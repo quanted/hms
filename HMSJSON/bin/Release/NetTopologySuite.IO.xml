@@ -1,0 +1,390 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NetTopologySuite.IO</name>
+    </assembly>
+    <members>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBufferToSequenceConverterHandler">
+            <summary>
+            Delegate to convert from a <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a <see cref="T:GeoAPI.Geometries.ICoordinateSequence"/>
+            </summary>
+            <param name="buffer">The coordinate sequence</param>
+            <returns>The converted coordinate sequence</returns>
+        </member>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBuffer">
+            <summary>
+            Utility class for storing coordinates
+            </summary>
+            <remarks>
+            This class may be useful for other IO classes as well
+            </remarks>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor">
+            <summary>
+            Creates an instance of this class
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Double,System.Boolean)">
+            <summary>
+            Creates an instance of this class with <paramref name="nullValue"/> defining the values that should be treated as null.
+            </summary>
+            <param name="nullValue">The value that should be treated as null.</param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:nullValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Int32)">
+            <summary>
+            Creates an instance of this class with an inital <paramref name="capacity"/>
+            </summary>
+            <param name="capacity">The inital capacity of the buffer.</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Int32,System.Double,System.Boolean)">
+            <summary>
+            Creates an instance of this class with an inital <paramref name="capacity"/>
+            </summary>
+            <param name="capacity">The inital capacity of the buffer.</param>
+            <param name="nullValue">The value that should be treated as null.</param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:nullValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.CheckDefinedOrdinates(System.Double@,System.Double@)">
+            <summary>
+            Updates the <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer._definedOrdinates"/> flags
+            </summary>
+            <param name="z">The z-Ordinate</param>
+            <param name="m">The m-Ordinate</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.AddCoordinate(System.Double,System.Double,System.Nullable{System.Double},System.Nullable{System.Double},System.Boolean)">
+            <summary>
+            Adds a coordinate made up of the ordinates (x, y, z, m) to the buffer.
+            </summary>
+            <param name="x">The x-Ordinate</param>
+            <param name="y">The y-Ordinate</param>
+            <param name="z">The (optional) z-Ordinate</param>
+            <param name="m">The (optional) m-Ordinate</param>
+            <param name="allowRepeated">Allows repated coordinates to be added</param>
+            <returns><value>true</value> if the coordinate was successfully added.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.AddMarker">
+            <summary>
+            Method to add a marker
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.InsertCoordinate(System.Int32,System.Double,System.Double,System.Nullable{System.Double},System.Nullable{System.Double},System.Boolean)">
+            <summary>
+            Inserts a coordinate made up of the ordinates (<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, <paramref name="m"/>) at index <paramref name="index"/> to the buffer.
+             </summary>
+            <param name="index">The index at which to insert the ordinate.</param>
+            <param name="x">The x-Ordinate</param>
+            <param name="y">The y-Ordinate</param>
+            <param name="z">The (optional) z-Ordinate</param>
+            <param name="m">The (optional) m-Ordinate</param>
+            <param name="allowRepeated">Allows repated coordinates to be added</param>
+            <returns><value>true</value> if the coordinate was successfully inserted.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Clear">
+            <summary>
+            Clears the contents of this buffer
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToCoordinateArray">
+            <summary>
+            Convertes the contents of the buffer to an array of <see cref="T:GeoAPI.Geometries.Coordinate"/>s
+            </summary>
+            <returns>An array of <see cref="T:GeoAPI.Geometries.Coordinate"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequence(NetTopologySuite.Geometries.CoordinateBufferToSequenceConverterHandler)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence using the provided <paramref name="converter"/>.
+            </summary>
+            <param name="converter">The converter to use</param>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequence(GeoAPI.Geometries.ICoordinateSequenceFactory)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence.
+            </summary>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequences(GeoAPI.Geometries.ICoordinateSequenceFactory)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence.
+            </summary>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.SetZ(System.Int32,System.Double)">
+            <summary>
+            Sets a z-value at the provided <paramref name="index"/>
+            </summary>
+            <param name="index">The index</param>
+            <param name="z">The value</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.SetM(System.Int32,System.Double)">
+            <summary>
+            Sets a m-value at the provided <paramref name="index"/>
+            </summary>
+            <param name="index">The index</param>
+            <param name="m">The value</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXY">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYZ(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.Z"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYM(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYZM(System.Double[]@,System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> and one of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ"/> and or <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToPackedArray(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="T:GeoAPI.Geometries.Ordinate"/> values.
+            </summary>
+            <returns>The number of dimensions and an array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToPackedArray(System.Single[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="T:GeoAPI.Geometries.Ordinate"/> values.
+            </summary>
+            <returns>The number of dimensions and an array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Equals(NetTopologySuite.Geometries.CoordinateBuffer)">
+            <summary>
+            Checks of <paramref name="other"/> <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> is equal to this.
+            </summary>
+            <param name="other">The coordinate buffer to test.</param>
+            <returns><c>true</c> if the coordinates in this buffer match those of other.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Equals(GeoAPI.Geometries.ICoordinateSequence)">
+            <summary>
+            Checks a coordinate sequence for equality with this 
+            </summary>
+            <param name="other">The coordinate sequence to test</param>
+            <returns><c>true</c> if the coordinates in the coordinate sequence are equal to those in this buffer.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.RemoveRepeated(System.Boolean)">
+            <summary>
+            Creates a coordinate sequence, that has all possibly repeated points removed
+            </summary>
+            <param name="checkZM">Controls if z- and m-values are to be considered in the equality check.</param>
+            <returns>A coordinate buffer without repeated points</returns>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Factory">
+            <summary>
+            Gets or sets the <see cref="T:GeoAPI.Geometries.ICoordinateSequenceFactory"/> used to create a coordinate sequence from the coordinate data in the buffer.
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Count">
+            <summary>
+            Gets the number of coordinates added to the buffer
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.DefinedOrdinates">
+            <summary>
+            Gets the defined ordinates in this buffer
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Dimension">
+            <summary>
+            Gets the number of dimension a coordinate sequence must provide
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ">
+            <summary>
+            Gets a value indicating if this buffer contains any z-ordinate values
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM">
+            <summary>
+            Gets a value indicating if this buffer contains any m-ordinate values
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Capacity">
+            <summary>
+            Gets the (current) capacity of the buffer
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker">
+            <summary>
+            Utility to check <see cref="T:System.Double"/> values for a defined null/no-data-value
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.#ctor(System.Double,System.Boolean)">
+            <summary>
+            Initializes this stucture with a <paramref name="noDataValue"/>
+            </summary>
+            <param name="noDataValue">The value that is to be treated as <c>null</c></param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:noDataValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.IsNotNoDataValue(System.Double)">
+            <summary>
+            Checks if <paramref name="value"/> doesn't satisfy null-check
+            </summary>
+            <param name="value">The value to check</param>
+            <returns><c>true</c> if <paramref name="value"/> is not equal to <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker._noDataCheckValue"/></returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.IsNoDataValue(System.Double)">
+            <summary>
+            Checks if <paramref name="value"/> does satisfy null-check
+            </summary>
+            <param name="value">The value to check</param>
+            <returns><c>true</c> if <paramref name="value"/> is equal to <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker._noDataCheckValue"/></returns>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.NoDataValue">
+            <summary>
+            Gets the defined <c>null</c> value
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.Streams.FileStreamProvider">
+            <summary>
+            An implementation of <see cref="T:NetTopologySuite.IO.Streams.IStreamProvider"/> that gives acces to file streams
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.Streams.IStreamProvider">
+            <summary>
+            Interface for stream provider
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.IStreamProvider.OpenRead">
+            <summary>
+            Function to open the underlying stream for reading purposes
+            </summary>
+            <returns>An opened stream</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.IStreamProvider.OpenWrite(System.Boolean)">
+            <summary>
+            Function to open the underlying stream for writing purposes
+            
+            </summary>
+            <remarks>If <see cref="P:NetTopologySuite.IO.Streams.IStreamProvider.UnderlyingStreamIsReadonly"/> is not <value>true</value> this method shall fail</remarks>
+            <returns>An opened stream</returns>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.IStreamProvider.UnderlyingStreamIsReadonly">
+            <summary>
+            Gets a value indicating that the underlying stream is read-only
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.IStreamProvider.Kind">
+            <summary>
+            Gets a value indicating the kind of stream
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.FileStreamProvider.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Creates an instance of this class
+            </summary>
+            <param name="kind">The kind of stream</param>
+            <param name="path">The path to the stream</param>
+            <param name="validatePath">A value indicating if the provided path is to be validated</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.FileStreamProvider.OpenRead">
+            <summary>
+            Function to open the underlying stream for reading purposes
+            </summary>
+            <returns>An opened stream</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.FileStreamProvider.OpenWrite(System.Boolean)">
+            <summary>
+            Function to open the underlying stream for writing purposes
+            </summary>
+            <remarks>If <see cref="P:NetTopologySuite.IO.Streams.IStreamProvider.UnderlyingStreamIsReadonly"/> is not <value>true</value> this method shall fail</remarks>
+            <returns>An opened stream</returns>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.FileStreamProvider.Path">
+            <summary>
+            Gets a value indicating the path to the file
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.FileStreamProvider.UnderlyingStreamIsReadonly">
+            <summary>
+            Gets a value indicating that the underlying stream is read-only
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.FileStreamProvider.Kind">
+            <summary>
+            Gets a value indicating the kind of stream
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.Streams.IStreamProviderRegistry">
+            <summary>
+            Interface for a registry of stream providers
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.IO.Streams.IStreamProviderRegistry.Item(System.String)">
+            <summary>
+            Indexer for a stream provider
+            </summary>
+            <param name="streamType">The stream type</param>
+            <returns>A stream provider</returns>
+        </member>
+        <member name="T:NetTopologySuite.IO.Streams.StreamTypes">
+            <summary>
+            An enumeration of stream types
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.Streams.StreamTypes.Shape">
+            <summary>
+            A shape stream
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.Streams.StreamTypes.Data">
+            <summary>
+            A data stream (dbf)
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.Streams.StreamTypes.Index">
+            <summary>
+            An index stream
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.Streams.ShapefileStreamProviderRegistry">
+            <summary>
+            A stream provider registry for an ESRI Shapefile dataset
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.ShapefileStreamProviderRegistry.#ctor(System.String,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates an instance of this class
+            </summary>
+            <param name="path">The path to the shapefile</param>
+            <param name="validateShapePath">A value indicating that the <paramref name="path"/> must be validated</param>
+            <param name="validateDataPath">A value indicating that the data file modified <paramref name="path"/> must be validated</param>
+            <param name="validateIndexPath">A value indicating that the shape index modified <paramref name="path"/> must be validated</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.ShapefileStreamProviderRegistry.#ctor(NetTopologySuite.IO.Streams.IStreamProvider,NetTopologySuite.IO.Streams.IStreamProvider,System.Boolean,System.Boolean)">
+            <summary>
+            Creates an instance of this class
+            </summary>
+            <param name="shapeStream">A stream provider for the shape stream</param>
+            <param name="dataStream">A stream provider for the data stream</param>
+            <param name="validateShapeProvider">A value indicating that the <paramref name="shapeStream"/> must be validated</param>
+            <param name="validateDataProvider">A value indicating that the <paramref name="dataStream"/> must be validated</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.Streams.ShapefileStreamProviderRegistry.#ctor(NetTopologySuite.IO.Streams.IStreamProvider,NetTopologySuite.IO.Streams.IStreamProvider,NetTopologySuite.IO.Streams.IStreamProvider,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Creates an instance of this class
+            </summary>
+            <param name="shapeStream">A stream provider for the shape stream</param>
+            <param name="dataStream">A stream provider for the data stream</param>
+            <param name="indexStream">A stream provider for the shape index stream</param>
+            <param name="validateShapeProvider">A value indicating that the <paramref name="shapeStream"/> must be validated</param>
+            <param name="validateDataProvider">A value indicating that the <paramref name="dataStream"/> must be validated</param>
+            <param name="validateIndexProvider">A value indicating that the <paramref name="indexStream"/> must be validated</param>
+        </member>
+    </members>
+</doc>

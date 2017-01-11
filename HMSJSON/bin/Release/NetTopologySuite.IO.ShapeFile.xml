@@ -1,0 +1,657 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NetTopologySuite.IO.ShapeFile</name>
+    </assembly>
+    <members>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBufferToSequenceConverterHandler">
+            <summary>
+            Delegate to convert from a <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a <see cref="T:GeoAPI.Geometries.ICoordinateSequence"/>
+            </summary>
+            <param name="buffer">The coordinate sequence</param>
+            <returns>The converted coordinate sequence</returns>
+        </member>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBuffer">
+            <summary>
+            Utility class for storing coordinates
+            </summary>
+            <remarks>
+            This class may be useful for other IO classes as well
+            </remarks>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor">
+            <summary>
+            Creates an instance of this class
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Double,System.Boolean)">
+            <summary>
+            Creates an instance of this class with <paramref name="nullValue"/> defining the values that should be treated as null.
+            </summary>
+            <param name="nullValue">The value that should be treated as null.</param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:nullValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Int32)">
+            <summary>
+            Creates an instance of this class with an inital <paramref name="capacity"/>
+            </summary>
+            <param name="capacity">The inital capacity of the buffer.</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.#ctor(System.Int32,System.Double,System.Boolean)">
+            <summary>
+            Creates an instance of this class with an inital <paramref name="capacity"/>
+            </summary>
+            <param name="capacity">The inital capacity of the buffer.</param>
+            <param name="nullValue">The value that should be treated as null.</param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:nullValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.CheckDefinedOrdinates(System.Double@,System.Double@)">
+            <summary>
+            Updates the <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer._definedOrdinates"/> flags
+            </summary>
+            <param name="z">The z-Ordinate</param>
+            <param name="m">The m-Ordinate</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.AddCoordinate(System.Double,System.Double,System.Nullable{System.Double},System.Nullable{System.Double},System.Boolean)">
+            <summary>
+            Adds a coordinate made up of the ordinates (x, y, z, m) to the buffer.
+            </summary>
+            <param name="x">The x-Ordinate</param>
+            <param name="y">The y-Ordinate</param>
+            <param name="z">The (optional) z-Ordinate</param>
+            <param name="m">The (optional) m-Ordinate</param>
+            <param name="allowRepeated">Allows repated coordinates to be added</param>
+            <returns><value>true</value> if the coordinate was successfully added.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.AddMarker">
+            <summary>
+            Method to add a marker
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.InsertCoordinate(System.Int32,System.Double,System.Double,System.Nullable{System.Double},System.Nullable{System.Double},System.Boolean)">
+            <summary>
+            Inserts a coordinate made up of the ordinates (<paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, <paramref name="m"/>) at index <paramref name="index"/> to the buffer.
+             </summary>
+            <param name="index">The index at which to insert the ordinate.</param>
+            <param name="x">The x-Ordinate</param>
+            <param name="y">The y-Ordinate</param>
+            <param name="z">The (optional) z-Ordinate</param>
+            <param name="m">The (optional) m-Ordinate</param>
+            <param name="allowRepeated">Allows repated coordinates to be added</param>
+            <returns><value>true</value> if the coordinate was successfully inserted.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Clear">
+            <summary>
+            Clears the contents of this buffer
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToCoordinateArray">
+            <summary>
+            Convertes the contents of the buffer to an array of <see cref="T:GeoAPI.Geometries.Coordinate"/>s
+            </summary>
+            <returns>An array of <see cref="T:GeoAPI.Geometries.Coordinate"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequence(NetTopologySuite.Geometries.CoordinateBufferToSequenceConverterHandler)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence using the provided <paramref name="converter"/>.
+            </summary>
+            <param name="converter">The converter to use</param>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequence(GeoAPI.Geometries.ICoordinateSequenceFactory)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence.
+            </summary>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToSequences(GeoAPI.Geometries.ICoordinateSequenceFactory)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to a coordinate sequence.
+            </summary>
+            <returns>A coordinate sequence</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.SetZ(System.Int32,System.Double)">
+            <summary>
+            Sets a z-value at the provided <paramref name="index"/>
+            </summary>
+            <param name="index">The index</param>
+            <param name="z">The value</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.SetM(System.Int32,System.Double)">
+            <summary>
+            Sets a m-value at the provided <paramref name="index"/>
+            </summary>
+            <param name="index">The index</param>
+            <param name="m">The value</param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXY">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYZ(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.Z"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYM(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToXYZM(System.Double[]@,System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="F:GeoAPI.Geometries.Ordinate.X"/> and <see cref="F:GeoAPI.Geometries.Ordinate.Y"/> values.
+            Additionally an array of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> and one of <see cref="F:GeoAPI.Geometries.Ordinate.M"/> values is supplied if this instance <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ"/> and or <see cref="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM"/> property is <c>true</c>
+            </summary>
+            <returns>An array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToPackedArray(System.Double[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="T:GeoAPI.Geometries.Ordinate"/> values.
+            </summary>
+            <returns>The number of dimensions and an array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.ToPackedArray(System.Single[]@)">
+            <summary>
+            Converts the contents of this <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> to an array of <see cref="T:GeoAPI.Geometries.Ordinate"/> values.
+            </summary>
+            <returns>The number of dimensions and an array of <see cref="T:System.Double"/>s</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Equals(NetTopologySuite.Geometries.CoordinateBuffer)">
+            <summary>
+            Checks of <paramref name="other"/> <see cref="T:NetTopologySuite.Geometries.CoordinateBuffer"/> is equal to this.
+            </summary>
+            <param name="other">The coordinate buffer to test.</param>
+            <returns><c>true</c> if the coordinates in this buffer match those of other.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.Equals(GeoAPI.Geometries.ICoordinateSequence)">
+            <summary>
+            Checks a coordinate sequence for equality with this 
+            </summary>
+            <param name="other">The coordinate sequence to test</param>
+            <returns><c>true</c> if the coordinates in the coordinate sequence are equal to those in this buffer.</returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.RemoveRepeated(System.Boolean)">
+            <summary>
+            Creates a coordinate sequence, that has all possibly repeated points removed
+            </summary>
+            <param name="checkZM">Controls if z- and m-values are to be considered in the equality check.</param>
+            <returns>A coordinate buffer without repeated points</returns>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Factory">
+            <summary>
+            Gets or sets the <see cref="T:GeoAPI.Geometries.ICoordinateSequenceFactory"/> used to create a coordinate sequence from the coordinate data in the buffer.
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Count">
+            <summary>
+            Gets the number of coordinates added to the buffer
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.DefinedOrdinates">
+            <summary>
+            Gets the defined ordinates in this buffer
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Dimension">
+            <summary>
+            Gets the number of dimension a coordinate sequence must provide
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.HasZ">
+            <summary>
+            Gets a value indicating if this buffer contains any z-ordinate values
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.HasM">
+            <summary>
+            Gets a value indicating if this buffer contains any m-ordinate values
+            </summary>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.Capacity">
+            <summary>
+            Gets the (current) capacity of the buffer
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker">
+            <summary>
+            Utility to check <see cref="T:System.Double"/> values for a defined null/no-data-value
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.#ctor(System.Double,System.Boolean)">
+            <summary>
+            Initializes this stucture with a <paramref name="noDataValue"/>
+            </summary>
+            <param name="noDataValue">The value that is to be treated as <c>null</c></param>
+            <param name="lessThan">This optional parameter controls whether a value has to be less than <see cref="!:noDataValue"/> to be considered <c>null</c></param>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.IsNotNoDataValue(System.Double)">
+            <summary>
+            Checks if <paramref name="value"/> doesn't satisfy null-check
+            </summary>
+            <param name="value">The value to check</param>
+            <returns><c>true</c> if <paramref name="value"/> is not equal to <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker._noDataCheckValue"/></returns>
+        </member>
+        <member name="M:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.IsNoDataValue(System.Double)">
+            <summary>
+            Checks if <paramref name="value"/> does satisfy null-check
+            </summary>
+            <param name="value">The value to check</param>
+            <returns><c>true</c> if <paramref name="value"/> is equal to <see cref="F:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker._noDataCheckValue"/></returns>
+        </member>
+        <member name="P:NetTopologySuite.Geometries.CoordinateBuffer.DoubleNoDataChecker.NoDataValue">
+            <summary>
+            Gets the defined <c>null</c> value
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.ShapeFileConstants">
+            <summary>
+            Shapefile specific constants
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeFileConstants.NoDataBorder">
+            <summary>
+            Every value less that this is considered as not set.
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeFileConstants.NoDataValue">
+            <summary>
+            A value that represents an unset value
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.ShapeGeometryType">
+            <summary>
+            Feature type enumeration
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.NullShape">
+            <summary>
+            Null Shape
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.Point">
+            <summary>
+            Point
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.LineString">
+            <summary>
+            LineString
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.Polygon">
+            <summary>
+            Polygon
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.MultiPoint">
+            <summary>
+            MultiPoint
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PointZM">
+            <summary>
+            PointMZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.LineStringZM">
+            <summary>
+            PolyLineMZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PolygonZM">
+            <summary>
+            PolygonMZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.MultiPointZM">
+            <summary>
+            MultiPointMZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PointM">
+            <summary>
+            PointM
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.LineStringM">
+            <summary>
+            LineStringM
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PolygonM">
+            <summary>
+            PolygonM
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.MultiPointM">
+            <summary>
+            MultiPointM
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.MultiPatch">
+            <summary>
+            MultiPatch
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PointZ">
+            <summary>
+            PointZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.LineStringZ">
+            <summary>
+            LineStringZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.PolygonZ">
+            <summary>
+            PolygonZ
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeGeometryType.MultiPointZ">
+            <summary>
+            MultiPointZ
+            </summary>
+        </member>
+        <member name="T:NetTopologySuite.IO.ShapeReader">
+            <summary>
+            Contains methods for reading a single <c>Geometry</c> in binary ESRI shapefile format.
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.#ctor">
+            <summary>
+            Initialize reader with a standard <c>GeometryFactory</c>.
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.#ctor(GeoAPI.Geometries.IGeometryFactory)">
+            <summary>
+            Initialize reader with the given <c>GeometryFactory</c>.
+            </summary>
+            <param name="factory"></param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadPoint(System.IO.BinaryReader,GeoAPI.Geometries.Ordinates)">
+            <summary>
+            Function to read a <see cref="T:GeoAPI.Geometries.IPoint"/> from a ShapeFile stream using the specified <paramref name="reader"/>.
+            </summary>
+            <param name="reader">The reader to use</param>
+            <param name="ordinates">The ordinates to read</param>
+            <returns>The read point geometry</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadLineString(System.IO.BinaryReader,GeoAPI.Geometries.Ordinates)">
+            <summary>
+            Function to read a <see cref="T:GeoAPI.Geometries.ILineString"/> or <see cref="T:GeoAPI.Geometries.IMultiLineString"/> from a ShapeFile stream using the specified <paramref name="reader"/>.
+            </summary>
+            <param name="reader">The reader to use</param>
+            <param name="ordinates">The ordinates to read</param>
+            <returns>The read lineal geometry</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadPolygon(System.IO.BinaryReader,GeoAPI.Geometries.Ordinates)">
+            <summary>
+            Function to read a either a <see cref="T:GeoAPI.Geometries.IPolygon"/> or an <see cref="T:GeoAPI.Geometries.IMultiPolygon"/> from a ShapeFile stream using the specified <paramref name="reader"/>.
+            </summary>
+            <param name="reader">The reader to use</param>
+            <param name="ordinates">The ordinates to read</param>
+            <returns>The read polygonal geometry</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadMultiPoint(System.IO.BinaryReader,GeoAPI.Geometries.Ordinates)">
+            <summary>
+            Function to read a <see cref="T:GeoAPI.Geometries.IMultiPoint"/> from a ShapeFile stream using the specified <paramref name="reader"/>.
+            </summary>
+            <param name="reader">The reader to use</param>
+            <param name="ordinates">The ordinates to read</param>
+            <returns>The read polygonal geometry</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.CreateMultiLineString(GeoAPI.Geometries.ICoordinateSequence[])">
+            <summary>
+            Creates a MultiLineString.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.CreateSingleOrMultiPolygon(NetTopologySuite.Geometries.CoordinateBuffer)">
+            <summary>
+            Creates a single Polygon with holes.
+            </summary>
+            <param name="buffer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.CreateSimpleSinglePolygon(GeoAPI.Geometries.Coordinate[])">
+            <summary>
+            Creates a single Polygon without holes.
+            </summary>
+            <param name="coords"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadBoundingBox(System.IO.BinaryReader)">
+            <summary>
+            Read the x-y Envelope
+            </summary>
+            <param name="reader">The reader to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadInterval(System.IO.BinaryReader)">
+            <summary>
+            Read the ordinate range Envelope
+            </summary>
+            <param name="reader">The reader to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadNumParts(System.IO.BinaryReader)">
+            <summary>
+            
+            </summary>
+            <param name="reader"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadNumPoints(System.IO.BinaryReader)">
+            <summary>
+            
+            </summary>
+            <param name="reader"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadIndexParts(System.IO.BinaryReader,System.Int32,System.Int32)">
+            <summary>
+            Read the index parts of the shape header
+            </summary>
+            <param name="reader">The reader</param>
+            <param name="numParts">The number of parts</param>
+            <param name="numPoints">The total number of points</param>
+            <returns>An array of integer values</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeReader.ReadCoordinates(System.IO.BinaryReader,System.Int32,System.Int32[],GeoAPI.Geometries.Ordinates,NetTopologySuite.Geometries.CoordinateBuffer)">
+            <summary>
+            Method to read the coordinates block
+            </summary>
+            <param name="reader">The reader</param>
+            <param name="numPoints">The total number of points to read</param>
+            <param name="markers">The markers</param>
+            <param name="ordinates">The ordinates to read</param>
+            <param name="buffer">The buffer to add the coordinates to.</param>
+        </member>
+        <member name="P:NetTopologySuite.IO.ShapeReader.Factory">
+            <summary>
+            <see cref="T:GeoAPI.Geometries.IGeometry"/> creator.
+            </summary>        
+        </member>
+        <member name="T:NetTopologySuite.IO.ShapeWriter">
+            <summary>
+            Contains methods for writing a single <c>Geometry</c> in binary ESRI shapefile format.
+            </summary>
+        </member>
+        <member name="F:NetTopologySuite.IO.ShapeWriter.InitCount">
+            <summary>
+            Standard byte size for each complex point.
+            Each complex point (LineString, Polygon, ...) contains
+                4 bytes for ShapeTypes and
+                32 bytes for Boundingbox.      
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.#ctor">
+            <summary> 
+            Creates a <coordinate>ShapeWriter</coordinate> that creates objects using a basic GeometryFactory.
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.Coordinate,System.IO.BinaryWriter)">
+            <summary>
+            Writes x- and y-ordinate of <paramref name="coordinate"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="coordinate">The coordinate to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.Coordinate[],System.IO.BinaryWriter)">
+            <summary>
+            Writes x- and y-ordinates of <paramref name="coordinates"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="coordinates">The array of <see cref="T:GeoAPI.Geometries.Coordinate"/>s to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.IPoint,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="point"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="point">The point to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.ILineString,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="lineString"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="lineString">The linestring to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.IPolygon,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="polygon"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="polygon">The polygon to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.IMultiPoint,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="multiPoint"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="multiPoint">The multi point to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.BuildSequence(GeoAPI.Geometries.IGeometryCollection)">
+            <summary>
+            
+            </summary>
+            <param name="collection"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.DetectShapeType(GeoAPI.Geometries.IGeometry)">
+            <summary>
+            Function to determine the shape geometry type for the <paramref name="geometry"/>
+            </summary>
+            <param name="geometry">The geometry</param>
+            <returns>The shape geometry type</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.DetectOrdinates(GeoAPI.Geometries.IGeometry)">
+            <summary>
+            Function to determine which ordinates are set in the <paramref name="geometry"/>.
+            To do that, this function looks for the first geometry that has a <see cref="T:GeoAPI.Geometries.ICoordinateSequence"/> property.
+            Assuming all other geometries have the same ordinates at hand.
+            </summary>
+            <param name="geometry">The geometry</param>
+            <returns>The ordinates flag</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.IMultiLineString,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="multiLineString"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="multiLineString">The multi linestring to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.Write(GeoAPI.Geometries.IMultiPolygon,System.IO.BinaryWriter)">
+            <summary>
+            Writes <paramref name="multiPolygon"/> to a stream using <paramref name="writer"/>
+            </summary>
+            <param name="multiPolygon">The multi polygon to write</param>
+            <param name="writer">The writer to use</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.WriteBoundingBox(GeoAPI.Geometries.Envelope,System.IO.BinaryWriter)">
+            <summary>
+            Writes the 2D <paramref name="boundingBox"/> using <paramref name="writer"/>
+            </summary>
+            <param name="boundingBox">The bounding box to write</param>
+            <param name="writer">The writer</param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.GetBytes(GeoAPI.Geometries.IGeometry)">
+            <summary>
+            Sets correct length for Byte Stream.
+            </summary>
+            <param name="geometry"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.GetBytesLength(GeoAPI.Geometries.IGeometry)">
+            <summary>
+            Return correct length for Byte Stream.
+            </summary>
+            <param name="geometry"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.IMultiPolygon)">
+            <summary>
+            
+            </summary>
+            <param name="multiPolygon"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.IMultiLineString)">
+            <summary>
+            
+            </summary>
+            <param name="multiLineString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.IMultiPoint)">
+            <summary>
+            
+            </summary>
+            <param name="multiPoint"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.IPolygon)">
+            <summary>
+            
+            </summary>
+            <param name="polygon"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.ILineString)">
+            <summary>
+            
+            </summary>
+            <param name="lineString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.SetByteStreamLength(GeoAPI.Geometries.IPoint)">
+            <summary>
+            
+            </summary>
+            <param name="point"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.CalculateLength(System.Int32,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="numParts"></param>
+            <param name="numPoints"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeWriter.CalculateLength(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="numPoints"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
