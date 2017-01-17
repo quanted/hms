@@ -14,8 +14,8 @@ Steps to execute HMS windows form (currently being used for testing and developm
   5. Start Project   
 	
 Additional Notes:   
-&nbsp;&nbsp;&nbsp;&nbsp;HMS currently only works while running in DEBUG mode due the location of the external files that are required for &nbsp;&nbsp;&nbsp;&nbsp;data retrieval.   
-&nbsp;&nbsp;&nbsp;&nbsp;To run and test the webservices module of HMS, the WebServicesTest solution needs to be executed in addition to HMS &nbsp;&nbsp;&nbsp;&nbsp;(WebServicesTest is yet not located on GitHub).
+&nbsp;&nbsp;&nbsp;&nbsp;HMS currently only works while running in DEBUG mode due to the location of the external files that are required for data retrieval.   
+&nbsp;&nbsp;&nbsp;&nbsp;To run and test the webservices module of HMS, the WebServicesTest solution needs to be executed in addition to HMS (WebServicesTest is yet not located on GitHub).
 	
 	
 Packages used by HMS.sln include:   
