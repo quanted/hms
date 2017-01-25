@@ -49,17 +49,32 @@ namespace HMSBaseFlow
         /// <param name="source"></param>
         /// <param name="local"></param>
         /// <param name="sfPath"></param>
-        public BaseFlow(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath)
+        public BaseFlow(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, latitude, longitude, startDate, endDate, source, local, sfPath, "0.0", "NaN")
+        { 
+        }
+
+        /// <summary>
+        /// Constructor using latitude and longitude, with the gmtOffset already known.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="source"></param>
+        /// <param name="local"></param>
+        /// <param name="sfPath"></param>
+        public BaseFlow(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, string gmtOffset, string tzName)
         {
             errorMsg = "";
-            this.gmtOffset = 0.0;
+            this.gmtOffset = Convert.ToDouble(gmtOffset);
             this.dataSource = source;
             this.localTime = local;
-            this.tzName = "GMT";
-            if (errorMsg.Contains("Error")) { return; }
+            this.tzName = tzName;
             SetDates(out errorMsg, startDate, endDate);
             if (errorMsg.Contains("Error")) { return; }
-            ts = new List<HMSTimeSeries.HMSTimeSeries>();
+            this.ts = new List<HMSTimeSeries.HMSTimeSeries>();
+            this.gdal = new HMSGDAL.HMSGDAL();
             if (string.IsNullOrWhiteSpace(sfPath))
             {
                 this.shapefilePath = null;
@@ -72,9 +87,9 @@ namespace HMSBaseFlow
                 this.latitude = 0.0;
                 this.longitude = 0.0;
             }
+            this.cellWidth = 0.00;
             if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
-            this.gdal = new HMSGDAL.HMSGDAL();
         }
 
         /// <summary>
@@ -89,15 +104,7 @@ namespace HMSBaseFlow
             double result = 0.0;
             if (Double.TryParse(str, out result))
             {
-                try
-                {
-                    return result = Convert.ToDouble(str);
-                }
-                catch
-                {
-                    errorMsg = "Error: Unable to convert string value to double.";
-                    return result;
-                }
+               return result = Convert.ToDouble(str);
             }
             else
             {
@@ -176,10 +183,12 @@ namespace HMSBaseFlow
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
                 this.latitude = center[0];   // coordinate values for objects are taken from the centroid of the shapefile.
                 this.longitude = center[1];
-                gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);
+                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);           //Obsolete
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
+                if (errorMsg.Contains("Error")) { return null; }
             }
 
-            if (this.localTime == true && offset == 0.0)
+            if (this.localTime == true && tzName.Contains("NaN"))
             {
                 this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
                 if (errorMsg.Contains("Error")) { return null; }
