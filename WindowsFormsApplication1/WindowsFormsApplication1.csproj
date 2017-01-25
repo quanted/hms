@@ -32,6 +32,26 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -58,12 +78,19 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="PrecipCompare.cs" />
+    <Compile Include="PrecipCompare.Designer.cs">
+      <DependentUpon>PrecipCompare.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PrecipCompare.resx">
+      <DependentUpon>PrecipCompare.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -101,6 +128,14 @@
       <Project>{3db6caeb-fdbe-41fe-a22e-2c09a3587d76}</Project>
       <Name>Evapotranspiration</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HMSBASINS\HMSNCDC.csproj">
+      <Project>{1acfd2bc-7fb2-48c4-be76-30fe92b34c41}</Project>
+      <Name>HMSNCDC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HMSDaymet\HMSDaymet.csproj">
+      <Project>{0fc7fae1-3d38-44b7-b6d7-4dcf951d9f76}</Project>
+      <Name>HMSDaymet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HMSGDAL\HMSGDAL.csproj">
       <Project>{fb3b67fd-8840-411f-b717-deeac8499b2c}</Project>
       <Name>HMSGDAL</Name>
@@ -133,6 +168,9 @@
       <Project>{f6b9df59-4208-4202-9f5e-af98edd4b4c8}</Project>
       <Name>TotalFlow</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TempStorage\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

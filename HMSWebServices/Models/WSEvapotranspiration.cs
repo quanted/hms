@@ -7,15 +7,9 @@ namespace HMSWebServices.Models
 {
     public class WSEvapotranspiration
     {
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string startDate { get; set; }
-        public string endDate { get; set; }
-        public string dataSource { get; set; }
-        public bool localTime { get; set; }
 
         /// <summary>
-        /// Gets Evapotranspiration data using a shapefile.
+        /// Gets Evapotranspiration data using latitude/longitude.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="latitude"></param>
@@ -28,7 +22,6 @@ namespace HMSWebServices.Models
         public string GetEvapotranspirationData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
         {
             errorMsg = "";
-            //string wsPath = HttpRuntime.AppDomainAppPath;
             HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
             if (errorMsg.Contains("Error")) { return null; }
             string data = evapo.GetDataSetsString(out errorMsg);

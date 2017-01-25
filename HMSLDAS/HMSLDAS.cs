@@ -149,10 +149,10 @@ namespace HMSLDAS
         private string ConstructURL(out string errorMsg, double latitude, double longitude, DateTime startDate, DateTime endDate, string source, string wsPath)
         {
             errorMsg = "";
-            //string prepInfo = System.IO.Directory.GetCurrentDirectory() + @"\LDAS_url_info.txt";  // URL configuration info.
-            string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\LDAS_url_info.txt";  // URL configuration info.
-
-            string urlStr = "";
+            //string prepInfo = System.IO.Directory.GetCurrentDirectory() + @"\url_info.txt";  // URL configuration info.
+            string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
+            StringBuilder builder = new StringBuilder();
+            //string urlStr = "";
             string[] lineData;
             try
             {
@@ -161,7 +161,8 @@ namespace HMSLDAS
                     lineData = line.Split(' ');
                     if (lineData[0].Equals(source + "_URL", StringComparison.OrdinalIgnoreCase))
                     {
-                        urlStr = lineData[1];
+                        //urlStr = lineData[1];
+                        builder.Append(lineData[1]);
                         break;
                     }
                 }
@@ -176,19 +177,23 @@ namespace HMSLDAS
                 //Add X and Y coordinates
                 string[] xy = GetXYNLDAS(out errorMsg, longitude, latitude); // [0] = x, [1] = y
                 if (errorMsg.Contains("Error")) { return null; }
-                urlStr = urlStr + "X" + xy[0] + "-" + "Y" + xy[1];
+                builder.Append("X" + xy[0] + "-" + "Y" + xy[1]);
+                //urlStr = urlStr + "X" + xy[0] + "-" + "Y" + xy[1];
             }
             else if(source.Contains("GLDAS"))
             {
                 //Add latitude/longitude points
-                urlStr = urlStr + @"%28" + longitude + @",%20" + latitude + @"%29";
+                builder.Append(@"%28" + longitude + @",%20" + latitude + @"%29");
+                //urlStr = urlStr + @"%28" + longitude + @",%20" + latitude + @"%29";
             }
             //Add Start and End Date
             string[] startDT = startDate.ToString("yyyy-MM-dd HH").Split(' ');
             string[] endDT = endDate.ToString("yyyy-MM-dd HH").Split(' ');
-            urlStr = urlStr + @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1];
+            //urlStr = urlStr + @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1];
+            builder.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
             //Add format type 
-            return urlStr + @"&type=asc2";
+            //return urlStr + @"&type=asc2";
+            return builder.ToString();
         }
 
         /// <summary>
@@ -206,7 +211,7 @@ namespace HMSLDAS
             try
             {
                 //https certification error requires the following statement to successfully retrieve data
-                ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
+                //ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
                 byte[] dataBuffer = myWC.DownloadData(url);
                 data = Encoding.UTF8.GetString(dataBuffer);
             }
@@ -236,6 +241,7 @@ namespace HMSLDAS
                     return null;
                 }
             }
+            myWC.Dispose();
             return data;
         }
 
@@ -303,6 +309,13 @@ namespace HMSLDAS
             return coord;
         }
 
+        /// <summary>
+        /// Function begins sequence of method calls to retrieve LDAS data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="module"></param>
+        /// <param name="dataset"></param>
+        /// <param name="newTS"></param>
         public void BeginLDASSequence(out string errorMsg, IHMSModule module, string dataset, HMSTimeSeries.HMSTimeSeries newTS)
         {
             errorMsg = "";
@@ -315,45 +328,18 @@ namespace HMSLDAS
                 for (int i = 0; i < totalPoints; i++)
                 {
                     if (i != 0) { newTS = new HMSTimeSeries.HMSTimeSeries(); module.ts.Add(newTS); }
-                    if (module.dataSource.Contains("NLDAS"))
-                    {
-                        data = LDAS(out errorMsg, module.gdal.coordinatesInShapefile[i].Item1, module.gdal.coordinatesInShapefile[i].Item2, module.startDate, module.endDate, module.dataSource + "_" + dataset, newTS, module.shapefilePath);
-                        if (errorMsg.Contains("Error")) { return; }
-                    }
-                    else if (module.dataSource.Contains("GLDAS"))
-                    {
-                        data = LDAS(out errorMsg, module.gdal.coordinatesInShapefile[i].Item1, module.gdal.coordinatesInShapefile[i].Item2, module.startDate, module.endDate, module.dataSource + "_" + dataset, newTS, module.shapefilePath);
-                        if (errorMsg.Contains("Error")) { return; }
-                    }
-                    else
-                    {
-                        errorMsg = "Error: Invalid data source selected.";
-                        return;
-                    }
-                    newTS.SetTimeSeriesVariables(out errorMsg, newTS, data);
+                    data = LDAS(out errorMsg, module.gdal.coordinatesInShapefile[i].Item1, module.gdal.coordinatesInShapefile[i].Item2, module.startDate, module.endDate, module.dataSource + "_" + dataset, newTS, module.shapefilePath);
+                    if (errorMsg.Contains("Error")) { return; }
+                    newTS.SetTimeSeriesVariables(out errorMsg, newTS, data, module.dataSource);
                     newTS.newMetaData = String.Concat(newTS.newMetaData, "percentInCell=", module.gdal.areaPrecentInGeometry[i], "\nareaInCell=", module.gdal.areaGeometryIntersection[i], "\n");
                     if (errorMsg.Contains("Error")) { return; }
-
                 }
             }
             else
             {
-                if (module.dataSource.Contains("NLDAS"))
-                {
-                    data = LDAS(out errorMsg, module.latitude, module.longitude, module.startDate, module.endDate, module.dataSource + "_" + dataset, module.ts[0], module.shapefilePath);
-                    if (errorMsg.Contains("Error")) { return; }
-                }
-                else if (module.dataSource.Contains("GLDAS"))
-                {
-                    data = LDAS(out errorMsg, module.latitude, module.longitude, module.startDate, module.endDate, module.dataSource + "_" + dataset, module.ts[0], module.shapefilePath);
-                    if (errorMsg.Contains("Error")) { return; }
-                }
-                else
-                {
-                    errorMsg = "Error: Invalid data source selected.";
-                    return;
-                }
-                module.ts[0].SetTimeSeriesVariables(out errorMsg, newTS, data);
+                data = LDAS(out errorMsg, module.latitude, module.longitude, module.startDate, module.endDate, module.dataSource + "_" + dataset, module.ts[0], module.shapefilePath);
+                if (errorMsg.Contains("Error")) { return; }
+                module.ts[0].SetTimeSeriesVariables(out errorMsg, newTS, data, module.dataSource);
                 if (errorMsg.Contains("Error")) { return; }
             }
         } 

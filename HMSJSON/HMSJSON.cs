@@ -73,14 +73,17 @@ namespace HMSJSON
         public string CombineDatasetsAsJSON(out string errorMsg, List<HMSTimeSeries.HMSTimeSeries> ts, string dataset, string source, bool localtime, double gmtOffset)
         {
             errorMsg = "";
-            string data = "";
+            //string data = "";
+            StringBuilder stBuilder = new StringBuilder();
             for (int i = 0; i < ts.Count; i++)
             {
                 // "DataSetBlock" is used to parse the data on the client side, where it is saved as individual files.
                 string jsonString = GetJSONString(out errorMsg, ts[i].timeSeries, ts[i].newMetaData, ts[i].metaData, dataset, source, localtime, gmtOffset);
-                data = String.Concat(data, "DataSetBlock ", jsonString);
+                //data = String.Concat(data, "DataSetBlock ", jsonString);
+                stBuilder.Append("DataSetBlock");
+                stBuilder.Append(jsonString);
             }
-            return data;
+            return stBuilder.ToString();
         }
 
         /// <summary>
@@ -101,10 +104,24 @@ namespace HMSJSON
             HMSData output = new HMSData();
             output.dataset = dataset;
             output.source = source;
-            output.metadata = SetHMSDataMetaData(out errorMsg, output, newMetaData, metadata);
-            output.data = SetHMSDataTS(out errorMsg, output, timeseries, localtime, gmtOffset);
-            string result = JsonConvert.SerializeObject(output);
-            return result;
+            if (source.Contains("NLDAS") || source.Contains("GLDAS"))
+            {
+                output.metadata = SetHMSDataMetaData(out errorMsg, output, newMetaData, metadata);
+                output.data = SetHMSDataTS(out errorMsg, output, timeseries, localtime, gmtOffset);
+                //output.data = SetHMSDataTSConversion(out errorMsg, output, timeseries, localtime, gmtOffset, source);
+                //SetHMSDataTSConversion is used to output NLDAS and GLDAS data for daily values, instead of hourly and 3 hourly.
+            }
+            else if (source.Contains("Daymet"))
+            {
+                output.metadata = SetHMSDaymetMetaData(out errorMsg, output, newMetaData, metadata);
+                output.data = SetHMSDaymetDataTS(out errorMsg, output, timeseries);
+            }
+            else
+            {
+                errorMsg = "Error: Unable to create JSON from data.";
+                return null;
+            }
+            return JsonConvert.SerializeObject(output);
         }
 
         /// <summary>
@@ -185,5 +202,107 @@ namespace HMSJSON
             return data;
         }
 
+        /// <summary>
+        /// Creates the timeseries dictionary containing the date/hour as the key and an array for the data values, depending on the total number of datasets provided.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="timeseries"></param>
+        /// <param name="localtime"></param>
+        /// <param name="gmtOffset"></param>
+        /// <returns></returns>
+        private Dictionary<string, List<string>> SetHMSDataTSConversion(out string errorMsg, HMSData output, string timeseries, bool localtime, double gmtOffset, string source)
+        {
+            errorMsg = "";
+            Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+            List<string> timestepData;
+            string[] tsLines = timeseries.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
+            double sum = 0.0;
+            int conversion = 8;        //Total time entries summed for each data value (NLDAS = 24 for daily, GLDAS = 8 for daily)
+
+            for (int i = 0; i < tsLines.Length; i++)
+            {
+                timestepData = new List<string>();
+                string date = "";
+                string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                if (source.Contains("GLDAS")) { sum += 3*3600*Convert.ToDouble(lineData[2]); }
+                else { sum += Convert.ToDouble(lineData[2]); }
+                if (i % conversion == 0)
+                {
+                    if (localtime == true) { date = gdal.SetDateToLocal(out errorMsg, lineData[0] + " " + lineData[1], gmtOffset); }
+                    else { date = lineData[0] + " " + lineData[1]; }
+                    timestepData.Add(sum.ToString("E4"));
+                    for (int j = 3; j < lineData.Length; j++)
+                    {
+                        timestepData.Add(lineData[j]);
+                    }
+                    data.Add(date, timestepData);
+                    sum = 0;
+                }
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// Creates the metaData dictionary for Daymet data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="newMetaData"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> SetHMSDaymetMetaData(out string errorMsg, HMSData output, string newMetaData, string metadata)
+        {
+            errorMsg = "";
+            Dictionary<string, string> daymetMeta = new Dictionary<string, string>();
+            string[] metaLines = metadata.Split(new string[] { "\n", "  " }, StringSplitOptions.RemoveEmptyEntries);
+            for(int i = 0; i < metaLines.Length; i++)
+            {
+                if (metaLines[i].Contains("http"))
+                {
+                    daymetMeta.Add("url_reference:", metaLines[i].Trim());
+                }
+                else if(metaLines[i].Contains(':'))
+                {
+                    string[] lineData = metaLines[i].Split(new string[] { ": " }, StringSplitOptions.RemoveEmptyEntries);
+                    daymetMeta.Add(lineData[0].Trim(), lineData[1].Trim());
+                }
+            }
+            if (newMetaData == null) { return daymetMeta; }
+            string[] dataLines = newMetaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < dataLines.Length; i++)
+            {
+                if (dataLines[i].Contains("="))
+                {
+                    string[] line = dataLines[i].Split(new char[] { '=' }, 2);
+                    if (!daymetMeta.ContainsKey(line[0]))
+                    {
+                        daymetMeta.Add(line[0], line[1].Trim());
+                    }
+                }
+            }
+            return daymetMeta;
+        }
+
+        /// <summary>
+        /// Creates the timeseries dictionary for the daymet data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="timeseries"></param>
+        /// <returns></returns>
+        private Dictionary<string, List<string>> SetHMSDaymetDataTS(out string errorMsg, HMSData output, string timeseries)
+        {
+            errorMsg = "";
+            Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+            string[] tsLines = timeseries.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for(int i = 0; i < tsLines.Length; i++)
+            {
+                string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                data.Add(lineData[0] + " " + lineData[1], new List<string> { lineData[2] });
+            }
+            return data;
+        }
     }
 }

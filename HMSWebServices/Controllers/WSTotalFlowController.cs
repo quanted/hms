@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 
@@ -13,6 +10,18 @@ namespace HMSWebServices.Controllers
 {
     public class WSTotalFlowController : ApiController
     {
+        public class TotalFlow
+        {
+            public string ID { get; set; }                                  // GUID for specific session
+            public string latitude { get; set; }                            // Latitude for timeseries
+            public string longitude { get; set; }                           // Longitude for timeseries
+            public string startDate { get; set; }                           // Start data for timeseries
+            public string endDate { get; set; }                             // End date for timeseries
+            public string source { get; set; }                              // NLDAS, GLDAS, or SWAT algorithm simulation
+            public string localTime { get; set; }                           // False = GMT time, true = local time
+            public string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
+        }
+
         /// <summary>
         /// Gets total flow data using the parameters provided in the param string.
         /// </summary>
@@ -24,23 +33,24 @@ namespace HMSWebServices.Controllers
         {
             string data = "";
             string errorMsg = "";
-            string[] parameters = ParseParameters(out errorMsg, param);
+            Dictionary<string, string> parameters = ParseParameters(out errorMsg, param);
             if (errorMsg.Contains("Error")) { return errorMsg; }
             WSTotalFlow result = new WSTotalFlow();
 
-            if (param.Contains("Location"))             //Location provided by latitude, longitude
+            if (parameters.ContainsKey("latitude"))             //Location provided by latitude, longitude
             {
-                data = result.GetTotalFlowData(out errorMsg, parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], Convert.ToBoolean(parameters[5]));
+                data = result.GetTotalFlowData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
             }
             else if (param.Contains("ShapeFile"))       //Location provided by shapefile.
             {
-                string shapefilePath = HttpContext.Current.Server.MapPath("~/TransientStorage/") + parameters[0] + ".zip";
-                UnzipFile(out errorMsg, shapefilePath);
-                if (errorMsg.Contains("Error")) { DeleteTempShapefiles(); return errorMsg; }
-                data = result.GetTotalFlowData(out errorMsg, parameters[1], parameters[2], parameters[3], Convert.ToBoolean(parameters[4]), shapefilePath);
+                string shapefile = HttpContext.Current.Server.MapPath("~/TransientStorage/") + parameters["ID"] + ".zip";
+                UnzipFile(out errorMsg, shapefile, parameters["ID"]);
+                if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
+                string unzippedShapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["ID"] + "\\" + parameters["shapefilePath"] + ".shp";
+                data = result.GetTotalFlowData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), unzippedShapefile);
+                DeleteTempShapefiles(parameters["ID"]);
             }
-            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(); return errorMsg; }
-            DeleteTempShapefiles();
+            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
             return data;
         }
 
@@ -50,28 +60,28 @@ namespace HMSWebServices.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("api/WSTotalFlow/{param}")]
-        public string Post(string param)
+        [Route("api/WSTotalFlow/")]
+        public string Post([FromBody]TotalFlow param)
         {
             string data = "";
             string errorMsg = "";
-            string[] parameters = ParseParameters(out errorMsg, param);
             if (errorMsg.Contains("Error")) { return errorMsg; }
             WSTotalFlow result = new WSTotalFlow();
 
-            if (param.Contains("Location"))             //Location provided by latitude, longitude
+            if (String.IsNullOrWhiteSpace(param.shapefilePath))
             {
-                data = result.GetTotalFlowData(out errorMsg, parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], Convert.ToBoolean(parameters[5]));
+                data = result.GetTotalFlowData(out errorMsg, param.latitude, param.longitude, param.startDate, param.endDate, param.source, Convert.ToBoolean(param.localTime));
             }
-            else if (param.Contains("ShapeFile"))       //Location provided by shapefile.
+            else
             {
-                string shapefilePath = HttpContext.Current.Server.MapPath("~/TransientStorage/") + parameters[0] + ".zip";
-                UnzipFile(out errorMsg, shapefilePath);
-                if (errorMsg.Contains("Error")) { DeleteTempShapefiles(); return errorMsg; }
-                data = result.GetTotalFlowData(out errorMsg, parameters[1], parameters[2], parameters[3], Convert.ToBoolean(parameters[4]), shapefilePath);
+                string shapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + param.ID + ".zip";
+                UnzipFile(out errorMsg, shapefile, param.ID);
+                if (errorMsg.Contains("Error")) { DeleteTempShapefiles(param.ID); return errorMsg; }
+                string unzippedShapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + param.ID + "\\" + param.shapefilePath + ".shp";
+                data = result.GetTotalFlowData(out errorMsg, param.startDate.ToString(), param.endDate.ToString(), param.source, Convert.ToBoolean(param.localTime), unzippedShapefile);
+                DeleteTempShapefiles(param.ID);
             }
-            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(); return errorMsg; }
-            DeleteTempShapefiles();
+            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(param.ID); return errorMsg; }
             return data;
         }
 
@@ -81,40 +91,17 @@ namespace HMSWebServices.Controllers
         /// <param name="errorMsg"></param>
         /// <param name="paramOne"></param>
         /// <returns></returns>
-        private string[] ParseParameters(out string errorMsg, string param)
+        private Dictionary<string, string> ParseParameters(out string errorMsg, string param)
         {
             errorMsg = "";
-            string[] result = new string[6];
-            string[] parsedValue = param.Split('&');
-            int j = 0;
-            string[] value = new string[2];
-            for (int i = 0; i <= parsedValue.Length; i++)
+            Dictionary<string, string> variables = new Dictionary<string, string>();
+            string[] values = param.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < values.Length; i++)
             {
-                if (j < parsedValue.Length) { value = parsedValue[j].Split('='); }
-                else { return result; }
-                try
-                {
-
-                    if (value[0].Contains("Location"))
-                    {
-                        string[] coord = value[1].Split(',');
-                        result[i] = coord[0];           //Latitude
-                        result[i + 1] = coord[1];       //Longitude
-                        i++;
-                    }
-                    else
-                    {
-                        result[i] = value[1];
-                    }
-                    j++;
-                }
-                catch (Exception ex)
-                {
-                    errorMsg = "Error: " + ex;
-                    return null;
-                }
+                string[] line = values[i].Split('=');
+                variables.Add(line[0], line[1]);
             }
-            return result;
+            return variables;
         }
 
         /// <summary>
@@ -122,13 +109,14 @@ namespace HMSWebServices.Controllers
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="zipPath"></param>
-        private void UnzipFile(out string errorMsg, string zipPath)
+        private void UnzipFile(out string errorMsg, string zipPath, string sessionGUID)
         {
             errorMsg = "";
-            string extractPath = HttpContext.Current.Server.MapPath("~/TransientStorage/");
+            string extractPath = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID);
             try
             {
                 ZipFile.ExtractToDirectory(zipPath, extractPath);
+                File.Delete(zipPath);
             }
             catch (Exception ex)
             {
@@ -140,13 +128,14 @@ namespace HMSWebServices.Controllers
         /// <summary>
         /// Deletes extracted shapefiles for cleanup.
         /// </summary>
-        private void DeleteTempShapefiles()
+        private void DeleteTempShapefiles(string sessionGUID)
         {
-            string[] filePaths = Directory.GetFiles(HttpContext.Current.Server.MapPath("~/TransientStorage/"));
-            foreach (string filePath in filePaths)
+            try
             {
-                File.Delete(filePath);
+                Directory.Delete(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\"), true);
             }
+            catch
+            { }
         }
     }
 }

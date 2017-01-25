@@ -7,12 +7,6 @@ namespace HMSWebServices.Models
 {
     public class WSPrecipitation
     {
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string startDate { get; set; }
-        public string endDate { get; set; }
-        public string dataSource { get; set; }
-        public bool localTime { get; set; }
 
         /// <summary>
         /// Gets Precipitation data using latitude/longitude.
@@ -28,7 +22,6 @@ namespace HMSWebServices.Models
         public string GetPrecipitationData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
         {
             errorMsg = "";
-            //string wsPath = HttpRuntime.AppDomainAppPath;
             HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
             if (errorMsg.Contains("Error")) { return null; }
             string data = precip.GetDataSetsString(out errorMsg);

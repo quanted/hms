@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Configuration;
 
 namespace WindowsFormsApplication1
 {
@@ -39,7 +40,7 @@ namespace WindowsFormsApplication1
             DateTime start = DateTime.Now;
             lblError.Text = "";
             dGVData.DataSource = null;
-            timeseriesChart.DataSource = null;
+            //timeseriesChart.DataSource = null;
             System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
             string latitude = txtLatitude.Text;
@@ -209,12 +210,7 @@ namespace WindowsFormsApplication1
             this.gmtOffset = offset;
             this.localtime = local;
 
-            this.timeseriesChart.Series.Clear();
-            this.timeseriesChart.Titles.Add(cmbDataSet.SelectedItem.ToString());
-            Series series = this.timeseriesChart.Series.Add(cmbDataSet.SelectedItem.ToString());
-            series.ChartType = SeriesChartType.Spline;
-
-            PopulateTable(out errorMsg, dt, local, offset, series);
+            PopulateTable(out errorMsg, dt, local, offset);
 
             lblError.Text = "Data successfully retrieved.";
             
@@ -243,10 +239,12 @@ namespace WindowsFormsApplication1
             System.IO.File.WriteAllText(outputFilePath, data);
         }
 
-        private void PopulateTable(out string errorMsg, DataTable dt, bool local, double offset, Series series)
+        private void PopulateTable(out string errorMsg, DataTable dt, bool local, double offset)
         {
             errorMsg = "";
             string[] dataArray = ts[0].timeSeries.Split('\n');
+            string units = @" (kg/m^2)";
+            if (cmbSource.SelectedItem.ToString().Contains("Daymet")) { units = "(mm/day)"; }
 
             List<string[]> data = new List<string[]>();
 
@@ -254,12 +252,9 @@ namespace WindowsFormsApplication1
             for (int i = 0; i < ts.Count; i++)
             {
                 string title = ts[i].metaLat + ", " + ts[i].metaLon;
-                DataColumn dc = dt.Columns.Add(title + @" (kg/m^2)", typeof(String));
+                DataColumn dc = dt.Columns.Add(title + units, typeof(String));
                 data.Add(ts[i].timeSeries.Split('\n'));
             }
-            int step = 1;               // Will plot data for every 'step' hours
-            double sum = 0.0;
-            int k = 0;
 
             HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
             for (int i = 0; i < data[0].Length - 1; i++)
@@ -277,23 +272,13 @@ namespace WindowsFormsApplication1
                     dr[0] = line1[0].Trim() + " " + line1[1].Trim();
                 }
                 dr[1] = line1[2].Trim();
-                sum += Convert.ToDouble(line1[2].Trim());
-                if (k == step)
-                {
-                    //series.Points.AddY(sum/step);          //Plotting the chart. Getting the average from sum/step
-                    series.Points.AddXY(line1[0], sum / step);
-                    k = 0;
-                    sum = 0.0;
-                }
                 for (int j = 1; j < ts.Count; j++)
                 {
                     string[] line2 = data[j][i].Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                     dr[j+1] = line2[2].Trim();
                 }
-                k += 1;
             }
         }
-
 
         private void chkbShapefile_CheckedChanged(object sender, EventArgs e)
         {
@@ -405,6 +390,16 @@ namespace WindowsFormsApplication1
         {
             if (cmbDataSet.SelectedItem.ToString().Contains("SoilMoisture")) { lblSoilMoisture.Visible = true; chklstbxDatasetOptions.Visible = true; }
             else { lblSoilMoisture.Visible = false; chklstbxDatasetOptions.Visible = false; }
+
+            if (cmbDataSet.SelectedItem.ToString().Contains("Precipitation"))
+            {
+                cmbSource.Items.Add("Daymet");
+            }
+            else
+            {
+                if(cmbSource.Items.Contains("Daymet")) { cmbSource.Items.Remove("Daymet"); }
+            }
+
         }
 
         private void cmbSource_SelectedValueChanged(object sender, EventArgs e)
@@ -435,6 +430,12 @@ namespace WindowsFormsApplication1
         private void lblError_TextChanged(object sender, EventArgs e)
         {
             lblError.Visible = true;
+        }
+
+        private void btnPrecipCompare_Click(object sender, EventArgs e)
+        {
+            PrecipCompare compare = new PrecipCompare();
+            compare.Show();
         }
     }
 }

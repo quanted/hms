@@ -44,6 +44,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HMSBASINS\HMSNCDC.csproj">
+      <Project>{1acfd2bc-7fb2-48c4-be76-30fe92b34c41}</Project>
+      <Name>HMSNCDC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HMSDaymet\HMSDaymet.csproj">
+      <Project>{0fc7fae1-3d38-44b7-b6d7-4dcf951d9f76}</Project>
+      <Name>HMSDaymet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HMSGDAL\HMSGDAL.csproj">
       <Project>{fb3b67fd-8840-411f-b717-deeac8499b2c}</Project>
       <Name>HMSGDAL</Name>

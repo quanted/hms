@@ -7,12 +7,6 @@ namespace HMSWebServices.Models
 {
     public class WSTotalFlow
     {
-        public string latitude { get; set; }
-        public string longitude { get; set; }
-        public string startDate { get; set; }
-        public string endDate { get; set; }
-        public string dataSource { get; set; }
-        public bool localTime { get; set; }
 
         /// <summary>
         /// Gets TotalFlow data using latitude/longitude.
@@ -28,7 +22,6 @@ namespace HMSWebServices.Models
         public string GetTotalFlowData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
         {
             errorMsg = "";
-            //string wsPath = HttpRuntime.AppDomainAppPath;
             HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
             if (errorMsg.Contains("Error")) { return null; }
             string data = tFlow.GetDataSetsString(out errorMsg);
@@ -55,6 +48,5 @@ namespace HMSWebServices.Models
             if (errorMsg.Contains("Error")) { return null; }
             return data;
         }
-
     }
 }

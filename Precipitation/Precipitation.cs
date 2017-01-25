@@ -22,8 +22,14 @@ namespace HMSPrecipitation
         public double cellWidth { get; set; }                           // LDAS data point cell width, defined by source.
         public string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
         public HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
+        public string station { get; set; }                             // Station ID for BASIN data.
 
         public Precipitation() { }
+
+        public Precipitation(out string errorMsg, string startDate, string endDate, string source, string station) : this(out errorMsg, startDate, endDate, source, false, "")
+        {
+            this.station = station;
+        }
 
         /// <summary>
         /// Constructor using a shapefile.
@@ -49,13 +55,28 @@ namespace HMSPrecipitation
         /// <param name="source"></param>
         /// <param name="local"></param>
         /// <param name="sfPath"></param>
-        public Precipitation(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath)
+        public Precipitation(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, latitude, longitude, startDate, endDate, source, local, sfPath, "0.0", "NaN")
+        {
+        }
+
+        /// <summary>
+        /// Constructor using latitude and longitude, with gmtOffset already known.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="source"></param>
+        /// <param name="local"></param>
+        /// <param name="sfPath"></param>
+        public Precipitation(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, string gmtOffset, string tzName)
         {
             errorMsg = "";
-            this.gmtOffset = 0.0;
+            this.gmtOffset = Convert.ToDouble(gmtOffset);
             this.dataSource = source;
             this.localTime = local;
-            this.tzName = "GMT";
+            this.tzName = tzName;
             if (errorMsg.Contains("Error")) { return; }
             SetDates(out errorMsg, startDate, endDate);
             if (errorMsg.Contains("Error")) { return; }
@@ -74,8 +95,10 @@ namespace HMSPrecipitation
             }
             if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
+            else if (this.dataSource == "Daymet") { this.cellWidth = 0.01; }
+            else { this.cellWidth = 0.0; }
             this.gdal = new HMSGDAL.HMSGDAL();
-            }
+        }
 
         /// <summary>
         /// Method first checks if the string is numeric then attemps to convert to a double.
@@ -138,20 +161,28 @@ namespace HMSPrecipitation
                 errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
-            if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
+            if (this.dataSource.Contains("NLDAS"))  
             {
-                DateTime minDate = new DateTime(1979, 01, 02); 
+                DateTime minDate = new DateTime(1979, 01, 02);              //NLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
                 {
-                    this.startDate = minDate;   //start date is set to NLDAS start date
+                    this.startDate = minDate;                               //start date is set to NLDAS start date
                 }
             }
-            else if (this.dataSource.Contains("GLDAS"))   //GLDAS data collection start date
+            else if (this.dataSource.Contains("GLDAS"))   
             {
-                DateTime minDate = new DateTime(2000, 02, 25); 
+                DateTime minDate = new DateTime(2000, 02, 25);              //GLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
                 {
-                    this.startDate = minDate;   //start date is set to GLDAS start date
+                    this.startDate = minDate;                               //start date is set to GLDAS start date
+                }
+            }
+            else if (this.dataSource.Contains("Daymet"))
+            {
+                DateTime minDate = new DateTime(1980, 01, 01);              //Daymet dataset start date
+                if (DateTime.Compare(this.startDate, minDate) < 0)
+                {
+                    this.startDate = minDate;
                 }
             }
         }
@@ -168,27 +199,49 @@ namespace HMSPrecipitation
             HMSTimeSeries.HMSTimeSeries newTS = new HMSTimeSeries.HMSTimeSeries();
             ts.Add(newTS);
 
-            if (this.shapefilePath != null)
+            if (this.shapefilePath != null && this.dataSource.Contains("LDAS"))
             {
                 bool sourceNLDAS = true;
                 if (this.dataSource.Contains("GLDAS")) { sourceNLDAS = false; }
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
                 this.latitude = center[0];   // coordinate values for Precipitation objects are taken from the centroid of the shapefile.
                 this.longitude = center[1];
-                gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);
+                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);       //Obsolete
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
+                if (errorMsg.Contains("Error")) { return null; }
+            }
+            else if (this.shapefilePath != null && this.dataSource.Contains("Daymet"))
+            {
+                double[] center = gdal.ReturnCentroid(out errorMsg, this.shapefilePath);
+                this.latitude = center[0];   // coordinate values for Precipitation objects are taken from the centroid of the shapefile.
+                this.longitude = center[1];
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
             }
 
-            if (this.localTime == true && offset == 0.0)
+            if (this.localTime == true && tzName.Contains("NaN"))
             {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
+                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 if (errorMsg.Contains("Error")) { return null; }
-                this.tzName = ts[0].tzName;              //Gets the Timezone name
+                this.tzName = ts[0].tzName;                                                                     //Gets the Timezone name
                 if (errorMsg.Contains("Error")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
             }
 
-            gldas.BeginLDASSequence(out errorMsg, this, "PRECIP", newTS);
+            if (this.dataSource.Contains("NLDAS") || this.dataSource.Contains("GLDAS"))
+            {
+                gldas.BeginLDASSequence(out errorMsg, this, "PRECIP", newTS);
+            }
+            else if (this.dataSource.Contains("Daymet"))
+            {
+                HMSDaymet.HMSDaymet daymet = new HMSDaymet.HMSDaymet();
+                daymet.GetDaymetData(out errorMsg, this, "Precip", newTS);
+            }
+            else if (this.dataSource.Contains("NCDC"))
+            {
+                HMSNCDC.HMSNCDC ncdc = new HMSNCDC.HMSNCDC();
+                ncdc.BeginNCDCSequence(out errorMsg, this, "NCDC", this.station, newTS);
+            }
             if (errorMsg.Contains("Error")) { return null; }
             return ts;
         }

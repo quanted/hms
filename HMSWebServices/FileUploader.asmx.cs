@@ -18,6 +18,7 @@ namespace HMSWebServices
     public class FileUploader : System.Web.Services.WebService
     {
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         [WebMethod]
         public string UploadShapefile(byte[] f, string fileName)
         {

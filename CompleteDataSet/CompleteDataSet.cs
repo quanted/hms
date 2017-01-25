@@ -283,37 +283,37 @@ namespace HMSCompleteDataSet
                 {
                     dataPrecip = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Precip", newPrecipTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    precipTS[precipTS.Count-1].SetTimeSeriesVariables(out errorMsg, newPrecipTS, dataPrecip);
+                    precipTS[precipTS.Count-1].SetTimeSeriesVariables(out errorMsg, newPrecipTS, dataPrecip, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataHumid = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Humidity", newHumidTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    humidityTS[humidityTS.Count-1].SetTimeSeriesVariables(out errorMsg, newHumidTS, dataHumid);
+                    humidityTS[humidityTS.Count-1].SetTimeSeriesVariables(out errorMsg, newHumidTS, dataHumid, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataTemp = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Temp", newTempTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    tempTS[tempTS.Count-1].SetTimeSeriesVariables(out errorMsg, newTempTS, dataTemp);
+                    tempTS[tempTS.Count-1].SetTimeSeriesVariables(out errorMsg, newTempTS, dataTemp, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataLongW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Longwave_Rad", newLongWTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    longwaveRadTS[longwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newLongWTS, dataLongW);
+                    longwaveRadTS[longwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newLongWTS, dataLongW, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataShortW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Shortwave_Rad", newShortWTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    shortwaveRadTS[shortwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newShortWTS, dataShortW);
+                    shortwaveRadTS[shortwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newShortWTS, dataShortW, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataZonalW= gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Zonal_Wind", newZonalWTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    zonalWindTS[zonalWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newZonalWTS, dataZonalW);
+                    zonalWindTS[zonalWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newZonalWTS, dataZonalW, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
 
                     dataMeridW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Merid_Wind", newMeridWTS, shapefilePath);
                     if (errorMsg.Contains("Error")) { return null; }
-                    meridWindTS[meridWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newMeridWTS, dataMeridW);
+                    meridWindTS[meridWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newMeridWTS, dataMeridW, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
                 }
                 else
@@ -363,7 +363,7 @@ namespace HMSCompleteDataSet
                     data += precipDataArrayLine[0] + " " + precipDataArrayLine[1] + ", " + precipDataArrayLine[2] + ", " + humidDataArrayLine[2] + ", " + tempDataArrayLine[2] + ", " + zonalWDataArrayLine[2] + ", " + meridWDataArrayLine[2] + ", " + shortWDataArrayLine[2] + ", " + longWDataArrayLine[2] + "\n";
                 }
                 if (precipTS.Count > 1) { ts.Add(newTS); }
-                ts[ts.Count - 1].SetTimeSeriesVariables(out errorMsg, newTS, String.Concat(precipTS[precipTS.Count - 1].metaData, "\n\n     Date&Time     Data\n", data, "MEAN"));
+                ts[ts.Count - 1].SetTimeSeriesVariables(out errorMsg, newTS, String.Concat(precipTS[precipTS.Count - 1].metaData, "\n\n     Date&Time     Data\n", data, "MEAN"), "NLDAS");
             }
             catch (Exception ex)
             {

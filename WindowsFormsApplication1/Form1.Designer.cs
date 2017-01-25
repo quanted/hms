@@ -28,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblLatitude = new System.Windows.Forms.Label();
             this.lblLongitude = new System.Windows.Forms.Label();
@@ -64,17 +61,15 @@
             this.lblSoilMoisture = new System.Windows.Forms.Label();
             this.lblTimer = new System.Windows.Forms.Label();
             this.lblTimerResult = new System.Windows.Forms.Label();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.dGVData = new System.Windows.Forms.DataGridView();
-            this.timeseriesChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.btnPrecipCompare = new System.Windows.Forms.Button();
             this.grpbTime.SuspendLayout();
-            this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dGVData)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.timeseriesChart)).BeginInit();
+            this.tabControl1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -397,15 +392,14 @@
             this.lblTimerResult.Text = "lblTimerResult";
             this.lblTimerResult.Visible = false;
             // 
-            // tabControl1
+            // tabPage2
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(41, 207);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(675, 541);
-            this.tabControl1.TabIndex = 32;
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(667, 512);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tabPage1
             // 
@@ -418,17 +412,6 @@
             this.tabPage1.Text = "Timeseries";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.timeseriesChart);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(667, 512);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Plot";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
             // dGVData
             // 
             this.dGVData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -438,27 +421,32 @@
             this.dGVData.Size = new System.Drawing.Size(635, 470);
             this.dGVData.TabIndex = 14;
             // 
-            // timeseriesChart
+            // tabControl1
             // 
-            chartArea1.Name = "ChartArea1";
-            this.timeseriesChart.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.timeseriesChart.Legends.Add(legend1);
-            this.timeseriesChart.Location = new System.Drawing.Point(15, 16);
-            this.timeseriesChart.Name = "timeseriesChart";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.timeseriesChart.Series.Add(series1);
-            this.timeseriesChart.Size = new System.Drawing.Size(635, 479);
-            this.timeseriesChart.TabIndex = 0;
-            this.timeseriesChart.Text = "Timeseries Chart";
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(41, 207);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(675, 541);
+            this.tabControl1.TabIndex = 32;
+            // 
+            // btnPrecipCompare
+            // 
+            this.btnPrecipCompare.Location = new System.Drawing.Point(734, 717);
+            this.btnPrecipCompare.Name = "btnPrecipCompare";
+            this.btnPrecipCompare.Size = new System.Drawing.Size(191, 31);
+            this.btnPrecipCompare.TabIndex = 33;
+            this.btnPrecipCompare.Text = "Precipitaiton Compare";
+            this.btnPrecipCompare.UseVisualStyleBackColor = true;
+            this.btnPrecipCompare.Click += new System.EventHandler(this.btnPrecipCompare_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(969, 814);
+            this.ClientSize = new System.Drawing.Size(955, 779);
+            this.Controls.Add(this.btnPrecipCompare);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.lblTimerResult);
             this.Controls.Add(this.lblTimer);
@@ -495,11 +483,9 @@
             this.Text = "Form1";
             this.grpbTime.ResumeLayout(false);
             this.grpbTime.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dGVData)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.timeseriesChart)).EndInit();
+            this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -540,11 +526,11 @@
         private System.Windows.Forms.Label lblSoilMoisture;
         private System.Windows.Forms.Label lblTimer;
         private System.Windows.Forms.Label lblTimerResult;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.DataGridView dGVData;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.DataVisualization.Charting.Chart timeseriesChart;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.Button btnPrecipCompare;
     }
 }
 

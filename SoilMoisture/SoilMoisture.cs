@@ -49,13 +49,27 @@ namespace HMSSoilMoisture
         /// <param name="endDate"></param>
         /// <param name="source"></param>
         /// <param name="sfPath"></param>
-        public SoilMoisture(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, int[] soilLayers)
+        public SoilMoisture(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, int[] soilLayers) : this(out errorMsg, latitude, longitude, startDate, endDate, source, local, sfPath, soilLayers, "0.0", "NaN")
+        {
+        }
+
+        /// <summary>
+        /// Constructor using latitude and longitude, with gmtOffset already known.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="source"></param>
+        /// <param name="sfPath"></param>
+        public SoilMoisture(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, int[] soilLayers, string gmtOffset, string tzName)
         {
             errorMsg = "";
-            this.gmtOffset = 0.0;
+            this.gmtOffset = Convert.ToDouble(gmtOffset);
             this.dataSource = source;
             this.localTime = local;
-            this.tzName = "GMT";
+            this.tzName = tzName;
             if (errorMsg.Contains("Error")) { return; }
             SetDates(out errorMsg, startDate, endDate);
             if (errorMsg.Contains("Error")) { return; }
@@ -228,7 +242,9 @@ namespace HMSSoilMoisture
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
                 this.latitude = center[0];   // coordinate values for LandSurfaceFlow objects are taken from the centroid of the shapefile.
                 this.longitude = center[1];
-                gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);
+                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);               //Obsolete
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
+                if (errorMsg.Contains("Error")) { return null; }
             }
 
             if (this.localTime == true && offset == 0.0)
@@ -273,7 +289,7 @@ namespace HMSSoilMoisture
                             errorMsg = "Error: Invalid data source selected.";
                             return null;
                         }
-                        layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data);
+                        layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data, dataSource);
                         if (errorMsg.Contains("Error")) { return null; }
                     }
                     string result = SetSoilMoistureTimeSeries(out errorMsg, ts.Count);
@@ -282,7 +298,7 @@ namespace HMSSoilMoisture
                         newTS = new HMSTimeSeries.HMSTimeSeries();
                         ts.Add(newTS);
                     }
-                    ts[i].SetTimeSeriesVariables(out errorMsg, layers[0], result);
+                    ts[i].SetTimeSeriesVariables(out errorMsg, layers[0], result, dataSource);
                     
                     //Setting metadata
                     for (int j = 0; j < layersSelected.Length; j++)
@@ -320,12 +336,12 @@ namespace HMSSoilMoisture
                         errorMsg = "Error: Invalid data source selected.";
                         return null;
                     }
-                    layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data);
+                    layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data, dataSource);
                     if (errorMsg.Contains("Error")) { return null; }
-                    ts[0].newMetaData += "layer" + (j + 1) + " Name=" + layerName + "cm\n";
+                    ts[0].newMetaData += "layer" + (j + 1) + "_Name=" + layerName + "cm\n";
                 }
                 string result = SetSoilMoistureTimeSeries(out errorMsg, 0);
-                ts[0].SetTimeSeriesVariables(out errorMsg, layers[0], result);
+                ts[0].SetTimeSeriesVariables(out errorMsg, layers[0], result, dataSource);
                 if (errorMsg.Contains("Error")) { return null; }
             }
             return ts;
@@ -364,7 +380,7 @@ namespace HMSSoilMoisture
                     layerData.Add(layers[i].timeSeries.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries));
                 }
 
-                string timeSeries = "";
+                StringBuilder stBuilder = new StringBuilder();
                 for (int i = 0; i < layerData[0].Length; i++)
                 {
                     string date = "";
@@ -373,16 +389,17 @@ namespace HMSSoilMoisture
                     for (int j = 0; j < layers.Count; j++)
                     {
                         string[] layerLineData = layerData[j][i].Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                        if (j == 0)
+                        if (j == 0)                         // Sets date for the timeseries element, no difference in performance with or without conditional statement
                         {
                             date = layerLineData[0] + " " + layerLineData[1];
                         }
                         data += layerLineData[2] + " ";
                     }
-                    timeSeries = String.Concat(timeSeries, date, " ", data, "\n");
-
+                    stBuilder.Append(date + " " + data + "\n");
                 }
-                return timeSeries = String.Concat(layers[0].metaData, "\n\n     Date&Time     Data\n", timeSeries, "MEAN");
+                StringBuilder stBuilder2 = new StringBuilder();
+                stBuilder2.Append(layers[0].metaData + "\n\n     Date&Time     Data\n" + stBuilder.ToString() + "MEAN");
+                return stBuilder2.ToString();
             }
             catch (Exception ex)
             {
