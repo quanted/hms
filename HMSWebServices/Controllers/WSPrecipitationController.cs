@@ -8,58 +8,46 @@ using System.Web;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
-using System.Net.Http.Headers;
 
 namespace HMSWebServices.Controllers
 {
-
-    //public class Precipitation
-    //{
-    //    public string ID { get; set; }                                  // GUID for specific session
-    //    public string latitude { get; set; }                            // Latitude for timeseries
-    //    public string longitude { get; set; }                           // Longitude for timeseries
-    //    public string startDate { get; set; }                           // Start data for timeseries
-    //    public string endDate { get; set; }                             // End date for timeseries
-    //    public string source { get; set; }                              // NLDAS, GLDAS, or SWAT algorithm simulation
-    //    public string localTime { get; set; }                           // False = GMT time, true = local time
-    //    public string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
-    //}
-    
-    //public class CustomMultipartFormDataStreamProvider : MultipartFormDataStreamProvider
-    //{
-    //    public CustomMultipartFormDataStreamProvider(string path) : base(path) { }
-
-    //    public override string GetLocalFileName(HttpContentHeaders headers)
-    //    {
-    //        return headers.ContentDisposition.FileName.Replace("\"", string.Empty);
-    //    }
-    //}
 
     public class WSPrecipitationController : ApiController
     {
         public Dictionary<string, string> parameters;
 
-        public void ParameterCheck(out string errorMsg)
+        /// <summary>
+        /// Evaluates the parameters provided by the POST body, ensuring all required parameters are present.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        private void ParameterCheck(out string errorMsg)
         {
             errorMsg = "";
-            string location = "";
             if ((parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude")))
             {
                 if ((String.IsNullOrWhiteSpace(parameters["latitude"])) || (String.IsNullOrWhiteSpace(parameters["longitude"])))
                 {
-                    location = "shapefile";
+                    errorMsg = "Error: No latitude or longitude value provided.";
                 }
             }
-            if (parameters.ContainsKey("shapefile"))
-            { 
-                if ((String.IsNullOrWhiteSpace(parameters["shapefile"])) && location.Contains("shapefile"))
+            else if (parameters.ContainsKey("filePath"))
+            {
+                if ((String.IsNullOrWhiteSpace(parameters["filePath"])) && !parameters.ContainsKey("geoJson"))
                 {
-                    errorMsg += "Error: Invalid location details provided.";
+                    errorMsg += "Error: No file provided.";
+                }
+            }
+            else if (parameters.ContainsKey("geoJson"))
+            {
+                if (parameters.ContainsKey("geoJson"))
+                {
+                    parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
+                    System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
                 }
             }
             else
             {
-                errorMsg += "Error: All location details were not provided. Both a latitude and longitude value must be given OR a shapefile provided.\n";
+                errorMsg += "Error: No valid data location values provided. Both a latitude and longitude value must be given OR a shapefile provided OR a geoJson (as a parameter or json file).\n";
             }
             if (!(parameters.ContainsKey("startDate")))
             {
@@ -91,6 +79,11 @@ namespace HMSWebServices.Controllers
                     parameters["localTime"] = "false";
                 }
             }
+            if (!parameters.ContainsKey("layers"))
+            {
+                parameters.Add("layers", "0");
+            }
+
         }
 
         /// <summary>
@@ -98,32 +91,34 @@ namespace HMSWebServices.Controllers
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        //[HttpGet]
-        //[Route("api/WSPrecipitation/{param}")]
-        //public string Get(string param)
-        //{
-        //    string data = "";
-        //    string errorMsg = "";
-        //    Dictionary<string, string> parameters = ParseParameters(out errorMsg, param);
-        //    if (errorMsg.Contains("Error")) { return errorMsg; }
-        //    WSPrecipitation result = new WSPrecipitation();
-
-        //    if (parameters.ContainsKey("latitude"))             //Location provided by latitude, longitude
-        //    {
-        //        data = result.GetPrecipitationData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
-        //    }
-        //    else if (parameters.ContainsKey("shapefilePath"))       //Location provided by shapefile.
-        //    {
-        //        string shapefile = HttpContext.Current.Server.MapPath("~/TransientStorage/") + parameters["ID"] + ".zip";
-        //        UnzipFile(out errorMsg, shapefile, parameters["ID"]);
-        //        if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
-        //        string unzippedShapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["ID"] + "\\" + parameters["shapefilePath"] + ".shp";
-        //        data = result.GetPrecipitationData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), unzippedShapefile);
-        //        DeleteTempShapefiles(parameters["ID"]);
-        //    }
-        //    if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
-        //    return data;
-        //}
+        [HttpGet]
+        [Route("api/WSPrecipitation/{param}")]
+        public string Get(string param)
+        {
+            string data = "";
+            string errorMsg = "";
+            Dictionary<string, string> parameters = ParseParameters(out errorMsg, param);
+            if (errorMsg.Contains("Error")) { return errorMsg; }
+            WSPrecipitation result = new WSPrecipitation();
+            if (!parameters.ContainsKey("localTime")) { parameters.Add("localTime", "false"); }
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))             //Location provided by latitude, longitude
+                {
+                    data = result.GetPrecipitationData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                }
+                else
+                {
+                    errorMsg = "Error: Latitude and longitude must be provided.";
+                }
+            }
+            else
+            {
+                errorMsg = "Error: Latitude and longitude must be provided.";
+            }
+            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
+            return data;
+        }
 
         /// <summary>
         /// Gets precipitaiton data using the parameters provided in the param string.
@@ -188,6 +183,7 @@ namespace HMSWebServices.Controllers
                 foreach (MultipartFileData file in provider.FileData)
                 {
                     files.Add(Path.GetFileName(file.LocalFileName));
+                    parameters.Add("filePath", file.LocalFileName);
                 }
             }
             catch (Exception e)
@@ -198,7 +194,7 @@ namespace HMSWebServices.Controllers
             ParameterCheck(out errorMsg);
             if (errorMsg.Contains("Error"))
             {
-                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]))){ DeleteTempShapefiles(parameters["id"]); }
+                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]))) { DeleteTempShapefiles(parameters["id"]); }
                 return errorMsg;
             }
             string data = RetrieveData();
@@ -215,51 +211,89 @@ namespace HMSWebServices.Controllers
         /// <param name="errorMsg"></param>
         /// <param name="paramOne"></param>
         /// <returns></returns>
-        //private Dictionary<string, string> ParseParameters(out string errorMsg, string param)
-        //{
-        //    errorMsg = "";
-        //    Dictionary<string, string> variables = new Dictionary<string, string>();
-        //    string[] values = param.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
-        //    for (int i = 0; i < values.Length; i++)
-        //    {
-        //        string[] line = values[i].Split('=');
-        //        variables.Add(line[0], line[1]);
-        //    }
-        //    return variables;
-        //}
+        private Dictionary<string, string> ParseParameters(out string errorMsg, string param)
+        {
+            errorMsg = "";
+            Dictionary<string, string> variables = new Dictionary<string, string>();
+            string[] values = param.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < values.Length; i++)
+            {
+                string[] line = values[i].Split('=');
+                variables.Add(line[0], line[1]);
+            }
+            return variables;
+        }
 
         /// <summary>
-        /// Extracts the contents of the zip file containing the shapefile.
+        /// Checks file type, if zip will extract and check contents.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="zipPath"></param>
-        private void UnzipFile(out string errorMsg, string zipPath, string sessionGUID)
+        private static void CheckFile(out string errorMsg, string filePath, string sessionGUID)
         {
             errorMsg = "";
-            string extractPath = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID );
-            try
+            if (Path.GetExtension(filePath).Contains("zip"))
             {
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
-                File.Delete(zipPath);
+                string extractPath = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID);
+                try
+                {
+                    ZipFile.ExtractToDirectory(filePath, extractPath);
+                    File.Delete(filePath);
+                    CheckShapefiles(out errorMsg, sessionGUID);
+                    if (errorMsg.Contains("Error")) { return; }
+                }
+                catch (Exception ex)
+                {
+                    errorMsg = "Error: " + ex;
+                    return;
+                }
             }
-            catch (Exception ex)
-            {
-                errorMsg = "Error: " + ex;
-                return;
-            }
+            else if (Path.GetExtension(filePath).Contains("json")) { return; }
+            else { errorMsg = "Error: Invalid file provided. Accepted file types are: zipped shapefile (containing a shp, prj, and dbf file) or a json (containing geojson data)."; return; }
         }
 
         /// <summary>
         /// Deletes extracted shapefiles for cleanup.
         /// </summary>
-        private void DeleteTempShapefiles(string sessionGUID)
+        private static void DeleteTempShapefiles(string sessionGUID)
         {
             try
             {
-                Directory.Delete(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\"), true);
+                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\")))
+                {
+                    Directory.Delete(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\"), true);
+                }
             }
             catch
-            { }
+            {
+                // write to log?
+            }
+        }
+
+        /// <summary>
+        /// Checks for required files for shapefile within the provided zip.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="sessionGUID"></param>
+        private static void CheckShapefiles(out string errorMsg, string sessionGUID)
+        {
+            errorMsg = "";
+            Dictionary<string, bool> requiredFiles = new Dictionary<string, bool>
+            {
+                {".shp", false},
+                {".prj", false},
+                {".dbf", false}
+            };
+
+            foreach (string file in Directory.GetFiles(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID)))
+            {
+                string ext = Path.GetExtension(file);
+                if (requiredFiles.ContainsKey(ext))
+                {
+                    requiredFiles[ext] = true;
+                }
+            }
+            if (requiredFiles.ContainsValue(false)) { errorMsg = "Error: Zipped Shapefile did not contain all required files. Zip must contain shp, prj, and dbf files."; }
         }
 
         /// <summary>
@@ -272,32 +306,33 @@ namespace HMSWebServices.Controllers
             string errorMsg = "";
             WSPrecipitation result = new WSPrecipitation();
 
-            if (parameters.ContainsKey("shapefile"))
+            if (parameters.ContainsKey("filePath"))
             {
-                if (!String.IsNullOrWhiteSpace(parameters["shapefile"]))
+                if (!String.IsNullOrWhiteSpace(parameters["filePath"]))
                 {
-                    string shapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["id"] + "\\" + parameters["shapefile"] + ".zip";
-                    UnzipFile(out errorMsg, shapefile, parameters["id"]);
+                    CheckFile(out errorMsg, parameters["filePath"], parameters["id"]);
                     if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["id"]); return errorMsg; }
-                    string unzippedShapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["id"] + "\\" + parameters["shapefile"] + ".shp";
-                    data = result.GetPrecipitationData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), unzippedShapefile);
+                    data = result.GetPrecipitationData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
                 }
-                else if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
+                else
+                {
+                    errorMsg = "Error: Invalid file provided."; return errorMsg;
+                }
+            }
+            else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
                 {
                     data = result.GetPrecipitationData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
                 }
                 else
                 {
-                    data = "Error: Valid location parameters must be provided."; return data;
+                    errorMsg = "Error: Invalid latitude or longitude values provided."; return errorMsg;
                 }
-            }
-            else if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
-            {
-                data = result.GetPrecipitationData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
             }
             else
             {
-                data = "Error: Valid location parameters must be provided."; return data;
+                errorMsg = "Error: Valid location parameters must be provided."; return errorMsg;
             }
             if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["id"]); return errorMsg; }
             return data;

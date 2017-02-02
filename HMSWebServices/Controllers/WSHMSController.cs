@@ -96,6 +96,10 @@ namespace HMSWebServices.Controllers
             {
                 parameters.Add("layers", "0");
             }
+            if (!parameters.ContainsKey("dataset"))
+            {
+                errorMsg += "Error: A dataset must be provided.";
+            }
 
         }
         
@@ -187,12 +191,22 @@ namespace HMSWebServices.Controllers
         {
             try
             {
-                Directory.Delete(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\"), true);
+                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\")))
+                {
+                    Directory.Delete(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID + "\\"), true);
+                }
             }
             catch
-            { }
+            {
+                // write to log?
+            }
         }
 
+        /// <summary>
+        /// Checks for required files for shapefile within the provided zip.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="sessionGUID"></param>
         private static void CheckShapefiles(out string errorMsg, string sessionGUID)
         {
             errorMsg = "";
@@ -228,24 +242,25 @@ namespace HMSWebServices.Controllers
             {
                 if (!String.IsNullOrWhiteSpace(parameters["filePath"]))
                 {
-                    //string shapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["id"] + "\\" + parameters["shapefile"] + ".zip";
                     CheckFile(out errorMsg, parameters["filePath"], parameters["id"]);
                     if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["id"]); return errorMsg; }
-                    //string unzippedShapefile = HttpContext.Current.Server.MapPath("~\\TransientStorage\\") + parameters["id"] + "\\" + parameters["shapefile"] + ".shp";
                     data = result.GetHMSData(out errorMsg, parameters["dataset"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"], parameters["layers"]);
                 }
-                else if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
+                else
+                {
+                    errorMsg = "Error: Invalid file provided."; return errorMsg;
+                }
+            }
+            else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
                 {
                     data = result.GetHMSData(out errorMsg, parameters["dataset"], parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["layers"]);
                 }
                 else
                 {
-                    errorMsg = "Error: Valid location parameters must be provided."; return errorMsg;
+                    errorMsg = "Error: Invalid latitude or longitude values provided."; return errorMsg;
                 }
-            }
-            else if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
-            {
-                data = result.GetHMSData(out errorMsg, parameters["dataset"], parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["layers"]);
             }
             else
             {
