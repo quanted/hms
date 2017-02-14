@@ -11,7 +11,7 @@ namespace HMSDaymet
 {
     public class HMSDaymet
     {
-
+         
         /// <summary>
         /// Gets Daymet data for the specified dataset using the variables provided by the IHMSModule object, and sets the value to the HMSTimeseries object.
         /// </summary>
@@ -141,11 +141,12 @@ namespace HMSDaymet
             {
                 case "Precip":
                     return "prcp";
+                case "Temp":
+                    return "tmax,tmin";
                 default:
                     errorMsg = "Error: Parameter for Daynet did not load.";
                     return null;
             }
-        }
-               
+        }     
     }
 }

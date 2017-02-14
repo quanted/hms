@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1ACFD2BC-7FB2-48C4-BE76-30FE92B34C41}</ProjectGuid>
+    <ProjectGuid>{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HMSBASINS</RootNamespace>
-    <AssemblyName>HMSBASINS</AssemblyName>
+    <RootNamespace>Temperature</RootNamespace>
+    <AssemblyName>Temperature</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,14 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,16 +40,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HMSNCDC.cs" />
+    <Compile Include="Temperature.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HMSDaymet\HMSDaymet.csproj">
+      <Project>{0fc7fae1-3d38-44b7-b6d7-4dcf951d9f76}</Project>
+      <Name>HMSDaymet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HMSGDAL\HMSGDAL.csproj">
+      <Project>{fb3b67fd-8840-411f-b717-deeac8499b2c}</Project>
+      <Name>HMSGDAL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HMSJSON\HMSJSON.csproj">
       <Project>{c6ae58ad-7af6-4edb-8157-20ce812dc787}</Project>
       <Name>HMSJSON</Name>
     </ProjectReference>
     <ProjectReference Include="..\HMSLDAS\HMSLDAS.csproj">
-      <Project>{FF9B999F-7EB7-4785-9EC1-83D8DA35A2FF}</Project>
+      <Project>{ff9b999f-7eb7-4785-9ec1-83d8da35a2ff}</Project>
       <Name>HMSLDAS</Name>
     </ProjectReference>
     <ProjectReference Include="..\HMSTimeSeries\HMSTimeSeries.csproj">
@@ -65,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

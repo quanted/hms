@@ -77,6 +77,8 @@ namespace HMSNCDC
             {
                 data = GetData(out errorMsg, module.startDate, module.endDate, module.ts[0], "PRECIP_HLY", station);
                 if (errorMsg.Contains("Error")) { return; }
+                module.ts[0].ConvertTSDictToTS(out errorMsg);
+                if (errorMsg.Contains("Error")) { return; }
             }
         }
 

@@ -24,6 +24,7 @@ namespace HMSLDAS
         double cellWidth { get; set; }                           // LDAS data point cell width, defined by source.
         string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
         HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
+        HMSJSON.HMSJSON.HMSData jsonData { get; set; }
     }
 
     public class HMSLDAS

@@ -25,7 +25,7 @@ namespace HMSTotalFlow
 
         public HMSLandSurfaceFlow.LandSurfaceFlow landSurfaceFlow { get; set; }             // LandSurfaceFlow object
         public HMSBaseFlow.BaseFlow baseFlow { get; set; }                                  // BaseFlow object
-
+        public HMSJSON.HMSJSON.HMSData jsonData { get; set; }
 
         public TotalFlow() { }
 
@@ -262,7 +262,8 @@ namespace HMSTotalFlow
             if (errorMsg.Contains("Error")) { return null; }
             SetTotalFlowTimeSeries(out errorMsg, newTS);
             if (errorMsg.Contains("Error")) { return null; }
-
+            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
+            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "TotalFlow", this.dataSource, this.localTime, this.gmtOffset);
             return ts;
         }
 
@@ -313,7 +314,7 @@ namespace HMSTotalFlow
             GetDataSets(out errorMsg);
             if (errorMsg.Contains("Error")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
-            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, ts, "TotalFlow", this.dataSource, this.localTime, this.gmtOffset);
+            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
             if (errorMsg.Contains("Error")) { return null; }
             return combinedData;
         }

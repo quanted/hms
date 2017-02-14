@@ -121,10 +121,10 @@
             "Precipitation",
             "LandSurfaceFlow",
             "BaseFlow",
-            "TotalFlow",
             "Evapotranspiration",
             "SoilMoisture",
-            "Complete"});
+            "Temperature",
+            "TotalFlow"});
             this.cmbDataSet.Location = new System.Drawing.Point(143, 70);
             this.cmbDataSet.Name = "cmbDataSet";
             this.cmbDataSet.Size = new System.Drawing.Size(155, 24);
@@ -414,6 +414,10 @@
             // 
             // dGVData
             // 
+            this.dGVData.AllowUserToAddRows = false;
+            this.dGVData.AllowUserToDeleteRows = false;
+            this.dGVData.AllowUserToResizeColumns = false;
+            this.dGVData.AllowUserToResizeRows = false;
             this.dGVData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dGVData.Location = new System.Drawing.Point(15, 19);
             this.dGVData.Name = "dGVData";

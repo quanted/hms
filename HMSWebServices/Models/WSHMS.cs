@@ -48,6 +48,13 @@ namespace HMSWebServices.Models
                 data = sm.GetDataSetsString(out errorMsg);
                 if (errorMsg.Contains("Error")) { return null; }
             }
+            else if (dataset.Contains("Temperature"))
+            {
+                HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
+                if (errorMsg.Contains("Error")) { return null; }
+                data = temp.GetDataSetsString(out errorMsg);
+                if (errorMsg.Contains("Error")) { return null; }
+            }
             else if (dataset.Contains("TotalFlow"))
             {
                 HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
@@ -103,6 +110,13 @@ namespace HMSWebServices.Models
                 HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
                 if (errorMsg.Contains("Error")) { return null; }
                 data = tFlow.GetDataSetsString(out errorMsg);
+                if (errorMsg.Contains("Error")) { return null; }
+            }
+            else if (dataset.Contains("TotalFlow"))
+            {
+                HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
+                if (errorMsg.Contains("Error")) { return null; }
+                data = temp.GetDataSetsString(out errorMsg);
                 if (errorMsg.Contains("Error")) { return null; }
             }
             return data;

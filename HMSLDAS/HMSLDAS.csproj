@@ -50,6 +50,10 @@
       <Project>{fb3b67fd-8840-411f-b717-deeac8499b2c}</Project>
       <Name>HMSGDAL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HMSJSON\HMSJSON.csproj">
+      <Project>{c6ae58ad-7af6-4edb-8157-20ce812dc787}</Project>
+      <Name>HMSJSON</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HMSTimeSeries\HMSTimeSeries.csproj">
       <Project>{de6ac2e8-6567-4185-b81b-d549b19107ca}</Project>
       <Name>HMSTimeSeries</Name>

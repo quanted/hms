@@ -24,6 +24,7 @@ namespace HMSSoilMoisture
         public HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
         public int[] layersSelected { get; set; }                       // Layers selected is represented by an integer 1-6, 
         public List<HMSTimeSeries.HMSTimeSeries> layers { get; set; }
+        public HMSJSON.HMSJSON.HMSData jsonData { get; set; }
 
         public SoilMoisture() { }
 
@@ -344,6 +345,8 @@ namespace HMSSoilMoisture
                 ts[0].SetTimeSeriesVariables(out errorMsg, layers[0], result, dataSource);
                 if (errorMsg.Contains("Error")) { return null; }
             }
+            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
+            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "SoilMoisture", this.dataSource, this.localTime, this.gmtOffset);
             return ts;
         }
 
@@ -358,7 +361,7 @@ namespace HMSSoilMoisture
             GetDataSets(out errorMsg);
             if (errorMsg.Contains("Error")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
-            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, ts, "SoilMoisture", this.dataSource, this.localTime, this.gmtOffset);
+            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
             if (errorMsg.Contains("Error")) { return null; }
             return combinedData;
         }

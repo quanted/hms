@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Configuration;
+using Newtonsoft.Json;
 
 namespace WindowsFormsApplication1
 {
@@ -18,9 +19,10 @@ namespace WindowsFormsApplication1
 
         private string shapefilePath;
         private List<HMSTimeSeries.HMSTimeSeries> ts;
-        private List<HMSJSON.HMSJSON> jsonData;
+        private List<HMSJSON.HMSJSON> jsonDataOLD;
         private bool localtime;
         private double gmtOffset;
+        private HMSJSON.HMSJSON.HMSData jsonData;
 
         public Form1()
         {
@@ -40,7 +42,6 @@ namespace WindowsFormsApplication1
             DateTime start = DateTime.Now;
             lblError.Text = "";
             dGVData.DataSource = null;
-            //timeseriesChart.DataSource = null;
             System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
             string latitude = txtLatitude.Text;
@@ -94,6 +95,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = precip.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = precip.jsonData;
             }
             else if (dataset == "LandSurfaceFlow")
             {
@@ -111,6 +113,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = landFlow.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = landFlow.jsonData;
             }
             else if ( dataset == "BaseFlow")
             {
@@ -128,6 +131,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = baseFlow.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = baseFlow.jsonData;
             }
             else if (dataset == "TotalFlow")
             {
@@ -145,6 +149,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = totalFlow.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = totalFlow.jsonData;
             }
             else if (dataset == "Evapotranspiration")
             {
@@ -162,6 +167,25 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = evapo.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = evapo.jsonData;
+            }
+            else if (dataset == "Temperature")
+            {
+                HMSTemperature.Temperature temp = new HMSTemperature.Temperature();
+                if (String.IsNullOrWhiteSpace(shapefilePath))
+                {
+                    temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, source, local, "");   //Returns data based on the latitude/longitude values provided
+                }
+                else
+                {
+                    temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
+                }
+                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                ts = temp.GetDataSets(out errorMsg);
+                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                offset = temp.gmtOffset;
+                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = temp.jsonData;
             }
             else if (dataset == "Complete")     //Currently removed from list
             {
@@ -180,6 +204,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = complete.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                //this.jsonData = complete.jsonData;
             }
             else if (dataset == "SoilMoisture")
             {
@@ -200,6 +225,7 @@ namespace WindowsFormsApplication1
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
                 offset = soilM.gmtOffset;
                 if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                this.jsonData = soilM.jsonData;
             }
             else
             {
@@ -210,7 +236,7 @@ namespace WindowsFormsApplication1
             this.gmtOffset = offset;
             this.localtime = local;
 
-            PopulateTable(out errorMsg, dt, local, offset);
+            PopulateTableV2(out errorMsg, dt, this.jsonData, local, offset);
 
             lblError.Text = "Data successfully retrieved.";
             
@@ -231,13 +257,13 @@ namespace WindowsFormsApplication1
             System.Windows.Forms.Cursor.Current = Cursors.Default;
         }
 
-        private void OutputToFile(string data, string fileName, string source)
-        {
-            string fileExt = @".txt";
-            string outputFileName = fileName + "_" + source;
-            string outputFilePath = @"C:\Users\dsmith\Documents\HMS Data\" + outputFileName + fileExt;
-            System.IO.File.WriteAllText(outputFilePath, data);
-        }
+        //private void OutputToFile(string data, string fileName, string source)
+        //{
+        //    string fileExt = @".txt";
+        //    string outputFileName = fileName + "_" + source;
+        //    string outputFilePath = @"C:\Users\dsmith\Documents\HMS Data\" + outputFileName + fileExt;
+        //    System.IO.File.WriteAllText(outputFilePath, data);
+        //}
 
         private void PopulateTable(out string errorMsg, DataTable dt, bool local, double offset)
         {
@@ -276,6 +302,41 @@ namespace WindowsFormsApplication1
                 {
                     string[] line2 = data[j][i].Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
                     dr[j+1] = line2[2].Trim();
+                }
+            }
+        }
+
+        private void PopulateTableV2(out string errorMsg, DataTable dt, HMSJSON.HMSJSON.HMSData jsonData, bool local, double offset)
+        {
+            errorMsg = "";
+            string units = jsonData.metadata["unit"];
+            string[] locTitle;
+            if (jsonData.source.Contains("LDAS")) { locTitle = new string[2] { "lat", "lon" }; }
+            else { locTitle = new string[2] { "Latitude", "Longitude" }; }
+            DataColumn dc1 = dt.Columns.Add("Date/Hour", typeof(String));
+            string date0 = jsonData.data.Keys.ElementAt(0).ToString();
+            if (jsonData.data[date0].Count == 1)
+            {
+                DataColumn dc = dt.Columns.Add(jsonData.metadata[locTitle[0]] + ", " + jsonData.metadata[locTitle[1]] + units, typeof(String));
+            }
+            else
+            {
+                for (int i = 0; i < jsonData.data[date0].Count; i++)
+                {
+                    string title = jsonData.metadata["timeseries_" + (i + 1)];
+                    DataColumn dc = dt.Columns.Add(title + units, typeof(String));
+                }
+            }
+            for (int i = 0; i < jsonData.data.Count; i++)
+            {
+                DataRow dr = dt.NewRow();
+                dt.Rows.Add(dr);
+                dr[0] = jsonData.data.Keys.ElementAt(i);
+                string date = jsonData.data.Keys.ElementAt(i).ToString();
+                for (int j = 0; j < jsonData.data[date].Count; j++)
+                {
+                    dr[j + 1] = jsonData.data[date][j];
+
                 }
             }
         }
@@ -331,14 +392,14 @@ namespace WindowsFormsApplication1
                 saveFileDialog1.FilterIndex = 2;
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    this.jsonData = new List<HMSJSON.HMSJSON>();
+                    this.jsonDataOLD = new List<HMSJSON.HMSJSON>();
                     string dataset = cmbDataSet.SelectedItem.ToString();
                     string source = cmbSource.SelectedItem.ToString();
 
                     for (int i = 0; i < ts.Count; i++)
                     {
-                        this.jsonData.Add(new HMSJSON.HMSJSON());
-                        string data = jsonData[i].GetJSONString(out errorMsg, this.ts[i].timeSeries, this.ts[i].newMetaData, ts[i].metaData, dataset, source, this.localtime, this.gmtOffset );
+                        this.jsonDataOLD.Add(new HMSJSON.HMSJSON());
+                        string data = jsonDataOLD[i].GetJSONString(out errorMsg, this.ts[i].timeSeries, this.ts[i].newMetaData, ts[i].metaData, dataset, source, this.localtime, this.gmtOffset, this.ts[i].cellCoverage );
 
                         string fileName = Path.GetFileNameWithoutExtension(saveFileDialog1.FileName) + "_" + (i + 1) + Path.GetExtension(saveFileDialog1.FileName);
                         string filePath = Path.GetDirectoryName(saveFileDialog1.FileName) + @"\" + fileName;
@@ -358,10 +419,45 @@ namespace WindowsFormsApplication1
             System.Windows.Forms.Cursor.Current = Cursors.Default;
         }
 
+        private void SaveDataV2(out string errorMsg)
+        {
+            errorMsg = "";
+            System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                saveFileDialog1.InitialDirectory = @"C:\Users\dsmith\Documents\HMS Data\";
+                saveFileDialog1.RestoreDirectory = true;
+                saveFileDialog1.Title = "Save HMS Data";
+                saveFileDialog1.DefaultExt = "json";
+                saveFileDialog1.FileName = cmbDataSet.SelectedItem.ToString() + "_data_" + cmbSource.SelectedItem.ToString();
+                saveFileDialog1.Filter = "All files (*.*)|*.*";
+                saveFileDialog1.FilterIndex = 2;
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string dataset = cmbDataSet.SelectedItem.ToString();
+                    string source = cmbSource.SelectedItem.ToString();
+                    string fileName = Path.GetFullPath(saveFileDialog1.FileName);
+                    string data = JsonConvert.SerializeObject(this.jsonData);
+                    FileStream fs = File.Create(fileName);
+                    fs.Write(Encoding.UTF8.GetBytes(data), 0, Encoding.UTF8.GetByteCount(data));
+                    fs.Close();
+                    if (errorMsg.Contains("Error")) { return; }
+                    lblError.Text = "Data successfully saved to: " + saveFileDialog1.FileName;
+                }
+            }
+            catch
+            {
+                lblError.Text = "Error: Failed to saved data to file.";
+                return;
+            }
+            System.Windows.Forms.Cursor.Current = Cursors.Default;
+        }
+
         private void btnSaveData_Click(object sender, EventArgs e)
         {
             string errorMsg = "";
-            SaveData(out errorMsg);
+            SaveDataV2(out errorMsg);
         }
 
         private string ConvertToCSV(out string errorMsg, string data)
@@ -434,7 +530,7 @@ namespace WindowsFormsApplication1
 
         private void btnPrecipCompare_Click(object sender, EventArgs e)
         {
-            PrecipCompare compare = new PrecipCompare();
+            PrecipitationCompare compare = new PrecipitationCompare();
             compare.Show();
         }
     }

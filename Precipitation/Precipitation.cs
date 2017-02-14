@@ -1,5 +1,4 @@
-﻿using HMSNCDC;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +8,7 @@ namespace HMSPrecipitation
 {
     public class Precipitation : HMSLDAS.IHMSModule
     {
-        
+
         // Class variables which define a precipitation object.
         public double latitude { get; set; }                            // Latitude for timeseries
         public double longitude { get; set; }                           // Longitude for timeseries
@@ -19,11 +18,12 @@ namespace HMSPrecipitation
         public string tzName { get; set; }                              // Timezone name
         public string dataSource { get; set; }                          // NLDAS, GLDAS, or SWAT algorithm simulation
         public bool localTime { get; set; }                             // False = GMT time, true = local time.
-        public List<HMSTimeSeries.HMSTimeSeries> ts { get; set; }       // TimeSeries Data
+        public List<HMSTimeSeries.HMSTimeSeries> ts { get; set; }       // TimeSeries Data, unaltered from source
         public double cellWidth { get; set; }                           // LDAS data point cell width, defined by source.
         public string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
         public HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
         public string station { get; set; }                             // Station ID for NCDC data.
+        public HMSJSON.HMSJSON.HMSData jsonData { get; set; }           // Post-Processed data object, ready to be serialized into json string.
 
         public Precipitation() { }
 
@@ -155,14 +155,14 @@ namespace HMSPrecipitation
             }
             if (DateTime.Compare(this.endDate, DateTime.Today) > 0)   //If endDate is past today's date, endDate is set to 2 days prior to today.
             {
-                this.endDate = DateTime.Today.AddDays(-2.0); 
+                this.endDate = DateTime.Today.AddDays(-2.0);
             }
             if (DateTime.Compare(this.startDate, this.endDate) > 0)
             {
                 errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
-            if (this.dataSource.Contains("NLDAS"))  
+            if (this.dataSource.Contains("NLDAS"))
             {
                 DateTime minDate = new DateTime(1979, 01, 02);              //NLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
@@ -170,7 +170,7 @@ namespace HMSPrecipitation
                     this.startDate = minDate;                               //start date is set to NLDAS start date
                 }
             }
-            else if (this.dataSource.Contains("GLDAS"))   
+            else if (this.dataSource.Contains("GLDAS"))
             {
                 DateTime minDate = new DateTime(2000, 02, 25);              //GLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
@@ -219,7 +219,7 @@ namespace HMSPrecipitation
                 gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
             }
 
-            if (this.localTime == true && tzName.Contains("NaN"))
+            if (this.localTime == true && !String.IsNullOrWhiteSpace(this.tzName))
             {
                 this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 if (errorMsg.Contains("Error")) { return null; }
@@ -229,6 +229,13 @@ namespace HMSPrecipitation
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
             }
 
+            if (this.shapefilePath != null)
+            {
+                if (gdal.coordinatesInShapefile.Count > 30)
+                {
+                    errorMsg = "Error: Feature geometries containing more than 30 datapoints are prohibited. Current feature contains " + gdal.coordinatesInShapefile.Count + " " + this.dataSource + " data points."; return null;
+                }
+            }
             if (this.dataSource.Contains("NLDAS") || this.dataSource.Contains("GLDAS"))
             {
                 gldas.BeginLDASSequence(out errorMsg, this, "PRECIP", newTS);
@@ -244,6 +251,8 @@ namespace HMSPrecipitation
                 ncdc.BeginNCDCSequence(out errorMsg, this, "NCDC", this.station, newTS);
             }
             if (errorMsg.Contains("Error")) { return null; }
+            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
+            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "Precipitation", this.dataSource, this.localTime, this.gmtOffset);
             return ts;
         }
 
@@ -258,7 +267,7 @@ namespace HMSPrecipitation
             GetDataSets(out errorMsg);
             if (errorMsg.Contains("Error")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
-            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, ts, "Precipitation", this.dataSource, this.localTime, this.gmtOffset);
+            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
             if (errorMsg.Contains("Error")) { return null; }
             return combinedData;
         }

@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HMSLandSurfaceFlow
+namespace HMSTemperature
 {
-    public class LandSurfaceFlow : HMSLDAS.IHMSModule
+    public class Temperature : HMSLDAS.IHMSModule
     {
-
-        // Class variables which define a landsurfaceflow object.
+        // Class variables which define a precipitation object.
         public double latitude { get; set; }                            // Latitude for timeseries
         public double longitude { get; set; }                           // Longitude for timeseries
         public DateTime startDate { get; set; }                         // Start data for timeseries
-        public DateTime endDate { get; set; }                           // End date for timeseries
+        public DateTime endDate { get; set; }                           // End date for timeseriesr
         public double gmtOffset { get; set; }                           // Timezone offset from GMT
         public string tzName { get; set; }                              // Timezone name
         public string dataSource { get; set; }                          // NLDAS, GLDAS, or SWAT algorithm simulation
@@ -24,7 +23,7 @@ namespace HMSLandSurfaceFlow
         public HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
         public HMSJSON.HMSJSON.HMSData jsonData { get; set; }
 
-        public LandSurfaceFlow() { }
+        public Temperature() { }
 
         /// <summary>
         /// Constructor using a shapefile.
@@ -33,9 +32,10 @@ namespace HMSLandSurfaceFlow
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="source"></param>
-        /// <param name="sfPath"></param>
-        public LandSurfaceFlow(out string errorMsg, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, "0.0", "0.0", startDate, endDate, source, local, sfPath)
-        {   
+        /// <param name="local"></param>
+        /// <param name="snow"></param>
+        public Temperature(out string errorMsg, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, "0.0", "0.0", startDate, endDate, source, local, sfPath)
+        {
         }
 
         /// <summary>
@@ -47,9 +47,10 @@ namespace HMSLandSurfaceFlow
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="source"></param>
+        /// <param name="local"></param>
         /// <param name="sfPath"></param>
-        public LandSurfaceFlow(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, latitude, longitude, startDate, endDate, source, local, sfPath, "0.0", "NaN")
-        { 
+        public Temperature(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath) : this(out errorMsg, latitude, longitude, startDate, endDate, source, local, sfPath, "0.0", "NaN")
+        {
         }
 
         /// <summary>
@@ -61,8 +62,9 @@ namespace HMSLandSurfaceFlow
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="source"></param>
+        /// <param name="local"></param>
         /// <param name="sfPath"></param>
-        public LandSurfaceFlow(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, string gmtOffset, string tzName)
+        public Temperature(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath, string gmtOffset, string tzName)
         {
             errorMsg = "";
             this.gmtOffset = Convert.ToDouble(gmtOffset);
@@ -87,6 +89,8 @@ namespace HMSLandSurfaceFlow
             }
             if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
+            else if (this.dataSource == "Daymet") { this.cellWidth = 0.01; }
+            else { this.cellWidth = 0.0; }
             this.gdal = new HMSGDAL.HMSGDAL();
         }
 
@@ -118,7 +122,7 @@ namespace HMSLandSurfaceFlow
                 return result;
             }
         }
-                
+
         /// <summary>
         /// Sets startDate and endDate, checks that dates are valid (start date before end date, end date no greater than today, start dates are valid for data sources)
         /// </summary>
@@ -132,7 +136,6 @@ namespace HMSLandSurfaceFlow
             {
                 this.startDate = Convert.ToDateTime(start);
                 this.endDate = Convert.ToDateTime(end);
-                //Add Hours to start/end dates
                 DateTime newStartDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day, 00, 00, 00);
                 DateTime newEndDate = new DateTime(this.endDate.Year, this.endDate.Month, this.endDate.Day, 23, 00, 00);
                 this.startDate = newStartDate;
@@ -140,7 +143,7 @@ namespace HMSLandSurfaceFlow
             }
             catch
             {
-                errorMsg = "Error: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
+                errorMsg = "Error: Invalid date format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
                 return;
             }
             if (DateTime.Compare(this.endDate, DateTime.Today) > 0)   //If endDate is past today's date, endDate is set to 2 days prior to today.
@@ -152,26 +155,34 @@ namespace HMSLandSurfaceFlow
                 errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
-            if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
+            if (this.dataSource.Contains("NLDAS"))
             {
-                DateTime minDate = new DateTime(1979, 01, 02);
+                DateTime minDate = new DateTime(1979, 01, 02);              //NLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
                 {
-                    this.startDate = minDate;   //start date is set to NLDAS start date
+                    this.startDate = minDate;                               //start date is set to NLDAS start date
                 }
             }
-            else if (this.dataSource.Contains("GLDAS"))   //GLDAS data collection start date
+            else if (this.dataSource.Contains("GLDAS"))
             {
-                DateTime minDate = new DateTime(2000, 02, 25);
+                DateTime minDate = new DateTime(2000, 02, 25);              //GLDAS data collection start date
                 if (DateTime.Compare(this.startDate, minDate) < 0)
                 {
-                    this.startDate = minDate;   //start date is set to GLDAS start date
+                    this.startDate = minDate;                               //start date is set to GLDAS start date
+                }
+            }
+            else if (this.dataSource.Contains("Daymet"))
+            {
+                DateTime minDate = new DateTime(1980, 01, 01);              //Daymet dataset start date
+                if (DateTime.Compare(this.startDate, minDate) < 0)
+                {
+                    this.startDate = minDate;
                 }
             }
         }
 
         /// <summary>
-        /// Gets land surface runoff data.
+        /// Gets precipitation data.
         /// </summary>
         /// <param name="errorMsg"></param>
         public List<HMSTimeSeries.HMSTimeSeries> GetDataSets(out string errorMsg)
@@ -182,36 +193,40 @@ namespace HMSLandSurfaceFlow
             HMSTimeSeries.HMSTimeSeries newTS = new HMSTimeSeries.HMSTimeSeries();
             ts.Add(newTS);
 
-            if (this.shapefilePath != null)
+            if (this.shapefilePath != null && this.dataSource.Contains("LDAS"))
             {
                 bool sourceNLDAS = true;
                 if (this.dataSource.Contains("GLDAS")) { sourceNLDAS = false; }
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
-                this.latitude = center[0];   // coordinate values for LandSurfaceFlow objects are taken from the centroid of the shapefile.
+                this.latitude = center[0];   // coordinate values for Precipitation objects are taken from the centroid of the shapefile.
                 this.longitude = center[1];
-                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);               //Obsolete
+                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);       //Obsolete
                 gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
                 if (errorMsg.Contains("Error")) { return null; }
-            }
-            else
-            {
-                ts[0].cellCoverage = 1.0;
             }
 
             if (this.localTime == true && tzName.Contains("NaN"))
             {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
+                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 if (errorMsg.Contains("Error")) { return null; }
-                this.tzName = ts[0].tzName;              //Gets the Timezone name
+                this.tzName = ts[0].tzName;                                                                     //Gets the Timezone name
                 if (errorMsg.Contains("Error")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
             }
+            if (this.dataSource.Contains("NLDAS") || this.dataSource.Contains("GLDAS"))
+            {
+                gldas.BeginLDASSequence(out errorMsg, this, "Temp", newTS);
+            }
+            else if (this.dataSource.Contains("Daymet"))
+            {
+                HMSDaymet.HMSDaymet daymet = new HMSDaymet.HMSDaymet();
+                daymet.GetDaymetData(out errorMsg, this, "Temp", newTS);
+            }
 
-            gldas.BeginLDASSequence(out errorMsg, this, "Surface_Flow", newTS);
-            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
-            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "SurfaceFlow", this.dataSource, this.localTime, this.gmtOffset);
             if (errorMsg.Contains("Error")) { return null; }
+            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
+            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "Temperature", this.dataSource, this.localTime, this.gmtOffset);
             return ts;
         }
 
@@ -230,5 +245,6 @@ namespace HMSLandSurfaceFlow
             if (errorMsg.Contains("Error")) { return null; }
             return combinedData;
         }
+
     }
 }

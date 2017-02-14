@@ -5,17 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace HMSJSON
 {
     public class HMSJSON
     {
-        public string timeseriesJSON { get; set; }
-        public string metadataJSON { get; set; }
-        public string datasetJSON { get; set; }
-        public string sourceJSON { get; set; }
-        public string newMetadataJSON { get; set; }
-        private Dictionary<string, string> metaDictionary { get; set; }
+        //public string timeseriesJSON { get; set; }
+        //public string metadataJSON { get; set; }
+        //public string datasetJSON { get; set; }
+        //public string sourceJSON { get; set; }
+        //public string newMetadataJSON { get; set; }
+        //private Dictionary<string, string> metaDictionary { get; set; }
         
         public struct HMSData
         {
@@ -32,36 +33,36 @@ namespace HMSJSON
         /// <param name="data"></param>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public string ConvertDataToJSON(out string errorMsg, string data, string dataset)
-        {
-            errorMsg = "";
-            string[] dataLine = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            string jsonString = "";
+        //public string ConvertDataToJSON(out string errorMsg, string data, string dataset)
+        //{
+        //    errorMsg = "";
+        //    string[] dataLine = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //    string jsonString = "";
 
-            jsonString = String.Concat("{\"", dataset,"\":[");
+        //    jsonString = String.Concat("{\"", dataset,"\":[");
 
-            for (int i = 0; i < dataLine.Length; i++)
-            {
-                string[] dataArray = dataLine[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = 0; i < dataLine.Length; i++)
+        //    {
+        //        string[] dataArray = dataLine[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
-                //Explicitly stating data types
-                //jsonString += "{\"date/hour\":\"" + dataArray[0] + " " + dataArray[1] + "\",";
-                //jsonString += "\"data\":\"" + dataArray[2] + "\"}";
+        //        //Explicitly stating data types
+        //        //jsonString += "{\"date/hour\":\"" + dataArray[0] + " " + dataArray[1] + "\",";
+        //        //jsonString += "\"data\":\"" + dataArray[2] + "\"}";
 
-                //Implicitly stating data types
-                jsonString = String.Concat(jsonString, "{\"", dataArray[0], " ", dataArray[1], "\":\"", dataArray[2], "\"}");
-                //jsonString += @"{""" + dataArray[0] + " " + dataArray[1] + @""":""" + dataArray[2] + @"""}";
+        //        //Implicitly stating data types
+        //        jsonString = String.Concat(jsonString, "{\"", dataArray[0], " ", dataArray[1], "\":\"", dataArray[2], "\"}");
+        //        //jsonString += @"{""" + dataArray[0] + " " + dataArray[1] + @""":""" + dataArray[2] + @"""}";
 
-                if (i+3 != dataLine.Length)
-                {
-                    jsonString += @",";
-                }
-                i += 2;
-            }
-            jsonString += @"]}";
-            int count = Encoding.ASCII.GetCharCount(Encoding.ASCII.GetBytes(jsonString));
-            return jsonString;
-        }
+        //        if (i+3 != dataLine.Length)
+        //        {
+        //            jsonString += @",";
+        //        }
+        //        i += 2;
+        //    }
+        //    jsonString += @"]}";
+        //    int count = Encoding.ASCII.GetCharCount(Encoding.ASCII.GetBytes(jsonString));
+        //    return jsonString;
+        //}
 
         /// <summary>
         /// Returns a single string containing all the individual timeseries data with their metadata.
@@ -70,20 +71,20 @@ namespace HMSJSON
         /// <param name="ts"></param>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public string CombineDatasetsAsJSON(out string errorMsg, List<HMSTimeSeries.HMSTimeSeries> ts, string dataset, string source, bool localtime, double gmtOffset)
-        {
-            errorMsg = "";
-            //string data = "";
-            StringBuilder stBuilder = new StringBuilder();
-            for (int i = 0; i < ts.Count; i++)
-            {
-                // "DataSetBlock" is used to parse the data on the client side, where it is saved as individual files.
-                string jsonString = GetJSONString(out errorMsg, ts[i].timeSeries, ts[i].newMetaData, ts[i].metaData, dataset, source, localtime, gmtOffset);
-                stBuilder.Append("DataSetBlock");
-                stBuilder.Append(jsonString);
-            }
-            return stBuilder.ToString();
-        }
+        //public string CombineDatasetsAsJSON(out string errorMsg, List<HMSTimeSeries.HMSTimeSeries> ts, string dataset, string source, bool localtime, double gmtOffset)
+        //{
+        //    errorMsg = "";
+        //    //string data = "";
+        //    StringBuilder stBuilder = new StringBuilder();
+        //    for (int i = 0; i < ts.Count; i++)
+        //    {
+        //        // "DataSetBlock" is used to parse the data on the client side, where it is saved as individual files.
+        //        string jsonString = GetJSONString(out errorMsg, ts[i].timeSeries, ts[i].newMetaData, ts[i].metaData, dataset, source, localtime, gmtOffset);
+        //        stBuilder.Append("DataSetBlock");
+        //        stBuilder.Append(jsonString);
+        //    }
+        //    return stBuilder.ToString();
+        //}
 
         /// <summary>
         /// Generates a HMSData object from the argument parameters and converts the object into a json string.
@@ -97,7 +98,7 @@ namespace HMSJSON
         /// <param name="localtime"></param>
         /// <param name="gmtOffset"></param>
         /// <returns></returns>
-        public string GetJSONString(out string errorMsg, string timeseries, string newMetaData, string metadata, string dataset, string source, bool localtime, double gmtOffset)
+        public string GetJSONString(out string errorMsg, string timeseries, string newMetaData, string metadata, string dataset, string source, bool localtime, double gmtOffset, double coverage)
         {
             errorMsg = "";
             HMSData output = new HMSData();
@@ -106,7 +107,7 @@ namespace HMSJSON
             if (source.Contains("NLDAS") || source.Contains("GLDAS"))
             {
                 output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata);
-                output.data = SetHMSDataTS(out errorMsg, timeseries, localtime, gmtOffset);
+                output.data = SetHMSDataTS(out errorMsg, timeseries, source, dataset, localtime, gmtOffset, coverage);
             }
             else if (source.Contains("Daymet"))
             {
@@ -175,13 +176,14 @@ namespace HMSJSON
         /// <param name="localtime"></param>
         /// <param name="gmtOffset"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> SetHMSDataTS(out string errorMsg, string timeseries, bool localtime, double gmtOffset)
+        private Dictionary<string, List<string>> SetHMSDataTS(out string errorMsg, string timeseries, string dataset, string source, bool localtime, double gmtOffset, double coverage)
         {
             errorMsg = "";
             Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
             List<string> timestepData;
             string[] tsLines = timeseries.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
+            
             for (int i = 0; i < tsLines.Length; i++)
             {
                 timestepData = new List<string>();
@@ -193,7 +195,7 @@ namespace HMSJSON
                 string values = "";
                 for (int j = 2; j < lineData.Length; j++)
                 {
-                    values = values + lineData[j];
+                    values = values + CoverageAdjust(out errorMsg, lineData[j], coverage, dataset, source);
                     if (j != lineData.Length - 1) { values += ", "; }
                 }
                 timestepData.Add(values);
@@ -258,7 +260,11 @@ namespace HMSJSON
             for(int i = 0; i < tsLines.Length; i++)
             {
                 string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                data.Add(lineData[0] + " " + lineData[1], new List<string> { lineData[2] });
+                DateTime date = new DateTime(Convert.ToInt16(lineData[0]), 1, 1);
+                DateTime date2;
+                if (i > 0) { date2 = date.AddDays(Convert.ToInt16(lineData[1]) - 1); }
+                else { date2 = date; }
+                data.Add(date2.Year + "-" + date2.Month.ToString("00") + "-" + date2.Day.ToString("00"), new List<string> { lineData[2] });
             }
             return data;
         }
@@ -270,44 +276,10 @@ namespace HMSJSON
         /// <param name="ts"></param>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        public string CombineTimeseriesAsJson(out string errorMsg, List<HMSTimeSeries.HMSTimeSeries> ts, string dataset, string source, bool localtime, double gmtOffset)
+        public string CombineTimeseriesAsJson(out string errorMsg, HMSData data)
         {
             errorMsg = "";
-            HMSData json = new HMSData();
-            if (source.Contains("GLDAS") || source.Contains("NLDAS"))
-            {
-                json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, localtime, gmtOffset);
-                json.metadata = SetHMSDataMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
-
-                if (ts.Count > 1)
-                {
-                    json.metadata.Add("timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
-                    json.metadata.Add("elevation[m]_1", ts[0].metaElev.ToString());
-                    json.metadata.Add("percentInCell_1", json.metadata["percentInCell"]);
-                    json.metadata.Remove("elevation[m]");
-                }
-                else
-                {
-                    json.metadata.Add("timeseries", ts[0].metaLat + "," + ts[0].metaLon);
-                }
-                for (int i = 1; i < ts.Count; i++)
-                {
-                    Dictionary<string, string> tempMeta = SetHMSDataMetaData(out errorMsg, ts[i].newMetaData, ts[i].metaData);
-                    json.metadata.Add("timeseries_" + (i + 1), ts[i].metaLat + "," + ts[i].metaLon);
-                    json.metadata.Add("elevation[m]_" + (i + 1), ts[i].metaElev.ToString());
-                    if (ts.Count > 1) { json.metadata.Add("percentInCell_" + (i + 1), tempMeta["percentInCell"]); }
-                    Dictionary<string, List<string>> values = MergeJsonTS(out errorMsg, json.data, ts[i].timeSeries);
-                    json.data = values;
-                }
-            }
-            else if (source.Contains("Daymet"))
-            {
-                json.metadata = SetHMSDaymetMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
-                json.data = SetHMSDaymetDataTS(out errorMsg, ts[0].timeSeries);
-            }
-            json.dataset = dataset;
-            json.source = source;
-            return JsonConvert.SerializeObject(json);
+            return JsonConvert.SerializeObject(data);
         }
         
         /// <summary>
@@ -317,7 +289,7 @@ namespace HMSJSON
         /// <param name="baseTS"></param>
         /// <param name="newTS"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> MergeJsonTS(out string errorMsg, Dictionary<string, List<string>> baseTS, string newTS)
+        private Dictionary<string, List<string>> MergeJsonTS(out string errorMsg, string dataset, string source, Dictionary<string, List<string>> baseTS, string newTS, double coverage)
         {
             errorMsg = "";
             string[] newTSLines = newTS.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -327,12 +299,193 @@ namespace HMSJSON
                 string values = "";
                 for (int j = 2; j < lineData.Length; j++)
                 {
-                    values = values + lineData[j];
+                    values = values + CoverageAdjust(out errorMsg, lineData[j], coverage, dataset, source);
                     if (j != lineData.Length - 1) { values += ", "; }
                 }
                 baseTS[lineData[0] + " " + lineData[1]].Add(values);
             }
             return baseTS;
         }
+
+        /// <summary>
+        /// Constructs a HMSData object from the timeSeries List provided. If localtime is true and source is NLDAS/GLDAS, date/time is adjusted for gmtOffset.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="ts"></param>
+        /// <param name="dataset"></param>
+        /// <param name="source"></param>
+        /// <param name="localtime"></param>
+        /// <param name="gmtOffset"></param>
+        /// <returns></returns>
+        public HMSData ConstructHMSDataFromTS(out string errorMsg, List<HMSTimeSeries.HMSTimeSeries> ts, string dataset, string source, bool localtime, double gmtOffset)
+        {
+            errorMsg = "";
+            HMSData json = new HMSData();
+            if (source.Contains("GLDAS") || source.Contains("NLDAS"))
+            {
+                json.metadata = SetHMSDataMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
+
+                if (ts.Count > 1)
+                {
+                    json.metadata.Add("timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
+                    json.metadata.Add("elevation[m]_1", ts[0].metaElev.ToString());
+                    json.metadata.Add("percentInCell_1", json.metadata["percentInCell"]);
+                    json.metadata.Remove("elevation[m]");
+                    json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, Convert.ToDouble(json.metadata["percentInCell_1"]));
+                }
+                else
+                {
+                    json.metadata.Add("timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
+                    json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, ts[0].cellCoverage);
+                }
+                
+
+                for (int i = 1; i < ts.Count; i++)
+                {
+                    Dictionary<string, string> tempMeta = SetHMSDataMetaData(out errorMsg, ts[i].newMetaData, ts[i].metaData);
+                    json.metadata.Add("timeseries_" + (i + 1), ts[i].metaLat + "," + ts[i].metaLon);
+                    json.metadata.Add("elevation[m]_" + (i + 1), ts[i].metaElev.ToString());
+                    if (ts.Count > 1) { json.metadata.Add("percentInCell_" + (i + 1), tempMeta["percentInCell"]); }
+                    Dictionary<string, List<string>> values = MergeJsonTS(out errorMsg, dataset, source, json.data, ts[i].timeSeries, Convert.ToDouble(json.metadata["percentInCell_" + (i+1)]));
+                    json.data = values;
+                }
+            }
+            else if (source.Contains("Daymet"))
+            {
+                json.metadata = SetHMSDaymetMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
+                json.metadata.Add("unit", "mm/day");
+                json.metadata.Add("timeseries_1", json.metadata["Latitude"] + ", " + json.metadata["Longitude"]);
+                json.data = SetHMSDaymetDataTS(out errorMsg, ts[0].timeSeries);
+            }
+            else if (source.Contains("NCDC"))
+            {
+                json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, ts[0].cellCoverage);
+            }
+            else
+            {
+                return new HMSData();
+            }
+            json.dataset = dataset;
+            json.source = source;
+            return json;
+        }
+
+        private string CoverageAdjust(out string errorMsg, string value, double coverage, string dataset, string source)
+        {
+            errorMsg = "";
+            double modifier = 1.0;
+            if (dataset.Contains("Precipitation") && source.Contains("GLDAS")) { modifier = 3 * 60 * 60; }     //Convert GLDAS s to 3hr
+            try
+            {
+                if (dataset.Contains("Baseflow") || dataset.Contains("SurfaceFlow"))
+                {
+                    string adjustedValue = (Convert.ToDouble(value) * coverage * modifier).ToString("0.0000####E+00");
+                    return adjustedValue;
+                }
+                else
+                {
+                    return (Convert.ToDouble(value) * modifier).ToString("0.0000####E+00");
+                }
+            }
+            catch
+            {
+                return (Convert.ToDouble(value) * modifier).ToString("0.0000####E+00");
+            }
+        }
+
+        public HMSData CollectDataTotals(out string errorMsg, HMSData jsonData, string frequency)
+        {
+            errorMsg = "";
+            HMSData totals = new HMSData();
+            totals.dataset = jsonData.dataset;
+            totals.source = jsonData.source;
+            totals.metadata = jsonData.metadata;
+            DateTime iDate = new DateTime();
+            double sum = 0.0;
+            if (totals.source.Contains("LDAS") || totals.source.Contains("NCDC"))
+            {
+                string dateString1 = jsonData.data.Keys.ElementAt(0).ToString().Substring(0, jsonData.data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString1, out iDate);
+            }
+            else if (totals.source.Contains("Daymet"))
+            {
+                string dateString1 = jsonData.data.Keys.ElementAt(0).ToString();
+                DateTime.TryParse(dateString1, out iDate);
+            }
+
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            for (int i = 0; i < jsonData.data.Count; i++)
+            {
+                DateTime date = new DateTime();
+                if (totals.source.Contains("LDAS") || totals.source.Contains("NCDC"))
+                {
+                    string dateString = jsonData.data.Keys.ElementAt(i).ToString().Substring(0, jsonData.data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
+                    DateTime.TryParse(dateString, out date);
+                }
+                else if (totals.source.Contains("Daymet"))
+                {
+                    string dateString = jsonData.data.Keys.ElementAt(i).ToString();
+                    DateTime.TryParse(dateString, out date);
+                }
+                switch (frequency)
+                {
+                    case "daily":
+                        if (date.Day != iDate.Day)
+                        {
+                            tempData.Add(iDate.ToString("yyyy-MM-dd"), new List<string>() { sum.ToString("0.0000####E+00") });
+                            iDate = date;
+                            sum = Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        else
+                        {
+                            sum += Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        break;
+                    case "weekly":
+                        int dayDif = (int)(date - iDate).TotalDays;
+                        if (dayDif >= 7)
+                        {
+                            tempData.Add(iDate.ToString("yyyy-MM-dd"), new List<string>() { sum.ToString("0.0000####E+00") });
+                            iDate = date;
+                            sum = Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        else
+                        {
+                            sum += Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        break;
+                    case "monthly":
+                        if (date.Month != iDate.Month)
+                        {
+                            tempData.Add(iDate.ToString("yyyy-MM-dd"), new List<string>() { sum.ToString("0.0000####E+00") });
+                            iDate = date;
+                            sum = Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        else
+                        {
+                            sum += Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        break;
+                    case "yearly":
+                        int yearDif = (date.Year - iDate.Year);
+                        if (yearDif > 0)
+                        {
+                            tempData.Add(iDate.ToString("yyyy-MM-dd"), new List<string>() { sum.ToString("0.0000####E+00") });
+                            iDate = date;
+                            sum = Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        else
+                        {
+                            sum += Convert.ToDouble(jsonData.data[jsonData.data.Keys.ElementAt(i)][0]);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            totals.data = tempData;
+            return totals;
+        }
+
     }
 }

@@ -72,25 +72,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataFrequency.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataFrequency.Designer.cs">
+      <DependentUpon>DataFrequency.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="PrecipCompare.cs" />
-    <Compile Include="PrecipCompare.Designer.cs">
-      <DependentUpon>PrecipCompare.cs</DependentUpon>
+    <Compile Include="PrecipitationCompare.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PrecipitationCompare.Designer.cs">
+      <DependentUpon>PrecipitationCompare.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DataFrequency.resx">
+      <DependentUpon>DataFrequency.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PrecipCompare.resx">
-      <DependentUpon>PrecipCompare.cs</DependentUpon>
+    <EmbeddedResource Include="PrecipitationCompare.resx">
+      <DependentUpon>PrecipitationCompare.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -159,6 +170,10 @@
     <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj">
       <Project>{2b040225-c65a-4358-a614-1fdc50d4cbbb}</Project>
       <Name>SoilMoisture</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Temperature\Temperature.csproj">
+      <Project>{889d4b83-d52c-4b4f-8367-fb6ac0dc1a7c}</Project>
+      <Name>Temperature</Name>
     </ProjectReference>
     <ProjectReference Include="..\TotalFlow\TotalFlow.csproj">
       <Project>{f6b9df59-4208-4202-9f5e-af98edd4b4c8}</Project>

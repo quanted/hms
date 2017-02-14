@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSDaymet", "HMSDaymet\HMSD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSNCDC", "HMSNCDC\HMSNCDC.csproj", "{1ACFD2BC-7FB2-48C4-BE76-30FE92B34C41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Temperature", "Temperature\Temperature.csproj", "{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -171,6 +173,14 @@ Global
 		{1ACFD2BC-7FB2-48C4-BE76-30FE92B34C41}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1ACFD2BC-7FB2-48C4-BE76-30FE92B34C41}.Release|x86.ActiveCfg = Release|Any CPU
 		{1ACFD2BC-7FB2-48C4-BE76-30FE92B34C41}.Release|x86.Build.0 = Release|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Debug|x86.Build.0 = Debug|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Release|x86.ActiveCfg = Release|Any CPU
+		{889D4B83-D52C-4B4F-8367-FB6AC0DC1A7C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

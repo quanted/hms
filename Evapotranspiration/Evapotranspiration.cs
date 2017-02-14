@@ -22,6 +22,7 @@ namespace HMSEvapotranspiration
         public double cellWidth { get; set; }                           // LDAS data point cell width, defined by source.
         public string shapefilePath { get; set; }                       // Path to shapefile, if provided. Used in place of coordinates.
         public HMSGDAL.HMSGDAL gdal { get; set; }                       // GDAL object for GIS operations.
+        public HMSJSON.HMSJSON.HMSData jsonData { get; set; }
 
         public Evapotranspiration() { }
 
@@ -207,6 +208,8 @@ namespace HMSEvapotranspiration
             }
 
             gldas.BeginLDASSequence(out errorMsg, this, "Evapotrans", newTS);
+            HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
+            this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "Evapotranspiration", this.dataSource, this.localTime, this.gmtOffset);
             if (errorMsg.Contains("Error")) { return null; }
             return ts;
         }
@@ -222,7 +225,7 @@ namespace HMSEvapotranspiration
             GetDataSets(out errorMsg);
             if (errorMsg.Contains("Error")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
-            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, ts, "Evapotranspiration", this.dataSource, this.localTime, this.gmtOffset);
+            string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
             if (errorMsg.Contains("Error")) { return null; }
             return combinedData;
         }

@@ -237,8 +237,6 @@ namespace HMSGDAL
             errorMsg = "";
             int startHour = 0;
             int endHour = 23;
-            //DateTime newDate = new DateTime();
-            //newDate = date;
             if (start == true)
             {
                 if (offset < 0.0)
@@ -247,11 +245,9 @@ namespace HMSGDAL
                 }
                 else if (offset > 0.0)
                 {
-                    // newDate = date.AddDays(-1.0);
                     date.AddDays(-1.0);
                     startHour = 24 - Convert.ToInt16(offset);
                 }
-                //DateTime newStartDate = new DateTime(newDate.Year, newDate.Month, newDate.Day, startHour, 00, 00);
                 DateTime newStartDate = new DateTime(date.Year, date.Month, date.Day, startHour, 00, 00);
                 return newStartDate;
             }
@@ -259,7 +255,6 @@ namespace HMSGDAL
             {
                 if (offset < 0.0)
                 {
-                    //newDate = date.AddDays(1.0);
                     date.AddDays(1.0);
                     endHour = -1 * Convert.ToInt16(offset) - 1;
                 }
@@ -267,7 +262,6 @@ namespace HMSGDAL
                 {
                     endHour = 23 - Convert.ToInt16(offset);
                 }
-                //DateTime newEndDate = new DateTime(newDate.Year, newDate.Month, newDate.Day, endHour, 00, 00);
                 DateTime newEndDate = new DateTime(date.Year, date.Month, date.Day, endHour, 00, 00);
                 return newEndDate;
             }
@@ -767,7 +761,6 @@ namespace HMSGDAL
             errorMsg = "";
             try
             {
-                //NetTopologySuite.Features.Feature feature = new NetTopologySuite.Features.Feature();
                 IGeometryFactory geoFactory = new NetTopologySuite.Geometries.GeometryFactory();
                 NetTopologySuite.Geometries.LinearRing linear = (NetTopologySuite.Geometries.LinearRing)new GeometryFactory().CreateLinearRing(coordinatesList);
                 Polygon poly = new Polygon(linear, null, geoFactory);
@@ -970,6 +963,12 @@ namespace HMSGDAL
             return featureCollection;
         }
 
+        /// <summary>
+        /// Finds all data points in a feature geometry, either from a shapefile or json.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="coordinate"></param>
+        /// <param name="cellWidth"></param>
         public void CellAreaInShapefileByGrid(out string errorMsg, double[] coordinate, double cellWidth)
         {
             errorMsg = "";

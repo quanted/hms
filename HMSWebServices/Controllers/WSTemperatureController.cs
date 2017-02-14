@@ -1,30 +1,18 @@
-﻿using System;
+﻿using HMSWebServices.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
-using HMSWebServices.Models;
 
 namespace HMSWebServices.Controllers
 {
-
-    public class CustomMultipartFormDataStreamProvider : MultipartFormDataStreamProvider
-    {
-        public CustomMultipartFormDataStreamProvider(string path) : base(path) { }
-
-        public override string GetLocalFileName(HttpContentHeaders headers)
-        {
-            return headers.ContentDisposition.FileName.Replace("\"", string.Empty);
-        }
-    }
-
-    public class WSHMSController : ApiController
+    public class WSTemperatureController : ApiController
     {
         public Dictionary<string, string> parameters;
 
@@ -35,22 +23,21 @@ namespace HMSWebServices.Controllers
         private void ParameterCheck(out string errorMsg)
         {
             errorMsg = "";
-            string location = "";
             if ((parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude")))
             {
                 if ((String.IsNullOrWhiteSpace(parameters["latitude"])) || (String.IsNullOrWhiteSpace(parameters["longitude"])))
                 {
-                    location = "file";
+                    errorMsg = "Error: No latitude or longitude value provided.";
                 }
             }
-            else if (parameters.ContainsKey("filePath") )
+            else if (parameters.ContainsKey("filePath"))
             {
-                if ((String.IsNullOrWhiteSpace(parameters["filePath"])) && location.Contains("file") && !parameters.ContainsKey("geoJson"))
+                if ((String.IsNullOrWhiteSpace(parameters["filePath"])) && !parameters.ContainsKey("geoJson"))
                 {
-                    errorMsg += "Error: Invalid location details provided.";
+                    errorMsg += "Error: No file provided.";
                 }
             }
-            else if(parameters.ContainsKey("geoJson"))
+            else if (parameters.ContainsKey("geoJson"))
             {
                 if (parameters.ContainsKey("geoJson"))
                 {
@@ -60,7 +47,7 @@ namespace HMSWebServices.Controllers
             }
             else
             {
-                errorMsg += "Error: All location details were not provided. Both a latitude and longitude value must be given OR a shapefile provided.\n";
+                errorMsg += "Error: No valid data location values provided. Both a latitude and longitude value must be given OR a shapefile provided OR a geoJson (as a parameter or json file).\n";
             }
             if (!(parameters.ContainsKey("startDate")))
             {
@@ -96,15 +83,45 @@ namespace HMSWebServices.Controllers
             {
                 parameters.Add("layers", "0");
             }
-            if (!parameters.ContainsKey("dataset"))
-            {
-                errorMsg += "Error: A dataset must be provided.";
-            }
 
         }
-        
+
+        /// <summary>
+        /// Gets temperature data using the parameters provided in the param string.
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("api/WSTemperature/{param}")]
+        public string Get(string param)
+        {
+            string data = "";
+            string errorMsg = "";
+            Dictionary<string, string> parameters = ParseParameters(out errorMsg, param);
+            if (errorMsg.Contains("Error")) { return errorMsg; }
+            WSTemperature result = new WSTemperature();
+            if (!parameters.ContainsKey("localTime")) { parameters.Add("localTime", "false"); }
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))             //Location provided by latitude, longitude
+                {
+                    data = result.GetTemperatureData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                }
+                else
+                {
+                    errorMsg = "Error: Latitude and longitude must be provided.";
+                }
+            }
+            else
+            {
+                errorMsg = "Error: Latitude and longitude must be provided.";
+            }
+            if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["ID"]); return errorMsg; }
+            return data;
+        }
+
         [HttpPost]
-        [Route("api/WSHMS/")]
+        [Route("api/WSTemperature/")]
         public async Task<string> Post()
         {
             if (!Request.Content.IsMimeMultipartContent())
@@ -154,6 +171,25 @@ namespace HMSWebServices.Controllers
                 DeleteTempShapefiles(parameters["id"]);
             }
             return data;
+        }
+
+        /// <summary>
+        /// Parses the parameters in the param string.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="paramOne"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> ParseParameters(out string errorMsg, string param)
+        {
+            errorMsg = "";
+            Dictionary<string, string> variables = new Dictionary<string, string>();
+            string[] values = param.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < values.Length; i++)
+            {
+                string[] line = values[i].Split('=');
+                variables.Add(line[0], line[1]);
+            }
+            return variables;
         }
 
         /// <summary>
@@ -220,7 +256,7 @@ namespace HMSWebServices.Controllers
             foreach (string file in Directory.GetFiles(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + sessionGUID)))
             {
                 string ext = Path.GetExtension(file);
-                if(requiredFiles.ContainsKey(ext))
+                if (requiredFiles.ContainsKey(ext))
                 {
                     requiredFiles[ext] = true;
                 }
@@ -236,7 +272,7 @@ namespace HMSWebServices.Controllers
         {
             string data = "";
             string errorMsg = "";
-            WSHMS result = new WSHMS();
+            WSTemperature result = new WSTemperature();
 
             if (parameters.ContainsKey("filePath"))
             {
@@ -244,7 +280,7 @@ namespace HMSWebServices.Controllers
                 {
                     CheckFile(out errorMsg, parameters["filePath"], parameters["id"]);
                     if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["id"]); return errorMsg; }
-                    data = result.GetHMSData(out errorMsg, parameters["dataset"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"], parameters["layers"]);
+                    data = result.GetTemperatureData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
                 }
                 else
                 {
@@ -255,7 +291,7 @@ namespace HMSWebServices.Controllers
             {
                 if (!String.IsNullOrWhiteSpace(parameters["latitude"]) && !String.IsNullOrWhiteSpace(parameters["longitude"]))
                 {
-                    data = result.GetHMSData(out errorMsg, parameters["dataset"], parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["layers"]);
+                    data = result.GetTemperatureData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
                 }
                 else
                 {
@@ -264,10 +300,11 @@ namespace HMSWebServices.Controllers
             }
             else
             {
-                errorMsg = "Error: Valid location parameters must be provided."; return errorMsg;
+                data = "Error: Valid location parameters must be provided."; return data;
             }
             if (errorMsg.Contains("Error")) { DeleteTempShapefiles(parameters["id"]); return errorMsg; }
             return data;
         }
+
     }
 }

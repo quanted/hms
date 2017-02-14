@@ -19,7 +19,7 @@ namespace HMSTimeSeries
         public string tzName { get; set; }
         public double gmtOffset { get; set; }
         public double cellCoverage { get; set; }            // % of the NLDAS, GLDAS cell that intersects with the shapefile.
-        public double mean { get; set; }
+        //public double mean { get; set; }
         public Dictionary<DateTime, double> timeSeriesDict { get; set; }
 
 
@@ -29,31 +29,31 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private string ParseForData(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string dataResults = "";
-            if (data.Contains("Data"))
-            {
-                string[] parseData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
-                if (data.Contains("MEAN"))
-                {
-                    string[] parseData2 = parseData[1].Trim().Split(new string[] { "MEAN" }, StringSplitOptions.RemoveEmptyEntries);
-                    dataResults = parseData2[0];
-                }
-                else
-                {
-                    errorMsg = "Error: Failed to parse data.";
-                    return null;
-                }
-            }
-            else
-            {
-                errorMsg = "Error: Requested data not found.";
-                return null;
-            }
-            return dataResults;
-        }
+        //private string ParseForData(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string dataResults = "";
+        //    if (data.Contains("Data"))
+        //    {
+        //        string[] parseData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //        if (data.Contains("MEAN"))
+        //        {
+        //            string[] parseData2 = parseData[1].Trim().Split(new string[] { "MEAN" }, StringSplitOptions.RemoveEmptyEntries);
+        //            dataResults = parseData2[0];
+        //        }
+        //        else
+        //        {
+        //            errorMsg = "Error: Failed to parse data.";
+        //            return null;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Requested data not found.";
+        //        return null;
+        //    }
+        //    return dataResults;
+        //}
 
         /// <summary>
         /// Parses the Daymet data downloaded and returns the timeseries data.
@@ -76,12 +76,22 @@ namespace HMSTimeSeries
                 }
                 return builder.ToString();
             }
+            else if (data.Contains("year,yday,tmax (deg c),tmin (deg c)"))
+            {
+                string[] splitData = data.Split(new string[] { "year,yday,tmax (deg c),tmin (deg c)" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] lines = splitData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string[] lineData = lines[i].Split(',');
+                    builder.Append(lineData[0] + " " + lineData[1] + " " + lineData[2] + "," + lineData[3] +" \n");
+                }
+                return builder.ToString();
+            }
             else
             {
                 errorMsg = "Error: Unable to parse out Daymet data.";
                 return null;
             }
-            
         }
 
         /// <summary>
@@ -90,22 +100,22 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private string ParseForMetaData(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string metaData = "";
-            if (data.Contains("Date&Time"))
-            {
-                string[] parseData = data.Split(new string[] { "Date&Time" }, StringSplitOptions.RemoveEmptyEntries);
-                metaData = parseData[0].Trim();
-            }
-            else
-            {
-                errorMsg = "Error: Requested data not found.";
-                return null;
-            }
-            return metaData;
-        }
+        //private string ParseForMetaData(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string metaData = "";
+        //    if (data.Contains("Date&Time"))
+        //    {
+        //        string[] parseData = data.Split(new string[] { "Date&Time" }, StringSplitOptions.RemoveEmptyEntries);
+        //        metaData = parseData[0].Trim();
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Requested data not found.";
+        //        return null;
+        //    }
+        //    return metaData;
+        //}
 
         /// <summary>
         /// Parses the Daymet data downloaded and returns the metadata.
@@ -124,6 +134,14 @@ namespace HMSTimeSeries
                 metaData += "column_2: prcp (mm/day)";
                 return metaData;
             }
+            else if (data.Contains("year,yday,tmax (deg c),tmin (deg c)"))
+            {
+                string[] splitData = data.Split(new string[] { "year,yday,tmax (deg c),tmin (deg c)" }, StringSplitOptions.RemoveEmptyEntries);
+                string metaData = splitData[0];
+                metaData += "column_1: year yday\n";
+                metaData += "column_2: tmax (deg c), tmin (deg c)";
+                return metaData;
+             }
             else
             {
                 errorMsg = "Error: Unable to parse out Daymet metadata.";
@@ -137,30 +155,30 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private double GetElevation(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string elevation = "";
-            if (data.Contains("elevation"))
-            {
-                string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    if (lines[i].Contains("elevation"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        elevation = singleLine[1].Trim();
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                errorMsg = "Error: Unable to find elevation in meta data.";
-                return 0;
-            }
-            return Convert.ToDouble(elevation);
-        }
+        //private double GetElevation(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string elevation = "";
+        //    if (data.Contains("elevation"))
+        //    {
+        //        string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //        for (int i = 0; i < lines.Length; i++)
+        //        {
+        //            if (lines[i].Contains("elevation"))
+        //            {
+        //                string[] singleLine = lines[i].Split('=');
+        //                elevation = singleLine[1].Trim();
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Unable to find elevation in meta data.";
+        //        return 0;
+        //    }
+        //    return Convert.ToDouble(elevation);
+        //}
 
         /// <summary>
         /// Parses the meta data for the latitude.
@@ -168,40 +186,40 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private double GetLatitude(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string latitude = "";
-            if (data.Contains("Metadata"))
-            {
-                string[] metaData = data.Split(new string[] { "Metadata for Requested Time Series:" }, StringSplitOptions.RemoveEmptyEntries);
+        //private double GetLatitude(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string latitude = "";
+        //    if (data.Contains("Metadata"))
+        //    {
+        //        string[] metaData = data.Split(new string[] { "Metadata for Requested Time Series:" }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (metaData[1].Contains("lat="))
-                {
-                    string[] lines = metaData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < lines.Length; i++)
-                    {
-                        if (lines[i].Contains("lat="))
-                        {
-                            string[] singleLine = lines[i].Split('=');
-                            latitude = singleLine[1].Trim();
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    errorMsg = "Error: Unable to find latitude in meta data.";
-                    return 0;
-                }
-                return Convert.ToDouble(latitude);
-            }
-            else
-            {
-                errorMsg = "Error: Metadata was not found.";
-                return 0;
-            }
-        }
+        //        if (metaData[1].Contains("lat="))
+        //        {
+        //            string[] lines = metaData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //            for (int i = 0; i < lines.Length; i++)
+        //            {
+        //                if (lines[i].Contains("lat="))
+        //                {
+        //                    string[] singleLine = lines[i].Split('=');
+        //                    latitude = singleLine[1].Trim();
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            errorMsg = "Error: Unable to find latitude in meta data.";
+        //            return 0;
+        //        }
+        //        return Convert.ToDouble(latitude);
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Metadata was not found.";
+        //        return 0;
+        //    }
+        //}
 
         /// <summary>
         /// Parses the meta data for the longitude.
@@ -209,40 +227,40 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private double GetLongitude(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string longitude = "";
-            if (data.Contains("Metadata"))
-            {
-                string[] metaData = data.Split(new string[] { "Metadata for Requested Time Series:" }, StringSplitOptions.RemoveEmptyEntries);
+        //private double GetLongitude(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string longitude = "";
+        //    if (data.Contains("Metadata"))
+        //    {
+        //        string[] metaData = data.Split(new string[] { "Metadata for Requested Time Series:" }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (metaData[1].Contains("lon="))
-                {
-                    string[] lines = metaData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < lines.Length; i++)
-                    {
-                        if (lines[i].Contains("lon="))
-                        {
-                            string[] singleLine = lines[i].Split('=');
-                            longitude = singleLine[1].Trim();
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    errorMsg = "Error: Unable to find longitude in meta data.";
-                    return 0;
-                }
-                return Convert.ToDouble(longitude);
-            }
-            else
-            {
-                errorMsg = "Error: Metadata was not found.";
-                return 0;
-            }
-        }
+        //        if (metaData[1].Contains("lon="))
+        //        {
+        //            string[] lines = metaData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //            for (int i = 0; i < lines.Length; i++)
+        //            {
+        //                if (lines[i].Contains("lon="))
+        //                {
+        //                    string[] singleLine = lines[i].Split('=');
+        //                    longitude = singleLine[1].Trim();
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            errorMsg = "Error: Unable to find longitude in meta data.";
+        //            return 0;
+        //        }
+        //        return Convert.ToDouble(longitude);
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Metadata was not found.";
+        //        return 0;
+        //    }
+        //}
 
         /// <summary>
         /// Parses the meta data for the elevation.
@@ -250,73 +268,30 @@ namespace HMSTimeSeries
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private double GetCellSize(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            string size = "";
-            if (data.Contains("dlat"))
-            {
-                string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    if (lines[i].Contains("dlat"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        size = singleLine[1].Trim();
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                errorMsg = "Error: Unable to find cell size in meta data.";
-                return 0;
-            }
-            return Convert.ToDouble(size);
-        }
-
-        /// <summary>
-        /// Parses all timeseries variables values from the metadata in one method. Not currently in use, IN TESTING.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="data"></param>
-        private void SetVariables(out string errorMsg, string data)
-        {
-            errorMsg = "";
-            try
-            {
-                string[] metaData = data.Split(new string[] { "Metadata for Requested Time Series:" }, StringSplitOptions.RemoveEmptyEntries);
-                string[] lines = metaData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    if (lines[i].Contains("elevation"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        this.metaElev = Convert.ToDouble(singleLine[1].Trim());
-                    }
-                    else if (lines[i].Contains("lat"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        this.metaLat = Convert.ToDouble(singleLine[1].Trim());
-                    }
-                    else if (lines[i].Contains("lon"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        this.metaLon = Convert.ToDouble(singleLine[1].Trim());
-                    }
-                    else if (lines[i].Contains("dlat"))
-                    {
-                        string[] singleLine = lines[i].Split('=');
-                        this.cellSize = Convert.ToDouble(singleLine[1].Trim());
-                    }
-                }
-            }
-            catch
-            {
-                errorMsg = "Error: Unable to parse metadata.";
-                return;
-            }
-        }
+        //private double GetCellSize(out string errorMsg, string data)
+        //{
+        //    errorMsg = "";
+        //    string size = "";
+        //    if (data.Contains("dlat"))
+        //    {
+        //        string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //        for (int i = 0; i < lines.Length; i++)
+        //        {
+        //            if (lines[i].Contains("dlat"))
+        //            {
+        //                string[] singleLine = lines[i].Split('=');
+        //                size = singleLine[1].Trim();
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        errorMsg = "Error: Unable to find cell size in meta data.";
+        //        return 0;
+        //    }
+        //    return Convert.ToDouble(size);
+        //}
 
         /// <summary>
         /// Parses through the Daymet metadata to determine the timeseries variable values.
@@ -366,14 +341,7 @@ namespace HMSTimeSeries
             errorMsg = "";
             if (source.Contains("NLDAS") || source.Contains("GLDAS"))           //Data parsing is unique to the datasource.
             {
-                this.timeSeries = ts.ParseForData(out errorMsg, data);
-                this.metaData = ts.ParseForMetaData(out errorMsg, data);
-                this.metaElev = ts.GetElevation(out errorMsg, this.metaData);
-                this.metaLat = ts.GetLatitude(out errorMsg, this.metaData);
-                this.metaLon = ts.GetLongitude(out errorMsg, this.metaData);
-                this.cellSize = ts.GetCellSize(out errorMsg, this.metaData);
-                //SetVariables(out errorMsg, this.metaData);                    //Currently being tested, this will set up LDAS to have the same structure as the Daymet parsing methods.
-                this.newMetaData = "\n" + this.newMetaData + "cell_width[deg]=" + this.cellSize + "\n";
+                SetLDASTimeSeries(out errorMsg, ts, data);
                 if (errorMsg.Contains("Error")) { return; }
             }
             else if (source.Contains("Daymet"))
@@ -383,6 +351,78 @@ namespace HMSTimeSeries
                 SetDaymetVariables(out errorMsg, this.metaData);
                 if (errorMsg.Contains("Error")) { return; }
             }
+        }
+
+        /// <summary>
+        /// Parses LDAS return data and assigns to timeseries, metadata, metaLat, metaLon, and elevation.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="ts"></param>
+        /// <param name="data"></param>
+        private void SetLDASTimeSeries(out string errorMsg, HMSTimeSeries ts, string data)
+        {
+            errorMsg = "";
+
+            if (data.Contains("Data"))
+            {
+                string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+                if (splitData[1].Contains("MEAN"))              // Collect LDAS data 
+                {
+                    this.timeSeries = splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim();
+                }
+                else
+                {
+                    errorMsg = "Error: LDAS data was not found.";
+                }
+
+                if (splitData[0].Contains("Date&Time"))         // Collect LDAS metadata
+                {
+                    this.metaData = splitData[0].Trim();
+                    this.newMetaData = "\n" + this.newMetaData;
+                    string[] splitMeta = splitData[0].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = splitMeta.Length - 1; i != 0; i--)
+                    {
+                        if(splitMeta[i].Contains("="))
+                        {
+                            string[] metaLine = splitMeta[i].Split('=');
+                            switch (metaLine[0])
+                            {
+                                case "elevation[m]":
+                                    this.metaElev = Convert.ToDouble(metaLine[1]);
+                                    break;
+                                case "lat":
+                                    this.metaLat = Convert.ToDouble(metaLine[1]);
+                                    break;
+                                case "lon":
+                                    this.metaLon = Convert.ToDouble(metaLine[1]);
+                                    break;
+                                case "dlat":
+                                    this.cellSize = Convert.ToDouble(metaLine[1]);
+                                    this.newMetaData += "cell_width[deg]=" + this.cellSize + "\n";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                errorMsg = "Error: LDAS data was not found.";
+            }
+        }
+
+        public void ConvertTSDictToTS(out string errorMsg)
+        {
+            errorMsg = "";
+            StringBuilder st = new StringBuilder();
+            for (int i = 0; i < this.timeSeriesDict.Count; i++)
+            {
+                DateTime date = this.timeSeriesDict.Keys.ElementAt(i);
+                st.Append(date.ToString("yyyy-MM-dd HH") + "Z " + this.timeSeriesDict[date].ToString("0.0000####E+00") + "\n");
+            }
+            this.timeSeries = st.ToString();
         }
     }
 }
