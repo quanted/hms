@@ -8,6 +8,7 @@ using System.Web;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net;
+using System.Collections.Specialized;
 
 namespace HMSWebServices.Controllers
 {
@@ -118,10 +119,6 @@ namespace HMSWebServices.Controllers
         [Route("api/WSPrecipitation/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
-            if (!Request.Content.IsMimeMultipartContent())
-            {
-                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
-            }
 
             string guid = Guid.NewGuid().ToString();
 
@@ -133,19 +130,34 @@ namespace HMSWebServices.Controllers
             parameters.Add("id", guid);
             try
             {
-                await Request.Content.ReadAsMultipartAsync(provider);
-                foreach (var key in provider.FormData.AllKeys)
+                if (Request.Content.IsMimeMultipartContent())
                 {
-                    foreach (var val in provider.FormData.GetValues(key))
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                    foreach (var key in provider.FormData.AllKeys)
                     {
-                        parameters.Add(key, val);
+                        foreach (var val in provider.FormData.GetValues(key))
+                        {
+                            parameters.Add(key, val);
+                        }
+                    }
+
+                    foreach (MultipartFileData file in provider.FileData)
+                    {
+                        files.Add(Path.GetFileName(file.LocalFileName));
+                        parameters.Add("filePath", file.LocalFileName);
                     }
                 }
-
-                foreach (MultipartFileData file in provider.FileData)
+                else if (Request.Content.IsFormData())
                 {
-                    files.Add(Path.GetFileName(file.LocalFileName));
-                    parameters.Add("filePath", file.LocalFileName);
+                    NameValueCollection collection = await Request.Content.ReadAsFormDataAsync();
+                    foreach (string key in collection)
+                    {
+                        parameters.Add(key, collection[key]);
+                    }
+                }
+                else
+                {
+                    return new HMSJSON.HMSJSON.HMSData();
                 }
             }
             catch
@@ -217,6 +229,10 @@ namespace HMSWebServices.Controllers
             else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
             {
                 data = result.GetPrecipitationDataObject(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+            }
+            else if (parameters["source"] == "compare")
+            {
+                data = result.GetPrecipitationCompareDataObject(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["stationID"]);
             }
             else
             {

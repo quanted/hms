@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using HMSWebServices.Models;
+using System.Collections.Specialized;
 
 namespace HMSWebServices.Controllers
 {
@@ -35,32 +36,35 @@ namespace HMSWebServices.Controllers
         private void ParameterCheck(out string errorMsg)
         {
             errorMsg = "";
-            string location = "";
-            if ((parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude")))
+            if (!parameters.ContainsKey("stationID"))
             {
-                if ((String.IsNullOrWhiteSpace(parameters["latitude"])) || (String.IsNullOrWhiteSpace(parameters["longitude"])))
+                string location = "";
+                if ((parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude")))
                 {
-                    location = "file";
+                    if ((String.IsNullOrWhiteSpace(parameters["latitude"])) || (String.IsNullOrWhiteSpace(parameters["longitude"])))
+                    {
+                        location = "file";
+                    }
                 }
-            }
-            else if (parameters.ContainsKey("filePath") )
-            {
-                if ((String.IsNullOrWhiteSpace(parameters["filePath"])) && location.Contains("file") && !parameters.ContainsKey("geoJson"))
+                else if (parameters.ContainsKey("filePath"))
                 {
-                    errorMsg += "Error: Invalid location details provided.";
+                    if ((String.IsNullOrWhiteSpace(parameters["filePath"])) && location.Contains("file") && !parameters.ContainsKey("geoJson"))
+                    {
+                        errorMsg += "Error: Invalid location details provided.";
+                    }
                 }
-            }
-            else if(parameters.ContainsKey("geoJson"))
-            {
-                if (parameters.ContainsKey("geoJson"))
+                else if (parameters.ContainsKey("geoJson"))
                 {
-                    parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
-                    System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
+                    if (parameters.ContainsKey("geoJson"))
+                    {
+                        parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
+                        System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
+                    }
                 }
-            }
-            else
-            {
-                errorMsg += "Error: All location details were not provided. Both a latitude and longitude value must be given OR a shapefile provided.\n";
+                else
+                {
+                    errorMsg += "Error: All location details were not provided. Both a latitude and longitude value must be given OR a shapefile provided.\n";
+                }
             }
             if (!(parameters.ContainsKey("startDate")))
             {
@@ -72,7 +76,7 @@ namespace HMSWebServices.Controllers
             }
             if (parameters.ContainsKey("source"))
             {
-                if (String.IsNullOrWhiteSpace(parameters["source"]))
+                if (String.IsNullOrWhiteSpace(parameters["source"]) || !parameters.ContainsKey("stationID"))
                 {
                     errorMsg += "Error: A valid data source must be provided.";
                 }
@@ -176,10 +180,6 @@ namespace HMSWebServices.Controllers
         [Route("api/WSHMS/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
-            if (!Request.Content.IsMimeMultipartContent())
-            {
-                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
-            }
 
             string guid = Guid.NewGuid().ToString();
 
@@ -191,19 +191,35 @@ namespace HMSWebServices.Controllers
             parameters.Add("id", guid);
             try
             {
-                await Request.Content.ReadAsMultipartAsync(provider);
-                foreach (var key in provider.FormData.AllKeys)
+
+                if (Request.Content.IsMimeMultipartContent())
                 {
-                    foreach (var val in provider.FormData.GetValues(key))
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                    foreach (var key in provider.FormData.AllKeys)
                     {
-                        parameters.Add(key, val);
+                        foreach (var val in provider.FormData.GetValues(key))
+                        {
+                            parameters.Add(key, val);
+                        }
+                    }
+
+                    foreach (MultipartFileData file in provider.FileData)
+                    {
+                        files.Add(Path.GetFileName(file.LocalFileName));
+                        parameters.Add("filePath", file.LocalFileName);
                     }
                 }
-
-                foreach (MultipartFileData file in provider.FileData)
+                else if(Request.Content.IsFormData())
                 {
-                    files.Add(Path.GetFileName(file.LocalFileName));
-                    parameters.Add("filePath", file.LocalFileName);
+                    NameValueCollection collection = await Request.Content.ReadAsFormDataAsync();
+                    foreach(string key in collection)
+                    {
+                        parameters.Add(key, collection[key]);
+                    }
+                }
+                else
+                {
+                    return new HMSJSON.HMSJSON.HMSData();
                 }
             }
             catch (Exception e)

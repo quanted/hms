@@ -1,6 +1,7 @@
 ﻿using HMSWebServices.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -55,10 +56,6 @@ namespace HMSWebServices.Controllers
         [Route("api/WSSoilMoisture/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
-            if (!Request.Content.IsMimeMultipartContent())
-            {
-                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
-            }
 
             string guid = Guid.NewGuid().ToString();
 
@@ -70,19 +67,34 @@ namespace HMSWebServices.Controllers
             parameters.Add("id", guid);
             try
             {
-                await Request.Content.ReadAsMultipartAsync(provider);
-                foreach (var key in provider.FormData.AllKeys)
+                if (Request.Content.IsMimeMultipartContent())
                 {
-                    foreach (var val in provider.FormData.GetValues(key))
+                    await Request.Content.ReadAsMultipartAsync(provider);
+                    foreach (var key in provider.FormData.AllKeys)
                     {
-                        parameters.Add(key, val);
+                        foreach (var val in provider.FormData.GetValues(key))
+                        {
+                            parameters.Add(key, val);
+                        }
+                    }
+
+                    foreach (MultipartFileData file in provider.FileData)
+                    {
+                        files.Add(Path.GetFileName(file.LocalFileName));
+                        parameters.Add("filePath", file.LocalFileName);
                     }
                 }
-
-                foreach (MultipartFileData file in provider.FileData)
+                else if (Request.Content.IsFormData())
                 {
-                    files.Add(Path.GetFileName(file.LocalFileName));
-                    parameters.Add("filePath", file.LocalFileName);
+                    NameValueCollection collection = await Request.Content.ReadAsFormDataAsync();
+                    foreach (string key in collection)
+                    {
+                        parameters.Add(key, collection[key]);
+                    }
+                }
+                else
+                {
+                    return new HMSJSON.HMSJSON.HMSData();
                 }
             }
             catch //(Exception e)

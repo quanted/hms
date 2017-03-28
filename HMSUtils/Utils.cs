@@ -17,7 +17,7 @@ namespace HMSUtils
         };
         enum Sources
         {
-            NLDAS, GLDAS, Daymet, NCDC
+            NLDAS, GLDAS, Daymet, NCDC, compare
         };
 
         /// <summary>
@@ -62,33 +62,36 @@ namespace HMSUtils
             }
 
             //Checks coordinate values for the selected source
-            if(parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            if (!parameters.ContainsKey("stationID"))
             {
-                if (valid == true)
+                if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
                 {
-                    valid = CoordinatesValidation(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["source"]);
+                    if (valid == true)
+                    {
+                        valid = CoordinatesValidation(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["source"]);
+                    }
                 }
-            }
-            else if (parameters.ContainsKey("filePath"))        // If shapefile provided
-            {
-                if (String.IsNullOrWhiteSpace(parameters["filePath"]))
+                else if (parameters.ContainsKey("filePath"))        // If shapefile provided
                 {
-                    errorMsg += "Error: No file provided.\n";
+                    if (String.IsNullOrWhiteSpace(parameters["filePath"]))
+                    {
+                        errorMsg += "Error: No file provided.\n";
+                        valid = false;
+                    }
+                }
+                else if (parameters.ContainsKey("geoJson"))         // if geoJson provided       
+                {
+                    if (String.IsNullOrWhiteSpace(parameters["geoJson"]))
+                    {
+                        parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
+                        System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
+                    }
+                }
+                else
+                {
+                    errorMsg += "Error: No valid spatial location values provided. Must provide one of the follow: latitude and longitude coordinates, zipped shapefile, or geoJson (file or as a parameter).\n";
                     valid = false;
                 }
-            }
-            else if (parameters.ContainsKey("geoJson"))         // if geoJson provided       
-            {
-                if (String.IsNullOrWhiteSpace(parameters["geoJson"]))
-                {
-                    parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
-                    System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
-                }
-            }
-            else
-            {
-                errorMsg += "Error: No valid spatial location values provided. Must provide one of the follow: latitude and longitude coordinates, zipped shapefile, or geoJson (file or as a parameter).\n";
-                valid = false;
             }
 
             // Checking for optional parameters and setting to default if not found.
@@ -231,6 +234,25 @@ namespace HMSUtils
                 default:
                     return false;
             }
+        }
+
+        public int CompareDates(out string errorMsg, string date1, string date2)
+        {
+            errorMsg = "";
+            DateTime firstDate;
+            DateTime secondDate;
+            if(!DateTime.TryParse(date1, out firstDate))
+            {
+                errorMsg = "Error: Invalid firstDate, unable to parse date from string.";
+                return 0;
+            }
+            if (!DateTime.TryParse(date2, out secondDate))
+            {
+                errorMsg = "Error: Invalid secondDate, unable to parse date from string.";
+                return 0;
+            }
+
+            return DateTime.Compare(firstDate, secondDate);
         }
 
         /// <summary>
@@ -432,6 +454,18 @@ namespace HMSUtils
 
 
             return parameters;
+        }
+
+        public Dictionary<string, string> GetNCDCStationDetails(out string errorMsg, string stationID)
+        {
+            errorMsg = "";
+            HMSNCDC.HMSNCDC details = new HMSNCDC.HMSNCDC();
+            Dictionary<string, string> stationDetails = details.GetStationDetails(out errorMsg, stationID);
+            if(errorMsg != "")
+            {
+                stationDetails.Add("errorMsg", errorMsg);
+            }
+            return stationDetails;
         }
     }
 }

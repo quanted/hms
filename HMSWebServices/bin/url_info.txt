@@ -55,3 +55,5 @@ Daymet_Temp_URL https://daymet.ornl.gov/data/send/saveData?
 
 NCDC_URL http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
 
+NCDC_STATION_URL https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
+

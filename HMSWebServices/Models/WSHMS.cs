@@ -121,30 +121,36 @@ namespace HMSWebServices.Models
             errorMsg = "";
             switch (dataset) {
                 case "BaseFlow":
+                case "baseflow":
                     HMSBaseFlow.BaseFlow bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     bFlow.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return bFlow.jsonData;
                 case "Evapotranspiration":
+                case "evapotranspiration":
                     HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     evapo.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return evapo.jsonData;
                 case "LandSurfaceFlow":
+                case "landsurfaceflow":
+                case "surfacerunoff":
                     HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     lsFlow.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return lsFlow.jsonData;
                 case "Precipitation":
+                case "precipitation":
                     HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     precip.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return precip.jsonData;
                 case "SoilMoisture":
+                case "soilmoisture":
                     int[] layersArray = ConvertLayersString(out errorMsg, layers);
                     HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null, layersArray);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
@@ -152,12 +158,14 @@ namespace HMSWebServices.Models
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return sm.jsonData;
                 case "Temperature":
+                case "temperature":
                     HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     temp.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     return temp.jsonData;
                 case "TotalFlow":
+                case "totalflow":
                     HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
                     if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
                     tFlow.GetDataSetsObject(out errorMsg);

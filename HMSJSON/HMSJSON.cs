@@ -106,7 +106,8 @@ namespace HMSJSON
             output.source = source;
             if (source.Contains("NLDAS") || source.Contains("GLDAS"))
             {
-                output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata);
+                //output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata);
+                output.metadata = SetHMSDataMetaData2(out errorMsg, newMetaData, metadata, source);
                 output.data = SetHMSDataTS(out errorMsg, timeseries, source, dataset, localtime, gmtOffset, coverage);
             }
             else if (source.Contains("Daymet"))
@@ -122,6 +123,7 @@ namespace HMSJSON
             return JsonConvert.SerializeObject(output);
         }
 
+        //TODO: Create a single SetHMSMetadata method
         /// <summary>
         /// Creates a dictionary from the input metadata.
         /// </summary>
@@ -130,7 +132,52 @@ namespace HMSJSON
         /// <param name="newMetaData"></param>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetHMSDataMetaData(out string errorMsg, string newMetaData, string metadata)
+        //private Dictionary<string, string> SetHMSDataMetaData(out string errorMsg, string newMetaData, string metadata, string source)
+        //{
+        //    errorMsg = "";
+        //    Dictionary<string, string> metaDict = new Dictionary<string, string>();
+
+        //    string[] keys = ConfigurationManager.AppSettings["metadataConfig"].ToString().Split(',');
+        //    string[] metaLines = metadata.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = metaLines.Length - 1; i > 0; i--)
+        //    {
+        //        string[] metadataLineArray = metaLines[i].Split(new char[] { '=' }, 2);
+        //        if (keys.Contains(metadataLineArray[0]) && !metaDict.ContainsKey(metadataLineArray[0]) && !metaDict.Keys.Contains(metadataLineArray[0] + "[GMT]"))
+        //        {
+        //            if (metadataLineArray[0].Contains("begin_time") || metadataLineArray[0].Contains("end_time"))
+        //            {
+        //                metaDict.Add(source + "_" + metadataLineArray[0] + "[GMT]" , metadataLineArray[1].Trim());
+        //            }
+        //            else
+        //            {
+        //                metaDict.Add(source + "_" + metadataLineArray[0], metadataLineArray[1].Trim());
+        //            }
+        //        }
+        //    }
+        //    string[] dataLines = newMetaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = 0; i < dataLines.Length; i++)
+        //    {
+        //        if (dataLines[i].Contains("="))
+        //        {
+        //            string[] line = dataLines[i].Split(new char[] { '=' }, 2);
+        //            if (!metaDict.ContainsKey(line[0]))
+        //            {
+        //                metaDict.Add(source + "_" + line[0], line[1].Trim());
+        //            }
+        //        }
+        //    }
+        //    return metaDict;
+        //}
+
+        /// <summary>
+        /// Creates a dictionary from the input metadata.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="newMetaData"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> SetHMSDataMetaData2(out string errorMsg, string newMetaData, string metadata, string source)
         {
             errorMsg = "";
             Dictionary<string, string> metaDict = new Dictionary<string, string>();
@@ -140,16 +187,20 @@ namespace HMSJSON
             for (int i = metaLines.Length - 1; i > 0; i--)
             {
                 string[] metadataLineArray = metaLines[i].Split(new char[] { '=' }, 2);
-                if (keys.Contains(metadataLineArray[0]) && !metaDict.ContainsKey(metadataLineArray[0]) && !metaDict.Keys.Contains(metadataLineArray[0] + "[GMT]"))
+                if (!metaDict.ContainsKey(source + "_" + metadataLineArray[0]) && metadataLineArray.Length > 1)
                 {
-                    if (metadataLineArray[0].Contains("begin_time") || metadataLineArray[0].Contains("end_time"))
+                    try
                     {
-                        metaDict.Add(metadataLineArray[0] + "[GMT]" , metadataLineArray[1].Trim());
+                        if (metadataLineArray[0].Contains("begin_time") || metadataLineArray[0].Contains("end_time"))
+                        {
+                            metaDict.Add(source + "_" + metadataLineArray[0] + "[GMT]", metadataLineArray[1].Trim());
+                        }
+                        else
+                        {
+                            metaDict.Add(source + "_" + metadataLineArray[0], metadataLineArray[1].Trim());
+                        }
                     }
-                    else
-                    {
-                        metaDict.Add(metadataLineArray[0], metadataLineArray[1].Trim());
-                    }
+                    catch { }
                 }
             }
             string[] dataLines = newMetaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -160,7 +211,7 @@ namespace HMSJSON
                     string[] line = dataLines[i].Split(new char[] { '=' }, 2);
                     if (!metaDict.ContainsKey(line[0]))
                     {
-                        metaDict.Add(line[0], line[1].Trim());
+                        metaDict.Add(source + "_" + line[0], line[1].Trim());
                     }
                 }
             }
@@ -221,12 +272,12 @@ namespace HMSJSON
             {
                 if (metaLines[i].Contains("http"))
                 {
-                    daymetMeta.Add("url_reference:", metaLines[i].Trim());
+                    daymetMeta.Add("Daymet_url_reference:", metaLines[i].Trim());
                 }
                 else if(metaLines[i].Contains(':'))
                 {
                     string[] lineData = metaLines[i].Split(new string[] { ": " }, StringSplitOptions.RemoveEmptyEntries);
-                    daymetMeta.Add(lineData[0].Trim(), lineData[1].Trim());
+                    daymetMeta.Add("Daymet_" + lineData[0].Trim(), lineData[1].Trim());
                 }
             }
             if (newMetaData == null) { return daymetMeta; }
@@ -238,7 +289,7 @@ namespace HMSJSON
                     string[] line = dataLines[i].Split(new char[] { '=' }, 2);
                     if (!daymetMeta.ContainsKey(line[0]))
                     {
-                        daymetMeta.Add(line[0], line[1].Trim());
+                        daymetMeta.Add("Daymet_" + line[0], line[1].Trim());
                     }
                 }
             }
@@ -323,29 +374,29 @@ namespace HMSJSON
             HMSData json = new HMSData();
             if (source.Contains("GLDAS") || source.Contains("NLDAS"))
             {
-                json.metadata = SetHMSDataMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
+                json.metadata = SetHMSDataMetaData2(out errorMsg, ts[0].newMetaData, ts[0].metaData, source);
 
                 if (ts.Count > 1)
                 {
-                    json.metadata.Add("timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
-                    json.metadata.Add("elevation[m]_1", ts[0].metaElev.ToString());
-                    json.metadata.Add("percentInCell_1", json.metadata["percentInCell"]);
+                    json.metadata.Add(source + "_timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
+                    json.metadata.Add(source + "_elevation[m]_1", ts[0].metaElev.ToString());
+                    json.metadata.Add(source + "_percentInCell_1", json.metadata["percentInCell"]);
                     json.metadata.Remove("elevation[m]");
                     json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, Convert.ToDouble(json.metadata["percentInCell_1"]));
                 }
                 else
                 {
-                    json.metadata.Add("timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
+                    json.metadata.Add(source + "_timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
                     json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, ts[0].cellCoverage);
                 }
                 
 
                 for (int i = 1; i < ts.Count; i++)
                 {
-                    Dictionary<string, string> tempMeta = SetHMSDataMetaData(out errorMsg, ts[i].newMetaData, ts[i].metaData);
-                    json.metadata.Add("timeseries_" + (i + 1), ts[i].metaLat + "," + ts[i].metaLon);
-                    json.metadata.Add("elevation[m]_" + (i + 1), ts[i].metaElev.ToString());
-                    if (ts.Count > 1) { json.metadata.Add("percentInCell_" + (i + 1), tempMeta["percentInCell"]); }
+                    Dictionary<string, string> tempMeta = SetHMSDataMetaData2(out errorMsg, ts[i].newMetaData, ts[i].metaData, source);
+                    json.metadata.Add(source + "_timeseries_" + (i + 1), ts[i].metaLat + "," + ts[i].metaLon);
+                    json.metadata.Add(source + "_elevation[m]_" + (i + 1), ts[i].metaElev.ToString());
+                    if (ts.Count > 1) { json.metadata.Add(source + "_percentInCell_" + (i + 1), tempMeta["percentInCell"]); }
                     Dictionary<string, List<string>> values = MergeJsonTS(out errorMsg, dataset, source, json.data, ts[i].timeSeries, Convert.ToDouble(json.metadata["percentInCell_" + (i+1)]));
                     json.data = values;
                 }
@@ -353,8 +404,8 @@ namespace HMSJSON
             else if (source.Contains("Daymet"))
             {
                 json.metadata = SetHMSDaymetMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
-                json.metadata.Add("unit", "mm/day");
-                json.metadata.Add("timeseries_1", json.metadata["Latitude"] + ", " + json.metadata["Longitude"]);
+                json.metadata.Add(source + "_unit", "mm/day");
+                json.metadata.Add(source + "_timeseries_1", json.metadata[source + "_Latitude"] + ", " + json.metadata[source + "_Longitude"]);
                 json.data = SetHMSDaymetDataTS(out errorMsg, ts[0].timeSeries);
             }
             else if (source.Contains("NCDC"))
@@ -486,6 +537,45 @@ namespace HMSJSON
             }
             totals.data = tempData;
             return totals;
+        }
+
+        public HMSData MergeHMSDataList(out string errorMsg, List<HMSData> list)
+        {
+            errorMsg = "";
+            HMSData results = new HMSData();
+            results = list[0];
+            results.dataset = "Precipitation Compare";
+            results.metadata.Add("column_1", "date/time");
+            results.metadata.Add("column_2", list[0].source);
+            for(int i = 1; i < list.Count; i++){
+                results.source += "-" + list[i].source;
+                if (list[i].metadata != null)
+                {
+                    for (int j = 0; j < list[i].metadata.Count; j++)
+                    {
+                        string metKey = list[i].metadata.Keys.ElementAt(j);
+                        if (!results.metadata.ContainsKey(metKey) || !metKey.Contains("column"))
+                        {
+                            results.metadata.Add(metKey, list[i].metadata.Values.ElementAt(j));
+                        }
+                    }
+                    results.metadata.Add("column_" + (i + 2), list[i].source);
+                }
+                else
+                {
+                    results.metadata.Add("column_" + (i + 2), list[i].source);
+                }
+                if (list[i].data != null)
+                {
+                    for (int j = 0; j < list[0].data.Count; j++) //First object in list determines length of data dictionary.
+                    {
+                        string date = list[i].data.Keys.ElementAt(j);
+                        string data = list[i].data[date][0];
+                        results.data[date].Add(data);
+                    }
+                }
+            }
+            return results;
         }
 
     }
