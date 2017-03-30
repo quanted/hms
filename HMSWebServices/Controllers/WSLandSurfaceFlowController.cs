@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.IO.Compression;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -18,7 +16,7 @@ namespace HMSWebServices.Controllers
         public Dictionary<string, string> parameters;
 
         /// <summary>
-        /// Gets land surface flow data using the parameters provided in the param string.
+        /// GET method for retrieving land surface flow data using the parameters provided in the param string.
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -26,47 +24,50 @@ namespace HMSWebServices.Controllers
         [Route("api/WSLandSurfaceFlow/{param}")]
         public HMSJSON.HMSJSON.HMSData Get(string param)
         {
-            //string data = "";
             string errorMsg = "";
-            HMSUtils.Utils util = new HMSUtils.Utils();
-            parameters = new Dictionary<string, string>();
-            parameters = util.ParseParameterString(out errorMsg, param);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            if (util.ParameterValidation(out errorMsg, parameters))
+            HMSUtils.Utils utils = new HMSUtils.Utils();
+            parameters = utils.ParseParameterString(out errorMsg, param);
+            parameters["dataset"] = "landsurfaceflow";
+            if (errorMsg.Contains("ERROR"))
             {
-                if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                return utils.ReturnError(errorMsg);
+            }
+            if (utils.ParameterValidation(out errorMsg, parameters))
+            {
+                if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                 WSLandSurfaceFlow result = new WSLandSurfaceFlow();
-                HMSJSON.HMSJSON.HMSData data = result.GetLandSurfaceFlowDataObject(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                HMSJSON.HMSJSON.HMSData data = result.GetLandSurfaceFlowData(out errorMsg, parameters);
                 return data;
             }
             else
             {
-                return new HMSJSON.HMSJSON.HMSData();
+                return utils.ReturnError("ERROR: Errors found in parameters. " + errorMsg);
             }
-            //return data;
         }
 
         /// <summary>
-        /// POST method for getting LandSurfaceFlow data.
+        /// POST method for retrieving LandSurfaceFlow data.
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         [Route("api/WSLandSurfaceFlow/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
-
             string guid = Guid.NewGuid().ToString();
 
-            string fileSaveLocation = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + guid);
-            Directory.CreateDirectory(fileSaveLocation);
-            CustomMultipartFormDataStreamProvider provider = new CustomMultipartFormDataStreamProvider(fileSaveLocation);
+            HMSUtils.Utils utils = new HMSUtils.Utils();
+
             List<string> files = new List<string>();
-            parameters = new Dictionary<string, string>();
+            parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             parameters.Add("id", guid);
+            parameters["dataset"] = "landsurfaceflow";
             try
             {
                 if (Request.Content.IsMimeMultipartContent())
                 {
+                    string fileSaveLocation = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + guid);
+                    CustomMultipartFormDataStreamProvider provider = new CustomMultipartFormDataStreamProvider(fileSaveLocation);
+
                     await Request.Content.ReadAsMultipartAsync(provider);
                     foreach (var key in provider.FormData.AllKeys)
                     {
@@ -74,6 +75,10 @@ namespace HMSWebServices.Controllers
                         {
                             parameters.Add(key, val);
                         }
+                    }
+                    if (parameters.ContainsKey("filePath"))
+                    {
+                        Directory.CreateDirectory(fileSaveLocation);
                     }
 
                     foreach (MultipartFileData file in provider.FileData)
@@ -92,72 +97,40 @@ namespace HMSWebServices.Controllers
                 }
                 else
                 {
-                    return new HMSJSON.HMSJSON.HMSData();
+                    return utils.ReturnError("ERROR: Invalid request content-type.");
                 }
             }
-            catch
+            catch (Exception e)
             {
-                return new HMSJSON.HMSJSON.HMSData();
-                //return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e).ToString();
+                return utils.ReturnError("ERROR: " + e.Message);
             }
             string errorMsg = "";
-            HMSUtils.Utils util = new HMSUtils.Utils();
-            util.ParameterValidation(out errorMsg, parameters);
+            utils.ParameterValidation(out errorMsg, parameters);
 
             if (parameters.ContainsKey("filePath"))
             {
-                util.UnzipShapefile(out errorMsg, parameters["filePath"], parameters["id"]);
+                utils.UnzipShapefile(out errorMsg, parameters["filePath"], parameters["id"]);
             }
-            if (errorMsg.Contains("Error"))
+            if (errorMsg.Contains("ERROR"))
             {
-                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]))) { util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]); }
-                return new HMSJSON.HMSJSON.HMSData();
+                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"])))
+                {
+                    utils.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
+                }
+                return utils.ReturnError(errorMsg);
             }
 
             WSLandSurfaceFlow result = new WSLandSurfaceFlow();
-            HMSJSON.HMSJSON.HMSData data = new HMSJSON.HMSJSON.HMSData();
-            if (parameters.ContainsKey("filePath"))
+            HMSJSON.HMSJSON.HMSData data = result.GetLandSurfaceFlowData(out errorMsg, parameters);
+            if (errorMsg != "")
             {
-                data = result.GetLandSurfaceFlowDataObject(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
+                return utils.ReturnError(errorMsg);
             }
-            else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
-            {
-                data = result.GetLandSurfaceFlowDataObject(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
-            }
-            else
-            {
-                return new HMSJSON.HMSJSON.HMSData();
-            }
+
             if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"])))
             {
-                util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
+                utils.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
             }
-            return data;
-        }
-
-        /// <summary>
-        /// Executes methods for retieving data using the values in the parameters variable.
-        /// </summary>
-        /// <returns></returns>
-        private string RetrieveData()
-        {
-            string data = "";
-            string errorMsg = "";
-            WSLandSurfaceFlow result = new WSLandSurfaceFlow();
-
-            if (parameters.ContainsKey("filePath"))
-            {
-                data = result.GetLandSurfaceFlowData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
-            }
-            else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
-            {
-                data = result.GetLandSurfaceFlowData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
-            }
-            else
-            {
-                return null;
-            }
-            if (errorMsg.Contains("Error")) { return errorMsg; }
             return data;
         }
     }

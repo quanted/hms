@@ -8,85 +8,51 @@ namespace HMSWebServices.Models
     public class WSTemperature
     {
         /// <summary>
-        /// Gets temperature data using latitude/longitude.
+        /// Gets termpature data using the parameters in the dictionary.
         /// </summary>
         /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
+        /// <param name="parameters"></param>
         /// <returns></returns>
-        public string GetTemperatureData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
+        public HMSJSON.HMSJSON.HMSData GetTemperatureData(out string errorMsg, Dictionary<string, string> parameters)
         {
             errorMsg = "";
-            HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = temp.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            HMSUtils.Utils utils = new HMSUtils.Utils();
 
-        /// <summary>
-        /// Gets Temperature data using shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public string GetTemperatureData(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = temp.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            // Temperature Initiailization
+            HMSTemperature.Temperature temp;
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                temp = new HMSTemperature.Temperature(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+            }
+            else if (parameters.ContainsKey("filePath"))
+            {
+                temp = new HMSTemperature.Temperature(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
+            }
+            else if (parameters.ContainsKey("geojson"))
+            {
+                temp = new HMSTemperature.Temperature(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                temp.gdal.geoJSON = parameters["geojson"];
+            }
+            else if (parameters.ContainsKey("stationID"))
+            {
+                temp = new HMSTemperature.Temperature();
+            }
+            else
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+            }
 
-        /// <summary>
-        /// Gets temperature data using latitude/longitude.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetTemperatureDataObject(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
-        {
-            errorMsg = "";
-            HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters. " + errorMsg);
+            }
             temp.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: Unable to get requested data. " + errorMsg);
+            }
             return temp.jsonData;
-        }
 
-        /// <summary>
-        /// Gets Temperature data using shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetTemperatureDataObject(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            temp.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return temp.jsonData;
         }
 
     }

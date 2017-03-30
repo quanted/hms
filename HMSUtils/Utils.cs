@@ -31,19 +31,29 @@ namespace HMSUtils
             errorMsg = "";
             bool valid = true;
 
+            if (parameters.ContainsKey("dataset"))
+            {
+                parameters["dataset"] = parameters["dataset"].ToLower();
+            }
+            else
+            {
+                errorMsg = "ERROR: dataset parameter was not found.\n";
+                valid = false;
+            }
+
             //Source test
             if (parameters.ContainsKey("source"))
             {
                 Sources source;
                 if (!Enum.TryParse(parameters["source"], out source))
                 {
-                    errorMsg += "Error: source parameter is not valid.\n";
+                    errorMsg += "ERROR: source parameter was not found.\n";
                     valid = false;
                 }
             }
             else
             {
-                errorMsg += "Error: source parameter not found, source is required.\n";
+                errorMsg += "ERROR: source parameter not found, source is required.\n";
                 valid = false;
             }
 
@@ -57,7 +67,7 @@ namespace HMSUtils
             }
             else
             {
-                errorMsg += "Error: startDate and endDate parameters not found, startDate and endDate are required.\n";
+                errorMsg += "ERROR: startDate and endDate parameters not found, startDate and endDate are required.\n";
                 valid = false;
             }
 
@@ -75,21 +85,21 @@ namespace HMSUtils
                 {
                     if (String.IsNullOrWhiteSpace(parameters["filePath"]))
                     {
-                        errorMsg += "Error: No file provided.\n";
+                        errorMsg += "ERROR: No file provided.\n";
                         valid = false;
                     }
                 }
-                else if (parameters.ContainsKey("geoJson"))         // if geoJson provided       
+                else if (parameters.ContainsKey("geojson"))         // if geoJSON provided       
                 {
-                    if (String.IsNullOrWhiteSpace(parameters["geoJson"]))
-                    {
-                        parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
-                        System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJson"]);
-                    }
+                    //if (String.IsNullOrWhiteSpace(parameters["geoJSON"]))
+                    //{
+                    //    parameters.Add("filePath", HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]) + "\\geo.json");
+                    //    System.IO.File.WriteAllText(parameters["filePath"], parameters["geoJSON"]);
+                    //}
                 }
                 else
                 {
-                    errorMsg += "Error: No valid spatial location values provided. Must provide one of the follow: latitude and longitude coordinates, zipped shapefile, or geoJson (file or as a parameter).\n";
+                    errorMsg += "ERROR: No valid spatial location values provided. Must provide one of the follow: latitude and longitude coordinates, zipped shapefile, or geoJson (file or as a parameter).\n";
                     valid = false;
                 }
             }
@@ -130,35 +140,35 @@ namespace HMSUtils
             DateTime end;
             if (!DateTime.TryParse(startDate, out start))
             {
-                errorMsg = "Error: startDate is not a valid date.\n";
+                errorMsg = "ERROR: startDate is not a valid date.\n";
                 valid = false;
             }
             if (!DateTime.TryParse(endDate, out end))
             {
-                errorMsg += "Error: endDate is not a valid date.\n";
+                errorMsg += "ERROR: endDate is not a valid date.\n";
                 valid = false;
             }
             if (start != DateTime.MinValue && end != DateTime.MinValue)
             {
                 if (DateTime.Compare(start, end) > 0)
                 {
-                    errorMsg += "Error: endDate must be a date after startDate.\n";
+                    errorMsg += "ERROR: endDate must be a date after startDate.\n";
                     valid = false;
                 }
                 if (DateTime.Compare(start, DateTime.Now) > 0)
                 {
-                    errorMsg += "Error: startDate must be a date before today.\n";
+                    errorMsg += "ERROR: startDate must be a date before today.\n";
                     valid = false;
                 }
                 if (DateTime.Compare(end, DateTime.Now) > 0)
                 {
-                    errorMsg += "Error: endDate must be a date before today.\n";
+                    errorMsg += "ERROR: endDate must be a date before today.\n";
                     valid = false;
                 }
             }
             else
             {
-                errorMsg += "Error: startDate and endDate parameters do not contain valid dates.\n";
+                errorMsg += "ERROR: startDate and endDate parameters do not contain valid dates.\n";
                 valid = false;
             }
             if (valid == true)
@@ -187,12 +197,12 @@ namespace HMSUtils
                     DateTime minNLDASDate = new DateTime(1979, 01, 02);
                     if (DateTime.Compare(start, minNLDASDate) < 0)
                     {
-                        errorMsg = "Error: Startdate value is before NLDAS min date. NLDAS min date is: " + minNLDASDate.ToString() + "\n";
+                        errorMsg = "ERROR: Startdate value is before NLDAS min date. NLDAS min date is: " + minNLDASDate.ToString() + "\n";
                         valid = false;
                     }
                     if (DateTime.Compare(end, DateTime.Now.AddDays(-4)) > 0)
                     {
-                        errorMsg += "Error: Enddate value is after latest NLDAS data release date. NLDAS latency is about 4 days.\n";
+                        errorMsg += "ERROR: Enddate value is after latest NLDAS data release date. NLDAS latency is about 4 days.\n";
                         valid = false;
                     }
                     return valid;
@@ -200,12 +210,12 @@ namespace HMSUtils
                     DateTime minGLDASDate = new DateTime(2000, 02, 25);
                     if (DateTime.Compare(start, minGLDASDate) < 0)
                     {
-                        errorMsg = "Error: Startdate value is before GLDAS min date. GLDAS min date is: " + minGLDASDate.ToString() + "\n";
+                        errorMsg = "ERROR: Startdate value is before GLDAS min date. GLDAS min date is: " + minGLDASDate.ToString() + "\n";
                         valid = false;
                     }
                     if (DateTime.Compare(end, DateTime.Now.AddDays(-60)) > 0)
                     {
-                        errorMsg += "Error: Enddate value is after latest GLDAS data release date. GLDAS latency is about 2 months.\n";
+                        errorMsg += "ERROR: Enddate value is after latest GLDAS data release date. GLDAS latency is about 2 months.\n";
                         valid = false;
                     }
                     return valid;
@@ -213,18 +223,18 @@ namespace HMSUtils
                     DateTime minDaymetDate = new DateTime(1980, 01, 01);
                     if (DateTime.Compare(start, minDaymetDate) < 0)
                     { 
-                        errorMsg = "Error: Startdate value is before Daymet min date. Daymet min date is: " + minDaymetDate.ToString() + "\n";
+                        errorMsg = "ERROR: Startdate value is before Daymet min date. Daymet min date is: " + minDaymetDate.ToString() + "\n";
                         valid = false;
                     }
                     if (DateTime.Compare(end, DateTime.Now.AddMonths(-18)) > 0)
                     {
-                        errorMsg += "Error: Enddate value is after latest Daymet data release date. Daymet latency is about 18 months.\n";
+                        errorMsg += "ERROR: Enddate value is after latest Daymet data release date. Daymet latency is about 18 months.\n";
                         valid = false;
                     }
                     //Daymet requires at least one year between start and end dates.
                     if ((end - start).Days <= 364)
                     {
-                        errorMsg += "Error: Daymet requires start and end date must be equal to or greater than 1 year.\n";
+                        errorMsg += "ERROR: Daymet requires start and end date must be equal to or greater than 1 year.\n";
                         valid = false;
                     }
                     return valid;
@@ -243,12 +253,12 @@ namespace HMSUtils
             DateTime secondDate;
             if(!DateTime.TryParse(date1, out firstDate))
             {
-                errorMsg = "Error: Invalid firstDate, unable to parse date from string.";
+                errorMsg = "ERROR: Invalid firstDate, unable to parse date from string.";
                 return 0;
             }
             if (!DateTime.TryParse(date2, out secondDate))
             {
-                errorMsg = "Error: Invalid secondDate, unable to parse date from string.";
+                errorMsg = "ERROR: Invalid secondDate, unable to parse date from string.";
                 return 0;
             }
 
@@ -272,27 +282,27 @@ namespace HMSUtils
 
             if (!Double.TryParse(latitude, out lat))
             {
-                errorMsg = "Error: latitude is not a valid numeric value.\n";
+                errorMsg = "ERROR: latitude is not a valid numeric value.\n";
                 valid = false;
             }
             else
             {
                 if (Math.Abs(lat) > 90)
                 {
-                    errorMsg += "Error: latitude value is outside latitude range. Max/min latitude value is 90/-90.\n";
+                    errorMsg += "ERROR: latitude value is outside latitude range. Max/min latitude value is 90/-90.\n";
                     valid = false;
                 }
             }
             if (!Double.TryParse(longitude, out lon))
             {
-                errorMsg += "Error: longitude is not a valid numeric value.\n";
+                errorMsg += "ERROR: longitude is not a valid numeric value.\n";
                 valid = false;
             }
             else
             {
                 if (Math.Abs(lon) > 180)
                 {
-                    errorMsg += "Error: longitude value is outside longitude range. Max/min longitude value is 180/-180.\n";
+                    errorMsg += "ERROR: longitude value is outside longitude range. Max/min longitude value is 180/-180.\n";
                     valid = false;
                 }
             }
@@ -321,19 +331,19 @@ namespace HMSUtils
                 case "NLDAS":
                     if (latitude > 53 || latitude < 25)     //NLDAS spatial bounds for latitude
                     {
-                        errorMsg = "Error: Latitude value is outside of the spatial coverage for NLDAS. NLDAS spatial coverage is: 125W ~ 63W, 25N ~ 53N.\n";
+                        errorMsg = "ERROR: Latitude value is outside of the spatial coverage for NLDAS. NLDAS spatial coverage is: 125W ~ 63W, 25N ~ 53N.\n";
                         valid = false;
                     }
                     if (longitude > -63 || longitude < -125)        //NLDAS spatial bounds for longitude
                     {
-                        errorMsg += "Error: Longitude value is outside of the spatial coverage for NLDAS. NLDAS spatial coverage is: 125W ~ 63W, 25N ~ 53N.\n";
+                        errorMsg += "ERROR: Longitude value is outside of the spatial coverage for NLDAS. NLDAS spatial coverage is: 125W ~ 63W, 25N ~ 53N.\n";
                         valid = false;
                     }
                     return valid;
                 case "GLDAS":
                     if (latitude < -60)
                     {
-                        errorMsg = "Error: Latitude value is outside of the spatial coverage for GLDAS. GLDAS spatial coverage is: 180W ~ 180E, 60S ~ 90N.\n";
+                        errorMsg = "ERROR: Latitude value is outside of the spatial coverage for GLDAS. GLDAS spatial coverage is: 180W ~ 180E, 60S ~ 90N.\n";
                         valid = false;
                     }
                     return valid;
@@ -360,16 +370,16 @@ namespace HMSUtils
                     ZipFile.ExtractToDirectory(filePath, extractPath);
                     File.Delete(filePath);
                     CheckUnzippedShapefiles(out errorMsg, filePath, sessionGUID);
-                    if (errorMsg.Contains("Error")) { return; }
+                    if (errorMsg.Contains("ERROR")) { return; }
                 }
                 catch (Exception ex)
                 {
-                    errorMsg = "Error: " + ex;
+                    errorMsg = "ERROR: " + ex;
                     return;
                 }
             }
             else if (Path.GetExtension(filePath).Contains("json")) { return; }
-            else { errorMsg = "Error: Invalid file provided. Accepted file types are: zipped shapefile (containing a shp, prj, and dbf file) or a json (containing geojson data)."; return; }
+            else { errorMsg = "ERROR: Invalid file provided. Accepted file types are: zipped shapefile (containing a shp, prj, and dbf file) or a json (containing geojson data)."; return; }
 
         }
 
@@ -399,7 +409,7 @@ namespace HMSUtils
             }
             if (requiredFiles.ContainsValue(false))
             {
-                errorMsg = "Error: Zipped shapefile did not contain all required files. Zip must contain shp, prj, and dbf files.";
+                errorMsg = "ERROR: Zipped shapefile did not contain all required files. Zip must contain shp, prj, and dbf files.";
                 return false;
             }
             else
@@ -437,7 +447,7 @@ namespace HMSUtils
         public Dictionary<string, string> ParseParameterString(out string errorMsg, string paramString)
         {
             errorMsg = "";
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
+            Dictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             try
             {
                 string[] values = paramString.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
@@ -449,7 +459,7 @@ namespace HMSUtils
             }
             catch
             {
-                errorMsg = "Error: Unable to collect parameters.\n";
+                errorMsg = "ERROR: Unable to collect parameters.\n";
             }
 
 
@@ -466,6 +476,24 @@ namespace HMSUtils
                 stationDetails.Add("errorMsg", errorMsg);
             }
             return stationDetails;
+        }
+
+        //---------------------- Updated Util Methods ---------------------//
+
+        /// <summary>
+        /// Creates HMSData object with a metadata property containing an ERROR message to be returned.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
+        public HMSJSON.HMSJSON.HMSData ReturnError(string errorMsg)
+        {
+            HMSJSON.HMSJSON.HMSData reply = new HMSJSON.HMSJSON.HMSData();
+            Dictionary<string, string> meta = new Dictionary<string, string>()
+            {
+                { "errorMsg", errorMsg }
+            };
+            reply.metadata = meta;
+            return reply;
         }
     }
 }

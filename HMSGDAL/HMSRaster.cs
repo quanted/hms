@@ -18,9 +18,9 @@ namespace HMSGDAL
             try
             {
                 Dataset ds = Gdal.Open(gdalName, Access.GA_ReadOnly);
-                if (ds == null) { errorMsg = "Error: Unable to open raster dataset."; return null; }
+                if (ds == null) { errorMsg = "ERROR: Unable to open raster dataset."; return null; }
                 Driver drv = ds.GetDriver();
-                if (drv == null) { errorMsg = "Error: Unable to open raster driver."; return null; }
+                if (drv == null) { errorMsg = "ERROR: Unable to open raster driver."; return null; }
 
                 Band band = ds.GetRasterBand(1);
                 int width = band.XSize;

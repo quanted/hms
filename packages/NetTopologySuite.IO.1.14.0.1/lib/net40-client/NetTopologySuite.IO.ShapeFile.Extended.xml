@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NetTopologySuite.IO.ShapeFile.Extended</name>
+    </assembly>
+    <members>
+        <member name="M:NetTopologySuite.IO.ShapeFile.Extended.DbaseReader.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the DbaseFileReader class.
+            </summary>
+            <param name="filename"></param>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeFile.Extended.DbaseReader.ReadHeader">
+            <summary>
+            Gets the header information for the dbase file.
+            </summary>
+            <returns>DbaseFileHeader contain header and field information.</returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader.ReadByMBRFilter(GeoAPI.Geometries.Envelope,System.Boolean)">
+            <summary>
+            Query shapefile by MBR.
+            MBR coordinates MUST be in the Shapefile's coordinate system.
+            
+            NOTE: If you are using the default ISpatialIndex (which is an instance of the STRtree NTS class), it has some limitations.
+            Since it works with MBRs rather than the shapes themselves, you can get some shapes that are not actually in the MBR
+            you provided just because their MBRs are bounded by the given envelope.
+            If you wish to avoid this behaviour, send true in the second paramter, but be weary of the consequences listed below.
+            </summary>
+            <param name="envelope"> The envlope to query. </param>
+            <param name="testGeometriesActuallyInMBR"> 
+            False by default, true to double-check the returned geometries against given Envelope, to avoid index error margin.
+            
+            It is advisable that you implement your own ISpatialIndex with your required precision rather than set this to True.
+            
+            **********
+            CAUTION: If you choose to set this parameter as True, it will greatly affect performance as it
+            will cancel any lazy mechanism implemented with reading the geometries from the file.
+            Do not set this to True unless you either:
+            A. Do not have any performance restrictions.
+            Or:
+            B. Absolutely need that precision in the geographic query.
+            **********
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader.ValidateParameters">
+            <summary>
+            Check validity of parameters - null values and that all file needed to read shapes exist.
+            </summary>
+        </member>
+        <member name="M:NetTopologySuite.IO.ShapeFile.Extended.ShapeReader.ReadShapeAtOffset(System.Int64,GeoAPI.Geometries.IGeometryFactory)">
+            <summary>
+            Read shape at a given offset.
+            </summary>
+            <param name="shapeOffset"> The offset at which the requested shape metadata begins.</param>
+            <param name="geoFactory"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

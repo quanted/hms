@@ -47,6 +47,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HMSJSON\HMSJSON.csproj">
+      <Project>{c6ae58ad-7af6-4edb-8157-20ce812dc787}</Project>
+      <Name>HMSJSON</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HMSNCDC\HMSNCDC.csproj">
       <Project>{1acfd2bc-7fb2-48c4-be76-30fe92b34c41}</Project>
       <Name>HMSNCDC</Name>

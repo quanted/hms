@@ -52,13 +52,13 @@ namespace HMSCompleteDataSet
         public CompleteDataSet(out string errorMsg, string startDate, string endDate, string source, bool local, string sfPath)
         {
             errorMsg = "";
-            if (String.IsNullOrWhiteSpace(startDate) || String.IsNullOrWhiteSpace(endDate) || String.IsNullOrWhiteSpace(source) || String.IsNullOrWhiteSpace(sfPath)) { errorMsg = "Error: Required arguments are missing."; return; }
+            if (String.IsNullOrWhiteSpace(startDate) || String.IsNullOrWhiteSpace(endDate) || String.IsNullOrWhiteSpace(source) || String.IsNullOrWhiteSpace(sfPath)) { errorMsg = "ERROR: Required arguments are missing."; return; }
             this.gmtOffset = 0.0;
             this.dataSource = source;
             this.localTime = local;
             this.tzName = "GMT";
             SetDates(out errorMsg, startDate, endDate);
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             this.ts = new List<HMSTimeSeries.HMSTimeSeries>();
             this.precipTS = new List<HMSTimeSeries.HMSTimeSeries>();
             this.humidityTS = new List<HMSTimeSeries.HMSTimeSeries>();
@@ -70,7 +70,7 @@ namespace HMSCompleteDataSet
             this.shapefilePath = sfPath.Substring(0, sfPath.LastIndexOf('.'));
             if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
-            else { errorMsg = "Error: Invalid source."; return; }
+            else { errorMsg = "ERROR: Invalid source."; return; }
             this.gdal = new HMSGDAL.HMSGDAL();
         }
 
@@ -87,16 +87,16 @@ namespace HMSCompleteDataSet
         public CompleteDataSet(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string source, bool local, string sfPath)
         {
             errorMsg = "";
-            if (String.IsNullOrWhiteSpace(latitude) || String.IsNullOrWhiteSpace(longitude) || String.IsNullOrWhiteSpace(startDate) || String.IsNullOrWhiteSpace(endDate) || String.IsNullOrWhiteSpace(source)) { errorMsg = "Error: Required arguments are missing."; return; }
+            if (String.IsNullOrWhiteSpace(latitude) || String.IsNullOrWhiteSpace(longitude) || String.IsNullOrWhiteSpace(startDate) || String.IsNullOrWhiteSpace(endDate) || String.IsNullOrWhiteSpace(source)) { errorMsg = "ERROR: Required arguments are missing."; return; }
             this.gmtOffset = 0.0;
             this.dataSource = source;
             this.localTime = local;
             this.tzName = "GMT";
             this.latitude = ConvertStringToDouble(out errorMsg, latitude);
             this.longitude = ConvertStringToDouble(out errorMsg, longitude);
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             SetDates(out errorMsg, startDate, endDate);
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             this.ts = new List<HMSTimeSeries.HMSTimeSeries>();
             this.precipTS = new List<HMSTimeSeries.HMSTimeSeries>();
             this.humidityTS = new List<HMSTimeSeries.HMSTimeSeries>();
@@ -108,7 +108,7 @@ namespace HMSCompleteDataSet
             this.shapefilePath = null;
             if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
-            else { errorMsg = "Error: Invalid source."; return; }
+            else { errorMsg = "ERROR: Invalid source."; return; }
             this.gdal = new HMSGDAL.HMSGDAL();
         }
 
@@ -130,13 +130,13 @@ namespace HMSCompleteDataSet
                 }
                 catch
                 {
-                    errorMsg = "Error: Unable to convert string value to double.";
+                    errorMsg = "ERROR: Unable to convert string value to double.";
                     return result;
                 }
             }
             else
             {
-                errorMsg = "Error: Coordinates contain invalid characters.";
+                errorMsg = "ERROR: Coordinates contain invalid characters.";
                 return result;
             }
         }
@@ -162,7 +162,7 @@ namespace HMSCompleteDataSet
             }
             catch
             {
-                errorMsg = "Error: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
+                errorMsg = "ERROR: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
                 return;
             }
             if (DateTime.Compare(this.endDate, DateTime.Today) > 0)   //If endDate is past today's date, endDate is set to 2 days prior to today.
@@ -171,7 +171,7 @@ namespace HMSCompleteDataSet
             }
             if (DateTime.Compare(this.startDate, this.endDate) > 0)
             {
-                errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
+                errorMsg = "ERROR: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
             if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
@@ -235,9 +235,9 @@ namespace HMSCompleteDataSet
             if (this.localTime == true && offset == 0.0)
             {
                 this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
                 this.tzName = ts[0].tzName;              //Gets the Timezone name
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
             }
@@ -282,49 +282,49 @@ namespace HMSCompleteDataSet
                 if (dataSource.Contains("NLDAS"))
                 {
                     dataPrecip = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Precip", newPrecipTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     precipTS[precipTS.Count-1].SetTimeSeriesVariables(out errorMsg, newPrecipTS, dataPrecip, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataHumid = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Humidity", newHumidTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     humidityTS[humidityTS.Count-1].SetTimeSeriesVariables(out errorMsg, newHumidTS, dataHumid, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataTemp = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Temp", newTempTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     tempTS[tempTS.Count-1].SetTimeSeriesVariables(out errorMsg, newTempTS, dataTemp, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataLongW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Longwave_Rad", newLongWTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     longwaveRadTS[longwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newLongWTS, dataLongW, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataShortW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Shortwave_Rad", newShortWTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     shortwaveRadTS[shortwaveRadTS.Count-1].SetTimeSeriesVariables(out errorMsg, newShortWTS, dataShortW, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataZonalW= gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Zonal_Wind", newZonalWTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     zonalWindTS[zonalWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newZonalWTS, dataZonalW, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     dataMeridW = gldas.LDAS(out errorMsg, (center[0] + (mod[i] * this.cellWidth)), (center[1] + (mod[i + 1] * this.cellWidth)), startDate, endDate, "NLDAS_Merid_Wind", newMeridWTS, shapefilePath);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     meridWindTS[meridWindTS.Count-1].SetTimeSeriesVariables(out errorMsg, newMeridWTS, dataMeridW, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
-                    errorMsg = "Error: Invalid data source selected.";
+                    errorMsg = "ERROR: Invalid data source selected.";
                     return null;
                 }
                 SetTotalFlowTimeSeries(out errorMsg, newTS);
             }
             
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
 
             return ts;
         }
@@ -367,7 +367,7 @@ namespace HMSCompleteDataSet
             }
             catch (Exception ex)
             {
-                errorMsg = "Error: " + ex;
+                errorMsg = "ERROR: " + ex;
                 return;
             }
         }

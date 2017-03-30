@@ -8,47 +8,42 @@ namespace HMSWebServices.Models
     public class WSSoilMoisture
     {
 
-        /// <summary>
-        /// Gets Soil Moisture data using latitude, longitude.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <returns></returns>
-        public string GetSoilMoistureData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime, string layers)
+        public HMSJSON.HMSJSON.HMSData GetSoilMoistureData(out string errorMsg, Dictionary<string, string> parameters)
         {
             errorMsg = "";
-            int[] layersArray = ConvertLayersString(out errorMsg, layers);
-            HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null, layersArray);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = sm.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            HMSUtils.Utils utils = new HMSUtils.Utils();
 
-        /// <summary>
-        /// Gets Soil Moisture data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public string GetSoilMoistureData(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName, string layers)
-        {
-            errorMsg = "";
-            int[] layersArray = ConvertLayersString(out errorMsg, layers);
-            HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName, layersArray);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = sm.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
+            // Soilmoisture Initialization
+            HMSSoilMoisture.SoilMoisture soilM;
+            int[] layers = ConvertLayersString(out errorMsg, parameters["layers"]);
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null, layers);
+            }
+            else if (parameters.ContainsKey("filePath"))
+            {
+                soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"], layers);
+            }
+            else if (parameters.ContainsKey("geojson"))
+            {
+                soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), layers);
+                soilM.gdal.geoJSON = parameters["geojson"];
+            }
+            else
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+            }
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters. " + errorMsg);
+            }
+
+            soilM.GetDataSetsObject(out errorMsg);
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: Unable to get requested data. " + errorMsg);
+            }
+            return soilM.jsonData;
         }
 
         /// <summary>
@@ -67,53 +62,10 @@ namespace HMSWebServices.Models
             }
             catch
             {
-                errorMsg = "Error: Failed to convert layers argument.";
+                errorMsg = "ERROR: Failed to convert layers argument.";
                 return null;
             }
             return layerArray;
-        }
-
-        /// <summary>
-        /// Gets Soil Moisture data using latitude, longitude.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetSoilMoistureDataObject(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime, string layers)
-        {
-            errorMsg = "";
-            int[] layersArray = ConvertLayersString(out errorMsg, layers);
-            HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null, layersArray);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            sm.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return sm.jsonData;
-        }
-
-        /// <summary>
-        /// Gets Soil Moisture data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetSoilMoistureDataObject(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName, string layers)
-        {
-            errorMsg = "";
-            int[] layersArray = ConvertLayersString(out errorMsg, layers);
-            HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName, layersArray);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            sm.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return sm.jsonData;
         }
     }
 }

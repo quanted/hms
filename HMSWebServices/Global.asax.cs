@@ -8,6 +8,7 @@ using System.Web.SessionState;
 using System.Web.Http;
 using System.Web.Services;
 using System.IO;
+using System.Collections;
 
 namespace HMSWebServices
 {
@@ -17,6 +18,7 @@ namespace HMSWebServices
         {
             // Code that runs on application startup
             GlobalConfiguration.Configure(WebApiConfig.Register);
+
         }
 
     }

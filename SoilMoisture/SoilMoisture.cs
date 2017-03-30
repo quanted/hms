@@ -29,6 +29,19 @@ namespace HMSSoilMoisture
         public SoilMoisture() { }
 
         /// <summary>
+        /// Constructor for a generic soilmoisture object.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="source"></param>
+        /// <param name="local"></param>
+        /// <param name="layers"></param>
+        public SoilMoisture(out string errorMsg, string startDate, string endDate, string source, bool local, int[] layers) : this(out errorMsg, startDate, endDate, source, local, null, layers)
+        {
+        }
+
+        /// <summary>
         /// Constructor using a shapefile.
         /// </summary>
         /// <param name="errorMsg"></param>
@@ -71,15 +84,23 @@ namespace HMSSoilMoisture
             this.dataSource = source;
             this.localTime = local;
             this.tzName = tzName;
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             SetDates(out errorMsg, startDate, endDate);
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             ts = new List<HMSTimeSeries.HMSTimeSeries>();
             if (string.IsNullOrWhiteSpace(sfPath))
             {
                 this.shapefilePath = null;
-                this.latitude = ConvertStringToDouble(out errorMsg, latitude);
-                this.longitude = ConvertStringToDouble(out errorMsg, longitude);
+                try
+                {
+                    this.latitude = Convert.ToDouble(latitude.Trim());
+                    this.longitude = Convert.ToDouble(longitude.Trim());
+                }
+                catch
+                {
+                    errorMsg = "ERROR: Invalid latitude or longitude value.";
+                    return;
+                }
             }
             else
             {
@@ -93,35 +114,6 @@ namespace HMSSoilMoisture
 
             this.layersSelected = soilLayers;
             this.layers = new List<HMSTimeSeries.HMSTimeSeries>();
-        }
-
-        /// <summary>
-        /// Method first checks if the string is numeric then attemps to convert to a double.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        private double ConvertStringToDouble(out string errorMsg, string str)
-        {
-            errorMsg = "";
-            double result = 0.0;
-            if (Double.TryParse(str, out result))
-            {
-                try
-                {
-                    return result = Convert.ToDouble(str);
-                }
-                catch
-                {
-                    errorMsg = "Error: Unable to convert string value to double.";
-                    return result;
-                }
-            }
-            else
-            {
-                errorMsg = "Error: Coordinates contain invalid characters.";
-                return result;
-            }
         }
 
         /// <summary>
@@ -145,7 +137,7 @@ namespace HMSSoilMoisture
             }
             catch
             {
-                errorMsg = "Error: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
+                errorMsg = "ERROR: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
                 return;
             }
             if (DateTime.Compare(this.endDate, DateTime.Today) > 0)   //If endDate is past today's date, endDate is set to 2 days prior to today.
@@ -154,7 +146,7 @@ namespace HMSSoilMoisture
             }
             if (DateTime.Compare(this.startDate, this.endDate) > 0)
             {
-                errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
+                errorMsg = "ERROR: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
             if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
@@ -201,7 +193,7 @@ namespace HMSSoilMoisture
                     case 5:
                         return "0_200"; // 0-200cm layer
                     default:
-                        errorMsg = "Error: Soil layer " + layerIndex + " is invalid.";
+                        errorMsg = "ERROR: Soil layer " + layerIndex + " is invalid.";
                         return null;
                 }
             }
@@ -218,7 +210,7 @@ namespace HMSSoilMoisture
                     case 3:
                         return "0_100"; // 0-100cm layer
                     default:
-                        errorMsg = "Error: Soil layer " + layerIndex + " is invalid.";
+                        errorMsg = "ERROR: Soil layer " + layerIndex + " is invalid.";
                         return null;
                 }
             }   
@@ -236,31 +228,37 @@ namespace HMSSoilMoisture
             string data = "";
             HMSTimeSeries.HMSTimeSeries newTS = new HMSTimeSeries.HMSTimeSeries();
             ts.Add(newTS);
-            if (this.shapefilePath != null)
+            if (this.shapefilePath != null && this.dataSource.Contains("LDAS"))
             {
                 bool sourceNLDAS = true;
                 if (this.dataSource.Contains("GLDAS")) { sourceNLDAS = false; }
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
-                this.latitude = center[0];   // coordinate values for LandSurfaceFlow objects are taken from the centroid of the shapefile.
+                this.latitude = center[0];   
                 this.longitude = center[1];
-                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);               //Obsolete
                 gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
+            }
+            else if (this.gdal.geoJSON != null)
+            {
+                double[] center = gdal.ReturnCentroidFromGeoJSON(out errorMsg);
+                this.latitude = center[0];
+                this.longitude = center[1];
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
             }
 
-            if (this.localTime == true && offset == 0.0)
+            if (this.localTime == true && !String.IsNullOrWhiteSpace(this.tzName))
             {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
-                if (errorMsg.Contains("Error")) { return null; }
-                this.tzName = ts[0].tzName;              //Gets the Timezone name
-                if (errorMsg.Contains("Error")) { return null; }
+                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);     //Gets the GMT offset
+                if (errorMsg.Contains("ERROR")) { return null; }
+                this.tzName = ts[0].tzName;                                                                 //Gets the Timezone name
+                if (errorMsg.Contains("ERROR")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
             }
 
             int totalPoints = 0;
 
-            if (this.shapefilePath != null)
+            if (this.shapefilePath != null || this.gdal.geoJSON != null)
             {
                 totalPoints = gdal.coordinatesInShapefile.Count;
 
@@ -270,7 +268,7 @@ namespace HMSSoilMoisture
                     for (int j = 0; j < layersSelected.Length; j++)
                     {
                         string layerName = GetSoilMoistureLayer(out errorMsg, layersSelected[j]);
-                        if (errorMsg.Contains("Error")) { return null; }
+                        if (errorMsg.Contains("ERROR")) { return null; }
 
                         newTS = new HMSTimeSeries.HMSTimeSeries();
                         layers.Add(newTS);
@@ -278,20 +276,20 @@ namespace HMSSoilMoisture
                         if (dataSource.Contains("NLDAS"))
                         {
                             data = gldas.LDAS(out errorMsg, gdal.coordinatesInShapefile[i].Item1, gdal.coordinatesInShapefile[i].Item2, startDate, endDate, "NLDAS_" + layerName + "_Soil_Moisture", newTS, shapefilePath);
-                            if (errorMsg.Contains("Error")) { return null; }
+                            if (errorMsg.Contains("ERROR")) { return null; }
                         }
                         else if (dataSource.Contains("GLDAS"))
                         {
                             data = gldas.LDAS(out errorMsg, gdal.coordinatesInShapefile[i].Item1, gdal.coordinatesInShapefile[i].Item2, startDate, endDate, "GLDAS_" + layerName + "_Soil_Moisture", newTS, shapefilePath);
-                            if (errorMsg.Contains("Error")) { return null; }
+                            if (errorMsg.Contains("ERROR")) { return null; }
                         }
                         else
                         {
-                            errorMsg = "Error: Invalid data source selected.";
+                            errorMsg = "ERROR: Invalid data source selected.";
                             return null;
                         }
                         layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data, dataSource);
-                        if (errorMsg.Contains("Error")) { return null; }
+                        if (errorMsg.Contains("ERROR")) { return null; }
                     }
                     string result = SetSoilMoistureTimeSeries(out errorMsg, ts.Count);
                     if (i != 0)
@@ -317,7 +315,7 @@ namespace HMSSoilMoisture
                 for (int j = 0; j < layersSelected.Length; j++)
                 {
                     string layerName = GetSoilMoistureLayer(out errorMsg, layersSelected[j]);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
 
                     newTS = new HMSTimeSeries.HMSTimeSeries();
                     layers.Add(newTS);
@@ -325,25 +323,25 @@ namespace HMSSoilMoisture
                     if (dataSource.Contains("NLDAS"))
                     {
                         data = gldas.LDAS(out errorMsg, latitude, longitude, startDate, endDate, "NLDAS_" + layerName + "_Soil_Moisture", newTS, shapefilePath);
-                        if (errorMsg.Contains("Error")) { return null; }
+                        if (errorMsg.Contains("ERROR")) { return null; }
                     }
                     else if (dataSource.Contains("GLDAS"))
                     {
                         data = gldas.LDAS(out errorMsg, latitude, longitude, startDate, endDate, "GLDAS_" + layerName + "_Soil_Moisture", newTS, shapefilePath);
-                        if (errorMsg.Contains("Error")) { return null; }
+                        if (errorMsg.Contains("ERROR")) { return null; }
                     }
                     else
                     {
-                        errorMsg = "Error: Invalid data source selected.";
+                        errorMsg = "ERROR: Invalid data source selected.";
                         return null;
                     }
                     layers[j].SetTimeSeriesVariables(out errorMsg, newTS, data, dataSource);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     ts[0].newMetaData += "layer" + (j + 1) + "_Name=" + layerName + "cm\n";
                 }
                 string result = SetSoilMoistureTimeSeries(out errorMsg, 0);
                 ts[0].SetTimeSeriesVariables(out errorMsg, layers[0], result, dataSource);
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
             }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
             this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "SoilMoisture", this.dataSource, this.localTime, this.gmtOffset);
@@ -359,10 +357,10 @@ namespace HMSSoilMoisture
         {
             errorMsg = "";
             GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
             string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             return combinedData;
         }
 
@@ -406,7 +404,7 @@ namespace HMSSoilMoisture
             }
             catch (Exception ex)
             {
-                errorMsg = "Error: " + ex;
+                errorMsg = "ERROR: " + ex;
                 return null;
             }
         }

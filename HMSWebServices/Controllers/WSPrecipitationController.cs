@@ -3,22 +3,19 @@ using System.Collections.Generic;
 using System.Web.Http;
 using HMSWebServices.Models;
 using System.IO;
-using System.IO.Compression;
 using System.Web;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Net;
 using System.Collections.Specialized;
 
 namespace HMSWebServices.Controllers
 {
-
     public class WSPrecipitationController : ApiController
     {
         public Dictionary<string, string> parameters;
 
         /// <summary>
-        /// Gets precipitaiton data using the parameters provided in the param string.
+        /// GET method for retrieving precipitaiton data using the parameters provided in the param string.
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
@@ -26,112 +23,50 @@ namespace HMSWebServices.Controllers
         [Route("api/WSPrecipitation/{param}")]
         public HMSJSON.HMSJSON.HMSData Get(string param)
         {
-            //string data = "";
             string errorMsg = "";
-            HMSUtils.Utils util = new HMSUtils.Utils();
-            parameters = new Dictionary<string, string>();
-            parameters = util.ParseParameterString(out errorMsg, param);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            if (util.ParameterValidation(out errorMsg, parameters))
+            HMSUtils.Utils utils = new HMSUtils.Utils();
+            parameters = utils.ParseParameterString(out errorMsg, param);
+            parameters["dataset"] = "precipitation";
+            if (errorMsg.Contains("ERROR"))
             {
-                if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                return utils.ReturnError(errorMsg);
+            }
+            if (utils.ParameterValidation(out errorMsg, parameters))
+            {
+                if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                 WSPrecipitation result = new WSPrecipitation();
-                HMSJSON.HMSJSON.HMSData data = result.GetPrecipitationDataObject(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                HMSJSON.HMSJSON.HMSData data = result.GetPrecipitationData(out errorMsg, parameters);
                 return data;
             }
             else
             {
-                return new HMSJSON.HMSJSON.HMSData();
+                return utils.ReturnError("ERROR: Errors found in parameters. " + errorMsg);
             }
-            //return data;
         }
 
         /// <summary>
-        /// POST method for getting precipitation data.
-        /// </summary>
-        /// <returns></returns>
-        //[HttpPost]
-        //[Route("api/WSPrecipitation/")]
-        //public async Task<string> Post()
-        //{
-        //    if (!Request.Content.IsMimeMultipartContent())
-        //    {
-        //        throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
-        //    }
-
-        //    string guid = Guid.NewGuid().ToString();
-
-        //    string fileSaveLocation = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + guid);
-        //    Directory.CreateDirectory(fileSaveLocation);
-        //    CustomMultipartFormDataStreamProvider provider = new CustomMultipartFormDataStreamProvider(fileSaveLocation);
-        //    List<string> files = new List<string>();
-        //    parameters = new Dictionary<string, string>();
-        //    parameters.Add("id", guid);
-        //    try
-        //    {
-        //        await Request.Content.ReadAsMultipartAsync(provider);
-        //        foreach (var key in provider.FormData.AllKeys)
-        //        {
-        //            foreach (var val in provider.FormData.GetValues(key))
-        //            {
-        //                parameters.Add(key, val);
-        //            }
-        //        }
-
-        //        foreach (MultipartFileData file in provider.FileData)
-        //        {
-        //            files.Add(Path.GetFileName(file.LocalFileName));
-        //            parameters.Add("filePath", file.LocalFileName);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e).ToString();
-        //    }
-        //    string errorMsg = "";
-        //    HMSUtils.Utils util = new HMSUtils.Utils();
-        //    util.ParameterValidation(out errorMsg, parameters);
-
-        //    if (parameters.ContainsKey("filePath"))
-        //    {
-        //        util.UnzipShapefile(out errorMsg, parameters["filePath"], parameters["id"]);
-        //    }
-        //    if (errorMsg.Contains("Error"))
-        //    {
-        //        if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]))) { util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]); }
-        //        return errorMsg;
-        //    }
-
-        //    string data = RetrieveData();
-
-        //    if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"])))
-        //    {
-        //        util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
-        //    }
-        //    return data;
-        //}
-
-        /// <summary>
-        /// POST method for getting precipitation data.
+        /// POST method for retrieving precipitation data.
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         [Route("api/WSPrecipitation/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
-
             string guid = Guid.NewGuid().ToString();
 
-            string fileSaveLocation = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + guid);
-            Directory.CreateDirectory(fileSaveLocation);
-            CustomMultipartFormDataStreamProvider provider = new CustomMultipartFormDataStreamProvider(fileSaveLocation);
+            HMSUtils.Utils utils = new HMSUtils.Utils();    
+
             List<string> files = new List<string>();
-            parameters = new Dictionary<string, string>();
+            parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             parameters.Add("id", guid);
+            parameters["dataset"] = "precipitation";
             try
             {
                 if (Request.Content.IsMimeMultipartContent())
                 {
+                    string fileSaveLocation = HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + guid);
+                    CustomMultipartFormDataStreamProvider provider = new CustomMultipartFormDataStreamProvider(fileSaveLocation);
+
                     await Request.Content.ReadAsMultipartAsync(provider);
                     foreach (var key in provider.FormData.AllKeys)
                     {
@@ -139,6 +74,10 @@ namespace HMSWebServices.Controllers
                         {
                             parameters.Add(key, val);
                         }
+                    }
+                    if (parameters.ContainsKey("filePath"))
+                    {
+                        Directory.CreateDirectory(fileSaveLocation);
                     }
 
                     foreach (MultipartFileData file in provider.FileData)
@@ -157,88 +96,40 @@ namespace HMSWebServices.Controllers
                 }
                 else
                 {
-                    return new HMSJSON.HMSJSON.HMSData();
+                    return utils.ReturnError("ERROR: Invalid request content-type.");
                 }
             }
-            catch
+            catch(Exception e)
             {
-                return new HMSJSON.HMSJSON.HMSData();
+                return utils.ReturnError("ERROR: " + e.Message);
             }
             string errorMsg = "";
-            HMSUtils.Utils util = new HMSUtils.Utils();
-            util.ParameterValidation(out errorMsg, parameters);
+            utils.ParameterValidation(out errorMsg, parameters);
 
             if (parameters.ContainsKey("filePath"))
             {
-                util.UnzipShapefile(out errorMsg, parameters["filePath"], parameters["id"]);
+                utils.UnzipShapefile(out errorMsg, parameters["filePath"], parameters["id"]);
             }
-            if (errorMsg.Contains("Error"))
+            if (errorMsg.Contains("ERROR"))
             {
-                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"]))) { util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]); }
-                return new HMSJSON.HMSJSON.HMSData();
+                if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"])))
+                {
+                    utils.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
+                }
+                return utils.ReturnError(errorMsg);
             }
 
-            HMSJSON.HMSJSON.HMSData data = RetrieveData();
+            WSPrecipitation result = new WSPrecipitation();
+            HMSJSON.HMSJSON.HMSData data = result.GetPrecipitationData(out errorMsg, parameters);
+            if (errorMsg != "")
+            {
+                return utils.ReturnError(errorMsg);
+            }
 
             if (Directory.Exists(HttpContext.Current.Server.MapPath("~\\TransientStorage\\" + parameters["id"])))
             {
-                util.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
+                utils.DeleteTempGUIDDirectory(HttpContext.Current.Server.MapPath("~\\TransientStorage\\"), parameters["id"]);
             }
-            return data;
-        }
-
-        /// <summary>
-        /// Executes methods for retieving data using the values in the parameters variable.
-        /// </summary>
-        /// <returns></returns>
-        //private string RetrieveData()
-        //{
-        //    string data = "";
-        //    string errorMsg = "";
-        //    WSPrecipitation result = new WSPrecipitation();
-
-        //    if (parameters.ContainsKey("filePath"))
-        //    {
-        //        data = result.GetPrecipitationData(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
-        //    }
-        //    else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
-        //    {
-        //        data = result.GetPrecipitationData(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //    if (errorMsg.Contains("Error")) { return errorMsg; }
-        //    return data;
-        //}
-
-        /// <summary>
-        /// Executes methods for retieving data using the values in the parameters variable.
-        /// </summary>
-        /// <returns></returns>
-        private HMSJSON.HMSJSON.HMSData RetrieveData()
-        {
-            string errorMsg = "";
-            WSPrecipitation result = new WSPrecipitation();
-            HMSJSON.HMSJSON.HMSData data;
-            if (parameters.ContainsKey("filePath"))
-            {
-                data = result.GetPrecipitationDataObject(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
-            }
-            else if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
-            {
-                data = result.GetPrecipitationDataObject(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
-            }
-            else if (parameters["source"] == "compare")
-            {
-                data = result.GetPrecipitationCompareDataObject(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["stationID"]);
-            }
-            else
-            {
-                return new HMSJSON.HMSJSON.HMSData();
-            }
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
             return data;
         }
     }

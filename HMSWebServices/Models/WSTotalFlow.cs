@@ -9,85 +9,46 @@ namespace HMSWebServices.Models
     {
 
         /// <summary>
-        /// Gets TotalFlow data using latitude/longitude.
+        /// Gets total flow data using the parameters in the dictionary.
         /// </summary>
         /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
+        /// <param name="parameters"></param>
         /// <returns></returns>
-        public string GetTotalFlowData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
+        public HMSJSON.HMSJSON.HMSData GetTotalFlowData(out string errorMsg, Dictionary<string, string> parameters)
         {
             errorMsg = "";
-            HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = tFlow.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            HMSUtils.Utils utils = new HMSUtils.Utils();
 
-        /// <summary>
-        /// Gets TotalFlow data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public string GetTotalFlowData(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = tFlow.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            // TotalFlow Initialization
+            HMSTotalFlow.TotalFlow tflow;
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                tflow = new HMSTotalFlow.TotalFlow(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+            }
+            else if (parameters.ContainsKey("filePath"))
+            {
+                tflow = new HMSTotalFlow.TotalFlow(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
+            }
+            else if (parameters.ContainsKey("geojson"))
+            {
+                tflow = new HMSTotalFlow.TotalFlow(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                tflow.gdal.geoJSON = parameters["geojson"];
+            }
+            else
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+            }
 
-        /// <summary>
-        /// Gets TotalFlow data using latitude/longitude.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetTotalFlowDataObject(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
-        {
-            errorMsg = "";
-            HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            tFlow.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return tFlow.jsonData;
-        }
-
-        /// <summary>
-        /// Gets TotalFlow data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetTotalFlowDataObject(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            tFlow.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return tFlow.jsonData;
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters. " + errorMsg);
+            }
+            tflow.GetDataSetsObject(out errorMsg);
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: Unable to get requested data. " + errorMsg);
+            }
+            return tflow.jsonData;
         }
     }
 }

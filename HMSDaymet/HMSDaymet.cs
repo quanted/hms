@@ -32,20 +32,20 @@ namespace HMSDaymet
                     if (i != 0) { timeseries = new HMSTimeSeries.HMSTimeSeries(); module.ts.Add(timeseries); }
                     string url = GetDaymetURL(out errorMsg, module.dataSource, dataset) + BuildURLVariables(out errorMsg, module.startDate, module.endDate, module.gdal.coordinatesInShapefile[i].Item1, module.gdal.coordinatesInShapefile[i].Item2, dataset);             // Base url + variable string
                     data = RetrieveData(out errorMsg, url);
-                    if (errorMsg.Contains("Error")) { return; }
+                    if (errorMsg.Contains("ERROR")) { return; }
                     timeseries.SetTimeSeriesVariables(out errorMsg, timeseries, data, module.dataSource);
                     timeseries.newMetaData = String.Concat(timeseries.newMetaData, "percentInCell=", module.gdal.areaPrecentInGeometry[i], "\nareaInCell=", module.gdal.areaGeometryIntersection[i], "\n");
-                    if (errorMsg.Contains("Error")) { return; }
+                    if (errorMsg.Contains("ERROR")) { return; }
                 }
             }
             else
             {
                 string url = GetDaymetURL(out errorMsg, module.dataSource, dataset) + BuildURLVariables(out errorMsg, module.startDate, module.endDate, module.latitude, module.longitude, dataset);             // Base url + variable string
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
                 data = RetrieveData(out errorMsg, url);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
                 timeseries.SetTimeSeriesVariables(out errorMsg, timeseries, data, module.dataSource);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
             }
         }
 
@@ -76,7 +76,7 @@ namespace HMSDaymet
             }
             catch
             {
-                errorMsg = "Error: Unable to load url details for Daymet.";
+                errorMsg = "ERROR: Unable to load url details for Daymet.";
                 return null;
             }
             return urlStr;
@@ -100,7 +100,7 @@ namespace HMSDaymet
             builder.Append("&measuredParams=" + GetMeasuredParam(out errorMsg, dataset));                           // Adds dataset variable to string
             string years = GetListOfYears(out errorMsg, startDate, endDate);
             builder.Append("&year=" + years);         // Adds start and end dates, only takes years
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             return builder.ToString();
         }
 
@@ -123,7 +123,7 @@ namespace HMSDaymet
             }
             catch
             {
-                errorMsg = "Error: Unable to download data from Daymet.";
+                errorMsg = "ERROR: Unable to download data from Daymet.";
                 return null;
             }
             return data;
@@ -145,7 +145,7 @@ namespace HMSDaymet
                 case "Temp":
                     return "tmax,tmin";
                 default:
-                    errorMsg = "Error: Parameter for Daynet did not load.";
+                    errorMsg = "ERROR: Parameter for Daynet did not load.";
                     return null;
             }
         }     

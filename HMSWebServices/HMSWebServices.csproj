@@ -168,6 +168,8 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -188,6 +190,10 @@
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj">
       <Project>{3db6caeb-fdbe-41fe-a22e-2c09a3587d76}</Project>
       <Name>Evapotranspiration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HMSGDAL\HMSGDAL.csproj">
+      <Project>{fb3b67fd-8840-411f-b717-deeac8499b2c}</Project>
+      <Name>HMSGDAL</Name>
     </ProjectReference>
     <ProjectReference Include="..\HMSJSON\HMSJSON.csproj">
       <Project>{c6ae58ad-7af6-4edb-8157-20ce812dc787}</Project>

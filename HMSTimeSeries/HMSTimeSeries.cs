@@ -42,13 +42,13 @@ namespace HMSTimeSeries
         //        }
         //        else
         //        {
-        //            errorMsg = "Error: Failed to parse data.";
+        //            errorMsg = "ERROR: Failed to parse data.";
         //            return null;
         //        }
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Requested data not found.";
+        //        errorMsg = "ERROR: Requested data not found.";
         //        return null;
         //    }
         //    return dataResults;
@@ -88,7 +88,7 @@ namespace HMSTimeSeries
             }
             else
             {
-                errorMsg = "Error: Unable to parse out Daymet data.";
+                errorMsg = "ERROR: Unable to parse out Daymet data.";
                 return null;
             }
         }
@@ -110,7 +110,7 @@ namespace HMSTimeSeries
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Requested data not found.";
+        //        errorMsg = "ERROR: Requested data not found.";
         //        return null;
         //    }
         //    return metaData;
@@ -143,7 +143,7 @@ namespace HMSTimeSeries
              }
             else
             {
-                errorMsg = "Error: Unable to parse out Daymet metadata.";
+                errorMsg = "ERROR: Unable to parse out Daymet metadata.";
                 return null;
             }
         }
@@ -173,7 +173,7 @@ namespace HMSTimeSeries
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Unable to find elevation in meta data.";
+        //        errorMsg = "ERROR: Unable to find elevation in meta data.";
         //        return 0;
         //    }
         //    return Convert.ToDouble(elevation);
@@ -208,14 +208,14 @@ namespace HMSTimeSeries
         //        }
         //        else
         //        {
-        //            errorMsg = "Error: Unable to find latitude in meta data.";
+        //            errorMsg = "ERROR: Unable to find latitude in meta data.";
         //            return 0;
         //        }
         //        return Convert.ToDouble(latitude);
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Metadata was not found.";
+        //        errorMsg = "ERROR: Metadata was not found.";
         //        return 0;
         //    }
         //}
@@ -249,14 +249,14 @@ namespace HMSTimeSeries
         //        }
         //        else
         //        {
-        //            errorMsg = "Error: Unable to find longitude in meta data.";
+        //            errorMsg = "ERROR: Unable to find longitude in meta data.";
         //            return 0;
         //        }
         //        return Convert.ToDouble(longitude);
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Metadata was not found.";
+        //        errorMsg = "ERROR: Metadata was not found.";
         //        return 0;
         //    }
         //}
@@ -286,7 +286,7 @@ namespace HMSTimeSeries
         //    }
         //    else
         //    {
-        //        errorMsg = "Error: Unable to find cell size in meta data.";
+        //        errorMsg = "ERROR: Unable to find cell size in meta data.";
         //        return 0;
         //    }
         //    return Convert.ToDouble(size);
@@ -324,7 +324,7 @@ namespace HMSTimeSeries
             }
             catch
             {
-                errorMsg = "Error: Unable to parse metadata.";
+                errorMsg = "ERROR: Unable to parse metadata.";
                 return;
             }
         }
@@ -341,14 +341,14 @@ namespace HMSTimeSeries
             if (source.Contains("NLDAS") || source.Contains("GLDAS"))           //Data parsing is unique to the datasource.
             {
                 SetLDASTimeSeries(out errorMsg, ts, data);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
             }
             else if (source.Contains("Daymet"))
             {
                 this.timeSeries = ts.ParseForDaymetData(out errorMsg, data);
                 this.metaData = ts.ParseForDaymetMetaData(out errorMsg, data);
                 SetDaymetVariables(out errorMsg, this.metaData);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
             }
         }
 
@@ -371,7 +371,7 @@ namespace HMSTimeSeries
                 }
                 else
                 {
-                    errorMsg = "Error: LDAS data was not found.";
+                    errorMsg = "ERROR: LDAS data was not found.";
                 }
 
                 if (splitData[0].Contains("Date&Time"))         // Collect LDAS metadata
@@ -408,7 +408,7 @@ namespace HMSTimeSeries
             }
             else
             {
-                errorMsg = "Error: LDAS data was not found.";
+                errorMsg = "ERROR: LDAS data was not found.";
             }
         }
 

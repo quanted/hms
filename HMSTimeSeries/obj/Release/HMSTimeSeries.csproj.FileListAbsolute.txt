@@ -1,0 +1,4 @@
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\HMSTimeSeries\bin\Release\HMSTimeSeries.dll
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\HMSTimeSeries\bin\Release\HMSTimeSeries.pdb
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\HMSTimeSeries\obj\Release\HMSTimeSeries.dll
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\HMSTimeSeries\obj\Release\HMSTimeSeries.pdb

@@ -33,14 +33,14 @@ namespace WindowsFormsApplication1
         {
             string errorMsg = "";
 
-            lblError.Visible = false;
+            lblERROR.Visible = false;
             lblTimerResult.Visible = false;
             lblElevationResult.Visible = false;
             lblLatitude2Result.Visible = false;
             lblLongitude2Result.Visible = false;
             lblCellSizeResult.Visible = false;
             DateTime start = DateTime.Now;
-            lblError.Text = "";
+            lblERROR.Text = "";
             dGVData.DataSource = null;
             System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
@@ -55,7 +55,7 @@ namespace WindowsFormsApplication1
             {
                 dataset = cmbDataSet.SelectedItem.ToString();
             }
-            else { errorMsg = "Error: Dataset required."; }
+            else { errorMsg = "ERROR: Dataset required."; }
             if (cmbSource.SelectedItem != null)
             {
                 source = cmbSource.SelectedItem.ToString();
@@ -64,11 +64,11 @@ namespace WindowsFormsApplication1
             {
                 if (errorMsg.Equals(""))
                 {
-                    errorMsg = "Error: Source required.";
+                    errorMsg = "ERROR: Source required.";
                 }
                 else { errorMsg += " Source required."; }
             }
-            if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
 
             bool local = false;
             if (rdbLocal.Checked == true) { local = true; }
@@ -76,9 +76,9 @@ namespace WindowsFormsApplication1
             double offset = 0.0;
             DataTable dt = new DataTable();
             ts = new List<HMSTimeSeries.HMSTimeSeries>();
-            if (String.IsNullOrWhiteSpace(shapefilePath) && (txtLatitude.Text == "" || txtLongitude.Text == "")) { lblError.Text = "Shapefile or coordinates must be provided"; return; }
+            if (String.IsNullOrWhiteSpace(shapefilePath) && (txtLatitude.Text == "" || txtLongitude.Text == "")) { lblERROR.Text = "Shapefile or coordinates must be provided"; return; }
 
-            lblError.Text = "Retrieving data.";
+            lblERROR.Text = "Retrieving data.";
             if (dataset == "Precipitation")
             {
                 HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation();
@@ -90,11 +90,11 @@ namespace WindowsFormsApplication1
                 {
                     precip = new HMSPrecipitation.Precipitation(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = precip.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = precip.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = precip.jsonData;
             }
             else if (dataset == "LandSurfaceFlow")
@@ -108,11 +108,11 @@ namespace WindowsFormsApplication1
                 {
                     landFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = landFlow.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = landFlow.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = landFlow.jsonData;
             }
             else if ( dataset == "BaseFlow")
@@ -126,11 +126,11 @@ namespace WindowsFormsApplication1
                 {
                     baseFlow = new HMSBaseFlow.BaseFlow(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = baseFlow.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = baseFlow.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = baseFlow.jsonData;
             }
             else if (dataset == "TotalFlow")
@@ -144,11 +144,11 @@ namespace WindowsFormsApplication1
                 {
                     totalFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = totalFlow.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = totalFlow.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = totalFlow.jsonData;
             }
             else if (dataset == "Evapotranspiration")
@@ -162,11 +162,11 @@ namespace WindowsFormsApplication1
                 {
                     evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = evapo.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = evapo.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = evapo.jsonData;
             }
             else if (dataset == "Temperature")
@@ -180,11 +180,11 @@ namespace WindowsFormsApplication1
                 {
                     temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, source, local, shapefilePath);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = temp.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = temp.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = temp.jsonData;
             }
             else if (dataset == "Complete")     //Currently removed from list
@@ -196,19 +196,19 @@ namespace WindowsFormsApplication1
                 }
                 else
                 {
-                    lblError.Text = "Error: Complete dataset only accepts latitude/longitude coordinates for input.";             //Returns data based on the centroid of the shapefile provided
+                    lblERROR.Text = "ERROR: Complete dataset only accepts latitude/longitude coordinates for input.";             //Returns data based on the centroid of the shapefile provided
                     return;
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = complete.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = complete.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 //this.jsonData = complete.jsonData;
             }
             else if (dataset == "SoilMoisture")
             {
-                if (chklstbxDatasetOptions.CheckedIndices.Count == 0) { lblError.Text = "At least one soil moisture depth must be selected."; return; }
+                if (chklstbxDatasetOptions.CheckedIndices.Count == 0) { lblERROR.Text = "At least one soil moisture depth must be selected."; return; }
                 HMSSoilMoisture.SoilMoisture soilM = new HMSSoilMoisture.SoilMoisture();
                 int[] layers = new int[chklstbxDatasetOptions.CheckedIndices.Count];
                 chklstbxDatasetOptions.CheckedIndices.CopyTo(layers, 0);
@@ -220,25 +220,25 @@ namespace WindowsFormsApplication1
                 {
                     soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, startDate, endDate, source, local, shapefilePath, layers);             //Returns data based on the centroid of the shapefile provided
                 }
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 ts = soilM.GetDataSets(out errorMsg);
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 offset = soilM.gmtOffset;
-                if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 this.jsonData = soilM.jsonData;
             }
             else
             {
-                lblError.Text = "Error: Unknown dataset selected.";
+                lblERROR.Text = "ERROR: Unknown dataset selected.";
                 return;
             }
-            if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
             this.gmtOffset = offset;
             this.localtime = local;
 
             PopulateTableV2(out errorMsg, dt, this.jsonData, local, offset);
 
-            lblError.Text = "Data successfully retrieved.";
+            lblERROR.Text = "Data successfully retrieved.";
             
             dGVData.DataSource = dt.DefaultView;
             lblElevationResult.Text = Convert.ToString(ts[0].metaElev);
@@ -283,7 +283,7 @@ namespace WindowsFormsApplication1
                 if (local == true)
                 {
                     dr[0] = gdal.SetDateToLocal(out errorMsg, line1[0].Trim() + " " + line1[1].Trim(), offset);
-                    if (errorMsg.Contains("Error")) { lblError.Text = errorMsg; return; }
+                    if (errorMsg.Contains("ERROR")) { lblERROR.Text = errorMsg; return; }
                 }
                 else
                 {
@@ -356,7 +356,7 @@ namespace WindowsFormsApplication1
                     }
                     catch (Exception ex)
                     {
-                        lblError.Text = "Error: " + ex.Message;
+                        lblERROR.Text = "ERROR: " + ex.Message;
                     }
                 }
             }
@@ -399,13 +399,13 @@ namespace WindowsFormsApplication1
                         fs.Write(Encoding.UTF8.GetBytes(data), 0, Encoding.UTF8.GetByteCount(data));
                         fs.Close();
                     }
-                    if (errorMsg.Contains("Error")) { return; }
-                    lblError.Text = "Data successfully saved to: " + saveFileDialog1.FileName;
+                    if (errorMsg.Contains("ERROR")) { return; }
+                    lblERROR.Text = "Data successfully saved to: " + saveFileDialog1.FileName;
                 }
             }
             catch
             {
-                lblError.Text = "Error: Failed to saved data to file.";
+                lblERROR.Text = "ERROR: Failed to saved data to file.";
                 return;
             }
             System.Windows.Forms.Cursor.Current = Cursors.Default;
@@ -434,13 +434,13 @@ namespace WindowsFormsApplication1
                     FileStream fs = File.Create(fileName);
                     fs.Write(Encoding.UTF8.GetBytes(data), 0, Encoding.UTF8.GetByteCount(data));
                     fs.Close();
-                    if (errorMsg.Contains("Error")) { return; }
-                    lblError.Text = "Data successfully saved to: " + saveFileDialog1.FileName;
+                    if (errorMsg.Contains("ERROR")) { return; }
+                    lblERROR.Text = "Data successfully saved to: " + saveFileDialog1.FileName;
                 }
             }
             catch
             {
-                lblError.Text = "Error: Failed to saved data to file.";
+                lblERROR.Text = "ERROR: Failed to saved data to file.";
                 return;
             }
             System.Windows.Forms.Cursor.Current = Cursors.Default;
@@ -467,7 +467,7 @@ namespace WindowsFormsApplication1
             }
             catch
             {
-                errorMsg = "Error: Failed to convert data to csv format.";
+                errorMsg = "ERROR: Failed to convert data to csv format.";
                 return null;
             }
 
@@ -515,9 +515,9 @@ namespace WindowsFormsApplication1
             chklstbxDatasetOptions.SelectionMode = SelectionMode.MultiSimple;
         }
 
-        private void lblError_TextChanged(object sender, EventArgs e)
+        private void lblERROR_TextChanged(object sender, EventArgs e)
         {
-            lblError.Visible = true;
+            lblERROR.Visible = true;
         }
 
         private void btnPrecipCompare_Click(object sender, EventArgs e)

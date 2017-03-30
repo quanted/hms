@@ -66,7 +66,7 @@
             this.lblDateRange = new System.Windows.Forms.Label();
             this.bttnCompareData = new System.Windows.Forms.Button();
             this.dataGVCompare = new System.Windows.Forms.DataGridView();
-            this.lblErrorMsg = new System.Windows.Forms.Label();
+            this.lblerrorMsg = new System.Windows.Forms.Label();
             this.lblStationDetails = new System.Windows.Forms.Label();
             this.bttnSave = new System.Windows.Forms.Button();
             this.lblStationID = new System.Windows.Forms.Label();
@@ -451,16 +451,16 @@
             this.dataGVCompare.TabIndex = 37;
             this.dataGVCompare.Visible = false;
             // 
-            // lblErrorMsg
+            // lblerrorMsg
             // 
-            this.lblErrorMsg.AutoSize = true;
-            this.lblErrorMsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblErrorMsg.Location = new System.Drawing.Point(86, 308);
-            this.lblErrorMsg.Name = "lblErrorMsg";
-            this.lblErrorMsg.Size = new System.Drawing.Size(162, 17);
-            this.lblErrorMsg.TabIndex = 38;
-            this.lblErrorMsg.Text = "error/status message";
-            this.lblErrorMsg.Visible = false;
+            this.lblerrorMsg.AutoSize = true;
+            this.lblerrorMsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblerrorMsg.Location = new System.Drawing.Point(86, 308);
+            this.lblerrorMsg.Name = "lblerrorMsg";
+            this.lblerrorMsg.Size = new System.Drawing.Size(162, 17);
+            this.lblerrorMsg.TabIndex = 38;
+            this.lblerrorMsg.Text = "ERROR/status message";
+            this.lblerrorMsg.Visible = false;
             // 
             // lblStationDetails
             // 
@@ -507,7 +507,7 @@
             this.Controls.Add(this.lblStationID);
             this.Controls.Add(this.bttnSave);
             this.Controls.Add(this.lblStationDetails);
-            this.Controls.Add(this.lblErrorMsg);
+            this.Controls.Add(this.lblerrorMsg);
             this.Controls.Add(this.dataGVCompare);
             this.Controls.Add(this.bttnCompareData);
             this.Controls.Add(this.lblDateRange);
@@ -593,7 +593,7 @@
         private System.Windows.Forms.Label lblEndDateFinal;
         private System.Windows.Forms.Label lblDateRange;
         private System.Windows.Forms.DataGridView dataGVCompare;
-        private System.Windows.Forms.Label lblErrorMsg;
+        private System.Windows.Forms.Label lblerrorMsg;
         private System.Windows.Forms.Label lblStationDetails;
         private System.Windows.Forms.Button bttnSave;
         private System.Windows.Forms.Button bttnCompareData;

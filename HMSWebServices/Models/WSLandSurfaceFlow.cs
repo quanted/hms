@@ -7,87 +7,47 @@ namespace HMSWebServices.Models
 {
     public class WSLandSurfaceFlow
     {
-
         /// <summary>
-        /// Gets Land Surface Flow data using latitude, longitude.
+        /// Gets landsurfaceflow data using the parameters in the dictionary.
         /// </summary>
         /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
+        /// <param name="parameters"></param>
         /// <returns></returns>
-        public string GetLandSurfaceFlowData(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
+        public HMSJSON.HMSJSON.HMSData GetLandSurfaceFlowData(out string errorMsg, Dictionary<string, string> parameters)
         {
             errorMsg = "";
-            HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = lsFlow.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            HMSUtils.Utils utils = new HMSUtils.Utils();
 
-        /// <summary>
-        /// Gets Land Surface Flow data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public string GetLandSurfaceFlowData(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return null; }
-            string data = lsFlow.GetDataSetsString(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
-            return data;
-        }
+            // LandSurfaceFlow Initiailization
+            HMSLandSurfaceFlow.LandSurfaceFlow sflow;
+            if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+            {
+                sflow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+            }
+            else if (parameters.ContainsKey("filePath"))
+            {
+                sflow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), parameters["filePath"]);
+            }
+            else if (parameters.ContainsKey("geojson"))
+            {
+                sflow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                sflow.gdal.geoJSON = parameters["geojson"];
+            }
+            else
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+            }
 
-        /// <summary>
-        /// Gets Land Surface Flow data using latitude, longitude.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetLandSurfaceFlowDataObject(out string errorMsg, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime)
-        {
-            errorMsg = "";
-            HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            lsFlow.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return lsFlow.jsonData;
-        }
-
-        /// <summary>
-        /// Gets Land Surface Flow data using a shapefile.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="dataSource"></param>
-        /// <param name="localTime"></param>
-        /// <param name="shapefileName"></param>
-        /// <returns></returns>
-        public HMSJSON.HMSJSON.HMSData GetLandSurfaceFlowDataObject(out string errorMsg, string startDate, string endDate, string dataSource, bool localTime, string shapefileName)
-        {
-            errorMsg = "";
-            HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            lsFlow.GetDataSetsObject(out errorMsg);
-            if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-            return lsFlow.jsonData;
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: No valid geospatial information found in parameters. " + errorMsg);
+            }
+            sflow.GetDataSetsObject(out errorMsg);
+            if (errorMsg.Contains("ERROR"))
+            {
+                return utils.ReturnError("ERROR: Unable to get requested data. " + errorMsg);
+            }
+            return sflow.jsonData;
         }
     }
 }

@@ -41,7 +41,7 @@
             this.txtEndDate = new System.Windows.Forms.TextBox();
             this.lblSource = new System.Windows.Forms.Label();
             this.cmbSource = new System.Windows.Forms.ComboBox();
-            this.lblError = new System.Windows.Forms.Label();
+            this.lblERROR = new System.Windows.Forms.Label();
             this.grpbTime = new System.Windows.Forms.GroupBox();
             this.rdbLocal = new System.Windows.Forms.RadioButton();
             this.rdbGMT = new System.Windows.Forms.RadioButton();
@@ -193,17 +193,17 @@
             this.cmbSource.TabIndex = 4;
             this.cmbSource.SelectedValueChanged += new System.EventHandler(this.cmbSource_SelectedValueChanged);
             // 
-            // lblError
+            // lblERROR
             // 
-            this.lblError.AutoSize = true;
-            this.lblError.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblError.Location = new System.Drawing.Point(57, 178);
-            this.lblError.Name = "lblError";
-            this.lblError.Size = new System.Drawing.Size(132, 17);
-            this.lblError.TabIndex = 14;
-            this.lblError.Text = "error_status_text";
-            this.lblError.Visible = false;
-            this.lblError.TextChanged += new System.EventHandler(this.lblError_TextChanged);
+            this.lblERROR.AutoSize = true;
+            this.lblERROR.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblERROR.Location = new System.Drawing.Point(57, 178);
+            this.lblERROR.Name = "lblERROR";
+            this.lblERROR.Size = new System.Drawing.Size(132, 17);
+            this.lblERROR.TabIndex = 14;
+            this.lblERROR.Text = "ERROR_status_text";
+            this.lblERROR.Visible = false;
+            this.lblERROR.TextChanged += new System.EventHandler(this.lblERROR_TextChanged);
             // 
             // grpbTime
             // 
@@ -469,7 +469,7 @@
             this.Controls.Add(this.lblElevation);
             this.Controls.Add(this.bttnData);
             this.Controls.Add(this.grpbTime);
-            this.Controls.Add(this.lblError);
+            this.Controls.Add(this.lblERROR);
             this.Controls.Add(this.cmbSource);
             this.Controls.Add(this.lblSource);
             this.Controls.Add(this.txtEndDate);
@@ -510,7 +510,7 @@
         private System.Windows.Forms.TextBox txtEndDate;
         private System.Windows.Forms.Label lblSource;
         private System.Windows.Forms.ComboBox cmbSource;
-        private System.Windows.Forms.Label lblError;
+        private System.Windows.Forms.Label lblERROR;
         private System.Windows.Forms.GroupBox grpbTime;
         private System.Windows.Forms.RadioButton rdbLocal;
         private System.Windows.Forms.RadioButton rdbGMT;

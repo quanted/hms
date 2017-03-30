@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_NewBackgroundProfile>False</_NewBackgroundProfile>
+    <_PublishTargetUrl>\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="ApplicationInsights.config">
+      <publishTime>02/06/2017 09:09:49</publishTime>
+    </File>
+    <File Include="bin/App.config">
+      <publishTime>02/23/2017 13:40:50</publishTime>
+    </File>
+    <File Include="bin/ApplicationInsights.config">
+      <publishTime>02/06/2017 09:09:49</publishTime>
+    </File>
+    <File Include="bin/BaseFlow.dll">
+      <publishTime>03/29/2017 11:41:24</publishTime>
+    </File>
+    <File Include="bin/BaseFlow.dll.config">
+      <publishTime>02/23/2017 13:40:49</publishTime>
+    </File>
+    <File Include="bin/Default.aspx">
+      <publishTime>12/07/2016 16:29:06</publishTime>
+    </File>
+    <File Include="bin/Default.aspx.cs">
+      <publishTime>12/07/2016 16:29:07</publishTime>
+    </File>
+    <File Include="bin/Default.aspx.designer.cs">
+      <publishTime>12/07/2016 16:29:07</publishTime>
+    </File>
+    <File Include="bin/Evapotranspiration.dll">
+      <publishTime>03/29/2017 11:41:24</publishTime>
+    </File>
+    <File Include="bin/Evapotranspiration.dll.config">
+      <publishTime>02/23/2017 13:40:48</publishTime>
+    </File>
+    <File Include="bin/gdal_csharp.dll">
+      <publishTime>11/06/2015 10:13:50</publishTime>
+    </File>
+    <File Include="bin/GeoAPI.dll">
+      <publishTime>11/16/2015 11:53:58</publishTime>
+    </File>
+    <File Include="bin/HMSBASINS.dll">
+      <publishTime>03/29/2017 11:41:23</publishTime>
+    </File>
+    <File Include="bin/HMSBASINS.dll.config">
+      <publishTime>02/23/2017 13:40:50</publishTime>
+    </File>
+    <File Include="bin/HMSDaymet.dll">
+      <publishTime>03/29/2017 11:41:25</publishTime>
+    </File>
+    <File Include="bin/HMSDaymet.dll.config">
+      <publishTime>02/23/2017 13:40:46</publishTime>
+    </File>
+    <File Include="bin/HMSGDAL.dll">
+      <publishTime>03/29/2017 11:40:52</publishTime>
+    </File>
+    <File Include="bin/HMSGDAL.dll.config">
+      <publishTime>02/23/2017 13:40:43</publishTime>
+    </File>
+    <File Include="bin/HMSJSON.cs">
+      <publishTime>03/28/2017 11:36:04</publishTime>
+    </File>
+    <File Include="bin/HMSJSON.dll">
+      <publishTime>03/29/2017 11:40:58</publishTime>
+    </File>
+    <File Include="bin/HMSJSON.dll.config">
+      <publishTime>02/23/2017 13:40:50</publishTime>
+    </File>
+    <File Include="bin/HMSLDAS.dll">
+      <publishTime>03/29/2017 11:41:02</publishTime>
+    </File>
+    <File Include="bin/HMSLDAS.dll.config">
+      <publishTime>02/23/2017 13:40:51</publishTime>
+    </File>
+    <File Include="bin/HMSTimeSeries.dll">
+      <publishTime>03/29/2017 11:40:46</publishTime>
+    </File>
+    <File Include="bin/HMSUtils.dll">
+      <publishTime>03/29/2017 11:41:40</publishTime>
+    </File>
+    <File Include="bin/HMSWebServices.dll">
+      <publishTime>03/29/2017 11:58:11</publishTime>
+    </File>
+    <File Include="bin/LandSurfaceFlow.dll">
+      <publishTime>03/29/2017 11:41:09</publishTime>
+    </File>
+    <File Include="bin/LandSurfaceFlow.dll.config">
+      <publishTime>02/23/2017 13:40:50</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
+      <publishTime>12/09/2016 21:37:14</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.DependencyCollector.dll">
+      <publishTime>12/07/2016 11:45:42</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.PerfCounterCollector.dll">
+      <publishTime>12/07/2016 11:50:34</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.ServerTelemetryChannel.dll">
+      <publishTime>12/06/2016 15:15:48</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Web.dll">
+      <publishTime>12/07/2016 11:49:10</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.WindowsServer.dll">
+      <publishTime>12/07/2016 11:50:34</publishTime>
+    </File>
+    <File Include="bin/Microsoft.ApplicationInsights.dll">
+      <publishTime>12/06/2016 15:09:52</publishTime>
+    </File>
+    <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
+      <publishTime>12/13/2016 03:10:32</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.dll">
+      <publishTime>11/16/2015 22:35:28</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.IO.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.IO.GeoJSON.dll">
+      <publishTime>11/16/2015 22:35:36</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.IO.GeoTools.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.IO.ShapeFile.dll">
+      <publishTime>12/02/2015 15:27:14</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>06/13/2016 23:06:14</publishTime>
+    </File>
+    <File Include="bin/ogr_csharp.dll">
+      <publishTime>11/06/2015 10:13:50</publishTime>
+    </File>
+    <File Include="bin/osr_csharp.dll">
+      <publishTime>11/06/2015 10:13:50</publishTime>
+    </File>
+    <File Include="bin/PowerCollections.dll">
+      <publishTime>11/16/2015 22:35:28</publishTime>
+    </File>
+    <File Include="bin/Precipitation.dll">
+      <publishTime>03/29/2017 11:41:48</publishTime>
+    </File>
+    <File Include="bin/Precipitation.dll.config">
+      <publishTime>02/23/2017 13:40:46</publishTime>
+    </File>
+    <File Include="bin/ProjNet.dll">
+      <publishTime>09/17/2014 11:38:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.exe">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.exe.config">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.rsp">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/csi.exe">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/csi.rsp">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.Scripting.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.Scripting.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CSharp.Core.targets">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.DiaSymReader.Native.amd64.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.DiaSymReader.Native.x86.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.VisualBasic.Core.targets">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.AppContext.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Collections.Immutable.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Diagnostics.StackTrace.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.IO.FileSystem.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.IO.FileSystem.Primitives.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Reflection.Metadata.dll">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.exe">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.exe.config">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.rsp">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe.config">
+      <publishTime>06/27/2016 14:50:24</publishTime>
+    </File>
+    <File Include="bin/SoilMoisture.dll">
+      <publishTime>03/29/2017 11:41:25</publishTime>
+    </File>
+    <File Include="bin/SoilMoisture.dll.config">
+      <publishTime>02/23/2017 13:40:48</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>01/28/2015 04:02:42</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>01/28/2015 04:02:54</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>01/28/2015 04:03:46</publishTime>
+    </File>
+    <File Include="bin/Temperature.dll">
+      <publishTime>03/29/2017 11:41:40</publishTime>
+    </File>
+    <File Include="bin/Temperature.dll.config">
+      <publishTime>02/23/2017 13:40:43</publishTime>
+    </File>
+    <File Include="bin/TotalFlow.dll">
+      <publishTime>03/29/2017 11:41:51</publishTime>
+    </File>
+    <File Include="bin/TotalFlow.dll.config">
+      <publishTime>02/23/2017 13:40:49</publishTime>
+    </File>
+    <File Include="Default.aspx">
+      <publishTime>12/07/2016 16:29:06</publishTime>
+    </File>
+    <File Include="FileUploader.asmx">
+      <publishTime>12/19/2016 15:33:19</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>12/07/2016 10:25:39</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>02/06/2017 09:10:20</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>03/29/2017 11:58:17</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

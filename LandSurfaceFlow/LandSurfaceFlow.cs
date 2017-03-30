@@ -27,6 +27,17 @@ namespace HMSLandSurfaceFlow
         public LandSurfaceFlow() { }
 
         /// <summary>
+        /// Constructor for a generic landsurfaceflow object.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="source"></param>
+        /// <param name="local"></param>
+        public LandSurfaceFlow(out string errorMsg, string startDate, string endDate, string source, bool local) : this(out errorMsg, startDate, endDate, source, local, null)
+        { }
+
+        /// <summary>
         /// Constructor using a shapefile.
         /// </summary>
         /// <param name="errorMsg"></param>
@@ -69,15 +80,23 @@ namespace HMSLandSurfaceFlow
             this.dataSource = source;
             this.localTime = local;
             this.tzName = tzName;
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             SetDates(out errorMsg, startDate, endDate);
-            if (errorMsg.Contains("Error")) { return; }
+            if (errorMsg.Contains("ERROR")) { return; }
             ts = new List<HMSTimeSeries.HMSTimeSeries>();
             if (string.IsNullOrWhiteSpace(sfPath))
             {
                 this.shapefilePath = null;
-                this.latitude = ConvertStringToDouble(out errorMsg, latitude);
-                this.longitude = ConvertStringToDouble(out errorMsg, longitude);
+                try
+                {
+                    this.latitude = Convert.ToDouble(latitude.Trim());
+                    this.longitude = Convert.ToDouble(longitude.Trim());
+                }
+                catch
+                {
+                    errorMsg = "ERROR: Invalid latitude or longitude value.";
+                    return;
+                }
             }
             else
             {
@@ -89,36 +108,7 @@ namespace HMSLandSurfaceFlow
             else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
             this.gdal = new HMSGDAL.HMSGDAL();
         }
-
-        /// <summary>
-        /// Method first checks if the string is numeric then attemps to convert to a double.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        private double ConvertStringToDouble(out string errorMsg, string str)
-        {
-            errorMsg = "";
-            double result = 0.0;
-            if (Double.TryParse(str, out result))
-            {
-                try
-                {
-                    return result = Convert.ToDouble(str);
-                }
-                catch
-                {
-                    errorMsg = "Error: Unable to convert string value to double.";
-                    return result;
-                }
-            }
-            else
-            {
-                errorMsg = "Error: Coordinates contain invalid characters.";
-                return result;
-            }
-        }
-                
+    
         /// <summary>
         /// Sets startDate and endDate, checks that dates are valid (start date before end date, end date no greater than today, start dates are valid for data sources)
         /// </summary>
@@ -140,7 +130,7 @@ namespace HMSLandSurfaceFlow
             }
             catch
             {
-                errorMsg = "Error: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
+                errorMsg = "ERROR: Invalid data format. Please provide a date as mm-dd-yyyy or mm/dd/yyyy.";
                 return;
             }
             if (DateTime.Compare(this.endDate, DateTime.Today) > 0)   //If endDate is past today's date, endDate is set to 2 days prior to today.
@@ -149,7 +139,7 @@ namespace HMSLandSurfaceFlow
             }
             if (DateTime.Compare(this.startDate, this.endDate) > 0)
             {
-                errorMsg = "Error: Invalid dates entered. Please enter an end date set after the start date.";
+                errorMsg = "ERROR: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
             if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
@@ -182,36 +172,51 @@ namespace HMSLandSurfaceFlow
             HMSTimeSeries.HMSTimeSeries newTS = new HMSTimeSeries.HMSTimeSeries();
             ts.Add(newTS);
 
-            if (this.shapefilePath != null)
+            if (this.shapefilePath != null && this.dataSource.Contains("LDAS"))
             {
                 bool sourceNLDAS = true;
                 if (this.dataSource.Contains("GLDAS")) { sourceNLDAS = false; }
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
-                this.latitude = center[0];   // coordinate values for LandSurfaceFlow objects are taken from the centroid of the shapefile.
+                this.latitude = center[0];   
                 this.longitude = center[1];
-                //gdal.CellAreaInShapefile(out errorMsg, center, this.cellWidth);               //Obsolete
                 gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
+            }
+            else if (this.gdal.geoJSON != null)
+            {
+                double[] center = gdal.ReturnCentroidFromGeoJSON(out errorMsg);
+                this.latitude = center[0];
+                this.longitude = center[1];
+                gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
             }
             else
             {
                 ts[0].cellCoverage = 1.0;
             }
 
-            if (this.localTime == true && tzName.Contains("NaN"))
+            if (this.localTime == true && !String.IsNullOrWhiteSpace(this.tzName))
             {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
-                if (errorMsg.Contains("Error")) { return null; }
-                this.tzName = ts[0].tzName;              //Gets the Timezone name
-                if (errorMsg.Contains("Error")) { return null; }
+                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);     //Gets the GMT offset
+                if (errorMsg.Contains("ERROR")) { return null; }
+                this.tzName = ts[0].tzName;                                                                 //Gets the Timezone name
+                if (errorMsg.Contains("ERROR")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
+            }
+
+            // Define this from the utils class, possibly read from file.
+            if (this.shapefilePath != null || this.gdal.geoJSON != null)
+            {
+                if (gdal.coordinatesInShapefile.Count > 30)
+                {
+                    errorMsg = "ERROR: Feature geometries containing more than 30 datapoints are prohibited. Current feature contains " + gdal.coordinatesInShapefile.Count + " " + this.dataSource + " data points."; return null;
+                }
             }
 
             gldas.BeginLDASSequence(out errorMsg, this, "Surface_Flow", newTS);
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
             this.jsonData = output.ConstructHMSDataFromTS(out errorMsg, this.ts, "SurfaceFlow", this.dataSource, this.localTime, this.gmtOffset);
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             return ts;
         }
 
@@ -224,10 +229,10 @@ namespace HMSLandSurfaceFlow
         {
             errorMsg = "";
             GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             HMSJSON.HMSJSON output = new HMSJSON.HMSJSON();
             string combinedData = output.CombineTimeseriesAsJson(out errorMsg, this.jsonData);
-            if (errorMsg.Contains("Error")) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
             return combinedData;
         }
 

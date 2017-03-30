@@ -76,9 +76,9 @@ namespace HMSNCDC
             else
             {
                 data = GetData(out errorMsg, module.startDate, module.endDate, module.ts[0], "PRECIP_HLY", station);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
                 module.ts[0].ConvertTSDictToTS(out errorMsg);
-                if (errorMsg.Contains("Error")) { return; }
+                if (errorMsg.Contains("ERROR")) { return; }
             }
         }
 
@@ -110,31 +110,31 @@ namespace HMSNCDC
                     tempStartDate = startDate;
                     tempEndDate = endDate;
                     url = ConstructURL(out errorMsg) + SetVariables(out errorMsg, tempStartDate, tempEndDate, station);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else if (i == 0 && requiredCalls != 1)  //url constructed for first call of multiple
                 {
                     tempStartDate = startDate;
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
                     url = ConstructURL(out errorMsg) + SetVariables(out errorMsg, tempStartDate, tempEndDate, station);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else if (i != 0 && i == requiredCalls - 1) //url constructed for last call of multiple
                 {
                     tempStartDate = tempEndDate;
                     tempEndDate = endDate;
                     url = ConstructURL(out errorMsg) + SetVariables(out errorMsg, tempStartDate, tempEndDate, station);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else                                   //url constructed for calls that are not the start or end
                 {
                     tempStartDate = tempEndDate;
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
                     url = ConstructURL(out errorMsg) + SetVariables(out errorMsg, tempStartDate, tempEndDate, station);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 string json = DownloadData(out errorMsg, url);
-                if (errorMsg.Contains("Error")) { return null; }
+                if (errorMsg.Contains("ERROR")) { return null; }
                 if (!json.Equals("{}"))
                 {
                     NCDCJson results = JsonConvert.DeserializeObject<NCDCJson>(json);
@@ -145,21 +145,21 @@ namespace HMSNCDC
                         {
                             url = url + "&offset=" + (j) * 1000;
                             json = DownloadData(out errorMsg, url);
-                            if (errorMsg.Contains("Error")) { return null; }
+                            if (errorMsg.Contains("ERROR")) { return null; }
                             NCDCJson tempResults = JsonConvert.DeserializeObject<NCDCJson>(json);
                             results.results.AddRange(tempResults.results);                              //Adds the additional calls to the results.results variable
                         }
                     }
 
                     Dictionary<string, double> sumValues = SumDailyValues(out errorMsg, results);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     AddValuesToTS(out errorMsg, sumValues, tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
                     AddValuesToTS(out errorMsg, new Dictionary<string, double>(), tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
             //Need to set metadata
@@ -192,7 +192,7 @@ namespace HMSNCDC
             }
             catch
             {
-                errorMsg = "Error: Unable to load URL details from configuration file.";
+                errorMsg = "ERROR: Unable to load URL details from configuration file.";
                 return null;
             }
             return url;
@@ -233,7 +233,7 @@ namespace HMSNCDC
             }
             catch
             {
-                errorMsg = "Error: Unable to download ncdc station data.";
+                errorMsg = "ERROR: Unable to download ncdc station data.";
                 return null;
             }
             wc.Dispose();
@@ -295,14 +295,14 @@ namespace HMSNCDC
                 if (iDate.Date == newDate.Date)
                 {
                     sum += NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
                     dict.Add(newDate.ToString("yyyy-MM-dd"), sum);
                     newDate = iDate;
                     sum = NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
-                    if (errorMsg.Contains("Error")) { return null; }
+                    if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
             return dict;
@@ -357,7 +357,7 @@ namespace HMSNCDC
             }
             catch
             {
-                errorMsg = "Error: Unable to load URL details from configuration file.";
+                errorMsg = "ERROR: Unable to load URL details from configuration file.";
                 return null;
             }
             url = url + stationID;
@@ -372,7 +372,7 @@ namespace HMSNCDC
             }
             catch
             {
-                errorMsg = "Error: Unable to download ncdc station details.";
+                errorMsg = "ERROR: Unable to download ncdc station details.";
                 return null;
             }
             wc.Dispose();

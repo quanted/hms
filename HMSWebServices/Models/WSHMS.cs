@@ -7,226 +7,149 @@ namespace HMSWebServices.Models
 {
     public class WSHMS
     {
-
-        public string GetHMSData(out string errorMsg, string dataset, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime, string layers)
+        /// <summary>
+        /// Gets the specified data, as 'dataset', using the parameters in the dictionary.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public HMSJSON.HMSJSON.HMSData GetHMSData(out string errorMsg, Dictionary<string, string> parameters)
         {
             errorMsg = "";
-            string data = "";
-            switch (dataset)
+            HMSUtils.Utils utils = new HMSUtils.Utils();
+
+            switch (parameters["dataset"])
             {
-                case "BaseFlow":
-                    HMSBaseFlow.BaseFlow bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = bFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Evapotranspiration":
-                    HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = evapo.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "LandSurfaceFlow":
-                    HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = lsFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Precipitation":
-                    HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = precip.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "SoilMoisture":
-                    int[] layersArray = ConvertLayersString(out errorMsg, layers);
-                    HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null, layersArray);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = sm.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Temperature":
-                    HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = temp.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "TotalFlow":
-                    HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = tFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                default:
-                    return data;
-            }
-        }
-
-        public string GetHMSData(out string errorMsg, string dataset, string startDate, string endDate, string dataSource, bool localTime, string shapefileName, string layers)
-        {
-            errorMsg = "";
-            string data = "";
-            switch (dataset)
-            {
-                case "BaseFlow":
-                    HMSBaseFlow.BaseFlow bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = bFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Evapotranspiration":
-                    HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = evapo.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "LandSurfaceFlow":
-                    HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = lsFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Precipitation":
-                    HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = precip.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "SoilMoisture":
-                    int[] layersArray = ConvertLayersString(out errorMsg, layers);
-                    HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName, layersArray);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = sm.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "TotalFlow":
-                    HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = tFlow.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                case "Temperature":
-                    HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    data = temp.GetDataSetsString(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return null; }
-                    return data;
-                default:
-                    return data;
-            }
-        }
-
-        public HMSJSON.HMSJSON.HMSData GetHMSDataObject(out string errorMsg, string dataset, string latitude, string longitude, string startDate, string endDate, string dataSource, bool localTime, string layers)
-        {
-            errorMsg = "";
-            switch (dataset) {
-                case "BaseFlow":
                 case "baseflow":
-                    HMSBaseFlow.BaseFlow bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    HMSBaseFlow.BaseFlow bFlow;
+                    if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+                    {
+                        bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        bFlow.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
                     bFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return bFlow.jsonData;
-                case "Evapotranspiration":
                 case "evapotranspiration":
-                    HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    HMSEvapotranspiration.Evapotranspiration evapo;
+                    if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+                    {
+                        evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        evapo.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
                     evapo.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return evapo.jsonData;
-                case "LandSurfaceFlow":
                 case "landsurfaceflow":
                 case "surfacerunoff":
-                    HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    lsFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return lsFlow.jsonData;
-                case "Precipitation":
-                case "precipitation":
-                    HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    HMSLandSurfaceFlow.LandSurfaceFlow sFlow;
+                    if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
+                    {
+                        sFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        sFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        sFlow.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
+                    sFlow.GetDataSetsObject(out errorMsg);
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
+                    return sFlow.jsonData;
+                case "precipitaiton":
+                    HMSPrecipitation.Precipitation precip;
+                    if (parameters.ContainsKey("latitude"))
+                    {
+                        precip = new HMSPrecipitation.Precipitation(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        precip = new HMSPrecipitation.Precipitation(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        precip.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
                     precip.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return precip.jsonData;
-                case "SoilMoisture":
                 case "soilmoisture":
-                    int[] layersArray = ConvertLayersString(out errorMsg, layers);
-                    HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null, layersArray);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    sm.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return sm.jsonData;
-                case "Temperature":
+                    HMSSoilMoisture.SoilMoisture soilM;
+                    int[] layers = ConvertLayersString(out errorMsg, parameters["layers"]);
+                    if (parameters.ContainsKey("latitude"))
+                    {
+                        soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null, layers);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        soilM = new HMSSoilMoisture.SoilMoisture(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]), layers);
+                        soilM.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
+                    soilM.GetDataSetsObject(out errorMsg);
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
+                    return soilM.jsonData;
                 case "temperature":
-                    HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    HMSTemperature.Temperature temp;
+                    if (parameters.ContainsKey("latitude"))
+                    {
+                        temp = new HMSTemperature.Temperature(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        temp = new HMSTemperature.Temperature(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        temp.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
                     temp.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return temp.jsonData;
-                case "TotalFlow":
                 case "totalflow":
-                    HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, latitude, longitude, startDate, endDate, dataSource, localTime, null);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    HMSTotalFlow.TotalFlow tFlow;
+                    if (parameters.ContainsKey("latitude"))
+                    {
+                        tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, parameters["latitude"], parameters["longitude"], parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localtime"]), null);
+                    }
+                    else if (parameters.ContainsKey("geojson"))
+                    {
+                        tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, parameters["startdate"], parameters["enddate"], parameters["source"], Convert.ToBoolean(parameters["localTime"]));
+                        tFlow.gdal.geoJSON = parameters["geojson"];
+                    }
+                    else
+                    {
+                        return utils.ReturnError("ERROR: No valid geospatial information found in parameters.");
+                    }
                     tFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return tFlow.jsonData;
                 default:
-                    return new HMSJSON.HMSJSON.HMSData();
-
-            }
-        }
-
-        public HMSJSON.HMSJSON.HMSData GetHMSDataObject(out string errorMsg, string dataset, string startDate, string endDate, string dataSource, bool localTime, string shapefileName, string layers)
-        {
-            errorMsg = "";
-            switch (dataset)
-            {
-                case "BaseFlow":
-                    HMSBaseFlow.BaseFlow bFlow = new HMSBaseFlow.BaseFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    bFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return bFlow.jsonData;
-                case "Evapotranspiration":
-                    HMSEvapotranspiration.Evapotranspiration evapo = new HMSEvapotranspiration.Evapotranspiration(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    evapo.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return evapo.jsonData;
-                case "LandSurfaceFlow":
-                    HMSLandSurfaceFlow.LandSurfaceFlow lsFlow = new HMSLandSurfaceFlow.LandSurfaceFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    lsFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return lsFlow.jsonData;
-                case "Precipitation":
-                    HMSPrecipitation.Precipitation precip = new HMSPrecipitation.Precipitation(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    precip.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return precip.jsonData;
-                case "SoilMoisture":
-                    int[] layersArray = ConvertLayersString(out errorMsg, layers);
-                    HMSSoilMoisture.SoilMoisture sm = new HMSSoilMoisture.SoilMoisture(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName, layersArray);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    sm.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return sm.jsonData;
-                case "TotalFlow":
-                    HMSTotalFlow.TotalFlow tFlow = new HMSTotalFlow.TotalFlow(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    tFlow.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return tFlow.jsonData;
-                case "Temperature":
-                    HMSTemperature.Temperature temp = new HMSTemperature.Temperature(out errorMsg, startDate, endDate, dataSource, localTime, shapefileName);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    temp.GetDataSetsObject(out errorMsg);
-                    if (errorMsg.Contains("Error")) { return new HMSJSON.HMSJSON.HMSData(); }
-                    return temp.jsonData;
-                default:
-                    return new HMSJSON.HMSJSON.HMSData();
+                    return utils.ReturnError("ERROR: dataset provided not found.");
             }
         }
 
@@ -246,7 +169,7 @@ namespace HMSWebServices.Models
             }
             catch
             {
-                errorMsg = "Error: Failed to convert layers argument.";
+                errorMsg = "ERROR: Failed to convert layers argument.";
                 return null;
             }
             return layerArray;

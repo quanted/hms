@@ -157,10 +157,10 @@ namespace WindowsFormsApplication1
 
         private void bttnCompareData_Click(object sender, EventArgs e)
         {
-            lblErrorMsg.Text = "Retrieving data...";
+            lblerrorMsg.Text = "Retrieving data...";
             System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
             dataGVCompare.DataSource = null;
-            lblErrorMsg.Visible = true;
+            lblerrorMsg.Visible = true;
             bttnSave.Visible = false;
             string errorMsg = "";
             string latitude = lblLatValue.Text;
@@ -176,42 +176,42 @@ namespace WindowsFormsApplication1
             dataGVCompare.Visible = true;
 
             HMSPrecipitation.Precipitation nldas = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, "NLDAS", true, "");
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             temp = nldas.GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             ts.Add(temp[0]);
             jsonDataList.Add(nldas.jsonData);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
 
             HMSPrecipitation.Precipitation gldas = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, "GLDAS", true, "", ts[0].gmtOffset.ToString(), ts[0].tzName);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             temp = gldas.GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             ts.Add(temp[0]);
             jsonDataList.Add(gldas.jsonData);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
 
             HMSPrecipitation.Precipitation daymet = new HMSPrecipitation.Precipitation(out errorMsg, latitude, longitude, startDate, endDate, "Daymet", local, "");
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             temp = daymet.GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             ts.Add(temp[0]);
             jsonDataList.Add(daymet.jsonData);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
 
             HMSPrecipitation.Precipitation ncdc = new HMSPrecipitation.Precipitation(out errorMsg, startDate, endDate, "NCDC", lblLocationIDValue.Text);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             temp = ncdc.GetDataSets(out errorMsg);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
             ts.Add(temp[0]);
             jsonDataList.Add(ncdc.jsonData);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
 
             PopulateTable(out errorMsg, dt);
-            if (errorMsg.Contains("Error")) { lblErrorMsg.Text = errorMsg; return; }
+            if (errorMsg.Contains("ERROR")) { lblerrorMsg.Text = errorMsg; return; }
 
             dataGVCompare.DataSource = dt.DefaultView;
-            lblErrorMsg.Text = "Data successfully retrieved.";
+            lblerrorMsg.Text = "Data successfully retrieved.";
             bttnSave.Visible = true;
             System.Windows.Forms.Cursor.Current = Cursors.Default;
         }
@@ -290,7 +290,7 @@ namespace WindowsFormsApplication1
             System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
             this.dataFrequency = df.dataFrequency;
             HMSJSON.HMSJSON json = new HMSJSON.HMSJSON();
-            lblErrorMsg.Text = "Saving " + jsonDataList[0].dataset + " data.";         
+            lblerrorMsg.Text = "Saving " + jsonDataList[0].dataset + " data.";         
             try
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -315,12 +315,12 @@ namespace WindowsFormsApplication1
                         fs.Write(Encoding.ASCII.GetBytes(data), 0, Encoding.ASCII.GetByteCount(data));
                         fs.Close();
                     }
-                    lblErrorMsg.Text = "Successfully saved " + jsonDataList[0].dataset + " data.";
+                    lblerrorMsg.Text = "Successfully saved " + jsonDataList[0].dataset + " data.";
                 }
             }
             catch
             {
-                lblErrorMsg.Text = "Error: " + jsonDataList[0].dataset + " data failed to save.";
+                lblerrorMsg.Text = "ERROR: " + jsonDataList[0].dataset + " data failed to save.";
             }
             System.Windows.Forms.Cursor.Current = Cursors.Default;
         }
@@ -329,7 +329,7 @@ namespace WindowsFormsApplication1
         {
             try
             {
-                lblErrorMsg.Visible = false;
+                lblerrorMsg.Visible = false;
                 DateTime endDate = Convert.ToDateTime(lblDaymetEndDateValue.Text);           //Earliest end date value
                 DateTime startDate = Convert.ToDateTime(lblGLDASstartDateValue.Text);        //Latest end date value
                 List<Station> stationsInState = stations.FindAll(x => x.id.Contains(txtBxStationID.Text.Trim()));
@@ -345,7 +345,7 @@ namespace WindowsFormsApplication1
                 bttnSave.Visible = false;
                 SetDates();
             }
-            catch { lblErrorMsg.Text = "Station not found."; lblErrorMsg.Visible = true; }
+            catch { lblerrorMsg.Text = "Station not found."; lblerrorMsg.Visible = true; }
         }
     }
 
