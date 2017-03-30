@@ -2,7 +2,7 @@
 
 
 
-###HMS Development Setup
+### HMS Development Setup
 
 HMS is being developed in C# using Visual Studio Community 2015 (Visual Studio 14.0), which is available for free: [visual studio download](https://www.visualstudio.com/vs/community/)
 
