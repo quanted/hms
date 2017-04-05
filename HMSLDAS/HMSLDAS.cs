@@ -151,26 +151,31 @@ namespace HMSLDAS
         {
             errorMsg = "";
             //string prepInfo = System.IO.Directory.GetCurrentDirectory() + @"\url_info.txt";  // URL configuration info.
-            string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
+            //string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
             StringBuilder builder = new StringBuilder();
             //string urlStr = "";
-            string[] lineData;
+            //string[] lineData;
             try
             {
-                foreach (string line in File.ReadLines(prepInfo))
-                {
-                    lineData = line.Split(' ');
-                    if (lineData[0].Equals(source + "_URL", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //urlStr = lineData[1];
-                        builder.Append(lineData[1]);
-                        break;
-                    }
-                }
+				// Reading value from Application variables
+				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+				builder.Append(urls[source + "_URL"]);
+
+				// Reading value directly from the file (Read error when performed on the server)
+                //foreach (string line in File.ReadLines(prepInfo))
+                //{
+                //    lineData = line.Split(' ');
+                //    if (lineData[0].Equals(source + "_URL", StringComparison.OrdinalIgnoreCase))
+                //    {
+                //        //urlStr = lineData[1];
+                //        builder.Append(lineData[1]);
+                //        break;
+                //    }
+                //}
             }
-            catch
+			catch (Exception e)
             {
-                errorMsg = "ERROR: Unable to load URL details from configuration file.";
+				errorMsg = "ERROR: Unable to load URL details from configuration file. " + e.Message;
                 return null;
             }
             if (source.Contains("NLDAS"))

@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Web;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -176,23 +177,26 @@ namespace HMSNCDC
         {
             errorMsg = "";
             string url = "";
-            string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
+            //string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
             string[] lineData;
             try
             {
-                foreach (string line in File.ReadLines(prepInfo))
-                {
-                    lineData = line.Split(' ');
-                    if (lineData[0].Equals("NCDC_URL", StringComparison.OrdinalIgnoreCase))
-                    {
-                        url = lineData[1];
-                        break;
-                    }
-                }
+				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+				url = urls["NCDC_URL"];
+
+                //foreach (string line in File.ReadLines(prepInfo))
+                //{
+                //    lineData = line.Split(' ');
+                //    if (lineData[0].Equals("NCDC_URL", StringComparison.OrdinalIgnoreCase))
+                //    {
+                //        url = lineData[1];
+                //        break;
+                //    }
+                //}
             }
-            catch
+			catch (Exception e)
             {
-                errorMsg = "ERROR: Unable to load URL details from configuration file.";
+                errorMsg = "ERROR: Unable to load URL details from configuration file. " + e.Message;
                 return null;
             }
             return url;
