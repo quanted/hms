@@ -60,24 +60,12 @@ namespace HMSDaymet
         private string GetDaymetURL(out string errorMsg, string datasource, string dataSet)
         {
             errorMsg = "";
-            //string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
             string urlStr = "";
-            string[] lineData;
             try
             {
-
 				// Reading value from Application variables
 				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
 				urlStr = urls[datasource + "_" + dataSet + "_URL"];
-                //foreach( string line in File.ReadLines(prepInfo))
-                //{
-                //    lineData = line.Split(' ');
-                //    if (lineData[0].Equals(datasource +"_" + dataSet + "_URL", StringComparison.OrdinalIgnoreCase))
-                //    {
-                //        urlStr = lineData[1];
-                //        break;
-                //    }
-                //}
             }
             catch
             {

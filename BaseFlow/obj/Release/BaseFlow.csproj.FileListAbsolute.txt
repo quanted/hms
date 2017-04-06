@@ -39,3 +39,44 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\BaseFlow\obj\Release\BaseFlow.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\BaseFlow\obj\Release\BaseFlow.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\BaseFlow\obj\Release\BaseFlow.pdb
+C:\hms\BaseFlow\bin\Release\HMSGDAL.cs
+C:\hms\BaseFlow\bin\Release\HMSJSON.cs
+C:\hms\BaseFlow\bin\Release\App.config
+C:\hms\BaseFlow\bin\Release\HMSLDAS.cs
+C:\hms\BaseFlow\bin\Release\BaseFlow.dll.config
+C:\hms\BaseFlow\bin\Release\BaseFlow.dll
+C:\hms\BaseFlow\bin\Release\BaseFlow.pdb
+C:\hms\BaseFlow\bin\Release\HMSGDAL.dll
+C:\hms\BaseFlow\bin\Release\HMSJSON.dll
+C:\hms\BaseFlow\bin\Release\HMSLDAS.dll
+C:\hms\BaseFlow\bin\Release\HMSTimeSeries.dll
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.dll
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.GeoTools.dll
+C:\hms\BaseFlow\bin\Release\GeoAPI.dll
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.GeoJSON.dll
+C:\hms\BaseFlow\bin\Release\gdal_csharp.dll
+C:\hms\BaseFlow\bin\Release\ProjNet.dll
+C:\hms\BaseFlow\bin\Release\Newtonsoft.Json.dll
+C:\hms\BaseFlow\bin\Release\PowerCollections.dll
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.dll
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.ShapeFile.dll
+C:\hms\BaseFlow\bin\Release\ogr_csharp.dll
+C:\hms\BaseFlow\bin\Release\osr_csharp.dll
+C:\hms\BaseFlow\bin\Release\HMSGDAL.pdb
+C:\hms\BaseFlow\bin\Release\HMSGDAL.dll.config
+C:\hms\BaseFlow\bin\Release\HMSJSON.pdb
+C:\hms\BaseFlow\bin\Release\HMSJSON.dll.config
+C:\hms\BaseFlow\bin\Release\HMSLDAS.pdb
+C:\hms\BaseFlow\bin\Release\HMSLDAS.dll.config
+C:\hms\BaseFlow\bin\Release\HMSTimeSeries.pdb
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.xml
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.GeoTools.xml
+C:\hms\BaseFlow\bin\Release\GeoAPI.xml
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.GeoJSON.xml
+C:\hms\BaseFlow\bin\Release\Newtonsoft.Json.xml
+C:\hms\BaseFlow\bin\Release\PowerCollections.xml
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.xml
+C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\BaseFlow\obj\Release\BaseFlow.csprojResolveAssemblyReference.cache
+C:\hms\BaseFlow\obj\Release\BaseFlow.dll
+C:\hms\BaseFlow\obj\Release\BaseFlow.pdb

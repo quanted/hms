@@ -39,3 +39,44 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\SoilMoisture\obj\Release\SoilMoisture.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\SoilMoisture\obj\Release\SoilMoisture.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\SoilMoisture\obj\Release\SoilMoisture.pdb
+C:\hms\SoilMoisture\bin\Release\HMSGDAL.cs
+C:\hms\SoilMoisture\bin\Release\HMSJSON.cs
+C:\hms\SoilMoisture\bin\Release\App.config
+C:\hms\SoilMoisture\bin\Release\HMSLDAS.cs
+C:\hms\SoilMoisture\bin\Release\SoilMoisture.dll.config
+C:\hms\SoilMoisture\bin\Release\SoilMoisture.dll
+C:\hms\SoilMoisture\bin\Release\SoilMoisture.pdb
+C:\hms\SoilMoisture\bin\Release\HMSGDAL.dll
+C:\hms\SoilMoisture\bin\Release\HMSJSON.dll
+C:\hms\SoilMoisture\bin\Release\HMSLDAS.dll
+C:\hms\SoilMoisture\bin\Release\HMSTimeSeries.dll
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.dll
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.GeoTools.dll
+C:\hms\SoilMoisture\bin\Release\GeoAPI.dll
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.GeoJSON.dll
+C:\hms\SoilMoisture\bin\Release\gdal_csharp.dll
+C:\hms\SoilMoisture\bin\Release\ProjNet.dll
+C:\hms\SoilMoisture\bin\Release\Newtonsoft.Json.dll
+C:\hms\SoilMoisture\bin\Release\PowerCollections.dll
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.dll
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.ShapeFile.dll
+C:\hms\SoilMoisture\bin\Release\ogr_csharp.dll
+C:\hms\SoilMoisture\bin\Release\osr_csharp.dll
+C:\hms\SoilMoisture\bin\Release\HMSGDAL.pdb
+C:\hms\SoilMoisture\bin\Release\HMSGDAL.dll.config
+C:\hms\SoilMoisture\bin\Release\HMSJSON.pdb
+C:\hms\SoilMoisture\bin\Release\HMSJSON.dll.config
+C:\hms\SoilMoisture\bin\Release\HMSLDAS.pdb
+C:\hms\SoilMoisture\bin\Release\HMSLDAS.dll.config
+C:\hms\SoilMoisture\bin\Release\HMSTimeSeries.pdb
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.xml
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.GeoTools.xml
+C:\hms\SoilMoisture\bin\Release\GeoAPI.xml
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.GeoJSON.xml
+C:\hms\SoilMoisture\bin\Release\Newtonsoft.Json.xml
+C:\hms\SoilMoisture\bin\Release\PowerCollections.xml
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.xml
+C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\SoilMoisture\obj\Release\SoilMoisture.csprojResolveAssemblyReference.cache
+C:\hms\SoilMoisture\obj\Release\SoilMoisture.dll
+C:\hms\SoilMoisture\obj\Release\SoilMoisture.pdb

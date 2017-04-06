@@ -75,7 +75,7 @@ namespace HMSWebServices.Models
                     sFlow.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return sFlow.jsonData;
-                case "precipitaiton":
+                case "precipitation":
                     HMSPrecipitation.Precipitation precip;
                     if (parameters.ContainsKey("latitude"))
                     {

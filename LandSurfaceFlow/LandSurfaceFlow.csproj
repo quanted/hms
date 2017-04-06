@@ -76,6 +76,10 @@
       <Project>{de6ac2e8-6567-4185-b81b-d549b19107ca}</Project>
       <Name>HMSTimeSeries</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HMSUtils\HMSUtils.csproj">
+      <Project>{283d257e-8bc2-4bb7-877e-8d8273876095}</Project>
+      <Name>HMSUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

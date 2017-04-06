@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -494,6 +495,36 @@ namespace HMSUtils
             };
             reply.metadata = meta;
             return reply;
+        }
+
+        /// <summary>
+        ///  Uses google maps api to get timezone details from lat/lon values.
+        ///  --May replace current timezone return methods--
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
+        public Dictionary<string, string> GetTZInfo(out string errorMsg, double latitude, double longitude)
+        {
+            errorMsg = "";
+            string key = "AIzaSyDUdVJFt_SUwqfNTfziXXUFK7gkHxTnRIE";     // Personal google api key, to be replaced by project key
+            string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
+            string location = "location=" + latitude.ToString() + "," + longitude.ToString();
+            string timeStamp = "timestamp=1331161200";
+            string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
+            try
+            {
+                WebClient wc = new WebClient();
+                byte[] buffer = wc.DownloadData(completeUrl);
+                string resultString = Encoding.UTF8.GetString(buffer);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+            }
+            catch (Exception e)
+            {
+                errorMsg = e.Message;
+                return new Dictionary<string, string>();
+            }
         }
     }
 }

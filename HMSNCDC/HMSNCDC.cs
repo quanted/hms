@@ -177,22 +177,10 @@ namespace HMSNCDC
         {
             errorMsg = "";
             string url = "";
-            //string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
-            string[] lineData;
             try
             {
 				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
 				url = urls["NCDC_URL"];
-
-                //foreach (string line in File.ReadLines(prepInfo))
-                //{
-                //    lineData = line.Split(' ');
-                //    if (lineData[0].Equals("NCDC_URL", StringComparison.OrdinalIgnoreCase))
-                //    {
-                //        url = lineData[1];
-                //        break;
-                //    }
-                //}
             }
 			catch (Exception e)
             {

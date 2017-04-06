@@ -192,11 +192,19 @@ namespace HMSEvapotranspiration
                 gdal.CellAreaInShapefileByGrid(out errorMsg, center, this.cellWidth);
             }
 
+            // Updated to use call to google instead of using shapefile search. Commented code obsolete.
             if (this.localTime == true && !String.IsNullOrWhiteSpace(this.tzName))
             {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);     //Gets the GMT offset
-                if (errorMsg.Contains("ERROR")) { return null; }
-                this.tzName = ts[0].tzName;                                                                 //Gets the Timezone name
+                HMSUtils.Utils utils = new HMSUtils.Utils();
+                Dictionary<string, string> tzDetails = utils.GetTZInfo(out errorMsg, this.latitude, this.longitude);
+                if (tzDetails.ContainsKey("rawOffset") && tzDetails.ContainsKey("timeZoneId"))
+                {
+                    this.gmtOffset = Convert.ToDouble(tzDetails["rawOffset"]) / 3600;
+                    this.tzName = tzDetails["timeZoneId"];
+                }
+                //this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
+                //if (errorMsg.Contains("ERROR")) { return null; }
+                //this.tzName = ts[0].tzName;                                                                     //Gets the Timezone name
                 if (errorMsg.Contains("ERROR")) { return null; }
                 this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
                 this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);

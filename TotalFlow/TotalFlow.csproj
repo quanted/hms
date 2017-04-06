@@ -64,6 +64,10 @@
       <Project>{de6ac2e8-6567-4185-b81b-d549b19107ca}</Project>
       <Name>HMSTimeSeries</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HMSUtils\HMSUtils.csproj">
+      <Project>{283d257e-8bc2-4bb7-877e-8d8273876095}</Project>
+      <Name>HMSUtils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LandSurfaceFlow\LandSurfaceFlow.csproj">
       <Project>{7c603669-a99d-4e00-b5f8-a97ce45c8254}</Project>
       <Name>LandSurfaceFlow</Name>
