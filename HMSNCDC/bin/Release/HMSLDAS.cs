@@ -84,7 +84,7 @@ namespace HMSLDAS
         {
             errorMsg = "";
 
-            double offset = 0.0;
+            //double offset = 0.0;
             DateTime newStartDate = new DateTime();
             DateTime newEndDate = new DateTime();
 
@@ -92,14 +92,14 @@ namespace HMSLDAS
             if (local == true)
             {
                 HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
-                if (gmtOffset == 0.0)
-                {
-                    offset = gdal.GetGMTOffset(out errorMsg, latitude, longitude, ts);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                gmtOffset = offset;
-                newStartDate = gdal.AdjustDateByOffset(out errorMsg, offset, startDate, true);
-                newEndDate = gdal.AdjustDateByOffset(out errorMsg, offset, endDate, false);
+                //if (gmtOffset == 0.0)
+                //{
+                //    offset = gdal.GetGMTOffset(out errorMsg, latitude, longitude, ts);
+                //    if (errorMsg.Contains("ERROR")) { return null; }
+                //}
+                //gmtOffset = offset;
+                newStartDate = gdal.AdjustDateByOffset(out errorMsg, gmtOffset, startDate, true);
+                newEndDate = gdal.AdjustDateByOffset(out errorMsg, gmtOffset, endDate, false);
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
             else
@@ -155,7 +155,8 @@ namespace HMSLDAS
             {
 				// Reading value from Application variables
 				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-				builder.Append(urls[source + "_URL"]);
+                Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+				builder.Append(caselessUrls[source + "_URL"]);
             }
 			catch (Exception e)
             {

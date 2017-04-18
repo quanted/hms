@@ -92,3 +92,6 @@ C:\hms\Precipitation\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\Precipitation\obj\Release\Precipitation.csprojResolveAssemblyReference.cache
 C:\hms\Precipitation\obj\Release\Precipitation.dll
 C:\hms\Precipitation\obj\Release\Precipitation.pdb
+C:\hms\Precipitation\bin\Release\HMSUtils.dll
+C:\hms\Precipitation\bin\Release\HMSUtils.pdb
+C:\hms\Precipitation\bin\Release\HMSUtils.dll.config

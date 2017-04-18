@@ -27,3 +27,44 @@
 //aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSBASINS/obj/Debug/HMSNCDC.csprojResolveAssemblyReference.cache
 //aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSBASINS/obj/Debug/HMSBASINS.dll
 //aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSBASINS/obj/Debug/HMSBASINS.pdb
+C:\hms\HMSNCDC\bin\Debug\HMSGDAL.cs
+C:\hms\HMSNCDC\bin\Debug\HMSJSON.cs
+C:\hms\HMSNCDC\bin\Debug\App.config
+C:\hms\HMSNCDC\bin\Debug\HMSLDAS.cs
+C:\hms\HMSNCDC\bin\Debug\HMSBASINS.dll.config
+C:\hms\HMSNCDC\bin\Debug\HMSBASINS.dll
+C:\hms\HMSNCDC\bin\Debug\HMSBASINS.pdb
+C:\hms\HMSNCDC\bin\Debug\HMSJSON.dll
+C:\hms\HMSNCDC\bin\Debug\HMSLDAS.dll
+C:\hms\HMSNCDC\bin\Debug\HMSTimeSeries.dll
+C:\hms\HMSNCDC\bin\Debug\Newtonsoft.Json.dll
+C:\hms\HMSNCDC\bin\Debug\HMSGDAL.dll
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.dll
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.GeoTools.dll
+C:\hms\HMSNCDC\bin\Debug\GeoAPI.dll
+C:\hms\HMSNCDC\bin\Debug\ProjNet.dll
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.GeoJSON.dll
+C:\hms\HMSNCDC\bin\Debug\gdal_csharp.dll
+C:\hms\HMSNCDC\bin\Debug\PowerCollections.dll
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.dll
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.ShapeFile.dll
+C:\hms\HMSNCDC\bin\Debug\ogr_csharp.dll
+C:\hms\HMSNCDC\bin\Debug\osr_csharp.dll
+C:\hms\HMSNCDC\bin\Debug\HMSJSON.pdb
+C:\hms\HMSNCDC\bin\Debug\HMSJSON.dll.config
+C:\hms\HMSNCDC\bin\Debug\HMSLDAS.pdb
+C:\hms\HMSNCDC\bin\Debug\HMSLDAS.dll.config
+C:\hms\HMSNCDC\bin\Debug\HMSTimeSeries.pdb
+C:\hms\HMSNCDC\bin\Debug\Newtonsoft.Json.xml
+C:\hms\HMSNCDC\bin\Debug\HMSGDAL.pdb
+C:\hms\HMSNCDC\bin\Debug\HMSGDAL.dll.config
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.xml
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.GeoTools.xml
+C:\hms\HMSNCDC\bin\Debug\GeoAPI.xml
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.GeoJSON.xml
+C:\hms\HMSNCDC\bin\Debug\PowerCollections.xml
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.xml
+C:\hms\HMSNCDC\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\HMSNCDC\obj\Debug\HMSNCDC.csprojResolveAssemblyReference.cache
+C:\hms\HMSNCDC\obj\Debug\HMSBASINS.dll
+C:\hms\HMSNCDC\obj\Debug\HMSBASINS.pdb

@@ -80,3 +80,9 @@ C:\hms\SoilMoisture\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\SoilMoisture\obj\Release\SoilMoisture.csprojResolveAssemblyReference.cache
 C:\hms\SoilMoisture\obj\Release\SoilMoisture.dll
 C:\hms\SoilMoisture\obj\Release\SoilMoisture.pdb
+C:\hms\SoilMoisture\bin\Release\HMSUtils.dll
+C:\hms\SoilMoisture\bin\Release\HMSBASINS.dll
+C:\hms\SoilMoisture\bin\Release\HMSUtils.pdb
+C:\hms\SoilMoisture\bin\Release\HMSUtils.dll.config
+C:\hms\SoilMoisture\bin\Release\HMSBASINS.pdb
+C:\hms\SoilMoisture\bin\Release\HMSBASINS.dll.config

@@ -106,8 +106,7 @@ namespace HMSJSON
             output.source = source;
             if (source.Contains("NLDAS") || source.Contains("GLDAS"))
             {
-                //output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata);
-                output.metadata = SetHMSDataMetaData2(out errorMsg, newMetaData, metadata, source, 1);
+                output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata, source, 1);
                 output.data = SetHMSDataTS(out errorMsg, timeseries, source, dataset, localtime, gmtOffset, coverage);
             }
             else if (source.Contains("Daymet"))
@@ -177,7 +176,7 @@ namespace HMSJSON
         /// <param name="newMetaData"></param>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetHMSDataMetaData2(out string errorMsg, string newMetaData, string metadata, string source, int index)
+        private Dictionary<string, string> SetHMSDataMetaData(out string errorMsg, string newMetaData, string metadata, string source, int index)
         {
             errorMsg = "";
             Dictionary<string, string> metaDict = new Dictionary<string, string>();
@@ -377,7 +376,7 @@ namespace HMSJSON
             HMSData json = new HMSData();
             if (source.Contains("GLDAS") || source.Contains("NLDAS"))
             {
-                json.metadata = SetHMSDataMetaData2(out errorMsg, ts[0].newMetaData, ts[0].metaData, source, 1);
+                json.metadata = SetHMSDataMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData, source, 1);
 
                 if (ts.Count > 1)
                 {
@@ -398,7 +397,7 @@ namespace HMSJSON
                 for (int i = 1; i < ts.Count; i++)
                 {
                     string tempSource = source + "_" + (i+1).ToString();
-                    Dictionary<string, string> tempMeta = SetHMSDataMetaData2(out errorMsg, ts[i].newMetaData, ts[i].metaData, source, i+1);
+                    Dictionary<string, string> tempMeta = SetHMSDataMetaData(out errorMsg, ts[i].newMetaData, ts[i].metaData, source, i+1);
                     json.metadata.Add(tempSource + "_timeseries_" + (i + 1), ts[i].metaLat + "," + ts[i].metaLon);
                     json.metadata.Add(tempSource + "_elevation[m]_" + (i + 1), ts[i].metaElev.ToString());
                     json.metadata.Add(tempSource + "_percentInCell_" + (i + 1), tempMeta[tempSource + "_percentInCell"]);

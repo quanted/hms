@@ -84,3 +84,4 @@ C:\hms\HMSUtils\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSUtils\obj\Release\HMSUtils.csprojResolveAssemblyReference.cache
 C:\hms\HMSUtils\obj\Release\HMSUtils.dll
 C:\hms\HMSUtils\obj\Release\HMSUtils.pdb
+C:\hms\HMSUtils\bin\Release\HMSUtils.dll.config

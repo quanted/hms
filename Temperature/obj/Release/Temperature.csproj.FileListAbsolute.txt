@@ -86,3 +86,9 @@ C:\hms\Temperature\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\Temperature\obj\Release\Temperature.csprojResolveAssemblyReference.cache
 C:\hms\Temperature\obj\Release\Temperature.dll
 C:\hms\Temperature\obj\Release\Temperature.pdb
+C:\hms\Temperature\bin\Release\HMSUtils.dll
+C:\hms\Temperature\bin\Release\HMSBASINS.dll
+C:\hms\Temperature\bin\Release\HMSUtils.pdb
+C:\hms\Temperature\bin\Release\HMSUtils.dll.config
+C:\hms\Temperature\bin\Release\HMSBASINS.pdb
+C:\hms\Temperature\bin\Release\HMSBASINS.dll.config

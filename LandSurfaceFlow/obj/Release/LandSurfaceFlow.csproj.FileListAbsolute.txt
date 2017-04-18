@@ -41,10 +41,6 @@ C:\hms\LandSurfaceFlow\bin\Release\HMSGDAL.dll
 C:\hms\LandSurfaceFlow\bin\Release\HMSJSON.dll
 C:\hms\LandSurfaceFlow\bin\Release\HMSLDAS.dll
 C:\hms\LandSurfaceFlow\bin\Release\HMSTimeSeries.dll
-C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.dll
-C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.GeoTools.dll
-C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.MsSqlSpatial.dll
-C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.PostGis.dll
 C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.GeoJSON.dll
 C:\hms\LandSurfaceFlow\bin\Release\gdal_csharp.dll
 C:\hms\LandSurfaceFlow\bin\Release\ProjNet.dll
@@ -74,3 +70,13 @@ C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\LandSurfaceFlow\obj\Release\LandSurfaceFlow.csprojResolveAssemblyReference.cache
 C:\hms\LandSurfaceFlow\obj\Release\LandSurfaceFlow.dll
 C:\hms\LandSurfaceFlow\obj\Release\LandSurfaceFlow.pdb
+C:\hms\LandSurfaceFlow\bin\Release\HMSUtils.dll
+C:\hms\LandSurfaceFlow\bin\Release\HMSBASINS.dll
+C:\hms\LandSurfaceFlow\bin\Release\HMSUtils.pdb
+C:\hms\LandSurfaceFlow\bin\Release\HMSUtils.dll.config
+C:\hms\LandSurfaceFlow\bin\Release\HMSBASINS.pdb
+C:\hms\LandSurfaceFlow\bin\Release\HMSBASINS.dll.config
+C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.dll
+C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.GeoTools.dll
+C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.MsSqlSpatial.dll
+C:\hms\LandSurfaceFlow\bin\Release\NetTopologySuite.IO.PostGis.dll

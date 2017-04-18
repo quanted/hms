@@ -39,3 +39,44 @@
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSDaymet/obj/Debug/HMSDaymet.csprojResolveAssemblyReference.cache
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSDaymet/obj/Debug/HMSDaymet.dll
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSDaymet/obj/Debug/HMSDaymet.pdb
+C:\hms\HMSDaymet\bin\Debug\HMSGDAL.cs
+C:\hms\HMSDaymet\bin\Debug\HMSJSON.cs
+C:\hms\HMSDaymet\bin\Debug\App.config
+C:\hms\HMSDaymet\bin\Debug\HMSLDAS.cs
+C:\hms\HMSDaymet\bin\Debug\HMSDaymet.dll.config
+C:\hms\HMSDaymet\bin\Debug\HMSDaymet.dll
+C:\hms\HMSDaymet\bin\Debug\HMSDaymet.pdb
+C:\hms\HMSDaymet\bin\Debug\HMSGDAL.dll
+C:\hms\HMSDaymet\bin\Debug\HMSLDAS.dll
+C:\hms\HMSDaymet\bin\Debug\HMSTimeSeries.dll
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.dll
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.GeoTools.dll
+C:\hms\HMSDaymet\bin\Debug\GeoAPI.dll
+C:\hms\HMSDaymet\bin\Debug\ProjNet.dll
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.GeoJSON.dll
+C:\hms\HMSDaymet\bin\Debug\gdal_csharp.dll
+C:\hms\HMSDaymet\bin\Debug\HMSJSON.dll
+C:\hms\HMSDaymet\bin\Debug\PowerCollections.dll
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.dll
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.ShapeFile.dll
+C:\hms\HMSDaymet\bin\Debug\Newtonsoft.Json.dll
+C:\hms\HMSDaymet\bin\Debug\ogr_csharp.dll
+C:\hms\HMSDaymet\bin\Debug\osr_csharp.dll
+C:\hms\HMSDaymet\bin\Debug\HMSGDAL.pdb
+C:\hms\HMSDaymet\bin\Debug\HMSGDAL.dll.config
+C:\hms\HMSDaymet\bin\Debug\HMSLDAS.pdb
+C:\hms\HMSDaymet\bin\Debug\HMSLDAS.dll.config
+C:\hms\HMSDaymet\bin\Debug\HMSTimeSeries.pdb
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.xml
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.GeoTools.xml
+C:\hms\HMSDaymet\bin\Debug\GeoAPI.xml
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.GeoJSON.xml
+C:\hms\HMSDaymet\bin\Debug\HMSJSON.pdb
+C:\hms\HMSDaymet\bin\Debug\HMSJSON.dll.config
+C:\hms\HMSDaymet\bin\Debug\PowerCollections.xml
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.xml
+C:\hms\HMSDaymet\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\HMSDaymet\bin\Debug\Newtonsoft.Json.xml
+C:\hms\HMSDaymet\obj\Debug\HMSDaymet.csprojResolveAssemblyReference.cache
+C:\hms\HMSDaymet\obj\Debug\HMSDaymet.dll
+C:\hms\HMSDaymet\obj\Debug\HMSDaymet.pdb

@@ -1,0 +1,5 @@
+C:\hms\HMSTimeSeries\bin\Debug\HMSTimeSeries.dll
+C:\hms\HMSTimeSeries\bin\Debug\HMSTimeSeries.pdb
+C:\hms\HMSTimeSeries\obj\Debug\HMSTimeSeries.csprojResolveAssemblyReference.cache
+C:\hms\HMSTimeSeries\obj\Debug\HMSTimeSeries.dll
+C:\hms\HMSTimeSeries\obj\Debug\HMSTimeSeries.pdb

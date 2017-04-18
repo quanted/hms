@@ -80,3 +80,9 @@ C:\hms\Evapotranspiration\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\Evapotranspiration\obj\Release\Evapotranspiration.csprojResolveAssemblyReference.cache
 C:\hms\Evapotranspiration\obj\Release\Evapotranspiration.dll
 C:\hms\Evapotranspiration\obj\Release\Evapotranspiration.pdb
+C:\hms\Evapotranspiration\bin\Release\HMSUtils.dll
+C:\hms\Evapotranspiration\bin\Release\HMSBASINS.dll
+C:\hms\Evapotranspiration\bin\Release\HMSUtils.pdb
+C:\hms\Evapotranspiration\bin\Release\HMSUtils.dll.config
+C:\hms\Evapotranspiration\bin\Release\HMSBASINS.pdb
+C:\hms\Evapotranspiration\bin\Release\HMSBASINS.dll.config

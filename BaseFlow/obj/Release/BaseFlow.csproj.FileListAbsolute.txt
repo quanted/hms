@@ -80,3 +80,9 @@ C:\hms\BaseFlow\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\BaseFlow\obj\Release\BaseFlow.csprojResolveAssemblyReference.cache
 C:\hms\BaseFlow\obj\Release\BaseFlow.dll
 C:\hms\BaseFlow\obj\Release\BaseFlow.pdb
+C:\hms\BaseFlow\bin\Release\HMSUtils.dll
+C:\hms\BaseFlow\bin\Release\HMSBASINS.dll
+C:\hms\BaseFlow\bin\Release\HMSUtils.pdb
+C:\hms\BaseFlow\bin\Release\HMSUtils.dll.config
+C:\hms\BaseFlow\bin\Release\HMSBASINS.pdb
+C:\hms\BaseFlow\bin\Release\HMSBASINS.dll.config

@@ -36,3 +36,41 @@
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSLDAS/obj/Debug/HMSLDAS.csprojResolveAssemblyReference.cache
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSLDAS/obj/Debug/HMSLDAS.dll
 //Aa.ad.epa.gov/ord/ATH/Users/A-M/DSmith/Net MyDocuments/Visual Studio 2015/Projects/HMS/HMSLDAS/obj/Debug/HMSLDAS.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSGDAL.cs
+C:\hms\HMSLDAS\bin\Debug\HMSJSON.cs
+C:\hms\HMSLDAS\bin\Debug\App.config
+C:\hms\HMSLDAS\bin\Debug\HMSLDAS.cs
+C:\hms\HMSLDAS\bin\Debug\HMSLDAS.dll.config
+C:\hms\HMSLDAS\bin\Debug\HMSLDAS.dll
+C:\hms\HMSLDAS\bin\Debug\HMSLDAS.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSGDAL.dll
+C:\hms\HMSLDAS\bin\Debug\HMSJSON.dll
+C:\hms\HMSLDAS\bin\Debug\HMSTimeSeries.dll
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.dll
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.GeoTools.dll
+C:\hms\HMSLDAS\bin\Debug\GeoAPI.dll
+C:\hms\HMSLDAS\bin\Debug\ProjNet.dll
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.GeoJSON.dll
+C:\hms\HMSLDAS\bin\Debug\gdal_csharp.dll
+C:\hms\HMSLDAS\bin\Debug\Newtonsoft.Json.dll
+C:\hms\HMSLDAS\bin\Debug\PowerCollections.dll
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.dll
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.ShapeFile.dll
+C:\hms\HMSLDAS\bin\Debug\ogr_csharp.dll
+C:\hms\HMSLDAS\bin\Debug\osr_csharp.dll
+C:\hms\HMSLDAS\bin\Debug\HMSGDAL.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSGDAL.dll.config
+C:\hms\HMSLDAS\bin\Debug\HMSJSON.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSJSON.dll.config
+C:\hms\HMSLDAS\bin\Debug\HMSTimeSeries.pdb
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.xml
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.GeoTools.xml
+C:\hms\HMSLDAS\bin\Debug\GeoAPI.xml
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.GeoJSON.xml
+C:\hms\HMSLDAS\bin\Debug\Newtonsoft.Json.xml
+C:\hms\HMSLDAS\bin\Debug\PowerCollections.xml
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.xml
+C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\HMSLDAS\obj\Debug\HMSLDAS.csprojResolveAssemblyReference.cache
+C:\hms\HMSLDAS\obj\Debug\HMSLDAS.dll
+C:\hms\HMSLDAS\obj\Debug\HMSLDAS.pdb

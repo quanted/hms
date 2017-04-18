@@ -12,6 +12,7 @@ using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Precision;
 using NetTopologySuite.Features;
+using System.Web;
 
 namespace HMSGDAL
 {
@@ -33,96 +34,96 @@ namespace HMSGDAL
 
         public HMSGDAL() { }
 
-        public HMSGDAL(out string errorMsg, string shapeFile)
-        {
-            errorMsg = "";
-            SetShapeFile(out errorMsg, shapeFile);
-            if (errorMsg.Contains("ERROR")) { return; }
-        }
+        //public HMSGDAL(out string errorMsg, string shapeFile)
+        //{
+        //    errorMsg = "";
+        //    SetShapeFile(out errorMsg, shapeFile);
+        //    if (errorMsg.Contains("ERROR")) { return; }
+        //}
 
         /// <summary>
         /// Loads timezones using shapefile of timezones. (tz_world)
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="shapeFile"></param>
-        private void SetShapeFile(out string errorMsg, string shapeFileName)
-        {
-            errorMsg = "";
-            try
-            {
-                List<NetTopologySuite.Features.Feature> featureCollection = new List<NetTopologySuite.Features.Feature>();
+        //private void SetShapeFile(out string errorMsg, string shapeFileName)
+        //{
+        //    errorMsg = "";
+        //    try
+        //    {
+        //        List<NetTopologySuite.Features.Feature> featureCollection = new List<NetTopologySuite.Features.Feature>();
 
-                //built feature collection from shapefile
-                
-                NetTopologySuite.IO.ShapefileDataReader dataReader = new NetTopologySuite.IO.ShapefileDataReader(shapeFileName, new NetTopologySuite.Geometries.GeometryFactory());
+        //        //built feature collection from shapefile
 
-                while (dataReader.Read())
-                {
-                    //read current feature
-                    NetTopologySuite.Features.Feature feature = new NetTopologySuite.Features.Feature();
-                    feature.Geometry = dataReader.Geometry;
-                    //get feature keys
-                    int length = dataReader.DbaseHeader.NumFields;
-                    string[] keys = new string[length];
-                    for (int i = 0; i < length; i++)
-                        keys[i] = dataReader.DbaseHeader.Fields[i].Name;
-                    //get features attributes
-                    feature.Attributes = new NetTopologySuite.Features.AttributesTable();
-                    for (int i = 0; i < length; i++)
-                    {
-                        object val = dataReader.GetValue(i);
-                        feature.Attributes.AddAttribute(keys[i], val);
-                    }
-                    //add feature to collection
-                    featureCollection.Add(feature);
-                }
-               
-                IGeometryFactory gf = GeoAPI.GeometryServiceProvider.Instance.CreateGeometryFactory();
+        //        NetTopologySuite.IO.ShapefileDataReader dataReader = new NetTopologySuite.IO.ShapefileDataReader(shapeFileName, new NetTopologySuite.Geometries.GeometryFactory());
 
-                //built timezones array
-                foreach (NetTopologySuite.Features.Feature feature in featureCollection)
-                {
-                    try
-                    {
-                        //get timezone
-                        NetTopologySuite.Features.AttributesTable table = (NetTopologySuite.Features.AttributesTable)feature.Attributes;
-                        string timezone = table["TZID"].ToString();
+        //        while (dataReader.Read())
+        //        {
+        //            //read current feature
+        //            NetTopologySuite.Features.Feature feature = new NetTopologySuite.Features.Feature();
+        //            feature.Geometry = dataReader.Geometry;
+        //            //get feature keys
+        //            int length = dataReader.DbaseHeader.NumFields;
+        //            string[] keys = new string[length];
+        //            for (int i = 0; i < length; i++)
+        //                keys[i] = dataReader.DbaseHeader.Fields[i].Name;
+        //            //get features attributes
+        //            feature.Attributes = new NetTopologySuite.Features.AttributesTable();
+        //            for (int i = 0; i < length; i++)
+        //            {
+        //                object val = dataReader.GetValue(i);
+        //                feature.Attributes.AddAttribute(keys[i], val);
+        //            }
+        //            //add feature to collection
+        //            featureCollection.Add(feature);
+        //        }
 
-                        //set getometry
-                        IGeometry geometry = feature.Geometry;
+        //        IGeometryFactory gf = GeoAPI.GeometryServiceProvider.Instance.CreateGeometryFactory();
 
-                        bool addnew = true;
-                        foreach (TimeZones geotimezone in geotimezones)
-                        {
-                            //add geometry to existing timezone
-                            if (geotimezone.timezone.CompareTo(timezone) == 0)
-                            {
-                                addnew = false;
-                                geotimezone.geometry = geotimezone.geometry.Concat<IGeometry>(new[] { geometry }).ToArray();
-                            }
-                        }
-                        //add a new timezone and first geometry
-                        if (addnew)
-                        {
-                            TimeZones addgeotimezone = new TimeZones();
-                            addgeotimezone.timezone = timezone;
-                            addgeotimezone.geometry = new[] { geometry };
-                            geotimezones.Add(addgeotimezone);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        errorMsg = "ERROR: " + ex;
-                        return;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: " + ex;
-                return;
-            }
-        }
+        //        //built timezones array
+        //        foreach (NetTopologySuite.Features.Feature feature in featureCollection)
+        //        {
+        //            try
+        //            {
+        //                //get timezone
+        //                NetTopologySuite.Features.AttributesTable table = (NetTopologySuite.Features.AttributesTable)feature.Attributes;
+        //                string timezone = table["TZID"].ToString();
+
+        //                //set getometry
+        //                IGeometry geometry = feature.Geometry;
+
+        //                bool addnew = true;
+        //                foreach (TimeZones geotimezone in geotimezones)
+        //                {
+        //                    //add geometry to existing timezone
+        //                    if (geotimezone.timezone.CompareTo(timezone) == 0)
+        //                    {
+        //                        addnew = false;
+        //                        geotimezone.geometry = geotimezone.geometry.Concat<IGeometry>(new[] { geometry }).ToArray();
+        //                    }
+        //                }
+        //                //add a new timezone and first geometry
+        //                if (addnew)
+        //                {
+        //                    TimeZones addgeotimezone = new TimeZones();
+        //                    addgeotimezone.timezone = timezone;
+        //                    addgeotimezone.geometry = new[] { geometry };
+        //                    geotimezones.Add(addgeotimezone);
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                errorMsg = "ERROR: " + ex;
+        //                return;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        errorMsg = "ERROR: " + ex;
+        //        return;
+        //    }
+        //}
 
         /// <summary>
         /// Returns the Iana timezone name for a specific latitude/longitude coordinate.
@@ -131,43 +132,43 @@ namespace HMSGDAL
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
         /// <returns></returns>
-        private string GetTZName(out string errorMsg, double latitude, double longitude)
-        {
-            errorMsg = "";
-            string result = "";
+        //private string GetTZName(out string errorMsg, double latitude, double longitude)
+        //{
+        //    errorMsg = "";
+        //    string result = "";
 
-            if (Math.Abs(latitude) > 180) { errorMsg = "ERROR: Invalid latitude value."; return null; }
-            if (Math.Abs(longitude) > 180) { errorMsg = "ERROR: Invalid longitude value."; return null; }
+        //    if (Math.Abs(latitude) > 180) { errorMsg = "ERROR: Invalid latitude value."; return null; }
+        //    if (Math.Abs(longitude) > 180) { errorMsg = "ERROR: Invalid longitude value."; return null; }
 
-            GeoAPI.Geometries.Coordinate point = new GeoAPI.Geometries.Coordinate(longitude, latitude);
-            foreach (TimeZones geoTZ in geotimezones)
-            {
-                foreach (GeoAPI.Geometries.IGeometry geometry in geoTZ.geometry)
-                {
-                    if (NetTopologySuite.Algorithm.Locate.SimplePointInAreaLocator.Locate(point, geometry).Equals(GeoAPI.Geometries.Location.Interior))
-                    {
-                        return result = geoTZ.timezone;
-                    }
-                }
-            }
-            double distance = 0.01;
-            if (result == "")
-            {
-                foreach (TimeZones geoTZ in geotimezones)
-                {
-                    foreach (GeoAPI.Geometries.IGeometry geometry in geoTZ.geometry)
-                    {
-                        NetTopologySuite.Algorithm.Distance.PointPairDistance ptdist = new NetTopologySuite.Algorithm.Distance.PointPairDistance();
-                        NetTopologySuite.Algorithm.Distance.DistanceToPoint.ComputeDistance(geometry, point, ptdist);
-                        if (ptdist.Distance < distance)
-                        {
-                            return result = geoTZ.timezone;
-                        }
-                    }
-                }
-            }
-            return result;
-        }
+        //    GeoAPI.Geometries.Coordinate point = new GeoAPI.Geometries.Coordinate(longitude, latitude);
+        //    foreach (TimeZones geoTZ in geotimezones)
+        //    {
+        //        foreach (GeoAPI.Geometries.IGeometry geometry in geoTZ.geometry)
+        //        {
+        //            if (NetTopologySuite.Algorithm.Locate.SimplePointInAreaLocator.Locate(point, geometry).Equals(GeoAPI.Geometries.Location.Interior))
+        //            {
+        //                return result = geoTZ.timezone;
+        //            }
+        //        }
+        //    }
+        //    double distance = 0.01;
+        //    if (result == "")
+        //    {
+        //        foreach (TimeZones geoTZ in geotimezones)
+        //        {
+        //            foreach (GeoAPI.Geometries.IGeometry geometry in geoTZ.geometry)
+        //            {
+        //                NetTopologySuite.Algorithm.Distance.PointPairDistance ptdist = new NetTopologySuite.Algorithm.Distance.PointPairDistance();
+        //                NetTopologySuite.Algorithm.Distance.DistanceToPoint.ComputeDistance(geometry, point, ptdist);
+        //                if (ptdist.Distance < distance)
+        //                {
+        //                    return result = geoTZ.timezone;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return result;
+        //}
 
         /// <summary>
         /// Returns the gmt offset as a double.
@@ -176,54 +177,56 @@ namespace HMSGDAL
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
         /// <returns></returns>
-        public double GetGMTOffset( out string errorMsg, double latitude, double longitude, HMSTimeSeries.HMSTimeSeries ts)
-        {
-            errorMsg = "";
-            //May need to remove \ from \bin\... (added beacuse of issue with unit tests)
-            string tzShapeFile = String.Concat(AppDomain.CurrentDomain.BaseDirectory, @"\bin\TZShapeFile\tz_world"); // file containing the shapefile.
-            string zonesFile = String.Concat(AppDomain.CurrentDomain.BaseDirectory, @"\bin\tzinfo.csv"); // file containing list of timezones with offset values.
-            double offset = 0.0;
-            string gmtOffset = "";
-            string tzName = "";
-            try
-            {
-                HMSGDAL tz = new HMSGDAL(out errorMsg, tzShapeFile);
-                tzName = tz.GetTZName(out errorMsg, latitude, longitude);
-                ts.tzName = tzName;
-                ts.newMetaData += "tzName=" + tzName + "\n";
-                if (errorMsg.Contains("ERROR")) { return 0; }
-                StreamReader reader = new StreamReader(File.OpenRead(zonesFile));
-                while(!reader.EndOfStream)
-                {
-                    string[] line = reader.ReadLine().Split(',');
-                    if (line[1].Equals(tzName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        gmtOffset = line[2];
-                    }
-                }
-            }
-            catch
-            {
-                errorMsg = "ERROR: Failed to load or find timezone.";
-                return 0;
-            }
-            ts.newMetaData += "gmtoffset=" + gmtOffset + "\n";
-            string[] time = gmtOffset.Split(':');
-            int minutes = 0;
-            try
-            {
-                minutes = Convert.ToInt32(time[0]) * 3600 + Convert.ToInt32(time[1]) * 60;
-            }
-            catch
-            {
-                errorMsg = "ERROR: Failed to convert GMT offset value to hours.";
-                return 0;
-            }
-            offset = Convert.ToDouble(minutes) / 3600.0;
-            ts.gmtOffset = offset;
-            return offset;
-        }
-                
+        //public double GetGMTOffset(out string errorMsg, double latitude, double longitude, HMSTimeSeries.HMSTimeSeries ts)
+        //{
+        //    errorMsg = "";
+        //    //May need to remove \ from \bin\... (added beacuse of issue with unit tests)
+        //    string tzShapeFile = String.Concat(AppDomain.CurrentDomain.BaseDirectory, @"\bin\TZShapeFile\tz_world"); // file containing the shapefile.
+        //    //string zonesFile = String.Concat(AppDomain.CurrentDomain.BaseDirectory, @"\bin\tzinfo.csv"); // file containing list of timezones with offset values.
+        //    double offset = 0.0;
+        //    string gmtOffset = "";
+        //    string tzName = "";
+        //    try
+        //    {
+        //        //HMSGDAL tz = new HMSGDAL(out errorMsg, tzShapeFile);
+        //        //tzName = tz.GetTZName(out errorMsg, latitude, longitude);
+        //        ts.tzName = tzName;
+        //        ts.newMetaData += "tzName=" + tzName + "\n";
+        //        if (errorMsg.Contains("ERROR")) { return 0; }
+        //        //StreamReader reader = new StreamReader(File.OpenRead(zonesFile));
+        //        //while(!reader.EndOfStream)
+        //        //{
+        //        //    string[] line = reader.ReadLine().Split(',');
+        //        //    if (line[1].Equals(tzName, StringComparison.OrdinalIgnoreCase))
+        //        //    {
+        //        //        gmtOffset = line[2];
+        //        //    }
+        //        //}
+        //        Dictionary<string, string> tZones = (Dictionary<string, string>)HttpContext.Current.Application["tzList"];
+        //        gmtOffset = tZones[tzName];
+        //    }
+        //    catch
+        //    {
+        //        errorMsg = "ERROR: Failed to load or find timezone.";
+        //        return 0;
+        //    }
+        //    ts.newMetaData += "gmtoffset=" + gmtOffset + "\n";
+        //    string[] time = gmtOffset.Split(':');
+        //    int minutes = 0;
+        //    try
+        //    {
+        //        minutes = Convert.ToInt32(time[0]) * 3600 + Convert.ToInt32(time[1]) * 60;
+        //    }
+        //    catch
+        //    {
+        //        errorMsg = "ERROR: Failed to convert GMT offset value to hours.";
+        //        return 0;
+        //    }
+        //    offset = Convert.ToDouble(minutes) / 3600.0;
+        //    ts.gmtOffset = offset;
+        //    return offset;
+        //}
+
         /// <summary>
         /// Returns a DateTime date that has been adjusted by offset depending on if it is the start or end date. Used to get data from LDAS that corresponds to the correct local time.
         /// LDAS returns data from GMT time.

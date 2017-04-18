@@ -92,3 +92,9 @@ C:\hms\TotalFlow\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\TotalFlow\obj\Release\TotalFlow.csprojResolveAssemblyReference.cache
 C:\hms\TotalFlow\obj\Release\TotalFlow.dll
 C:\hms\TotalFlow\obj\Release\TotalFlow.pdb
+C:\hms\TotalFlow\bin\Release\HMSUtils.dll
+C:\hms\TotalFlow\bin\Release\HMSBASINS.dll
+C:\hms\TotalFlow\bin\Release\HMSUtils.pdb
+C:\hms\TotalFlow\bin\Release\HMSUtils.dll.config
+C:\hms\TotalFlow\bin\Release\HMSBASINS.pdb
+C:\hms\TotalFlow\bin\Release\HMSBASINS.dll.config
