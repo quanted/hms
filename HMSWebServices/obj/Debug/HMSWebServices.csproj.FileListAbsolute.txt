@@ -50,7 +50,6 @@ C:\hms\HMSWebServices\bin\roslyn\VBCSCompiler.exe.config
 C:\hms\HMSWebServices\bin\HMSGDAL.cs
 C:\hms\HMSWebServices\bin\HMSJSON.cs
 C:\hms\HMSWebServices\bin\App.config
-C:\hms\HMSWebServices\bin\HMSLDAS.cs
 C:\hms\HMSWebServices\bin\Default.aspx
 C:\hms\HMSWebServices\bin\Default.aspx.cs
 C:\hms\HMSWebServices\bin\Default.aspx.designer.cs

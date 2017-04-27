@@ -6,6 +6,8 @@ shortwave radiation, and longwave radiation.
 5 total data points are provided, the central point that is given by the latitude/longitude variables, 
 and the four surrounding data points.
 
+OBSOLETE, TO BE DELETED
+
 */
 
 using System;

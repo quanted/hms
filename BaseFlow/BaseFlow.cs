@@ -79,7 +79,7 @@ namespace HMSBaseFlow
         {
             errorMsg = "";
             this.gmtOffset = Convert.ToDouble(gmtOffset);
-            this.dataSource = source;
+            this.dataSource = source.ToLower();
             this.localTime = local;
             this.tzName = tzName;
             SetDates(out errorMsg, startDate, endDate);
@@ -107,8 +107,8 @@ namespace HMSBaseFlow
                 this.longitude = 0.0;
             }
             this.cellWidth = 0.00;
-            if (this.dataSource == "NLDAS") { this.cellWidth = 0.12500; }
-            else if (this.dataSource == "GLDAS") { this.cellWidth = 0.2500; }
+            if (this.dataSource == "nldas") { this.cellWidth = 0.12500; }
+            else if (this.dataSource == "gldas") { this.cellWidth = 0.2500; }
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace HMSBaseFlow
                 errorMsg = "ERROR: Invalid dates entered. Please enter an end date set after the start date.";
                 return;
             }
-            if (this.dataSource.Contains("NLDAS"))   //NLDAS data collection start date
+            if (this.dataSource.Contains("nldas"))   //NLDAS data collection start date
             {
                 DateTime minDate = new DateTime(1979, 01, 02);
                 if (DateTime.Compare(this.startDate, minDate) < 0)
@@ -152,7 +152,7 @@ namespace HMSBaseFlow
                     this.startDate = minDate;   //start date is set to NLDAS start date
                 }
             }
-            else if (this.dataSource.Contains("GLDAS"))   //GLDAS data collection start date
+            else if (this.dataSource.Contains("gldas"))   //GLDAS data collection start date
             {
                 DateTime minDate = new DateTime(2000, 02, 25);
                 if (DateTime.Compare(this.startDate, minDate) < 0)
@@ -177,7 +177,7 @@ namespace HMSBaseFlow
             if (this.shapefilePath != null)
             {
                 bool sourceNLDAS = true;
-                if (this.dataSource.Contains("GLDAS")) { sourceNLDAS = false; }
+                if (this.dataSource.Contains("gldas")) { sourceNLDAS = false; }
                 double[] center = gldas.DetermineReturnCoordinates(out errorMsg, gdal.ReturnCentroid(out errorMsg, this.shapefilePath), sourceNLDAS);
                 this.latitude = center[0];   // coordinate values for objects are taken from the centroid of the shapefile.
                 this.longitude = center[1];

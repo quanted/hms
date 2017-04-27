@@ -338,12 +338,12 @@ namespace HMSTimeSeries
         public void SetTimeSeriesVariables(out string errorMsg, HMSTimeSeries ts, string data, string source)
         {
             errorMsg = "";
-            if (source.Contains("NLDAS") || source.Contains("GLDAS"))           //Data parsing is unique to the datasource.
+            if (source.Contains("nldas") || source.Contains("gldas"))           //Data parsing is unique to the datasource.
             {
                 SetLDASTimeSeries(out errorMsg, ts, data);
                 if (errorMsg.Contains("ERROR")) { return; }
             }
-            else if (source.Contains("Daymet"))
+            else if (source.Contains("daymet"))
             {
                 this.timeSeries = ts.ParseForDaymetData(out errorMsg, data);
                 this.metaData = ts.ParseForDaymetMetaData(out errorMsg, data);

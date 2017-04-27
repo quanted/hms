@@ -21,6 +21,7 @@ namespace HMSWebServices.Models
             switch (parameters["dataset"])
             {
                 case "baseflow":
+                case "subsurfaceflow":
                     HMSBaseFlow.BaseFlow bFlow;
                     if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
                     {

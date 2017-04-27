@@ -65,7 +65,7 @@ namespace HMSDaymet
             {
 				// Reading value from Application variables
 				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-				urlStr = urls[datasource + "_" + dataSet + "_URL"];
+				urlStr = urls["Daymet_" + dataSet + "_URL"];
             }
             catch
             {
