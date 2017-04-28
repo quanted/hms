@@ -332,25 +332,16 @@ namespace HMSNCDC
         {
             errorMsg = "";
             Dictionary<string, string> stationDetails = new Dictionary<string, string>();
-            string urlFile = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";
+            Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
             string url = "";
-            string[] lineData;
             try
             {
-                foreach (string line in File.ReadLines(urlFile))
-                {
-                    lineData = line.Split(' ');
-                    if (lineData[0].Equals("NCDC_STATION_URL", StringComparison.OrdinalIgnoreCase))
-                    {
-                        url = lineData[1];
-                        break;
-                    }
-                }
+                url = urls["NCDC_STATION_URL"];
             }
             catch
             {
                 errorMsg = "ERROR: Unable to load URL details from configuration file.";
-                return null;
+                return new Dictionary<string, string>();
             }
             url = url + stationID;
             string token = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
@@ -365,7 +356,7 @@ namespace HMSNCDC
             catch(Exception ex)
             {
                 errorMsg = "ERROR: Unable to download ncdc station details. " + ex.Message;
-                return new Dictionary<string, string>(); ;
+                return new Dictionary<string, string>();
             }
             wc.Dispose();
             return stationDetails;
