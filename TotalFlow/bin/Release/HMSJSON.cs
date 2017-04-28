@@ -104,12 +104,12 @@ namespace HMSJSON
             HMSData output = new HMSData();
             output.dataset = dataset;
             output.source = source;
-            if (source.Contains("NLDAS") || source.Contains("GLDAS"))
+            if (source.Contains("nldas") || source.Contains("gldas"))
             {
                 output.metadata = SetHMSDataMetaData(out errorMsg, newMetaData, metadata, source, 1);
                 output.data = SetHMSDataTS(out errorMsg, timeseries, source, dataset, localtime, gmtOffset, coverage);
             }
-            else if (source.Contains("Daymet"))
+            else if (source.Contains("daymet"))
             {
                 output.metadata = SetHMSDaymetMetaData(out errorMsg, newMetaData, metadata);
                 output.data = SetHMSDaymetDataTS(out errorMsg, timeseries);
@@ -274,12 +274,12 @@ namespace HMSJSON
             {
                 if (metaLines[i].Contains("http"))
                 {
-                    daymetMeta.Add("Daymet_url_reference:", metaLines[i].Trim());
+                    daymetMeta.Add("daymet_url_reference:", metaLines[i].Trim());
                 }
                 else if(metaLines[i].Contains(':'))
                 {
                     string[] lineData = metaLines[i].Split(new string[] { ": " }, StringSplitOptions.RemoveEmptyEntries);
-                    daymetMeta.Add("Daymet_" + lineData[0].Trim(), lineData[1].Trim());
+                    daymetMeta.Add("daymet_" + lineData[0].Trim(), lineData[1].Trim());
                 }
             }
             if (newMetaData == null) { return daymetMeta; }
@@ -291,7 +291,7 @@ namespace HMSJSON
                     string[] line = dataLines[i].Split(new char[] { '=' }, 2);
                     if (!daymetMeta.ContainsKey(line[0]))
                     {
-                        daymetMeta.Add("Daymet_" + line[0], line[1].Trim());
+                        daymetMeta.Add("daymet_" + line[0], line[1].Trim());
                     }
                 }
             }
@@ -374,7 +374,7 @@ namespace HMSJSON
         {
             errorMsg = "";
             HMSData json = new HMSData();
-            if (source.Contains("GLDAS") || source.Contains("NLDAS"))
+            if (source.Contains("gldas") || source.Contains("nldas"))
             {
                 json.metadata = SetHMSDataMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData, source, 1);
 
@@ -406,14 +406,14 @@ namespace HMSJSON
                     json.data = values;
                 }
             }
-            else if (source.Contains("Daymet"))
+            else if (source.Contains("daymet"))
             {
                 json.metadata = SetHMSDaymetMetaData(out errorMsg, ts[0].newMetaData, ts[0].metaData);
                 json.metadata.Add(source + "_unit", "mm/day");
                 json.metadata.Add(source + "_timeseries_1", json.metadata[source + "_Latitude"] + ", " + json.metadata[source + "_Longitude"]);
                 json.data = SetHMSDaymetDataTS(out errorMsg, ts[0].timeSeries);
             }
-            else if (source.Contains("NCDC"))
+            else if (source.Contains("ncdc"))
             {
                 json.data = SetHMSDataTS(out errorMsg, ts[0].timeSeries, dataset, source, localtime, gmtOffset, ts[0].cellCoverage);
             }
@@ -430,7 +430,7 @@ namespace HMSJSON
         {
             errorMsg = "";
             double modifier = 1.0;
-            if (dataset.Contains("Precipitation") && source.Contains("GLDAS")) { modifier = 3; }     //Convert GLDAS hr to 3hr
+            if (dataset.Contains("Precipitation") && source.Contains("gldas")) { modifier = 3; }     //Convert GLDAS hr to 3hr
             try
             {
                 if (dataset.Contains("Baseflow") || dataset.Contains("SurfaceFlow"))
@@ -459,12 +459,12 @@ namespace HMSJSON
             totals.metadata = jsonData.metadata;
             DateTime iDate = new DateTime();
             double sum = 0.0;
-            if (totals.source.Contains("LDAS") || totals.source.Contains("NCDC"))
+            if (totals.source.Contains("ldas") || totals.source.Contains("ncdc"))
             {
                 string dateString1 = jsonData.data.Keys.ElementAt(0).ToString().Substring(0, jsonData.data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString1, out iDate);
             }
-            else if (totals.source.Contains("Daymet"))
+            else if (totals.source.Contains("daymet"))
             {
                 string dateString1 = jsonData.data.Keys.ElementAt(0).ToString();
                 DateTime.TryParse(dateString1, out iDate);
@@ -474,12 +474,12 @@ namespace HMSJSON
             for (int i = 0; i < jsonData.data.Count; i++)
             {
                 DateTime date = new DateTime();
-                if (totals.source.Contains("LDAS") || totals.source.Contains("NCDC"))
+                if (totals.source.Contains("ldas") || totals.source.Contains("ncdc"))
                 {
                     string dateString = jsonData.data.Keys.ElementAt(i).ToString().Substring(0, jsonData.data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                     DateTime.TryParse(dateString, out date);
                 }
-                else if (totals.source.Contains("Daymet"))
+                else if (totals.source.Contains("daymet"))
                 {
                     string dateString = jsonData.data.Keys.ElementAt(i).ToString();
                     DateTime.TryParse(dateString, out date);

@@ -46,7 +46,7 @@ namespace HMSUtils
             if (parameters.ContainsKey("source"))
             {
                 Sources source;
-                if (!Enum.TryParse(parameters["source"], out source))
+                if (!Enum.TryParse(parameters["source"], true, out source))
                 {
                     errorMsg += "ERROR: source parameter was not found.\n";
                     valid = false;

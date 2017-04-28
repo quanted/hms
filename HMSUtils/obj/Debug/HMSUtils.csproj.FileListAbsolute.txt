@@ -1,7 +1,6 @@
 C:\hms\HMSUtils\bin\Debug\HMSGDAL.cs
 C:\hms\HMSUtils\bin\Debug\HMSJSON.cs
 C:\hms\HMSUtils\bin\Debug\App.config
-C:\hms\HMSUtils\bin\Debug\HMSLDAS.cs
 C:\hms\HMSUtils\bin\Debug\HMSUtils.dll.config
 C:\hms\HMSUtils\bin\Debug\HMSUtils.dll
 C:\hms\HMSUtils\bin\Debug\HMSUtils.pdb
@@ -42,3 +41,4 @@ C:\hms\HMSUtils\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSUtils\obj\Debug\HMSUtils.csprojResolveAssemblyReference.cache
 C:\hms\HMSUtils\obj\Debug\HMSUtils.dll
 C:\hms\HMSUtils\obj\Debug\HMSUtils.pdb
+C:\hms\HMSUtils\bin\Debug\HMSLDAS.cs

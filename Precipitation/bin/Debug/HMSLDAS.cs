@@ -202,9 +202,9 @@ namespace HMSLDAS
                 byte[] dataBuffer = myWC.DownloadData(url);
                 data = Encoding.UTF8.GetString(dataBuffer);
             }
-            catch
+            catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested data.";
+                errorMsg = "ERROR: Unable to download requested data." + ex.Message;
                 return null;
             }
             if (data.Contains("ERROR"))

@@ -163,14 +163,14 @@ namespace HMSLDAS
 				errorMsg = "ERROR: Unable to load URL details from configuration file. " + e.Message;
                 return null;
             }
-            if (source.Contains("nldas"))
+            if (source.Contains("NLDAS"))
             {
                 //Add X and Y coordinates
                 string[] xy = GetXYNLDAS(out errorMsg, longitude, latitude); // [0] = x, [1] = y
                 if (errorMsg.Contains("ERROR")) { return null; }
                 builder.Append("X" + xy[0] + "-" + "Y" + xy[1]);
             }
-            else if(source.Contains("gldas"))
+            else if(source.Contains("GLDAS"))
             {
                 //Add latitude/longitude points
                 builder.Append(@"%28" + longitude + @",%20" + latitude + @"%29");
@@ -202,9 +202,9 @@ namespace HMSLDAS
                 byte[] dataBuffer = myWC.DownloadData(url);
                 data = Encoding.UTF8.GetString(dataBuffer);
             }
-            catch
+            catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested data.";
+                errorMsg = "ERROR: Unable to download requested data." + ex.Message;
                 return null;
             }
             if (data.Contains("ERROR"))
