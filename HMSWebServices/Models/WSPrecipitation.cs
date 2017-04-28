@@ -72,9 +72,9 @@ namespace HMSWebServices.Models
             string errorMsg = "";
             HMSJSON.HMSJSON.HMSData results = new HMSJSON.HMSJSON.HMSData();
             HMSUtils.Utils utils = new HMSUtils.Utils();
-
             // Get station details 
-            Dictionary<string, string> stationDetails = utils.GetNCDCStationDetails(out errorMsg, parameters["stationID"]);
+            Dictionary<string, string> stationDetails = new Dictionary<string, string>();
+            stationDetails = utils.GetNCDCStationDetails(out errorMsg, parameters["stationID"]);
             // If ERROR in retrieving station details, returns errorMsg in json object
             if (stationDetails.ContainsKey("errorMsg") || stationDetails.Count == 0)
             {

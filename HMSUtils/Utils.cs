@@ -471,7 +471,8 @@ namespace HMSUtils
         {
             errorMsg = "";
             HMSNCDC.HMSNCDC details = new HMSNCDC.HMSNCDC();
-            Dictionary<string, string> stationDetails = details.GetStationDetails(out errorMsg, stationID);
+            Dictionary<string, string> stationDetails = new Dictionary<string, string>();
+            stationDetails = details.GetStationDetails(out errorMsg, stationID);
             if(errorMsg != "")
             {
                 stationDetails.Add("errorMsg", errorMsg);

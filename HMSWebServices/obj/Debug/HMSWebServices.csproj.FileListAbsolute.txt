@@ -142,5 +142,4 @@ C:\hms\HMSWebServices\obj\Debug\HMSWebServices.Properties.Resources.resources
 C:\hms\HMSWebServices\obj\Debug\HMSWebServices.csproj.GenerateResource.Cache
 C:\hms\HMSWebServices\obj\Debug\HMSWebServices.dll
 C:\hms\HMSWebServices\obj\Debug\HMSWebServices.pdb
-C:\hms\HMSWebServices\bin\HMSLDAS.cs
 C:\hms\HMSWebServices\bin\App_Data\url_info.txt

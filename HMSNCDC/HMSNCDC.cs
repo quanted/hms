@@ -362,10 +362,10 @@ namespace HMSNCDC
                 byte[] dataBuffer = wc.DownloadData(url);
                 stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(dataBuffer));
             }
-            catch
+            catch(Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station details.";
-                return null;
+                errorMsg = "ERROR: Unable to download ncdc station details. " + ex.Message;
+                return new Dictionary<string, string>(); ;
             }
             wc.Dispose();
             return stationDetails;

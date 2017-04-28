@@ -44,7 +44,6 @@
 C:\hms\HMSUtils\bin\Release\HMSGDAL.cs
 C:\hms\HMSUtils\bin\Release\HMSJSON.cs
 C:\hms\HMSUtils\bin\Release\App.config
-C:\hms\HMSUtils\bin\Release\HMSLDAS.cs
 C:\hms\HMSUtils\bin\Release\HMSUtils.dll
 C:\hms\HMSUtils\bin\Release\HMSUtils.pdb
 C:\hms\HMSUtils\bin\Release\HMSBASINS.dll
@@ -85,3 +84,4 @@ C:\hms\HMSUtils\obj\Release\HMSUtils.csprojResolveAssemblyReference.cache
 C:\hms\HMSUtils\obj\Release\HMSUtils.dll
 C:\hms\HMSUtils\obj\Release\HMSUtils.pdb
 C:\hms\HMSUtils\bin\Release\HMSUtils.dll.config
+C:\hms\HMSUtils\bin\Release\HMSLDAS.cs
