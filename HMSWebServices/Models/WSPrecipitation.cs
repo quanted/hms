@@ -103,7 +103,7 @@ namespace HMSWebServices.Models
             HMSJSON.HMSJSON totals = new HMSJSON.HMSJSON();
 
             // Get nldas precip data.
-            HMSPrecipitation.Precipitation nldasPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "NLDAS", true, null);
+            HMSPrecipitation.Precipitation nldasPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "nldas", true, null);
             nldasPrecip.GetDataSetsObject(out errorMsg);
             if (errorMsg != "")
             {
@@ -111,7 +111,7 @@ namespace HMSWebServices.Models
             }
             list.Add(totals.CollectDataTotals(out errorMsg, nldasPrecip.jsonData, "daily"));
             // Get gldas precip data.
-            HMSPrecipitation.Precipitation gldasPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "GLDAS", true, "", nldasPrecip.gmtOffset.ToString(), nldasPrecip.tzName);
+            HMSPrecipitation.Precipitation gldasPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "gldas", true, "", nldasPrecip.gmtOffset.ToString(), nldasPrecip.tzName);
             gldasPrecip.GetDataSetsObject(out errorMsg);
             if (errorMsg != "")
             {
@@ -119,7 +119,7 @@ namespace HMSWebServices.Models
             }
             list.Add(totals.CollectDataTotals(out errorMsg, gldasPrecip.jsonData, "daily"));
             // Get daymet precip data.
-            HMSPrecipitation.Precipitation daymetPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "Daymet", true, "", nldasPrecip.gmtOffset.ToString(), nldasPrecip.tzName);
+            HMSPrecipitation.Precipitation daymetPrecip = new HMSPrecipitation.Precipitation(out errorMsg, stationDetails["latitude"], stationDetails["longitude"], parameters["startDate"], parameters["endDate"], "daymet", true, "", nldasPrecip.gmtOffset.ToString(), nldasPrecip.tzName);
             daymetPrecip.GetDataSetsObject(out errorMsg);
             if (errorMsg != "")
             {
@@ -127,7 +127,7 @@ namespace HMSWebServices.Models
             }
             list.Add(daymetPrecip.jsonData);
             // Get ncdc precip data.
-            HMSPrecipitation.Precipitation ncdcPrecip = new HMSPrecipitation.Precipitation(out errorMsg, parameters["startDate"], parameters["endDate"], "NCDC", parameters["stationID"]);
+            HMSPrecipitation.Precipitation ncdcPrecip = new HMSPrecipitation.Precipitation(out errorMsg, parameters["startDate"], parameters["endDate"], "ncdc", parameters["stationID"]);
             ncdcPrecip.GetDataSetsObject(out errorMsg);
             if (errorMsg != "")
             {
