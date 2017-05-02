@@ -345,13 +345,28 @@ namespace HMSNCDC
             }
             url = url + stationID;
             string token = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-            WebClient wc = new WebClient();
+            WebClient wc = new WebClient();             // WebClient Method
+            WebRequest wr = WebRequest.Create(url);     // HttpWebRespose Method
             Thread.Sleep(333);
             try
             {
-                wc.Headers.Add("token", token);
-                byte[] dataBuffer = wc.DownloadData(url);
-                stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(dataBuffer));
+                // WebClient method
+                //wc.Headers.Add("token", token);
+                //byte[] dataBuffer = wc.DownloadData(url);
+                //stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(dataBuffer));
+
+                // HttpWebRespose Method
+                wr.Headers.Add("token", token);
+                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                string status = response.StatusCode.ToString();
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                string dataBuffer = reader.ReadToEnd();
+
+                stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
+
+                reader.Close();
+                response.Close();
             }
             catch(Exception ex)
             {
