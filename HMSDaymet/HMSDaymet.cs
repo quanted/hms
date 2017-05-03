@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace HMSDaymet
 {
@@ -110,13 +111,26 @@ namespace HMSDaymet
             WebClient myWC = new WebClient();
             try
             {
-                byte[] dataBuffer = myWC.DownloadData(url);
-                data = Encoding.UTF8.GetString(dataBuffer);
-                myWC.Dispose();
+                int retries = 5;                                        // Max number of request retries
+                string status = "";                                     // response status code
+
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    Thread.Sleep(100);
+                    WebRequest wr = WebRequest.Create(url);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data = reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                errorMsg = "ERROR: Unable to download data from Daymet.";
+                errorMsg = "ERROR: Unable to download data from Daymet. " + ex.Message;
                 return null;
             }
             return data;
@@ -143,6 +157,13 @@ namespace HMSDaymet
             }
         }     
 
+        /// <summary>
+        /// Converts date parameters to list of years.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
         private string GetListOfYears(out string errorMsg, DateTime startDate, DateTime endDate)
         {
             errorMsg = "";

@@ -182,9 +182,9 @@ namespace HMSNCDC
 				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
 				url = urls["NCDC_URL"];
             }
-			catch (Exception e)
+			catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to load URL details from configuration file. " + e.Message;
+                errorMsg = "ERROR: Unable to load URL details for ncdc from configuration file. " + ex.Message;
                 return null;
             }
             return url;
@@ -201,6 +201,7 @@ namespace HMSNCDC
         private string SetVariables(out string errorMsg, DateTime startDate, DateTime endDate, string station)
         {
             errorMsg = "";
+            // Only gets and returns precipitation data
             return "datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000";
         }
 
@@ -215,20 +216,37 @@ namespace HMSNCDC
             errorMsg = "";
             string data = "";
             string token = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";          //required for accessing ncdc data
-            WebClient wc = new WebClient();
-            Thread.Sleep(333);
+            //WebClient wc = new WebClient();
             try
             {
-                wc.Headers.Add("token", token);
-                byte[] dataBuffer = wc.DownloadData(url);
-                data = Encoding.UTF8.GetString(dataBuffer);
+                //wc.Headers.Add("token", token);
+                //byte[] dataBuffer = wc.DownloadData(url);
+                //data = Encoding.UTF8.GetString(dataBuffer);
+
+                int retries = 5;                                        // Max number of request retries
+                string status = "";                                     // response status code
+
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    Thread.Sleep(333);
+                    WebRequest wr = WebRequest.Create(url);
+                    wr.Headers.Add("token", token);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data= reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station data.";
+                errorMsg = "ERROR: Unable to download ncdc station data. " + ex.Message;
                 return null;
             }
-            wc.Dispose();
+            //wc.Dispose();
             return data;
         }
 
@@ -255,16 +273,6 @@ namespace HMSNCDC
                 return value;
             }
             // place additional checks for attribute values
-        }
-
-        /// <summary>
-        /// Converts a double value in Inches to MM. OBSOLETE. Data is retrieved already converted to Metric.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private double ConvertInchesToMM(double value)
-        {
-            return (value * 25.4);      // inches to mm eq: x[In] * (25.4[mm]/1[In]) = result[mm]
         }
 
         /// <summary>
@@ -317,7 +325,6 @@ namespace HMSNCDC
                 DateTime date = startDate.AddDays(i);
                 if (data.ContainsKey(date.ToString("yyyy-MM-dd")))
                 {
-                    //value = ConvertInchesToMM(data[date.ToString("yyyy-MM-dd")]);             //Only required if not requesting metric values
                     value = data[date.ToString("yyyy-MM-dd")];
                 }
                 else
@@ -328,6 +335,12 @@ namespace HMSNCDC
             }
         }
 
+        /// <summary>
+        /// Gets NCDC station details.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="stationID"></param>
+        /// <returns></returns>
         public Dictionary<string, string> GetStationDetails(out string errorMsg, string stationID)
         {
             errorMsg = "";
@@ -338,44 +351,40 @@ namespace HMSNCDC
             {
                 url = urls["NCDC_STATION_URL"];
             }
-            catch
+            catch(Exception ex)
             {
-                errorMsg = "ERROR: Unable to load URL details from configuration file.";
+                errorMsg = "ERROR: Unable to load URL details from configuration file. " + ex.Message;
                 return new Dictionary<string, string>();
             }
             url = url + stationID;
-            string token = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-            WebClient wc = new WebClient();             // WebClient Method
-            WebRequest wr = WebRequest.Create(url);     // HttpWebRespose Method
-            Thread.Sleep(333);
+            string token = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";          // NCDC token      
             try
             {
-                // WebClient method
-                //wc.Headers.Add("token", token);
-                //byte[] dataBuffer = wc.DownloadData(url);
-                //stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(Encoding.UTF8.GetString(dataBuffer));
+                int retries = 5;                                        // Max number of request retries
+                string status = "";                                     // response status code
 
-                // HttpWebRespose Method
-                wr.Headers.Add("token", token);
-                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                string status = response.StatusCode.ToString();
-                Stream dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-                string dataBuffer = reader.ReadToEnd();
-
-                stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
-
-                reader.Close();
-                response.Close();
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    Thread.Sleep(333);
+                    WebRequest wr = WebRequest.Create(url);
+                    wr.Headers.Add("token", token);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    string dataBuffer = reader.ReadToEnd();
+                    stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                }
             }
             catch(Exception ex)
             {
                 errorMsg = "ERROR: Unable to download ncdc station details. " + ex.Message;
                 return new Dictionary<string, string>();
             }
-            wc.Dispose();
             return stationDetails;
         }
-
     }
 }
