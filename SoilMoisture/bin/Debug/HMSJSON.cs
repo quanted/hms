@@ -380,7 +380,7 @@ namespace HMSJSON
 
                 if (ts.Count > 1)
                 {
-                    json.metadata.Add(source + "_timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
+                    json.metadata.Add(source + "1_timeseries_1", ts[0].metaLat + "," + ts[0].metaLon);
                     json.metadata.Add(source + "_elevation[m]_1", ts[0].metaElev.ToString());
                     json.metadata.Add(source + "_percentInCell_1", json.metadata[source +"_percentInCell"]);
                     json.metadata.Add(source + "_areaInCell_1", json.metadata[source + "_areaInCell"]);

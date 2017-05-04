@@ -142,6 +142,10 @@ namespace HMSWebServices.Models
             HMSJSON.HMSJSON result = new HMSJSON.HMSJSON();
             results = result.MergeHMSDataList(out errorMsg, list);
 
+            // Metadata cleanup. 
+            results.metadata.Remove("daymet_column_1");
+            results.metadata.Remove("daymet_column_2");
+
             return results;
         }
     }
