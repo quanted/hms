@@ -41,4 +41,3 @@ C:\hms\HMSUtils\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSUtils\obj\Debug\HMSUtils.csprojResolveAssemblyReference.cache
 C:\hms\HMSUtils\obj\Debug\HMSUtils.dll
 C:\hms\HMSUtils\obj\Debug\HMSUtils.pdb
-C:\hms\HMSUtils\bin\Debug\HMSLDAS.cs

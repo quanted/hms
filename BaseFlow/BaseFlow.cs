@@ -201,10 +201,15 @@ namespace HMSBaseFlow
             {
                 HMSUtils.Utils utils = new HMSUtils.Utils();
                 Dictionary<string, string> tzDetails = utils.GetTZInfo(out errorMsg, this.latitude, this.longitude);
-                if (tzDetails.ContainsKey("rawOffset") && tzDetails.ContainsKey("timeZoneId"))
+                if (tzDetails.ContainsKey("rawOffset") && tzDetails.ContainsKey("timeZoneId"))      
                 {
                     this.gmtOffset = Convert.ToDouble(tzDetails["rawOffset"]) / 3600;
                     this.tzName = tzDetails["timeZoneId"];
+                }
+                else if (tzDetails.ContainsKey("tzOffset") && tzDetails.ContainsKey("tzName"))
+                {
+                    this.gmtOffset = Convert.ToDouble(tzDetails["tzOffset"]);
+                    this.tzName = tzDetails["tzName"];
                 }
                 //this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 //if (errorMsg.Contains("ERROR")) { return null; }

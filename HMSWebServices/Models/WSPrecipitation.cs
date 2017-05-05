@@ -22,7 +22,7 @@ namespace HMSWebServices.Models
             HMSPrecipitation.Precipitation precip;
             if (parameters["source"] == "compare")
             {
-                return GetPrecipitationCompareData(parameters);
+                return GetPrecipitationCompareData(out errorMsg, parameters);
             }
             else
             {
@@ -67,9 +67,9 @@ namespace HMSWebServices.Models
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private HMSJSON.HMSJSON.HMSData GetPrecipitationCompareData(Dictionary<string, string> parameters)
+        private HMSJSON.HMSJSON.HMSData GetPrecipitationCompareData(out string errorMsg, Dictionary<string, string> parameters)
         {
-            string errorMsg = "";
+            errorMsg = "";
             HMSJSON.HMSJSON.HMSData results = new HMSJSON.HMSJSON.HMSData();
             HMSUtils.Utils utils = new HMSUtils.Utils();
             // Get station details 
@@ -95,7 +95,7 @@ namespace HMSWebServices.Models
                 {
                     return utils.ReturnError(errorMsg);
                 }
-                return utils.ReturnError("ERROR: Date ERROR, invalid date range provided for the selected station.");
+                return utils.ReturnError("ERROR: Date error, invalid date range provided for the selected station.");
               
             }
 

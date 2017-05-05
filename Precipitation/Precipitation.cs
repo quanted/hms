@@ -237,6 +237,11 @@ namespace HMSPrecipitation
                     this.gmtOffset = Convert.ToDouble(tzDetails["rawOffset"]) / 3600;
                     this.tzName = tzDetails["timeZoneId"];
                 }
+                else if (tzDetails.ContainsKey("tzOffset") && tzDetails.ContainsKey("tzName"))
+                {
+                    this.gmtOffset = Convert.ToDouble(tzDetails["tzOffset"]);
+                    this.tzName = tzDetails["tzName"];
+                }
                 //this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 //if (errorMsg.Contains("ERROR")) { return null; }
                 //this.tzName = ts[0].tzName;                                                                     //Gets the Timezone name
@@ -253,16 +258,17 @@ namespace HMSPrecipitation
                     errorMsg = "ERROR: Feature geometries containing more than 30 datapoints are prohibited. Current feature contains " + gdal.coordinatesInShapefile.Count + " " + this.dataSource + " data points."; return null;
                 }
             }
-            if (this.dataSource.Contains("nldas") || this.dataSource.Contains("gldas"))
+            // TODO: Move data retrieval calls back into the precipitation class.
+            if (this.dataSource.Contains("nldas") || this.dataSource.Contains("gldas"))         // LDAS Precipitation DATA
             {
                 gldas.BeginLDASSequence(out errorMsg, this, "PRECIP", newTS);
             }
-            else if (this.dataSource.Contains("daymet"))
+            else if (this.dataSource.Contains("daymet"))                                        // Daymet Precipitation DATA
             {
                 HMSDaymet.HMSDaymet daymet = new HMSDaymet.HMSDaymet();
                 daymet.GetDaymetData(out errorMsg, this, "Precip", newTS);
             }
-            else if (this.dataSource.Contains("ncdc"))
+            else if (this.dataSource.Contains("ncdc"))                                          // NCDC Precipitation DATA
             {
                 HMSNCDC.HMSNCDC ncdc = new HMSNCDC.HMSNCDC();
                 ncdc.BeginNCDCSequence(out errorMsg, this, "NCDC", this.station, newTS);

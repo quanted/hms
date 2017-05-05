@@ -509,22 +509,46 @@ namespace HMSUtils
         public Dictionary<string, string> GetTZInfo(out string errorMsg, double latitude, double longitude)
         {
             errorMsg = "";
-            string key = "AIzaSyDUdVJFt_SUwqfNTfziXXUFK7gkHxTnRIE";     // Personal google api key, to be replaced by project key
-            string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
-            string location = "location=" + latitude.ToString() + "," + longitude.ToString();
-            string timeStamp = "timestamp=1331161200";
-            string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
-            try
+            bool useGEE = true;
+
+            if (useGEE == true)
             {
-                WebClient wc = new WebClient();
-                byte[] buffer = wc.DownloadData(completeUrl);
-                string resultString = Encoding.UTF8.GetString(buffer);
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+                string url = urls["TIMEZONE_GEE_INT"];
+                string queryString = "latitude=" + latitude.ToString() + "&longitude=" + longitude.ToString();
+                string completeUrl = url + queryString;
+                try
+                {
+                    WebClient wc = new WebClient();
+                    byte[] buffer = wc.DownloadData(completeUrl);
+                    string resultString = Encoding.UTF8.GetString(buffer);
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                }
+                catch (Exception e)
+                {
+                    errorMsg = e.Message;
+                    return new Dictionary<string, string>();
+                }
             }
-            catch (Exception e)
+            else
             {
-                errorMsg = e.Message;
-                return new Dictionary<string, string>();
+                string key = "AIzaSyDUdVJFt_SUwqfNTfziXXUFK7gkHxTnRIE";     // Personal google api key, to be replaced by project key
+                string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
+                string location = "location=" + latitude.ToString() + "," + longitude.ToString();
+                string timeStamp = "timestamp=1331161200";
+                string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
+                try
+                {
+                    WebClient wc = new WebClient();
+                    byte[] buffer = wc.DownloadData(completeUrl);
+                    string resultString = Encoding.UTF8.GetString(buffer);
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                }
+                catch (Exception e)
+                {
+                    errorMsg = e.Message;
+                    return new Dictionary<string, string>();
+                }
             }
         }
     }

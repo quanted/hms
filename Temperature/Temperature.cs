@@ -211,6 +211,11 @@ namespace HMSTemperature
                     this.gmtOffset = Convert.ToDouble(tzDetails["rawOffset"]) / 3600;
                     this.tzName = tzDetails["timeZoneId"];
                 }
+                else if (tzDetails.ContainsKey("tzOffset") && tzDetails.ContainsKey("tzName"))
+                {
+                    this.gmtOffset = Convert.ToDouble(tzDetails["tzOffset"]);
+                    this.tzName = tzDetails["tzName"];
+                }
                 //this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);         //Gets the GMT offset
                 //if (errorMsg.Contains("ERROR")) { return null; }
                 //this.tzName = ts[0].tzName;                                                                     //Gets the Timezone name
