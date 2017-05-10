@@ -18,7 +18,7 @@ namespace HMSUtils
         };
         enum Sources
         {
-            NLDAS, GLDAS, Daymet, NCDC, compare
+            NLDAS, GLDAS, Daymet, NCDC, compare, curvenumber, wgen
         };
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace HMSUtils
             }
             else
             {
-                errorMsg = "ERROR: dataset parameter was not found.\n";
+                errorMsg = "ERROR: dataset parameter not found.\n";
                 valid = false;
             }
 
@@ -48,7 +48,7 @@ namespace HMSUtils
                 Sources source;
                 if (!Enum.TryParse(parameters["source"], true, out source))
                 {
-                    errorMsg += "ERROR: source parameter was not found.\n";
+                    errorMsg += "ERROR: provided source is invalid.\n";
                     valid = false;
                 }
             }
@@ -192,7 +192,7 @@ namespace HMSUtils
         {
             errorMsg = "";
             bool valid = true;
-            switch (source)
+            switch (source.ToUpper())
             {
                 case "NLDAS":
                     DateTime minNLDASDate = new DateTime(1979, 01, 02);
@@ -220,7 +220,7 @@ namespace HMSUtils
                         valid = false;
                     }
                     return valid;
-                case "Daymet":
+                case "DAYMET":
                     DateTime minDaymetDate = new DateTime(1980, 01, 01);
                     if (DateTime.Compare(start, minDaymetDate) < 0)
                     { 
@@ -327,7 +327,7 @@ namespace HMSUtils
             errorMsg = "";
             bool valid = true;
             // Coordinate values have already been evaluated to be within the required -90:90, -180:180 range
-            switch (source)
+            switch (source.ToUpper())
             {
                 case "NLDAS":
                     if (latitude > 53 || latitude < 25)     //NLDAS spatial bounds for latitude

@@ -22,8 +22,7 @@ NLDAS_Humidity_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeser
 
 NLDAS_Temp_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:TMP2m&location=NLDAS:
 
-GLDAS_Temp_URL
-https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Tair&location=GEOM:POINT
+GLDAS_Temp_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Tair&location=GEOM:POINT
 
 NLDAS_Zonal_Wind_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:UGRD10m&location=NLDAS:
 
@@ -57,3 +56,10 @@ NCDC_URL http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
 
 NCDC_STATION_URL https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 
+CURVE_NUMBER_INT https://134.67.114.1/hms/rest/runoff
+
+CURVE_NUMBER_EXT https://172.20.100.11/hms/rest/runoff/
+
+TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
+
+TIMEZONE_GEE_INT https://172.20.100.11/hms/rest/timezone/

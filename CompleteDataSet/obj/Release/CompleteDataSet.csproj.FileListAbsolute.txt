@@ -39,3 +39,6 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\CompleteDataSet\obj\Release\CompleteDataSet.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\CompleteDataSet\obj\Release\CompleteDataSet.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\Visual Studio 2015\Projects\HMS\CompleteDataSet\obj\Release\CompleteDataSet.pdb
+C:\hms\CompleteDataSet\obj\Release\CompleteDataSet.csprojResolveAssemblyReference.cache
+C:\hms\CompleteDataSet\obj\Release\CompleteDataSet.dll
+C:\hms\CompleteDataSet\obj\Release\CompleteDataSet.pdb

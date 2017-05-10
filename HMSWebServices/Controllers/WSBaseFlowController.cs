@@ -1,31 +1,39 @@
 ﻿using HMSWebServices.Models;
+using Swashbuckle.Examples;
+using Swashbuckle.Swagger.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Description;
 
 namespace HMSWebServices.Controllers
 {
     public class WSBaseFlowController : ApiController
     {
+
         public Dictionary<string, string> parameters;
 
         /// <summary>
         /// GET method for retrieving base flow data using the parameters provided in the param string.
         /// </summary>
-        /// <param name="param"></param>
+        /// <param name="queryString"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("api/WSBaseFlow/{param}")]
-        public HMSJSON.HMSJSON.HMSData Get(string param)
+        [Route("api/WSBaseFlow/{queryString}")]
+        [SwaggerResponse(HttpStatusCode.OK, Type=typeof(HMSJSON.HMSJSON.HMSData))]
+        [SwaggerResponseExample(HttpStatusCode.OK, typeof(WSHMSResponseExample))]
+        [SwaggerRequestExample(typeof(string), typeof(WSBaseFlowGetRequestExample))]
+        public HMSJSON.HMSJSON.HMSData Get(string queryString)
         {
             string errorMsg = "";
             HMSUtils.Utils utils = new HMSUtils.Utils();
-            parameters = utils.ParseParameterString(out errorMsg, param);
+            parameters = utils.ParseParameterString(out errorMsg, queryString);
             parameters["dataset"] = "baseflow";
             if (errorMsg.Contains("ERROR"))
             {
@@ -50,6 +58,8 @@ namespace HMSWebServices.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("api/WSBaseFlow/")]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(HMSJSON.HMSJSON.HMSData))]
+        [SwaggerResponseExample(HttpStatusCode.OK, typeof(WSHMSResponseExample))]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()
         {
             string guid = Guid.NewGuid().ToString();

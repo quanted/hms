@@ -11,7 +11,12 @@ namespace HMSGDAL
 {
     class HMSRaster
     {
-        
+        /// <summary>
+        /// EXPERIMENTAL, currently unused.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="gdalName"></param>
+        /// <returns></returns>
         public Bitmap ReadRaster(out string errorMsg, string gdalName)
         {
             errorMsg = "";

@@ -53,7 +53,6 @@ C:\hms\HMSJSON\bin\Debug\NetTopologySuite.IO.ShapeFile.dll
 C:\hms\HMSJSON\bin\Debug\ogr_csharp.dll
 C:\hms\HMSJSON\bin\Debug\osr_csharp.dll
 C:\hms\HMSJSON\bin\Debug\HMSGDAL.pdb
-C:\hms\HMSJSON\bin\Debug\HMSGDAL.dll.config
 C:\hms\HMSJSON\bin\Debug\HMSTimeSeries.pdb
 C:\hms\HMSJSON\bin\Debug\Newtonsoft.Json.xml
 C:\hms\HMSJSON\bin\Debug\NetTopologySuite.xml
@@ -66,3 +65,4 @@ C:\hms\HMSJSON\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSJSON\obj\Debug\HMSJSON.csprojResolveAssemblyReference.cache
 C:\hms\HMSJSON\obj\Debug\HMSJSON.dll
 C:\hms\HMSJSON\obj\Debug\HMSJSON.pdb
+C:\hms\HMSJSON\bin\Debug\HMSGDAL.dll.config

@@ -343,7 +343,7 @@ namespace HMSTimeSeries
                 SetLDASTimeSeries(out errorMsg, ts, data);
                 if (errorMsg.Contains("ERROR")) { return; }
             }
-            else if (source.Contains("daymet"))
+            else if (source.Contains("daymet") || source.Contains("wgen"))
             {
                 this.timeSeries = ts.ParseForDaymetData(out errorMsg, data);
                 this.metaData = ts.ParseForDaymetMetaData(out errorMsg, data);

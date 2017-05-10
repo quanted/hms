@@ -11,18 +11,30 @@ namespace HMSJSON
 {
     public class HMSJSON
     {
-        //public string timeseriesJSON { get; set; }
-        //public string metadataJSON { get; set; }
-        //public string datasetJSON { get; set; }
-        //public string sourceJSON { get; set; }
-        //public string newMetadataJSON { get; set; }
-        //private Dictionary<string, string> metaDictionary { get; set; }
         
+        /// <summary>
+        /// HMS time series data object.
+        /// </summary>
         public struct HMSData
         {
+            /// <summary>
+            /// Dataset for the time series.
+            /// </summary>
             public string dataset;
+
+            /// <summary>
+            /// Source of the dataset.
+            /// </summary>
             public string source;
+
+            /// <summary>
+            /// Metadata dictionary providing details for the time series.
+            /// </summary>
             public Dictionary<string, string> metadata;
+
+            /// <summary>
+            /// Time series data.
+            /// </summary>
             public Dictionary<string, List<string>> data;
         };
 
