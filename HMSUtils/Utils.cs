@@ -18,7 +18,7 @@ namespace HMSUtils
         };
         enum Sources
         {
-            NLDAS, GLDAS, Daymet, NCDC, compare
+            NLDAS, GLDAS, Daymet, NCDC, compare, curvenumber, wgen
         };
 
         /// <summary>
@@ -36,9 +36,10 @@ namespace HMSUtils
             {
                 parameters["dataset"] = parameters["dataset"].ToLower();
             }
+            else if (parameters.ContainsKey("geometry")) { }
             else
             {
-                errorMsg = "ERROR: dataset parameter was not found.\n";
+                errorMsg = "ERROR: dataset parameter not found.\n";
                 valid = false;
             }
 
@@ -46,12 +47,13 @@ namespace HMSUtils
             if (parameters.ContainsKey("source"))
             {
                 Sources source;
-                if (!Enum.TryParse(parameters["source"], out source))
+                if (!Enum.TryParse(parameters["source"], true, out source))
                 {
-                    errorMsg += "ERROR: source parameter was not found.\n";
+                    errorMsg += "ERROR: provided source is invalid.\n";
                     valid = false;
                 }
             }
+            else if (parameters["dataset"].Contains("geometry")) { }
             else
             {
                 errorMsg += "ERROR: source parameter not found, source is required.\n";
@@ -66,6 +68,7 @@ namespace HMSUtils
                     valid = DateValidation(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"]);
                 }
             }
+            else if (parameters["dataset"].Contains("geometry")) { }
             else
             {
                 errorMsg += "ERROR: startDate and endDate parameters not found, startDate and endDate are required.\n";
@@ -192,7 +195,7 @@ namespace HMSUtils
         {
             errorMsg = "";
             bool valid = true;
-            switch (source)
+            switch (source.ToUpper())
             {
                 case "NLDAS":
                     DateTime minNLDASDate = new DateTime(1979, 01, 02);
@@ -220,7 +223,7 @@ namespace HMSUtils
                         valid = false;
                     }
                     return valid;
-                case "Daymet":
+                case "DAYMET":
                     DateTime minDaymetDate = new DateTime(1980, 01, 01);
                     if (DateTime.Compare(start, minDaymetDate) < 0)
                     { 
@@ -327,7 +330,7 @@ namespace HMSUtils
             errorMsg = "";
             bool valid = true;
             // Coordinate values have already been evaluated to be within the required -90:90, -180:180 range
-            switch (source)
+            switch (source.ToUpper())
             {
                 case "NLDAS":
                     if (latitude > 53 || latitude < 25)     //NLDAS spatial bounds for latitude
@@ -471,7 +474,8 @@ namespace HMSUtils
         {
             errorMsg = "";
             HMSNCDC.HMSNCDC details = new HMSNCDC.HMSNCDC();
-            Dictionary<string, string> stationDetails = details.GetStationDetails(out errorMsg, stationID);
+            Dictionary<string, string> stationDetails = new Dictionary<string, string>();
+            stationDetails = details.GetStationDetails(out errorMsg, stationID);
             if(errorMsg != "")
             {
                 stationDetails.Add("errorMsg", errorMsg);
@@ -508,22 +512,46 @@ namespace HMSUtils
         public Dictionary<string, string> GetTZInfo(out string errorMsg, double latitude, double longitude)
         {
             errorMsg = "";
-            string key = "AIzaSyDUdVJFt_SUwqfNTfziXXUFK7gkHxTnRIE";     // Personal google api key, to be replaced by project key
-            string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
-            string location = "location=" + latitude.ToString() + "," + longitude.ToString();
-            string timeStamp = "timestamp=1331161200";
-            string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
-            try
+            bool useGEE = true;
+
+            if (useGEE == true)
             {
-                WebClient wc = new WebClient();
-                byte[] buffer = wc.DownloadData(completeUrl);
-                string resultString = Encoding.UTF8.GetString(buffer);
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+                string url = urls["TIMEZONE_GEE_INT"];
+                string queryString = "latitude=" + latitude.ToString() + "&longitude=" + longitude.ToString();
+                string completeUrl = url + queryString;
+                try
+                {
+                    WebClient wc = new WebClient();
+                    byte[] buffer = wc.DownloadData(completeUrl);
+                    string resultString = Encoding.UTF8.GetString(buffer);
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                }
+                catch (Exception e)
+                {
+                    errorMsg = e.Message;
+                    return new Dictionary<string, string>();
+                }
             }
-            catch (Exception e)
+            else
             {
-                errorMsg = e.Message;
-                return new Dictionary<string, string>();
+                string key = "AIzaSyDUdVJFt_SUwqfNTfziXXUFK7gkHxTnRIE";     // Personal google api key, to be replaced by project key
+                string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
+                string location = "location=" + latitude.ToString() + "," + longitude.ToString();
+                string timeStamp = "timestamp=1331161200";
+                string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
+                try
+                {
+                    WebClient wc = new WebClient();
+                    byte[] buffer = wc.DownloadData(completeUrl);
+                    string resultString = Encoding.UTF8.GetString(buffer);
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
+                }
+                catch (Exception e)
+                {
+                    errorMsg = e.Message;
+                    return new Dictionary<string, string>();
+                }
             }
         }
     }

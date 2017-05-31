@@ -1,0 +1,59 @@
+NLDAS_PRECIP_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:
+
+GLDAS_PRECIP_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:precip&location=GEOM:POINT
+
+NLDAS_Surface_Flow_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SSRUNsfc&location=NLDAS:
+
+GLDAS_Surface_Flow_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Qs&location=GEOM:POINT
+
+NLDAS_BaseFlow_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:BGRUNsfc&location=NLDAS:
+
+GLDAS_BaseFlow_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Qsb&location=GEOM:POINT
+
+NLDAS_Evapotrans_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:EVPsfc&location=NLDAS:
+
+GLDAS_Evapotrans_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Evap&location=GEOM:POINT
+
+NLDAS_Longwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DLWRFsfc&location=NLDAS:
+
+NLDAS_Shortwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc&location=NLDAS:
+
+NLDAS_Humidity_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:SPFH2m&location=NLDAS:
+
+NLDAS_Temp_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:TMP2m&location=NLDAS:
+
+GLDAS_Temp_URL
+https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Tair&location=GEOM:POINT
+
+NLDAS_Zonal_Wind_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:UGRD10m&location=NLDAS:
+
+NLDAS_Merid_Wind_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:VGRD10m&location=NLDAS:
+
+NLDAS_0_10_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM0-10cm&location=NLDAS:
+
+NLDAS_10_40_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM10-40cm&location=NLDAS:
+
+NLDAS_40_100_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM40-100cm&location=NLDAS:
+
+NLDAS_100_200_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM100-200cm&location=NLDAS:
+
+NLDAS_0_100_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM0-100cm&location=NLDAS:
+
+NLDAS_0_200_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM0-200cm&location=NLDAS:
+
+GLDAS_0_10_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:SOILM0-10cm&location=GEOM:POINT
+
+GLDAS_10_40_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:SOILM10-40cm&location=GEOM:POINT
+
+GLDAS_40_100_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:SOILM40-100cm&location=GEOM:POINT
+
+GLDAS_0_100_Soil_Moisture_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:SOILM0-100cm&location=GEOM:POINT
+
+Daymet_Precip_URL https://daymet.ornl.gov/data/send/saveData?
+
+Daymet_Temp_URL https://daymet.ornl.gov/data/send/saveData?
+
+NCDC_URL http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
+
+NCDC_STATION_URL https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
+

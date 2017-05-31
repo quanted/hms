@@ -7,9 +7,14 @@ using System.IO;
 using System.Net;
 using System.Web;
 using System.Net.Security;
+using System.Threading;
 
 namespace HMSLDAS
 {
+
+    /// <summary>
+    /// Interface for dataset object. TODO: move object definition to new project, like HMSDatasets
+    /// </summary>
     public interface IHMSModule
     {
         double latitude { get; set; }                            // Latitude for timeseries
@@ -62,7 +67,6 @@ namespace HMSLDAS
         public string LDAS(out string errorMsg, double latitude, double longitude, DateTime startDate, DateTime endDate, bool local, string source, ref double gmtOffset, HMSTimeSeries.HMSTimeSeries ts, string wsPath)
         {
             errorMsg = "";
-
             string data = GetData(out errorMsg, latitude, longitude, startDate, endDate, local, source, ref gmtOffset, ts, wsPath);
             return data;
         }
@@ -84,7 +88,6 @@ namespace HMSLDAS
         {
             errorMsg = "";
 
-            double offset = 0.0;
             DateTime newStartDate = new DateTime();
             DateTime newEndDate = new DateTime();
 
@@ -92,14 +95,8 @@ namespace HMSLDAS
             if (local == true)
             {
                 HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
-                if (gmtOffset == 0.0)
-                {
-                    offset = gdal.GetGMTOffset(out errorMsg, latitude, longitude, ts);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                gmtOffset = offset;
-                newStartDate = gdal.AdjustDateByOffset(out errorMsg, offset, startDate, true);
-                newEndDate = gdal.AdjustDateByOffset(out errorMsg, offset, endDate, false);
+                newStartDate = gdal.AdjustDateByOffset(out errorMsg, gmtOffset, startDate, true);
+                newEndDate = gdal.AdjustDateByOffset(out errorMsg, gmtOffset, endDate, false);
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
             else
@@ -150,50 +147,36 @@ namespace HMSLDAS
         private string ConstructURL(out string errorMsg, double latitude, double longitude, DateTime startDate, DateTime endDate, string source, string wsPath)
         {
             errorMsg = "";
-            //string prepInfo = System.IO.Directory.GetCurrentDirectory() + @"\url_info.txt";  // URL configuration info.
-            string prepInfo = System.AppDomain.CurrentDomain.BaseDirectory + @"bin\url_info.txt";  // URL configuration info.
             StringBuilder builder = new StringBuilder();
-            //string urlStr = "";
-            string[] lineData;
             try
             {
-                foreach (string line in File.ReadLines(prepInfo))
-                {
-                    lineData = line.Split(' ');
-                    if (lineData[0].Equals(source + "_URL", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //urlStr = lineData[1];
-                        builder.Append(lineData[1]);
-                        break;
-                    }
-                }
+				// Reading value from Application variables
+				Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+                Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+				builder.Append(caselessUrls[source + "_URL"]);
             }
-            catch
+			catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to load URL details from configuration file.";
+				errorMsg = "ERROR: Unable to load URL details from configuration file. " + ex.Message;
                 return null;
             }
-            if (source.Contains("NLDAS"))
+            if (source.Contains("NLDAS") || source.Contains("nldas"))
             {
                 //Add X and Y coordinates
                 string[] xy = GetXYNLDAS(out errorMsg, longitude, latitude); // [0] = x, [1] = y
                 if (errorMsg.Contains("ERROR")) { return null; }
                 builder.Append("X" + xy[0] + "-" + "Y" + xy[1]);
-                //urlStr = urlStr + "X" + xy[0] + "-" + "Y" + xy[1];
             }
-            else if(source.Contains("GLDAS"))
+            else if(source.Contains("GLDAS") || source.Contains("gldas"))
             {
                 //Add latitude/longitude points
                 builder.Append(@"%28" + longitude + @",%20" + latitude + @"%29");
-                //urlStr = urlStr + @"%28" + longitude + @",%20" + latitude + @"%29";
             }
             //Add Start and End Date
             string[] startDT = startDate.ToString("yyyy-MM-dd HH").Split(' ');
             string[] endDT = endDate.ToString("yyyy-MM-dd HH").Split(' ');
-            //urlStr = urlStr + @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1];
             builder.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
             //Add format type 
-            //return urlStr + @"&type=asc2";
             return builder.ToString();
         }
 
@@ -207,18 +190,29 @@ namespace HMSLDAS
         {
             errorMsg = "";
             string data = "";
-            WebClient myWC = new WebClient();
             string[] checkData;
             try
             {
-                //https certification ERROR requires the following statement to successfully retrieve data
-                //ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
-                byte[] dataBuffer = myWC.DownloadData(url);
-                data = Encoding.UTF8.GetString(dataBuffer);
+                int retries = 5;                                        // Max number of request retries
+                string status = "";                                     // response status code
+
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    Thread.Sleep(100);
+                    WebRequest wr = WebRequest.Create(url);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data = reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested data.";
+                errorMsg = "ERROR: Unable to download requested ldas data. " + ex.Message;
                 return null;
             }
             if (data.Contains("ERROR"))
@@ -238,11 +232,10 @@ namespace HMSLDAS
                 }
                 else
                 {
-                    errorMsg = "ERROR: Failed to return data for the selected date and location.";
+                    errorMsg = "ERROR: Failed to return ldas data for the selected date and location.";
                     return null;
                 }
             }
-            myWC.Dispose();
             return data;
         }
 
@@ -273,7 +266,6 @@ namespace HMSLDAS
             results[0] = Convert.ToString(Math.Round(x, MidpointRounding.AwayFromZero));
             results[1] = Convert.ToString(Math.Round(y, MidpointRounding.AwayFromZero));
             return results;
-
         }
 
         /// <summary>

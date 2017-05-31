@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HMSWebServices</name>
+    </assembly>
+    <members>
+        <member name="M:HMSWebServices.Controllers.WSBaseFlowController.Get(System.String)">
+            <summary>
+            GET method for retrieving base flow data using the parameters provided in the param string.
+            </summary>
+            <param name="queryString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSBaseFlowController.Post">
+            <summary>
+            POST method for getting base flow data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSEvapotranspirationController.Get(System.String)">
+            <summary>
+            GET method for retrieving evapotranspiration data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSEvapotranspirationController.Post">
+            <summary>
+            POST method for getting Evapotranspiration data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSHMSController.Post">
+            <summary>
+            POST method using WSHMS api, requires additional 'dataset' parameter.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSLandSurfaceFlowController.Get(System.String)">
+            <summary>
+            GET method for retrieving land surface flow data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSLandSurfaceFlowController.Post">
+            <summary>
+            POST method for retrieving LandSurfaceFlow data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSPrecipitationController.Get(System.String)">
+            <summary>
+            GET method for retrieving precipitaiton data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSPrecipitationController.Post">
+            <summary>
+            POST method for retrieving precipitation data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSSoilMoistureController.Get(System.String)">
+            <summary>
+            GET method soil moisture data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSSoilMoistureController.Post">
+            <summary>
+            POST method to get soil moisture data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSTemperatureController.Get(System.String)">
+            <summary>
+            Gets temperature data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSTemperatureController.Post">
+            <summary>
+            POST method for getting temperature data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSTotalFlowController.Get(System.String)">
+            <summary>
+            Gets total flow data using the parameters provided in the param string.
+            </summary>
+            <param name="param"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Controllers.WSTotalFlowController.Post">
+            <summary>
+            POST method for getting total flow data.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:HMSWebServices.Default.form1">
+            <summary>
+            form1 control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify move field declaration from designer file to code-behind file.
+            </remarks>
+        </member>
+        <member name="T:HMSWebServices.FileUploader">
+            <summary>
+            Summary description for FileUploader
+            </summary>
+        </member>
+        <member name="M:HMSWebServices.Global.ReadURLFile(System.String)">
+            <summary>
+            Reads the contents of a space delimited file and populates urlList dictionary adding it to the application variables.
+            </summary>
+            <param name="fileName">File name.</param>
+        </member>
+        <member name="M:HMSWebServices.Models.WSBaseFlow.GetBaseFlowData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets baseflow data using the parameters in the dictionary .
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSHMS.GetHMSData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets the specified data, as 'dataset', using the parameters in the dictionary.
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSHMS.ConvertLayersString(System.String@,System.String)">
+            <summary>
+            Converts the argument string that contains the selected layers to an int[]
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="layerString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSLandSurfaceFlow.GetLandSurfaceFlowData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets landsurfaceflow data using the parameters in the dictionary.
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSLandSurfaceFlow.GetLandSurfaceFlowCompareData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets landsurfaceflow comparision data using the latitude/longitude values in parameters.
+            </summary>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSPrecipitation.GetPrecipitationData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets precipitation data using the parameters in the dictionary.
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSPrecipitation.GetPrecipitationCompareData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets precipitation comparision data using the stationID provided in parameters.
+            </summary>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSSoilMoisture.ConvertLayersString(System.String@,System.String)">
+            <summary>
+            Converts the argument string that contains the selected layers to an int[]
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="layerString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSTemperature.GetTemperatureData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets termpature data using the parameters in the dictionary.
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="M:HMSWebServices.Models.WSTotalFlow.GetTotalFlowData(System.String@,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Gets total flow data using the parameters in the dictionary.
+            </summary>
+            <param name="errorMsg"></param>
+            <param name="parameters"></param>
+            <returns></returns>
+        </member>
+        <member name="T:HMSWebServices.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:HMSWebServices.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:HMSWebServices.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+    </members>
+</doc>

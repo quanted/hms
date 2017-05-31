@@ -17,10 +17,11 @@ namespace HMSWebServices.Models
         {
             errorMsg = "";
             HMSUtils.Utils utils = new HMSUtils.Utils();
-
+            HMSJSON.HMSJSON jsonUtils = new HMSJSON.HMSJSON();
             switch (parameters["dataset"])
             {
                 case "baseflow":
+                case "subsurfaceflow":
                     HMSBaseFlow.BaseFlow bFlow;
                     if (parameters.ContainsKey("latitude") && parameters.ContainsKey("longitude"))
                     {
@@ -92,6 +93,15 @@ namespace HMSWebServices.Models
                     }
                     precip.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
+
+                    if (parameters.ContainsKey("temporalresolution"))
+                    {
+                        if (!parameters["temporalresolution"].Contains("default"))
+                        {
+                            precip.jsonData = jsonUtils.CollectDataTotals(out errorMsg, precip.jsonData, parameters["temporalresolution"]);
+                        }
+                    }
+                    if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return precip.jsonData;
                 case "soilmoisture":
                     HMSSoilMoisture.SoilMoisture soilM;
@@ -148,6 +158,15 @@ namespace HMSWebServices.Models
                     tFlow.GetDataSetsObject(out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return utils.ReturnError(errorMsg); }
                     return tFlow.jsonData;
+                case "geometry":
+                    HMSGDAL.HMSGDAL gdal = new HMSGDAL.HMSGDAL();
+                    gdal.geoJSON = parameters["geojson"];
+                    HMSJSON.HMSJSON.HMSData geomData = new HMSJSON.HMSJSON.HMSData();
+                    geomData.source = "geometry";
+                    geomData.metadata = new Dictionary<string, string>();
+                    double[] centroid = gdal.ReturnCentroidFromGeoJSON(out errorMsg);
+                    geomData.metadata["centroid"] = centroid[0].ToString() + ", " + centroid[1].ToString();
+                    return geomData;
                 default:
                     return utils.ReturnError("ERROR: dataset provided not found.");
             }

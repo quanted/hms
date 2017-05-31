@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Precipitation", "Precipitation\Precipitation.csproj", "{BCB6055C-BAE3-4A93-A6B7-0AB305D8EB40}"
 EndProject
@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompleteDataSet", "Complete
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoilMoisture", "SoilMoisture\SoilMoisture.csproj", "{2B040225-C65A-4358-A614-1FDC50D4CBBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests_HMSGDAL", "UnitTests_HMSGDAL\UnitTests_HMSGDAL.csproj", "{FB91C96B-D502-44E9-8BB8-B4F8A540A2D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSGDAL.Tests", "UnitTests_HMSGDAL\HMSGDAL.Tests.csproj", "{FB91C96B-D502-44E9-8BB8-B4F8A540A2D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HMSDaymet", "HMSDaymet\HMSDaymet.csproj", "{0FC7FAE1-3D38-44B7-B6D7-4DCF951D9F76}"
 EndProject

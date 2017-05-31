@@ -20,19 +20,19 @@ namespace HMSGDAL.Tests
         /// <summary>
         /// Executes a unit test on the GetGMTOffset method, using the test double arrays for inputs and expected outputs. All results are expected to be valid.
         /// </summary>
-        [TestMethod()]
-        public void GetGMTOffsetSerialTest()
-        {
-            string errorMsg = "";
-            HMSTimeSeries.HMSTimeSeries ts = new HMSTimeSeries.HMSTimeSeries();
-            HMSGDAL testGDAL = new HMSGDAL();
-            double results;
-            for (int i = 0; i < test_gmtOffset.Length; i++)
-            {
-                results = testGDAL.GetGMTOffset(out errorMsg, test_latitude[i], test_longitude[i], ts);
-                Assert.AreEqual(test_gmtOffset[i], results);
-            }
-        }
+        //[TestMethod()]
+        //public void GetGMTOffsetSerialTest()
+        //{
+        //    string errorMsg = "";
+        //    HMSTimeSeries.HMSTimeSeries ts = new HMSTimeSeries.HMSTimeSeries();
+        //    HMSGDAL testGDAL = new HMSGDAL();
+        //    double results;
+        //    for (int i = 0; i < test_gmtOffset.Length; i++)
+        //    {
+        //        results = testGDAL.GetGMTOffset(out errorMsg, test_latitude[i], test_longitude[i], ts);
+        //        Assert.AreEqual(test_gmtOffset[i], results);
+        //    }
+        //}
 
         //Invalid test coordinates
         double[] invalid_latitude = new double[] { 181.0, 0.0, 181.0, -181.0, 0.0, -181.0 };
@@ -41,21 +41,21 @@ namespace HMSGDAL.Tests
         /// <summary>
         /// Executes a unit test on the GetGMTOffset method, using the invalid test arrays. All results expected to be invalid.
         /// </summary>
-        [TestMethod()]
-        public void GetGMTOffsetInvalidCoordinates()
-        {
-            string errorMsg = "";
-            HMSTimeSeries.HMSTimeSeries ts = new HMSTimeSeries.HMSTimeSeries();
-            HMSGDAL testGDAL = new HMSGDAL();
-            string result = "";
-            for (int i = 0; i < invalid_latitude.Length; i++)
-            {
-                double results = testGDAL.GetGMTOffset(out errorMsg, invalid_latitude[i], invalid_longitude[i], ts);
-                if (i == 1 || i == 4) { result = "ERROR: Invalid longitude value."; }
-                else { result = "ERROR: Invalid latitude value."; }
-                Assert.AreEqual(result, errorMsg);
-            }
-        }
+        //[TestMethod()]
+        //public void GetGMTOffsetInvalidCoordinates()
+        //{
+        //    string errorMsg = "";
+        //    HMSTimeSeries.HMSTimeSeries ts = new HMSTimeSeries.HMSTimeSeries();
+        //    HMSGDAL testGDAL = new HMSGDAL();
+        //    string result = "";
+        //    for (int i = 0; i < invalid_latitude.Length; i++)
+        //    {
+        //        double results = testGDAL.GetGMTOffset(out errorMsg, invalid_latitude[i], invalid_longitude[i], ts);
+        //        if (i == 1 || i == 4) { result = "ERROR: Invalid longitude value."; }
+        //        else { result = "ERROR: Invalid latitude value."; }
+        //        Assert.AreEqual(result, errorMsg);
+        //    }
+        //}
 
         //Valid date transform values
         string[] test_initial_dates = new string[] { "2000-01-01 00", "1999-12-31 23", "2000-01-01 10", "1999-12-31 22", "2000-01-01 09", "2000-01-01 12", "2000-01-01 00", "2000-01-01 03", "2000-01-01 02", "2000-01-01 08", "1999-12-31 10"};
@@ -160,6 +160,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method using a sample catchment shapefile.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void ReturnCentroidTestResult()
@@ -174,6 +175,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method using an invalid catchment shapefile path. Exception expected.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(NullReferenceException))]
@@ -187,6 +189,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on CellAreaInShapefile method testing for coordinate count and area precentages. Results expected to be valid.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void CellAreaInShapefileValidResults()
@@ -209,6 +212,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method with coordinate not inside shapefile, result is count=0, and with cellwidths of negative values. 
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void CellAreaInShapefileInValidResults()

@@ -11,6 +11,7 @@ using System.Web;
 using System.Web.Http;
 using HMSWebServices.Models;
 using System.Collections.Specialized;
+using System.Web.Http.Cors;
 
 namespace HMSWebServices.Controllers
 {
@@ -33,6 +34,7 @@ namespace HMSWebServices.Controllers
         /// POST method using WSHMS api, requires additional 'dataset' parameter.
         /// </summary>
         /// <returns></returns>
+        [EnableCors(origins: "*", headers: "*", methods: "*")]
         [HttpPost]
         [Route("api/WSHMS/")]
         public async Task<HMSJSON.HMSJSON.HMSData> Post()

@@ -24,7 +24,6 @@ namespace HMSWebServices
 			// Load url_info.txt file from App_Data
 			ReadURLFile("url_info.txt");
             //ReadTZFile("tzList", "tz_info.csv");          // Obsolete with google api call for timezone info
-
         }
 
 

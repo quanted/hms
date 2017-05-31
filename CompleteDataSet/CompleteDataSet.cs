@@ -6,6 +6,8 @@ shortwave radiation, and longwave radiation.
 5 total data points are provided, the central point that is given by the latitude/longitude variables, 
 and the four surrounding data points.
 
+OBSOLETE, TO BE DELETED
+
 */
 
 using System;
@@ -232,15 +234,15 @@ namespace HMSCompleteDataSet
             this.latitude = center[0];
             this.longitude = center[1];
 
-            if (this.localTime == true && offset == 0.0)
-            {
-                this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
-                if (errorMsg.Contains("ERROR")) { return null; }
-                this.tzName = ts[0].tzName;              //Gets the Timezone name
-                if (errorMsg.Contains("ERROR")) { return null; }
-                this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
-                this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
-            }
+            //if (this.localTime == true && offset == 0.0)
+            //{
+            //    this.gmtOffset = gdal.GetGMTOffset(out errorMsg, this.latitude, this.longitude, ts[0]);    //Gets the GMT offset
+            //    if (errorMsg.Contains("ERROR")) { return null; }
+            //    this.tzName = ts[0].tzName;              //Gets the Timezone name
+            //    if (errorMsg.Contains("ERROR")) { return null; }
+            //    this.startDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.startDate, true);
+            //    this.endDate = gdal.AdjustDateByOffset(out errorMsg, this.gmtOffset, this.endDate, false);
+            //}
 
             HMSTimeSeries.HMSTimeSeries newPrecipTS;
             HMSTimeSeries.HMSTimeSeries newHumidTS;
