@@ -160,6 +160,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method using a sample catchment shapefile.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void ReturnCentroidTestResult()
@@ -174,6 +175,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method using an invalid catchment shapefile path. Exception expected.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         [ExpectedException(typeof(NullReferenceException))]
@@ -187,6 +189,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on CellAreaInShapefile method testing for coordinate count and area precentages. Results expected to be valid.
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void CellAreaInShapefileValidResults()
@@ -209,6 +212,7 @@ namespace HMSGDAL.Tests
 
         /// <summary>
         /// Executes a unit test on ReturnCentroid method with coordinate not inside shapefile, result is count=0, and with cellwidths of negative values. 
+        /// NEED TO MODIFY FOR NEW DIRECTORY LOCATION
         /// </summary>
         [TestMethod()]
         public void CellAreaInShapefileInValidResults()

@@ -11,6 +11,9 @@ namespace HMSWebServices
         {
             // Web API configuration and services
 
+            // Enable Cross-Origin Requests
+            config.EnableCors();
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 

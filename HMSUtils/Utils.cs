@@ -36,6 +36,7 @@ namespace HMSUtils
             {
                 parameters["dataset"] = parameters["dataset"].ToLower();
             }
+            else if (parameters.ContainsKey("geometry")) { }
             else
             {
                 errorMsg = "ERROR: dataset parameter not found.\n";
@@ -52,6 +53,7 @@ namespace HMSUtils
                     valid = false;
                 }
             }
+            else if (parameters["dataset"].Contains("geometry")) { }
             else
             {
                 errorMsg += "ERROR: source parameter not found, source is required.\n";
@@ -66,6 +68,7 @@ namespace HMSUtils
                     valid = DateValidation(out errorMsg, parameters["startDate"], parameters["endDate"], parameters["source"]);
                 }
             }
+            else if (parameters["dataset"].Contains("geometry")) { }
             else
             {
                 errorMsg += "ERROR: startDate and endDate parameters not found, startDate and endDate are required.\n";

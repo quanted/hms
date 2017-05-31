@@ -259,6 +259,10 @@ namespace HMSNCDC
         /// <returns></returns>
         private double NCDCAttributeCheck(out string errorMsg, double value, string attribute)
         {
+
+            // TODO: include a count of thrown out data entries in meta data.
+            // TODO: add attribute column to data output for data entries handling
+
             errorMsg = "";
             if (attribute.Contains("[") || attribute.Contains("]"))             // Begin and end of deleted period, during the given hour
             {

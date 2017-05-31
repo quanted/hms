@@ -81,6 +81,7 @@ C:\hms\WindowsFormsApplication1\bin\Release\HMSGDAL.cs
 C:\hms\WindowsFormsApplication1\bin\Release\HMSJSON.cs
 C:\hms\WindowsFormsApplication1\bin\Release\App.config
 C:\hms\WindowsFormsApplication1\bin\Release\HMSLDAS.cs
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.dll.config
 C:\hms\WindowsFormsApplication1\bin\Release\Program.cs
 C:\hms\WindowsFormsApplication1\bin\Release\WindowsFormsApplication1.exe.config
 C:\hms\WindowsFormsApplication1\bin\Release\WindowsFormsApplication1.exe
@@ -107,10 +108,14 @@ C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.GeoJSON.dll
 C:\hms\WindowsFormsApplication1\bin\Release\gdal_csharp.dll
 C:\hms\WindowsFormsApplication1\bin\Release\ProjNet.dll
 C:\hms\WindowsFormsApplication1\bin\Release\HMSBASINS.dll
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Statistics.dll
 C:\hms\WindowsFormsApplication1\bin\Release\PowerCollections.dll
 C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.dll
 C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.ShapeFile.dll
 C:\hms\WindowsFormsApplication1\bin\Release\ogr_csharp.dll
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Math.dll
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.dll
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Math.Core.dll
 C:\hms\WindowsFormsApplication1\bin\Release\osr_csharp.dll
 C:\hms\WindowsFormsApplication1\bin\Release\BaseFlow.pdb
 C:\hms\WindowsFormsApplication1\bin\Release\BaseFlow.dll.config
@@ -146,9 +151,13 @@ C:\hms\WindowsFormsApplication1\bin\Release\GeoAPI.xml
 C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.GeoJSON.xml
 C:\hms\WindowsFormsApplication1\bin\Release\HMSBASINS.pdb
 C:\hms\WindowsFormsApplication1\bin\Release\HMSBASINS.dll.config
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Statistics.xml
 C:\hms\WindowsFormsApplication1\bin\Release\PowerCollections.xml
 C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.xml
 C:\hms\WindowsFormsApplication1\bin\Release\NetTopologySuite.IO.ShapeFile.xml
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Math.xml
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.xml
+C:\hms\WindowsFormsApplication1\bin\Release\Accord.Math.Core.xml
 C:\hms\WindowsFormsApplication1\obj\Release\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
 C:\hms\WindowsFormsApplication1\obj\Release\WindowsFormsApplication1.DataFrequency.resources
 C:\hms\WindowsFormsApplication1\obj\Release\WindowsFormsApplication1.Form1.resources

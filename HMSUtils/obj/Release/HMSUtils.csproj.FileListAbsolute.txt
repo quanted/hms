@@ -44,13 +44,15 @@
 C:\hms\HMSUtils\bin\Release\HMSGDAL.cs
 C:\hms\HMSUtils\bin\Release\HMSJSON.cs
 C:\hms\HMSUtils\bin\Release\App.config
+C:\hms\HMSUtils\bin\Release\HMSLDAS.cs
+C:\hms\HMSUtils\bin\Release\HMSUtils.dll.config
 C:\hms\HMSUtils\bin\Release\HMSUtils.dll
 C:\hms\HMSUtils\bin\Release\HMSUtils.pdb
 C:\hms\HMSUtils\bin\Release\HMSBASINS.dll
 C:\hms\HMSUtils\bin\Release\HMSJSON.dll
+C:\hms\HMSUtils\bin\Release\Newtonsoft.Json.dll
 C:\hms\HMSUtils\bin\Release\HMSGDAL.dll
 C:\hms\HMSUtils\bin\Release\HMSTimeSeries.dll
-C:\hms\HMSUtils\bin\Release\Newtonsoft.Json.dll
 C:\hms\HMSUtils\bin\Release\HMSLDAS.dll
 C:\hms\HMSUtils\bin\Release\NetTopologySuite.dll
 C:\hms\HMSUtils\bin\Release\NetTopologySuite.IO.GeoTools.dll
@@ -67,10 +69,10 @@ C:\hms\HMSUtils\bin\Release\HMSJSON.pdb
 C:\hms\HMSUtils\bin\Release\HMSJSON.dll.config
 C:\hms\HMSUtils\bin\Release\HMSBASINS.pdb
 C:\hms\HMSUtils\bin\Release\HMSBASINS.dll.config
+C:\hms\HMSUtils\bin\Release\Newtonsoft.Json.xml
 C:\hms\HMSUtils\bin\Release\HMSGDAL.pdb
 C:\hms\HMSUtils\bin\Release\HMSGDAL.dll.config
 C:\hms\HMSUtils\bin\Release\HMSTimeSeries.pdb
-C:\hms\HMSUtils\bin\Release\Newtonsoft.Json.xml
 C:\hms\HMSUtils\bin\Release\HMSLDAS.pdb
 C:\hms\HMSUtils\bin\Release\HMSLDAS.dll.config
 C:\hms\HMSUtils\bin\Release\NetTopologySuite.xml
@@ -83,5 +85,3 @@ C:\hms\HMSUtils\bin\Release\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSUtils\obj\Release\HMSUtils.csprojResolveAssemblyReference.cache
 C:\hms\HMSUtils\obj\Release\HMSUtils.dll
 C:\hms\HMSUtils\obj\Release\HMSUtils.pdb
-C:\hms\HMSUtils\bin\Release\HMSUtils.dll.config
-C:\hms\HMSUtils\bin\Release\HMSLDAS.cs

@@ -59,7 +59,9 @@ C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.ShapeFile.dll
 C:\hms\HMSLDAS\bin\Debug\ogr_csharp.dll
 C:\hms\HMSLDAS\bin\Debug\osr_csharp.dll
 C:\hms\HMSLDAS\bin\Debug\HMSGDAL.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSGDAL.dll.config
 C:\hms\HMSLDAS\bin\Debug\HMSJSON.pdb
+C:\hms\HMSLDAS\bin\Debug\HMSJSON.dll.config
 C:\hms\HMSLDAS\bin\Debug\HMSTimeSeries.pdb
 C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.xml
 C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.GeoTools.xml
@@ -72,5 +74,3 @@ C:\hms\HMSLDAS\bin\Debug\NetTopologySuite.IO.ShapeFile.xml
 C:\hms\HMSLDAS\obj\Debug\HMSLDAS.csprojResolveAssemblyReference.cache
 C:\hms\HMSLDAS\obj\Debug\HMSLDAS.dll
 C:\hms\HMSLDAS\obj\Debug\HMSLDAS.pdb
-C:\hms\HMSLDAS\bin\Debug\HMSGDAL.dll.config
-C:\hms\HMSLDAS\bin\Debug\HMSJSON.dll.config
