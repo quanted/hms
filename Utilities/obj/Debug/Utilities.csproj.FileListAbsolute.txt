@@ -1,0 +1,7 @@
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\bin\Debug\Utilities.dll
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\bin\Debug\Utilities.pdb
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\bin\Debug\Data.dll
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\bin\Debug\Data.pdb
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\obj\Debug\Utilities.csprojResolveAssemblyReference.cache
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\obj\Debug\Utilities.dll
+\\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Utilities\obj\Debug\Utilities.pdb
