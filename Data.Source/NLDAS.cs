@@ -8,16 +8,29 @@ using System.IO;
 
 namespace Data.Source
 {
+    /// <summary>
+    /// Base NLDAS class
+    /// </summary>
     public class NLDAS
     {
-
-        public string GetData(out string errorMsg, ITimeSeriesInput componentInput)
+        /// <summary>
+        /// Get data function for nldas.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="componentInput"></param>
+        /// <returns></returns>
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
         {
             errorMsg = "";
-            string url = ConstructURL(out errorMsg, componentInput);
+
+            // Constructs the url for the NLDAS data request and it's query string.
+            string url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
+
+            // Uses the constructed url to download time series data.
             string data = DownloadData(out errorMsg, url);
             if (errorMsg.Contains("ERROR")) { return null; }
+
             return data;
         }
 
@@ -27,7 +40,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, ITimeSeriesInput cInput)
+        private string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
@@ -36,7 +49,7 @@ namespace Data.Source
                 // Reading value from Application variables
                 Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
                 Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
-                sb.Append(caselessUrls[cInput.Source + "_URL"]);
+                sb.Append(caselessUrls[cInput.Source + "_" + dataset + "_URL"]);
             }
             catch (Exception ex)
             {
@@ -50,8 +63,8 @@ namespace Data.Source
             sb.Append("X" + xy[0] + "-" + "Y" + xy[1]);
 
             //Add Start and End Date
-            string[] startDT = cInput.TimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-            string[] endDT = cInput.TimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
+            string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
+            string[] endDT = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
             sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
             
             return sb.ToString();
@@ -70,8 +83,12 @@ namespace Data.Source
             string data = "";
             try
             {
+                // TODO: Read in max retry attempt from config file.
                 int retries = 5;
+
+                // Response status message
                 string status = "";
+
                 while (retries > 0 && !status.Contains("OK"))
                 {
                     Thread.Sleep(100);
@@ -100,7 +117,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="point">ICoordinate</param>
         /// <returns></returns>
-        private string[] GetXYCoordinate(out string errorMsg, ICoordinate point)
+        private string[] GetXYCoordinate(out string errorMsg, IPointCoordinate point)
         {
             errorMsg = "";
             double xMax = 463.0;
@@ -130,7 +147,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="point">ICoordinate</param>
         /// <returns>[Latitude, Longitude]</returns>
-        public double[] DetermineReturnCoordinates(out string errorMsg, ICoordinate point)
+        public double[] DetermineReturnCoordinates(out string errorMsg, IPointCoordinate point)
         {
             errorMsg = "";
             double[] coord = new double[2];
@@ -150,7 +167,7 @@ namespace Data.Source
         /// <param name="component"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public ITimeSeries SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeries output, ITimeSeriesInput input)
+        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
@@ -168,7 +185,7 @@ namespace Data.Source
         /// <param name="data"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetMetadata(out string errorMsg, string metaData, ITimeSeries output)
+        private Dictionary<string, string> SetMetadata(out string errorMsg, string metaData, ITimeSeriesOutput output)
         {
             errorMsg = "";
             Dictionary<string, string> meta = output.Metadata;

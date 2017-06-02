@@ -5,6 +5,8 @@ using System.Web.Http.Description;
 
 namespace Web.Services.Areas.HelpPage
 {
+    /// <summary>
+    /// </summary>
     public static class ApiDescriptionExtensions
     {
         /// <summary>

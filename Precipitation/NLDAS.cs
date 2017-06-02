@@ -5,16 +5,25 @@ using System.Text;
 
 namespace Precipitation
 {
-    class NLDAS
+    /// <summary>
+    /// Precipitation NLDAS class
+    /// </summary>
+    public class NLDAS
     {
-
-        public ITimeSeries GetData(out string errorMsg, ITimeSeries output, ITimeSeriesInput input)
+        /// <summary>
+        /// Makes the GetData call to the base NLDAS class.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
-            string data = nldas.GetData(out errorMsg, input);
+            string data = nldas.GetData(out errorMsg, "PRECIP", input);
             if (errorMsg.Contains("ERROR")) { return null; }
-            ITimeSeries setOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            ITimeSeriesOutput setOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
             return setOutput;
         }

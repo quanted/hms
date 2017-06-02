@@ -7,7 +7,7 @@ namespace Data
     public interface ITimeSeriesComponent
     {
 
-        ITimeSeries Output { get; set; }
+        ITimeSeriesOutput Output { get; set; }
         ITimeSeriesInput Input { get; set; }
 
     }

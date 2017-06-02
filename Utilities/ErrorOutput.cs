@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Utilities
 {
-    public class ErrorOutput : ITimeSeries
+    public class ErrorOutput : ITimeSeriesOutput
     {
 
         // Implement ITimeSeries interface
@@ -30,9 +30,9 @@ namespace Utilities
         /// </summary>
         /// <param name="errorMsg">Error message to be pasted to the MetaData in the output.</param>
         /// <returns>ITimeSeries</returns>
-        public ITimeSeries ReturnError(string errorMsg)
+        public ITimeSeriesOutput ReturnError(string errorMsg)
         {
-            ITimeSeries output = new ErrorOutput();
+            ITimeSeriesOutput output = new ErrorOutput();
             output.Metadata["ERROR"] = errorMsg;
             return output;
         }

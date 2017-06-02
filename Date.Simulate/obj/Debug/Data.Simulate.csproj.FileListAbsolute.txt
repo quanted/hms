@@ -1,0 +1,5 @@
+C:\git\hms_backend\Date.Simulate\bin\Debug\Date.Simulate.dll
+C:\git\hms_backend\Date.Simulate\bin\Debug\Date.Simulate.pdb
+C:\git\hms_backend\Date.Simulate\obj\Debug\Data.Simulate.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Date.Simulate\obj\Debug\Date.Simulate.dll
+C:\git\hms_backend\Date.Simulate\obj\Debug\Date.Simulate.pdb

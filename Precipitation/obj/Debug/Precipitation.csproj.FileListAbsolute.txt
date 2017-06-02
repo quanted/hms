@@ -7,3 +7,12 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.pdb
+C:\git\hms_backend\Precipitation\bin\Debug\Precipitation.dll
+C:\git\hms_backend\Precipitation\bin\Debug\Precipitation.pdb
+C:\git\hms_backend\Precipitation\bin\Debug\Data.dll
+C:\git\hms_backend\Precipitation\bin\Debug\Data.Source.dll
+C:\git\hms_backend\Precipitation\bin\Debug\Data.Source.pdb
+C:\git\hms_backend\Precipitation\bin\Debug\Data.pdb
+C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.dll
+C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.pdb

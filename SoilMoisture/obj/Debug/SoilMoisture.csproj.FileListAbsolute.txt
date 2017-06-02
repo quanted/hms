@@ -1,0 +1,4 @@
+C:\git\hms_backend\SoilMoisture\bin\Debug\SoilMoisture.dll
+C:\git\hms_backend\SoilMoisture\bin\Debug\SoilMoisture.pdb
+C:\git\hms_backend\SoilMoisture\obj\Debug\SoilMoisture.dll
+C:\git\hms_backend\SoilMoisture\obj\Debug\SoilMoisture.pdb

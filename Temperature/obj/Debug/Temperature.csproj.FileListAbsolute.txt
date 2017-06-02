@@ -1,0 +1,4 @@
+C:\git\hms_backend\Temperature\bin\Debug\Temperature.dll
+C:\git\hms_backend\Temperature\bin\Debug\Temperature.pdb
+C:\git\hms_backend\Temperature\obj\Debug\Temperature.dll
+C:\git\hms_backend\Temperature\obj\Debug\Temperature.pdb

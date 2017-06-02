@@ -1,0 +1,4 @@
+C:\git\hms_backend\Evapotranspiration\bin\Debug\Evapotranspiration.dll
+C:\git\hms_backend\Evapotranspiration\bin\Debug\Evapotranspiration.pdb
+C:\git\hms_backend\Evapotranspiration\obj\Debug\Evapotranspiration.dll
+C:\git\hms_backend\Evapotranspiration\obj\Debug\Evapotranspiration.pdb

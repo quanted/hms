@@ -1,0 +1,11 @@
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\SoilMoisture.Tests.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\SoilMoisture.Tests.pdb
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\git\hms_backend\SoilMoisture.Tests\obj\Debug\SoilMoisture.Tests.dll
+C:\git\hms_backend\SoilMoisture.Tests\obj\Debug\SoilMoisture.Tests.pdb

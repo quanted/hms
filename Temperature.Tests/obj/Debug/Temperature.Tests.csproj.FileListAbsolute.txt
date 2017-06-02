@@ -1,0 +1,11 @@
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Temperature.Tests.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Temperature.Tests.pdb
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\git\hms_backend\Temperature.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\git\hms_backend\Temperature.Tests\obj\Debug\Temperature.Tests.dll
+C:\git\hms_backend\Temperature.Tests\obj\Debug\Temperature.Tests.pdb
