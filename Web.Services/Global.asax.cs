@@ -10,8 +10,12 @@ using System.Web.Routing;
 
 namespace Web.Services
 {
+    /// <summary>
+    /// </summary>
     public class WebApiApplication : System.Web.HttpApplication
     {
+        /// <summary>
+        /// </summary>
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -20,15 +24,19 @@ namespace Web.Services
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            FileToApplication("url_info.txt", "urlList");       // Loads url list into Application variable as "urlList"
+            FileToApplicationDict("url_info.txt", "urlList");       // Loads url list into Application variable as "urlList"
 
+            // Token for accessing ncdc data.
+            Application["ncdc_token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
+            
         }
 
         /// <summary>
         /// Reads the contents of a space delimited file and populates the specified Application variable.
         /// </summary>
         /// <param name="fileName">File name.</param>
-        private void FileToApplication(string fileName, string variableName)
+        /// <param name="variableName">Name for the Application variable</param>
+        private void FileToApplicationDict(string fileName, string variableName)
         {
             Dictionary<string, string> fileValues = new Dictionary<string, string>();
             foreach (string line in File.ReadLines(Server.MapPath("~/App_Data/" + fileName)))

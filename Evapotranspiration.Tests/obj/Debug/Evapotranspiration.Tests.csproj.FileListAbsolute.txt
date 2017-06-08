@@ -7,5 +7,6 @@ C:\git\hms_backend\Evapotranspiration.Tests\bin\Debug\Microsoft.VisualStudio.Tes
 C:\git\hms_backend\Evapotranspiration.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
 C:\git\hms_backend\Evapotranspiration.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
 C:\git\hms_backend\Evapotranspiration.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\git\hms_backend\Evapotranspiration.Tests\obj\Debug\Evapotranspiration.Tests.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Evapotranspiration.Tests\obj\Debug\Evapotranspiration.Tests.dll
 C:\git\hms_backend\Evapotranspiration.Tests\obj\Debug\Evapotranspiration.Tests.pdb

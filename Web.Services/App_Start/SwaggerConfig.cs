@@ -4,19 +4,33 @@ using Web.Services;
 using Swashbuckle.Application;
 using System.Web;
 using Swashbuckle.Examples;
+using System.IO;
+using System.Reflection;
+using Data;
 
 [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
 namespace Web.Services
 {
+    /// <summary>
+    /// Swagger config file.
+    /// </summary>
     public class SwaggerConfig
     {
         private static string GetXmlCommentsPath()
         {
-            return string.Format(@"{0}\bin\XmlComments.xml",
-                HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\bin\XmlComments.xml", HttpRuntime.AppDomainAppPath);
         }
 
+        private static string GetXmlCommentsPathData()
+        {
+            //return string.Format(@"{0}\bin\"+ fileName, HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\bin\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static void Register()
         {
             var thisAssembly = typeof(SwaggerConfig).Assembly;
@@ -65,7 +79,7 @@ namespace Web.Services
                         //c.BasicAuth("basic")
                         //    .Description("Basic HTTP Authentication");
                         //
-						// NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
+                        // NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
                         //c.ApiKey("apiKey")
                         //    .Description("API Key Authentication")
                         //    .Name("apiKey")
@@ -106,6 +120,7 @@ namespace Web.Services
                         // more Xml comment files.
                         //
                         c.IncludeXmlComments(GetXmlCommentsPath());
+                        c.IncludeXmlComments(GetXmlCommentsPathData());
 
                         // Swashbuckle makes a best attempt at generating Swagger compliant JSON schemas for the various types
                         // exposed in your API. However, there may be occasions when more control of the output is needed.

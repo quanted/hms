@@ -2,3 +2,12 @@ C:\git\hms_backend\Temperature\bin\Debug\Temperature.dll
 C:\git\hms_backend\Temperature\bin\Debug\Temperature.pdb
 C:\git\hms_backend\Temperature\obj\Debug\Temperature.dll
 C:\git\hms_backend\Temperature\obj\Debug\Temperature.pdb
+C:\git\hms_backend\Temperature\bin\Debug\Data.dll
+C:\git\hms_backend\Temperature\bin\Debug\Data.Source.dll
+C:\git\hms_backend\Temperature\bin\Debug\Utilities.dll
+C:\git\hms_backend\Temperature\bin\Debug\Newtonsoft.Json.dll
+C:\git\hms_backend\Temperature\bin\Debug\Data.Source.pdb
+C:\git\hms_backend\Temperature\bin\Debug\Data.pdb
+C:\git\hms_backend\Temperature\bin\Debug\Utilities.pdb
+C:\git\hms_backend\Temperature\bin\Debug\Newtonsoft.Json.xml
+C:\git\hms_backend\Temperature\obj\Debug\Temperature.csprojResolveAssemblyReference.cache

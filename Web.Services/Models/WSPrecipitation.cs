@@ -11,8 +11,11 @@ namespace Web.Services.Models
     /// </summary>
     public class WSPrecipitation
     {
+
+        private enum PrecipSources{ nldas, gldas, ncdc, daymet, wgen };
+
         /// <summary>
-        /// Gets precipitation data using the give TimeSeriesInput parameters.
+        /// Gets precipitation data using the given TimeSeriesInput parameters.
         /// </summary>
         /// <param name="input">ITimeSeriesInput</param>
         /// <returns></returns>
@@ -22,6 +25,10 @@ namespace Web.Services.Models
             
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+
+            // Validate precipitation sources.
+            errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid.": "";
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Precipitation object
             Precipitation.Precipitation precip = new Precipitation.Precipitation();

@@ -8,7 +8,9 @@
 C:\git\hms_backend\Utilities\bin\Debug\Utilities.dll
 C:\git\hms_backend\Utilities\bin\Debug\Utilities.pdb
 C:\git\hms_backend\Utilities\bin\Debug\Data.dll
+C:\git\hms_backend\Utilities\bin\Debug\Newtonsoft.Json.dll
 C:\git\hms_backend\Utilities\bin\Debug\Data.pdb
+C:\git\hms_backend\Utilities\bin\Debug\Newtonsoft.Json.xml
 C:\git\hms_backend\Utilities\obj\Debug\Utilities.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Utilities\obj\Debug\Utilities.dll
 C:\git\hms_backend\Utilities\obj\Debug\Utilities.pdb

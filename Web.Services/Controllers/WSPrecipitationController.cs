@@ -20,7 +20,7 @@ namespace Web.Services.Controllers
 {
 
     /// <summary>
-    /// PrecipitationInput that implements TimeSeriesInput object.
+    /// Precipitation Input that implements TimeSeriesInput object.
     /// </summary>
     public class PrecipitationInput : TimeSeriesInput
     {
@@ -106,12 +106,12 @@ namespace Web.Services.Controllers
                     {
                         Name = "EST",
                         Offset = -5,
-                        DLS = true
+                        DLS = false
                     }
                 },
-                DataValueFormat = "G3",
+                DataValueFormat = "E3",
                 TemporalResolution = "default",
-                TimeLocalized = false,
+                TimeLocalized = true,
                 Units = "default",
                 OutputFormat = "json"
             };
@@ -144,7 +144,7 @@ namespace Web.Services.Controllers
                 { "nldas_begin_time", "2015/01/01/00" },
                 { "nldas_end_time", "2015/01/01/05" },
                 { "nldas_time_interval[hour]", "1" },
-                { "nldas_tot_record", "169" },
+                { "nldas_tot_record", "5" },
                 { "nldas_grid_y", "71" },
                 { "nldas_grid_x", "333" },
                 { "nldas_elevation[m]", "219.065796" },

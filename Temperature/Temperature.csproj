@@ -46,5 +46,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Temperature.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Source\Data.Source.csproj">
+      <Project>{59eeb97c-7a66-4cdd-a5a1-24bd488b98ba}</Project>
+      <Name>Data.Source</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Data\Data.csproj">
+      <Project>{e3bc2510-77a5-42c2-8321-f17d8916e413}</Project>
+      <Name>Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{b4a4b3f5-159f-4f34-8853-044af812fb44}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

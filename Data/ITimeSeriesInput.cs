@@ -11,52 +11,51 @@ namespace Data
     public interface ITimeSeriesInput
     {
         /// <summary>
-        /// Data source for the timeseries.
+        /// REQUIRED: Data source of the timeseries.
         /// </summary>
         string Source { get; set; }
 
         /// <summary>
-        /// Gets date object for time series.
+        /// REQUIRED: Contains a start date and end date for the timeseries request.
         /// </summary>
         DateTimeSpan DateTimeSpan { get; set; }
 
         /// <summary>
-        /// Gets geometry object for time series.
+        /// REQUIRED: Contains the point, latitude/longitude, for the timeseries request. Metadata may be provided for the geometry.
         /// </summary>
         TimeSeriesGeometry Geometry { get; set; }
 
         /// <summary>
-        /// Specifies output format for the data values.
+        /// OPTIONAL: Specifies the output format for the data values in the timeseries.
+        /// DEFAULT: 
         /// Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
         /// </summary>
         string DataValueFormat { get; set; }
 
         /// <summary>
-        /// The temporal resolution of the time series to be returned.
+        /// OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
+        /// DEFAULT: "default"
+        /// VALUES: "default", "hourly", "daily", "weekly", "monthly"
         /// </summary>
         string TemporalResolution { get; set; }
 
         /// <summary>
-        /// Indicates whether the output time values are used for the timezone of the input geometry.
+        /// OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the timeseries.
+        /// DEFAULT: True
         /// </summary>
         bool TimeLocalized { get; set; }
 
         /// <summary>
-        /// Unit system applied to output.
+        /// OPTIONAL: Unit system of the output values.
+        /// DEFAULT: "metric"
+        /// VALUES: "metric", "imperial"
         /// </summary>
         string Units { get; set; }
 
         /// <summary>
-        /// Indicates the type of output for the given spatial data.
-        /// Default: Return all datapoints with no aggregation.
-        /// Options: 1. Return a subset of all datapoints (for handling large input geometries)
-        ///          2. Type of spatial aggregation (total of area, average of area... )
-        /// </summary>
-        //string SpatialAggregation { get; set; }
-
-        /// <summary>
-        /// Specifies output format type.
-        /// JSON, XML... other.
+        /// OPTIONAL: Specifies output format type.
+        /// DEFAULT: "json"
+        /// VALUES: "json", "xml", "csv"
         /// </summary>
         string OutputFormat { get; set; }
     }
@@ -67,54 +66,53 @@ namespace Data
     public class TimeSeriesInput : ITimeSeriesInput
     {
         /// <summary>
-        /// Data source for the timeseries.
+        /// REQUIRED: Data source of the timeseries.
         /// </summary>
         [Required] 
         public string Source { get; set; }
 
         /// <summary>
-        /// Gets date object for time series.
+        /// REQUIRED: Contains a start date and end date for the timeseries request.
         /// </summary>
         [Required]
         public DateTimeSpan DateTimeSpan { get; set; }
 
         /// <summary>
-        /// Gets geometry object for time series.
+        /// REQUIRED: Contains the point, latitude/longitude, for the timeseries request. Metadata may be provided for the geometry.
         /// </summary>
         public TimeSeriesGeometry Geometry { get; set; }
 
         /// <summary>
-        /// Specifies output format for the data values.
+        /// OPTIONAL: Specifies the output format for the data values in the timeseries.
+        /// DEFAULT: 
         /// Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
         /// </summary>
         public string DataValueFormat { get; set; }
 
         /// <summary>
-        /// The temporal resolution of the time series to be returned.
+        /// OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
+        /// DEFAULT: "default"
+        /// VALUES: "default", "hourly", "daily", "weekly", "monthly"
         /// </summary>
         public string TemporalResolution { get; set; }
 
         /// <summary>
-        /// Indicates whether the output time values are used for the timezone of the input geometry.
+        /// OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the timeseries.
+        /// DEFAULT: True
         /// </summary>
         public bool TimeLocalized { get; set; }
 
         /// <summary>
-        /// Unit system applied to output.
+        /// OPTIONAL: Unit system of the output values.
+        /// DEFAULT: "metric"
+        /// VALUES: "metric", "imperial"
         /// </summary>
         public string Units { get; set; }
 
         /// <summary>
-        /// Indicates the type of output for the given spatial data.
-        /// Default: Return all datapoints with no aggregation.
-        /// Options: 1. Return a subset of all datapoints (for handling large input geometries)
-        ///          2. Type of spatial aggregation (total of area, average of area... )
-        /// </summary>
-        // public string SpatialAggregation { get; set; }
-
-        /// <summary>
-        /// Specifies output format type.
-        /// JSON, XML... other.
+        /// OPTIONAL: Specifies output format type.
+        /// DEFAULT: "json"
+        /// VALUES: "json", "xml", "csv"
         /// </summary>
         public string OutputFormat { get; set; }
     }
@@ -166,39 +164,55 @@ namespace Data
 
             // Validating Geometry object
             // Validates that the Latitude parameter is not invalid
-            if (Double.IsNaN(input.Geometry.Point.Latitude))
+            if (!input.Source.Contains("ncdc"))
             {
-                errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
-            }
-            // Validates that the Longitude parameter is not invalid
-            if (Double.IsNaN(input.Geometry.Point.Longitude))
-            {
-                errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
-            }
-            if (!errorMsg.Contains("Latitude") || !errorMsg.Contains("Longitude"))
-            {
-                if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
-                input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
+                if (Double.IsNaN(input.Geometry.Point.Latitude))
                 {
-                    IPointCoordinate pC = new PointCoordinate()
-                    {
-                        Latitude = input.Geometry.Point.Latitude,
-                        Longitude = input.Geometry.Point.Longitude
-                    };
-                    newInput.Geometry = new TimeSeriesGeometry()
-                    {
-                        Point = (PointCoordinate)pC
-                    };
-                    
+                    errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
                 }
-                else
+                // Validates that the Longitude parameter is not invalid
+                if (Double.IsNaN(input.Geometry.Point.Longitude))
                 {
-                    errorMsg += "ERROR: Latitude or Longitude value is not a valid coordinate.";
+                    errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
                 }
+                if (!errorMsg.Contains("Latitude") || !errorMsg.Contains("Longitude"))
+                {
+                    if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
+                    input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
+                    {
+                        IPointCoordinate pC = new PointCoordinate()
+                        {
+                            Latitude = input.Geometry.Point.Latitude,
+                            Longitude = input.Geometry.Point.Longitude
+                        };
+                        newInput.Geometry = new TimeSeriesGeometry()
+                        {
+                            Point = (PointCoordinate)pC
+                        };
+
+                    }
+                    else
+                    {
+                        errorMsg += "ERROR: Latitude or Longitude value is not a valid coordinate.";
+                    }
+                }
+            }
+            else
+            {
+                if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+                {
+                    errorMsg += "ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.";
+                }
+                IPointCoordinate pC = new PointCoordinate()
+                {
+                    Latitude = input.Geometry.Point.Latitude,
+                    Longitude = input.Geometry.Point.Longitude
+                };
+                newInput.Geometry = new TimeSeriesGeometry() { Point = (PointCoordinate)pC };
             }
 
-            newInput.Geometry.GeometryMetadata = (input.Geometry.GeometryMetadata == null) ? new Dictionary<string, string>() : input.Geometry.GeometryMetadata;
-            newInput.Geometry.Description = (input.Geometry.Description == null) ? "" : input.Geometry.Description;
+            newInput.Geometry.GeometryMetadata = input.Geometry.GeometryMetadata ?? new Dictionary<string, string>();
+            newInput.Geometry.Description = input.Geometry.Description ?? "";
             // Validates and sets Timezone information
             if (input.Geometry.Timezone == null)
             {
@@ -236,26 +250,27 @@ namespace Data
             }
             // Validates DateTime output format
             newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH": input.DateTimeSpan.DateTimeFormat;
-            // TODO: Add validation of the given format.
+            // TODO: Add validation of the given datetimeformat. If not valid set to default, TBD
 
             // Validates the DataValueFormat parameter
             newInput.DataValueFormat = (String.IsNullOrWhiteSpace(input.DataValueFormat)) ? "default" : input.DataValueFormat;
-            // TODO: Add validation of the given format.
+            // TODO: Add validation of the given datavalueformat. If not valid set to default, TBD
 
             // Validates TemporalResolution parameter
             newInput.TemporalResolution = (String.IsNullOrWhiteSpace(input.TemporalResolution)) ? "default" : input.TemporalResolution;
-            // TODO: Add validation of the provided value.
+            // TODO: Add validation of the provided temporalresolution. If not valid set to default
 
             // Validates TimeLocalized parameter
             newInput.TimeLocalized = (input.TimeLocalized == true) ? true : false;
+            // TODO: Add validation of the provided timelocalized. If not valid set to true
 
             // Validates Units parameter
             newInput.Units = (String.IsNullOrWhiteSpace(input.Units)) ? "metric" : input.Units;
-            // TODO: Add validation of the provided value.
+            // TODO: Add validation of the provided units. If not valid set to "metric"
 
             // Validates OutputFormat parameter
             newInput.OutputFormat = (String.IsNullOrWhiteSpace(input.OutputFormat)) ? "json" : input.OutputFormat;
-            // TODO: Add validation of the provided value.
+            // TODO: Add validation of the provided output. If not valid set to "json"
 
             return newInput;
         }

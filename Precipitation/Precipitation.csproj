@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,6 +57,14 @@
     <ProjectReference Include="..\Data\Data.csproj">
       <Project>{e3bc2510-77a5-42c2-8321-f17d8916e413}</Project>
       <Name>Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Date.Simulate\Data.Simulate.csproj">
+      <Project>{6f1cdd08-d493-488c-8692-5ccd7cb40484}</Project>
+      <Name>Data.Simulate</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{b4a4b3f5-159f-4f34-8853-044af812fb44}</Project>
+      <Name>Utilities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

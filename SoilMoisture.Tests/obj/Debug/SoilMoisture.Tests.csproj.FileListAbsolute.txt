@@ -7,5 +7,6 @@ C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatf
 C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
 C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
 C:\git\hms_backend\SoilMoisture.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\git\hms_backend\SoilMoisture.Tests\obj\Debug\SoilMoisture.Tests.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\SoilMoisture.Tests\obj\Debug\SoilMoisture.Tests.dll
 C:\git\hms_backend\SoilMoisture.Tests\obj\Debug\SoilMoisture.Tests.pdb

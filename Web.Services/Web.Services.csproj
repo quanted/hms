@@ -183,11 +183,21 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\WSEvapotranspirationController.cs" />
     <Compile Include="Controllers\WSPrecipitationController.cs" />
+    <Compile Include="Controllers\WSSoilMoistureController.cs" />
+    <Compile Include="Controllers\WSSubSurfaceFlowController.cs" />
+    <Compile Include="Controllers\WSSurfaceRunoffController.cs" />
+    <Compile Include="Controllers\WSTemperatureController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\WSSoilMoisture.cs" />
+    <Compile Include="Models\WSSubSurfaceFlow.cs" />
+    <Compile Include="Models\WSEvapotranspiration.cs" />
     <Compile Include="Models\WSPrecipitation.cs" />
+    <Compile Include="Models\WSSurfaceRunoff.cs" />
+    <Compile Include="Models\WSTemperature.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -264,9 +274,29 @@
       <Project>{e3bc2510-77a5-42c2-8321-f17d8916e413}</Project>
       <Name>Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj">
+      <Project>{79afbae5-3482-425a-8ec1-a76a4aed93b7}</Project>
+      <Name>Evapotranspiration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Precipitation\Precipitation.csproj">
       <Project>{702c7e7d-a4df-4b32-b820-d60fc07356e1}</Project>
       <Name>Precipitation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj">
+      <Project>{02bd2871-4225-44b7-8334-794d2bf3661b}</Project>
+      <Name>SoilMoisture</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj">
+      <Project>{8bd38556-4b67-4159-9be7-100a398252a9}</Project>
+      <Name>SubSurfaceFlow</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj">
+      <Project>{3ede0002-509d-4541-97be-e14ee23ae2aa}</Project>
+      <Name>SurfaceRunoff</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Temperature\Temperature.csproj">
+      <Project>{dd6ba946-6d13-4193-a0d0-346b74257642}</Project>
+      <Name>Temperature</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{b4a4b3f5-159f-4f34-8853-044af812fb44}</Project>

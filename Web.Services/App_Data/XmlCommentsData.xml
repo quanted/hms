@@ -1,0 +1,376 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Data</name>
+    </assembly>
+    <members>
+        <member name="T:Data.ITimeSeriesOutput">
+            <summary>
+            TimeSeriesOutput interface for output object.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesOutput.Dataset">
+            <summary>
+            Dataset for the time series.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesOutput.DataSource">
+            <summary>
+            Source of the dataset.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesOutput.Metadata">
+            <summary>
+            Metadata dictionary providing details for the time series.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesOutput.Data">
+            <summary>
+            Time series data.
+            </summary>
+        </member>
+        <member name="T:Data.TimeSeriesOutput">
+            <summary>
+            Concrete TimeSeriesOutput class
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesOutput.Dataset">
+            <summary>
+            Dataset for the time series.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesOutput.DataSource">
+            <summary>
+            Source of the dataset.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesOutput.Metadata">
+            <summary>
+            Metadata dictionary providing details for the time series.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesOutput.Data">
+            <summary>
+            Time series data.
+            </summary>
+        </member>
+        <member name="T:Data.ITimeSeriesOutputFactory">
+            <summary>
+            Abstract ITimeSeriesOutput Factory class
+            </summary>
+        </member>
+        <member name="M:Data.ITimeSeriesOutputFactory.Initialize">
+            <summary>
+            ITimeSeriesOutput Intializer.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Data.TimeSeriesOutputFactory">
+            <summary>
+            Concrete ITimeSeriesOutput Factory Class
+            </summary>
+        </member>
+        <member name="M:Data.TimeSeriesOutputFactory.Initialize">
+            <summary>
+            Initialier.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Data.ITimeSeriesInput">
+            <summary>
+            Interface for timeseries inputs.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.Source">
+            <summary>
+            REQUIRED: Data source of the timeseries.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.DateTimeSpan">
+            <summary>
+            REQUIRED: Contains a start date and end date for the timeseries request.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.Geometry">
+            <summary>
+            REQUIRED: Contains the point, latitude/longitude, for the timeseries request. Metadata may be provided for the geometry.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.DataValueFormat">
+            <summary>
+            OPTIONAL: Specifies the output format for the data values in the timeseries.
+            DEFAULT: 
+            Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.TemporalResolution">
+            <summary>
+            OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
+            DEFAULT: "default"
+            VALUES: "default", "hourly", "3hourly", "6hourly", "12hourly", "daily", "weekly", "monthly"
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.TimeLocalized">
+            <summary>
+            OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the timeseries.
+            DEFAULT: True
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.Units">
+            <summary>
+            OPTIONAL: Unit system of the output values.
+            DEFAULT: "metric"
+            VALUES: "metric", "imperial"
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.OutputFormat">
+            <summary>
+            OPTIONAL: Specifies output format type.
+            DEFAULT: "json"
+            VALUES: "json", "xml", "csv"
+            </summary>
+        </member>
+        <member name="T:Data.TimeSeriesInput">
+            <summary>
+            Concrete class for timeseries inputs.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.Source">
+            <summary>
+            REQUIRED: Data source of the timeseries.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.DateTimeSpan">
+            <summary>
+            REQUIRED: Contains a start date and end date for the timeseries request.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.Geometry">
+            <summary>
+            REQUIRED: Contains the point, latitude/longitude, for the timeseries request. Metadata may be provided for the geometry.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.DataValueFormat">
+            <summary>
+            OPTIONAL: Specifies the output format for the data values in the timeseries.
+            DEFAULT: 
+            Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.TemporalResolution">
+            <summary>
+            OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
+            DEFAULT: "default"
+            VALUES: "default", "hourly", "3hourly", "6hourly", "12hourly", "daily", "weekly", "monthly"
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.TimeLocalized">
+            <summary>
+            OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the timeseries.
+            DEFAULT: True
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.Units">
+            <summary>
+            OPTIONAL: Unit system of the output values.
+            DEFAULT: "metric"
+            VALUES: "metric", "imperial"
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesInput.OutputFormat">
+            <summary>
+            OPTIONAL: Specifies output format type.
+            DEFAULT: "json"
+            VALUES: "json", "xml", "csv"
+            </summary>
+        </member>
+        <member name="T:Data.ITimeSeriesInputFactory">
+            <summary>
+            Creator abstract class for TimeSeriesInputFactory
+            </summary>
+        </member>
+        <member name="M:Data.ITimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+            <summary>
+            TimeSeriesInput setter abstract function
+            </summary>
+            <param name="input"></param>
+            <param name="errorMsg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Data.TimeSeriesInputFactory">
+            <summary>
+            Creator concrete class for TimeSeriesInputFactory
+            </summary>
+        </member>
+        <member name="M:Data.TimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+            <summary>
+            TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
+            </summary>
+            <param name="input"></param>
+            <param name="errorMsg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Data.IDateTimeSpan">
+            <summary>
+            DateTimeSpan interface for time series components.
+            </summary>
+        </member>
+        <member name="P:Data.IDateTimeSpan.StartDate">
+            <summary>
+            Start date of the time series.
+            </summary>
+        </member>
+        <member name="P:Data.IDateTimeSpan.EndDate">
+            <summary>
+            End date of the time series.
+            </summary>
+        </member>
+        <member name="P:Data.IDateTimeSpan.DateTimeFormat">
+            <summary>
+            Format for the output of DateTime values.
+            Format Reference: https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
+            </summary>
+        </member>
+        <member name="T:Data.DateTimeSpan">
+            <summary>
+            DateTimeSpan concrete class.
+            </summary>
+        </member>
+        <member name="P:Data.DateTimeSpan.StartDate">
+            <summary>
+            Start date of the time series.
+            </summary>
+        </member>
+        <member name="P:Data.DateTimeSpan.EndDate">
+            <summary>
+            End date of the time series.
+            </summary>
+        </member>
+        <member name="P:Data.DateTimeSpan.DateTimeFormat">
+            <summary>
+            Format for the output of DateTime values.
+            Format Reference: https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
+            </summary>
+        </member>
+        <member name="T:Data.ITimezone">
+            <summary>
+            Timezone interface for timezone information of input geometry.
+            </summary>
+        </member>
+        <member name="P:Data.ITimezone.Name">
+            <summary>
+            Timezone name.
+            </summary>
+        </member>
+        <member name="P:Data.ITimezone.Offset">
+            <summary>
+            Timezone offset from GMT.
+            </summary>
+        </member>
+        <member name="P:Data.ITimezone.DLS">
+            <summary>
+            Indicates if day light savings is active or not.
+            </summary>
+        </member>
+        <member name="T:Data.Timezone">
+            <summary>
+            Timezone concrete class for timezone information of input geometry.
+            </summary>
+        </member>
+        <member name="P:Data.Timezone.Name">
+            <summary>
+            Timezone name.
+            </summary>
+        </member>
+        <member name="P:Data.Timezone.Offset">
+            <summary>
+            Timezone offset from GMT.
+            </summary>
+        </member>
+        <member name="P:Data.Timezone.DLS">
+            <summary>
+            Indicates if day light savings is active or not.
+            </summary>
+        </member>
+        <member name="T:Data.ITimeSeriesGeometry">
+            <summary>
+            Geometry interface for time series components.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesGeometry.Description">
+            <summary>
+            Description of the geometry, used to indicate details about the type of location the point represents.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesGeometry.Point">
+            <summary>
+            Lat/lon point for when a coordinates are used as the geometry type.
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesGeometry.GeometryMetadata">
+            <summary>
+            Dictionary for holding metadata and additional information about the provided geometry. 
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesGeometry.Timezone">
+            <summary>
+            Timezone information for the input geometry.
+            </summary>
+        </member>
+        <member name="T:Data.TimeSeriesGeometry">
+            <summary>
+            TimeSeries Geometry concrete class for time series components.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesGeometry.Description">
+            <summary>
+            Description of the geometry, used to indicate details about the type of location the point represents.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesGeometry.Point">
+            <summary>
+            Lat/lon point for when a coordinates are used as the geometry type.
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesGeometry.GeometryMetadata">
+            <summary>
+            Dictionary for holding metadata and additional information about the provided geometry. 
+            </summary>
+        </member>
+        <member name="P:Data.TimeSeriesGeometry.Timezone">
+            <summary>
+            Timezone information for the input geometry.
+            </summary>
+        </member>
+        <member name="T:Data.IPointCoordinate">
+            <summary>
+            Point geometry object interface.
+            </summary>
+        </member>
+        <member name="P:Data.IPointCoordinate.Latitude">
+            <summary>
+            Latitude value of point geometry.
+            </summary>
+        </member>
+        <member name="P:Data.IPointCoordinate.Longitude">
+            <summary>
+            Longitude value of point geometry.
+            </summary>
+        </member>
+        <member name="T:Data.PointCoordinate">
+            <summary>
+            Point geometry object interface.
+            </summary>
+        </member>
+        <member name="P:Data.PointCoordinate.Latitude">
+            <summary>
+            Latitude value of point geometry.
+            </summary>
+        </member>
+        <member name="P:Data.PointCoordinate.Longitude">
+            <summary>
+            Longitude value of point geometry.
+            </summary>
+        </member>
+    </members>
+</doc>

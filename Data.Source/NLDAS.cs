@@ -17,11 +17,18 @@ namespace Data.Source
         /// Get data function for nldas.
         /// </summary>
         /// <param name="errorMsg"></param>
+        /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
         public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
         {
             errorMsg = "";
+
+            // Adjusts date/times by the timezone offset if timelocalized is set to true.
+            if (componentInput.TimeLocalized == true)
+            {
+                componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
+            }
 
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
@@ -32,6 +39,59 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
+        }
+
+        /// <summary>
+        /// Adjusts the DateTimeSpan object to account for timezone offset. 
+        /// NLDAS Date/Times are in GMT.
+        /// Adjustment effects range of the requested data but not the date values of the data. Date values are altered with SetDateToLocal()
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="cInput">ITimeSeriesInput</param>
+        /// <returns></returns>
+        public static IDateTimeSpan AdjustForOffset(out string errorMsg, ITimeSeriesInput cInput)
+        {
+            errorMsg = "";
+            IDateTimeSpan dateTime = cInput.DateTimeSpan;
+
+            if (cInput.Geometry.Timezone.Offset < 0.0) {
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
+            }
+            else if (cInput.Geometry.Timezone.Offset > 0.0)
+            {
+                dateTime.StartDate.AddDays(-1.0);
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+            }
+
+            if (cInput.Geometry.Timezone.Offset < 0.0)
+            {
+                dateTime.EndDate.AddDays(1.0);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, -1 * Convert.ToInt16(cInput.Geometry.Timezone.Offset) - 1, 00, 00);
+            }
+            else if (cInput.Geometry.Timezone.Offset > 0.0)
+            {
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 23 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+            }
+            return dateTime;
+        }
+
+        /// <summary>
+        /// Adjusts the Date/Time value to the local time, using the offset.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="offset"></param>
+        /// <param name="dateHour"></param>
+        /// <returns></returns>
+        public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
+        {
+            string[] date = dateHour.Split(' ');
+            string hourStr = date[1].Substring(0, 2);
+            string dateHourStr = date[0] + " " + hourStr;
+            DateTime newDate = new DateTime();
+            DateTime.TryParseExact(dateHourStr, new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
+            newDate = (offset != 0.0) ? newDate.AddHours(offset) : newDate;
+            string newDateString = newDate.ToString(dateFormat);
+            return newDateString;
         }
 
         /// <summary>
@@ -174,7 +234,7 @@ namespace Data.Source
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim());
+            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
             return output;
         }
 
@@ -207,21 +267,22 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> SetData(out string errorMsg, string data)
+        private Dictionary<string, List<string>> SetData(out string errorMsg, string data, bool localTime, string dateFormat, string dataFormat, ITimezone tzDetails)
         {
             errorMsg = "";
             Dictionary<string, List<string>> dataDict = new Dictionary<string, List<string>>();
             List<string> timestepData;
+            double offset = (localTime == true) ? tzDetails.Offset : 0.0;
             string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
             for (int i = 0; i < tsLines.Length; i++)
             {
                 timestepData = new List<string>();
                 string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                timestepData.Add(lineData[2]);
-                dataDict[lineData[0] + " " + lineData[1]] = timestepData;
+                timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
+                dataDict[SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
             }
             return dataDict;
-            }
-
+        }
     }
 }
