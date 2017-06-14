@@ -189,6 +189,7 @@
     <Compile Include="Controllers\WSSubSurfaceFlowController.cs" />
     <Compile Include="Controllers\WSSurfaceRunoffController.cs" />
     <Compile Include="Controllers\WSTemperatureController.cs" />
+    <Compile Include="Controllers\WSWorkFlowController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -198,6 +199,7 @@
     <Compile Include="Models\WSPrecipitation.cs" />
     <Compile Include="Models\WSSurfaceRunoff.cs" />
     <Compile Include="Models\WSTemperature.cs" />
+    <Compile Include="Models\WSWorkFlow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

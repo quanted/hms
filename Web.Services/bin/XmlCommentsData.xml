@@ -76,6 +76,21 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:Data.ITimeSeriesComponent">
+            <summary>
+            Base timeseries parameter object
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesComponent.Output">
+            <summary>
+            Output variable object for a timeseries component
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesComponent.Input">
+            <summary>
+            Input variable object for a timeseries component.
+            </summary>
+        </member>
         <member name="T:Data.ITimeSeriesInput">
             <summary>
             Interface for timeseries inputs.

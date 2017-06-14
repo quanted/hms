@@ -170,7 +170,14 @@ namespace Data.Source
                 if (metaDataLines[i].Contains("="))
                 {
                     string[] line = metaDataLines[i].Split('=');
-                    output.Metadata["gldas_" + line[0]] = line[1];
+                    if (line[0].Contains("column"))
+                    {
+                        meta[line[0]] = line[1];
+                    }
+                    else
+                    {
+                        meta["gldas_" + line[0]] = line[1];
+                    }
                 }
             }
             return meta;

@@ -50,66 +50,66 @@ namespace Temperature
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "F"; }
             output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, output, input) : output.Data;
 
-            output.Metadata.Add("nldas_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
             
             switch (input.TemporalResolution)
             {
                 case "daily":
                     // Combined max/min/average
                     output.Data = DailyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
-                    output.Metadata.Add("nldas_column_3", "Min Temperature");
-                    output.Metadata.Add("nldas_column_4", "Average Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
+                    output.Metadata.Add("column_3", "Min Temperature");
+                    output.Metadata.Add("column_4", "Average Temperature");
                     return output;
                 case "daily-avg":
                     output.Data = DailyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("nldas_column_2", "Average Temperature");
+                    output.Metadata.Add("column_2", "Average Temperature");
                     return output;
                 case "daily-high":
                     output.Data = DailyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
                     return output;
                 case "daily-low":
                     output.Data = DailyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("nldas_column_2", "Min Temperature");
+                    output.Metadata.Add("column_2", "Min Temperature");
                     return output;
                 case "weekly":
                     // Combined max/min/average
                     output.Data = WeeklyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
-                    output.Metadata.Add("nldas_column_3", "Min Temperature");
-                    output.Metadata.Add("nldas_column_4", "Average Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
+                    output.Metadata.Add("column_3", "Min Temperature");
+                    output.Metadata.Add("column_4", "Average Temperature");
                     return output;
                 case "weekly-avg":
                     output.Data = WeeklyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("nldas_column_2", "Average Temperature");
+                    output.Metadata.Add("column_2", "Average Temperature");
                     return output;
                 case "weekly-high":
                     output.Data = WeeklyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
                     return output;
                 case "weekly-low":
                     output.Data = WeeklyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("nldas_column_2", "Min Temperature");
+                    output.Metadata.Add("column_2", "Min Temperature");
                     return output;
                 case "monthly":
                     // Combined max/min/average
                     output.Data = MonthlyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
-                    output.Metadata.Add("nldas_column_3", "Low Temperature");
-                    output.Metadata.Add("nldas_column_4", "Average Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
+                    output.Metadata.Add("column_3", "Low Temperature");
+                    output.Metadata.Add("column_4", "Average Temperature");
                     return output;
                 case "monthly-avg":
                     output.Data = MonthlyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("nldas_column_2", "Average Temperature");
+                    output.Metadata.Add("column_2", "Average Temperature");
                     return output;
                 case "monthly-high":
                     output.Data = MonthlyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("nldas_column_2", "Max Temperature");
+                    output.Metadata.Add("column_2", "Max Temperature");
                     return output;
                 case "monthly-low":
                     output.Data = MonthlyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("nldas_column_2", "Min Temperature");
+                    output.Metadata.Add("column_2", "Min Temperature");
                     return output;
                 default:
                     return output;

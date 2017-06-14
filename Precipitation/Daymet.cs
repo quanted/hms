@@ -30,6 +30,9 @@ namespace Precipitation
             daymetOutput = SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             daymetOutput.Metadata["daymet_unit"] = (input.Units.Contains("imperial")) ? "in" : "mm";
 
+            daymetOutput.Dataset = "Precipitation";
+            daymetOutput.DataSource = "daymet";
+
             // Temporal aggregation
             daymetOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -48,21 +51,21 @@ namespace Precipitation
         {
             errorMsg = "";
             output.Metadata.Add("daymet_temporalresolution", input.TemporalResolution);
-            output.Metadata.Add("daymet_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
 
             switch (input.TemporalResolution)
             {
                 case "weekly":
                     output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("daymet_column_2", "Weekly Total");
+                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("daymet_column_2", "Monthly Total");
+                    output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 case "daily":
                 default:
-                    output.Metadata.Add("daymet_column_2", "Daily Total");
+                    output.Metadata.Add("column_2", "Daily Total");
                     return output;
             }
         }

@@ -45,7 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorOutput.cs" />
+    <Compile Include="Merger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Statistics.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Validators.cs" />
   </ItemGroup>

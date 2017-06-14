@@ -255,7 +255,14 @@ namespace Data.Source
                 if (metaDataLines[i].Contains("="))
                 {
                     string[] line = metaDataLines[i].Split('=');
-                    output.Metadata["nldas_" + line[0]] = line[1];
+                    if (line[0].Contains("column"))
+                    {
+                        meta[line[0]] = line[1];
+                    }
+                    else
+                    {
+                        meta["nldas_" + line[0]] = line[1];
+                    }
                 }
             }
             return meta;

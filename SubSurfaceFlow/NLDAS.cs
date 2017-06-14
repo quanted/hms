@@ -46,7 +46,7 @@ namespace SubSurfaceFlow
         {
             errorMsg = "";
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
-            output.Metadata.Add("nldas_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
 
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
@@ -54,31 +54,31 @@ namespace SubSurfaceFlow
             {
                 case "daily":
                     output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input, false);
-                    output.Metadata.Add("nldas_column_2", "Daily Total");
+                    output.Metadata.Add("column_2", "Daily Total");
                     return output;
                 case "daily-avg":
                     output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("nldas_column_2", "Daily Average");
+                    output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input, false);
-                    output.Metadata.Add("nldas_column_2", "Weekly Total");
+                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "weekly-avg":
                     output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("nldas_column_2", "Weekly Average");
+                    output.Metadata.Add("column_2", "Weekly Average");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input, false);
-                    output.Metadata.Add("nldas_column_2", "Monthly Total");
+                    output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 case "monthly-avg":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("nldas_column_2", "Monthly Average");
+                    output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
-                    output.Metadata.Add("nldas_column_2", "Hourly Total");
+                    output.Metadata.Add("column_2", "Hourly Total");
                     return output;
             }
         }

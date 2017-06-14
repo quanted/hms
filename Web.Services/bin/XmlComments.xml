@@ -836,6 +836,56 @@
             <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
+        <member name="T:Web.Services.Controllers.WorkFlowCompareInput">
+            <summary>
+            WorkFlow Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.WorkFlowCompareInput.Dataset">
+            <summary>
+            Specified dataset for the workflow
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.WorkFlowCompareInput.SourceList">
+            <summary>
+            List of sources for the workflow.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WorkFlowCompareInputExample">
+            <summary>
+            Swashbuckle WorkFlowCompare POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WorkFlowCompareInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WorkFlowCompareOutputExample">
+            <summary>
+            Swashbucle WorkFlowCompare Output example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WorkFlowCompareOutputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSWorkFlowCompareController">
+            <summary>
+            WorkFlowCompare controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWorkFlowCompareController.POST(Web.Services.Controllers.WorkFlowCompareInput)">
+            <summary>
+            POST Method for getting WorkFlowCompare data.
+            Source parameter must contain a value, but value is not used.
+            </summary>
+            <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
+            <returns>ITimeSeries</returns>
+        </member>
         <member name="T:Web.Services.WebApiApplication">
             <summary>
             </summary>
@@ -919,6 +969,18 @@
         <member name="M:Web.Services.Models.WSTemperature.GetTemperature(Data.ITimeSeriesInput)">
             <summary>
             Gets temperature data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSWorkFlow">
+            <summary>
+            HMS Web Serivce WorkFlow Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSWorkFlow.GetWorkFlowData(Web.Services.Controllers.WorkFlowCompareInput)">
+            <summary>
+            Gets workflow data.
             </summary>
             <param name="input"></param>
             <returns></returns>

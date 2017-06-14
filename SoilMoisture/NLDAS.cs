@@ -69,7 +69,7 @@ namespace SoilMoisture
             for (int i = 0; i < layersData.Count; i++)
             {
                 string layerName = layersData[i].Metadata[source + "_param_short_name"].Substring(layersData[i].Metadata[source + "_param_short_name"].IndexOf('M') + 1);
-                output.Metadata.Add(source + "_column_" + (i + 2), layerName);
+                output.Metadata.Add("column_" + (i + 2), layerName);
             }
 
             return output;
@@ -93,9 +93,9 @@ namespace SoilMoisture
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
             output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, output, input) : output.Data;
 
-            if (!output.Metadata.ContainsKey("nldas_column_1"))
+            if (!output.Metadata.ContainsKey("column_1"))
             {
-                output.Metadata.Add("nldas_column_1", "Date");
+                output.Metadata.Add("column_1", "Date");
             };
             
 
@@ -103,15 +103,15 @@ namespace SoilMoisture
             {
                 case "daily":
                     output.Data = DailyValues(out errorMsg, output, input);
-                    output.Metadata.Add("nldas_column_2_details", "Daily Average");
+                    output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("nldas_column_2_details", "Weekly Average");
+                    output.Metadata.Add("column_2", "Weekly Average");
                      return output;
                 case "monthly":
                     output.Data = MonthlyValues(out errorMsg, output, input);
-                    output.Metadata.Add("nldas_column_2_details", "Monthly Average");
+                    output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     return output;

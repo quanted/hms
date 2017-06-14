@@ -57,21 +57,21 @@ namespace SoilMoisture
             if (input.Units.Contains("imperial")) { output.Metadata["gldas_unit"] = "in"; }
             output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, output, input) : output.Data;
 
-            output.Metadata.Add("gldas_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
 
             switch (input.TemporalResolution)
             {
                 case "daily":
                     output.Data = NLDAS.DailyValues(out errorMsg, output, input);
-                    output.Metadata.Add("gldas_data_type", "Daily Average");
+                    output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = NLDAS.WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("gldas_data_type", "Weekly Average");
+                    output.Metadata.Add("column_2", "Weekly Average");
                     return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyValues(out errorMsg, output, input);
-                    output.Metadata.Add("gldas_data_type", "Monthly Average");
+                    output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     return output;

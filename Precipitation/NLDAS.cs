@@ -24,6 +24,12 @@ namespace Precipitation
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
             if (errorMsg.Contains("ERROR")) { return null; }
+            if (data.Contains("ERROR"))
+            {
+                string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
+                return null;
+            }
 
             ITimeSeriesOutput nldasOutput = output;
             nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
@@ -46,25 +52,25 @@ namespace Precipitation
         {
             errorMsg = "";
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
-            output.Metadata.Add("nldas_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
             switch (input.TemporalResolution)
             {
                 case "daily":
                     output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("nldas_column_2", "Daily Total");
+                    output.Metadata.Add("column_2", "Daily Total");
                     return output;
                 case "weekly":
                     output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("nldas_column_2", "Weekly Total");
+                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("nldas_column_2", "Monthly Total");
+                    output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
-                    output.Metadata.Add("nldas_column_2", "Hourly Total");
+                    output.Metadata.Add("column_2", "Hourly Total");
                     return output;
             }
         }

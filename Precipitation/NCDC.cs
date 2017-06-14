@@ -27,7 +27,7 @@ namespace Precipitation
 
             // Make call to get station metadata and add to output.Metadata
             string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
-            ncdcOutput.Metadata = ncdc.GetStationDetails(out errorMsg, input.Geometry.GeometryMetadata["stationID"], token);
+            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncdc", ncdc.GetStationDetails(out errorMsg, input.Geometry.GeometryMetadata["stationID"], token));
             ncdcOutput.Metadata.Add("ncdc_temporalResolution", input.TemporalResolution);
             ncdcOutput.Metadata.Add("ncdc_units", "mm");
 
@@ -38,6 +38,9 @@ namespace Precipitation
             // Set resulting data to output.Data
             ncdcOutput.Data = ConvertDict(out errorMsg, input.DataValueFormat, data);
             if (errorMsg.Contains("ERROR")) { return null; }
+
+            ncdcOutput.DataSource = "ncdc";
+            ncdcOutput.Dataset = "Precipitation";
 
             return ncdcOutput;
         }
@@ -61,6 +64,23 @@ namespace Precipitation
             return result;
         }
 
-        //TODO: Add temporal resolution method for NCDC.
+        /// <summary>
+        /// Adds source_ to the metadata keys.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="source"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> SetMetadata(out string errorMsg, string source, Dictionary<string, string> metadata)
+        {
+            errorMsg = "";
+            Dictionary<string, string> newMeta = new Dictionary<string, string>();
+            foreach (var ele in metadata)
+            {
+                newMeta.Add(source + "_" + ele.Key, ele.Value);
+            }
+            return newMeta;
+        }
+
     }
 }

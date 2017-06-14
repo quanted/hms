@@ -163,9 +163,20 @@ namespace Data
             }
 
             // Validating Geometry object
-            // Validates that the Latitude parameter is not invalid
-            if (!input.Source.Contains("ncdc"))
+            if (input.Geometry == null)
             {
+                errorMsg += "ERROR: No geometry values found in the provided parameters.";
+                return null;
+            }
+            // Validates that the Latitude parameter is not invalid
+            if (!input.Source.Contains("ncdc") && !input.Source.Contains("compare"))
+            {
+                if (input.Geometry.Point == null)
+                {
+                    errorMsg += "ERROR: No geometry values found in the provided parameters.";
+                    return null;
+                }
+
                 if (Double.IsNaN(input.Geometry.Point.Latitude))
                 {
                     errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
@@ -203,10 +214,11 @@ namespace Data
                 {
                     errorMsg += "ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.";
                 }
+
                 IPointCoordinate pC = new PointCoordinate()
                 {
-                    Latitude = input.Geometry.Point.Latitude,
-                    Longitude = input.Geometry.Point.Longitude
+                    Latitude = 0.0,
+                    Longitude = 0.0
                 };
                 newInput.Geometry = new TimeSeriesGeometry() { Point = (PointCoordinate)pC };
             }
@@ -248,12 +260,21 @@ namespace Data
                     EndDate = input.DateTimeSpan.EndDate
                 };
             }
+            if (!errorMsg.Contains("ERROR"))
+            {
+                if (DateTime.Compare(newInput.DateTimeSpan.StartDate, newInput.DateTimeSpan.EndDate) >= 0)
+                {
+                    errorMsg += "ERROR: Start date must be before end date.";
+                }
+            }
+
+
             // Validates DateTime output format
             newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH": input.DateTimeSpan.DateTimeFormat;
             // TODO: Add validation of the given datetimeformat. If not valid set to default, TBD
 
             // Validates the DataValueFormat parameter
-            newInput.DataValueFormat = (String.IsNullOrWhiteSpace(input.DataValueFormat)) ? "default" : input.DataValueFormat;
+            newInput.DataValueFormat = (String.IsNullOrWhiteSpace(input.DataValueFormat)) ? "E3" : input.DataValueFormat;
             // TODO: Add validation of the given datavalueformat. If not valid set to default, TBD
 
             // Validates TemporalResolution parameter

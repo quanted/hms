@@ -157,8 +157,6 @@ namespace Data.Source
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
-            //Need to set metadata
-            //ts.timeSeriesDict = timeSeries;
             return data;
         }
 
@@ -184,7 +182,15 @@ namespace Data.Source
                 errorMsg = "ERROR: Unable to load URL details for ncdc from configuration file. " + ex.Message;
                 return null;
             }
-            sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+
+            if (station.Contains("GHCND"))
+            {
+                sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+            }
+            else
+            {
+                sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+            }
 
             return sb.ToString();
         }
@@ -272,12 +278,12 @@ namespace Data.Source
             switch (inputData.TemporalResolution)
             {
                 case "hourly":
-                case "default":
-                default:
                     sumValues = SumHourlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "daily":
+                case "default":
+                default:
                     sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
@@ -447,8 +453,6 @@ namespace Data.Source
             switch (tRes)
             {
                 case "hourly":
-                case "default":
-                default:
                     int hours = Convert.ToInt16((endDate - startDate).TotalHours);
                     for (int i = 0; i < hours; i++)
                     {
@@ -464,6 +468,8 @@ namespace Data.Source
                     }
                     break;
                 case "daily":
+                case "default":
+                default:
                     int days = Convert.ToInt16((endDate - startDate).TotalDays);
                     for (int i = 0; i < days; i++)
                     {
@@ -510,8 +516,7 @@ namespace Data.Source
                         }
                     }
                     break;
-            }
-             
+            }             
         }
 
         /// <summary>

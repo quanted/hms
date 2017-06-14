@@ -51,9 +51,9 @@ namespace Temperature
             output.Metadata["daymet_unit"] = (input.Units.Contains("imperial")) ? "F" : "K";
             output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, false, output, input) : UnitConversion(out errorMsg, true, output, input);
 
-            output.Metadata.Add("daymet_column_1", "date");
-            output.Metadata.Add("daymet_column_2", "Max Temp");
-            output.Metadata.Add("daymet_column_3", "Min Temp");
+            output.Metadata.Add("column_1", "date");
+            output.Metadata.Add("column_2", "Max Temp");
+            output.Metadata.Add("column_3", "Min Temp");
             switch (input.TemporalResolution)
             {
                 case "weekly":
