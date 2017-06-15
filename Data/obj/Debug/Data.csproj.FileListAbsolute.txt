@@ -3,9 +3,3 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data\obj\Debug\Data.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data\obj\Debug\Data.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data\obj\Debug\Data.pdb
-C:\git\hms_backend\Data\bin\Debug\Data.dll
-C:\git\hms_backend\Data\bin\Debug\Data.pdb
-C:\git\hms_backend\Data\bin\Debug\XmlCommentsData.xml
-C:\git\hms_backend\Data\obj\Debug\Data.dll
-C:\git\hms_backend\Data\obj\Debug\Data.pdb
-C:\git\hms_backend\Data\obj\Debug\Data.csprojResolveAssemblyReference.cache

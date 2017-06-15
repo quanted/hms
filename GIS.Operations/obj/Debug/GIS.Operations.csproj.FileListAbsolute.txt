@@ -1,4 +1,0 @@
-C:\git\hms_backend\GIS.Operations\bin\Debug\GIS.Operations.dll
-C:\git\hms_backend\GIS.Operations\bin\Debug\GIS.Operations.pdb
-C:\git\hms_backend\GIS.Operations\obj\Debug\GIS.Operations.dll
-C:\git\hms_backend\GIS.Operations\obj\Debug\GIS.Operations.pdb

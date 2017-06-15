@@ -5,12 +5,3 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data.Source\obj\Debug\Data.Source.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data.Source\obj\Debug\Data.Source.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Data.Source\obj\Debug\Data.Source.pdb
-C:\git\hms_backend\Data.Source\bin\Debug\Data.Source.dll
-C:\git\hms_backend\Data.Source\bin\Debug\Data.Source.pdb
-C:\git\hms_backend\Data.Source\bin\Debug\Data.dll
-C:\git\hms_backend\Data.Source\bin\Debug\Data.pdb
-C:\git\hms_backend\Data.Source\obj\Debug\Data.Source.csprojResolveAssemblyReference.cache
-C:\git\hms_backend\Data.Source\obj\Debug\Data.Source.dll
-C:\git\hms_backend\Data.Source\obj\Debug\Data.Source.pdb
-C:\git\hms_backend\Data.Source\bin\Debug\Newtonsoft.Json.dll
-C:\git\hms_backend\Data.Source\bin\Debug\Newtonsoft.Json.xml
