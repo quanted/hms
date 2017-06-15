@@ -1,0 +1,16 @@
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.dll.config
+C:\git\hms_backend\Date.Simulate\bin\Release\Date.Simulate.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Date.Simulate.pdb
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Math.Core.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Math.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Statistics.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Data.dll
+C:\git\hms_backend\Date.Simulate\bin\Release\Data.pdb
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.xml
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Math.xml
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Math.Core.xml
+C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Statistics.xml
+C:\git\hms_backend\Date.Simulate\obj\Release\Data.Simulate.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Date.Simulate\obj\Release\Date.Simulate.dll
+C:\git\hms_backend\Date.Simulate\obj\Release\Date.Simulate.pdb

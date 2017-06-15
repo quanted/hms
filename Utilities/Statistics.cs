@@ -21,114 +21,166 @@ namespace Utilities
         {
             errorMsg = "";
 
-            // Array to hold the total values associated with the sources in the sources[]
-            double[] totals = new double[data.Data[data.Data.Keys.ElementAt(0)].Count];
-
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            // Number of days of Data
-            double nDays = Convert.ToDouble(data.Data.Keys.Count);
-
-            Dictionary<string, double> dailyMeans = new Dictionary<string, double>();
-
-            // Calculate totals and dailyMeans
-            foreach(string key in data.Data.Keys)
-            {
-                double sum = 0.0;
-                for(int i = 0; i < data.Data[key].Count; i++)
-                {
-                    totals[i] += Convert.ToDouble(data.Data[key][i]);
-                    sum += Convert.ToDouble(data.Data[key][i]);
-                }
-                dailyMeans.Add(key, sum / Convert.ToDouble(data.Data[key].Count));
-            }
-
-            // Calculate average
-            double[] average = new double[totals.Length];
-            double averageSum = 0.0;
-            double[] averageIndex = new double[totals.Length];
-            for(int i = 0; i < average.Length; i++)
-            {
-                average[i] = totals[i] / nDays;
-                averageSum += average[i];
-
-                if (i != 0)
-                {
-                    averageIndex[i] += (totals[0] + totals[i])/ nDays;
-                }
-            }
-
-            // Calculate total average
-            double totalMean = averageSum / Convert.ToDouble(average.Length);
-            double[] totalMeanIndexed = new double[average.Length];
-            for(int i = 0; i < average.Length-1; i++)
-            {
-                totalMeanIndexed[i] = averageIndex[i] / 2;
-            }
-
-            // residual sum of squares
-            double[] resSS = new double[average.Length];
-            double[] resSSIndexed = new double[average.Length];
-            double totSS = 0.0;
-            double totSSIndexed = 0.0;
-            
-            // Standard Deviation Difference
-            double[] stdDevD = new double[average.Length];
-                        
-            foreach(string key in data.Data.Keys)
-            {
-                // daily value
-                double[] dailyValue = new double[average.Length];
-
-                double dailyMean = 0.0;
-                double[] dailyMeanIndexed = new double[average.Length];
-                for(int i = 0; i < data.Data[key].Count; i++)
-                {
-                    dailyValue[i] = Convert.ToDouble(data.Data[key][i]);
-                    dailyMean += Convert.ToDouble(data.Data[key][i]);
-                    stdDevD[i] += Math.Pow(Convert.ToDouble(data.Data[key][i]) - average[i], 2.0);
-
-                    if(i != 0)
-                    {
-                        dailyMeanIndexed[i] = Convert.ToDouble(data.Data[key][i]) + Convert.ToDouble(data.Data[key][0]) / 2.0;
-                    }
-                }
-                // daily mean
-                dailyMean = dailyMean / Convert.ToDouble(average.Length);
-
-                // residual sum of squares calculated for each source
-                for (int i = 0; i < data.Data[key].Count; i++)
-                {
-                    resSS[i] += Math.Pow(Math.Sqrt(dailyValue[i]) - Math.Sqrt(dailyMean), 2.0);
-                    
-                    if(i != 0)
-                    {
-                        resSSIndexed[i] += Math.Pow(Math.Sqrt(dailyValue[i]) - Math.Sqrt(Convert.ToDouble(data.Data[key][0])), 2.0);
-                    }
-                }
-                totSSIndexed += Math.Pow(Math.Sqrt(Convert.ToDouble(data.Data[key][0])) - Math.Sqrt(average[0]), 2.0);
-
-                // total sum of squares
-                totSS += Math.Pow(Math.Sqrt(dailyMean) - Math.Sqrt(totalMean), 2.0);  
-            }
+            double[] dailyAverage = CalculateDailyAverage(data.Data);
+            double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data);
+            double[] gore = CalculateGORE(dailyAverage, data.Data);
+            double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
 
             // calculated GORE value
-            double[] goreValue = new double[average.Length];
-            for (int i = 0; i < average.Length; i++)
+            for (int i = 0; i < dailyAverage.Length; i++)
             {
-                goreValue[i] = 1 - (resSS[i] / totSS);
-                data.Metadata.Add(sources[i].Trim() + "_gore", goreValue[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_average", average[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_standard_deviation", Math.Sqrt(stdDevD[i] / nDays).ToString());
+                data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
                 if (i != 0)
                 {
-                    double compareGoreValue = 1 - (resSSIndexed[i] / totSSIndexed);
-                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", compareGoreValue.ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", gore[i].ToString());
                 }
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Calculates daily average for all value sources.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateDailyAverage(Dictionary<string, List<string>> data)
+        {
+            // calculate daily values to get daily sums
+            double[] dailyTotals = new double[data.Values.ElementAt(0).Count];
+            foreach (var e in data)
+            {
+                for (int i = 0; i < e.Value.Count; i++)
+                {
+                    dailyTotals[i] += Convert.ToDouble(e.Value.ElementAt(i));
+                }
+            }
+
+            // calculate daily average
+            double[] dailyAverage = new double[data.Values.ElementAt(0).Count];
+            for (int i = 0; i < dailyTotals.Length; i++)
+            {
+                dailyAverage[i] = dailyTotals[i] / Convert.ToDouble(data.Values.Count);
+            }
+
+            return dailyAverage;
+        }
+
+        /// <summary>
+        /// Calculates standard deviation for all sources.
+        /// </summary>
+        /// <param name="averages"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateStandardDeviation(double[] averages, Dictionary<string, List<string>> data)
+        {
+
+            double[] sumDif = new double[data.Values.ElementAt(0).Count];
+            foreach (var el in data)
+            {
+                for(int i = 0; i < el.Value.Count; i++)
+                {
+                    // A. Sum of (daily value - daily average) squared
+                    sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
+                }
+            }
+
+            double days = data.Keys.Count;
+            double[] stdDev = new double[data.Values.ElementAt(0).Count];
+
+            // Standard Deviation = A / #days 
+            for(int i = 0; i < sumDif.Length; i++)
+            {
+                stdDev[i] = Math.Sqrt(sumDif[i] / days);
+            }
+
+            return stdDev;
+        }
+
+        /// <summary>
+        /// Caculates GORE value for each value source. Value at index 0 is set as primary.
+        /// </summary>
+        /// <param name="dailyAverage"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateGORE(double[] dailyAverage, Dictionary<string, List<string>> data)
+        {
+
+            double[] dailyDif = new double[data.Values.ElementAt(0).Count];
+            double dailyAvgDif = 0.0;
+
+            foreach (var el in data)
+            {
+                for (int i = 1; i < el.Value.Count; i++) { 
+                    // Sum of (square root of sourceValue - square root of ncdcValue) squared
+                    dailyDif[i] += Math.Pow(Math.Sqrt(Convert.ToDouble(el.Value[i])) - Math.Sqrt(Convert.ToDouble(el.Value[0])), 2.0);
+                }
+                // Sum of (square root of ncdcValue - square root of ncdc dailyAverage) squared
+                dailyAvgDif += Math.Pow(Math.Sqrt(Convert.ToDouble(el.Value[0])) - Math.Sqrt(Convert.ToDouble(dailyAverage[0])), 2.0);                  
+            }
+
+            double[] gore = new double[data.Values.ElementAt(0).Count];
+            for(int i = 1; i < gore.Length; i++)
+            {
+                // Calculate GORE value
+                gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            }
+
+            return gore;
+        }
+
+        /// <summary>
+        /// Caculates average GORE value for each value source. Primary source is the average of all sources.
+        /// </summary>
+        /// <param name="dailyAverage"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateAverageGORE(double[] dailyAverage, Dictionary<string, List<string>> data)
+        {
+
+            double[] dailyDif = new double[data.Values.ElementAt(0).Count];
+            double dailyAvgDif = 0.0;
+
+            // calculate average daily of all sources
+            double dailyAvgTot = 0.0;
+
+            for(int i = 0; i < dailyAverage.Length; i++)
+            {
+                dailyAvgTot += dailyAverage[i];
+            }
+            dailyAvgTot = dailyAvgTot / Convert.ToDouble(dailyAverage.Length);
+
+            foreach (var el in data)
+            {
+                double dailySum = 0.0;
+                for (int i = 0; i < el.Value.Count; i++)
+                {
+                    dailySum += Convert.ToDouble(el.Value[i]);
+                }
+                double dailySumAverage = dailySum / Convert.ToDouble(el.Value.Count);
+
+                for (int i = 0; i < el.Value.Count; i++)
+                {
+                    // Sum of (square root of sourceValue - square root of ncdcValue) squared
+                    dailyDif[i] += Math.Pow(Math.Sqrt(Convert.ToDouble(el.Value[i])) - Math.Sqrt(dailySumAverage), 2.0);
+                }
+                // Sum of (square root of ncdcValue - square root of ncdc dailyAverage) squared
+                dailyAvgDif += Math.Pow(Math.Sqrt(dailySumAverage) - Math.Sqrt(Convert.ToDouble(dailyAvgTot)), 2.0);
+            }
+
+            double[] gore = new double[data.Values.ElementAt(0).Count];
+            for (int i = 0; i < gore.Length; i++)
+            {
+                // Calculate GORE value
+                gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            }
+
+            return gore;
         }
     }
 }
