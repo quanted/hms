@@ -26,7 +26,7 @@ namespace Precipitation
             if (data.Contains("ERROR"))
             {
                 string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
+                errorMsg = lines[0] + " Dataset: precipitation; Source: " + input.Source;
                 return null;
             }
 

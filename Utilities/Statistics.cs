@@ -24,7 +24,8 @@ namespace Utilities
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            double[] dailyAverage = CalculateDailyAverage(data.Data);
+            double[] sums = CalculateSums(data.Data);
+            double[] dailyAverage = CalculateDailyAverage(sums, data.Data);
             double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data);
             double[] gore = CalculateGORE(dailyAverage, data.Data);
             double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
@@ -34,6 +35,7 @@ namespace Utilities
             {
                 data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_sum", sums[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
                 if (i != 0)
                 {
@@ -45,27 +47,36 @@ namespace Utilities
         }
 
         /// <summary>
-        /// Calculates daily average for all value sources.
+        /// Calculates sum for all value sources.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private static double[] CalculateDailyAverage(Dictionary<string, List<string>> data)
+        private static double[] CalculateSums(Dictionary<string, List<string>> data)
         {
-            // calculate daily values to get daily sums
-            double[] dailyTotals = new double[data.Values.ElementAt(0).Count];
+            // calculate daily values to get sums
+            double[] sums = new double[data.Values.ElementAt(0).Count];
             foreach (var e in data)
             {
                 for (int i = 0; i < e.Value.Count; i++)
                 {
-                    dailyTotals[i] += Convert.ToDouble(e.Value.ElementAt(i));
+                    sums[i] += Convert.ToDouble(e.Value.ElementAt(i));
                 }
             }
+            return sums;
+        }
 
+        /// <summary>
+        /// Calculates daily average for all value sources.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateDailyAverage(double[] sums, Dictionary<string, List<string>> data)
+        {
             // calculate daily average
             double[] dailyAverage = new double[data.Values.ElementAt(0).Count];
-            for (int i = 0; i < dailyTotals.Length; i++)
+            for (int i = 0; i < sums.Length; i++)
             {
-                dailyAverage[i] = dailyTotals[i] / Convert.ToDouble(data.Values.Count);
+                dailyAverage[i] = sums[i] / Convert.ToDouble(data.Values.Count);
             }
 
             return dailyAverage;

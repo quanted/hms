@@ -60,7 +60,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to load NLDAS url details from configuration file.\n" + ex.Message;
+                errorMsg = "ERROR: Unable to load GLDAS url details from configuration file.\n" + ex.Message;
                 return null;
             }
 
