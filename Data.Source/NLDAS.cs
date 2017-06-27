@@ -231,6 +231,10 @@ namespace Data.Source
         {
             errorMsg = "";
             string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (splitData.Length <= 1)
+            {
+                splitData = data.Split(new string[] { "Data\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            }
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
