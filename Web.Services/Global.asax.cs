@@ -36,7 +36,7 @@ namespace Web.Services
         /// </summary>
         /// <param name="fileName">File name.</param>
         /// <param name="variableName">Name for the Application variable</param>
-        private void FileToApplicationDict(string fileName, string variableName)
+        public void FileToApplicationDict(string fileName, string variableName)
         {
             Dictionary<string, string> fileValues = new Dictionary<string, string>();
             foreach (string line in File.ReadLines(Server.MapPath("~/App_Data/" + fileName)))

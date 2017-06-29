@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Daymet.cs" />
@@ -58,6 +59,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Source\Data.Source.csproj">
+      <Project>{59eeb97c-7a66-4cdd-a5a1-24bd488b98ba}</Project>
+      <Name>Data.Source</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Data\Data.csproj">
+      <Project>{e3bc2510-77a5-42c2-8321-f17d8916e413}</Project>
+      <Name>Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Precipitation\Precipitation.csproj">
+      <Project>{702c7e7d-a4df-4b32-b820-d60fc07356e1}</Project>
+      <Name>Precipitation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Web.Services\Web.Services.csproj">
+      <Project>{045721df-3c71-4c39-b413-dcf1c8e52df7}</Project>
+      <Name>Web.Services</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
