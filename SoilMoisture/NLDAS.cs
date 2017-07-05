@@ -21,12 +21,14 @@ namespace SoilMoisture
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             ITimeSeriesOutput nldasOutput = input.Output;
             List<ITimeSeriesOutput> layersData = new List<ITimeSeriesOutput>();
+            List<string> urls = input.Input.BaseURL;
             for (int i = 0; i < input.Layers.Count; i++)
             {
+                input.Input.BaseURL = new List<string>() { urls[i] };
                 ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
                 ITimeSeriesOutput tempOutput = new TimeSeriesOutput();
                 tempOutput = oFactory.Initialize();
-                string data = nldas.GetData(out errorMsg, input.Layers[i].Replace('-', '_') + "_Soil_Moisture", input.Input);
+                string data = nldas.GetData(out errorMsg, input.Layers[i].Replace('-', '_') + "_SOILM", input.Input);
                 if (errorMsg.Contains("ERROR")) { return null; }
 
                 tempOutput = nldas.SetDataToOutput(out errorMsg, "SoilMoisture", data, tempOutput, input.Input);

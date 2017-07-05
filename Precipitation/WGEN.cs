@@ -27,7 +27,7 @@ namespace Precipitation
             int years = (input.Geometry.GeometryMetadata.ContainsKey("yearsHistoric")) ? Convert.ToInt16(input.Geometry.GeometryMetadata["yearsHistoric"]) : 20;
             // Historic Precipitation data.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput historicInput = iFactory.SetTimeSeriesInput(input, out errorMsg);
+            ITimeSeriesInput historicInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "WGEN" }, out errorMsg);
             ITimeSeriesOutput historicData = GetHistoricData(out errorMsg, years, historicInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
 

@@ -19,8 +19,9 @@ namespace Utilities
         public ITimezone GetTimezone(out string errorMsg, IPointCoordinate point)
         {
             errorMsg = "";
-            Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            string url = urls["TIMEZONE_GEE_INT"];
+            //Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            //string url = urls["TIMEZONE_GEE_INT"];
+            string url = "https://134.67.114.1/hms/rest/timezone/";
             string queryString = "latitude=" + point.Latitude.ToString() + "&longitude=" + point.Longitude.ToString();
             string completeUrl = url + queryString;
             try

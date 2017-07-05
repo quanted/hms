@@ -39,55 +39,88 @@ namespace Web.Services.Models
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             output.DataSource = string.Join(" - ", input.SourceList.ToArray());
-            //List<ITimeSeriesOutput> results = new List<ITimeSeriesOutput>();
 
             if (input.Dataset.Contains("Precipitation"))
             {
+                input.SourceList = new List<string>()
+                {
+                    { "nldas" },
+                    { "gldas" },
+                    { "daymet" }
+                };
+                input.Source = "ncdc";
                 // Validate precipitation sources.
                 errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-                foreach(string source in input.SourceList)
+                List<Precipitation.Precipitation> precipList = new List<Precipitation.Precipitation>();
+                List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
+
+                // NCDC Call
+                Precipitation.Precipitation ncdc = new Precipitation.Precipitation();
+                // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
+                ITimeSeriesInputFactory nFactory = new TimeSeriesInputFactory();
+                ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
+                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+                
+
+                // Set input to precip object.
+                ncdc.Input = nInput;
+                ncdc.Input.TemporalResolution = "daily";
+                ITimeSeriesOutput nResult = ncdc.GetData(out errorMsg);
+                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+                output = nResult;
+
+                // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.
+                foreach (string source in input.SourceList)
                 {
                     // Precipitation object
                     Precipitation.Precipitation precip = new Precipitation.Precipitation();
-
+                    if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
+                    {
+                        input.Geometry.Point = new PointCoordinate();
+                        input.Geometry.Point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
+                        input.Geometry.Point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
+                    }
+                    else
+                    {
+                        errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCDC station.";
+                    }
                     // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                     ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-                    ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, out errorMsg);
+                    input.Source = source;
+                    ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                    sInput.Source = source;
+                    //sInput.Source = source;
 
                     // Set input to precip object.
                     precip.Input = sInput;
                     precip.Input.TemporalResolution = "daily";
-                    // Assigns coordinates of the ncdc station to the point coordinate values for the other data source calls.
-                    if (!source.Contains("ncdc"))
-                    {
-                       if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
-                       {
-                           precip.Input.Geometry.Point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
-                           precip.Input.Geometry.Point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
-                       }
-                       else
-                       {
-                           errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCDC station.";
-                       }
-                       precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
-                    }
 
+                    precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
+
+                    precipList.Add(precip);
+                }
+                
+                Parallel.ForEach(precipList, (Precipitation.Precipitation precip) =>
+                {
                     // Gets the Precipitation data.
                     ITimeSeriesOutput result = precip.GetData(out errorMsg);
-                    if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                    if (result.DataSource.Contains("ncdc"))
-                    {
-                        output = result;
-                    }
-                    else
-                    {
-                        output = Utilities.Merger.MergeTimeSeries(output, result);
-                    }
-                };
+                    outputList.Add(result);
+                    //if (result.DataSource.Contains("ncdc"))
+                    //{
+                    //    output = result;
+                    //}
+                    //else
+                    //{
+                    //    output = Utilities.Merger.MergeTimeSeries(output, result);
+                    //}
+                });
+
+                foreach(ITimeSeriesOutput result in outputList)
+                {
+                    output = Utilities.Merger.MergeTimeSeries(output, result);
+                }
 
                 output.Metadata.Add("column_1", "date");
                 output.Metadata.Add("column_2", "ncdc");

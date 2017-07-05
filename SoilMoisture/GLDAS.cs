@@ -20,8 +20,10 @@ namespace SoilMoisture
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
             ITimeSeriesOutput gldasOutput = input.Output;
             List<ITimeSeriesOutput> layersData = new List<ITimeSeriesOutput>();
+            List<string> urls = input.Input.BaseURL;
             for (int i = 0; i < input.Layers.Count; i++)
             {
+                input.Input.BaseURL = new List<string>() { urls[i] };
                 ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
                 ITimeSeriesOutput tempOutput = new TimeSeriesOutput();
                 tempOutput = oFactory.Initialize();

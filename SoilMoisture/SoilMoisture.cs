@@ -52,7 +52,6 @@ namespace SoilMoisture
 
             if (!CheckLayers(out errorMsg)) { return null; }
 
-            //TODO: Check Source and run specific subcomponent class for source
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 

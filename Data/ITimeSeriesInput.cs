@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Web;
 
 namespace Data
 {
@@ -58,6 +59,11 @@ namespace Data
         /// VALUES: "json", "xml", "csv"
         /// </summary>
         string OutputFormat { get; set; }
+
+        /// <summary>
+        /// Internal: Base url for data retrieval depending on the specified source and dataset.
+        /// </summary>
+        List<string> BaseURL { get; set; }
     }
 
     /// <summary>
@@ -115,6 +121,11 @@ namespace Data
         /// VALUES: "json", "xml", "csv"
         /// </summary>
         public string OutputFormat { get; set; }
+
+        /// <summary>
+        /// Internal: Holds base url for data retrieval depending on the specified source and dataset.
+        /// </summary>
+        public List<string> BaseURL { get; set; }
     }
 
 
@@ -131,7 +142,7 @@ namespace Data
         /// <param name="input"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public abstract ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, out string errorMsg);
+        public abstract ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg);
     }
 
     /// <summary>
@@ -145,7 +156,7 @@ namespace Data
         /// <param name="input"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, out string errorMsg)
+        public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
         {
             errorMsg = "";
             TimeSeriesInput newInput = new TimeSeriesInput();
@@ -293,8 +304,53 @@ namespace Data
             newInput.OutputFormat = (String.IsNullOrWhiteSpace(input.OutputFormat)) ? "json" : input.OutputFormat;
             // TODO: Add validation of the provided output. If not valid set to "json"
 
+            newInput.BaseURL = new List<string>();
+            foreach (string ds in dataset)
+            {
+                newInput.BaseURL.Add(GetBaseURL(input, ds, out errorMsg));
+            }
+
             return newInput;
         }
+
+
+        private static string GetBaseURL(ITimeSeriesInput input, string dataset, out string errorMsg)
+        {
+            errorMsg = "";
+            Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+            string src = "";
+            switch (input.Source)
+            {
+                case "nldas":
+                    src = "NLDAS";
+                    break;
+                case "gldas":
+                    src = "GLDAS";
+                    break;
+                case "daymet":
+                    src = "DAYMET";
+                    break;
+                case "ncdc":
+                    src = "NCDC";
+                    break;
+                case "wgen":
+                    return "";
+                default:
+                    errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
+                    return "";
+            }
+            try
+            {
+                return caselessUrls[src + "_" + dataset + "_URL"];
+            }
+            catch
+            {
+                errorMsg = "ERROR: Unable to construct base url from the specified dataset and provided data source.";
+                return "";
+            }
+        }
+
     }
 
 

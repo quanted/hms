@@ -62,6 +62,15 @@ namespace Utilities
                     sums[i] += Convert.ToDouble(e.Value.ElementAt(i));
                 }
             }
+
+            //Parallel.ForEach(data, (KeyValuePair<string, List<string>> e) =>
+            //{
+            //    for (int i = 0; i < e.Value.Count; i++)
+            //    {
+            //        sums[i] += Convert.ToDouble(e.Value.ElementAt(i));
+            //    }
+            //});
+
             return sums;
         }
 
@@ -74,10 +83,17 @@ namespace Utilities
         {
             // calculate daily average
             double[] dailyAverage = new double[data.Values.ElementAt(0).Count];
-            for (int i = 0; i < sums.Length; i++)
+
+            //for (int i = 0; i < sums.Length; i++)
+            //{
+            //    dailyAverage[i] = sums[i] / Convert.ToDouble(data.Values.Count);
+            //}
+
+            double count = Convert.ToDouble(data.Values.Count);
+            Parallel.For(0, sums.Length, i =>
             {
-                dailyAverage[i] = sums[i] / Convert.ToDouble(data.Values.Count);
-            }
+                dailyAverage[i] = sums[i] / count;
+            });
 
             return dailyAverage;
         }
@@ -92,24 +108,38 @@ namespace Utilities
         {
 
             double[] sumDif = new double[data.Values.ElementAt(0).Count];
-            foreach (var el in data)
+            //foreach (var el in data)
+            //{
+            //    for(int i = 0; i < el.Value.Count; i++)
+            //    {
+            //        // A. Sum of (daily value - daily average) squared
+            //        sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
+            //    }
+            //}
+
+            Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) =>
             {
-                for(int i = 0; i < el.Value.Count; i++)
+                for (int i = 0; i < el.Value.Count; i++)
                 {
                     // A. Sum of (daily value - daily average) squared
                     sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
                 }
-            }
+            });
 
             double days = data.Keys.Count;
             double[] stdDev = new double[data.Values.ElementAt(0).Count];
 
             // Standard Deviation = A / #days 
-            for(int i = 0; i < sumDif.Length; i++)
+            //for(int i = 0; i < sumDif.Length; i++)
+            //{
+            //    stdDev[i] = Math.Sqrt(sumDif[i] / days);
+            //}
+
+            Parallel.For(0, sumDif.Length, i =>
             {
                 stdDev[i] = Math.Sqrt(sumDif[i] / days);
-            }
-
+            });
+            
             return stdDev;
         }
 
@@ -136,11 +166,17 @@ namespace Utilities
             }
 
             double[] gore = new double[data.Values.ElementAt(0).Count];
-            for(int i = 1; i < gore.Length; i++)
+
+            //for(int i = 1; i < gore.Length; i++)
+            //{
+            //    // Calculate GORE value
+            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            //}
+
+            Parallel.For(1, gore.Length, i =>
             {
-                // Calculate GORE value
                 gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            }
+            });
 
             return gore;
         }
@@ -160,14 +196,21 @@ namespace Utilities
             // calculate average daily of all sources
             double dailyAvgTot = 0.0;
 
-            for(int i = 0; i < dailyAverage.Length; i++)
+            for (int i = 0; i < dailyAverage.Length; i++)
             {
                 dailyAvgTot += dailyAverage[i];
             }
+            //Parallel.For(0, dailyAverage.Length, i =>
+            //{
+            //    dailyAvgTot += dailyAverage[i];
+            //});
+
             dailyAvgTot = dailyAvgTot / Convert.ToDouble(dailyAverage.Length);
 
-            foreach (var el in data)
-            {
+            //foreach (var el in data)
+            //{
+            Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) => 
+                {
                 double dailySum = 0.0;
                 for (int i = 0; i < el.Value.Count; i++)
                 {
@@ -182,14 +225,21 @@ namespace Utilities
                 }
                 // Sum of (square root of ncdcValue - square root of ncdc dailyAverage) squared
                 dailyAvgDif += Math.Pow(Math.Sqrt(dailySumAverage) - Math.Sqrt(Convert.ToDouble(dailyAvgTot)), 2.0);
-            }
+                //}
+            });
 
             double[] gore = new double[data.Values.ElementAt(0).Count];
-            for (int i = 0; i < gore.Length; i++)
+            //for (int i = 0; i < gore.Length; i++)
+            //{
+            //    // Calculate GORE value
+            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            //}
+
+            Parallel.For(0, gore.Length, i =>
             {
-                // Calculate GORE value
+                //    // Calculate GORE value
                 gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            }
+            });
 
             return gore;
         }
