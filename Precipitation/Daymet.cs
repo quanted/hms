@@ -87,9 +87,32 @@ namespace Precipitation
             if (errorMsg.Contains("ERROR")) { return null; }
 
             double modifier = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-            output.Data = SetData(out errorMsg, splitData[1], input.DataValueFormat, input.DateTimeSpan.DateTimeFormat, modifier);
+            Dictionary<DateTime, List<string>> outputTemp = SetData(out errorMsg, splitData[1], input.DataValueFormat, input.DateTimeSpan.DateTimeFormat, modifier);
             if (errorMsg.Contains("ERROR")) { return null; }
 
+            SortedDictionary<DateTime, List<string>> sortedData = new SortedDictionary<DateTime, List<string>>(outputTemp);
+
+            // Daymet Leap Year MESS!
+            // Inserts Dec 31st for leap years.
+            // Daymet leap year black magic (DON'T TOUCH)
+            for(int i = 0; i <= (outputTemp.Keys.Last().Year - outputTemp.Keys.First().Year); i++)
+            {
+                DateTime date = sortedData.Keys.First().AddYears(i);
+
+                if(DateTime.IsLeapYear(date.Year) && sortedData.ContainsKey(new DateTime(date.Year, 12, 30)))
+                {
+                    sortedData.Add(new DateTime(date.Year, 12, 31), new List<string>() { (0).ToString(input.DataValueFormat) });
+                }
+                if(i == (outputTemp.Keys.Last().Year - outputTemp.Keys.First().Year) - 1) { break; }
+            }
+
+            Dictionary<string, List<string>> outputFinal = new Dictionary<string, List<string>>();
+            foreach(DateTime key in sortedData.Keys)
+            {
+                outputFinal.Add(key.ToString(input.DateTimeSpan.DateTimeFormat), sortedData[key]);
+            }
+
+            output.Data = outputFinal;
             return output;
         }
 
@@ -130,19 +153,26 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="modifier"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, double modifier)
+        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, double modifier)
         {
             errorMsg = "";
-            Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
+            Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>();
             string[] tsLines = timeseries.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < tsLines.Length; i++)
             {
                 string[] lineData = tsLines[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 DateTime date = new DateTime(Convert.ToInt16(lineData[0]), 1, 1);
+
+                // Leap year dates have to be shifted by -1 day after Feb 28, due to Daymet not including Feb 29th
+                if (DateTime.IsLeapYear(date.Year) && date > new DateTime(date.Year, 2, 28))
+                {
+                    date = date.AddDays(-1.0);
+                };
+
                 DateTime date2;
                 if (i > 0) { date2 = date.AddDays(Convert.ToInt16(lineData[1]) - 1); }
                 else { date2 = date; }
-                data.Add(date2.ToString(dateFormat), new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
+                data.Add(date2, new List<string> { ( modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
             }
             return data;
         }

@@ -117,7 +117,7 @@ namespace Web.Services.Models
                     //}
                 });
 
-                foreach(ITimeSeriesOutput result in outputList)
+                foreach (ITimeSeriesOutput result in outputList)
                 {
                     output = Utilities.Merger.MergeTimeSeries(output, result);
                 }
