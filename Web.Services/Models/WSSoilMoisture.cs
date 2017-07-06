@@ -35,9 +35,17 @@ namespace Web.Services.Models
             SoilMoisture.SoilMoisture soilM = new SoilMoisture.SoilMoisture();
             soilM.Layers = input.Layers;
 
+            // Assigning dataset values, used to determine base url
+            List<string> dataset = new List<string>();
+            foreach(string layer in soilM.Layers)
+            {
+                string l = layer.Replace('-', '_');
+                dataset.Add(l + "_SOILM");
+            }
+            
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            soilM.Input = iFactory.SetTimeSeriesInput(input, out errorMsg);
+            soilM.Input = iFactory.SetTimeSeriesInput(input, dataset, out errorMsg);
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }

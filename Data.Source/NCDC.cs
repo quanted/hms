@@ -106,28 +106,28 @@ namespace Data.Source
                 {
                     tempStartDate = input.DateTimeSpan.StartDate;
                     tempEndDate = input.DateTimeSpan.EndDate;
-                    url = ConstructURL(out errorMsg, station, tempStartDate, tempEndDate);
+                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else if (i == 0 && requiredCalls != 1)  //url constructed for first call of multiple
                 {
                     tempStartDate = input.DateTimeSpan.StartDate;
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
-                    url = ConstructURL(out errorMsg, station, tempStartDate, tempEndDate);
+                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else if (i != 0 && i == requiredCalls - 1) //url constructed for last call of multiple
                 {
                     tempStartDate = tempEndDate;
                     tempEndDate = input.DateTimeSpan.EndDate;
-                    url = ConstructURL(out errorMsg, station, tempStartDate, tempEndDate);
+                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else                                   //url constructed for calls that are not the start or end
                 {
                     tempStartDate = tempEndDate;
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
-                    url = ConstructURL(out errorMsg, station, tempStartDate, tempEndDate);
+                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 string json = DownloadData(out errorMsg, token, url);
@@ -168,20 +168,21 @@ namespace Data.Source
         /// <param name="station">stationID</param>
         /// <param name="dateTime">IDateTimeSpan</param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, string station, DateTime startDate, DateTime endDate)
+        private string ConstructURL(out string errorMsg, string station, string baseURL, DateTime startDate, DateTime endDate)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
-            try
-            {
-                Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-                sb.Append(urls["NCDC_URL"]);
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Unable to load URL details for ncdc from configuration file. " + ex.Message;
-                return null;
-            }
+            sb.Append(baseURL);
+            //try
+            //{
+            //    Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            //    sb.Append(urls["NCDC_URL"]);
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorMsg = "ERROR: Unable to load URL details for ncdc from configuration file. " + ex.Message;
+            //    return null;
+            //}
 
             if (station.Contains("GHCND"))
             {

@@ -35,7 +35,7 @@ namespace Web.Services.Models
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            temp.Input = iFactory.SetTimeSeriesInput(input, out errorMsg);
+            temp.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "TEMP" }, out errorMsg);
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }

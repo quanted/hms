@@ -81,16 +81,17 @@ namespace Data.Source
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
-            try
-            {
-                Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-                sb.Append(urls["Daymet_" + dataSet + "_URL"]);
-            }
-            catch(Exception ex)
-            {
-                errorMsg = "ERROR: Unable to load url for " + dataSet + " dataset for Daymet. " + ex.Message;
-                return null;
-            }
+            sb.Append(input.BaseURL[0]);
+            //try
+            //{
+            //    Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            //    sb.Append(urls["Daymet_" + dataSet + "_URL"]);
+            //}
+            //catch(Exception ex)
+            //{
+            //    errorMsg = "ERROR: Unable to load url for " + dataSet + " dataset for Daymet. " + ex.Message;
+            //    return null;
+            //}
             sb.Append("lat=" + input.Geometry.Point.Latitude + "&lon=" + input.Geometry.Point.Longitude);                   // Adds coordinates to url variable string
             sb.Append("&measuredParams=" + GetMeasuredParam(out errorMsg, dataSet));                                        // Adds dataset variable to string
             string years = GetListOfYears(out errorMsg, input.DateTimeSpan.StartDate, input.DateTimeSpan.EndDate);

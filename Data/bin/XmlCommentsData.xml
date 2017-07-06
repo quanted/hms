@@ -145,6 +145,11 @@
             VALUES: "json", "xml", "csv"
             </summary>
         </member>
+        <member name="P:Data.ITimeSeriesInput.BaseURL">
+            <summary>
+            Internal: Base url for data retrieval depending on the specified source and dataset.
+            </summary>
+        </member>
         <member name="T:Data.TimeSeriesInput">
             <summary>
             Concrete class for timeseries inputs.
@@ -199,12 +204,17 @@
             VALUES: "json", "xml", "csv"
             </summary>
         </member>
+        <member name="P:Data.TimeSeriesInput.BaseURL">
+            <summary>
+            Internal: Holds base url for data retrieval depending on the specified source and dataset.
+            </summary>
+        </member>
         <member name="T:Data.ITimeSeriesInputFactory">
             <summary>
             Creator abstract class for TimeSeriesInputFactory
             </summary>
         </member>
-        <member name="M:Data.ITimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+        <member name="M:Data.ITimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.Collections.Generic.List{System.String},System.String@)">
             <summary>
             TimeSeriesInput setter abstract function
             </summary>
@@ -217,7 +227,7 @@
             Creator concrete class for TimeSeriesInputFactory
             </summary>
         </member>
-        <member name="M:Data.TimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+        <member name="M:Data.TimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.Collections.Generic.List{System.String},System.String@)">
             <summary>
             TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
             </summary>
