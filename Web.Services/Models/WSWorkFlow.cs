@@ -98,7 +98,10 @@ namespace Web.Services.Models
                     precip.Input.TemporalResolution = "daily";
 
                     precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
-
+                    if (!precip.Input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
+                    {
+                        precip.Input.Geometry.GeometryMetadata.Add("leapYear", "correction");
+                    }
                     precipList.Add(precip);
                 }
                 
