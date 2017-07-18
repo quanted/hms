@@ -58,7 +58,7 @@ namespace Precipitation
             switch (input.TemporalResolution)
             {
                 case "daily":
-                    output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 3.0, output, input);
+                    output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 7, 3.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
                 case "weekly":

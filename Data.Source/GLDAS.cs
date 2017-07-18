@@ -70,7 +70,8 @@ namespace Data.Source
 
             //Add Start and End Date
             string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-            string[] endDT = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
+            DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
+            string[] endDT = tempDate.ToString("yyyy-MM-dd HH").Split(' ');
             sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
 
             return sb.ToString();

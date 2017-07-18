@@ -55,7 +55,7 @@ namespace Data.Source
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
             if (cInput.Geometry.Timezone.Offset < 0.0) {
-                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 1 + Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0)
             {
@@ -66,11 +66,11 @@ namespace Data.Source
             if (cInput.Geometry.Timezone.Offset < 0.0)
             {
                 dateTime.EndDate.AddDays(1.0);
-                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, -1 * Convert.ToInt16(cInput.Geometry.Timezone.Offset) - 1, 00, 00);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0)
             {
-                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 23 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
             return dateTime;
         }
@@ -84,9 +84,12 @@ namespace Data.Source
         /// <returns></returns>
         public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
         {
+            //TODO: add +1 and -1 modifier to the hour of the offset.
+        
             string[] date = dateHour.Split(' ');
             string hourStr = date[1].Substring(0, 2);
             string dateHourStr = date[0] + " " + hourStr;
+            double adjustedOffset = offset + 1;
             DateTime newDate = new DateTime();
             DateTime.TryParseExact(dateHourStr, new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
             newDate = (offset != 0.0) ? newDate.AddHours(offset) : newDate;
