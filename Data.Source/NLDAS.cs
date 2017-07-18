@@ -59,13 +59,13 @@ namespace Data.Source
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0)
             {
-                dateTime.StartDate.AddDays(-1.0);
+                dateTime.StartDate = dateTime.StartDate.AddDays(-1.0);
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
 
             if (cInput.Geometry.Timezone.Offset < 0.0)
             {
-                dateTime.EndDate.AddDays(1.0);
+                dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
                 dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0)
@@ -84,7 +84,6 @@ namespace Data.Source
         /// <returns></returns>
         public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
         {
-            //TODO: add +1 and -1 modifier to the hour of the offset.
         
             string[] date = dateHour.Split(' ');
             string hourStr = date[1].Substring(0, 2);
