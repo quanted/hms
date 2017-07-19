@@ -25,10 +25,7 @@ namespace Data.Source
             errorMsg = "";
 
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
-            if (componentInput.TimeLocalized == true)
-            {
-                componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
-            }
+            componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);

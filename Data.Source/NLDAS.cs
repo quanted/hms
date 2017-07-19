@@ -76,7 +76,7 @@ namespace Data.Source
             else
             {
                 dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
-                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 01, 00, 00);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 00, 00, 00);
             }
             return dateTime;
         }
