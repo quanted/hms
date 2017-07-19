@@ -25,10 +25,7 @@ namespace Data.Source
             errorMsg = "";
 
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
-            if (componentInput.TimeLocalized == true)
-            {
-                componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
-            }
+            componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
@@ -54,23 +51,28 @@ namespace Data.Source
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
-            if (cInput.Geometry.Timezone.Offset < 0.0) {
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true) {
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 1 + Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
-            else if (cInput.Geometry.Timezone.Offset > 0.0)
+            else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
             {
                 dateTime.StartDate = dateTime.StartDate.AddDays(-1.0);
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
 
-            if (cInput.Geometry.Timezone.Offset < 0.0)
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true)
             {
                 dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
                 dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
-            else if (cInput.Geometry.Timezone.Offset > 0.0)
+            else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
             {
                 dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+            }
+            else
+            {
+                dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 01, 00, 00);
             }
             return dateTime;
         }
