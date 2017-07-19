@@ -59,6 +59,10 @@ namespace Data.Source
                 dateTime.StartDate = dateTime.StartDate.AddDays(-1.0);
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
+            else
+            {
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 01, 00, 00);
+            }
 
             if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true)
             {
