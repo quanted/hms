@@ -26,8 +26,19 @@ namespace Precipitation
             ITimeSeriesOutput ncdcOutput = output;
 
             // Make call to get station metadata and add to output.Metadata
-            string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
-            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncdc", ncdc.GetStationDetails(out errorMsg, input.Geometry.GeometryMetadata["stationID"], token));
+            //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
+            if (!input.Geometry.GeometryMetadata.ContainsKey("token"))
+            {
+                errorMsg = "ERROR: No ncdc token provided. Please provide a valid ncdc token.";
+                return null;
+            }
+            string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
+            if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            {
+                errorMsg = "ERROR: No ncdc stationID provided. Please provide a valid ncdc stationID.";
+                return null;
+            }
+            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncdc", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
             ncdcOutput.Metadata.Add("ncdc_temporalResolution", input.TemporalResolution);
             ncdcOutput.Metadata.Add("ncdc_units", "mm");
 

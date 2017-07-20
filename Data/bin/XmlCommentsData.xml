@@ -4,6 +4,12 @@
         <name>Data</name>
     </assembly>
     <members>
+        <member name="M:Data.Files.FileToDictionary(System.String)">
+            <summary>
+            Reads the contents of a space delimited file and populates the specified Application variable.
+            </summary>
+            <param name="fileName">File name.</param>
+        </member>
         <member name="T:Data.ITimeSeriesOutput">
             <summary>
             TimeSeriesOutput interface for output object.

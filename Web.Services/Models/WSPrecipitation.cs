@@ -40,6 +40,11 @@ namespace Web.Services.Models
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }           
 
+            if (precip.Input.Source.Contains("ncdc"))
+            {
+                precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
+            }
+
             // Gets the Precipitation data.
             ITimeSeriesOutput result = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }

@@ -95,7 +95,9 @@ namespace Data.Source
             DateTime tempEndDate = input.DateTimeSpan.EndDate;
 
             string station = input.Geometry.GeometryMetadata["stationID"];
-            string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
+            string token = input.Geometry.GeometryMetadata["token"];
+
+            //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
             string url = "";
 
             //Check if date difference is greater than one year, if true splits dates apart into multiple requests that are equal to 1y-1day.
@@ -527,23 +529,28 @@ namespace Data.Source
         /// <param name="stationID"></param>
         /// <param name="token">Token required for accessing ncdc services.</param>
         /// <returns></returns>
-        public Dictionary<string, string> GetStationDetails(out string errorMsg, string stationID, string token)
+        public Dictionary<string, string> GetStationDetails(out string errorMsg, string url, string stationID, string token)
         {
             errorMsg = "";
             Dictionary<string, string> stationDetails = new Dictionary<string, string>();
-            Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            string url = "";
-            try
+            //Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            //string url = "";
+            //try
+            //{
+            //    url = urls["NCDC_STATION_URL"];
+            //}
+            //catch (Exception ex)
+            //{
+            //    errorMsg = "ERROR: Unable to load URL details from configuration file. " + ex.Message;
+            //    return new Dictionary<string, string>();
+            //}
+            url = url + stationID;
+            if (String.IsNullOrWhiteSpace(token))
             {
-                url = urls["NCDC_STATION_URL"];
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Unable to load URL details from configuration file. " + ex.Message;
+                errorMsg = "ERROR: No token provided for retrieving ncdc station details.";
                 return new Dictionary<string, string>();
             }
-            url = url + stationID;
-            token = (String.IsNullOrWhiteSpace(token)) ? (string)HttpContext.Current.Application["ncdc_token"] : token;
+            //token = (String.IsNullOrWhiteSpace(token)) ? (string)HttpContext.Current.Application["ncdc_token"] : token;
             try
             {
                 int retries = 5;                                        // Max number of request retries
