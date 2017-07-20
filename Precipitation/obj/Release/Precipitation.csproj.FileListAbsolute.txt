@@ -22,3 +22,4 @@ C:\git\hms_backend\Precipitation\bin\Release\Accord.Math.Core.xml
 C:\git\hms_backend\Precipitation\obj\Release\Precipitation.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Precipitation\obj\Release\Precipitation.dll
 C:\git\hms_backend\Precipitation\obj\Release\Precipitation.pdb
+C:\git\hms_backend\Precipitation\bin\Release\App_Data\url_info.txt

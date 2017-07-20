@@ -7,3 +7,4 @@ C:\git\hms_backend\Utilities\bin\Release\Newtonsoft.Json.xml
 C:\git\hms_backend\Utilities\obj\Release\Utilities.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Utilities\obj\Release\Utilities.dll
 C:\git\hms_backend\Utilities\obj\Release\Utilities.pdb
+C:\git\hms_backend\Utilities\bin\Release\App_Data\url_info.txt

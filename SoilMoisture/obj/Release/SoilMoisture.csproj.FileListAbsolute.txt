@@ -11,3 +11,4 @@ C:\git\hms_backend\SoilMoisture\bin\Release\Newtonsoft.Json.xml
 C:\git\hms_backend\SoilMoisture\obj\Release\SoilMoisture.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\SoilMoisture\obj\Release\SoilMoisture.dll
 C:\git\hms_backend\SoilMoisture\obj\Release\SoilMoisture.pdb
+C:\git\hms_backend\SoilMoisture\bin\Release\App_Data\url_info.txt

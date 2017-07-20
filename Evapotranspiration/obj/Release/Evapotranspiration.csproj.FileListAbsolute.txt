@@ -11,3 +11,4 @@ C:\git\hms_backend\Evapotranspiration\bin\Release\Newtonsoft.Json.xml
 C:\git\hms_backend\Evapotranspiration\obj\Release\Evapotranspiration.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Evapotranspiration\obj\Release\Evapotranspiration.dll
 C:\git\hms_backend\Evapotranspiration\obj\Release\Evapotranspiration.pdb
+C:\git\hms_backend\Evapotranspiration\bin\Release\App_Data\url_info.txt

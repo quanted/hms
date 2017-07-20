@@ -22,3 +22,4 @@ C:\git\hms_backend\SurfaceRunoff\bin\Release\Accord.Math.Core.xml
 C:\git\hms_backend\SurfaceRunoff\obj\Release\SurfaceRunoff.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\SurfaceRunoff\obj\Release\SurfaceRunoff.dll
 C:\git\hms_backend\SurfaceRunoff\obj\Release\SurfaceRunoff.pdb
+C:\git\hms_backend\SurfaceRunoff\bin\Release\App_Data\url_info.txt

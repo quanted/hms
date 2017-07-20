@@ -11,3 +11,4 @@ C:\git\hms_backend\SubSurfaceFlow\bin\Release\Newtonsoft.Json.xml
 C:\git\hms_backend\SubSurfaceFlow\obj\Release\SubSurfaceFlow.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\SubSurfaceFlow\obj\Release\SubSurfaceFlow.dll
 C:\git\hms_backend\SubSurfaceFlow\obj\Release\SubSurfaceFlow.pdb
+C:\git\hms_backend\SubSurfaceFlow\bin\Release\App_Data\url_info.txt

@@ -72,6 +72,9 @@ namespace Data.Source
         {
             errorMsg = "";
 
+            // Add one day to the end of the requested time span, to include the end date. NCDC cuts off at the requested end date.
+            input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(1);
+
             // Begins sequence to download ncdc data.
             Dictionary<string, double> data = BeginDataDownload(out errorMsg, dataset, input);
             if (errorMsg.Contains("ERROR")) { return null; }

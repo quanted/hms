@@ -14,3 +14,4 @@ C:\git\hms_backend\Date.Simulate\bin\Release\Accord.Statistics.xml
 C:\git\hms_backend\Date.Simulate\obj\Release\Data.Simulate.csprojResolveAssemblyReference.cache
 C:\git\hms_backend\Date.Simulate\obj\Release\Date.Simulate.dll
 C:\git\hms_backend\Date.Simulate\obj\Release\Date.Simulate.pdb
+C:\git\hms_backend\Date.Simulate\bin\Release\App_Data\url_info.txt
