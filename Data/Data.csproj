@@ -56,7 +56,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy "$(SolutionDir)Data\bin\XmlCommentsData.xml" "$(SolutionDir)Web.Services\bin\XmlCommentsData.xml"
+    <PreBuildEvent>copy "$(SolutionDir)Data\bin\XmlCommentsData.xml" "$(SolutionDir)Web.Services\App_Data\XmlCommentsData.xml"
 </PreBuildEvent>
   </PropertyGroup>
 </Project>

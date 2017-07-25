@@ -12,20 +12,20 @@ using Data;
 
 namespace Web.Services
 {
-    /// <summary>
+    /// <summary> 
     /// Swagger config file.
     /// </summary>
     public class SwaggerConfig
     {
         private static string GetXmlCommentsPath()
         {
-            return string.Format(@"{0}\bin\XmlComments.xml", HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\App_Data\XmlComments.xml", HttpRuntime.AppDomainAppPath);
         }
 
         private static string GetXmlCommentsPathData()
         {
             //return string.Format(@"{0}\bin\"+ fileName, HttpRuntime.AppDomainAppPath);
-            return string.Format(@"{0}\bin\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\App_Data\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
         }
 
         /// <summary>
