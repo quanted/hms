@@ -32,7 +32,7 @@
             <param name="routes"></param>
         </member>
         <member name="T:Web.Services.SwaggerConfig">
-            <summary>
+            <summary> 
             Swagger config file.
             </summary>
         </member>

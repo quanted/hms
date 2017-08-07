@@ -4,6 +4,12 @@
         <name>Data</name>
     </assembly>
     <members>
+        <member name="M:Data.Files.FileToDictionary(System.String)">
+            <summary>
+            Reads the contents of a space delimited file and populates the specified Application variable.
+            </summary>
+            <param name="fileName">File name.</param>
+        </member>
         <member name="T:Data.ITimeSeriesOutput">
             <summary>
             TimeSeriesOutput interface for output object.
@@ -76,6 +82,21 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:Data.ITimeSeriesComponent">
+            <summary>
+            Base timeseries parameter object
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesComponent.Output">
+            <summary>
+            Output variable object for a timeseries component
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesComponent.Input">
+            <summary>
+            Input variable object for a timeseries component.
+            </summary>
+        </member>
         <member name="T:Data.ITimeSeriesInput">
             <summary>
             Interface for timeseries inputs.
@@ -107,7 +128,7 @@
             <summary>
             OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
             DEFAULT: "default"
-            VALUES: "default", "hourly", "3hourly", "6hourly", "12hourly", "daily", "weekly", "monthly"
+            VALUES: "default", "hourly", "daily", "weekly", "monthly"
             </summary>
         </member>
         <member name="P:Data.ITimeSeriesInput.TimeLocalized">
@@ -128,6 +149,11 @@
             OPTIONAL: Specifies output format type.
             DEFAULT: "json"
             VALUES: "json", "xml", "csv"
+            </summary>
+        </member>
+        <member name="P:Data.ITimeSeriesInput.BaseURL">
+            <summary>
+            Internal: Base url for data retrieval depending on the specified source and dataset.
             </summary>
         </member>
         <member name="T:Data.TimeSeriesInput">
@@ -161,7 +187,7 @@
             <summary>
             OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
             DEFAULT: "default"
-            VALUES: "default", "hourly", "3hourly", "6hourly", "12hourly", "daily", "weekly", "monthly"
+            VALUES: "default", "hourly", "daily", "weekly", "monthly"
             </summary>
         </member>
         <member name="P:Data.TimeSeriesInput.TimeLocalized">
@@ -184,12 +210,17 @@
             VALUES: "json", "xml", "csv"
             </summary>
         </member>
+        <member name="P:Data.TimeSeriesInput.BaseURL">
+            <summary>
+            Internal: Holds base url for data retrieval depending on the specified source and dataset.
+            </summary>
+        </member>
         <member name="T:Data.ITimeSeriesInputFactory">
             <summary>
             Creator abstract class for TimeSeriesInputFactory
             </summary>
         </member>
-        <member name="M:Data.ITimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+        <member name="M:Data.ITimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.Collections.Generic.List{System.String},System.String@)">
             <summary>
             TimeSeriesInput setter abstract function
             </summary>
@@ -202,7 +233,7 @@
             Creator concrete class for TimeSeriesInputFactory
             </summary>
         </member>
-        <member name="M:Data.TimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.String@)">
+        <member name="M:Data.TimeSeriesInputFactory.SetTimeSeriesInput(Data.ITimeSeriesInput,System.Collections.Generic.List{System.String},System.String@)">
             <summary>
             TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
             </summary>
