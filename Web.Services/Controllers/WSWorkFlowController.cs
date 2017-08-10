@@ -225,6 +225,7 @@ namespace Web.Services.Controllers
         [SwaggerResponseExample(HttpStatusCode.OK, typeof(WorkFlowCompareOutputExample))]
         public ITimeSeriesOutput POST(WorkFlowCompareInput workflowInput)
         {
+
             WSWorkFlow workFlow = new WSWorkFlow();
             ITimeSeriesOutput results = workFlow.GetWorkFlowData(workflowInput);
             return results;

@@ -28,6 +28,7 @@ namespace Web.Services
             return string.Format(@"{0}\App_Data\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
         }
 
+
         /// <summary>
         /// 
         /// </summary>
@@ -49,6 +50,7 @@ namespace Web.Services
                         // about them, you can use the "Schemes" option as shown below.
                         //
                         //c.Schemes(new[] { "http", "https" });
+                        c.Schemes(new[] { "http"});
 
                         // Use "SingleApiVersion" to describe a single version API. Swagger 2.0 includes an "Info" object to
                         // hold additional metadata for an API. Version and title are required but you can also provide
