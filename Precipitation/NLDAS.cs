@@ -57,7 +57,7 @@ namespace Precipitation
             switch (input.TemporalResolution)
             {
                 case "daily":
-                    output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Data = DailyAggregatedSum(out errorMsg, 23, 1.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
                 case "weekly":
@@ -105,7 +105,7 @@ namespace Precipitation
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> DailyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public static Dictionary<string, List<string>> DailyAggregatedSum(out string errorMsg, int hours, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
 
@@ -119,20 +119,23 @@ namespace Precipitation
             DateTime.TryParse(dateString0, out iDate);
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            int nHourly = 0;
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                if (date.Day != iDate.Day)
+                if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
                 {
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
                     iDate = date;
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    nHourly = 0;
                 }
                 else
                 {
                     sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    nHourly++;
                 }
             }
             return tempData;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Accord.Statistics;
 
 namespace Utilities
 {
@@ -28,18 +29,20 @@ namespace Utilities
             double[] dailyAverage = CalculateDailyAverage(sums, data.Data);
             double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data);
             double[] gore = CalculateGORE(dailyAverage, data.Data);
-            double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
+            //double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
+            double[] rSquared = CalculateDetermination(data.Data);
 
             // calculated GORE value
             for (int i = 0; i < dailyAverage.Length; i++)
             {
-                data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
+                //data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_sum", sums[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", gore[i].ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_R-Squared", rSquared[i].ToString());
                 }
             }
 
@@ -242,6 +245,42 @@ namespace Utilities
             });
 
             return gore;
+        }
+
+        /// <summary>
+        /// Calculates the coefficient of determination (R-Squared), where the first element is the actual and remaining elemnts are expected values.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static double[] CalculateDetermination(Dictionary<string, List<string>> data)
+        {
+            double[] r2 = new double[data.Values.ElementAt(0).Count];
+            double[][] datasets = new double[data.Values.ElementAt(0).Count][];
+
+            // Array initialization
+            for(int i = 0; i < data.Values.ElementAt(0).Count; i++)
+            {
+                datasets[i] = new double[data.Count];
+            }
+
+            // Assigns each dataset from the Output dictionary to a a double[each dataset][each date value]
+            for(int i = 0; i < data.Count; i++)
+            {
+                List<string> d = data.ElementAt(i).Value;
+                for(int j = 0; j < d.Count; j++)
+                {
+                   datasets[j][i] = Double.Parse(d.ElementAt(j));
+                }
+            }
+
+            // Calculates coefficient of determination using dataset array [0] against each other dataset and assigning resulting value to r2
+            r2[0] = 0.0;
+            for(int i = 1; i < r2.Length; i++)
+            {
+                r2[i] = Accord.Statistics.Tools.Determination(datasets[0], datasets[i]);
+            }
+
+            return r2;
         }
     }
 }

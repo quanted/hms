@@ -48,7 +48,7 @@ namespace UnitTests
             ITimeSeriesInput input = ConstructTestInput();
             ITimeSeriesOutput output = ConstructTestOutput(input);
 
-            Dictionary<string, List<string>> dailyValues = Precipitation.NLDAS.DailyAggregatedSum(out string errorMsg, 1.0, output, input);
+            Dictionary<string, List<string>> dailyValues = Precipitation.NLDAS.DailyAggregatedSum(out string errorMsg, 23, 1.0, output, input);
             Assert.AreEqual("3.085E+000", dailyValues["2015-01-01 00"][0]);
             Assert.AreEqual("0.000E+000", dailyValues["2015-01-10 00"][0]);
             Assert.AreEqual("0.000E+000", dailyValues["2015-01-21 00"][0]);

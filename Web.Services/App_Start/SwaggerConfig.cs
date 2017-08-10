@@ -12,21 +12,22 @@ using Data;
 
 namespace Web.Services
 {
-    /// <summary>
+    /// <summary> 
     /// Swagger config file.
     /// </summary>
     public class SwaggerConfig
     {
         private static string GetXmlCommentsPath()
         {
-            return string.Format(@"{0}\bin\XmlComments.xml", HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\App_Data\XmlComments.xml", HttpRuntime.AppDomainAppPath);
         }
 
         private static string GetXmlCommentsPathData()
         {
             //return string.Format(@"{0}\bin\"+ fileName, HttpRuntime.AppDomainAppPath);
-            return string.Format(@"{0}\bin\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
+            return string.Format(@"{0}\App_Data\XmlCommentsData.xml", HttpRuntime.AppDomainAppPath);
         }
+
 
         /// <summary>
         /// 
@@ -49,6 +50,7 @@ namespace Web.Services
                         // about them, you can use the "Schemes" option as shown below.
                         //
                         //c.Schemes(new[] { "http", "https" });
+                        c.Schemes(new[] { "http"});
 
                         // Use "SingleApiVersion" to describe a single version API. Swagger 2.0 includes an "Info" object to
                         // hold additional metadata for an API. Version and title are required but you can also provide

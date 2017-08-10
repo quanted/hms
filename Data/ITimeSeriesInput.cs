@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Text;
 using System.Web;
 
@@ -317,8 +318,17 @@ namespace Data
         private static string GetBaseURL(ITimeSeriesInput input, string dataset, out string errorMsg)
         {
             errorMsg = "";
-            Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
+            Dictionary<string, string> urls = new Dictionary<string, string>();
+            if (HttpContext.Current == null)
+            {
+                urls = Data.Files.FileToDictionary(@"..\..\..\Data\App_Data\" + "url_info.txt");
+            }
+            else
+            {
+                urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];    
+            }
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+
             string src = "";
             switch (input.Source)
             {

@@ -63,10 +63,10 @@ namespace Web.Services.Models
                 ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
                 
-
                 // Set input to precip object.
                 ncdc.Input = nInput;
                 ncdc.Input.TemporalResolution = "daily";
+                ncdc.Input.Geometry.GeometryMetadata["token"] = (ncdc.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncdc.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
                 ITimeSeriesOutput nResult = ncdc.GetData(out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
                 output = nResult;

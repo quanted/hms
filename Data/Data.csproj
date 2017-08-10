@@ -43,14 +43,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Files.cs" />
     <Compile Include="ITimeSeriesOutput.cs" />
     <Compile Include="ITimeSeriesComponent.cs" />
     <Compile Include="ITimeSeriesInput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="App_Data\url_info.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy "$(SolutionDir)Data\bin\XmlCommentsData.xml" "$(SolutionDir)Web.Services\bin\XmlCommentsData.xml"
+    <PreBuildEvent>copy "$(SolutionDir)Data\bin\XmlCommentsData.xml" "$(SolutionDir)Web.Services\App_Data\XmlCommentsData.xml"
 </PreBuildEvent>
   </PropertyGroup>
 </Project>

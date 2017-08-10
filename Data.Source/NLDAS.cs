@@ -25,10 +25,7 @@ namespace Data.Source
             errorMsg = "";
 
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
-            if (componentInput.TimeLocalized == true)
-            {
-                componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
-            }
+            componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
@@ -54,23 +51,32 @@ namespace Data.Source
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
-            if (cInput.Geometry.Timezone.Offset < 0.0) {
-                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true) {
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 1 + Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
-            else if (cInput.Geometry.Timezone.Offset > 0.0)
+            else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
             {
-                dateTime.StartDate.AddDays(-1.0);
+                dateTime.StartDate = dateTime.StartDate.AddDays(-1.0);
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
-
-            if (cInput.Geometry.Timezone.Offset < 0.0)
+            else
             {
-                dateTime.EndDate.AddDays(1.0);
-                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, -1 * Convert.ToInt16(cInput.Geometry.Timezone.Offset) - 1, 00, 00);
+                dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 01, 00, 00);
             }
-            else if (cInput.Geometry.Timezone.Offset > 0.0)
+
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true)
             {
-                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 23 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+                dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
+            }
+            else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
+            {
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
+            }
+            else
+            {
+                dateTime.EndDate = dateTime.EndDate.AddDays(1.0);
+                dateTime.EndDate = new DateTime(dateTime.EndDate.Year, dateTime.EndDate.Month, dateTime.EndDate.Day, 00, 00, 00);
             }
             return dateTime;
         }
@@ -84,9 +90,11 @@ namespace Data.Source
         /// <returns></returns>
         public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
         {
+        
             string[] date = dateHour.Split(' ');
             string hourStr = date[1].Substring(0, 2);
             string dateHourStr = date[0] + " " + hourStr;
+            double adjustedOffset = offset + 1;
             DateTime newDate = new DateTime();
             DateTime.TryParseExact(dateHourStr, new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
             newDate = (offset != 0.0) ? newDate.AddHours(offset) : newDate;
