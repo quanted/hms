@@ -7,28 +7,3 @@
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.csprojResolveAssemblyReference.cache
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.dll
 \\Aa.ad.epa.gov\ord\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\VS17\HMS\Precipitation\obj\Debug\Precipitation.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\App_Data\url_info.txt
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.dll.config
-C:\git\hms_backend\Precipitation\bin\Debug\Precipitation.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Precipitation.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\Data.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Data.Source.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Date.Simulate.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Utilities.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Newtonsoft.Json.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Statistics.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Math.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Math.Core.dll
-C:\git\hms_backend\Precipitation\bin\Debug\Data.Source.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\Data.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\Date.Simulate.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\Utilities.pdb
-C:\git\hms_backend\Precipitation\bin\Debug\Newtonsoft.Json.xml
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Statistics.xml
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Math.xml
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.xml
-C:\git\hms_backend\Precipitation\bin\Debug\Accord.Math.Core.xml
-C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.csprojResolveAssemblyReference.cache
-C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.dll
-C:\git\hms_backend\Precipitation\obj\Debug\Precipitation.pdb

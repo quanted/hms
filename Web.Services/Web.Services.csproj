@@ -190,6 +190,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\WSUtilitiesController.cs" />
     <Compile Include="Controllers\WSEvapotranspirationController.cs" />
     <Compile Include="Controllers\WSPrecipitationController.cs" />
     <Compile Include="Controllers\WSSoilMoistureController.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\WSUtilities.cs" />
     <Compile Include="Models\WSSoilMoisture.cs" />
     <Compile Include="Models\WSSubSurfaceFlow.cs" />
     <Compile Include="Models\WSEvapotranspiration.cs" />

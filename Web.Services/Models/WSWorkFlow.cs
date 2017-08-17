@@ -91,7 +91,6 @@ namespace Web.Services.Models
                     input.Source = source;
                     ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                    //sInput.Source = source;
 
                     // Set input to precip object.
                     precip.Input = sInput;
@@ -110,14 +109,6 @@ namespace Web.Services.Models
                     // Gets the Precipitation data.
                     ITimeSeriesOutput result = precip.GetData(out errorMsg);
                     outputList.Add(result);
-                    //if (result.DataSource.Contains("ncdc"))
-                    //{
-                    //    output = result;
-                    //}
-                    //else
-                    //{
-                    //    output = Utilities.Merger.MergeTimeSeries(output, result);
-                    //}
                 });
 
                 foreach (ITimeSeriesOutput result in outputList)

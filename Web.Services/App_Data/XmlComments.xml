@@ -531,6 +531,18 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="T:Web.Services.Controllers.WSUtilitiesController">
+            <summary>
+            Utility REST endpoints for HMS components.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSUtilitiesController.DatasetEndpointsCheck(System.String)">
+            <summary>
+            Checks endpoints for a specified dataset.
+            </summary>
+            <param name="dataset"></param>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Controllers.EvapotranspirationInput">
             <summary>
             Evapotranspiration Input that implements TimeSeriesInput object
@@ -893,6 +905,17 @@
         <member name="M:Web.Services.WebApiApplication.Application_Start">
             <summary>
             </summary>
+        </member>
+        <member name="T:Web.Services.Models.WSUtilities">
+            <summary>
+            Web Service Utilities Class
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckPrecipEndpoints">
+            <summary>
+            Checks the data endpoints for the precipitation component.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSSoilMoisture">
             <summary>

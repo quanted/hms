@@ -44,23 +44,11 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
+        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
             sb.Append(cInput.BaseURL[0]);
-            //try
-            //{
-            //    // Reading value from Application variables
-            //    Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            //    Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
-            //    sb.Append(caselessUrls[cInput.Source + "_" + dataset + "_URL"]);
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorMsg = "ERROR: Unable to load GLDAS url details from configuration file.\n" + ex.Message;
-            //    return null;
-            //}
 
             //Add X and Y coordinates
             sb.Append(@"%28" + cInput.Geometry.Point.Longitude.ToString() + @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29");
@@ -206,5 +194,35 @@ namespace Data.Source
             return dataDict;
         }
 
+        /// <summary>
+        /// Directly downloads from the source using the testInput object. Used for checking the status of the GLDAS endpoints.
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <param name="testInput"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(string dataset, ITimeSeriesInput testInput)
+        {
+            try
+            {
+                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput));
+                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                string status = response.StatusCode.ToString();
+                string description = response.StatusDescription;
+                response.Close();
+                return new Dictionary<string, string>()
+                {
+                    { "status", status },
+                    { "description", description}
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "status", "ERROR" },
+                    { "description", ex.Message }
+                };
+            }
+        }
     }
 }

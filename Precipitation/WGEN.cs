@@ -58,43 +58,39 @@ namespace Precipitation
             Precipitation precip = new Precipitation();
             precip.Input = input;
             precip.Output = output;
-
             // Historic end date set to simulated data start date minus one day.
             precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.StartDate.AddDays(-1);
             // Historic start date set to 20 years before simulated start date.
-            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));
+            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));          
 
             if (input.Geometry.GeometryMetadata.ContainsKey("historicSource"))
             {
                 switch (input.Geometry.GeometryMetadata["historicSource"])
                 {
                     case "nldas":
-                        precip.Input.Source = "nldas";
-                        precip.Input.TemporalResolution = "daily";
-                        precip.Output = precip.GetData(out errorMsg);
-                        if (errorMsg.Contains("ERROR")) { return null; }
-                        return precip.Output; ;
+                        input.Source = "nldas";
+                        input.TemporalResolution = "daily";
+                        break;
                     case "gldas":
-                        precip.Input.Source = "gldas";
-                        precip.Input.TemporalResolution = "daily";
-                        precip.Output = precip.GetData(out errorMsg);
-                        if (errorMsg.Contains("ERROR")) { return null; }
-                        return precip.Output;
+                        input.Source = "gldas";
+                        input.TemporalResolution = "daily";
+                        break;
                     case "daymet":
                     default:
-                        precip.Input.Source = "daymet";
-                        precip.Output = precip.GetData(out errorMsg);
-                        if (errorMsg.Contains("ERROR")) { return null; }
-                        return precip.Output; ;
+                        input.Source = "daymet";
+                        break;
                 }
             }
             else
             {
-                precip.Input.Source = "daymet";
-                precip.Output = precip.GetData(out errorMsg);
-                if (errorMsg.Contains("ERROR")) { return null; }
-                return precip.Output;
+                input.Source = "daymet";
             }
+            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+            ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precip" }, out errorMsg);
+            precip.Input = tempInput;
+            precip.Output = precip.GetData(out errorMsg);
+            if (errorMsg.Contains("ERROR")) { return null; }
+            return precip.Output;
         }
 
         /// <summary>

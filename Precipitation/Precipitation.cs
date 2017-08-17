@@ -90,7 +90,7 @@ namespace Precipitation
             };
 
             // Adds Geometry metadata to the output metadata. NOT WORKING
-            this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
+            //this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
             this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
@@ -99,6 +99,27 @@ namespace Precipitation
             //TODO: Add output format control
 
             return this.Output;
+        }
+
+        /// <summary>
+        /// Check precipitation data endpoints.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> CheckEndpointStatus()
+        {
+            switch (this.Input.Source)
+            {
+                case "nldas":
+                    return NLDAS.CheckStatus(this.Input);
+                case "gldas":
+                    return GLDAS.CheckStatus(this.Input);
+                case "daymet":
+                    return Daymet.CheckStatus(this.Input);
+                case "ncdc":
+                    return NCDC.CheckStatus(this.Input);
+                default:
+                    return new Dictionary<string, string>() { { "status", "invalid source" } };
+            }
         }
     }
 }

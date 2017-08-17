@@ -38,7 +38,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
+        private static string DownloadData(out string errorMsg, string url)
         {
             errorMsg = "";
             string data = "";
@@ -77,21 +77,11 @@ namespace Data.Source
         /// <param name="dataSet"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, string dataSet, ITimeSeriesInput input)
+        private static string ConstructURL(out string errorMsg, string dataSet, ITimeSeriesInput input)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
             sb.Append(input.BaseURL[0]);
-            //try
-            //{
-            //    Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            //    sb.Append(urls["Daymet_" + dataSet + "_URL"]);
-            //}
-            //catch(Exception ex)
-            //{
-            //    errorMsg = "ERROR: Unable to load url for " + dataSet + " dataset for Daymet. " + ex.Message;
-            //    return null;
-            //}
             sb.Append("lat=" + input.Geometry.Point.Latitude + "&lon=" + input.Geometry.Point.Longitude);                   // Adds coordinates to url variable string
             sb.Append("&measuredParams=" + GetMeasuredParam(out errorMsg, dataSet));                                        // Adds dataset variable to string
             string years = GetListOfYears(out errorMsg, input.DateTimeSpan.StartDate, input.DateTimeSpan.EndDate);
@@ -106,14 +96,16 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        private string GetMeasuredParam(out string errorMsg, string dataset)
+        private static string GetMeasuredParam(out string errorMsg, string dataset)
         {
             errorMsg = "";
             switch (dataset)
             {
                 case "Precip":
+                case "precip":
                     return "prcp";
                 case "Temp":
+                case "temp":
                     return "tmax,tmin";
                 default:
                     errorMsg = "ERROR: Parameter for Daynet did not load.";
@@ -128,7 +120,7 @@ namespace Data.Source
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        private string GetListOfYears(out string errorMsg, DateTime startDate, DateTime endDate)
+        private static string GetListOfYears(out string errorMsg, DateTime startDate, DateTime endDate)
         {
             errorMsg = "";
             StringBuilder st = new StringBuilder();
@@ -142,5 +134,36 @@ namespace Data.Source
             return st.ToString();
         }
 
+        /// <summary>
+        /// Directly downloads from the source using the testInput object. Used for checking the status of the GLDAS endpoints.
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <param name="testInput"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(string dataset, ITimeSeriesInput testInput)
+        {
+            string url = ConstructURL(out string errorMsg, dataset, testInput);
+            try
+            {
+                WebRequest wr = WebRequest.Create(url);
+                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                string status = response.StatusCode.ToString();
+                string description = response.StatusDescription;
+                response.Close();
+                return new Dictionary<string, string>()
+                {
+                    { "status", status },
+                    { "description", description}
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "status", "ERROR" },
+                    { "description", ex.Message }
+                };
+            }
+        }
     }
 }

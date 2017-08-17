@@ -192,5 +192,15 @@ namespace Precipitation
             }
             return data;
         }
+
+        /// <summary>
+        /// Calls the function in Data.Source.Daymet that will perform the status check.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
+        {
+            return Data.Source.Daymet.CheckStatus("Precip", input);
+        }
     }
 }

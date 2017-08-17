@@ -178,17 +178,6 @@ namespace Data.Source
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
             sb.Append(baseURL);
-            //try
-            //{
-            //    Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            //    sb.Append(urls["NCDC_URL"]);
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorMsg = "ERROR: Unable to load URL details for ncdc from configuration file. " + ex.Message;
-            //    return null;
-            //}
-
             if (station.Contains("GHCND"))
             {
                 sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
@@ -197,7 +186,6 @@ namespace Data.Source
             {
                 sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
-
             return sb.ToString();
         }
 
@@ -536,24 +524,12 @@ namespace Data.Source
         {
             errorMsg = "";
             Dictionary<string, string> stationDetails = new Dictionary<string, string>();
-            //Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-            //string url = "";
-            //try
-            //{
-            //    url = urls["NCDC_STATION_URL"];
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorMsg = "ERROR: Unable to load URL details from configuration file. " + ex.Message;
-            //    return new Dictionary<string, string>();
-            //}
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {
                 errorMsg = "ERROR: No token provided for retrieving ncdc station details.";
                 return new Dictionary<string, string>();
             }
-            //token = (String.IsNullOrWhiteSpace(token)) ? (string)HttpContext.Current.Application["ncdc_token"] : token;
             try
             {
                 int retries = 5;                                        // Max number of request retries
@@ -582,5 +558,39 @@ namespace Data.Source
             }
             return stationDetails;
         }
+
+        /// <summary>
+        /// Directly downloads from the source using the testInput object. Used for checking the status of the NCDC endpoints.
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <param name="testInput"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(string dataset, ITimeSeriesInput testInput)
+        {
+            string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
+            try
+            {
+                WebRequest wr = WebRequest.Create(station_url);
+                wr.Headers.Add("token", testInput.Geometry.GeometryMetadata["token"]);
+                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                string status = response.StatusCode.ToString();
+                string description = response.StatusDescription;
+                response.Close();
+                return new Dictionary<string, string>()
+                {
+                    { "status", status },
+                    { "description", description}
+                };
+            }
+            catch (Exception ex)
+            {
+                return new Dictionary<string, string>()
+                {
+                    { "status", "ERROR" },
+                    { "description", ex.Message }
+                };
+            }
+        }
+
     }
 }
