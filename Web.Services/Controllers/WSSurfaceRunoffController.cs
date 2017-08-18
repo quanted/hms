@@ -1,11 +1,10 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -171,7 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SurfaceRunoff controller for HMS.
     /// </summary>
-    public class WSSurfaceRunoffController : ApiController
+    public class WSSurfaceRunoffController : Controller
     {
         /// <summary>
         /// POST Method for getting SurfaceRunoff data.
@@ -181,9 +180,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/surfacerunoff/")]
         //[SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(SurfaceRunoffOutputExample))]
+        [SwaggerResponseExample(200, typeof(SurfaceRunoffOutputExample))]
         [SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExampleFull))]
-        public ITimeSeriesOutput POST(SurfaceRunoffInput runoffInput)
+        public ITimeSeriesOutput POST([FromBody]SurfaceRunoffInput runoffInput)
         {
             WSSurfaceRunoff runoff = new WSSurfaceRunoff();
             ITimeSeriesOutput results = runoff.GetSurfaceRunoff(runoffInput);

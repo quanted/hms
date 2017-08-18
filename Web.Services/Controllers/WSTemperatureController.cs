@@ -1,11 +1,10 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -171,7 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Temperature controller for HMS.
     /// </summary>
-    public class WSTemperatureController : ApiController
+    public class WSTemperatureController : Controller
     {
         /// <summary>
         /// POST Method for getting evapotranspiration data.
@@ -181,9 +180,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/temperature/")]
         //[SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(TemperatureOutputExample))]
+        [SwaggerResponseExample(200, typeof(TemperatureOutputExample))]
         [SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExampleFull))]
-        public ITimeSeriesOutput POST(TemperatureInput tempInput)
+        public ITimeSeriesOutput POST([FromBody]TemperatureInput tempInput)
         {
             WSTemperature temp = new WSTemperature();
             ITimeSeriesOutput results = temp.GetTemperature(tempInput);

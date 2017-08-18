@@ -1,11 +1,10 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -172,7 +171,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Evapotranspiration controller for HMS.
     /// </summary>
-    public class WSEvapotranspirationController : ApiController
+    public class WSEvapotranspirationController : Controller
     {
         /// <summary>
         /// POST Method for getting evapotranspiration data.
@@ -182,9 +181,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/evapotranspiration/")]
         //[SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(EvapotranspirationOutputExample))]
+        [SwaggerResponseExample(200, typeof(EvapotranspirationOutputExample))]
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
-        public ITimeSeriesOutput POST(EvapotranspirationInput evapoInput)
+        public ITimeSeriesOutput POST([FromBody]EvapotranspirationInput evapoInput)
         {
             WSEvapotranspiration evapo = new WSEvapotranspiration();
             ITimeSeriesOutput results = evapo.GetEvapotranspiration(evapoInput);

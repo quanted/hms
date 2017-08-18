@@ -1,11 +1,10 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -170,7 +169,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SubSurfaceFlow controller for HMS.
     /// </summary>
-    public class WSSubSurfaceFlowController : ApiController
+    public class WSSubSurfaceFlowController : Controller
     {
         /// <summary>
         /// POST Method for getting SubSurfaceFlow data.
@@ -180,9 +179,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/subsurfaceflow/")]
         //[SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(SubSurfaceFlowOutputExample))]
+        [SwaggerResponseExample(200, typeof(SubSurfaceFlowOutputExample))]
         [SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExampleFull))]
-        public ITimeSeriesOutput POST(SubSurfaceFlowInput ssFlowInput)
+        public ITimeSeriesOutput POST([FromBody]SubSurfaceFlowInput ssFlowInput)
         {
             WSSubSurfaceFlow ssFlow = new WSSubSurfaceFlow();
             ITimeSeriesOutput results = ssFlow.GetSubSurfaceFlow(ssFlowInput);

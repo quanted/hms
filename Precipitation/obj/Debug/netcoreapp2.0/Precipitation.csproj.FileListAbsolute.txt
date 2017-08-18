@@ -1,0 +1,4 @@
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Precipitation\obj\Debug\netcoreapp2.0\Precipitation.csprojResolveAssemblyReference.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Precipitation\obj\Debug\netcoreapp2.0\Precipitation.csproj.CoreCompileInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Precipitation\obj\Debug\netcoreapp2.0\Precipitation.AssemblyInfoInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Precipitation\obj\Debug\netcoreapp2.0\Precipitation.AssemblyInfo.cs

@@ -32,9 +32,9 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SoilMoisture object
-            SoilMoisture.SoilMoisture soilM = new SoilMoisture.SoilMoisture();
-            soilM.Layers = input.Layers;
-
+            SoilMoisture.SoilMoisture soilM = new SoilMoisture.SoilMoisture() {
+                Layers = input.Layers
+            };
             // Assigning dataset values, used to determine base url
             List<string> dataset = new List<string>();
             foreach(string layer in soilM.Layers)

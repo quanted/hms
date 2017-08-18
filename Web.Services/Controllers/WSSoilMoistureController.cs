@@ -1,11 +1,10 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -187,7 +186,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SoilMoisture controller for HMS.
     /// </summary>
-    public class WSSoilMoistureController : ApiController
+    public class WSSoilMoistureController : Controller
     {
         /// <summary>
         /// POST Method for getting SoilMoisture data.
@@ -197,9 +196,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/soilmoisture/")]
         //[SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(SoilMoistureOutputExample))]
+        [SwaggerResponseExample(200, typeof(SoilMoistureOutputExample))]
         [SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExampleFull))]
-        public ITimeSeriesOutput POST(SoilMoistureInput evapoInput)
+        public ITimeSeriesOutput POST([FromBody]SoilMoistureInput evapoInput)
         {
             WSSoilMoisture evapo = new WSSoilMoisture();
             ITimeSeriesOutput results = evapo.GetSoilMoisture(evapoInput);

@@ -1,0 +1,3 @@
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Temperature\obj\Debug\netcoreapp2.0\Temperature.csproj.CoreCompileInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Temperature\obj\Debug\netcoreapp2.0\Temperature.AssemblyInfoInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Temperature\obj\Debug\netcoreapp2.0\Temperature.AssemblyInfo.cs

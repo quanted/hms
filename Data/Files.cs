@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Data
 {
+    /// <summary>
+    /// File handling functions
+    /// </summary>
     public class Files
     {
         /// <summary>

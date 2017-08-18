@@ -1,0 +1,8 @@
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\bin\Debug\netcoreapp2.0\GIS.Operations.deps.json
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\bin\Debug\netcoreapp2.0\GIS.Operations.dll
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\bin\Debug\netcoreapp2.0\GIS.Operations.pdb
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\obj\Debug\netcoreapp2.0\GIS.Operations.csproj.CoreCompileInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\obj\Debug\netcoreapp2.0\GIS.Operations.AssemblyInfoInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\obj\Debug\netcoreapp2.0\GIS.Operations.AssemblyInfo.cs
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\obj\Debug\netcoreapp2.0\GIS.Operations.dll
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\GIS.Operations\obj\Debug\netcoreapp2.0\GIS.Operations.pdb

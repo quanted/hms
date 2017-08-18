@@ -1,12 +1,11 @@
 ﻿using Data;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -211,7 +210,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkFlowCompare controller for HMS.
     /// </summary>
-    public class WSWorkFlowCompareController : ApiController
+    public class WSWorkFlowCompareController : Controller
     {
         /// <summary>
         /// POST Method for getting WorkFlowCompare data.
@@ -222,8 +221,8 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/workflow/compare")]
         [SwaggerRequestExample(typeof(WorkFlowCompareInput), typeof(WorkFlowCompareInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(WorkFlowCompareOutputExample))]
-        public ITimeSeriesOutput POST(WorkFlowCompareInput workflowInput)
+        [SwaggerResponseExample(200, typeof(WorkFlowCompareOutputExample))]
+        public ITimeSeriesOutput POST([FromBody]WorkFlowCompareInput workflowInput)
         {
 
             WSWorkFlow workFlow = new WSWorkFlow();

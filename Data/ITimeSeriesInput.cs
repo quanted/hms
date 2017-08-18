@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Text;
-using System.Web;
+
 
 namespace Data
 {
@@ -141,6 +139,7 @@ namespace Data
         /// TimeSeriesInput setter abstract function
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="dataset"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
         public abstract ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg);
@@ -155,6 +154,7 @@ namespace Data
         /// TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="dataset"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
         public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
@@ -319,14 +319,17 @@ namespace Data
         {
             errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
-            if (HttpContext.Current == null)
-            {
-                urls = Data.Files.FileToDictionary(@"..\..\..\Data\App_Data\" + "url_info.txt");
-            }
-            else
-            {
-                urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];    
-            }
+
+            // TODO: Find alternative solution for HttpContext.Current to only load url_info.txt on application startup. HttpContext behavior altered in .Net Core
+            //if (HttpContext.Current == null)
+            //{
+            urls = Data.Files.FileToDictionary(@"..\Data\App_Data\" + "url_info.txt");
+            //}
+            //else
+            //{
+            //    urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];    
+            //}
+
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
 
             string src = "";

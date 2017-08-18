@@ -1,19 +1,8 @@
 ﻿using Data;
-using Newtonsoft.Json;
-using Swashbuckle.Examples;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.ModelBinding;
-using System.Web.Http.ValueProviders.Providers;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -180,7 +169,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Precipitation controller for HMS.
     /// </summary>
-    public class WSPrecipitationController : ApiController
+    public class WSPrecipitationController : Controller
     {
         /// <summary>
         /// POST Method for getting precipitation data.
@@ -190,9 +179,9 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("api/precipitation/")]
         //[SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
-        [SwaggerResponseExample(HttpStatusCode.OK, typeof(PrecipitationOutputExample))]
+        [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
         [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
-        public ITimeSeriesOutput POST(PrecipitationInput precipInput)
+        public ITimeSeriesOutput POST([FromBody]PrecipitationInput precipInput)
         {
             WSPrecipitation precip = new WSPrecipitation();
             ITimeSeriesOutput results = precip.GetPrecipitation(precipInput);

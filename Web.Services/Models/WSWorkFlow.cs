@@ -78,9 +78,11 @@ namespace Web.Services.Models
                     Precipitation.Precipitation precip = new Precipitation.Precipitation();
                     if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
                     {
-                        input.Geometry.Point = new PointCoordinate();
-                        input.Geometry.Point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
-                        input.Geometry.Point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
+                        input.Geometry.Point = new PointCoordinate
+                        {
+                            Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]),
+                            Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"])
+                        };
                     }
                     else
                     {

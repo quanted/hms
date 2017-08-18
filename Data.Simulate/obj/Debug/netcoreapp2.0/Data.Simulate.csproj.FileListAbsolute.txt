@@ -1,0 +1,4 @@
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Data.Simulate\obj\Debug\netcoreapp2.0\Data.Simulate.csprojResolveAssemblyReference.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Data.Simulate\obj\Debug\netcoreapp2.0\Data.Simulate.csproj.CoreCompileInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Data.Simulate\obj\Debug\netcoreapp2.0\Data.Simulate.AssemblyInfoInputs.cache
+\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Data.Simulate\obj\Debug\netcoreapp2.0\Data.Simulate.AssemblyInfo.cs
