@@ -1,0 +1,11 @@
+C:\git\hms_backend\Data.Source\bin\Release\App_Data\url_info.txt
+C:\git\hms_backend\Data.Source\bin\Release\Data.Source.dll
+C:\git\hms_backend\Data.Source\bin\Release\Data.Source.pdb
+C:\git\hms_backend\Data.Source\bin\Release\Data.dll
+C:\git\hms_backend\Data.Source\bin\Release\Newtonsoft.Json.dll
+C:\git\hms_backend\Data.Source\bin\Release\Data.pdb
+C:\git\hms_backend\Data.Source\bin\Release\Newtonsoft.Json.xml
+C:\git\hms_backend\Data.Source\obj\Release\Data.Source.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Data.Source\obj\Release\Data.Source.csproj.CoreCompileInputs.cache
+C:\git\hms_backend\Data.Source\obj\Release\Data.Source.dll
+C:\git\hms_backend\Data.Source\obj\Release\Data.Source.pdb

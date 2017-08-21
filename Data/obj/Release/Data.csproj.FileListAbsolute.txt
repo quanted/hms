@@ -1,0 +1,7 @@
+C:\git\hms_backend\Data\bin\Release\App_Data\url_info.txt
+C:\git\hms_backend\Data\bin\Release\Data.dll
+C:\git\hms_backend\Data\bin\Release\Data.pdb
+C:\git\hms_backend\Data\obj\Release\Data.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Data\obj\Release\Data.csproj.CoreCompileInputs.cache
+C:\git\hms_backend\Data\obj\Release\Data.dll
+C:\git\hms_backend\Data\obj\Release\Data.pdb
