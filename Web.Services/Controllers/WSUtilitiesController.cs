@@ -13,6 +13,25 @@ namespace Web.Services.Controllers
     public class WSUtilitiesController : Controller
     {
 
+        /// <summary>
+        /// Checks endpoints for all datasets.
+        /// </summary>
+        /// <returns></returns>
+        [Route("utilities/status")]
+        [HttpGet]
+        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> AllDatasetEndpointsCheck()
+        {
+            Dictionary<string, Dictionary<string, Dictionary<string, string>>> endpointStatus = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>
+            {
+                { "Evapotranspiration", Models.WSUtilities.CheckEvapoEndpoints() },
+                { "Precipitation", Models.WSUtilities.CheckPrecipEndpoints() },
+                { "Soil Moisture", Models.WSUtilities.CheckSoilMEndpoints() },
+                { "Subsurface Flow", Models.WSUtilities.CheckSubsurfaceEndpoints() },
+                { "Surface Runoff", Models.WSUtilities.CheckRunoffEndpoints() },
+                { "Temperature", Models.WSUtilities.CheckTempEndpoints() }
+            };
+            return endpointStatus;
+        }
 
         /// <summary>
         /// Checks endpoints for a specified dataset.
@@ -21,16 +40,42 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [Route("utilities/status/{dataset}")]
         [HttpGet]
-        public Dictionary<string, Dictionary<string, string>> DatasetEndpointsCheck(string dataset)
+        public List<Dictionary<string, Dictionary<string, string>>> DatasetEndpointsCheck(string dataset)
         {
-            Dictionary<string, Dictionary<string, string>> endpointStatus = new Dictionary<string, Dictionary<string, string>>();
+            List<string> validEndpoints = new List<string>() { "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature" };
+            List<Dictionary<string, Dictionary<string, string>>> endpointStatus = new List<Dictionary<string, Dictionary<string, string>>>();
             switch (dataset)
             {
+                case "evapo":
+                case "evapotranspiration":
+                    endpointStatus.Add(Models.WSUtilities.CheckEvapoEndpoints());
+                    break;
+                case "precip":
                 case "precipitation":
-                    endpointStatus = Models.WSUtilities.CheckPrecipEndpoints();  
+                    endpointStatus.Add(Models.WSUtilities.CheckPrecipEndpoints());  
+                    break;
+                case "soilm":
+                case "soilmoisture":
+                    endpointStatus.Add(Models.WSUtilities.CheckSoilMEndpoints());
+                    break;
+                case "subsurface":
+                case "subsurfaceflow":
+                    endpointStatus.Add(Models.WSUtilities.CheckSubsurfaceEndpoints());
+                    break;
+                case "runoff":
+                case "surfacerunoff":
+                    endpointStatus.Add(Models.WSUtilities.CheckRunoffEndpoints());
+                    break;
+                case "temp":
+                case "temperature":
+                    endpointStatus.Add(Models.WSUtilities.CheckTempEndpoints());
                     break;
                 default:
-                    endpointStatus = new Dictionary<string, Dictionary<string, string>>() { { "UNNOWN DATASET", new Dictionary<string, string>() { { "status", "dataset provided is not valid." } } } };
+                    endpointStatus.Add(new Dictionary<string, Dictionary<string, string>>() { { "UNKNOWN DATASET", new Dictionary<string, string>() {
+                        { "status", "dataset provided is not valid." },
+                        { "provided dataset", dataset },
+                        { "valid dataset values", String.Join(',', validEndpoints) }
+                    } } });
                     break;
             }
             return endpointStatus;

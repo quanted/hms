@@ -106,5 +106,25 @@ namespace SoilMoisture
             }
             return true;
         }
+
+        /// <summary>
+        /// Check soil moisture data endpoints.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> CheckEndpointStatus()
+        {
+            if (this.Input.Source.Contains("nldas"))
+            {
+                return NLDAS.CheckStatus(this.Input);
+            }
+            else if (this.Input.Source.Contains("gldas"))
+            {
+                return GLDAS.CheckStatus(this.Input);
+            }
+            else
+            {
+                return new Dictionary<string, string>() { { "status", "invalid source" } };
+            }
+        }
     }
 }

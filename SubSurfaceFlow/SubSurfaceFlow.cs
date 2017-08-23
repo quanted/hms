@@ -1,5 +1,6 @@
 ﻿using Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SubSurfaceFlow
@@ -82,6 +83,23 @@ namespace SubSurfaceFlow
             //TODO: Add output format control
 
             return this.Output;
+        }
+
+        /// <summary>
+        /// Check subsurface data endpoints.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> CheckEndpointStatus()
+        {
+            switch (this.Input.Source)
+            {
+                case "nldas":
+                    return NLDAS.CheckStatus(this.Input);
+                case "gldas":
+                    return GLDAS.CheckStatus(this.Input);
+                default:
+                    return new Dictionary<string, string>() { { "status", "invalid source" } };
+            }
         }
     }
 }

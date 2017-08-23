@@ -673,11 +673,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\GIS.Operations\\GIS.Operations.csproj",
+      "projectUniqueName": "C:\\git\\hms_backend\\GIS.Operations\\GIS.Operations.csproj",
       "projectName": "GIS.Operations",
-      "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\GIS.Operations\\GIS.Operations.csproj",
+      "projectPath": "C:\\git\\hms_backend\\GIS.Operations\\GIS.Operations.csproj",
       "packagesPath": "C:\\Users\\dsmith\\.nuget\\packages\\",
-      "outputPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\GIS.Operations\\obj\\",
+      "outputPath": "C:\\git\\hms_backend\\GIS.Operations\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

@@ -314,6 +314,12 @@
             Utility REST endpoints for HMS components.
             </summary>
         </member>
+        <member name="M:Web.Services.Controllers.WSUtilitiesController.AllDatasetEndpointsCheck">
+            <summary>
+            Checks endpoints for all dataset endpoints.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Web.Services.Controllers.WSUtilitiesController.DatasetEndpointsCheck(System.String)">
             <summary>
             Checks endpoints for a specified dataset.
@@ -450,7 +456,37 @@
         </member>
         <member name="M:Web.Services.Models.WSUtilities.CheckPrecipEndpoints">
             <summary>
-            Checks the data endpoints for the precipitation component.
+            Checks the data endpoints for the Precipitation component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckEvapoEndpoints">
+            <summary>
+            Checks the data endpoints for the Evapotranspiration component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckSoilMEndpoints">
+            <summary>
+            Checks the data endpoints for the Soil Moisture component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckSubsurfaceEndpoints">
+            <summary>
+            Checks the data endpoints for the Sub-Surface Flow component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckRunoffEndpoints">
+            <summary>
+            Checks the data endpoints for the SurfaceRunoff component.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSUtilities.CheckTempEndpoints">
+            <summary>
+            Checks the data endpoints for the Temperature component.
             </summary>
             <returns></returns>
         </member>

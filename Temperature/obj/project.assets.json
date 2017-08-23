@@ -3746,11 +3746,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Temperature\\Temperature.csproj",
+      "projectUniqueName": "C:\\git\\hms_backend\\Temperature\\Temperature.csproj",
       "projectName": "Temperature",
-      "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Temperature\\Temperature.csproj",
+      "projectPath": "C:\\git\\hms_backend\\Temperature\\Temperature.csproj",
       "packagesPath": "C:\\Users\\dsmith\\.nuget\\packages\\",
-      "outputPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Temperature\\obj\\",
+      "outputPath": "C:\\git\\hms_backend\\Temperature\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -3770,14 +3770,14 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj"
+            "C:\\git\\hms_backend\\Data\\Data.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Data\\Data.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Utilities\\Utilities.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Utilities\\Utilities.csproj"
+            "C:\\git\\hms_backend\\Utilities\\Utilities.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Utilities\\Utilities.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data.Source\\Data.Source.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data.Source\\Data.Source.csproj"
+            "C:\\git\\hms_backend\\Data.Source\\Data.Source.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Data.Source\\Data.Source.csproj"
             }
           }
         }

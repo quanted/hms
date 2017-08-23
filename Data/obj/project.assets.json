@@ -673,11 +673,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj",
+      "projectUniqueName": "C:\\git\\hms_backend\\Data\\Data.csproj",
       "projectName": "Data",
-      "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj",
+      "projectPath": "C:\\git\\hms_backend\\Data\\Data.csproj",
       "packagesPath": "C:\\Users\\dsmith\\.nuget\\packages\\",
-      "outputPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\obj\\",
+      "outputPath": "C:\\git\\hms_backend\\Data\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

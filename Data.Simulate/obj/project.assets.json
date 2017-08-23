@@ -806,11 +806,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data.Simulate\\Data.Simulate.csproj",
+      "projectUniqueName": "C:\\git\\hms_backend\\Data.Simulate\\Data.Simulate.csproj",
       "projectName": "Data.Simulate",
-      "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data.Simulate\\Data.Simulate.csproj",
+      "projectPath": "C:\\git\\hms_backend\\Data.Simulate\\Data.Simulate.csproj",
       "packagesPath": "C:\\Users\\dsmith\\.nuget\\packages\\",
-      "outputPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data.Simulate\\obj\\",
+      "outputPath": "C:\\git\\hms_backend\\Data.Simulate\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -830,8 +830,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj"
+            "C:\\git\\hms_backend\\Data\\Data.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Data\\Data.csproj"
             }
           }
         }

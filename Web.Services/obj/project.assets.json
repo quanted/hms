@@ -12985,11 +12985,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Web.Services\\Web.Services.csproj",
+      "projectUniqueName": "C:\\git\\hms_backend\\Web.Services\\Web.Services.csproj",
       "projectName": "Web.Services",
-      "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Web.Services\\Web.Services.csproj",
+      "projectPath": "C:\\git\\hms_backend\\Web.Services\\Web.Services.csproj",
       "packagesPath": "C:\\Users\\dsmith\\.nuget\\packages\\",
-      "outputPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Web.Services\\obj\\",
+      "outputPath": "C:\\git\\hms_backend\\Web.Services\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -13009,29 +13009,29 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Precipitation\\Precipitation.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Precipitation\\Precipitation.csproj"
+            "C:\\git\\hms_backend\\Precipitation\\Precipitation.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Precipitation\\Precipitation.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SoilMoisture\\SoilMoisture.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SoilMoisture\\SoilMoisture.csproj"
+            "C:\\git\\hms_backend\\SoilMoisture\\SoilMoisture.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\SoilMoisture\\SoilMoisture.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Data\\Data.csproj"
+            "C:\\git\\hms_backend\\Data\\Data.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Data\\Data.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Utilities\\Utilities.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Utilities\\Utilities.csproj"
+            "C:\\git\\hms_backend\\Utilities\\Utilities.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Utilities\\Utilities.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Temperature\\Temperature.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Temperature\\Temperature.csproj"
+            "C:\\git\\hms_backend\\Temperature\\Temperature.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Temperature\\Temperature.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SubSurfaceFlow\\SubSurfaceFlow.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SubSurfaceFlow\\SubSurfaceFlow.csproj"
+            "C:\\git\\hms_backend\\SubSurfaceFlow\\SubSurfaceFlow.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\SubSurfaceFlow\\SubSurfaceFlow.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Evapotranspiration\\Evapotranspiration.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\Evapotranspiration\\Evapotranspiration.csproj"
+            "C:\\git\\hms_backend\\Evapotranspiration\\Evapotranspiration.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\Evapotranspiration\\Evapotranspiration.csproj"
             },
-            "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SurfaceRunoff\\SurfaceRunoff.csproj": {
-              "projectPath": "\\\\AA.AD.EPA.GOV\\ORD\\ATH\\Users\\A-M\\DSmith\\Net MyDocuments\\HMS Project\\hms_backend_core2\\HMS\\SurfaceRunoff\\SurfaceRunoff.csproj"
+            "C:\\git\\hms_backend\\SurfaceRunoff\\SurfaceRunoff.csproj": {
+              "projectPath": "C:\\git\\hms_backend\\SurfaceRunoff\\SurfaceRunoff.csproj"
             }
           }
         }

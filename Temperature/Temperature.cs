@@ -1,5 +1,6 @@
 ﻿using Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Temperature
@@ -88,6 +89,25 @@ namespace Temperature
             //TODO: Add output format control
 
             return this.Output;
+        }
+
+        /// <summary>
+        /// Check temperature data endpoints.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> CheckEndpointStatus()
+        {
+            switch (this.Input.Source)
+            {
+                case "nldas":
+                    return NLDAS.CheckStatus(this.Input);
+                case "gldas":
+                    return GLDAS.CheckStatus(this.Input);
+                case "daymet":
+                    return Daymet.CheckStatus(this.Input);
+                default:
+                    return new Dictionary<string, string>() { { "status", "invalid source" } };
+            }
         }
     }
 }

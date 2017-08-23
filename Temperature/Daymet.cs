@@ -149,6 +149,14 @@ namespace Temperature
             return data;
         }
 
+        /// <summary>
+        /// Unit conversion function for temperature values, converts metric (K) to (F)
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="metric"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         private Dictionary<string, List<string>> UnitConversion(out string errorMsg, bool metric, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
@@ -263,5 +271,14 @@ namespace Temperature
             return tempData;
         }
 
+        /// <summary>
+        /// Calls the function in Data.Source.Daymet that will perform the status check.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
+        {
+            return Data.Source.Daymet.CheckStatus("Temperature", input);
+        }
     }
 }

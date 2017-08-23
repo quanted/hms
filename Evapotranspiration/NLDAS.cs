@@ -211,5 +211,14 @@ namespace Evapotranspiration
             return tempData;
         }
 
+        /// <summary>
+        /// Calls the function in Data.Source.NLDAS that will perform the status check.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
+        {
+            return Data.Source.NLDAS.CheckStatus("Evapotranspiration", input);
+        }
     }
 }

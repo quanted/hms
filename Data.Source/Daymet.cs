@@ -103,9 +103,11 @@ namespace Data.Source
             {
                 case "Precip":
                 case "precip":
+                case "Precipitation":
                     return "prcp";
                 case "Temp":
                 case "temp":
+                case "Temperature":
                     return "tmax,tmin";
                 default:
                     errorMsg = "ERROR: Parameter for Daynet did not load.";
