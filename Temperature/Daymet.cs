@@ -98,7 +98,7 @@ namespace Temperature
         /// <param name="output"></param>
         /// <param name="newMetaData"></param>
         /// <param name="metadata"></param>
-        /// <returns></returns>
+        /// <returns></returns> 
         private Dictionary<string, string> SetMetaData(out string errorMsg, string metadata)
         {
             errorMsg = "";
