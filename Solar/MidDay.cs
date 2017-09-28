@@ -16,7 +16,7 @@ namespace GCSOLAR
         /// mid-season, mid-day conditions.
         /// </summary>
         /// <param name="dtmday"></param>
-        public void CalculatePhotolysisRatesHalfLives(out DataTable dtmday)
+        public void CalculatePhotolysisRatesHalfLives(out DataTable dtmday, Common common)
         {
             /* FOR USER SELECTED SEASONS AND LATITUDES, THIS ROUTINE COMPUTES PHOTOLYSIS RATES 
              * AND HALF-LIVES FOR XENOBIOTICS IN WATERBODIES. THE COMPUTED VALUES ARE FOR 
@@ -69,18 +69,18 @@ namespace GCSOLAR
             double diviso;
             double half;
             double rate;
-            int ilow = Common.ilow;
-            int iup = Common.iup;
-            double q = Common.q;
-            double iscal = Common.iscal;
-            double deltaz = Common.deltaz;
-            double musubr = Common.musubr;
-            int minwav = Common.minwav;
-            int maxwav = Common.maxwav;
-            double izlam = Common.izlam;
-            double iwlam = Common.iwlam;
-            double dinc = Common.dinc;
-            double dfinal = Common.dfinal;
+            int ilow = common.ilow;
+            int iup = common.iup;
+            double q = common.q;
+            double iscal = common.iscal;
+            double deltaz = common.deltaz;
+            double musubr = common.musubr;
+            int minwav = common.minwav;
+            int maxwav = common.maxwav;
+            double izlam = common.izlam;
+            double iwlam = common.iwlam;
+            double dinc = common.dinc;
+            double dfinal = common.dfinal;
             double arad = 0.174533e-01; 
 
             double[] s = new double[46];
@@ -105,19 +105,19 @@ namespace GCSOLAR
             bool print_output2 = false;
             bool do_scalar = false;
 
-            int[] lat1 = Common.getLat();
-            string[] sea1 = Common.getSeasons();
-            double[,] xH = Common.getMiddayH();
-            double[,] xSN = Common.getMiddaySN();
+            int[] lat1 = common.getLat();
+            string[] sea1 = common.getSeasons();
+            double[,] xH = common.getMiddayH();
+            double[,] xSN = common.getMiddaySN();
             
-            double[,,] H = Common.getH();
-            double[,,] SN = Common.getSN();
+            double[,,] H = common.getH();
+            double[,,] SN = common.getSN();
 
-            double[] wave = Common.getWave();
-            double[] abwat = Common.getAbwat();
-            double[] weight = Common.getWeight();
-            double[] wgt = Common.getWgt();
-            double[] eppest = Common.getEppest();
+            double[] wave = common.getWave();
+            double[] abwat = common.getAbwat();
+            double[] weight = common.getWeight();
+            double[] wgt = common.getWgt();
+            double[] eppest = common.getEppest();
 
             DataRow dr1 = dtmday.NewRow();
             dtmday.Columns.Add("LATITUDE");
@@ -193,12 +193,12 @@ namespace GCSOLAR
                 }
 
                 // See if latitude selection is required.
-                if (Common.ilatsw > 0)
+                if (common.ilatsw > 0)
                 {
                     // Latitude selection is required.
-                    for (int i = 0; i < Common.ilattm.Length; i++)
+                    for (int i = 0; i < common.ilattm.Length; i++)
                     {
-                        if (lat1[index] == Common.ilattm[i]) 
+                        if (lat1[index] == common.ilattm[i]) 
                         {
                            // noLatMatch = false;
                             match1Found = true;
@@ -219,12 +219,12 @@ namespace GCSOLAR
                 }
 
                 // See if season selection is required.
-                if (Common.iseasw > 0)
+                if (common.iseasw > 0)
                 {
                     // Season selection is required.
-                    for (int i = 0; i < Common.sease.Length; i++)
+                    for (int i = 0; i < common.sease.Length; i++)
                     {
-                        if ( sea1[index].Equals(Common.sease[i], StringComparison.OrdinalIgnoreCase) ) 
+                        if ( sea1[index].Equals(common.sease[i], StringComparison.OrdinalIgnoreCase) ) 
                         {
                             match2Found = true;
                             break;
@@ -243,8 +243,8 @@ namespace GCSOLAR
 
                 }
 
-                Common.convert(xn1, y, minwav, maxwav);
-                Common.convert(xn2, z, minwav, maxwav);
+                common.convert(xn1, y, minwav, maxwav);
+                common.convert(xn2, z, minwav, maxwav);
 
                 // Determine the season subscript.
                 int seasonNum = 1;
@@ -278,7 +278,7 @@ namespace GCSOLAR
                 //
                 //  Begin the depth loop.  Using a do-while loop.
                 //
-                depth = Common.dinit;
+                depth = common.dinit;
 
                 do
                 {
@@ -463,11 +463,11 @@ namespace GCSOLAR
                     {
                         // WRITE (IUNIT, 1091) PNAME, RIVER
                         // 1091 FORMAT  ('1XENOBIOTIC NAME: ',5A4,/,' WATER IDENTIFICATION: ',5A4)
-                        if (Common.iatmos == 1)
+                        if (common.iatmos == 1)
                         {
                             string str1 = "Type of atmosphere: terrestrial.";
                         }
-                        else if (Common.iatmos == 2)
+                        else if (common.iatmos == 2)
                         {
                             string str2 = "Type of atmosphere: marine.";
                         }
@@ -515,9 +515,6 @@ namespace GCSOLAR
                 index = index + 1;
                
             }
-
-     
-
       
             //
             // If w-lambda or z-lambda tables were requested, go

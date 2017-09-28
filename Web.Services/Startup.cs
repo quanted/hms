@@ -37,6 +37,11 @@ namespace Web.Services
             // Add our repository type
             // services.AddSingleton<ITodoRepository, TodoRepository>();
 
+            //Set the comments path for the swagger json and ui.
+            var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+            var xmlPath = Path.Combine(basePath, "XmlComments.xml");
+            var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
+
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -46,14 +51,10 @@ namespace Web.Services
                     Description = "Swagger documentation for HMS REST API with example requests and responses."
                 });
                 
-                //Set the comments path for the swagger json and ui.
-                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-                var xmlPath = Path.Combine(basePath, "XmlComments.xml");
-                var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
                 c.IncludeXmlComments(xmlPath);
                 c.IncludeXmlComments(xmlDataPath);
-
                 c.OperationFilter<ExamplesOperationFilter>();
+                c.OperationFilter<DescriptionOperationFilter>();
             });
 
         }

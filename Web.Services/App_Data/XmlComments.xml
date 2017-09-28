@@ -159,6 +159,17 @@
             <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
+        <member name="T:Web.Services.Controllers.GCSolarInputExample">
+            <summary>
+            Input example taken from the default input values call.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.GCSolarInputExample.GetExamples">
+            <summary>
+            Gets example object.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Controllers.WSSolarController">
             <summary>
             HMS API controller for solar data.
@@ -173,9 +184,17 @@
         </member>
         <member name="M:Web.Services.Controllers.WSSolarController.GETDefaultInput">
             <summary>
-            GET request for retrieving the default input values for teh GCSolar module,
+            GET request for retrieving the default input values for the GCSolar module,
             this is equivalent to selecting the first option from the start menu of the desktop application.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSSolarController.POSTCustomInput(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            POST request for retrieving solar data using custom values from the GCSolar module,
+            this is equivalent to selecting the second option from the start menu of the desktop application.
+            </summary>
+            <param name="input"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInput">
@@ -437,18 +456,25 @@
             Model for the WSSolar controller
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSSolar.GetGCSolarDefaultOutput">
+        <member name="M:Web.Services.Models.WSSolar.GetGCSolarDefaultInput">
+            <summary>
+            Calls into the Solar module and gets the default input data,
+            equivlanet to selectin the first option from the windows start form.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSSolar.GetGCSolarOutput">
             <summary>
             Calls into the Solar module and gets the default data, 
             equivalent to selecting the third option from the windows start form.
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Web.Services.Models.WSSolar.GetGCSolarDefaultInput">
+        <member name="M:Web.Services.Models.WSSolar.GetGCSolarOutput(System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
-            Calls into the Solar module and gets the default input data,
-            equivlanet to selectin the first option from the windows start form.
+            Calls into the Solar module and sets the Common variables using the input object and returns the data based on those inputs.
             </summary>
+            <param name="input"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSSubSurfaceFlow">

@@ -3288,7 +3288,7 @@
           "lib/netstandard1.6/Swashbuckle.AspNetCore.dll": {}
         }
       },
-      "Swashbuckle.AspNetCore.Examples/2.1.1": {
+      "Swashbuckle.AspNetCore.Examples/2.2.2": {
         "type": "package",
         "dependencies": {
           "NETStandard.Library": "1.6.1",
@@ -8767,14 +8767,14 @@
         "swashbuckle.aspnetcore.nuspec"
       ]
     },
-    "Swashbuckle.AspNetCore.Examples/2.1.1": {
-      "sha512": "fbm4bweK57MKS2yHkR6iJstj+9b5/aBpm25Y1PGTpzKrHoVotaX8nS09I/zKRL9yi7eJoK06laDJvSehUn9iCQ==",
+    "Swashbuckle.AspNetCore.Examples/2.2.2": {
+      "sha512": "qky2Dvo0OGvKQyQgdSE1eWk4EFuw2hkSx+wpRil/+E7nHaXw5VQzHhjjMzYNzoqJme+Aj5fKkRhfFbTJTW3ZCQ==",
       "type": "package",
-      "path": "swashbuckle.aspnetcore.examples/2.1.1",
+      "path": "swashbuckle.aspnetcore.examples/2.2.2",
       "files": [
         "lib/net461/Swashbuckle.AspNetCore.Examples.dll",
         "lib/netstandard1.6/Swashbuckle.AspNetCore.Examples.dll",
-        "swashbuckle.aspnetcore.examples.2.1.1.nupkg.sha512",
+        "swashbuckle.aspnetcore.examples.2.2.2.nupkg.sha512",
         "swashbuckle.aspnetcore.examples.nuspec"
       ]
     },
@@ -13570,7 +13570,7 @@
       "SubSurfaceFlow >= 1.0.0",
       "SurfaceRunoff >= 1.0.0",
       "Swashbuckle.AspNetCore >= 1.0.0",
-      "Swashbuckle.AspNetCore.Examples >= 2.1.1",
+      "Swashbuckle.AspNetCore.Examples >= 2.2.2",
       "Swashbuckle.AspNetCore.SwaggerUi >= 1.0.0",
       "Temperature >= 1.0.0",
       "Utilities >= 1.0.0"
@@ -13659,7 +13659,7 @@
           },
           "Swashbuckle.AspNetCore.Examples": {
             "target": "Package",
-            "version": "2.1.1"
+            "version": "2.2.2"
           },
           "Microsoft.AspNetCore.Cors": {
             "target": "Package",

@@ -42,7 +42,7 @@ namespace Web.Services.Controllers
                 {
                     Point = new PointCoordinate()
                     {
-                        Latitude = 33.925673,
+                        Latitude = 35.925673,
                         Longitude = -83.355723
                     },
                     Timezone = new Timezone()

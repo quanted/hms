@@ -17,7 +17,7 @@ namespace GCSOLAR
         /// the routine computes direct photolysis rates. 
         /// </summary>
         /// <param name="dtday"></param>
-        public void CalculatePhotolysisRatesHalfLivesTDay(out DataTable dtOutput, out DataTable dtKL)
+        public void CalculatePhotolysisRatesHalfLivesTDay(out DataTable dtOutput, out DataTable dtKL, Common common)
         {
 
             /* For user selected dates and positions on the northern hemisphere, this routine computes 
@@ -82,13 +82,13 @@ namespace GCSOLAR
             double[] sunsav = new double[2];
             double[] sun = new double[2];
 
-            double[,] defdec = Common.getDefdec();
-            double[,] defrgt = Common.getDefrgt();
-            double[,] defsid = Common.getDefsid();
-            double[,] defoza = Common.getDefoza();
-            double[] wave = Common.getWave();
-            double[] wgt = Common.getWgt();
-            double[] xx = Common.xx;
+            double[,] defdec = common.getDefdec();
+            double[,] defrgt = common.getDefrgt();
+            double[,] defsid = common.getDefsid();
+            double[,] defoza = common.getDefoza();
+            double[] wave = common.getWave();
+            double[] wgt = common.getWgt();
+            double[] xx = common.xx;
 
             double depth;
             double zz;
@@ -111,23 +111,23 @@ namespace GCSOLAR
             double sunave;
             double satemp;
             double yptemp;
-            double q = Common.q;
-            double xlon = Common.xlon;
-            double aveozo = Common.aveozo;
+            double q = common.q;
+            double xlon = common.xlon;
+            double aveozo = common.aveozo;
 
             double deltaz = 0.0;
-            if (Common.useDeltaz) deltaz = Common.deltaz;
+            if (common.useDeltaz) deltaz = common.deltaz;
             
-            double dfinal = Common.dfinal;
-            double dinc = Common.dinc;
+            double dfinal = common.dfinal;
+            double dinc = common.dinc;
 
-            int ilatsw = Common.ilatsw;
-            int numSeasons = Common.iseasw;
-            int ioz = Common.ioz;
-            int iwlam = Common.iwlam;
-            int izlam = Common.izlam;
-            int minwav = Common.minwav;
-            int maxwav = Common.maxwav;
+            int ilatsw = common.ilatsw;
+            int numSeasons = common.iseasw;
+            int ioz = common.ioz;
+            int iwlam = common.iwlam;
+            int izlam = common.izlam;
+            int minwav = common.minwav;
+            int maxwav = common.maxwav;
 
             int numLats = ilatsw;
             int isap1;
@@ -140,7 +140,7 @@ namespace GCSOLAR
             string errorMsg = "";
             
             // Add columns to the tables.
-            if (Common.ityp == 0)
+            if (common.ityp == 0)
             {
                 dtLocal.Columns.Add("Latitude");
                 dtLocal.Columns.Add("Season");
@@ -184,7 +184,7 @@ namespace GCSOLAR
                 int jj1 = 0;
                 for (int j = 1; j <= 10; j++)
                 {
-                    if (Common.ilattm[ilat - 1] <= ((j - 1) * 10.0))
+                    if (common.ilattm[ilat - 1] <= ((j - 1) * 10.0))
                     {
                         jj1 = j;
                         break;
@@ -195,7 +195,7 @@ namespace GCSOLAR
                 if (jj1 != 1) jj2 = jj1 - 1;  // This will be needed for interpolation.
                 
                 // If non-typical conditions were selected, set season switch to 1.               
-                if (Common.ityp == 1) numSeasons = 1;
+                if (common.ityp == 1) numSeasons = 1;
 
                 /*
                  * Main season selection loop.
@@ -204,11 +204,11 @@ namespace GCSOLAR
                 {
                     // Test for season selection.
                     int j = iseason;
-                    if (Common.ityp != 1 && numSeasons != 4)
+                    if (common.ityp != 1 && numSeasons != 4)
                     {
                         for (j = 1; j <= 4; j++)
                         {
-                            if (Common.sease[iseason-1].Equals(seatst[j-1], StringComparison.OrdinalIgnoreCase)) 
+                            if (common.sease[iseason-1].Equals(seatst[j-1], StringComparison.OrdinalIgnoreCase)) 
                             {
                                 noSeasonMatch = false;
                                 break;
@@ -219,7 +219,7 @@ namespace GCSOLAR
                     
 
                     // Begin the depth loop.
-                    depth = Common.dinit;
+                    depth = common.dinit;
 
                     do
                     {
@@ -227,15 +227,15 @@ namespace GCSOLAR
 
                         // Compute maximum solar altitude.
                         zz = 0.0;
-                        xlat = Common.ilattm[ilat - 1];
+                        xlat = common.ilattm[ilat - 1];
 
                         // If non-typical values were selected, use the specified value.
-                        if (Common.ityp == 1) xlat = Common.typlat;
+                        if (common.ityp == 1) xlat = common.typlat;
                          
                         //
                         // If non-typical values were selected, bypass the default ephemeride selection.
                         //
-                        if (Common.ityp != 1) 
+                        if (common.ityp != 1) 
                         {
                             // Get default mid-season values.
                             for (int i = 1; i <= 3; i++)
@@ -248,7 +248,7 @@ namespace GCSOLAR
 
                         // Compute the solar zenith angle.
                         tempvar = 0.0;
-                        Common.timeofDay(out samid, tempvar, xx, out ut, xlat, xlon, zz);
+                        common.timeofDay(out samid, tempvar, xx, out ut, xlat, xlon, zz);
 
                         samid = 90.0 - samid;
 
@@ -260,7 +260,7 @@ namespace GCSOLAR
                         //
                         zz = 1.0;
                         tempvar = 90.0 + 0.833; 
-                        Common.timeofDay (out samidtemp, tempvar, xx, out ut, xlat, xlon, zz);
+                        common.timeofDay (out samidtemp, tempvar, xx, out ut, xlat, xlon, zz);
                         sun[0] = ut[0];
                         sun[1] = ut[1];
                         sunsav[0] = ut[0];
@@ -311,7 +311,7 @@ namespace GCSOLAR
                         DataRow drLocal2 = dtLocal.NewRow();
                         drLocal1["Latitude"] = xlat;
 
-                        if (Common.ityp == 0)
+                        if (common.ityp == 0)
                         {                           
                             drLocal1["Season"] = seatst[j - 1];
                         }
@@ -380,7 +380,7 @@ namespace GCSOLAR
                             //---------------------------------------------------------------------
                             // Call the SolarIntensities routine to compute the solar intensities.
                             //---------------------------------------------------------------------
-                            SolarIntensities(sa[isa - 1], depth, deltaz, ozz, out sum, s);
+                            SolarIntensities(common, sa[isa - 1], depth, deltaz, ozz, out sum, s);
 
                             //
                             // Test for zero rate of absorption.
@@ -417,7 +417,7 @@ namespace GCSOLAR
                             //---------------------------------------------------------------------
                             zz = 1.0;
                             tempvar = 90.0 - saisa;
-                            Common.timeofDay(out samidtemp, tempvar, xx, out ut, xlat, xlon, zz);
+                            common.timeofDay(out samidtemp, tempvar, xx, out ut, xlat, xlon, zz);
 
                             //---------------------------------------------------------------------
                             // Max solar altitude exceeded?
@@ -518,7 +518,7 @@ namespace GCSOLAR
                                 {
                                     drk1["Latitude"] = xlat;
                                 }
-                                if ((Common.ityp == 0) && (k == minwav))
+                                if ((common.ityp == 0) && (k == minwav))
                                 {
                                     drk1["Season"] = seatst[j - 1];
                                 }
@@ -535,7 +535,7 @@ namespace GCSOLAR
                         // Compute summaries
                         //-----------------------------------------------------------
                         tottim = sunmid[0] - sun[0];
-                        totint = Common.dintpt(maxplt, xplot, yplot, out errorMsg) * 3600.0;
+                        totint = common.dintpt(maxplt, xplot, yplot, out errorMsg) * 3600.0;
                         rate = 0.693 / totint;
                         sunave = totint / (7200.0 * tottim);
                             
@@ -556,7 +556,7 @@ namespace GCSOLAR
                         {
                             DataRow drTemp = dtOutput.NewRow();
                             drTemp["Latitude"] = rows["Latitude"].ToString();
-                            if (Common.ityp == 0) drTemp["Season"] = rows["Season"].ToString();
+                            if (common.ityp == 0) drTemp["Season"] = rows["Season"].ToString();
                             drTemp["Summary Items"] = rows["Summary Items"].ToString();
                             drTemp["Solar Altitude"] = rows["Solar Altitude"].ToString();
                             drTemp["Time of Day (hours)"] = rows["Time of Day (hours)"];
@@ -574,7 +574,7 @@ namespace GCSOLAR
 
                         // Store summary information under the "Summary Items" column.
                         drLocal5["Summary Items"] = "Depth (cm) = " + depth.ToString("#.###E+00", CultureInfo.InstalledUICulture);
-                        if (Common.useDeltaz)
+                        if (common.useDeltaz)
                         {
                             drLocal6["Summary Items"] = "Depth Point (cm) = " + deltaz.ToString("#.###E+00", CultureInfo.InstalledUICulture);
                         }
@@ -612,7 +612,7 @@ namespace GCSOLAR
                 //
                 // If non-typical values were selected, only one latitude is required.
                 //
-                if (Common.ityp == 1) break;
+                if (common.ityp == 1) break;
 
             }  // End of Latitude Loop
 
@@ -637,7 +637,7 @@ namespace GCSOLAR
         /// <param name="ozone"></param>
         /// <param name="sum"></param>
         /// <param name="s"></param>
-        public void SolarIntensities(double sa, double depth, double deltaz, double ozone, out double sum, double[] s)
+        public void SolarIntensities(Common common, double sa, double depth, double deltaz, double ozone, out double sum, double[] s)
         {
             double one1 = 1.0;
             double arad = 0.174533E-01;
@@ -674,13 +674,13 @@ namespace GCSOLAR
             double ztemp;
             double ytemp;
             double diviso;
-            double musubr = Common.musubr;
-            int minwav = Common.minwav;
-            int maxwav = Common.maxwav;
-            double[] abwat = Common.getAbwat();
+            double musubr = common.musubr;
+            int minwav = common.minwav;
+            int maxwav = common.maxwav;
+            double[] abwat = common.getAbwat();
             double[] eppest = null;
-            double[] weight = Common.getWeight();
-            double[] wave = Common.getWave();
+            double[] weight = common.getWeight();
+            double[] wave = common.getWave();
             double[] h = new double[46];
             double[] sn = new double[46];
             double[] x1 = new double[46];
@@ -689,13 +689,13 @@ namespace GCSOLAR
                                               307.5, 310.0, 312.5, 315.0, 317.5, 320.0, 325.0, 330.0, 340.0, 360.0, 380.0};
 
             // Get absorption coefficients for specific type of contaminant.
-            if (Common.contaminantType == "Chemical")
+            if (common.contaminantType == "Chemical")
             {
-                eppest = Common.getEppest();  // Units are in L/(mole cm)
+                eppest = common.getEppest();  // Units are in L/(mole cm)
             }
-            if (Common.contaminantType == "Biological")
+            if (common.contaminantType == "Biological")
             {
-                eppest = Common.getAbsBiological();  // Units are in hr^(-1) Watts^(-1) cm^2 nm
+                eppest = common.getAbsBiological();  // Units are in hr^(-1) Watts^(-1) cm^2 nm
             }
 
             //
@@ -703,7 +703,7 @@ namespace GCSOLAR
             //
             string errorMsg = "";
             GCSOLAR.Bener bn = new GCSOLAR.Bener();
-            bn.Elevation = Common.elevation;
+            bn.Elevation = common.elevation;
             for (int i = 1; i <= 22; i++)
             {
                 bn.BenerMethod(sa, wave1[i-1], ozone, out x1[i-1], out x2[i-1], out errorMsg);
@@ -717,15 +717,15 @@ namespace GCSOLAR
             //
             // Convert the intensity units.
             //
-            if (Common.contaminantType == "Chemical")
+            if (common.contaminantType == "Chemical")
             {
-                Common.convert(x1, h, minwav, maxwav);
-                Common.convert(x2, sn, minwav, maxwav);
+                common.convert(x1, h, minwav, maxwav);
+                common.convert(x2, sn, minwav, maxwav);
             }
-            if (Common.contaminantType == "Biological")
+            if (common.contaminantType == "Biological")
             {
-                Common.computeSolarIntensityOverInterval(x1, h, minwav, maxwav);
-                Common.computeSolarIntensityOverInterval(x1, sn, minwav, maxwav);
+                common.computeSolarIntensityOverInterval(x1, h, minwav, maxwav);
+                common.computeSolarIntensityOverInterval(x1, sn, minwav, maxwav);
             }
             
 
@@ -736,7 +736,7 @@ namespace GCSOLAR
             {
                 for (int i = 25; i <= maxwav; i++)
                 {
-                    Common.tslam(ozone, sa, wave[i-1], out h[i-1], out sn[i-1], out errorMsg);
+                    common.tslam(ozone, sa, wave[i-1], out h[i-1], out sn[i-1], out errorMsg);
                     if (errorMsg != "")
                     {
                         sum = 0.0;

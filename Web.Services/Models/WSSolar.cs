@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Solar;
+using GCSOLAR;
 
 namespace Web.Services.Models
 {
@@ -12,28 +13,39 @@ namespace Web.Services.Models
     /// </summary>
     public class WSSolar
     {
-        /// <summary>
-        /// Calls into the Solar module and gets the default data, 
-        /// equivalent to selecting the third option from the windows start form.
-        /// </summary>
-        /// <returns></returns>
-        public string GetGCSolarDefaultOutput()
-        {
-            GCSolar gcS = new GCSolar();
-            string output = gcS.GetDefaultData();
-            return output;
-        }
 
         /// <summary>
         /// Calls into the Solar module and gets the default input data,
         /// equivlanet to selectin the first option from the windows start form.
         /// </summary>
         /// <returns></returns>
-        public string GetGCSolarDefaultInput()
+        public Dictionary<string, object> GetGCSolarDefaultInput()
         {
             GCSolar gcS = new GCSolar();
-            string output = gcS.GetDefaultInputs();
-            return output;
+            return gcS.GetDefaultInputs();
+        }
+
+        /// <summary>
+        /// Calls into the Solar module and gets the default data, 
+        /// equivalent to selecting the third option from the windows start form.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> GetGCSolarOutput()
+        {
+            GCSolar gcS = new GCSolar();
+            return gcS.GetOutput();
+        }
+
+        /// <summary>
+        /// Calls into the Solar module and sets the Common variables using the input object and returns the data based on those inputs.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public Dictionary<string, object> GetGCSolarOutput(Dictionary<string, object> input)
+        {
+            GCSolar gcS = new GCSolar();
+            gcS.SetCommonVariables(input);
+            return gcS.GetOutput();
         }
     }
 }

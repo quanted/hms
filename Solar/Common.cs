@@ -7,32 +7,32 @@ namespace GCSOLAR
     /// <summary>
     /// This class contains parameters and methods that are shared among different classes.
     /// </summary>
-    public static class Common
+    public class Common
     {
-        public static double musubr = 1.34;
-        public static double dinit = 0.001;
-        public static double dinc = 10.0;
-        public static double dfinal = 5.0;
-        public static double deltaz = 0.001;
-        public static bool useDeltaz = false;
-        public static double elevation = 0.0;
+        public double musubr = 1.34;
+        public double dinit = 0.001;
+        public double dinc = 10.0;
+        public double dfinal = 5.0;
+        public double deltaz = 0.001;
+        public bool useDeltaz = false;
+        public double elevation = 0.0;
 
-        public static int minwav = 8;
-        public static int maxwav = 19;
-        public static int ilow = minwav;
-        public static int iup = maxwav;
+        public int minwav = 8;
+        public int maxwav = 19;
+        public int ilow = 8;
+        public int iup = 19;
 
-        public static int iatmos = 1;
-        public static int iscal = 1;
-        public static int iwlam = 0;
-        public static int izlam = 1;
-        public static int mid = 0;
-        public static int iben = 0;
-        public static int ivis = 0;
-        public static int itime = 0;
-        public static int iplot = 0;
-        public static int ityp = 0;
-        public static int ikalam = 0;
+        public int iatmos = 1;
+        public int iscal = 1;
+        public int iwlam = 0;
+        public int izlam = 1;
+        public int mid = 0;
+        public int iben = 0;
+        public int ivis = 0;
+        public int itime = 0;
+        public int iplot = 0;
+        public int ityp = 0;
+        public int ikalam = 0;
 
         public const int iunit = 9;
         public const int iprt = 8;
@@ -44,61 +44,61 @@ namespace GCSOLAR
         public const int inew = 4;
         public const int ihsn = 7;
 
-        public static double q = 0.32;
-        public static double aveozo = 0.3;
-        public static double xlon = 83.2;
-        public static double typlat = 40.0;  
-        public static int ioz = 1;
-        public static string asa = "1";
+        public double q = 0.32;
+        public double aveozo = 0.3;
+        public double xlon = 83.2;
+        public double typlat = 40.0;
+        public int ioz = 1;
+        public string asa = "1";
 
-        public static int ilatsw = 1;
-        public static double[] ilattm = new double[10] { 40.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0 };
-        public static double[] xx = new double[9] { 23.0, 26.0, 24.1, 5.0, 58.0, 53.26, 17.0, 57.0, 16.047 };
+        public int ilatsw = 1;
+        public double[] ilattm = new double[10] { 40.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0 };
+        public double[] xx = new double[9] { 23.0, 26.0, 24.1, 5.0, 58.0, 53.26, 17.0, 57.0, 16.047 };
 
-        public static int iseasw = 1;
-        public static string[] sease = new string[4] {"Spring", "  ", "  ", "  "};
+        public int iseasw = 1;
+        public string[] sease = new string[4] { "Spring", "  ", "  ", "  " };
 
-        public static string wavelengthName = "Wavelength (nm)";
-        public static string waterNameUnits = "Water Attenuation Coefficients (m**-1)";
-        public static string contaminantName = "Methoxyclor";
-        public static string contaminantType = "Chemical";
-        public static string contaminantUnits = "Absorption Coefficients (L/(mole cm))";
-        public static string bodyWaterType = "Pure Water";
-        public static string bodyWaterName = "Pure Water";
-        public static string typeAtmos = "Terrestrial";
+        public string wavelengthName = "Wavelength (nm)";
+        public string waterNameUnits = "Water Attenuation Coefficients (m**-1)";
+        public string contaminantName = "Methoxyclor";
+        public string contaminantType = "Chemical";
+        public string contaminantUnits = "Absorption Coefficients (L/(mole cm))";
+        public string bodyWaterType = "Pure Water";
+        public string bodyWaterName = "Pure Water";
+        public string typeAtmos = "Terrestrial";
 
         /// <summary>
         /// Pure water absorption coefficients.
         /// </summary>
         /// <returns></returns>
-        private static double[] abwat = new double[46] { 0.00120, 0.00113, 0.00106, 0.00099, 0.00093, 0.00085,
-                                                         0.00077, 0.00069, 0.00061, 0.00057, 0.00053, 0.00049, 
-                                                         0.00045, 0.00043, 0.00041, 0.00039, 0.00037, 0.00035,   
-                                                         0.00029, 0.00024, 0.00020, 0.00016, 0.00013, .000096,  
-                                                         0.000083, 0.000074, 0.000070, 0.000066, 0.000062, 0.000062,   
-                                                         0.000062, 0.000068, 0.000068, 0.000076, 0.000085, 0.00012, 
-                                                         0.00021, 0.00028, 0.00041, 0.00100, 0.00140, 0.00150,  
+        private double[] abwat = new double[46] { 0.00120, 0.00113, 0.00106, 0.00099, 0.00093, 0.00085,
+                                                         0.00077, 0.00069, 0.00061, 0.00057, 0.00053, 0.00049,
+                                                         0.00045, 0.00043, 0.00041, 0.00039, 0.00037, 0.00035,
+                                                         0.00029, 0.00024, 0.00020, 0.00016, 0.00013, .000096,
+                                                         0.000083, 0.000074, 0.000070, 0.000066, 0.000062, 0.000062,
+                                                         0.000062, 0.000068, 0.000068, 0.000076, 0.000085, 0.00012,
+                                                         0.00021, 0.00028, 0.00041, 0.00100, 0.00140, 0.00150,
                                                          0.00190, 0.00280, 0.01000, 0.00890 };
-        public static double[] getAbwat()
-        {           
+        public double[] getAbwat()
+        {
             return abwat;
         }
 
-        public static void setAbwat(double value, int i)
+        public void setAbwat(double value, int i)
         {
             abwat[i] = value;
         }
 
-        private static double[] pureWaterAbs = new double[46] { 0.00120, 0.00113, 0.00106, 0.00099, 0.00093, 0.00085,
-                                                                0.00077, 0.00069, 0.00061, 0.00057, 0.00053, 0.00049, 
-                                                                0.00045, 0.00043, 0.00041, 0.00039, 0.00037, 0.00035,   
-                                                                0.00029, 0.00024, 0.00020, 0.00016, 0.00013, .000096,  
-                                                                0.000083, 0.000074, 0.000070, 0.000066, 0.000062, 0.000062,   
-                                                                0.000062, 0.000068, 0.000068, 0.000076, 0.000085, 0.00012, 
-                                                                0.00021, 0.00028, 0.00041, 0.00100, 0.00140, 0.00150,  
+        private double[] pureWaterAbs = new double[46] { 0.00120, 0.00113, 0.00106, 0.00099, 0.00093, 0.00085,
+                                                                0.00077, 0.00069, 0.00061, 0.00057, 0.00053, 0.00049,
+                                                                0.00045, 0.00043, 0.00041, 0.00039, 0.00037, 0.00035,
+                                                                0.00029, 0.00024, 0.00020, 0.00016, 0.00013, .000096,
+                                                                0.000083, 0.000074, 0.000070, 0.000066, 0.000062, 0.000062,
+                                                                0.000062, 0.000068, 0.000068, 0.000076, 0.000085, 0.00012,
+                                                                0.00021, 0.00028, 0.00041, 0.00100, 0.00140, 0.00150,
                                                                 0.00190, 0.00280, 0.01000, 0.00890 };
 
-        public static double[] getPureWaterAbs()
+        public double[] getPureWaterAbs()
         {
             return pureWaterAbs;
         }
@@ -106,18 +106,18 @@ namespace GCSOLAR
         /// <summary>
         /// Contaminant absorption coefficients.
         /// </summary>
-        private static double[] eppest = new double[46] { 2200.0, 2020.0, 1530.0, 642.0, 271.0, 102.0, 28.0,  
-                                                          11.1, 4.67, 1.9, 1.1, 0.8, 0.53, 0.33, 0.27, 0.16, 
+        private double[] eppest = new double[46] { 2200.0, 2020.0, 1530.0, 642.0, 271.0, 102.0, 28.0,
+                                                          11.1, 4.67, 1.9, 1.1, 0.8, 0.53, 0.33, 0.27, 0.16,
                                                           0.1, 0.06, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                           0.0, 0.0, 0.0 };
-        public static double[] getEppest()
+        public double[] getEppest()
         {
             return eppest;
         }
 
-        public static void setEppest(double value, int i)
+        public void setEppest(double value, int i)
         {
             eppest[i] = value;
         }
@@ -125,18 +125,18 @@ namespace GCSOLAR
         /// <summary>
         /// Biological absorption values.
         /// </summary>
-        private static double[] absBiological = new double[46] { 2200.0, 2020.0, 1530.0, 642.0, 271.0, 102.0, 28.0,  
-                                                                 11.1, 4.67, 1.9, 1.1, 0.8, 0.53, 0.33, 0.27, 0.16, 
+        private double[] absBiological = new double[46] { 2200.0, 2020.0, 1530.0, 642.0, 271.0, 102.0, 28.0,
+                                                                 11.1, 4.67, 1.9, 1.1, 0.8, 0.53, 0.33, 0.27, 0.16,
                                                                  0.1, 0.06, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                                  0.0, 0.0, 0.0 };
-        public static double[] getAbsBiological()
+        public double[] getAbsBiological()
         {
             return absBiological;
         }
 
-        public static void setAbsBiological(double value, int i)
+        public void setAbsBiological(double value, int i)
         {
             absBiological[i] = value;
         }
@@ -145,60 +145,60 @@ namespace GCSOLAR
         /// Wavelengths in nm.
         /// </summary>
         /// <returns></returns>
-        public static double[] getWave()
+        public double[] getWave()
         {
-            double[] wave = new double[46] { 280.0, 282.5, 285.0, 287.5, 290.0, 292.5, 295.0,      
-                                             297.5, 300.0, 302.5, 305.0, 307.5, 310.0, 312.5, 
-                                             315.0, 317.5, 320.0, 323.1, 330.0, 340.0, 350.0, 
-                                             360.0, 370.0, 380.0, 390.0, 400.0, 410.0, 420.0, 
-                                             430.0, 440.0, 450.0, 460.0, 470.0, 480.0, 490.0, 
-                                             500.0, 525.0, 550.0, 575.0, 600.0, 625.0, 650.0, 
+            double[] wave = new double[46] { 280.0, 282.5, 285.0, 287.5, 290.0, 292.5, 295.0,
+                                             297.5, 300.0, 302.5, 305.0, 307.5, 310.0, 312.5,
+                                             315.0, 317.5, 320.0, 323.1, 330.0, 340.0, 350.0,
+                                             360.0, 370.0, 380.0, 390.0, 400.0, 410.0, 420.0,
+                                             430.0, 440.0, 450.0, 460.0, 470.0, 480.0, 490.0,
+                                             500.0, 525.0, 550.0, 575.0, 600.0, 625.0, 650.0,
                                              675.0, 700.0, 750.0, 800.0 };
 
             return wave;
         }
 
-        public static double getMinWave()
+        public double getMinWave(int minwav)
         {
-            double[] waveLengths = Common.getWave();
-            double minwave = waveLengths[Common.minwav - 1];
+            double[] waveLengths = getWave();
+            double minwave = waveLengths[minwav - 1];
             return minwave;
         }
 
-        public static double getMaxWave()
+        public double getMaxWave(int maxwav)
         {
-            double[] waveLengths = Common.getWave();
-            double maxwave = waveLengths[Common.maxwav - 1];
+            double[] waveLengths = getWave();
+            double maxwave = waveLengths[maxwav - 1];
             return maxwave;
         }
 
-        public static double[,] getDefdec()
+        public double[,] getDefdec()
         {
-            double[,] defdec = new double[3,4] { {10.0, 20.0,- 9.0, -20.0}, 
-                                                 {5.0, 5.0, 56.0, 8.0}, 
+            double[,] defdec = new double[3, 4] { {10.0, 20.0,- 9.0, -20.0},
+                                                 {5.0, 5.0, 56.0, 8.0},
                                                  {23.6, 40.4, 40.4, 15.2} };
-            return defdec;     
+            return defdec;
         }
 
-        public static double[,] getDefrgt()
+        public double[,] getDefrgt()
         {
-            double[,] defrgt = new double[3,4] { {1.0, 8.0, 13.0, 20.0}, 
-                                                 {36.0, 9.0, 35.0, 9.0}, 
+            double[,] defrgt = new double[3, 4] { {1.0, 8.0, 13.0, 20.0},
+                                                 {36.0, 9.0, 35.0, 9.0},
                                                  {55.38, 49.92, 24.52, 0.14} };
             return defrgt;
         }
 
-        public static double[,] getDefsid()
+        public double[,] getDefsid()
         {
-            double[,] defsid = new double[3,4] { {13.0, 20.0, 1.0, 7.0},
+            double[,] defsid = new double[3, 4] { {13.0, 20.0, 1.0, 7.0},
                                                  {37.0, 3.0, 50.0, 57.0},
                                                  {3.41, 25.884, 22.564, 59.844} };
-            return defsid; 
+            return defsid;
         }
-        
-        public static double[,] getDefoza()
+
+        public double[,] getDefoza()
         {
-            double[,] defoza = new double[10,4] { {0.26, 0.256, 0.244, 0.241 },
+            double[,] defoza = new double[10, 4] { {0.26, 0.256, 0.244, 0.241 },
                                                   {0.268, 0.261, 0.253, 0.247},
                                                   {0.287, 0.273, 0.261, 0.26},
                                                   {0.313, 0.292, 0.27, 0.284},
@@ -211,25 +211,25 @@ namespace GCSOLAR
             return defoza;
         }
 
-        public static double[] getWeight()
+        public double[] getWeight()
         {
             double[] weight = new double[46] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-                                               2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 
+                                               2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5,
                                                5.0, 5.0 };
             return weight;
         }
 
-        public static double[] getWgt()
+        public double[] getWgt()
         {
             double[] wgt = new double[46] { 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5,
                                             2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 3.75,
-                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 
-                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 
-                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 
-                                            25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0,  
+                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0,
+                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0,
+                                            10.0, 10.0, 10.0, 10.0, 10.0, 10.0,
+                                            25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0, 25.0,
                                             50.0, 50.0 };
             return wgt;
         }
@@ -238,9 +238,9 @@ namespace GCSOLAR
         /// Sky intensities from the whole sky on a horizontal surface.
         /// </summary>
         /// <returns></returns>
-        public static double[,,] getH()
+        public double[,,] getH()
         {
-            double[, ,] H = new double[22, 10, 4] {
+            double[,,] H = new double[22, 10, 4] {
                                                    { { 0.544895E+15, 0.531302E+15, 0.544895E+15, 0.531302E+15},
                                                    { 0.541202E+15, 0.544895E+15, 0.531302E+15, 0.524422E+15},
                                                    { 0.544895E+15, 0.541202E+15, 0.524422E+15, 0.494635E+15},
@@ -250,10 +250,10 @@ namespace GCSOLAR
                                                    { 0.469846E+15, 0.494635E+15, 0.323552E+15, 0.186812E+15},
                                                    { 0.408101E+15, 0.469846E+15, 0.186812E+15, 0.000000E+00},
                                                    { 0.323552E+15, 0.408101E+15, 0.000000E+00, 0.000000E+00},
-                                                   { 0.186812E+15, 0.323552E+15, 0.000000E+00, 0.000000E+00} 
+                                                   { 0.186812E+15, 0.323552E+15, 0.000000E+00, 0.000000E+00}
                                                    },
 
-                                                   { { 0.726592E+15, 0.707870E+15, 0.726592E+15, 0.707870E+15}, 
+                                                   { { 0.726592E+15, 0.707870E+15, 0.726592E+15, 0.707870E+15},
                                                    { 0.722302E+15, 0.726592E+15, 0.707870E+15, 0.700701E+15},
                                                    { 0.726592E+15, 0.722302E+15, 0.700701E+15, 0.662552E+15},
                                                    { 0.707870E+15, 0.726592E+15, 0.662552E+15, 0.633661E+15},
@@ -262,8 +262,8 @@ namespace GCSOLAR
                                                    { 0.633661E+15, 0.662552E+15, 0.446371E+15, 0.261081E+15},
                                                    { 0.553351E+15, 0.633661E+15, 0.261081E+15, 0.000000E+00},
                                                    { 0.446371E+15, 0.553351E+15, 0.000000E+00, 0.000000E+00},
-                                                   { 0.261081E+15, 0.446371E+15, 0.000000E+00, 0.000000E+00} 
-                                                   },   
+                                                   { 0.261081E+15, 0.446371E+15, 0.000000E+00, 0.000000E+00}
+                                                   },
 
                                                    { { 0.892492E+15, 0.870447E+15, 0.892492E+15, 0.870447E+15},
                                                      { 0.886213E+15, 0.892492E+15, 0.870447E+15, 0.862981E+15},
@@ -274,7 +274,7 @@ namespace GCSOLAR
                                                      { 0.786162E+15, 0.817109E+15, 0.565745E+15, 0.334936E+15},
                                                      { 0.689721E+15, 0.786162E+15, 0.334936E+15, 0.000000E+00},
                                                      { 0.565745E+15, 0.689721E+15, 0.000000E+00, 0.000000E+00},
-                                                     { 0.334936E+15, 0.565745E+15, 0.000000E+00, 0.000000E+00} 
+                                                     { 0.334936E+15, 0.565745E+15, 0.000000E+00, 0.000000E+00}
                                                    },
 
                                                     { { 0.859639E+15, 0.839333E+15, 0.859639E+15, 0.839333E+15},
@@ -286,7 +286,7 @@ namespace GCSOLAR
                                                     { 0.765300E+15, 0.791531E+15, 0.561344E+15, 0.335940E+15},
                                                     { 0.673961E+15, 0.765300E+15, 0.335940E+15, 0.000000E+00},
                                                     { 0.561344E+15, 0.673961E+15, 0.000000E+00, 0.000000E+00},
-                                                    { 0.335940E+15, 0.561344E+15, 0.000000E+00, 0.000000E+00} 
+                                                    { 0.335940E+15, 0.561344E+15, 0.000000E+00, 0.000000E+00}
                                                     },
 
                                                     { { 0.777378E+15, 0.759901E+15, 0.777378E+15, 0.759901E+15},
@@ -300,7 +300,7 @@ namespace GCSOLAR
                                                     { 0.522469E+15, 0.617601E+15, 0.000000E+00, 0.000000E+00},
                                                     { 0.316040E+15, 0.522469E+15, 0.000000E+00, 0.000000E+00}
                                                     },
-    
+
 
                                                     { { 0.863061E+15, 0.843609E+15, 0.863061E+15, 0.843609E+15},
                                                     { 0.855003E+15, 0.863061E+15, 0.843609E+15, 0.841777E+15},
@@ -335,7 +335,7 @@ namespace GCSOLAR
                                                     { 0.804289E+15, 0.817753E+15, 0.634021E+15, 0.394617E+15},
                                                     { 0.717501E+15, 0.804289E+15, 0.394617E+15, 0.000000E+00},
                                                     { 0.634021E+15, 0.717501E+15, 0.000000E+00, 0.000000E+00},
-                                                    { 0.394617E+15, 0.634021E+15, 0.000000E+00, 0.000000E+00} 
+                                                    { 0.394617E+15, 0.634021E+15, 0.000000E+00, 0.000000E+00}
                                                     },
 
                                                     {{ 0.860477E+15, 0.842766E+15, 0.860635E+15, 0.842772E+15},
@@ -397,7 +397,7 @@ namespace GCSOLAR
                                                     { 0.548355E+15, 0.580040E+15, 0.000000E+00, 0.000000E+00},
                                                     { 0.327530E+15, 0.543826E+15, 0.000000E+00, 0.000000E+00}
                                                     },
-                                                    
+
                                                     { { 0.653174E+15, 0.640846E+15, 0.654042E+15, 0.640874E+15},
                                                     { 0.644328E+15, 0.653120E+15, 0.640199E+15, 0.644047E+15},
                                                     { 0.651714E+15, 0.644061E+15, 0.643188E+15, 0.615420E+15},
@@ -516,9 +516,9 @@ namespace GCSOLAR
         /// 4 --> the seasons
         /// </summary>
         /// <returns></returns>
-        public static double[,,] getSN()
+        public double[,,] getSN()
         {
-            double[, ,] SN = new double[22, 10, 4] {
+            double[,,] SN = new double[22, 10, 4] {
                                                 { { 0.107679E+16, 0.100472E+16, 0.107679E+16, 0.100472E+16},
                                                 { 0.111760E+16, 0.107679E+16, 0.100472E+16, 0.856412E+15},
                                                 { 0.107679E+16, 0.111760E+16, 0.856412E+15, 0.696028E+15},
@@ -552,9 +552,9 @@ namespace GCSOLAR
                                                 { 0.100526E+16, 0.143762E+16, 0.240013E+15, 0.264607E+14},
                                                 { 0.625561E+15, 0.100526E+16, 0.264607E+14, 0.000000E+00},
                                                 { 0.240013E+15, 0.625561E+15, 0.000000E+00, 0.000000E+00},
-                                                { 0.264607E+14, 0.240013E+15, 0.000000E+00, 0.000000E+00} 
+                                                { 0.264607E+14, 0.240013E+15, 0.000000E+00, 0.000000E+00}
                                                 },
-        
+
                                                 { { 0.227904E+16, 0.213648E+16, 0.227904E+16, 0.213648E+16},
                                                 { 0.235481E+16, 0.227904E+16, 0.213648E+16, 0.184769E+16},
                                                 { 0.227904E+16, 0.235481E+16, 0.184769E+16, 0.152708E+16},
@@ -783,10 +783,10 @@ namespace GCSOLAR
                                                 { 0.353966E+15, 0.932940E+15, 0.000000E+00, 0.000000E+00}
                                                 }
                                                };
-                return SN;
+            return SN;
         }
 
-        public static double[,] getMiddayH()
+        public double[,] getMiddayH()
         {
             double[,] H = new double[40, 15] {
                                                 {1.65E-07,3.87E-07,1.10E-06,2.82E-06,4.47E-06,7.07E-06,9.73E-06,1.19E-05,1.50E-05,1.70E-05,2.28E-05,2.30E-05,2.19E-05,2.08E-05,2.31E-05},
@@ -834,7 +834,7 @@ namespace GCSOLAR
             return H;
         }
 
-        public static double[,] getMiddaySN()
+        public double[,] getMiddaySN()
         {
             double[,] SN = new double[40, 15] {
                                                 {2.97E-07,8.14E-07,1.91E-06,3.65E-06,5.56E-06,8.00E-06,1.07E-05,1.35E-05,1.57E-05,1.81E-05,2.45E-05,2.98E-05,3.48E-05,4.04E-05,4.83E-05},
@@ -882,19 +882,19 @@ namespace GCSOLAR
             return SN;
         }
 
-        public static int[] getLat()
+        public int[] getLat()
         {
-            int[] lat = new int[40] {0, 0, 0, 0, 10, 10, 10, 10, 20, 20, 20, 20, 30, 30, 30, 30, 40, 40, 40, 40, 50, 50, 50, 50, 
+            int[] lat = new int[40] {0, 0, 0, 0, 10, 10, 10, 10, 20, 20, 20, 20, 30, 30, 30, 30, 40, 40, 40, 40, 50, 50, 50, 50,
                                      60, 60, 60, 60, 70, 70, 70, 70, 80, 80, 80, 80, 90, 90, 90, 90 };
             return lat;
         }
 
-        public static string[] getSeasons()
+        public string[] getSeasons()
         {
-            string[] Seasons = new string[40] {"SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER", 
+            string[] Seasons = new string[40] {"SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER",
                                                "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER",
-                                               "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER", 
-                                               "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER", 
+                                               "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER",
+                                               "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER",
                                                "SPRING", "SUMMER", "FALL", "WINTER", "SPRING", "SUMMER", "FALL", "WINTER"};
             return Seasons;
         }
@@ -910,9 +910,9 @@ namespace GCSOLAR
         /// <param name="y"></param> array of 17 intensity values given in photons/cm**2/nm/sec
         /// <param name="minwav"></param>
         /// <param name="maxwav"></param>
-        public static void convert(double[] x, double[] y, int minwav, int maxwav)
+        public void convert(double[] x, double[] y, int minwav, int maxwav)
         {
-         
+
             //
             // Method to perform units conversion for the solar intensities and to compute
             // intensity values for additional wave lengths. 
@@ -928,7 +928,7 @@ namespace GCSOLAR
             // so, since 1 watt = 1 joule/sec, it follows that 1 watt corresponds to 
             // Lambda(nm)/1.986E-16 or Lambda(nm) * 5.035E+15 photons/sec.
             //
-      
+
             int i17 = 17;
             int i18 = 18;
             int i19 = 19;
@@ -937,7 +937,7 @@ namespace GCSOLAR
             int i22 = 22;
             int i23 = 23;
             int i24 = 24;
-  
+
             // +++++
             //
             //  Conversion factors
@@ -955,9 +955,9 @@ namespace GCSOLAR
             double e360 = 1.8126e19;
             double e370 = 1.86295e19;
             double e380 = 1.9133e19;
-            double e5035 = 5.035e15 ;
-            double e125 = 1.2587e16;  
-      
+            double e5035 = 5.035e15;
+            double e125 = 1.2587e16;
+
             double[] wave = new double[18] { 280.0, 282.5, 285.0, 287.5, 290.0, 292.5, 295.0, 297.5, 300.0,
                                             302.5, 305.0, 307.5, 310.0, 312.5, 315.0, 317.5, 320.0, 323.1 };
             int n = 17;
@@ -966,22 +966,22 @@ namespace GCSOLAR
 
             for (int i = minwav; i <= n; i++)
             {
-                y[i-1] = x[i-1] * wave[i-1] * e125;
+                y[i - 1] = x[i - 1] * wave[i - 1] * e125;
             }
-              
-          
-            if (maxwav >= 18) 
+
+
+            if (maxwav >= 18)
             {
                 //
                 //  Special conversion for the remainder of the intervals.
                 //
-                y[i18-1] = (1.875 * x[i17-1] + 3.125 * x[i18-1]) / 5.0 * e5035 * wave[i18-1] * 3.75;
-                y[i19-1] = (x[i18-1] + x[i19-1] + (x[i19-1] + x[i20-1]) / 2.0) / 3.0 *  e330;
-                y[i20-1] = x[i20-1] * e340;
-                y[i21-1] = (x[i20-1] + x[i21-1]) / 2.0 * e350;
-                y[i22-1] = x[i21-1] * e360;
-                y[i23-1] = (x[i21-1] + x[i22-1]) / 2.0 * e370;
-                y[i24-1] = x[i22-1] * e380;
+                y[i18 - 1] = (1.875 * x[i17 - 1] + 3.125 * x[i18 - 1]) / 5.0 * e5035 * wave[i18 - 1] * 3.75;
+                y[i19 - 1] = (x[i18 - 1] + x[i19 - 1] + (x[i19 - 1] + x[i20 - 1]) / 2.0) / 3.0 * e330;
+                y[i20 - 1] = x[i20 - 1] * e340;
+                y[i21 - 1] = (x[i20 - 1] + x[i21 - 1]) / 2.0 * e350;
+                y[i22 - 1] = x[i21 - 1] * e360;
+                y[i23 - 1] = (x[i21 - 1] + x[i22 - 1]) / 2.0 * e370;
+                y[i24 - 1] = x[i22 - 1] * e380;
             }
 
         }
@@ -995,7 +995,7 @@ namespace GCSOLAR
         /// <param name="y"></param>
         /// <param name="minwav"></param>
         /// <param name="maxwav"></param>
-        public static void computeSolarIntensityOverInterval(double[] x, double[] y, int minwav, int maxwav)
+        public void computeSolarIntensityOverInterval(double[] x, double[] y, int minwav, int maxwav)
         {
             int i17 = 17;
             int i18 = 18;
@@ -1022,7 +1022,7 @@ namespace GCSOLAR
             double e360 = 3.6e03;
             double e370 = 3.7e03;
             double e380 = 3.8e03;
-            
+
             double e125 = 2.5;
 
             double[] wave = new double[18] { 280.0, 282.5, 285.0, 287.5, 290.0, 292.5, 295.0, 297.5, 300.0,
@@ -1063,7 +1063,7 @@ namespace GCSOLAR
         /// <param name="errorMsg"></param>
         /// <returns></returns>
 
-        public static double dintpt (int n, double[] x, double[] y, out string errorMsg)
+        public double dintpt(int n, double[] x, double[] y, out string errorMsg)
         {
             //***********************************************************************
             //  Dintpt calculates an approximation for an integral on the basis of po
@@ -1081,11 +1081,11 @@ namespace GCSOLAR
             double[] dx = new double[100];
             double[] dy = new double[100];
 
-            double[] dc = new double[7] { -0.949107912342759, -0.741531185599394, -0.405845151377397, 0.0, 
+            double[] dc = new double[7] { -0.949107912342759, -0.741531185599394, -0.405845151377397, 0.0,
                                            0.405845151377397,  0.741531185599394,  0.949107912342759 };
 
-            double[] dw = new double[7] { 0.129484966168870, 0.279705391489277, 0.381830050505119, 
-                                          0.417959183673469, 0.381830050505119, 0.279705391489277, 
+            double[] dw = new double[7] { 0.129484966168870, 0.279705391489277, 0.381830050505119,
+                                          0.417959183673469, 0.381830050505119, 0.279705391489277,
                                           0.129484966168870 };
 
             double dalf;
@@ -1103,7 +1103,7 @@ namespace GCSOLAR
 
             //
             double dsum = 0.0;
-            if (n < 3 || n > 100) 
+            if (n < 3 || n > 100)
             {
                 errorMsg = "Invalid input in dintpt." + n;
                 return 0.0d;
@@ -1114,12 +1114,12 @@ namespace GCSOLAR
                 dx[i] = x[i];
                 dy[i] = y[i];
             }
-         
+
             if (n == 3) nip = 3;
 
-            dalf = 0.5 * (dx[0] + dx[n-1]);
-            dbet = 0.5 * (dx[n-1] - dx[0]);
-       
+            dalf = 0.5 * (dx[0] + dx[n - 1]);
+            dbet = 0.5 * (dx[n - 1] - dx[0]);
+
             for (int i = 0; i < ngpts; i++)
             {
                 dxx = dbet * dc[i] + dalf;
@@ -1129,7 +1129,7 @@ namespace GCSOLAR
             }
 
             return dsum;
-      
+
         }
 
         /// <summary>
@@ -1142,26 +1142,26 @@ namespace GCSOLAR
         /// <param name="mmm"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public static double dintrp (int nn, double[] dx, double[] dy, double dxx, int mmm, out string errorMsg)
+        public double dintrp(int nn, double[] dx, double[] dy, double dxx, int mmm, out string errorMsg)
         {
             errorMsg = "";
             bool flag1 = false;
-            bool flag2 = false; 
-            double[] dvd = new double[20];         
+            bool flag2 = false;
+            double[] dvd = new double[20];
             double dw;
             double dl;
             double result;
-            double dz = 0.0; 
+            double dz = 0.0;
             double deps = 1.0e-12;
             double d5 = 0.5;
             int mm;
-                   
+
             result = dz;
             int m = mmm;
             int n = nn;
 
             //  Check for valid parameters.
-            if (dxx <  (dx[0] - deps))
+            if (dxx < (dx[0] - deps))
             {
                 errorMsg = "Invalid argument in dintrp.";
                 return result;
@@ -1178,17 +1178,17 @@ namespace GCSOLAR
             //
             int l = 1;
 
-            if ( (nn > m) && (nn > 15) )
+            if ((nn > m) && (nn > 15))
             {
-                if (dxx >  (dx[n-1] + deps))
+                if (dxx > (dx[n - 1] + deps))
                 {
                     errorMsg = "Dxx is outside table.";
                     return result;
                 }
                 l = n;
-                if (Math.Abs(dxx - dx [n-1])  < deps)
+                if (Math.Abs(dxx - dx[n - 1]) < deps)
                 {
-                    result = dy[l-1];
+                    result = dy[l - 1];
                     return result;
                 }
                 if (m != n)
@@ -1198,15 +1198,15 @@ namespace GCSOLAR
                     dl = dw;
                     l = n / 2;
                     dw = d5 * dw;
-                    if (Math.Abs(dxx - dx [l-1])  < deps)
+                    if (Math.Abs(dxx - dx[l - 1]) < deps)
                     {
-                        result = dy[l-1];
-                        return result;                 
+                        result = dy[l - 1];
+                        return result;
                     }
 
                     while (dw >= d5)
-                    {                                        
-                        if (dxx > dx[l-1])
+                    {
+                        if (dxx > dx[l - 1])
                         {
                             dl = dl + dw;
                         }
@@ -1215,18 +1215,18 @@ namespace GCSOLAR
                             dl = dl - dw;
                         }
 
-                        l = (int) dl;
+                        l = (int)dl;
 
                         dw = d5 * dw;
 
-                        if (Math.Abs(dxx - dx [l-1])  < deps)
+                        if (Math.Abs(dxx - dx[l - 1]) < deps)
                         {
-                            result = dy[l-1];
-                            return result;                 
+                            result = dy[l - 1];
+                            return result;
                         }
                     }
-                  
-                    while (dx[l-1] >= dxx)
+
+                    while (dx[l - 1] >= dxx)
                     {
                         l = l - 1;
 
@@ -1237,10 +1237,10 @@ namespace GCSOLAR
                             return result;
                         }
                     }
-                  
+
                     l = l - m / 2 + 1;
                     if (l <= 0) l = 1;
-                    if (l >  (n - m + 1)) l = n - m + 1;
+                    if (l > (n - m + 1)) l = n - m + 1;
                     mm = m - 1;
                     divdif(dx, dy, l, m, ref dvd, out errorMsg);
                     if (errorMsg != "")
@@ -1292,29 +1292,29 @@ namespace GCSOLAR
                     return result;
                 }
                 return result;
-            } 
+            }
             else if (nn <= 15)
             {
                 l = 1;
                 do
                 {
-                    if (Math.Abs(dxx -dx[l-1]) < deps) 
+                    if (Math.Abs(dxx - dx[l - 1]) < deps)
                     {
                         flag1 = true;
                         break;
                     }
-                    if (dxx < dx[l-1]) 
+                    if (dxx < dx[l - 1])
                     {
                         flag2 = true;
                         break;
                     }
                     l = l + 1;
-                } 
+                }
                 while (l <= n);
 
                 if (flag1)
                 {
-                    result = dy[l-1];
+                    result = dy[l - 1];
                     return result;
                 }
                 else if (flag2)
@@ -1322,7 +1322,7 @@ namespace GCSOLAR
                     l = l - 1;
                     l = l - m / 2 + 1;
                     if (l <= 0) l = 1;
-                    if (l >  (n - m + 1)) l = n - m + 1;
+                    if (l > (n - m + 1)) l = n - m + 1;
                     mm = m - 1;
                     divdif(dx, dy, l, m, ref dvd, out errorMsg);
                     if (errorMsg != "")
@@ -1344,13 +1344,13 @@ namespace GCSOLAR
                     result = 0.0;
                     return result;
                 }
-              
+
             }
 
             return result;
         }
-      
-      
+
+
         /// <summary>
         /// This method performs a numerical calculation for a slope.
         /// </summary>
@@ -1359,7 +1359,7 @@ namespace GCSOLAR
         /// <param name="np"></param>
         /// <param name="dvd"></param>
         /// <param name="errorMsg"></param>
-        public static void divdif (double[] dc, double[] dy, int l, int np, ref double[] dvd, out string errorMsg)
+        public void divdif(double[] dc, double[] dy, int l, int np, ref double[] dvd, out string errorMsg)
         {
             errorMsg = "";
             int n;
@@ -1376,7 +1376,7 @@ namespace GCSOLAR
                 errorMsg = "Number of points in divdif is invalid: " + np + ".";
                 return;
             }
-              
+
             for (int j = 0; j < np; j++)
             {
                 dvd[j] = dy[j + lm1];
@@ -1395,10 +1395,10 @@ namespace GCSOLAR
                         errorMsg = "Two arguments are equal.";
                         return;
                     }
-                    dvd[j-1] = (dvd[j-1] - dvd[k-1]) / divs;
+                    dvd[j - 1] = (dvd[j - 1] - dvd[k - 1]) / divs;
                 }
             }
-       
+
             return;
         }
 
@@ -1411,7 +1411,7 @@ namespace GCSOLAR
         /// <param name="c"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public static double display(double[] a, int n, double dx, double [] c, int l, out string errorMsg)
+        public double display(double[] a, int n, double dx, double[] c, int l, out string errorMsg)
         {
             errorMsg = "";
             int nx;
@@ -1425,16 +1425,16 @@ namespace GCSOLAR
                 return dsply;
             }
 
-            dsply = a[n];  
-  
+            dsply = a[n];
+
             for (int i = 1; i <= n; i++)
             {
-                nx = n -i + 1;
-                dsply = dsply * (dx - c[nx - 1 + lm1] ) + a [nx - 1];
+                nx = n - i + 1;
+                dsply = dsply * (dx - c[nx - 1 + lm1]) + a[nx - 1];
             }
 
             return dsply;
-      
+
         }
 
         /// <summary>
@@ -1446,20 +1446,20 @@ namespace GCSOLAR
         /// <param name="h"></param>
         /// <param name="sn"></param>
         /// <param name="err"></param>
-        public static void tslam(double ozamt, double solalt, double wav, out double h, out double sn, out string err)
+        public void tslam(double ozamt, double solalt, double wav, out double h, out double sn, out string err)
         {
-            err = "";                     
-        
-            double[] iol = new double[22] { 2.2, 3.1, 4.01, 4.06, 3.86, 4.5, 5.0, 5.0, 5.14, 5.22, 4.91,  
+            err = "";
+
+            double[] iol = new double[22] { 2.2, 3.1, 4.01, 4.06, 3.86, 4.5, 5.0, 5.0, 5.14, 5.22, 4.91,
                                             4.98, 5.21, 5.4, 5.46, 5.47, 5.38, 5.30, 5.2, 5.08, 4.8, 4.55 };
 
-            double[] alphal = new double[22] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.7, 1.0,  
+            double[] alphal = new double[22] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.7, 1.0,
                                                 1.3, 2.3, 3.6, 5.2, 5.4, 4.1, 2.8, 1.7, 0.9, 0.4, 0.0 };
 
             double[] sa = new double[10] { 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0 };
 
-            double[] smlam = new double[22] { 0.175, .158, 0.142, 0.129, 0.117, 0.106, 0.0969, 0.0885,   
-                                                0.0810, 0.0743, 0.0687, 0.0628, 0.0515, 0.0426, 0.0356,     
+            double[] smlam = new double[22] { 0.175, .158, 0.142, 0.129, 0.117, 0.106, 0.0969, 0.0885,
+                                                0.0810, 0.0743, 0.0687, 0.0628, 0.0515, 0.0426, 0.0356,
                                                 0.0299, 0.0253, 0.0216, 0.0185, 0.0160, 0.0121, 0.0093 };
 
             double degrad = 1.745329e-2;
@@ -1468,7 +1468,7 @@ namespace GCSOLAR
             int i = 0;
             int isa;
             int iwave;
-            h  = -99.0;
+            h = -99.0;
             sn = -99.0;
 
             double lam;
@@ -1483,22 +1483,22 @@ namespace GCSOLAR
             double cosarg;
             double tiolco;
 
- 
+
             //
             // Determine wavelength.
             //
-            double[] wave = Common.getWave();
+            double[] wave = getWave();
 
             for (int j = 25; j <= 46; j++)
             {
-                if (wav == wave [j-1])
+                if (wav == wave[j - 1])
                 {
                     flag1 = true;
                     i = j;
                     break;
                 }
             }
-    
+
             if (flag1 == false)
             {
                 err = "Wave value not found in wave array.";
@@ -1506,14 +1506,14 @@ namespace GCSOLAR
             }
 
             iwave = i - 24;
-            lam = wave[i-1] / 1000.0;
+            lam = wave[i - 1] / 1000.0;
 
             //
             // Determine solar altitude.
             //
             for (int j = 1; j <= 10; j++)
             {
-                if (solalt == sa[j-1])
+                if (solalt == sa[j - 1])
                 {
                     flag2 = true;
                     i = j;
@@ -1526,7 +1526,7 @@ namespace GCSOLAR
                 err = "Solar altitude was not found in SA array.";
                 return;
             }
-      
+
             //
             // Determine solar altitude subscript.
             //
@@ -1536,22 +1536,22 @@ namespace GCSOLAR
             sin2 = sin2 * sin2;
             misa = Math.Sqrt(1.0 - sin2 / 1.001787);
             misa = 1.0 / misa;
-        
-            tmlam = Math.Pow(10.0, -(smlam[iwave-1] * 0.987 * misa));
-            tplam = Math.Pow(10.0, -( (7.5e-3 * Math.Pow(lam, -2) + 3.5e-2 * Math.Pow(lam, -0.75)) * misa) );       
+
+            tmlam = Math.Pow(10.0, -(smlam[iwave - 1] * 0.987 * misa));
+            tplam = Math.Pow(10.0, -((7.5e-3 * Math.Pow(lam, -2) + 3.5e-2 * Math.Pow(lam, -0.75)) * misa));
             tslamd = tmlam * tplam;
 
             //
             // Adjust the value alphal by 1.e-3.
             //
-            temp1 = alphal[iwave-1] * ozamt * misa * 1.0e-3;
+            temp1 = alphal[iwave - 1] * ozamt * misa * 1.0e-3;
             tallam = Math.Pow(10.0, -temp1 * 10.0);
             cosarg = Math.Cos(arg);
 
             //
             // Adjust the value of iol by 1.e15.
             //
-            tiolco = tallam * iol[iwave-1] * cosarg * 1.0e15;
+            tiolco = tallam * iol[iwave - 1] * cosarg * 1.0e15;
             sn = tslamd * tiolco;
             h = 0.5 * (1.0 - tslamd) * tiolco;
 
@@ -1569,7 +1569,7 @@ namespace GCSOLAR
         /// <param name="xlat"></param>
         /// <param name="xlon"></param>
         /// <param name="zz"></param>
-        public static void timeofDay(out double theta, double theta1, double[] x, out double[] ut, double xlat, double xlon, double zz)
+        public void timeofDay(out double theta, double theta1, double[] x, out double[] ut, double xlat, double xlon, double zz)
         {
             /*
             *  This routine computes the local times of day for
@@ -1616,18 +1616,18 @@ namespace GCSOLAR
             // Convert declination given in degrees, minutes and seconds to degrees 
             // with a decimal fraction.
             //
-            decu = x[x1-1] + (x[x2-1] * 60.0 + x[x3-1] ) / 3600.0;
-            if (x[x1-1] < 0.0) decu = x[x1-1] - (x[x2-1] * 60.0 + x[x3-1]) / 3600.0;
+            decu = x[x1 - 1] + (x[x2 - 1] * 60.0 + x[x3 - 1]) / 3600.0;
+            if (x[x1 - 1] < 0.0) decu = x[x1 - 1] - (x[x2 - 1] * 60.0 + x[x3 - 1]) / 3600.0;
 
             //
             // Do the same for the right ascension data.
             //
-            rash = x[x4-1] + (x[x5-1] * 60.0 + x[x6-1] ) / 3600.0;
+            rash = x[x4 - 1] + (x[x5 - 1] * 60.0 + x[x6 - 1]) / 3600.0;
 
             //
             // Do the same for the sidreal time.
             //
-            sidt = x[x7-1] + (x[x8-1] * 60.0 + x[x9-1]) / 3600.0;
+            sidt = x[x7 - 1] + (x[x8 - 1] * 60.0 + x[x9 - 1]) / 3600.0;
             decd = decu;
 
             //
@@ -1644,7 +1644,7 @@ namespace GCSOLAR
                 cdld2 = Math.Cos(dld2);
                 ssld2 = Math.Sin(sld2);
                 csld2 = Math.Cos(sld2);
-                ql = Math.Tan(theta1 / (2.0 * rtd) );
+                ql = Math.Tan(theta1 / (2.0 * rtd));
                 temp = sdld2 * sdld2 - ql * ql * cdld2 * cdld2;
                 temp1 = ql * ql * ssld2 * ssld2 - csld2 * csld2;
                 temp3 = temp / temp1;
@@ -1679,7 +1679,7 @@ namespace GCSOLAR
             // be a west long and a negative entry is for east long.
             //
             temp = Math.Abs(xlon);
-            lon = (int) ((temp - 7.5) / 15.0 + 1.0);
+            lon = (int)((temp - 7.5) / 15.0 + 1.0);
             timdif = lon;
             if (xlon >= 0.0) timdif = -timdif;
 
@@ -1727,93 +1727,93 @@ namespace GCSOLAR
         /// <param name="t8"></param>
         /// <param name="t9"></param>
         /// <param name="lat"></param>
-        public static void ProcessInputData(string Name, string Longitude, string Ozone, string Q,                                           
-                                            bool doDepthPoint, string Deltaz, string Elevation, string InitDepth,  
+        public void ProcessInputData(string Name, string Longitude, string Ozone, string Q,
+                                            bool doDepthPoint, string Deltaz, string Elevation, string InitDepth,
                                             string FinalDepth, string DepthIncr, string RefractiveI,
                                             string t1, string t2, string t3, string t4,
                                             string t5, string t6, string t7, string t8,
                                             string t9, string lat)
         {
 
-            if (!string.IsNullOrWhiteSpace(Name)) Common.contaminantName = Name;
+            if (!string.IsNullOrWhiteSpace(Name)) contaminantName = Name;
 
             if (string.IsNullOrWhiteSpace(Longitude))
             {
-                Common.xlon = 0;
+                xlon = 0;
             }
             else
             {
-                Common.xlon = Convert.ToDouble(Longitude.Trim());
+                xlon = Convert.ToDouble(Longitude.Trim());
             }
-            
+
 
             if (!string.IsNullOrWhiteSpace(Ozone))
             {
                 double ozoneLayer = Convert.ToDouble(Ozone.Trim());
                 if (ozoneLayer > 0.0)
                 {
-                    Common.aveozo = ozoneLayer;
-                    Common.ioz = 1;
+                    aveozo = ozoneLayer;
+                    ioz = 1;
                 }
                 else
                 {
-                    Common.ioz = 0;
+                    ioz = 0;
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(Q))
             {
-                Common.q = Convert.ToDouble(Q.Trim());
+                q = Convert.ToDouble(Q.Trim());
             }
 
             if (doDepthPoint)
             {
-                Common.deltaz = Convert.ToDouble(Deltaz.Trim());
-                Common.useDeltaz = true;
+                deltaz = Convert.ToDouble(Deltaz.Trim());
+                useDeltaz = true;
             }
             else
             {
-                Common.deltaz = 0.0;
-                Common.useDeltaz = false;
+                deltaz = 0.0;
+                useDeltaz = false;
             }
 
             if (!string.IsNullOrWhiteSpace(Elevation))
             {
-                Common.elevation = Convert.ToDouble(Elevation);
+                elevation = Convert.ToDouble(Elevation);
             }
 
             if (!string.IsNullOrWhiteSpace(DepthIncr))
             {
-                Common.dinc = Convert.ToDouble(DepthIncr);
+                dinc = Convert.ToDouble(DepthIncr);
             }
 
             if (!string.IsNullOrWhiteSpace(FinalDepth))
             {
-                Common.dfinal = Convert.ToDouble(FinalDepth);
+                dfinal = Convert.ToDouble(FinalDepth);
             }
 
             if (!string.IsNullOrWhiteSpace(InitDepth))
             {
-                Common.dinit = Convert.ToDouble(InitDepth);
+                dinit = Convert.ToDouble(InitDepth);
             }
 
             if (!string.IsNullOrWhiteSpace(RefractiveI))
             {
-                Common.musubr = Convert.ToDouble(RefractiveI);
+                musubr = Convert.ToDouble(RefractiveI);
             }
 
-            Common.xx[0] = Convert.ToDouble(t1);
-            Common.xx[1] = Convert.ToDouble(t2);
-            Common.xx[2] = Convert.ToDouble(t3);
-            Common.xx[3] = Convert.ToDouble(t4);
-            Common.xx[4] = Convert.ToDouble(t5);
-            Common.xx[5] = Convert.ToDouble(t6);
-            Common.xx[6] = Convert.ToDouble(t7);
-            Common.xx[7] = Convert.ToDouble(t8);
-            Common.xx[8] = Convert.ToDouble(t9);
-            Common.typlat = Convert.ToDouble(lat);
-            Common.ityp = 1;
-            Common.ilatsw = 1;
+            xx[0] = Convert.ToDouble(t1);
+            xx[1] = Convert.ToDouble(t2);
+            xx[2] = Convert.ToDouble(t3);
+            xx[3] = Convert.ToDouble(t4);
+            xx[4] = Convert.ToDouble(t5);
+            xx[5] = Convert.ToDouble(t6);
+            xx[6] = Convert.ToDouble(t7);
+            xx[7] = Convert.ToDouble(t8);
+            xx[8] = Convert.ToDouble(t9);
+            typlat = Convert.ToDouble(lat);
+            ityp = 1;
+            ilatsw = 1;
         }
 
         /// <summary>
@@ -1829,75 +1829,75 @@ namespace GCSOLAR
         /// <param name="InitDepth"></param>
         /// <param name="FinalDepth"></param>
         /// <param name="DepthIncr"></param>
-        public static void ProcessInputData(string Name, string Longitude, bool dOzone, string Ozone, string Q,
+        public void ProcessInputData(string Name, string Longitude, bool dOzone, string Ozone, string Q,
                                             bool doDepthPoint, string Deltaz, string Elevation, string InitDepth,
                                             string FinalDepth, string DepthIncr, string RefractiveI)
         {
 
-            if (!string.IsNullOrWhiteSpace(Name)) Common.contaminantName = Name;
+            if (!string.IsNullOrWhiteSpace(Name)) contaminantName = Name;
 
             if (string.IsNullOrWhiteSpace(Longitude))
             {
-                Common.xlon = 0;
+                xlon = 0;
             }
             else
             {
-                Common.xlon = Convert.ToDouble(Longitude.Trim());
+                xlon = Convert.ToDouble(Longitude.Trim());
             }
 
             if (dOzone)
             {
-                Common.aveozo = -1.0;
-                Common.ioz = 0;
+                aveozo = -1.0;
+                ioz = 0;
             }
             else
             {
                 double ozoneLayer = Convert.ToDouble(Ozone.Trim());
-                Common.aveozo = ozoneLayer;
-                Common.ioz = 1;
+                aveozo = ozoneLayer;
+                ioz = 1;
             }
 
             if (!string.IsNullOrWhiteSpace(Q))
             {
-                Common.q = Convert.ToDouble(Q.Trim());
+                q = Convert.ToDouble(Q.Trim());
             }
 
             if (doDepthPoint)
             {
-                Common.deltaz = Convert.ToDouble(Deltaz.Trim());
-                Common.useDeltaz = true;
+                deltaz = Convert.ToDouble(Deltaz.Trim());
+                useDeltaz = true;
             }
             else
             {
-                Common.deltaz = 0.0;
-                Common.useDeltaz = false;
+                deltaz = 0.0;
+                useDeltaz = false;
             }
 
             if (!string.IsNullOrWhiteSpace(Elevation))
             {
                 //Bener bn1 = new Bener();
                 //bn1.Elevation = Convert.ToDouble(Elevation);
-                Common.elevation = Convert.ToDouble(Elevation);
+                elevation = Convert.ToDouble(Elevation);
             }
 
             if (!string.IsNullOrWhiteSpace(DepthIncr))
             {
-                Common.dinc = Convert.ToDouble(DepthIncr);
+                dinc = Convert.ToDouble(DepthIncr);
             }
 
             if (!string.IsNullOrWhiteSpace(FinalDepth))
             {
-                Common.dfinal = Convert.ToDouble(FinalDepth);
+                dfinal = Convert.ToDouble(FinalDepth);
             }
 
             if (!string.IsNullOrWhiteSpace(InitDepth))
             {
-                Common.dinit = Convert.ToDouble(InitDepth);
+                dinit = Convert.ToDouble(InitDepth);
             }
 
             if (!string.IsNullOrWhiteSpace(RefractiveI))
             {
-                Common.musubr = Convert.ToDouble(RefractiveI);
+                musubr = Convert.ToDouble(RefractiveI);
             }
         }
 
@@ -1906,40 +1906,40 @@ namespace GCSOLAR
         /// absorption coefficients stored in the program.
         /// </summary>
         /// <param name="dt"></param>
-        public static void Listing(out DataTable dt)
+        public void Listing(out DataTable dt)
         {
             dt = new DataTable();
-            double[] wave = Common.getWave();
-            double[] abwat = Common.getAbwat();
+            double[] wave = getWave();
+            double[] abwat = getAbwat();
             double[] eppest = null;
 
-            if (Common.contaminantType == "Chemical")
+            if (contaminantType == "Chemical")
             {
                 eppest = getEppest();
             }
-            if (Common.contaminantType == "Biological")
+            if (contaminantType == "Biological")
             {
                 eppest = getAbsBiological();
             }
 
-            string contaminant = Common.contaminantType.Trim() + " " + Common.contaminantUnits.Trim();
+            string contaminant = contaminantType.Trim() + " " + contaminantUnits.Trim();
             DataRow dr1 = null;
-            dt.Columns.Add(Common.wavelengthName);
-            dt.Columns.Add(Common.waterNameUnits);
+            dt.Columns.Add(wavelengthName);
+            dt.Columns.Add(waterNameUnits);
             dt.Columns.Add(contaminant);
-           
-            int minwav = Common.minwav;
-            int maxwav = Common.maxwav;
+
+            //int minwav = minwav;
+            //int maxwav = maxwav;
 
 
             for (int i = minwav; i <= maxwav; i++)
             {
                 dr1 = dt.NewRow();
-                dr1[Common.wavelengthName] = wave[i - 1].ToString("F2", CultureInfo.InvariantCulture);
+                dr1[wavelengthName] = wave[i - 1].ToString("F2", CultureInfo.InvariantCulture);
                 // Multiply water attenuation coefficients by 100 to convert units from
                 // cm^-1 to m^-1.
                 double absorpWater = abwat[i - 1] * 100.0;
-                dr1[Common.waterNameUnits] = absorpWater.ToString("F6", CultureInfo.InvariantCulture);
+                dr1[waterNameUnits] = absorpWater.ToString("F6", CultureInfo.InvariantCulture);
                 dr1[contaminant] = eppest[i - 1].ToString("F6", CultureInfo.InvariantCulture);
                 dt.Rows.Add(dr1);
             }
@@ -1949,7 +1949,7 @@ namespace GCSOLAR
         /// This method generates a table of the latitudes stored in the program.
         /// </summary>
         /// <param name="dt"></param>
-        public static void Latitudes(out DataTable dt)
+        public void Latitudes(out DataTable dt)
         {
             dt = new DataTable();
             DataRow dr1 = null;
@@ -1960,7 +1960,7 @@ namespace GCSOLAR
             {
                 dr1 = dt.NewRow();
                 dr1["Latitude index"] = i + 1;
-                dr1["Latitude"] = Common.ilattm[i];
+                dr1["Latitude"] = ilattm[i];
                 dt.Rows.Add(dr1);
             }
         }
