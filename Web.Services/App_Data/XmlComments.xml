@@ -159,12 +159,12 @@
             <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
-        <member name="T:Web.Services.Controllers.GCSolarInputExample">
+        <member name="T:Web.Services.Controllers.SolarInputExample">
             <summary>
             Input example taken from the default input values call.
             </summary>
         </member>
-        <member name="M:Web.Services.Controllers.GCSolarInputExample.GetExamples">
+        <member name="M:Web.Services.Controllers.SolarInputExample.GetExamples">
             <summary>
             Gets example object.
             </summary>
@@ -189,12 +189,18 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Web.Services.Controllers.WSSolarController.POSTCustomInput(System.Collections.Generic.Dictionary{System.String,System.Object})">
+        <member name="M:Web.Services.Controllers.WSSolarController.POSTCustomInput(Web.Services.Controllers.SolarInput)">
             <summary>
             POST request for retrieving solar data using custom values from the GCSolar module,
             this is equivalent to selecting the second option from the start menu of the desktop application.
             </summary>
             <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSSolarController.GetInputMetadata">
+            <summary>
+            GET request for metadata on the inputs for the GCSolar module.
+            </summary>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInput">

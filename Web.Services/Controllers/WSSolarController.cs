@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Web.Services.Models;
 using Swashbuckle.AspNetCore.Examples;
+using System.Net.Http;
 
 namespace Web.Services.Controllers
 {
+    
+    public class SolarInput
+    {
+        public Dictionary<string, object> input;
+    }
+
     /// <summary>
     /// Input example taken from the default input values call.
     /// </summary>
-    public class GCSolarInputExample : IExamplesProvider
+    public class SolarInputExample : IExamplesProvider
     {
         /// <summary>
         /// Gets example object.
@@ -23,84 +26,101 @@ namespace Web.Services.Controllers
         {
             return new Dictionary<string, object>()
             {
-                { "Containment Name", "Methoxyclor" },
-                { "Water Type Name", "Pure Water" },
-                { "Type of Atmosphere", "Terrestrial" },
-                { "Longitude", "83.2" },
-                { "Elevation", "0"},
-                { "Quantum Yield", "0.32"},
-                { "Initial Depth", "0.001"},
-                { "Depth Increment", "10"},
-                { "Final Depth", "5"},
-                { "Refractive Index", "1.34"},
-                { "Depth Point", "None"},
-                { "Season(s)", new string[]{ "Spring", "  ", "  ", "  "}},
-                { "Latitude(s)", new int[] { 40, -99, -99, -99, -99, -99, -99, -99, -99, -99 }},
-                { "Input Table", new Dictionary<string, object>()
                 {
-                    { "0", new Dictionary<string, object>() {
-                        { "Wavelength", "297.50" },
-                        { "Water Attenuation Coefficients", "0.061000" },
-                        { "Chemical Absorption Coefficients", "11.100000" }
-                    }},
-                    { "1", new Dictionary<string, object>() {
-                        { "Wavelength", "300.00" },
-                        { "Water Attenuation Coefficients", "0.069000" },
-                        { "Chemical Absorption Coefficients", "4.670000" }
-                    }},
-                    { "2", new Dictionary<string, object>() {
-                        { "Wavelength", "302.50" },
-                        { "Water Attenuation Coefficients", "0.057000" },
-                        { "Chemical Absorption Coefficients", "1.900000" }
-                    }},
-                    { "3", new Dictionary<string, object>() {
-                        { "Wavelength", "305.00" },
-                        { "Water Attenuation Coefficients", "0.053000" },
-                        { "Chemical Absorption Coefficients", "1.100000" }
-                    }},
-                    { "4", new Dictionary<string, object>() {
-                        { "Wavelength", "307.50" },
-                        { "Water Attenuation Coefficients", "0.049000" },
-                        { "Chemical Absorption Coefficients", "0.800000" }
-                    }},
-                    { "5", new Dictionary<string, object>() {
-                        { "Wavelength", "310.00" },
-                        { "Water Attenuation Coefficients", "0.045000" },
-                        { "Chemical Absorption Coefficients", "0.530000" }
-                    }},
-                    { "6", new Dictionary<string, object>() {
-                        { "Wavelength", "312.50" },
-                        { "Water Attenuation Coefficients", "0.043000" },
-                        { "Chemical Absorption Coefficients", "0.330000" }
-                    }},
-                    { "7", new Dictionary<string, object>() {
-                        { "Wavelength", "315.00" },
-                        { "Water Attenuation Coefficients", "0.041000" },
-                        { "Chemical Absorption Coefficients", "0.270000" }
-                    }},
-                    { "8", new Dictionary<string, object>() {
-                        { "Wavelength", "317.50" },
-                        { "Water Attenuation Coefficients", "0.039000" },
-                        { "Chemical Absorption Coefficients", "0.160000" }
-                    }},
-                    { "9", new Dictionary<string, object>() {
-                        { "Wavelength", "320.00" },
-                        { "Water Attenuation Coefficients", "0.037000" },
-                        { "Chemical Absorption Coefficients", "0.100000" }
-                    }},
-                    { "10", new Dictionary<string, object>() {
-                        { "Wavelength", "323.10" },
-                        { "Water Attenuation Coefficients", "0.035000" },
-                        { "Chemical Absorption Coefficients", "0.060000" }
-                    }},
-                    { "11", new Dictionary<string, object>() {
-                        { "Wavelength", "333.00" },
-                        { "Water Attenuation Coefficients", "0.029000" },
-                        { "Chemical Absorption Coefficients", "0.020000" }
-                    }},
+                    "input", new Dictionary<string, object>()
+                    {
+                        { "contaminant name", "Methoxyclor" },
+                        { "contaminant type", "Chemical" },
+                        { "water type name", "Pure Water" },
+                        { "min wavelength", 297.5 },
+                        { "max wavelength", 330 },
+                        { "longitude", "83.2" },
+                        { "latitude(s)", new int[] { 40, -99, -99, -99, -99, -99, -99, -99, -99, -99 }},
+                        { "season(s)", new string[]{ "Spring", "  ", "  ", "  "}},
+                        { "atmospheric ozone layer", 0.3 },
+                        { "initial depth (cm)", "0.001"},
+                        { "final depth (cm)", "5"},
+                        { "depth increment (cm)", "10"},
+                        { "quantum yield", "0.32"},
+                        { "refractive index", "1.34"},
+                        { "elevation", "0"},
+                        { "wavelength table", new Dictionary<string, object>()
+                        {
+                            { "297.50", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.069000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "11.100000" }
+                            } },
+                            { "300.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.061000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "4.6700000" }
+                            } },
+                            { "302.50", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.057000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "1.900000" }
+                            } },
+                            { "305.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.053000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "1.100000" }
+                            } },
+                            { "307.50", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.049000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.800000" }
+                            } },
+                            { "310.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.045000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.5300000" }
+                            } },
+                            { "312.50", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.043000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.330000" }
+                            } },
+                            { "315.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.041000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.270000" }
+                            } },
+                            { "317.50", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.039000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.1600000" }
+                            } },
+                            { "320.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.037000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.100000" }
+                            } },
+                            { "323.10", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.035000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.060000" }
+                            } },
+                            { "330.00", new Dictionary<string, string>()
+                            {
+                                { "water attenuation coefficients (m**-1)", "0.029000" },
+                                { "chemical absorption coefficients (L/(mole cm))", "0.020000" }
+                            } }
+                        }
+                    }
+                    }
                 }
-                }
+            };
+        }
+    }
 
+    public class SolarOutputExample : IExamplesProvider
+    {
+        public object GetExamples()
+        {
+            return new Dictionary<string, object>()
+            {
+                {"test item 1", "test value 1" }
             };
         }
     }
@@ -118,7 +138,7 @@ namespace Web.Services.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("run")]
+        [Route("run/")]
         public Dictionary<string, object> GETDefaultOutput()
         {
             WSSolar solar = new WSSolar();
@@ -132,7 +152,7 @@ namespace Web.Services.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("inputs")]
+        [Route("inputs/")]
         public Dictionary<string, object> GETDefaultInput()
         {
             WSSolar solar = new WSSolar();
@@ -147,13 +167,46 @@ namespace Web.Services.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("run")]
-        [SwaggerRequestExample(typeof(Dictionary<string, object>), typeof(GCSolarInputExample))]
-        public Dictionary<string, object> POSTCustomInput([FromBody]Dictionary<string, object> input)
+        [Route("run/")]
+        //[SwaggerResponseExample(200, typeof(SolarOutputExample))]
+        [SwaggerRequestExample(typeof(SolarInput), typeof(SolarInputExample))]
+        public Dictionary<string, object> POSTCustomInput([FromBody]SolarInput input)
         {
             WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = solar.GetGCSolarOutput(input);
-            return result;
+            if (input.input is null)
+            {
+                Dictionary<string, object> errorMsg = new Dictionary<string, object>()
+                {
+                    { "input error:", "no valid inputs found in the request." }
+                };
+                return errorMsg;
+            }
+            else
+            {
+                Dictionary<string, object> result = solar.GetGCSolarOutput(input.input);
+                return result;
+            }
         }
+
+        /// <summary>
+        /// GET request for metadata on the inputs for the GCSolar module.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("inputs/metadata")]
+        public Dictionary<string, object> GetInputMetadata()
+        {
+            WSSolar solar = new WSSolar();
+            Dictionary<string, object> metadata = new Dictionary<string, object>();
+            metadata = solar.GetMetadata();
+            return metadata;
+        }
+
+        //[HttpGet]
+        //[Route("inputs/wavelength/")]
+        //public Dictionary<string, object> GetWavelengths(string querystring)
+        //{
+        //    WSSolar solar = new WSSolar();
+        //}
     }
 }
