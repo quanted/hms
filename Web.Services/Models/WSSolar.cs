@@ -45,7 +45,15 @@ namespace Web.Services.Models
         public Dictionary<string, object> GetGCSolarOutput(Dictionary<string, object> input)
         {
             GCSolar gcS = new GCSolar();
-            gcS.SetCommonVariables(input);
+            List<string> errors = new List<string>();
+            gcS.SetCommonVariables(input, out errors);
+            if (errors.Count > 0)
+            {
+                return new Dictionary<string, object>()
+                {
+                    { "Input Errors", errors }
+                };
+            }
             return gcS.GetOutput();
         }
 

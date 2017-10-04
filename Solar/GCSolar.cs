@@ -127,12 +127,12 @@ namespace Solar
         }
 
         /// <summary>
-        /// Sets the instance Common variables from the input dictionary provided.
+        /// Sets the instance Common variables from the input dictionary provided and validates inputs.
         /// </summary>
         /// <param name="cc"></param>
-        public void SetCommonVariables(Dictionary<string, object> cc)
+        public void SetCommonVariables(Dictionary<string, object> cc, out List<string> errors)
         {
-            // TODO: Add variable validation for each assignment (with corresponding error messages for each)
+            errors = new List<string>();
             double[] waves = common.getWave();
             bool ephemerideValues = false;
             foreach (KeyValuePair<string, object> p in cc)
@@ -140,16 +140,31 @@ namespace Solar
                 switch(p.Key.ToLower())
                 {
                     case "contaminant name":
-                        common.contaminantName = p.Value.ToString();
+                        string name = p.Value.ToString();
+                        if (!string.IsNullOrWhiteSpace(name))
+                        {
+                            common.contaminantName = name;
+                        }
                         break;
                     case "contaminant type":
-                        common.contaminantType = p.Value.ToString();
+                        string type = p.Value.ToString();
+                        common.contaminantType = (type == "Biological") ? "Biological": "Chemical";
                         break;
                     case "water type name":
-                        common.bodyWaterName = p.Value.ToString();
+                        string wName = p.Value.ToString();
+                        common.bodyWaterName = (!string.IsNullOrWhiteSpace(wName)) ? wName : "Default";
                         break;
                     case "min wavelength":
-                        double minWave = Convert.ToDouble(p.Value);
+                        double minWave = 0;
+                        try
+                        {
+                            minWave = Convert.ToDouble(p.Value);
+                        }
+                        catch (FormatException ex)
+                        {
+                            errors.Add("Minimum Wavelength Error: " + ex.Message);
+                            break;
+                        }
                         if (minWave != 0)
                         {
                             int iMax = waves.Count();
@@ -165,7 +180,16 @@ namespace Solar
                         }
                         break;
                     case "max wavelength":
-                        double maxWave = Convert.ToDouble(p.Value);
+                        double maxWave = 0;
+                        try
+                        {
+                            maxWave = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Maximum Wavelength Error: " + ex.Message);
+                            break;
+                        }
                         if (maxWave != 0)
                         {
                             int iMax = waves.Count();
@@ -180,71 +204,221 @@ namespace Solar
                         }
                         break;
                     case "longitude":
-                        common.xlon = Convert.ToDouble(p.Value);
+                        double lon = 0;
+                        try
+                        {
+                            lon = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Longitude Error: " + ex.Message);
+                            break;
+                        }
+                        common.xlon = lon;
                         break;
                     case "latitude(s)":
-                        double[] latitudeArray = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                        double[] latitudeArray;
+                        try
+                        {
+                            latitudeArray = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Latitute(s) Error: " + ex.Message);
+                            break;
+                        }
                         common.ilattm = latitudeArray;
                         break;
                     case "season(s)":
-                        string[] seasonArray = JsonConvert.DeserializeObject<string[]>(p.Value.ToString());
+                        string[] seasonArray;
+                        try
+                        {
+                            seasonArray = JsonConvert.DeserializeObject<string[]>(p.Value.ToString());
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Season(s) Error: " + ex.Message);
+                            break;
+                        }
                         common.sease = seasonArray;
                         ephemerideValues = true;
                         break;
                     case "latitude":
+                        double lat;
+                        try
+                        {
+                            lat = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Latitude Error: " + ex.Message);
+                            break;
+                        }
                         if(!ephemerideValues)
                             common.typlat = Convert.ToDouble(p.Value);
                         break;
                     case "solar declination":
+                        double[] sd_values;
+                        try
+                        {
+                            sd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Solar Declination Error: " + ex.Message);
+                            break;
+                        }
                         if (!ephemerideValues)
                         {
-                            double[] sd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
                             common.xx[0] = sd_values[0];
                             common.xx[1] = sd_values[1];
                             common.xx[2] = sd_values[2];
                         }
                         break;
                     case "right declination":
+                        double[] rd_values;
+                        try
+                        {
+                            rd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Right Declination Error: " + ex.Message);
+                            break;
+                        }
                         if (!ephemerideValues)
                         {
-                            double[] rd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
                             common.xx[3] = rd_values[0];
                             common.xx[4] = rd_values[1];
                             common.xx[5] = rd_values[2];
                         }
                         break;
                     case "sidereal time":
+                        double[] st_values;
+                        try
+                        {
+                            st_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Sidereal Time Error: " + ex.Message);
+                            break;
+                        }
                         if (!ephemerideValues)
                         {
-                            double[] st_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
                             common.xx[6] = st_values[0];
                             common.xx[7] = st_values[1];
                             common.xx[8] = st_values[2];
                         }
                         break;
                     case "atmospheric ozone layer":
+                        double ozone;
+                        try
+                        {
+                            ozone = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Atmospheric Ozone Layer Error: " + ex.Message);
+                            break;
+                        }
                         if (ephemerideValues)
                         {
-                            common.aveozo = Convert.ToDouble(p.Value);
+                            common.aveozo = ozone;
+                            common.ioz = 1;
                         }
                         break;
                     case "initial depth":
-                        common.dinit = Convert.ToDouble(p.Value);
+                        double idepth;
+                        try
+                        {
+                            idepth = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Initial Depth Error: " + ex.Message);
+                            break;
+                        }
+                        common.dinit = idepth;
                         break;
                     case "final depth":
-                        common.dfinal = Convert.ToDouble(p.Value);
+                        double fdepth;
+                        try
+                        {
+                            fdepth = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Final Depth Error: " + ex.Message);
+                            break;
+                        }
+                        common.dfinal = fdepth;
                         break;
                     case "depth increment":
-                        common.dinc = Convert.ToDouble(p.Value);
+                        double dinc;
+                        try
+                        {
+                            dinc = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Depth Increment Error: " + ex.Message);
+                            break;
+                        }
+                        common.dinc = dinc;
+                        break;
+                    case "depth point":
+                        double dPoint;
+                        try
+                        {
+                            dPoint = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Depth Point Error: " + ex.Message);
+                            break;
+                        }
+                        common.deltaz = dPoint;
+                        common.useDeltaz = true;
                         break;
                     case "quantum yield":
-                        common.q = Convert.ToDouble(p.Value);
+                        double Q;
+                        try
+                        {
+                            Q = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Quantum Yield Error: " + ex.Message);
+                            break;
+                        }
+                        common.q = Q;
                         break;
                     case "refractive index":
-                        common.musubr = Convert.ToDouble(p.Value);
+                        double refI;
+                        try
+                        {
+                            refI = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Refractive Index Error: " + ex.Message);
+                            break;
+                        }
+                        common.musubr = refI;
                         break;
                     case "elevation":
-                        common.elevation = Convert.ToDouble(p.Value);
+                        double ele;
+                        try
+                        {
+                            ele = Convert.ToDouble(p.Value);
+                        }
+                        catch(FormatException ex)
+                        {
+                            errors.Add("Elevation Error: " + ex.Message);
+                            break;
+                        }
+                        common.elevation = ele;
                         break;
                     case "wavelength table":
                         Dictionary<string, object> waveTable = JsonConvert.DeserializeObject <Dictionary<string, object>>(p.Value.ToString());
@@ -253,9 +427,19 @@ namespace Solar
                             int index = Array.IndexOf(waves,Convert.ToDouble(q.Key));
                             Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(q.Value.ToString());
                             values = new Dictionary<string, object>(values, StringComparer.OrdinalIgnoreCase);
-                            double wac = Convert.ToDouble(values["water attenuation coefficients (m**-1)"]) / 100.0;
+                            double wac;
+                            double cac;
                             string contaminantKey = (common.contaminantType + " " + common.contaminantUnits).ToLower();
-                            double cac = Convert.ToDouble(values[contaminantKey]);
+                            try
+                            {
+                                wac = Convert.ToDouble(values["water attenuation coefficients (m**-1)"]) / 100.0;
+                                cac = Convert.ToDouble(values[contaminantKey]);
+                            }
+                            catch(Exception ex)
+                            {
+                                errors.Add("Wavelength Table Error: " + ex.Message);
+                                break;
+                            }
                             common.setAbwat(wac, index - 1);
                             common.setEppest(cac, index - 1);
                         }

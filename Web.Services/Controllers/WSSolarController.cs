@@ -173,11 +173,11 @@ namespace Web.Services.Controllers
         public Dictionary<string, object> POSTCustomInput([FromBody]SolarInput input)
         {
             WSSolar solar = new WSSolar();
-            if (input.input is null)
+            if (input is null)
             {
                 Dictionary<string, object> errorMsg = new Dictionary<string, object>()
                 {
-                    { "input error:", "no valid inputs found in the request." }
+                    { "Input Error:", "No inputs found in the request or inputs contain invalid formatting." }
                 };
                 return errorMsg;
             }

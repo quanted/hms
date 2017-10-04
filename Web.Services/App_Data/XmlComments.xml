@@ -483,6 +483,12 @@
             <param name="input"></param>
             <returns></returns>
         </member>
+        <member name="M:Web.Services.Models.WSSolar.GetMetadata">
+            <summary>
+            Constructs input metadata for GCSolar module.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Models.WSSubSurfaceFlow">
             <summary>
             HMS Web Service SubSurfaceFlow Model
