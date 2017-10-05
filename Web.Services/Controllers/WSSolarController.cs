@@ -198,7 +198,7 @@ namespace Web.Services.Controllers
         {
             WSSolar solar = new WSSolar();
             Dictionary<string, object> metadata = new Dictionary<string, object>();
-            metadata = solar.GetMetadata();
+            metadata["Input Variables"] = solar.GetMetadata();
             return metadata;
         }
 

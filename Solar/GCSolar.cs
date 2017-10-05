@@ -67,7 +67,8 @@ namespace Solar
 
             DataTable inputTable = new DataTable();
             common.Listing(out inputTable);
-            result.Add("wavelength table", ToOutputArray(inputTable));
+            //result.Add("wavelength table", ToOutputArray(inputTable));
+            result.Add("wavelength table", ToDictionary(inputTable));
 
             return result;
         }
@@ -92,7 +93,7 @@ namespace Solar
                     rowDict.Add(k, v);
                 }
                 string key = dt.Rows[i][0].ToString();
-                dic.Add(i.ToString(), rowDict);
+                dic.Add(key, rowDict);
             }
             return dic;
         }
