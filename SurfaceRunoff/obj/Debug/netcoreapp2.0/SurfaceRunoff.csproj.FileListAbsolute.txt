@@ -1,3 +1,6 @@
 \\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.csproj.CoreCompileInputs.cache
 \\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.AssemblyInfoInputs.cache
 \\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.AssemblyInfo.cs
+C:\git\hms_backend\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.csproj.CoreCompileInputs.cache
+C:\git\hms_backend\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.AssemblyInfoInputs.cache
+C:\git\hms_backend\SurfaceRunoff\obj\Debug\netcoreapp2.0\SurfaceRunoff.AssemblyInfo.cs

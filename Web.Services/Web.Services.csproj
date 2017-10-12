@@ -9,6 +9,10 @@
     <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="App_Data\url_info.txt" />
     <None Remove="App_Data\XmlComments.xml" />
@@ -17,11 +21,13 @@
 
   <ItemGroup>
     <Content Include="App_Data\url_info.txt">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="App_Data\XmlComments.xml" />
+    <Content Include="App_Data\XmlComments.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="App_Data\XmlCommentsData.xml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -33,9 +39,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.2.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="1.0.0" />
   </ItemGroup>
 

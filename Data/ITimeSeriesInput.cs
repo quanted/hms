@@ -323,7 +323,8 @@ namespace Data
             // TODO: Find alternative solution for HttpContext.Current to only load url_info.txt on application startup. HttpContext behavior altered in .Net Core
             //if (HttpContext.Current == null)
             //{
-            urls = Data.Files.FileToDictionary(@"..\Data\App_Data\" + "url_info.txt");
+            urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+
             //}
             //else
             //{
@@ -363,7 +364,6 @@ namespace Data
                 return "";
             }
         }
-
     }
 
 

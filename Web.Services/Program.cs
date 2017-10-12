@@ -31,6 +31,8 @@ namespace Web.Services
         /// <returns></returns>
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .CaptureStartupErrors(true)
+                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
                 .UseStartup<Startup>()
                 .Build();
     }

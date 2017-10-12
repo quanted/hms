@@ -29,7 +29,6 @@ namespace Web.Services
         {
             // Add framework services.
             services.AddMvc();
-
             services.AddLogging();
 
             services.AddCors();
@@ -39,8 +38,8 @@ namespace Web.Services
 
             //Set the comments path for the swagger json and ui.
             var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-            var xmlPath = Path.Combine(basePath, "XmlComments.xml");
-            var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
+            var xmlPath = Path.Combine(basePath, "App_Data\\XmlComments.xml");
+            var xmlDataPath = Path.Combine(basePath, "App_Data\\XmlCommentsData.xml");
 
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -81,16 +80,22 @@ namespace Web.Services
 
             // Enable static files middleware.
             app.UseStaticFiles();
-
-            app.UseMvcWithDefaultRoute();
+            app.UseMvc();
+            //app.UseMvcWithDefaultRoute();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
+            //app.UseSwagger(c =>
+            //{
+            //    c.RouteTemplate = "HMSWS/swagger/v1/swagger.json";
+            //});
             app.UseSwagger();
+            //app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Service API V1"); });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
+                c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
+                //c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
                 c.DocExpansion("none");
                 c.ShowRequestHeaders();
                 //c.ShowJsonEditor();

@@ -3,3 +3,7 @@
 \\AA.AD.EPA.GOV\ORD\ATH\USERS\A-M\dsmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.csproj.CoreCompileInputs.cache
 \\AA.AD.EPA.GOV\ORD\ATH\USERS\A-M\dsmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.AssemblyInfoInputs.cache
 \\AA.AD.EPA.GOV\ORD\ATH\USERS\A-M\dsmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.AssemblyInfo.cs
+C:\git\hms_backend\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.csprojResolveAssemblyReference.cache
+C:\git\hms_backend\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.csproj.CoreCompileInputs.cache
+C:\git\hms_backend\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.AssemblyInfoInputs.cache
+C:\git\hms_backend\Web.Services\obj\Debug\netcoreapp2.0\Web.Services.AssemblyInfo.cs
