@@ -1,7 +1,0 @@
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.csprojResolveAssemblyReference.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.csproj.CoreCompileInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.AssemblyInfoInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.AssemblyInfo.cs
-C:\git\hms_backend\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.csproj.CoreCompileInputs.cache
-C:\git\hms_backend\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.AssemblyInfoInputs.cache
-C:\git\hms_backend\SoilMoisture\obj\Debug\netcoreapp2.0\SoilMoisture.AssemblyInfo.cs

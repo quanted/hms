@@ -1,9 +1,0 @@
-C:\git\hms_backend\Solar\bin\Debug\netcoreapp2.0\Solar.deps.json
-C:\git\hms_backend\Solar\bin\Debug\netcoreapp2.0\Solar.dll
-C:\git\hms_backend\Solar\bin\Debug\netcoreapp2.0\Solar.pdb
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.csproj.CoreCompileInputs.cache
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.AssemblyInfoInputs.cache
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.AssemblyInfo.cs
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.dll
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.pdb
-C:\git\hms_backend\Solar\obj\Debug\netcoreapp2.0\Solar.csprojResolveAssemblyReference.cache

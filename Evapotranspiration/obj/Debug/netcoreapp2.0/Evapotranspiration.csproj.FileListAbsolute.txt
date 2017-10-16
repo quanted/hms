@@ -1,6 +1,0 @@
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.csproj.CoreCompileInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.AssemblyInfoInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.AssemblyInfo.cs
-C:\git\hms_backend\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.csproj.CoreCompileInputs.cache
-C:\git\hms_backend\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.AssemblyInfoInputs.cache
-C:\git\hms_backend\Evapotranspiration\obj\Debug\netcoreapp2.0\Evapotranspiration.AssemblyInfo.cs

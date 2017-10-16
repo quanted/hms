@@ -1,6 +1,0 @@
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Utilities\obj\Debug\netcoreapp2.0\Utilities.csproj.CoreCompileInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Utilities\obj\Debug\netcoreapp2.0\Utilities.AssemblyInfoInputs.cache
-\\AA.AD.EPA.GOV\ORD\ATH\Users\A-M\DSmith\Net MyDocuments\HMS Project\hms_backend_core\Web.Services\Utilities\obj\Debug\netcoreapp2.0\Utilities.AssemblyInfo.cs
-C:\git\hms_backend\Utilities\obj\Debug\netcoreapp2.0\Utilities.csproj.CoreCompileInputs.cache
-C:\git\hms_backend\Utilities\obj\Debug\netcoreapp2.0\Utilities.AssemblyInfoInputs.cache
-C:\git\hms_backend\Utilities\obj\Debug\netcoreapp2.0\Utilities.AssemblyInfo.cs
