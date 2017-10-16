@@ -1,11 +1,24 @@
 # .gitignore for HMS C# .NET Core 2 solution
 
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
 # Build directories
 [Dd]ebug/
-[Rr]ealse/
-[Oo]bj/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
 [Bb]in/
-.vs/
+[Oo]bj/
+[Ll]og/
 
+# Visual Studio 2015 cache/options directory
+.vs/
 
 *.suo
