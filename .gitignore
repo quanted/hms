@@ -1,0 +1,11 @@
+# .gitignore for HMS C# .NET Core 2 solution
+
+# Build directories
+[Dd]ebug/
+[Rr]ealse/
+[Oo]bj/
+[Bb]in/
+v15/
+
+
+*.suo
