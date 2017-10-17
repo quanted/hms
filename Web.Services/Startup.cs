@@ -86,16 +86,17 @@ namespace Web.Services
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             //app.UseSwagger(c =>
             //{
-            //    c.RouteTemplate = "HMSWS/swagger/v1/swagger.json";
+            //    c.RouteTemplate = "HMSWS/swagger/{documentName}/swagger.json";
             //});
             app.UseSwagger();
-            //app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Service API V1"); });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
-                //c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
+                // Routing through IIS as a subdomain requires the following two lines for swagger.json to be accessible.
+                //c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
+                //c.RoutePrefix = "HMSWS/swagger";
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
                 c.DocExpansion("none");
                 c.ShowRequestHeaders();
                 //c.ShowJsonEditor();
