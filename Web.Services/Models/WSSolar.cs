@@ -64,9 +64,6 @@ namespace Web.Services.Models
         public Dictionary<string, object> GetMetadata()
         {
             GCSolar gcS = new GCSolar();
-            //string waves = JsonConvert.SerializeObject(gcS.common.getWave());
-            //string dLats = JsonConvert.SerializeObject(gcS.common.ilattm);
-            //string seasons = JsonConvert.SerializeObject(gcS.common.sease);
 
             double[] waves = gcS.common.getWave();
             double[] dLats = gcS.common.ilattm;
