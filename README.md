@@ -4,23 +4,46 @@
 
 ### HMS Development Setup
 
-HMS is being developed in C# using Visual Studio Community 2015 (Visual Studio 14.0), which is available for free: [visual studio download](https://www.visualstudio.com/vs/community/)
+Hydrologic Micro Services, HMS, is a suite of micro-services available through an API documented with Swagger.
+HMS is being develop in C# .NET Core 2 with Visual Studio 2017 (Visual Studio Community 2017 is available for free): [visual studio download](https://www.visualstudio.com/downloads/)
 
-Steps to execute HMS windows form (currently being used for testing and development):  
-  1. Download source code to your local machine. <https://github.com/USEPA/HMS>   
-  2. Install Visual Studio Community 2015, if you do not already have the IDE   
-  3. In the root of the HMS directory, open HMS.sln with Visual Studio   
-  4. Within the Solution Explorer, right click on the WindowsFormsApplication1 project and select Set as StartUp Project   
-  5. Start Project   
+Steps to create development enviornment:
+  1. Download or fork source code from github. [HMS source](https://github.com/quanted/hms_backend.git)
+  2. In Visual Studio, open up the solution file (HMS.sln)
+  3. Set the Web.Services as StartUp Project
+  4. Run HMS
+
+### Current HMS data modules:   
+  - Evapotranspiration   
+    1. GLDAS.cs   
+    2. NLDAS.cs   
+  - Precipitation   
+    1. Daymet.cs   
+    2. GLDAS.cs   
+    3. NCDC.cs   
+    4. NLDAS.cs   
+    5. WGEN.cs   
+  - SoilMoisture   
+    1. GLDAS.cs   
+    2. NLDAS.cs   
+  - Solar   
+    1. GCSolar.cs   
+  - SubSurfaceFlow   
+    1. GLDAS.cs   
+    2. NLDAS.cs   
+  - SurfaceRunoff   
+    1. CurveNumber.cs (in development)   
+    2. GLDAS.cs   
+    3. NLDAS.cs   
+  - Temperature   
+    1. Daymet.cs   
+    2. GLDAS.cs   
+    3. NLDAS.cs   
 	
-Additional Notes:   
-&nbsp;&nbsp;&nbsp;&nbsp;HMS currently only works while running in DEBUG mode due to the location of the external files that are required for data retrieval.   
-&nbsp;&nbsp;&nbsp;&nbsp;To run and test the webservices module of HMS, the WebServicesTest solution needs to be executed in addition to HMS (WebServicesTest is yet not located on GitHub).
-	
-	
+			
 Packages used by HMS.sln include:   
-&nbsp;&nbsp;&nbsp;&nbsp;GeoAPI - v1.7.4   
-&nbsp;&nbsp;&nbsp;&nbsp;NetTopologySuite - v1.14   
-&nbsp;&nbsp;&nbsp;&nbsp;NetTopologySuite.IO - v1.14.0.1   
-&nbsp;&nbsp;&nbsp;&nbsp;Newtonsoft.Json - v9.0.1   
-&nbsp;&nbsp;&nbsp;&nbsp;ProjNet4GeoAPI - v1.3.0.4   
+&nbsp;&nbsp;&nbsp;&nbsp;Accord.Statistics - v3.7.0  
+&nbsp;&nbsp;&nbsp;&nbsp;Newtonsoft.Json - v10.0.3   
+&nbsp;&nbsp;&nbsp;&nbsp;Swashbuckle.AspNetCore.Examples - v2.3.1   
+&nbsp;&nbsp;&nbsp;&nbsp;Swashbuckle.AspNetCore.Swagger - v1.0.0   
+&nbsp;&nbsp;&nbsp;&nbsp;Swashbuckle.AspNetCore.SwaggerUi - v1.0.0  

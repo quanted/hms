@@ -228,6 +228,17 @@ namespace Solar
                             errors.Add("Latitute(s) Error: " + ex.Message);
                             break;
                         }
+                        foreach(double l in latitudeArray)
+                        {
+                            if(l < 0 && l != -99)
+                            {
+                                errors.Add("Latitude(s) Error: Latitude value must be greater than or equal to 0 and less than 70, a value of =99 is used for unused latitudes.");
+                            }
+                            if (l >= 70)
+                            {
+                                errors.Add("Latitude(s) Error: Latitude value must be greater than or equal to 0 and less than 70, a value of =99 is used for unused latitudes.");
+                            }
+                        }
                         common.ilattm = latitudeArray;
                         break;
                     case "season(s)":
@@ -255,7 +266,15 @@ namespace Solar
                             errors.Add("Latitude Error: " + ex.Message);
                             break;
                         }
-                        if(!ephemerideValues)
+                        if (lat < 0 && lat != -99)
+                        {
+                            errors.Add("Latitude(s) Error: Latitude value must be greater than or equal to 0 and less than 70.");
+                        }
+                        if (lat >= 70)
+                        {
+                            errors.Add("Latitude(s) Error: Latitude value must be greater than or equal to 0 and less than 70.");
+                        }
+                        if (!ephemerideValues)
                             common.typlat = Convert.ToDouble(p.Value);
                         break;
                     case "solar declination":
