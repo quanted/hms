@@ -441,6 +441,8 @@ namespace Solar
                         common.elevation = ele;
                         break;
                     case "wavelength table":
+                        double minWaveTemp = 100000.0;
+                        double maxWaveTemp = 0.0;
                         Dictionary<string, object> waveTable = JsonConvert.DeserializeObject <Dictionary<string, object>>(p.Value.ToString());
                         foreach(KeyValuePair<string, object> q in waveTable)
                         {
@@ -462,7 +464,18 @@ namespace Solar
                             }
                             common.setAbwat(wac, index - 1);
                             common.setEppest(cac, index - 1);
+                            double waveTemp = Convert.ToDouble(q.Key);
+                            if(waveTemp < minWaveTemp)
+                            {
+                                minWaveTemp = waveTemp;
+                            }
+                            if(waveTemp > maxWaveTemp)
+                            {
+                                maxWaveTemp = waveTemp;
+                            }
                         }
+                        common.setMinWave(minWaveTemp);
+                        common.setMaxWave(maxWaveTemp);
                         break;
                     default:
                         break;
