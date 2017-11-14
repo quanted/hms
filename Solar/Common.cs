@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 
 namespace GCSOLAR
 {
@@ -170,6 +171,41 @@ namespace GCSOLAR
             double[] waveLengths = getWave();
             double maxwave = waveLengths[maxwav - 1];
             return maxwave;
+        }
+
+        public void setMinWave(double wave)
+        {
+            if (wave != 0)
+            {
+                double[] waves = this.getWave();
+                int iMax = waves.Count();
+                for (int i = 1; i <= iMax; i++)
+                {
+                    double t1 = waves[i];
+                    if (Math.Abs(wave) - waves[i - 1] < 0.001)
+                    {
+                        this.minwav = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void setMaxWave(double wave)
+        {
+            if (wave != 0)
+            {
+                double[] waves = this.getWave();
+                int iMax = waves.Count();
+                for (int i = 1; i <= iMax; i++)
+                {
+                    if (Math.Abs(wave) - waves[i - 1] < 0.001)
+                    {
+                        this.maxwav = i;
+                        break;
+                    }
+                }
+            }
         }
 
         public double[,] getDefdec()
