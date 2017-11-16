@@ -149,7 +149,7 @@ namespace Solar
                         break;
                     case "contaminant type":
                         string type = p.Value.ToString();
-                        common.contaminantType = (type == "Biological") ? "Biological": "Chemical";
+                        common.contaminantType = (type == "biological") ? "Biological": "Chemical";
                         break;
                     case "water type name":
                         string wName = p.Value.ToString();
