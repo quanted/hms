@@ -105,11 +105,14 @@ namespace Web.Services.Models
                     }
                     precipList.Add(precip);
                 }
-                
+
+                List<string> errorList = new List<string>();
                 Parallel.ForEach(precipList, (Precipitation.Precipitation precip) =>
                 {
                     // Gets the Precipitation data.
-                    ITimeSeriesOutput result = precip.GetData(out errorMsg);
+                    string errorM = "";
+                    ITimeSeriesOutput result = precip.GetData(out errorM);
+                    errorList.Add(errorM);
                     outputList.Add(result);
                 });
 

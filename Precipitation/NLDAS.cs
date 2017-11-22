@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Utilities;
 
 namespace Precipitation
 {
@@ -23,17 +24,27 @@ namespace Precipitation
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
-            if (errorMsg.Contains("ERROR")) { return null; }
-            if (data.Contains("ERROR"))
-            {
-                string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
-                return null;
-            }
+            //if (errorMsg.Contains("ERROR")) { return null; }
+            //if (data.Contains("ERROR"))
+            //{
+            //    string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            //    errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
+            //    return null;
+            //}
 
             ITimeSeriesOutput nldasOutput = output;
-            nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (errorMsg.Contains("ERROR"))
+            {
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                output = err.ReturnError("Precipitation", "nldas", errorMsg);
+                errorMsg = "";
+                return output;
+            }
+            else
+            {
+                nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            }
+            //if (errorMsg.Contains("ERROR")) { return null; }
 
             nldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }

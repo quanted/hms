@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities", "Utilities\Util
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solar", "Solar\Solar.csproj", "{7AADFAEA-47A6-47E6-9533-24E2EB2527E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solar.Tests", "Solar.Tests\Solar.Tests.csproj", "{5FB32D99-90F0-4601-A1C8-DF48BA751BC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solar.Tests", "Solar.Tests\Solar.Tests.csproj", "{5FB32D99-90F0-4601-A1C8-DF48BA751BC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.Tests", "Data.Tests\Data.Tests.csproj", "{88410378-C651-432C-A44B-6A9AC6FA0BD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{5FB32D99-90F0-4601-A1C8-DF48BA751BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FB32D99-90F0-4601-A1C8-DF48BA751BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FB32D99-90F0-4601-A1C8-DF48BA751BC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
