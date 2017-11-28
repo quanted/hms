@@ -168,6 +168,7 @@ namespace Data
             if (String.IsNullOrWhiteSpace(input.Source))
             {
                 errorMsg += "ERROR: Required 'Source' parameter was not found or is invalid.";
+                return newInput;
             }
             else
             {
@@ -178,7 +179,11 @@ namespace Data
             if (input.Geometry == null)
             {
                 errorMsg += "ERROR: No geometry values found in the provided parameters.";
-                return null;
+                return newInput;
+            }
+            else
+            {
+                newInput.Geometry = input.Geometry;
             }
             // Validates that the Latitude parameter is not invalid
             if (!input.Source.Contains("ncdc") && !input.Source.Contains("compare"))
@@ -186,7 +191,7 @@ namespace Data
                 if (input.Geometry.Point == null)
                 {
                     errorMsg += "ERROR: No geometry values found in the provided parameters.";
-                    return null;
+                    return newInput;
                 }
 
                 if (Double.IsNaN(input.Geometry.Point.Latitude))
@@ -196,7 +201,7 @@ namespace Data
                 // Validates that the Longitude parameter is not invalid
                 if (Double.IsNaN(input.Geometry.Point.Longitude))
                 {
-                    errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
+                    errorMsg += "ERROR: Required 'Longitude' parameter was not found or is invalid.";
                 }
                 if (!errorMsg.Contains("Latitude") || !errorMsg.Contains("Longitude"))
                 {
@@ -212,7 +217,6 @@ namespace Data
                         {
                             Point = (PointCoordinate)pC
                         };
-
                     }
                     else
                     {
@@ -237,6 +241,7 @@ namespace Data
 
             newInput.Geometry.GeometryMetadata = input.Geometry.GeometryMetadata ?? new Dictionary<string, string>();
             newInput.Geometry.Description = input.Geometry.Description ?? "";
+
             // Validates and sets Timezone information
             if (input.Geometry.Timezone == null)
             {
@@ -254,12 +259,17 @@ namespace Data
                 newInput.Geometry.Timezone.Offset = (Double.IsNaN(input.Geometry.Timezone.Offset)) ? 0.0 : input.Geometry.Timezone.Offset;
                 newInput.Geometry.Timezone.DLS = (input.Geometry.Timezone.DLS == true) ? true : false;
             }
+            if (input.DateTimeSpan == null)
+            {
+                errorMsg += "ERROR: DateTimeSpan object is null. DateTimeSpan, with a StartDate and EndDate, is required.";
+                return newInput;
+            }
             // Validates that the StartDate parameter is not invalid
             if (input.DateTimeSpan.StartDate.Equals(DateTime.MinValue))
             {
                 errorMsg += "ERROR: Required 'StartDate' parameter was not found or is invalid.";
             }
-            // Validates that the DndDate parameter is not invalid
+            // Validates that the EndDate parameter is not invalid
             if (input.DateTimeSpan.EndDate.Equals(DateTime.MinValue))
             {
                 errorMsg += "ERROR: Required 'EndDate' parameter was not found or is invalid.";
@@ -279,7 +289,6 @@ namespace Data
                     errorMsg += "ERROR: Start date must be before end date.";
                 }
             }
-
 
             // Validates DateTime output format
             newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH": input.DateTimeSpan.DateTimeFormat;
@@ -308,7 +317,12 @@ namespace Data
             newInput.BaseURL = new List<string>();
             foreach (string ds in dataset)
             {
-                newInput.BaseURL.Add(GetBaseURL(input, ds, out errorMsg));
+                string tempError = "";
+                newInput.BaseURL.Add(GetBaseURL(input, ds, out tempError));
+                if (tempError.Contains("ERROR"))
+                {
+                    errorMsg += tempError;
+                }
             }
 
             return newInput;

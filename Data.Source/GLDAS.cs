@@ -136,7 +136,8 @@ namespace Data.Source
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            output.Data = SetData(out errorMsg, splitData[1], input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            //output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
             return output;
         }
 
@@ -187,7 +188,7 @@ namespace Data.Source
             for (int i = 0; i < tsLines.Length; i++)
             {
                 timestepData = new List<string>();
-                string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] lineData = tsLines[i].Split(new string[] { "T", "\t" }, StringSplitOptions.RemoveEmptyEntries);
                 timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
                 dataDict[NLDAS.SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
             }

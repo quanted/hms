@@ -24,11 +24,16 @@ namespace Utilities
 
             result = primary;
 
-            result.DataSource = result.DataSource + ", " + secondary.DataSource;
+            if (!secondary.Metadata.ContainsKey(secondary.DataSource + "_ERROR"))
+            {
+                result.DataSource = result.DataSource + ", " + secondary.DataSource;
 
-            int columns = primary.Data[primary.Data.Keys.ElementAt(0)].Count();
-
-            result.Metadata.Add("column_" + (columns + 2), secondary.DataSource);
+                int columns = primary.Data[primary.Data.Keys.ElementAt(0)].Count();
+                if (!result.Metadata.ContainsKey("column_" + (columns + 2)))
+                {
+                    result.Metadata.Add("column_" + (columns + 2), secondary.DataSource);
+                }
+            }
             // Copies keys from secondary into primary.
             foreach (string key in secondary.Metadata.Keys)
             {
@@ -40,9 +45,12 @@ namespace Utilities
 
             // Assumption: secondary timeseries only has a single value for each date/data entry.
             // Merges data values for each date key in secondary into primary.
-            foreach (string date in result.Data.Keys)
+            if (secondary.Data.Keys.Count > 0)
             {
-                result.Data[date].Add(secondary.Data[date][0]);
+                foreach (string date in result.Data.Keys)
+                {
+                    result.Data[date].Add(secondary.Data[date][0]);
+                }
             }
 
             return result;

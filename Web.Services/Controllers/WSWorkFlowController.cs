@@ -210,6 +210,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkFlowCompare controller for HMS.
     /// </summary>
+    [Route("api/workflow/compare")]
     public class WSWorkFlowCompareController : Controller
     {
         /// <summary>
@@ -219,7 +220,8 @@ namespace Web.Services.Controllers
         /// <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/workflow/compare")]
+        [Route("")]             // Default endpoint
+        [Route("v1.0")]         // Version 1.0 endpoint
         [SwaggerRequestExample(typeof(WorkFlowCompareInput), typeof(WorkFlowCompareInputExample))]
         [SwaggerResponseExample(200, typeof(WorkFlowCompareOutputExample))]
         public ITimeSeriesOutput POST([FromBody]WorkFlowCompareInput workflowInput)
@@ -227,6 +229,7 @@ namespace Web.Services.Controllers
 
             WSWorkFlow workFlow = new WSWorkFlow();
             ITimeSeriesOutput results = workFlow.GetWorkFlowData(workflowInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

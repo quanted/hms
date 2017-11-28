@@ -7,7 +7,7 @@ namespace Solar.Tests
     public class SolarUTests
     {
         [TestMethod]
-        public void TesValidWavelengths()
+        public void TestValidWavelengths()
         {
             //GCSolar solar = new GCSolar();
             //solar.common.maxwav = 10;

@@ -4,6 +4,7 @@ using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using Web.Services.Models;
+using Newtonsoft.Json;
 
 namespace Web.Services.Controllers
 {
@@ -169,6 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Precipitation controller for HMS.
     /// </summary>
+    [Route("api/hydrology/precipitation")]
     public class WSPrecipitationController : Controller
     {
         /// <summary>
@@ -177,7 +179,8 @@ namespace Web.Services.Controllers
         /// <param name="precipInput">Parameters for retrieving precipitation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/precipitation/")]
+        [Route("")]                 // Default endpoint
+        [Route("v1.0")]             // Version 1.0 endpoint
         //[SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
         [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
@@ -185,6 +188,7 @@ namespace Web.Services.Controllers
         {
             WSPrecipitation precip = new WSPrecipitation();
             ITimeSeriesOutput results = precip.GetPrecipitation(precipInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

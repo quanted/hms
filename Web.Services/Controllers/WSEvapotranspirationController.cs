@@ -171,6 +171,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Evapotranspiration controller for HMS.
     /// </summary>
+    [Route("api/hydrology/evapotranspiration")]
     public class WSEvapotranspirationController : Controller
     {
         /// <summary>
@@ -179,7 +180,8 @@ namespace Web.Services.Controllers
         /// <param name="evapoInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/evapotranspiration/")]
+        [Route("")]                 // Default endpoint
+        [Route("v1.0")]             // Version 1.0 endpoint 
         //[SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExample))]
         [SwaggerResponseExample(200, typeof(EvapotranspirationOutputExample))]
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
@@ -187,6 +189,7 @@ namespace Web.Services.Controllers
         {
             WSEvapotranspiration evapo = new WSEvapotranspiration();
             ITimeSeriesOutput results = evapo.GetEvapotranspiration(evapoInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

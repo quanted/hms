@@ -1,7 +1,9 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Utilities;
 
 namespace Precipitation
 {
@@ -22,17 +24,27 @@ namespace Precipitation
             errorMsg = "";
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
             string data = gldas.GetData(out errorMsg, "PRECIP", input);
-            if (errorMsg.Contains("ERROR")) { return null; }
-            if (data.Contains("ERROR"))
-            {
-                string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                errorMsg = lines[0] + " Dataset: precipitation; Source: " + input.Source;
-                return null;
-            }
+            //if (errorMsg.Contains("ERROR")) { return null; }
+            //if (data.Contains("ERROR"))
+            //{
+            //    string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            //    errorMsg = lines[0] + " Dataset: precipitation; Source: " + input.Source;
+            //    return null;
+            //}
 
             ITimeSeriesOutput gldasOutput = output;
-            gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (errorMsg.Contains("ERROR"))
+            {
+                Utilities.ErrorOutput err = new ErrorOutput();
+                output = err.ReturnError("Precipitation", "gldas", errorMsg);
+                errorMsg = "";
+                return output;
+            }
+            else
+            {
+                gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            }
+            //if (errorMsg.Contains("ERROR")) { return null; }
 
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -52,6 +64,7 @@ namespace Precipitation
             errorMsg = "";
             output.Metadata.Add("gldas_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
+            output.Data = ConvertToHourly(out errorMsg, output, input);
             if (input.Units.Contains("imperial")) { output.Metadata["gldas_unit"] = "in"; }
 
             // NLDAS static methods used for aggregation as GLDAS is identical in function. Modifier refers to the 3hr different to nldas's hourly resolution.
@@ -84,6 +97,29 @@ namespace Precipitation
         public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
         {
             return Data.Source.GLDAS.CheckStatus("Precipitation", input);
+        }
+
+        /// <summary>
+        /// Converts metric kg m-2 s-1 to kg m-2
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> ConvertToHourly(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            // seconds to hours
+            double modifier = 3600;
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                tempData.Add(output.Data.Keys.ElementAt(i).ToString(), new List<string>()
+                {
+                    ( modifier * Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0])).ToString(input.DataValueFormat)
+                });
+            }
+            return tempData;
         }
     }
 }

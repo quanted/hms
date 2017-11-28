@@ -170,6 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SurfaceRunoff controller for HMS.
     /// </summary>
+    [Route("api/hydrology/surfacerunoff")]
     public class WSSurfaceRunoffController : Controller
     {
         /// <summary>
@@ -178,7 +179,8 @@ namespace Web.Services.Controllers
         /// <param name="runoffInput">Parameters for retrieving SurfaceRunoff data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/surfacerunoff/")]
+        [Route("")]             // Default endpoint
+        [Route("v1.0")]         // Version 1.0 endpoint
         //[SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExample))]
         [SwaggerResponseExample(200, typeof(SurfaceRunoffOutputExample))]
         [SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExampleFull))]
@@ -186,6 +188,7 @@ namespace Web.Services.Controllers
         {
             WSSurfaceRunoff runoff = new WSSurfaceRunoff();
             ITimeSeriesOutput results = runoff.GetSurfaceRunoff(runoffInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

@@ -170,6 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Temperature controller for HMS.
     /// </summary>
+    [Route("api/hydrology/temperature")]
     public class WSTemperatureController : Controller
     {
         /// <summary>
@@ -178,7 +179,8 @@ namespace Web.Services.Controllers
         /// <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/temperature/")]
+        [Route("")]                 // Default endpoint
+        [Route("v1.0")]             // Version 1.0 endpoint
         //[SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExample))]
         [SwaggerResponseExample(200, typeof(TemperatureOutputExample))]
         [SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExampleFull))]
@@ -186,6 +188,7 @@ namespace Web.Services.Controllers
         {
             WSTemperature temp = new WSTemperature();
             ITimeSeriesOutput results = temp.GetTemperature(tempInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

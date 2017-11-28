@@ -129,7 +129,8 @@ namespace Web.Services.Controllers
     /// HMS API controller for solar data.
     /// </summary>
     [Produces("application/json")]
-    [Route("api/WSSolar")]
+    [Route("api/water-quality/solar")]                      // Default endpoint
+    [Route("api/water-quality/solar/v1.0")]                 // Version 1.0 endpoint
     public class WSSolarController : Controller
     {
         /// <summary>
@@ -201,12 +202,5 @@ namespace Web.Services.Controllers
             metadata["Input Variables"] = solar.GetMetadata();
             return metadata;
         }
-
-        //[HttpGet]
-        //[Route("inputs/wavelength/")]
-        //public Dictionary<string, object> GetWavelengths(string querystring)
-        //{
-        //    WSSolar solar = new WSSolar();
-        //}
     }
 }

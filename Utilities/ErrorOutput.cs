@@ -37,5 +37,23 @@ namespace Utilities
             return output;
         }
 
+        /// <summary>
+        /// Returns ITimeSeries object containing the errorMsg in the metadata.
+        /// </summary>
+        /// <param name="errorMsg">Error message to be pasted to the MetaData in the output.</param>
+        /// <returns>ITimeSeries</returns>
+        public ITimeSeriesOutput ReturnError(string dataset, string source, string errorMsg)
+        {
+            ITimeSeriesOutput output = new ErrorOutput
+            {
+                Dataset = dataset,
+                DataSource = source
+            };
+            output.Metadata[source + "_ERROR"] = errorMsg;
+            return output;
+        }
+
+
+
     }
 }
