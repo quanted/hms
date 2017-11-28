@@ -169,6 +169,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SubSurfaceFlow controller for HMS.
     /// </summary>
+    [Route("api/hydrology/subsurfaceflow")]
     public class WSSubSurfaceFlowController : Controller
     {
         /// <summary>
@@ -177,7 +178,8 @@ namespace Web.Services.Controllers
         /// <param name="ssFlowInput">Parameters for retrieving SubSurfaceFlow data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/subsurfaceflow/")]
+        [Route("")]             // Default endpoint
+        [Route("v1.0")]         // Version 1.0 endpoint
         //[SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExample))]
         [SwaggerResponseExample(200, typeof(SubSurfaceFlowOutputExample))]
         [SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExampleFull))]
@@ -185,6 +187,7 @@ namespace Web.Services.Controllers
         {
             WSSubSurfaceFlow ssFlow = new WSSubSurfaceFlow();
             ITimeSeriesOutput results = ssFlow.GetSubSurfaceFlow(ssFlowInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }

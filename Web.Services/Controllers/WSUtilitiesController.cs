@@ -10,6 +10,8 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Utility REST endpoints for HMS components.
     /// </summary>
+    [Route("")]             // Default endpoints
+    [Route("v1.0")]         // Version 1.0 endpoints
     public class WSUtilitiesController : Controller
     {
 

@@ -186,6 +186,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SoilMoisture controller for HMS.
     /// </summary>
+    [Route("api/hydrology/soilmoisture")]
     public class WSSoilMoistureController : Controller
     {
         /// <summary>
@@ -194,7 +195,8 @@ namespace Web.Services.Controllers
         /// <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("api/soilmoisture/")]
+        [Route("")]             // Default endpoint
+        [Route("v1.0")]         // Version 1.0 endpoint
         //[SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExample))]
         [SwaggerResponseExample(200, typeof(SoilMoistureOutputExample))]
         [SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExampleFull))]
@@ -202,6 +204,7 @@ namespace Web.Services.Controllers
         {
             WSSoilMoisture evapo = new WSSoilMoisture();
             ITimeSeriesOutput results = evapo.GetSoilMoisture(evapoInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
     }
