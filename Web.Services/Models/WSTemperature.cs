@@ -12,7 +12,7 @@ namespace Web.Services.Models
     public class WSTemperature
     {
 
-        private enum TempSources { nldas, gldas, daymet }
+        private enum TempSources { nldas, gldas, daymet, prism }
 
         /// <summary>
         /// Gets temperature data using the given TimeSeriesInput parameters.
@@ -27,7 +27,7 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate evapotranspiration sources.
-            errorMsg = (!Enum.TryParse(input.Source, true, out TempSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+            errorMsg = (!Enum.TryParse(input.Source, true, out TempSources pSource)) ? "ERROR: 'Source' was not found or is invalid. Source provided: " + input.Source : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Temperature object

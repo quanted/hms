@@ -364,13 +364,17 @@ namespace Data
                     break;
                 case "wgen":
                     return "";
+                case "prism":
+                    src = "PRISM";
+                    break;
                 default:
                     errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
                     return "";
             }
+            string url_key = (src == "PRISM") ? src + "_URL": src + "_" + dataset + "_URL";
             try
             {
-                return caselessUrls[src + "_" + dataset + "_URL"];
+                return caselessUrls[url_key];
             }
             catch
             {

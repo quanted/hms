@@ -12,7 +12,7 @@ namespace Web.Services.Models
     public class WSPrecipitation
     {
 
-        private enum PrecipSources{ nldas, gldas, ncdc, daymet, wgen };
+        private enum PrecipSources{ nldas, gldas, ncdc, daymet, wgen, prism };
 
         /// <summary>
         /// Gets precipitation data using the given TimeSeriesInput parameters.

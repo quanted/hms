@@ -74,6 +74,12 @@ namespace Temperature
                     this.Output = daymet.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "prism":
+                    // PRISM Temperature Data call
+                    PRISM prism = new PRISM();
+                    this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 default:
                     errorMsg = "ERROR: 'Source' for temperature was not found among available sources or is invalid.";
                     break;
