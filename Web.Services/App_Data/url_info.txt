@@ -63,3 +63,5 @@ CURVE_NUMBER_EXT https://172.20.100.11/hms/rest/runoff/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
 
 TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/
+
+PRISM_URL http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0

@@ -83,6 +83,13 @@ namespace Precipitation
                     // wgen Precipitation Data call
                     WGEN wgen = new WGEN();
                     this.Output = wgen.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "prism":
+                    // PRISM Precipitation Data call
+                    PRISM prism = new PRISM();
+                    this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
                     errorMsg = "ERROR: 'Source' for precipitation was not found among available sources or is invalid.";
@@ -117,6 +124,7 @@ namespace Precipitation
                     return Daymet.CheckStatus(this.Input);
                 case "ncdc":
                     return NCDC.CheckStatus(this.Input);
+                // TODO: Add check status function for PRISM
                 default:
                     return new Dictionary<string, string>() { { "status", "invalid source" } };
             }
