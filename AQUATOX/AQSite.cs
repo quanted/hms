@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace AQUATOX.AQSite
 
@@ -15,205 +16,205 @@ namespace AQUATOX.AQSite
 
     public struct SiteRecord
     {
-        public string[] SiteName;
+        public string SiteName;
         public double ECoeffWater;
         public double SiteLength;        // units are KM
-        public string[] XLength;
+        public string XLength;
         public double StaticVolume;
-        public string[] XVolume;
+        public string XVolume;
         public double SurfArea;
-        public string[] XSurfArea;
+        public string XSurfArea;
         public double ICZMean;
-        public string[] XZMean;
+        public string XZMean;
         public double ZMax;
-        public string[] XZMax;
+        public string XZMax;
         public double[] TempMean;
-        public string[] XTempMean;
+        public string XTempMean;
         public double[] TempRange;
-        public string[] XTempRange;
+        public string XTempRange;
         public double Latitude;
-        public string[] XLatitude;
+        public string XLatitude;
         public double LightMean;
-        public string[] XLightMean;
+        public string XLightMean;
         public double LightRange;
-        public string[] XLightRange;
+        public string XLightRange;
         public double AlkCaCO3;
-        public string[] XAlkCaCO3;
+        public string XAlkCaCO3;
         public double HardCaCO3;
-        public string[] XHardCaCO3;
-        public string[] SiteComment;
+        public string XHardCaCO3;
+        public string SiteComment;
         public double SO4ConC;
-        public string[] XSO4Conc;
+        public string XSO4Conc;
         public double TotalDissSolids;
-        public string[] XTotalDissSolids;
+        public string XTotalDissSolids;
         public StreamTypes StreamType;
         public double Channel_Slope;
-        public string[] XChannel_Slope;
+        public string XChannel_Slope;
         public double Max_Chan_Depth;
-        public string[] XMax_Chan_Depth;
+        public string XMax_Chan_Depth;
         public double SedDepth;
-        public string[] XSedDepth;
+        public string XSedDepth;
         public double EnclWallArea;
-        public string[] XEnclWallArea;
+        public string XEnclWallArea;
         public double MeanEvap;         // inches / year
-        public string[] XMeanEvap;
+        public string XMeanEvap;
         public bool UseEnteredManning;
         public double EnteredManning;
-        public string[] XECoeffWater;
+        public string XECoeffWater;
         public double PctRiffle;
-        public string[] XPctRiffle;
+        public string XPctRiffle;
         public double PctPool;
-        public string[] XPctPool;
+        public string XPctPool;
         public bool UseBathymetry;
         public double ts_clay;         // clay critical shear stress for scour [kg/m2]
-        public string[] Xts_clay;
+        public string Xts_clay;
         public double ts_silt;        // silt critical shear stress for scour [kg/m2]
-        public string[] Xts_silt;
+        public string Xts_silt;
         public double tdep_clay;        // clay critical shear stress for deposition [kg/m2]
-        public string[] Xtdep_clay;
+        public string Xtdep_clay;
         public double tdep_silt;        // silt critical shear stress for deposition [kg/m2]
-        public string[] Xtdep_silt;
+        public string Xtdep_silt;
         public double FallVel_clay;        // clay fall velocity, m/s
-        public string[] XFallVel_clay;
+        public string XFallVel_clay;
         public double FallVel_silt;        // silt fall velocity, m/s
-        public string[] XFallVel_silt;
+        public string XFallVel_silt;
         // ESTUARY ADDITIONS BELOW
         public double SiteWidth;
-        public string[] XSiteWidth;         // m2
+        public string XSiteWidth;         // m2
         public double amplitude1;
         public double k1;
-        public string[] ConstRef1;        // s2
+        public string ConstRef1;        // s2
         public double amplitude2;
         public double k2;
-        public string[] ConstRef2;        // n2
+        public string ConstRef2;        // n2
         public double amplitude3;
         public double k3;
-        public string[] ConstRef3;        // k1
+        public string ConstRef3;        // k1
         public double amplitude4;
         public double k4;
-        public string[] ConstRef4;        // o1
+        public string ConstRef4;        // o1
         public double amplitude5;
         public double k5;
-        public string[] ConstRef5;        // SSA
+        public string ConstRef5;        // SSA
         public double amplitude6;
         public double k6;
-        public string[] ConstRef6;        // SA
+        public string ConstRef6;        // SA
         public double amplitude7;
         public double k7;
-        public string[] ConstRef7;        // P1
+        public string ConstRef7;        // P1
         public double amplitude8;
         public double k8;
-        public string[] ConstRef8;
+        public string ConstRef8;
         public double Min_Vol_Frac;
-        public string[] XMin_Vol_Frac;
+        public string XMin_Vol_Frac;
         public double WaterShedArea;
-        public string[] XWaterShedArea;
+        public string XWaterShedArea;
         public bool EnterTotalLength;
         public double TotalLength;
-        public string[] XTotalLength;
+        public string XTotalLength;
         public double ECoeffSED;
-        public string[] XECoeffSED;
+        public string XECoeffSED;
         public double ECoeffDOM;
-        public string[] XECoeffDOM;
+        public string XECoeffDOM;
         public double ECoeffPOM;
-        public string[] XECoeffPOM;
+        public string XECoeffPOM;
         public bool UseCovar;
         public double EnteredKReaer;
-        public string[] XEnteredKReaer;
+        public string XEnteredKReaer;
         public bool UsePhytoRetention;
         public double BasePercentEmbed;
-        public string[] XBasePercentEmbed;
+        public string XBasePercentEmbed;
         public double Altitude;
-        public string[] XAltitude;
+        public string XAltitude;
         public double FractalD;
-        public string[] XFractalD;
+        public string XFractalD;
         public double FD_Refuge_Coeff;
-        public string[] XFD_Refuge_Coeff;
+        public string XFD_Refuge_Coeff;
         public double HalfSatOysterRefuge;
-        public string[] XHalfSatOysterRefuge;
+        public string XHalfSatOysterRefuge;
         public double NotUsedReefHeight;
-        public string[] XNotUsedReefHeight;
+        public string XNotUsedReefHeight;
         public double PlaceholderN1;
-        public string[] PlaceholderR1;
+        public string PlaceholderR1;
         public double PlaceholderN2;
-        public string[] PlaceholderR2;
+        public string PlaceholderR2;
         public double PlaceholderN3;
-        public string[] PlaceholderR3;
+        public string PlaceholderR3;
         public double PlaceholderN4;
-        public string[] PlaceholderR4;
+        public string PlaceholderR4;
         public bool PlaceholderB1;
     } // end SiteRecord
 
 
     public struct ReminRecord
 {
-    public string[] RemRecName;
+    public string RemRecName;
     public double DecayMax_Lab;
-    public string[] XDecayMax_Lab;
+    public string XDecayMax_Lab;
     public double Q10_NotUsed;
-    public string[] XQ10;
+    public string XQ10;
     public double TOpt;
-    public string[] XTOpt;
+    public string XTOpt;
     public double TMax;
-    public string[] XTMax;
+    public string XTMax;
     public double TRef_NotUsed;
-    public string[] XTRef;
+    public string XTRef;
     public double pHMin;
-    public string[] XpHMin;
+    public string XpHMin;
     public double pHMax;
-    public string[] XpHMax;
+    public string XpHMax;
     public double P2OrgLab;
     public double N2OrgLab;
-    public string[] XP2OrgLab;
-    public string[] XN2OrgLab;
+    public string XP2OrgLab;
+    public string XN2OrgLab;
     public double O2Biomass;
-    public string[] XO2Biomass;
+    public string XO2Biomass;
     public double O2N;
-    public string[] XO2N;
+    public string XO2N;
     public double KSed;
-    public string[] XKsed;
+    public string XKsed;
     public double PSedRelease_NotUsed;
-    public string[] XPSedrelease;
+    public string XPSedrelease;
     public double NSedRelease_NotUsed;
-    public string[] XNSedRelease;
+    public string XNSedRelease;
     public double DecayMax_Refr;    // g/g d
-    public string[] XDecayMax_Refr;
+    public string XDecayMax_Refr;
     // ESTUARY ADDITIONS BELOW
     public double KSedTemp;
-    public string[] XKSedTemp;
+    public string XKSedTemp;
     public double KSedSalinity;
-    public string[] XKSedSalinity;
+    public string XKSedSalinity;
     // ESTUARY ADDITIONS Above
     public double P2Org_Refr;
-    public string[] XP2Org_Refr;
+    public string XP2Org_Refr;
     public double N2Org_Refr;
-    public string[] XN2Org_Refr;
+    public string XN2Org_Refr;
     public double Wet2DryPRefr;
-    public string[] XWet2DryPRefr;
+    public string XWet2DryPRefr;
     public double Wet2DryPLab;
-    public string[] Xet2DryPLab;
+    public string Xet2DryPLab;
     public double Wet2DrySRefr;
-    public string[] XWet2DrySRefr;
+    public string XWet2DrySRefr;
     public double Wet2DrySLab;
-    public string[] XWet2DrySLab;
+    public string XWet2DrySLab;
     public double N2OrgDissLab;
-    public string[] XN2OrgDissLab;
+    public string XN2OrgDissLab;
     public double P2OrgDissLab;
-    public string[] XP2OrgDissLab;
+    public string XP2OrgDissLab;
     public double N2OrgDissRefr;
-    public string[] XN2OrgDissRefr;
+    public string XN2OrgDissRefr;
     public double P2OrgDissRefr;
-    public string[] XP2OrgDissRefr;
+    public string XP2OrgDissRefr;
     public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
-    public string[] XKD_P_Calcite;
+    public string XKD_P_Calcite;
     public double NotUsed;         // Was BOD5_CBODu
-    public string[] XNotUsed;      // XBOD5_CBODu
+    public string XNotUsed;      // XBOD5_CBODu
     public double KNitri;
-    public string[] XKNitri;
+    public string XKNitri;
     public double KDenitri_Bot;
-    public string[] XKDenitri_Bot;
+    public string XKDenitri_Bot;
     public double KDenitri_Wat;
-    public string[] XKDenitri_Wat;
+    public string XKDenitri_Wat;
     public bool PlaceholderB1;
     public bool PlaceholderB2;
 } // end ReminRecord
@@ -254,8 +255,7 @@ public class TAQTSite
         public double P_Shape = 0;
         public double TotDischarge = 0;
         // was originally Q in older code
-        public MorphRecord Morph;
-        // variable morphometry results, NoSave
+        [JsonIgnore] public MorphRecord Morph;  // variable morphometry results, NoSave
         public double ICSurfArea = 0;
 
         // DeltaMorph procedures have been moved to TVOLUME.DELTAVOLUME found in STATE.INC
@@ -334,7 +334,6 @@ public class TAQTSite
         }
 
 
-        // Surface Area Initial Condition, NoSave
         //Constructor  Init()
         public TAQTSite()
         {

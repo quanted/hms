@@ -4,33 +4,52 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.IO;
 using System.Windows.Forms;
 using AQUATOX.AQTSegment;
+using Newtonsoft.Json;
+using System.Linq;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace AQUATOX.GUI.Test
 {
+
+
     public partial class AQTTestForm : Form
     {
         private TextBox textBox1;
-        private Label label1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private Button loadJSON;
+        private Button saveJSON;
+        private Button button4;
         private Button button1;
+        public AQUATOXSegment aQT = null; 
+        public JsonSerializerSettings loJsonSerializerSettings;
 
         public AQTTestForm()
         {
             InitializeComponent();
             chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
+            KnownTypesBinder AQTBinder = new KnownTypesBinder();
+            loJsonSerializerSettings = new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.Objects,
+                SerializationBinder = AQTBinder
+            };
         }
+     
 
-        private void InitializeComponent()
+    private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.button1 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.loadJSON = new System.Windows.Forms.Button();
+            this.saveJSON = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -38,9 +57,9 @@ namespace AQUATOX.GUI.Test
             // 
             this.button1.Location = new System.Drawing.Point(31, 12);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(145, 23);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Test";
+            this.button1.Text = "Simple Integration Test";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
@@ -56,16 +75,6 @@ namespace AQUATOX.GUI.Test
             this.textBox1.Size = new System.Drawing.Size(649, 157);
             this.textBox1.TabIndex = 1;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(155, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(72, 17);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "API Calls";
-            // 
             // chart1
             // 
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -73,21 +82,55 @@ namespace AQUATOX.GUI.Test
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chart1.BorderlineColor = System.Drawing.Color.Black;
             this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(31, 225);
             this.chart1.Name = "chart1";
             this.chart1.Size = new System.Drawing.Size(649, 288);
             this.chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
+            this.chart1.Click += new System.EventHandler(this.chart1_Click);
+            this.chart1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.chart1_MouseDown);
+            // 
+            // loadJSON
+            // 
+            this.loadJSON.Location = new System.Drawing.Point(342, 12);
+            this.loadJSON.Name = "loadJSON";
+            this.loadJSON.Size = new System.Drawing.Size(94, 23);
+            this.loadJSON.TabIndex = 4;
+            this.loadJSON.Text = "Load JSON";
+            this.loadJSON.UseVisualStyleBackColor = true;
+            this.loadJSON.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // saveJSON
+            // 
+            this.saveJSON.Location = new System.Drawing.Point(453, 12);
+            this.saveJSON.Name = "saveJSON";
+            this.saveJSON.Size = new System.Drawing.Size(94, 23);
+            this.saveJSON.TabIndex = 5;
+            this.saveJSON.Text = "Save JSON";
+            this.saveJSON.UseVisualStyleBackColor = true;
+            this.saveJSON.Click += new System.EventHandler(this.saveJSON_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(563, 12);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(94, 23);
+            this.button4.TabIndex = 6;
+            this.button4.Text = "Integrate";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(710, 533);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.saveJSON);
+            this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.chart1);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.Name = "AQTTestForm";
@@ -98,17 +141,17 @@ namespace AQUATOX.GUI.Test
         }
 
 
+        public void DisplaySVs()
 
-        private void Button1_Click(object sender, EventArgs e)
         {
             string outtxt = "";
-            AQUATOXSegment aQT = new AQUATOXSegment();
-            aQT.RunTest();
 
             outtxt = outtxt + "Times: ";
             foreach (DateTime Times in aQT.SV.restimes)
                 outtxt = outtxt + Times + ", ";
             outtxt = outtxt + Environment.NewLine;
+
+            chart1.Series.Clear();
 
             foreach (TStateVariable TSV in aQT.SV)
             {
@@ -116,7 +159,7 @@ namespace AQUATOX.GUI.Test
                 System.Windows.Forms.DataVisualization.Charting.Series ser = chart1.Series.Add(TSV.PName);
                 ser.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
                 ser.BorderWidth = 2;
-                ser.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
+ //               ser.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
                 foreach (double Vals in TSV.Results)
                 {
                     outtxt = outtxt + Vals + ", ";
@@ -128,9 +171,87 @@ namespace AQUATOX.GUI.Test
             }
 
             textBox1.Text = outtxt;
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            aQT = new AQUATOXSegment();
+            aQT.RunTest();
+            DisplaySVs();
 
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)  //loadbutton
+        {
+            string jsondata;
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Test File|*.txt";
+            openFileDialog1.Title = "Open a JSON File";
+            openFileDialog1.ShowDialog();
+
+            if (openFileDialog1.FileName != "")
+            {
+                jsondata = File.ReadAllText(openFileDialog1.FileName);
+                aQT = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(jsondata, loJsonSerializerSettings);
+                aQT.SetupLinks();
+
+                textBox1.Text = "Read File "+ openFileDialog1.FileName;
+             }
+        }
+
+
+            private void saveJSON_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "Test File|*.txt";
+            saveFileDialog1.Title = "Save to JSON File";
+            saveFileDialog1.ShowDialog();
+
+            IEnumerable<TStateVariable> reportingData = aQT.SV.AsEnumerable();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                string jsondata = Newtonsoft.Json.JsonConvert.SerializeObject(aQT, loJsonSerializerSettings);
+                textBox1.Text = jsondata;
+
+                File.WriteAllText(saveFileDialog1.FileName, jsondata);
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e) // integrate
+        {
+            aQT.ClearResults();
+            aQT.SVsToInitConds();
+            aQT.Integrate(aQT.PSetup.FirstDay, aQT.PSetup.LastDay, 0.1, 1e-5, 1);
+            DisplaySVs();
+        }
+
+        private void chart1_MouseDown(object sender, MouseEventArgs e)
+        {
+            HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
+            if (resultExplode.Series!=null)
+
+            {
+                string msgstr = resultExplode.Series.Name;
+                if (resultExplode.PointIndex > 0)
+                    {
+                    msgstr = msgstr + ": " +
+                    resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
+                    DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
+                    }
+                System.Windows.Forms.MessageBox.Show(msgstr);
+            }
+
+        }
+
+        private void chart1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

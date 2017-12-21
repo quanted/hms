@@ -4,8 +4,9 @@ using System.Text;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using Globals;
+using Newtonsoft.Json;
 
-namespace AQUATOX.TVolume
+namespace AQUATOX.Volume
 {
 
     public enum VolumeMethType
@@ -19,15 +20,15 @@ namespace AQUATOX.TVolume
 
     public class TVolume : TStateVariable
     {
-        double LastCalcTA = 0;
-        double LastTimeTA = 0;        // don't need saving
-        double Inflow = 0;
-        double Discharg = 0;          // don't need saving
-        double InflowLoad = 0;
-        double DischargeLoad = 0;
-        double KnownValueLoad = 0;
-        double OOSDischFracLoad = 0;
-        double OOSInflowFracLoad = 0;  // don't need saving
+        [JsonIgnore] double LastCalcTA = 0;
+        [JsonIgnore] double LastTimeTA = 0;        // don't need saving
+        [JsonIgnore] double Inflow = 0;
+        [JsonIgnore] double Discharg = 0;          // don't need saving
+        [JsonIgnore] double InflowLoad = 0;
+        [JsonIgnore] double DischargeLoad = 0;
+        [JsonIgnore] double KnownValueLoad = 0;
+        // [JsonIgnore] double OOSDischFracLoad = 0;
+        // [JsonIgnore] double OOSInflowFracLoad = 0;  // don't need saving
 
         public VolumeMethType Calc_Method;
 
@@ -42,8 +43,8 @@ namespace AQUATOX.TVolume
             Discharg = 0;
             InflowLoad = 0;
             DischargeLoad = 0;
-            OOSDischFracLoad = 1;
-            OOSInflowFracLoad = 1;
+            // OOSDischFracLoad = 1;
+            // OOSInflowFracLoad = 1;
             KnownValueLoad = 0;
             Calc_Method = VolumeMethType.KeepConst;
             //                StratInflow = FlowType.FTBoth;
@@ -57,6 +58,18 @@ namespace AQUATOX.TVolume
             //            StratDates.Destroy();
             //            base.Destroy();
         }
+
+        public override void SetToInitCond() 
+        {
+            base.SetToInitCond();
+            Inflow = 0;
+            LastTimeTA = 0;
+            LastCalcTA = 0;
+            AQTSeg.Volume_Last_Step = InitialCond;
+
+//            AQSite.VolFrac_Last_Step:= VolFrac(MaxEpiThick, Locale.ZMax, P_Shape);
+//            If EstuarySegment then VolFrac_Last_Step:= TVolume(P).FracUpper;
+          }
 
         public double Manning_Volume()
         {
@@ -73,7 +86,7 @@ namespace AQUATOX.TVolume
             // m3/s // m3/d  // s/d
             Width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000);
             // m                   // sq.m                      // km       // m/km
-            Y = Math.Pow(Q * Location.ManningCoeff() / (Math.Sqrt(Location.Locale.Channel_Slope) * Width), 3 / 5);
+            Y = Math.Pow((Q * Location.ManningCoeff()) / (Math.Sqrt(Location.Locale.Channel_Slope) * Width), 0.6);
             // m      // m3/s            // s/ m^1/3                                   // m/m         // m
             result = Y * CLength * Width;
             // cu. m   // m  // m     // m
@@ -186,8 +199,8 @@ namespace AQUATOX.TVolume
 
             InflowLoad = 0;
             DischargeLoad = 0;
-            OOSDischFracLoad = 1;
-            OOSInflowFracLoad = 1;
+            // OOSDischFracLoad = 1;
+            // OOSInflowFracLoad = 1;
 
             // not Linked Mode or "calibration" linked mode
             // Calculate Inflow

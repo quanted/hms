@@ -1,5 +1,6 @@
 ﻿using System;
 
+
 namespace Globals
 {
 
@@ -244,11 +245,6 @@ namespace Globals
         public bool T1IsAggregate;    // to 3.94
         public bool AmmoniaIsDriving;     // to 3.94
         public bool TSedDetrIsDriving;     // to 3.94
-        public double PlaceholderD1;
-        public double D2;     // place holders so additional parameters do not require storload mods
-        public bool PlaceholderB1;
-        public bool B2;
-        public bool B3;
     } // end Setup_Record
 
     class Consts
