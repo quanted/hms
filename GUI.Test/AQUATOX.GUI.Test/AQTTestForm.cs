@@ -14,7 +14,6 @@ using System.Windows.Forms.DataVisualization.Charting;
 namespace AQUATOX.GUI.Test
 {
 
-
     public partial class AQTTestForm : Form
     {
         private TextBox textBox1;
