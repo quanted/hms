@@ -132,17 +132,6 @@ namespace AQUATOX.AQSite
         public string XFD_Refuge_Coeff;
         public double HalfSatOysterRefuge;
         public string XHalfSatOysterRefuge;
-        public double NotUsedReefHeight;
-        public string XNotUsedReefHeight;
-        public double PlaceholderN1;
-        public string PlaceholderR1;
-        public double PlaceholderN2;
-        public string PlaceholderR2;
-        public double PlaceholderN3;
-        public string PlaceholderR3;
-        public double PlaceholderN4;
-        public string PlaceholderR4;
-        public bool PlaceholderB1;
     } // end SiteRecord
 
 
@@ -207,16 +196,15 @@ namespace AQUATOX.AQSite
     public string XP2OrgDissRefr;
     public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
     public string XKD_P_Calcite;
-    public double NotUsed;         // Was BOD5_CBODu
-    public string XNotUsed;      // XBOD5_CBODu
+//    public double NotUsed;         // Was BOD5_CBODu
+//    public string XNotUsed;      // XBOD5_CBODu
     public double KNitri;
     public string XKNitri;
     public double KDenitri_Bot;
     public string XKDenitri_Bot;
     public double KDenitri_Wat;
     public string XKDenitri_Wat;
-    public bool PlaceholderB1;
-    public bool PlaceholderB2;
+
 } // end ReminRecord
 
 

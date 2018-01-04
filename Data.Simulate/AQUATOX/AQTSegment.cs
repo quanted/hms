@@ -10,8 +10,7 @@ using Newtonsoft.Json;
 
 namespace AQUATOX.AQTSegment
     
-
-
+    
 {
 
     public class TStateVariable
@@ -119,7 +118,7 @@ namespace AQUATOX.AQTSegment
 
 
 
-    public class TExpIncrease : TStateVariable
+    public class TExpIncrease : TStateVariable  //temporary test class for differentiation test
     {
         public override void Derivative(ref double DB)
         {
@@ -128,7 +127,7 @@ namespace AQUATOX.AQTSegment
     }
 
 
-    public class T10PctDecrease : TStateVariable
+    public class T10PctDecrease : TStateVariable  //temporary test class for differentiation test
 
     {
         public override void Derivative(ref double DB)
@@ -468,7 +467,6 @@ namespace AQUATOX.AQTSegment
                     }
                 }
                 // no warning at this time
-                //@ Unsupported property or method(D): 'UseFixStepSize'
             } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PSetup.UseFixStepSize)));
             // If (MaxError>1) and (not StepSizeWarned) then
             // Begin
@@ -479,7 +477,6 @@ namespace AQUATOX.AQTSegment
             // MessageErr = true;
             // TSMessage;
             // End;
-            //@ Unsupported property or method(D): 'UseFixStepSize'
             if (PSetup.UseFixStepSize)
             {
                 hnext = h;
@@ -682,7 +679,6 @@ namespace AQUATOX.AQTSegment
         // Variable ZMean of segment or both segments if dynamic stratification
         if (!Location.Locale.UseBathymetry)
         {
-            //@ Unsupported property or method(D): 'SurfArea'
             result = Volume_Last_Step / Location.Locale.SurfArea;
             return result;
         }

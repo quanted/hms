@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Accord.Statistics" Version="3.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>

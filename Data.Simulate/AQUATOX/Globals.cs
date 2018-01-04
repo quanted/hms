@@ -223,7 +223,7 @@ namespace Globals
         public double StoreStepSize;
         public double MinStepSize;
         public double RelativeError;
-        public bool Placeholder;    // equilibrium fugacity disabled
+//        public bool Placeholder;    // equilibrium fugacity disabled
         public bool SaveBRates;
         public bool AlwaysWriteHypo;
         public bool ShowIntegration;
