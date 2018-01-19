@@ -247,7 +247,7 @@ namespace Globals
         public bool TSedDetrIsDriving;     // to 3.94
     } // end Setup_Record
 
-    class Consts
+    public class Consts
     {
         public const double Tiny = 5.0e-19;   // mach. accuracy = 1.0e-19
         public const double Small = 1.0e-6;

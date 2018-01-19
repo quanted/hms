@@ -7,12 +7,20 @@ using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using AQUATOX.AQTSegment;
-using Newtonsoft.Json;
+using AQUATOX.Volume;
+using Globals;
+using AQUATOX.AQSite;
+using AQUATOX.Loadings;
 using System.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Runtime.Serialization.Json;
+using System.Runtime.Serialization;
+
 
 namespace AQUATOX.GUI.Test
 {
+
+ 
 
     public partial class AQTTestForm : Form
     {
@@ -22,24 +30,20 @@ namespace AQUATOX.GUI.Test
         private Button saveJSON;
         private Button button4;
         private Button button1;
-        public AQUATOXSegment aQT = null; 
-        public JsonSerializerSettings loJsonSerializerSettings;
+        public AQTSim aQTS = null; 
+//        public JsonSerializerSettings loJsonSerializerSettings;
 
         public AQTTestForm()
         {
             InitializeComponent();
             chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-            KnownTypesBinder AQTBinder = new KnownTypesBinder();
-            loJsonSerializerSettings = new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.Objects,
-                SerializationBinder = AQTBinder
-            };
-        }
-     
 
-    private void InitializeComponent()
+        }
+
+
+
+        private void InitializeComponent()
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
@@ -146,23 +150,23 @@ namespace AQUATOX.GUI.Test
             string outtxt = "";
 
             outtxt = outtxt + "Times: ";
-            foreach (DateTime Times in aQT.SV.restimes)
+            foreach (DateTime Times in aQTS.AQTSeg.SV.restimes)
                 outtxt = outtxt + Times + ", ";
             outtxt = outtxt + Environment.NewLine;
 
             chart1.Series.Clear();
 
-            foreach (TStateVariable TSV in aQT.SV)
+            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
             {
                 int cnt = 0;
                 System.Windows.Forms.DataVisualization.Charting.Series ser = chart1.Series.Add(TSV.PName);
                 ser.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
                 ser.BorderWidth = 2;
- //               ser.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
+                ser.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
                 foreach (double Vals in TSV.Results)
                 {
                     outtxt = outtxt + Vals + ", ";
-                    ser.Points.AddXY(aQT.SV.restimes[cnt], Vals);
+                    ser.Points.AddXY(aQTS.AQTSeg.SV.restimes[cnt], Vals);
                     cnt++;
                 }
                 outtxt = outtxt + Environment.NewLine;
@@ -174,8 +178,8 @@ namespace AQUATOX.GUI.Test
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            aQT = new AQUATOXSegment();
-            aQT.RunTest();
+            aQTS.AQTSeg = new AQUATOXSegment();
+            aQTS.AQTSeg.RunTest();
             DisplaySVs();
 
         }
@@ -186,20 +190,23 @@ namespace AQUATOX.GUI.Test
         }
 
         private void button2_Click(object sender, EventArgs e)  //loadbutton
+
         {
-            string jsondata;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Test File|*.txt";
+            openFileDialog1.Filter = "Test File|*.txt;*.json";
             openFileDialog1.Title = "Open a JSON File";
             openFileDialog1.ShowDialog();
 
             if (openFileDialog1.FileName != "")
             {
-                jsondata = File.ReadAllText(openFileDialog1.FileName);
-                aQT = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(jsondata, loJsonSerializerSettings);
-                aQT.SetupLinks();
+                // FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open);
+                string json = File.ReadAllText(openFileDialog1.FileName);
+                AQTSim Sim = new AQTSim();
+                string err = Sim.Instantiate(json);
+                aQTS = Sim;
 
-                textBox1.Text = "Read File "+ openFileDialog1.FileName;
+                if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
+                else textBox1.Text = err;
              }
         }
 
@@ -211,23 +218,24 @@ namespace AQUATOX.GUI.Test
             saveFileDialog1.Title = "Save to JSON File";
             saveFileDialog1.ShowDialog();
 
-            IEnumerable<TStateVariable> reportingData = aQT.SV.AsEnumerable();
 
             if (saveFileDialog1.FileName != "")
             {
-                string jsondata = Newtonsoft.Json.JsonConvert.SerializeObject(aQT, loJsonSerializerSettings);
-                textBox1.Text = jsondata;
-
-                File.WriteAllText(saveFileDialog1.FileName, jsondata);
+                string jsondata="";
+                string errmessage = aQTS.SaveJSON(ref jsondata);
+                if (errmessage == "") File.WriteAllText(saveFileDialog1.FileName, jsondata);
+                else textBox1.Text = errmessage;
             }
         }
 
         private void button4_Click(object sender, EventArgs e) // integrate
         {
-            aQT.ClearResults();
-            aQT.SVsToInitConds();
-            aQT.Integrate(aQT.PSetup.FirstDay, aQT.PSetup.LastDay, 0.1, 1e-5, 1);
-            DisplaySVs();
+            if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
+            else {
+                string errmessage = aQTS.Integrate();
+                if (errmessage == "") DisplaySVs();
+                else textBox1.Text = errmessage;
+            }
         }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)

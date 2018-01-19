@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solar.Tests", "Solar.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Tests", "Data.Tests\Data.Tests.csproj", "{88410378-C651-432C-A44B-6A9AC6FA0BD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stream.Hydrology.AQUATOX", "..\..\CSRA\HMS\hms_backend-dev\Stream.Hydrology\AQUATOX\Volume\Stream.Hydrology.AQUATOX.csproj", "{90240887-987A-4C44-88FE-AD7B601C7343}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stream.Hydrology.AQUATOX", "Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj", "{90240887-987A-4C44-88FE-AD7B601C7343}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Simulate.AQUATOX", "Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj", "{4E8926D5-9C2E-4AEE-929A-407B5E4B04A2}"
 EndProject
