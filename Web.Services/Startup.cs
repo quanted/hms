@@ -11,6 +11,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using Swashbuckle.AspNetCore.Examples;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.Logging;
 
 namespace Web.Services
 {
@@ -64,7 +65,7 @@ namespace Web.Services
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             //if (env.IsDevelopment())
             //{
@@ -101,6 +102,8 @@ namespace Web.Services
                 c.ShowRequestHeaders();
                 //c.ShowJsonEditor();
             });
+
+            // Logger setup and configuration
         }
     }
 }
