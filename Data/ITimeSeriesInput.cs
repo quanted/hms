@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-
 namespace Data
 {
     /// <summary>
@@ -73,13 +72,17 @@ namespace Data
         /// <summary>
         /// REQUIRED: Data source of the timeseries.
         /// </summary>
-        [Required] 
+#if RUNNING_ON_4  // JSC 1/22/2018
+        [Required]   
+#endif
         public string Source { get; set; }
 
         /// <summary>
         /// REQUIRED: Contains a start date and end date for the timeseries request.
         /// </summary>
-        [Required]
+#if RUNNING_ON_4  // JSC 1/22/2018
+        [Required]   
+#endif
         public DateTimeSpan DateTimeSpan { get; set; }
 
         /// <summary>
@@ -518,7 +521,11 @@ namespace Data
         /// <summary>
         /// Lat/lon point for when a coordinates are used as the geometry type.
         /// </summary>
-        [Required]
+        /// 
+
+#if RUNNING_ON_4  // JSC 1/22/2018
+        [Required]   
+#endif
         public PointCoordinate Point { get; set; }
 
         /// <summary>

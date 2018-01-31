@@ -1,26 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.IO;
 using System.Windows.Forms;
 using AQUATOX.AQTSegment;
-using AQUATOX.Volume;
-using Globals;
-using AQUATOX.AQSite;
-using AQUATOX.Loadings;
-using System.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Runtime.Serialization.Json;
-using System.Runtime.Serialization;
-
+using Data;
+using System.Linq;
 
 namespace AQUATOX.GUI.Test
 {
-
- 
 
     public partial class AQTTestForm : Form
     {
@@ -38,11 +25,9 @@ namespace AQUATOX.GUI.Test
             InitializeComponent();
             chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-
         }
 
-
-
+        
         private void InitializeComponent()
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
@@ -149,10 +134,10 @@ namespace AQUATOX.GUI.Test
         {
             string outtxt = "";
 
-            outtxt = outtxt + "Times: ";
-            foreach (DateTime Times in aQTS.AQTSeg.SV.restimes)
-                outtxt = outtxt + Times + ", ";
-            outtxt = outtxt + Environment.NewLine;
+            //outtxt = outtxt + "Times: ";
+            //foreach (DateTime Times in aQTS.AQTSeg.SV.restimes)
+            //    outtxt = outtxt + Times + ", ";
+            //outtxt = outtxt + Environment.NewLine;
 
             chart1.Series.Clear();
 
@@ -163,14 +148,28 @@ namespace AQUATOX.GUI.Test
                 ser.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
                 ser.BorderWidth = 2;
                 ser.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
-                foreach (double Vals in TSV.Results)
+
+                for (int i = 0; i < TSV.output.Data.Keys.Count; i++)
                 {
-                    outtxt = outtxt + Vals + ", ";
-                    ser.Points.AddXY(aQTS.AQTSeg.SV.restimes[cnt], Vals);
+                    ITimeSeriesOutput ito = TSV.output;
+                    string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
+                    outtxt = outtxt + datestr + ", "+ Val.ToString()+"; ";
+                    ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
                     cnt++;
                 }
                 outtxt = outtxt + Environment.NewLine;
                 outtxt = outtxt + Environment.NewLine;
+
+
+                //foreach (double Vals in TSV.Results)
+                //{
+                //    outtxt = outtxt + Vals + ", ";
+                //    ser.Points.AddXY(aQTS.AQTSeg.SV.restimes[cnt], Vals);
+                //    cnt++;
+                //}
+                //outtxt = outtxt + Environment.NewLine;
+                //outtxt = outtxt + Environment.NewLine;
             }
 
             textBox1.Text = outtxt;
@@ -178,6 +177,7 @@ namespace AQUATOX.GUI.Test
 
         private void Button1_Click(object sender, EventArgs e)
         {
+            aQTS = new AQTSim();
             aQTS.AQTSeg = new AQUATOXSegment();
             aQTS.AQTSeg.RunTest();
             DisplaySVs();

@@ -253,6 +253,8 @@ namespace Globals
         public const double Small = 1.0e-6;
         public const double VSmall = 1.0e-10;
         public const double Minimum_Stepsize = 1.0e-5;
+        public const string DateFormatString = "yyyy-MM-dd'T'HH:mm:ss";
+        public const string ValFormatString = "E";  // e.g. 1.043700E+021
 
     }
 }

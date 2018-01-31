@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using Globals;
 using AQUATOX.AQSite;
 using AQUATOX.Loadings;
-using AQUATOX.Volume;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization.Json;
+using Data;
 
 namespace AQUATOX.AQTSegment
 
@@ -36,6 +35,10 @@ namespace AQUATOX.AQTSegment
             {
                 return e.Message;
             }
+            catch (System.TypeLoadException e)
+            {
+                return e.Message;
+            }
 
             finally
             {
@@ -43,7 +46,7 @@ namespace AQUATOX.AQTSegment
                 ms.Dispose();
             }
         }
-        
+
 
         public string Instantiate(string json)
         {
@@ -57,6 +60,10 @@ namespace AQUATOX.AQTSegment
                 return "";
             }
             catch (System.Runtime.Serialization.SerializationException e)
+            {
+                return e.Message;
+            }
+            catch (System.TypeLoadException e)
             {
                 return e.Message;
             }
@@ -77,12 +84,13 @@ namespace AQUATOX.AQTSegment
             return new DataContractJsonSerializer(
                 typeof(AQUATOXSegment), new DataContractJsonSerializerSettings
                 {
-                    DateTimeFormat = new DateTimeFormat("yyyy-MM-dd'T'HH:mm:ss"),
+                    DateTimeFormat = new DateTimeFormat(Globals.Consts.DateFormatString),
                     KnownTypes = knownTypeList,
 
                 });
 
         }
+
 
         public string Integrate()
         {
@@ -98,10 +106,10 @@ namespace AQUATOX.AQTSegment
                 AQTSeg.Integrate(AQTSeg.PSetup.FirstDay, AQTSeg.PSetup.LastDay, 0.1, 1e-5, 1);
                 return "";
             }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
+            //catch (Exception e)
+            //{
+            //    return e.Message;
+            //}
 
             finally
             {
@@ -117,11 +125,44 @@ namespace AQUATOX.AQTSegment
             return Integrate();
         }
 
-    // ITimeSeries AQTSim.ReturnResults(SV-Type)
-    // ITimeSeries AQTSim.ReturnResults(SV-Type) (StartDate, EndDate)
+        // ITimeSeries AQTSim.ReturnResults(SV-Type)
+        // ITimeSeries AQTSim.ReturnResults(SV-Type) (StartDate, EndDate)
 
     }
 
+    [DataContract]
+    [KnownType(typeof(AQUATOXITSOutput))]
+    public class AQUATOXITSOutput : ITimeSeriesOutput
+    {
+
+        /// <summary>
+        /// Dataset for the time series.
+        /// </summary>
+        [DataMember] public string Dataset { get; set; }
+
+        /// <summary>
+        /// Source of the dataset.
+        /// </summary>
+        [DataMember] public string DataSource { get; set; }
+
+        /// <summary>
+        /// Metadata dictionary providing details for the time series.
+        /// </summary>
+        [DataMember] public Dictionary<string, string> Metadata { get; set; }
+
+        /// <summary>
+        /// Time series data.
+        /// </summary>
+        [DataMember] public Dictionary<string, List<string>> Data { get; set; }
+
+        public AQUATOXITSOutput ()
+        {
+            Data = new Dictionary<string, List<string>>();
+            Dataset = "";
+            DataSource = "";
+            Metadata = new Dictionary<string, string>();
+        }
+    }
 
     [DataContract]
     [KnownType(typeof(TStateVariable))]
@@ -139,8 +180,8 @@ namespace AQUATOX.AQTSegment
         [IgnoreDataMember] public double[] StepRes = new double[7];  // Holds Step Results
         [IgnoreDataMember] public double yerror = 0;          // holds error term from RKCK
         [IgnoreDataMember] public double yscale = 0;          // use in Integration
-        [IgnoreDataMember] public List<double> Results = new List<double>(); // holds numerical results
-//        [DataMember] public ITimeSeriesOutput output;  // public and spaced results
+        [IgnoreDataMember] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
+        [DataMember] public AQUATOXITSOutput output;  // public and evenly-spaced results following integration / interpolation
 
         [IgnoreDataMember] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
         [DataMember] public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
@@ -256,7 +297,7 @@ namespace AQUATOX.AQTSegment
     [DataContract]
     public class TStates : List<TStateVariable>
         {
-           [DataMember] public List<DateTime> restimes = new List<DateTime>();
+           [IgnoreDataMember] public List<DateTime> restimes = new List<DateTime>();
 
         public void WriteResults(DateTime TimeIndex)
             {
@@ -266,10 +307,7 @@ namespace AQUATOX.AQTSegment
                     foreach (TStateVariable TSV in this)
                         TSV.Results.Add(TSV.State);
                 }
-
             }
-
-
         }
 
 
@@ -291,6 +329,7 @@ namespace AQUATOX.AQTSegment
 
         [IgnoreDataMember] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
+        [IgnoreDataMember] public DateTime SimulationDate;  // time integration started
         [IgnoreDataMember] public DateTime VolumeUpdated;  // 
         [IgnoreDataMember] public double Volume_Last_Step;    //Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
 
@@ -677,14 +716,10 @@ namespace AQUATOX.AQTSegment
         // The Integrate function steps from the beginning to the end of the
         // time period and handles bookkeeping at the start and between steps
         // ------------------------------------------------------------------------
-        public void Integrate(DateTime TStart, DateTime TEnd, double RelError, double h_minimum, double dxsav)
+        public string Integrate(DateTime TStart, DateTime TEnd, double RelError, double h_minimum, double dxsav)
         {
-            // Starting Point of Integral
-            // Ending Point of Integral
-            // Requested Accuracy of Results
-            // Smallest Step Size
-            // Store Result Interval
-            //            bool rk_has_executed;
+            // parameters above -- Starting Point of Integral; Ending Point of Integral; Requested Accuracy of Results; Smallest Step Size; Store-Result Interval
+
             DateTime x;
             double hnext = 0;
             //                DateTime xsav;
@@ -708,6 +743,8 @@ namespace AQUATOX.AQTSegment
             x = TStart;
             MaxStep = 1.0;
             h = MaxStep;
+
+            SimulationDate = DateTime.Now;
 
             //            ModelStartTime = TStart;
             //            TPreviousStep = TStart;
@@ -765,10 +802,7 @@ namespace AQUATOX.AQTSegment
                     h = hnext;
                 }
 
-
                 Integrate_CheckZeroStateAllSVs();
-
-                SV.WriteResults(x); // Write final step to Results Collection
 
                 void Integrate_SetYScale(TStateVariable p)
                 {
@@ -786,8 +820,151 @@ namespace AQUATOX.AQTSegment
 
             }
 
+            SV.WriteResults(x); // Write final step to Results Collection
+            return PostProcessResults();
+
         }  // integrate
 
+        public double TrapezoidalIntegration(ref string ErrMsg, DateTime Start_Interval_Time, DateTime End_Interval_Time, List<double> vals, int rti)
+        {
+            double End_SI_Val;  // ending sub-interval value
+            double Start_SI_Val; // starting sub-interval value
+            double SumThusFar = 0; // running sum of trapezoid areas
+
+            ErrMsg = "";
+            if (rti <= 0) { ErrMsg = "TrapezoidalIntegration index error, rti<=0"; return -99; };
+            if (rti > vals.Count - 1) { ErrMsg = "TrapezoidalIntegration index error rti >count"; return -99; };
+            bool firststep = true;
+
+            for (int i=rti-1; (firststep||SV.restimes[i]<End_Interval_Time); i++)
+            {
+                firststep = false;
+                DateTime Start_SI_Time = SV.restimes[i];
+                DateTime End_SI_Time = SV.restimes[i + 1];
+                Start_SI_Val = vals[i];
+                End_SI_Val = vals[i + 1];
+
+                if (End_SI_Time > End_Interval_Time)
+                {
+                    // Linearly interpolate to get the end sub-interval point
+                    End_SI_Val = LinearInterpolate(ref ErrMsg,Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, End_Interval_Time);
+                    if (ErrMsg!="") return -99;
+                    End_SI_Time = End_Interval_Time;
+                }
+
+            if (Start_SI_Time < Start_Interval_Time)
+            {
+                // Linearly interpolate to get the beginning sub-interval point
+                Start_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, Start_Interval_Time);
+                if (ErrMsg != "") return -99;
+                Start_SI_Time = Start_Interval_Time;
+            }
+
+            SumThusFar = SumThusFar + ((Start_SI_Val + End_SI_Val) / 2) * (End_SI_Time - Start_SI_Time).TotalDays;
+             // The area of the relevant trapezoid is calculated above
+
+            }
+
+            return SumThusFar/ (End_Interval_Time - Start_Interval_Time).TotalDays; 
+        }
+
+        public double LinearInterpolate(ref string ErrMsg, double OldVal, double NewVal, DateTime OldTime, DateTime NewTime, DateTime InterpTime)
+        {
+            // Interpolates to InterpTime between two points, OldPoint and NewPoint
+            if ((InterpTime > NewTime) || (InterpTime < OldTime)) { ErrMsg = "Linear Interpolation Timestamp Error"; return -99; };
+
+            return OldVal + ((NewVal - OldVal) / (NewTime - OldTime).TotalDays) * (InterpTime - OldTime).TotalDays;
+                   // y1    // Slope  (dy/dx)                                      // Delta X
+        }
+
+        public double InstantaneousConc(ref string ErrMsg, DateTime steptime, List<double> vals, int rti)
+        {
+            if (rti <= 0) { ErrMsg = "Linear interpolation index error, rti<=0"; return -99; };
+            if (rti > vals.Count-1) { ErrMsg = "Linear interpolation index error rti >count"; return -99; };
+
+            double OldVal = vals[rti - 1];
+            double NewVal = vals[rti];
+            DateTime OldTime = SV.restimes[rti-1];
+            DateTime NewTime = SV.restimes[rti];
+
+            return LinearInterpolate(ref ErrMsg, OldVal, NewVal, OldTime, NewTime, steptime);
+        }
+
+
+
+        public string PostProcessResults()
+        {
+            double val;
+            string errmsg="";
+            double stepsize = (PSetup.StoreStepSize);  // step size in days or hours
+            if (!PSetup.StepSizeInDays) stepsize = stepsize / 24;  // convert to step size in days
+            int NumDays = (PSetup.LastDay - PSetup.FirstDay).Days; // number of days in simulation
+            int numsteps = (int)(NumDays / stepsize); // number of time-steps to be written
+
+            if (numsteps <= 0) return "Zero time-steps are written given StoreStepSize and StepSizeInDays flag.";
+            if (SV.restimes == null) return "Results Times not initialized for SV List";
+            if (SV.restimes.Count == 0) return "No results times saved for SV SV List";
+
+            DateTime lastwritedate = PSetup.FirstDay.AddDays(numsteps * stepsize);
+
+            List<int> StartIndices = new List<int>();  //restime index to start linear interpolation or trapezoidal integration
+            int stepindex = 1;
+            for (int i = 0; i < SV.restimes.Count; i++)
+            {
+                DateTime DateToFind = PSetup.FirstDay.AddDays(stepindex * stepsize);
+                if (PSetup.AverageOutput) //trapezoidal integration
+                {
+                    if (DateToFind < SV.restimes[i].AddDays(stepsize))  // one time step before the reporting time step for integration
+                    {
+                        StartIndices.Add(i);
+                        stepindex++; i--;  //try this same i for the next stepindex before continuing
+                    }
+                }
+                else
+                {
+                    if (DateToFind <= SV.restimes[i])
+                    {
+                        StartIndices.Add(i);
+                        stepindex++; i--;
+                    }
+
+                }
+
+            }
+            
+            foreach (TStateVariable TSV in SV)
+            {
+                if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
+                if (TSV.Results.Count == 0) return "No results saved for SV " + TSV.PName;
+
+                TSV.output = new AQUATOXITSOutput();
+                TSV.output.Dataset = TSV.PName;
+                TSV.output.DataSource = "AQUATOX";
+                TSV.output.Metadata = new Dictionary<string, string>()
+                {
+                    {"AQUATOX_HMS_Version", "1.0.0"},
+                    {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
+                };
+
+                TSV.output.Data = new Dictionary<string, List<string>>();
+                List<string> vallist = new List<string>();
+                vallist.Add(TSV.Results[0].ToString(Consts.ValFormatString));
+                TSV.output.Data.Add(SV.restimes[0].ToString(Consts.DateFormatString), vallist);
+                for (int i = 1; i <= numsteps; i++)
+                {
+                    DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
+                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(ref errmsg,steptime.AddDays(-stepsize) ,steptime, TSV.Results, StartIndices[i - 1]);
+                    else val = InstantaneousConc(ref errmsg, steptime, TSV.Results, StartIndices[i - 1]);
+                    vallist = new List<string>();
+                    vallist.Add(val.ToString(Consts.ValFormatString));
+                    TSV.output.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
+                    if (errmsg != "") return errmsg;
+
+                }
+
+            }
+            return "";
+        }
 
         public void CalculateAllLoads(DateTime TimeIndex)
         // If EstuarySegment then TSalinity(GetStatePointer(Salinity, StV, WaterCol)).CalculateLoad(TimeIndex); {get salinity vals for salt balance}
@@ -850,7 +1027,7 @@ namespace AQUATOX.AQTSegment
         return result;
     }
 
-    public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
+      public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
         {
             foreach (TStateVariable TSV in SV)
                 if ((TSV.NState == S) && (TSV.SVType == T) && (TSV.Layer == L))  // needs optimization!
@@ -861,10 +1038,136 @@ namespace AQUATOX.AQTSegment
             return null;
     }
 
+
+        //public void calchradius(bool averaged)
+        //{
+        //    // calculate the hydraulic radius & channel depth
+        //    double runoff;
+        //    double vol;
+        //    // update runoff / discharge data
+        //    if (averaged)
+        //    {
+        //        runoff = meandischarge;
+        //    }
+        //    else
+        //    {
+        //        runoff = location.discharge[vseg];
+        //    }
+        //    sed_data.avg_disch = runoff / 86400;
+        //    if (sed_data.avg_disch <= 0)
+        //    {
+        //        sed_data.avg_disch = location.discharge_using_qbase() / 86400;
+        //    }
+        //    // m3/s
+        //    // m3/d
+        //    // s/d
+        //    sed_data.channel_depth = math.pow(sed_data.avg_disch * sed_data.manning / (math.sqrt(sed_data.slope) * sed_data.width), 3 / 5);
+        //    if (averaged)
+        //    {
+        //        vol = meanvolume;
+        //    }
+        //    else
+        //    {
+        //        vol = volume_last_step;
+        //    }
+        //    //@ unsupported property or method(d): 'surfarea'
+        //    sed_data.avg_depth = vol / location.locale.surfarea;
+        //    // simpler depth formulation to match hspf 2-5-2003
+        //    sed_data.hradius = sed_data.avg_depth * sed_data.width / (2 * sed_data.avg_depth + sed_data.width);
+        //    // with
+
+        //}
+
+        //// ---------------------------------------------------------------
+
+
+        //public double velocity(ref string errstr, double pctriffle, double pctpool, bool averaged)
+        //{
+        //    double xsecarea;
+        //    double avgflow;
+        //    double upflow;
+        //    double downflow;
+        //    double pctrun;
+        //    double runvel;
+        //    double rifflevel;
+        //    double poolvel;
+        //    double vol;
+        //    // ----------------------------------------------------------------------------------------------------
+        //    if (averaged) vol = meanvolume;
+        //    else vol = volume_last_step;
+
+        //    if ((location.sitetype == sitetypes.stream))
+        //    {
+        //        calchradius(averaged);
+        //        xsecarea = sed_data.width * sed_data.channel_depth;
+        //        // m2               // m                // m
+        //        if (averaged)
+        //        {
+        //            calchradius(false);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        xsecarea = vol / (location.locale.sitelength * 1000);
+        //        // m3                    // km      // m/km
+        //    }
+        //    pctrun = 100 - pctriffle - pctpool;
+        //    if ((calcvelocity || averaged))
+        //    {
+        //        morphrecord _wvar3 = location.morph;
+        //        upflow = _wvar3.inflowh2o[vseg];
+        //        downflow = location.discharge[vseg];
+        //        if (averaged)
+        //        {
+        //            upflow = meandischarge;
+        //            // m3/d
+        //            downflow = meandischarge;
+        //        }
+        //        avgflow = (upflow + downflow) / 2;
+        //        // m3/d   // m3/d    // m3/d
+        //        runvel = avgflow / xsecarea * (1 / 86400) * 100;
+        //        // cm/s  // m3/d    // m2         // d/s  // cm/m
+
+        //        if (runvel < 0) runvel = 0;
+        //    }
+        //    else
+        //    {
+        //        // user entered velocity
+        //        runvel = dynvelocity.getload(tpresent, true);
+        //        // cm/s
+        //        avgflow = runvel * xsecarea * 86400 * 0.01;
+        //        // m3/d  // cm/s   // m2    // s/d  // m/cm
+        //    }
+        //    if (avgflow < 2.59e5)
+        //    {
+        //        // q < 2.59e5 m3/d
+        //        rifflevel = 1.60 * runvel;
+        //        poolvel = 0.36 * runvel;
+        //    }
+        //    else if (avgflow < 5.18e5)
+        //    {
+        //        // 2.59e5 m3/d < q < 5.18e5 m3/d
+        //        rifflevel = 1.30 * runvel;
+        //        poolvel = 0.46 * runvel;
+        //    }
+        //    else if (avgflow < 7.77e5)
+        //    {
+        //        // 5.18e5 m3/d q < 7.77e5 m3/d
+        //        rifflevel = 1.10 * runvel;
+        //        poolvel = 0.56 * runvel;
+        //    }
+        //    else
+        //    {
+        //        // q >= 7.77e5 m3/d
+        //        rifflevel = 1.00 * runvel;
+        //        poolvel = 0.66 * runvel;
+        //    }
+        //    // cm/s
+
+        //    return (rifflevel * (pctriffle / 100)) + (runvel * (pctrun / 100)) + (poolvel * (pctpool / 100));
+        //}
+
     }  // end TAQUATOXSegment
 
-
 }
-
-
 

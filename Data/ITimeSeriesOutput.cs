@@ -74,7 +74,7 @@ namespace Data
     public class TimeSeriesOutputFactory : ITimeSeriesOutputFactory
     {
         /// <summary>
-        /// Initialier.
+        /// Initializer.
         /// </summary>
         /// <returns></returns>
         public override ITimeSeriesOutput Initialize()

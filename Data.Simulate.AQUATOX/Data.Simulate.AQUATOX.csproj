@@ -11,4 +11,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="HMSData" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>
