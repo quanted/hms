@@ -294,7 +294,7 @@ namespace AQUATOX.AQTSegment
 
     [Serializable]
     [KnownType(typeof(TStateVariable))]
-    [DataContract]
+    [DataContract]  //[CollectionDataContract]  // 1/31/2018 inconsistency between .NET Core & .NET Framework
     public class TStates : List<TStateVariable>
         {
            [IgnoreDataMember] public List<DateTime> restimes = new List<DateTime>();
