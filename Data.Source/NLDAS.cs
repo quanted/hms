@@ -162,7 +162,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data.\n" + ex.Message;
+                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
                 return null;
             }
             return data;

@@ -163,6 +163,7 @@ namespace Data
             TimeSeriesInput newInput = new TimeSeriesInput();
 
             // Below preforms validation of required parameters when attempting to initialize dataset component inputs.
+            // TODO: Append error messages to array and output to errorMsg on return.
 
             // Validates that the source string is not null or empty.
             if (String.IsNullOrWhiteSpace(input.Source))
@@ -257,6 +258,10 @@ namespace Data
                 newInput.Geometry.Timezone = new Timezone() { };
                 newInput.Geometry.Timezone.Name = (String.IsNullOrWhiteSpace(input.Geometry.Timezone.Name)) ? "TZNotSet" : input.Geometry.Timezone.Name;
                 newInput.Geometry.Timezone.Offset = (Double.IsNaN(input.Geometry.Timezone.Offset)) ? 0.0 : input.Geometry.Timezone.Offset;
+                if (newInput.Geometry.Timezone.Offset > 12 || newInput.Geometry.Timezone.Offset < -12)
+                {
+                    errorMsg += "ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + newInput.Geometry.Timezone.Offset.ToString();
+                }
                 newInput.Geometry.Timezone.DLS = (input.Geometry.Timezone.DLS == true) ? true : false;
             }
             if (input.DateTimeSpan == null)
@@ -292,11 +297,26 @@ namespace Data
 
             // Validates DateTime output format
             newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH": input.DateTimeSpan.DateTimeFormat;
-            // TODO: Add validation of the given datetimeformat. If not valid set to default, TBD
+            try
+            {
+                string dateTest = newInput.DateTimeSpan.StartDate.ToString(newInput.DateTimeSpan.DateTimeFormat);
+            }
+            catch(FormatException fe){
+                errorMsg += "ERROR: Problem with the DateTimeFormat. Provided DateTimeFormat: " + newInput.DateTimeSpan.DateTimeFormat + ". Error Message: " + fe.Message;
+            }
+
 
             // Validates the DataValueFormat parameter
             newInput.DataValueFormat = (String.IsNullOrWhiteSpace(input.DataValueFormat)) ? "E3" : input.DataValueFormat;
-            // TODO: Add validation of the given datavalueformat. If not valid set to default, TBD
+            try
+            {
+                double testValue = 12345.678901;
+                string testString = testValue.ToString(newInput.DataValueFormat);
+            }
+            catch(FormatException fe)
+            {
+                errorMsg += "ERROR: Problem with the DateValueFormat. Provded DataValueFormat: " + newInput.DataValueFormat + ". ErrorMessage: " + fe.Message;
+            }
 
             // Validates TemporalResolution parameter
             newInput.TemporalResolution = (String.IsNullOrWhiteSpace(input.TemporalResolution)) ? "default" : input.TemporalResolution;

@@ -1,10 +1,13 @@
 ﻿using GCSOLAR;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace Solar
 {
@@ -119,7 +122,8 @@ namespace Solar
                     rowDict.Add(k, v);
                 }
                 //string key = dt.Rows[i][0].ToString();
-                string value = JsonConvert.SerializeObject(rowDict);
+                //string value = JsonConvert.SerializeObject(rowDict);
+
                 values[i] = rowDict;
                 //dic.Add(i.ToString(), rowDict);
 
@@ -221,7 +225,12 @@ namespace Solar
                         double[] latitudeArray;
                         try
                         {
-                            latitudeArray = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                            //latitudeArray = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            MemoryStream mStream0 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                            DataContractJsonSerializer dcSer0 = new DataContractJsonSerializer(typeof(double[]));
+                            latitudeArray = dcSer0.ReadObject(mStream0) as double[];
+                            mStream0.Close();
                         }
                         catch(FormatException ex)
                         {
@@ -245,7 +254,12 @@ namespace Solar
                         string[] seasonArray;
                         try
                         {
-                            seasonArray = JsonConvert.DeserializeObject<string[]>(p.Value.ToString());
+                            //seasonArray = JsonConvert.DeserializeObject<string[]>(p.Value.ToString());
+
+                            MemoryStream mStream0 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                            DataContractJsonSerializer dcSer0 = new DataContractJsonSerializer(typeof(string[]));
+                            seasonArray = dcSer0.ReadObject(mStream0) as string[];
+                            mStream0.Close();
                         }
                         catch(FormatException ex)
                         {
@@ -281,7 +295,12 @@ namespace Solar
                         double[] sd_values;
                         try
                         {
-                            sd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                            //sd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            MemoryStream mStream0 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                            DataContractJsonSerializer dcSer0 = new DataContractJsonSerializer(typeof(double[]));
+                            sd_values = dcSer0.ReadObject(mStream0) as double[];
+                            mStream0.Close();
                         }
                         catch(FormatException ex)
                         {
@@ -299,7 +318,12 @@ namespace Solar
                         double[] rd_values;
                         try
                         {
-                            rd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                            //rd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            MemoryStream mStream0 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                            DataContractJsonSerializer dcSer0 = new DataContractJsonSerializer(typeof(double[]));
+                            rd_values = dcSer0.ReadObject(mStream0) as double[];
+                            mStream0.Close();
                         }
                         catch(FormatException ex)
                         {
@@ -317,7 +341,12 @@ namespace Solar
                         double[] st_values;
                         try
                         {
-                            st_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                            //st_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            MemoryStream mStream0 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                            DataContractJsonSerializer dcSer0 = new DataContractJsonSerializer(typeof(double[]));
+                            st_values = dcSer0.ReadObject(mStream0) as double[];
+                            mStream0.Close();
                         }
                         catch(FormatException ex)
                         {
@@ -443,11 +472,23 @@ namespace Solar
                     case "wavelength table":
                         double minWaveTemp = 100000.0;
                         double maxWaveTemp = 0.0;
-                        Dictionary<string, object> waveTable = JsonConvert.DeserializeObject <Dictionary<string, object>>(p.Value.ToString());
-                        foreach(KeyValuePair<string, object> q in waveTable)
+                        //Dictionary<string, object> waveTable = JsonConvert.DeserializeObject <Dictionary<string, object>>(p.Value.ToString());
+
+                        MemoryStream mStream1 = new MemoryStream(Encoding.UTF8.GetBytes(p.Value.ToString()));
+                        DataContractJsonSerializer dcSer1 = new DataContractJsonSerializer(typeof(Dictionary<string, object>));
+                        Dictionary<string, object> waveTable = dcSer1.ReadObject(mStream1) as Dictionary<string, object>;
+                        mStream1.Close();
+
+                        foreach (KeyValuePair<string, object> q in waveTable)
                         {
                             int index = Array.IndexOf(waves,Convert.ToDouble(q.Key));
-                            Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(q.Value.ToString());
+                            //Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(q.Value.ToString());
+
+                            MemoryStream mStream2 = new MemoryStream(Encoding.UTF8.GetBytes(q.Value.ToString()));
+                            DataContractJsonSerializer dcSer2 = new DataContractJsonSerializer(typeof(Dictionary<string, object>));
+                            Dictionary<string, object> values = dcSer2.ReadObject(mStream2) as Dictionary<string, object>;
+                            mStream2.Close();
+
                             values = new Dictionary<string, object>(values, StringComparer.OrdinalIgnoreCase);
                             double wac;
                             double cac;
