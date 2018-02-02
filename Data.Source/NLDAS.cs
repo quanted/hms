@@ -48,6 +48,8 @@ namespace Data.Source
         /// <returns></returns>
         public static IDateTimeSpan AdjustForOffset(out string errorMsg, ITimeSeriesInput cInput)
         {
+            //TODO: Add error handling for Timezone.Offset 
+
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 

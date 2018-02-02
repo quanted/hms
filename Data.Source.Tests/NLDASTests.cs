@@ -85,14 +85,13 @@ namespace Data.Source.Tests
         {
             BuildITimeSeries();
             NLDAS nldas = new NLDAS();
-            DateTimeSpan before = new DateTimeSpan();
-            before = timeSeries.Input.DateTimeSpan;
             string errorMsg = "";
             timeSeries.Input.TimeLocalized = true;
-
             string dataset = "Precipitation";
             timeSeries.Input.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, timeSeries.Input) as DateTimeSpan;
             Assert.AreEqual("", errorMsg);
         }
+
+        //TODO: AdjustForOffsetUnitTests, 1. Valid test, 2. Valid test for Offset -7 and timelocalized=true, 3. Valid test for Offset +7 and timelocalized=true, 4. Valid test with timelocalized=false, 5. Invalid timezone range
     }
 }

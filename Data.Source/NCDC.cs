@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using System.Xml;
 
 namespace Data.Source
 {
@@ -561,14 +563,17 @@ namespace Data.Source
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     string dataBuffer = reader.ReadToEnd();
-                    //stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
+                    stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
 
-                    MemoryStream mStream = new MemoryStream(Encoding.UTF8.GetBytes(dataBuffer));
-                    DataContractJsonSerializer ser2 = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
-                    stationDetails = ser2.ReadObject(mStream) as Dictionary<string, string>;
-                    mStream.Close();
+                    //MemoryStream mStream = new MemoryStream(Encoding.UTF8.GetBytes(dataBuffer));
+                    //MemoryStream mStream = new MemoryStream();
+                    //mStream.Write(Encoding.UTF8.GetBytes(dataBuffer), 0, Encoding.UTF8.GetBytes(dataBuffer).Length);
+                    //var ser2 = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
+                    //object stationDetails2 = ser2.ReadObject(dataStream);
+                    //stationDetails = ser2.ReadObject(mStream) as Dictionary<string, string>;
+                    //mStream.Close();
 
-                    reader.Close();
+                    //reader.Close();
                     response.Close();
                     retries -= 1;
                 }
