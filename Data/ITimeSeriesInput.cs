@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
+using System.Linq;
 
 namespace Data
 {
@@ -196,19 +196,19 @@ namespace Data
                         //errorMsg += "ERROR: No geometry values found in the provided parameters.";
                         //return newInput;
                     }
-
-                    if (Double.IsNaN(input.Geometry.Point.Latitude))
+                    else if (Double.IsNaN(input.Geometry.Point.Latitude))
                     {
                         errors.Add("ERROR: Required 'Latitude' parameter was not found or is invalid.");
                         //errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
                     }
                     // Validates that the Longitude parameter is not invalid
-                    if (Double.IsNaN(input.Geometry.Point.Longitude))
+                    else if (Double.IsNaN(input.Geometry.Point.Longitude))
                     {
                         errors.Add("ERROR: Required 'Longitude' parameter was not found or is invalid.");
                         //errorMsg += "ERROR: Required 'Longitude' parameter was not found or is invalid.";
-                    }
-                    if (!errorMsg.Contains("Latitude") || !errorMsg.Contains("Longitude"))
+                    }                   
+                    
+                    if (!(errors.Any(s => s.Contains("Latitude")) || errors.Any(s => s.Contains("Longitude")) || errors.Any(s => s.Contains("geometry"))))
                     {
                         if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
                         input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
@@ -225,9 +225,30 @@ namespace Data
                         }
                         else
                         {
+                            IPointCoordinate pC = new PointCoordinate()
+                            {
+                                Latitude = 0,
+                                Longitude = 0
+                            };
+                            newInput.Geometry = new TimeSeriesGeometry()
+                            {
+                                Point = (PointCoordinate)pC
+                            };
                             errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
-                            //errorMsg += "ERROR: Latitude or Longitude value is not a valid coordinate.";
                         }
+                    }
+                    else
+                    {
+                        IPointCoordinate pC = new PointCoordinate()
+                        {
+                            Latitude = 0,
+                            Longitude = 0
+                        };
+                        newInput.Geometry = new TimeSeriesGeometry()
+                        {
+                            Point = (PointCoordinate)pC
+                        };
+                        errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
                     }
                 }
                 else

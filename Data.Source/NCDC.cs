@@ -1,17 +1,13 @@
-﻿//using Newtonsoft.Json;
-using System;
-using System.Collections;
-using System.Runtime.Serialization.Json;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Web;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using System.Xml;
+using Utilities;
+
 
 namespace Data.Source
 {
@@ -146,11 +142,8 @@ namespace Data.Source
                 if (errorMsg.Contains("ERROR")) { return null; }
                 if (!json.Equals("{}"))
                 {
-                    //NCDCJson results = JsonConvert.DeserializeObject<NCDCJson>(json);
-                    MemoryStream mStream1 = new MemoryStream(Encoding.UTF8.GetBytes(json));
-                    DataContractJsonSerializer ser1 = new DataContractJsonSerializer(typeof(NCDCJson));
-                    NCDCJson results = ser1.ReadObject(mStream1) as NCDCJson;
-                    mStream1.Close();
+
+                    NCDCJson results = JSON.Deserialize<NCDCJson>(json);
 
                     double total = results.metadata.resultset.count;        //checking if available results exceed 1000 entry limit.
                     if (total > 1000)
@@ -161,11 +154,7 @@ namespace Data.Source
                             json = DownloadData(out errorMsg, input.Geometry.GeometryMetadata["token"], url);
                             if (errorMsg.Contains("ERROR")) { return null; }
 
-                            //NCDCJson tempResults = JsonConvert.DeserializeObject<NCDCJson>(json);                    
-                            MemoryStream mStream2 = new MemoryStream(Encoding.UTF8.GetBytes(json));
-                            DataContractJsonSerializer ser2 = new DataContractJsonSerializer(typeof(NCDCJson));
-                            NCDCJson tempResults = ser2.ReadObject(mStream2) as NCDCJson;
-                            mStream2.Close();
+                            NCDCJson tempResults = JSON.Deserialize<NCDCJson>(json);
 
                             results.results.AddRange(tempResults.results);                              //Adds the additional calls to the results.results variable
                         }
@@ -563,17 +552,7 @@ namespace Data.Source
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     string dataBuffer = reader.ReadToEnd();
-                    stationDetails = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataBuffer);
-
-                    //MemoryStream mStream = new MemoryStream(Encoding.UTF8.GetBytes(dataBuffer));
-                    //MemoryStream mStream = new MemoryStream();
-                    //mStream.Write(Encoding.UTF8.GetBytes(dataBuffer), 0, Encoding.UTF8.GetBytes(dataBuffer).Length);
-                    //var ser2 = new DataContractJsonSerializer(typeof(Dictionary<string, string>));
-                    //object stationDetails2 = ser2.ReadObject(dataStream);
-                    //stationDetails = ser2.ReadObject(mStream) as Dictionary<string, string>;
-                    //mStream.Close();
-
-                    //reader.Close();
+                    stationDetails = JSON.Deserialize<Dictionary<string, string>>(dataBuffer);
                     response.Close();
                     retries -= 1;
                 }
