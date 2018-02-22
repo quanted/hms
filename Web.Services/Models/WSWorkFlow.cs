@@ -106,14 +106,21 @@ namespace Web.Services.Models
                 }
 
                 List<string> errorList = new List<string>();
-                Parallel.ForEach(precipList, (Precipitation.Precipitation precip) =>
+                object outputListLock = new object();
+                var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+
+                Parallel.ForEach(precipList, options, (Precipitation.Precipitation precip) =>
                 {
                     // Gets the Precipitation data.
                     string errorM = "";
                     ITimeSeriesOutput result = precip.GetData(out errorM);
-                    errorList.Add(errorM);
-                    outputList.Add(result);
+                    lock (outputListLock)
+                    {
+                        errorList.Add(errorM);
+                        outputList.Add(result);
+                    }
                 });
+
 
                 foreach (ITimeSeriesOutput result in outputList)
                 {

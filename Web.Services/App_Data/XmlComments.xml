@@ -172,7 +172,7 @@
         </member>
         <member name="T:Web.Services.Controllers.WSSolarController">
             <summary>
-            HMS API controller for solar data.
+            HMS API controller for GC Solar data.
             </summary>
         </member>
         <member name="M:Web.Services.Controllers.WSSolarController.GETDefaultOutput">
@@ -201,6 +201,29 @@
             <summary>
             GET request for metadata on the inputs for the GCSolar module.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.SolarCalcInputExample">
+            <summary>
+            Input example for NOAA Solar Calculator POST
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.SolarCalcInputExample.GetExamples">
+            <summary>
+            Get example function
+            </summary>  
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSMeteorolgySolarController">
+            <summary>
+            Meterology Solar HMS endpoint class
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSMeteorolgySolarController.POSTSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
+            <summary>
+            NOAA Solar Calculator 
+            </summary>
+            <param name="i"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInput">
@@ -457,6 +480,21 @@
             <param name="input"></param>
             <returns></returns>
         </member>
+        <member name="T:Web.Services.Models.SolarCalculatorInput">
+            <summary>
+            Solar Calculator Input object
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.SolarCalculatorInput.Model">
+            <summary>
+            Calculator model: 'Day' or 'Year'
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.SolarCalculatorInput.LocalTime">
+            <summary>
+            Calculation localtime for when model='year', default='12:00:00'
+            </summary>
+        </member>
         <member name="T:Web.Services.Models.WSSolar">
             <summary>
             Model for the WSSolar controller
@@ -487,6 +525,13 @@
             <summary>
             Constructs input metadata for GCSolar module.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSSolar.RunSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
+            <summary>
+            Model for accessing NOAA Solar Calculator 
+            </summary>
+            <param name="input"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSSubSurfaceFlow">

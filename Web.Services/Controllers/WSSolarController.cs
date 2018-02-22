@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Web.Services.Models;
 using Swashbuckle.AspNetCore.Examples;
 using System.Net.Http;
+using Data;
 
 namespace Web.Services.Controllers
 {
@@ -126,7 +127,7 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// HMS API controller for solar data.
+    /// HMS API controller for GC Solar data.
     /// </summary>
     [Produces("application/json")]
     [Route("api/water-quality/solar")]                      // Default endpoint
@@ -201,6 +202,75 @@ namespace Web.Services.Controllers
             Dictionary<string, object> metadata = new Dictionary<string, object>();
             metadata["Input Variables"] = solar.GetMetadata();
             return metadata;
+        }
+    }
+
+    /// <summary>
+    /// Input example for NOAA Solar Calculator POST
+    /// </summary>
+    public class SolarCalcInputExample : IExamplesProvider
+    {
+        /// <summary>
+        /// Get example function
+        /// </summary>  
+        /// <returns></returns>
+        public object GetExamples()
+        {
+            SolarCalculatorInput example = new SolarCalculatorInput()
+            {
+
+                Model = "year",
+                LocalTime = "12:00:00",
+                DateTimeSpan = new DateTimeSpan()
+                {
+                    StartDate = new DateTime(2010, 01, 01),
+                    EndDate = new DateTime(2010, 12, 31)
+                },
+                Geometry = new TimeSeriesGeometry()
+                {
+                    Point = new PointCoordinate()
+                    {
+                        Latitude = 40,
+                        Longitude = -105
+                    },
+                    Timezone = new Timezone()
+                    {
+                        Offset = -7,
+                    }
+                }
+            };
+            return example;
+        }
+    }
+
+    /// <summary>
+    /// Meterology Solar HMS endpoint class
+    /// </summary>
+    [Produces("application/json")]
+    [Route("api/meteorology/solar")]
+    [Route("api/meteorology/solar/v1.0")]
+    public class WSMeteorolgySolarController : Controller
+    {
+        /// <summary>
+        /// NOAA Solar Calculator 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("")]
+        [SwaggerRequestExample(typeof(SolarCalculatorInput), typeof(SolarCalcInputExample))]
+        public ITimeSeriesOutput POSTSolarCalculator([FromBody]SolarCalculatorInput i)
+        {
+            WSSolar solar = new WSSolar();
+            Utilities.ErrorOutput error = new Utilities.ErrorOutput();
+            if(i is null)
+            {
+                return error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
+            }
+            else
+            {
+                return solar.RunSolarCalculator(i);
+            }
         }
     }
 }

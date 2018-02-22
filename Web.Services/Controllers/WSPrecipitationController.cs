@@ -4,7 +4,6 @@ using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
 using Web.Services.Models;
-using Newtonsoft.Json;
 
 namespace Web.Services.Controllers
 {
