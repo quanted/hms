@@ -231,7 +231,7 @@ namespace Web.Services.Controllers
             var stpWatch = System.Diagnostics.Stopwatch.StartNew();
             ITimeSeriesOutput results = workFlow.GetWorkFlowData(workflowInput);
             stpWatch.Stop();
-            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
+            //results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return results;
         }
