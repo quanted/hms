@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="C:\work\AQUATOX\HMS\hms_backend\Stream.Hydrology\AQUATOX.UnitTests\AQT_Hydrology_UnitTests.cs" Link="AQT_Hydrology_UnitTests.cs" />
-  </ItemGroup>
+   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />

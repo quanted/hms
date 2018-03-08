@@ -13,7 +13,7 @@ namespace AQUATOX.Volume
         /// Valid JSON inputs must include an AQUATOX segment with a volume state variable attached, valid site record and morphometry data, and a valid PSETUP record
         /// Example valid JSON inputs with comments may be found in the Stream.Hydrology\AQUATOX\DOCS directory.
         /// </summary>
-        /// <param name="json string, passed by reference:  a valid json input that is replaced by the model's json output including model results"></param>
+        /// <param name="json string, passed by reference:  a valid json input that is replaced by the models json output including model results"></param>
         /// <param name="errmsg string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string"></param>
 
         public AQTVolumeModel(ref string json, ref string errmsg)
