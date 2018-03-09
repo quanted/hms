@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using Globals;
-using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace AQUATOX.Volume
 {
@@ -17,20 +15,18 @@ namespace AQUATOX.Volume
         KnownVal
     } // end VolumeMethType
 
-    [Serializable]
-    [KnownType(typeof(TVolume))]
-    [DataContract]
+   
     public class TVolume : TStateVariable
     {
-        [IgnoreDataMember] double LastCalcTA = 0;  
-        [IgnoreDataMember] double LastTimeTA = 0;        // don't need saving
-        [IgnoreDataMember] double Inflow = 0;
-        [IgnoreDataMember] double Discharg = 0;          // don't need saving
-        [IgnoreDataMember] double InflowLoad = 0;
-        [IgnoreDataMember] double DischargeLoad = 0;
-        [IgnoreDataMember] double KnownValueLoad = 0;
-        // [IgnoreDataMember] double OOSDischFracLoad = 0;
-        // [IgnoreDataMember] double OOSInflowFracLoad = 0;  // don't need saving
+        [JsonIgnore] double LastCalcTA ;  
+        [JsonIgnore] double LastTimeTA ;        // don't need saving
+        [JsonIgnore] double Inflow = 0;
+        [JsonIgnore] double Discharg = 0;          // don't need saving
+        [JsonIgnore] double InflowLoad = 0;
+        [JsonIgnore] double DischargeLoad = 0;
+        [JsonIgnore] double KnownValueLoad = 0;
+        // [JsonIgnore] double OOSDischFracLoad = 0;
+        // [JsonIgnore] double OOSInflowFracLoad = 0;  // don't need saving
 
         public VolumeMethType Calc_Method;
 
@@ -118,7 +114,6 @@ namespace AQUATOX.Volume
         // ------------------------------------------------------------------------------------------------
         public double Evaporation()
         {
-            double result;
             if (AQTSeg.UseConstEvap)
             {
                 return Location.Locale.MeanEvap * (0.0254 / 365) * Location.Locale.SurfArea;

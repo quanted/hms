@@ -2,9 +2,11 @@
 using System.IO;
 using System.Windows.Forms;
 using AQUATOX.AQTSegment;
+using Newtonsoft.Json;
+using System.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
 using Data;
-using System.Linq;
+
 
 namespace AQUATOX.GUI.Test
 {
@@ -18,7 +20,6 @@ namespace AQUATOX.GUI.Test
         private Button button4;
         private Button button1;
         public AQTSim aQTS = null; 
-//        public JsonSerializerSettings loJsonSerializerSettings;
 
         public AQTTestForm()
         {

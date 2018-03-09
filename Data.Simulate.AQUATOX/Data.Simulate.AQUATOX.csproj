@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="HMSData" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
   </ItemGroup>
 
 </Project>

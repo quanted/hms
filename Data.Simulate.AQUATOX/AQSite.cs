@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace AQUATOX.AQSite
 
@@ -231,22 +231,20 @@ namespace AQUATOX.AQSite
     } // end SiteTypes
 
 
-    [Serializable]
-    [KnownType(typeof(TAQTSite))]
-    [DataContract]
+
     public class TAQTSite
     {
-        [DataMember] public SiteRecord Locale;
-        [DataMember] public double Discharge;
+        public SiteRecord Locale;
+        public double Discharge;
         // cu m/day
-        [DataMember] public ReminRecord Remin;
-        [DataMember] public SiteTypes SiteType;
-        [DataMember] public double MeanThick;
-        [DataMember] public double P_Shape = 0;
-        [DataMember] public double TotDischarge = 0;
+        public ReminRecord Remin;
+        public SiteTypes SiteType;
+        public double MeanThick;
+        public double P_Shape = 0;
+        public double TotDischarge = 0;
         // was originally Q in older code
-        [IgnoreDataMember] public MorphRecord Morph;  // variable morphometry results
-        [DataMember] public double ICSurfArea = 0;
+        [JsonIgnore] public MorphRecord Morph;  // variable morphometry results, NoSave
+        public double ICSurfArea = 0;
 
         // DeltaMorph procedures have been moved to TVOLUME.DELTAVOLUME found in STATE.INC
         // ----------------------------------------------------------------------------------------

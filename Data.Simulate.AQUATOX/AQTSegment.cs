@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using Globals;
 using AQUATOX.AQSite;
 using AQUATOX.Loadings;
-using System.Runtime.Serialization;
+
+
+using System.Linq;
+using Newtonsoft.Json;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization.Json;
@@ -20,75 +23,62 @@ namespace AQUATOX.AQTSegment
         public string SaveJSON(ref string json)
         {
 
-            MemoryStream ms = new MemoryStream();
-
             try
             {
-                DataContractJsonSerializer ser = AQTJSONSerializer();
-                ser.WriteObject(ms, AQTSeg);
-                byte[] json2 = ms.ToArray();
-                ms.Close();
-                json = Encoding.UTF8.GetString(json2, 0, json2.Length);
+                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
+                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
+                {
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                    TypeNameHandling = TypeNameHandling.Objects,
+                    SerializationBinder = AQTBinder
+                };
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
                 return "";
             }
-            catch (System.Runtime.Serialization.SerializationException e)
+            catch (Newtonsoft.Json.JsonWriterException e)
             {
-                return e.Message;
+               return e.Message;
             }
-            catch (System.TypeLoadException e)
+            catch (Exception e)
             {
                 return e.Message;
             }
 
             finally
             {
-                ms.Close();
-                ms.Dispose();
             }
+
         }
 
 
         public string Instantiate(string json)
         {
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
             try
             {
-                DataContractJsonSerializer ser = AQTJSONSerializer();
-                AQTSeg = ser.ReadObject(ms) as AQUATOXSegment;
+                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
+                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
+                {
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                    TypeNameHandling = TypeNameHandling.Objects,
+                    SerializationBinder = AQTBinder
+                };
+                AQTSeg = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(json, AQTJsonSerializerSettings);
                 AQTSeg.SetupLinks();
                 return "";
             }
-            catch (System.Runtime.Serialization.SerializationException e)
+            catch (Newtonsoft.Json.JsonReaderException e)
             {
                 return e.Message;
             }
-            catch (System.TypeLoadException e)
+            catch (Exception e)
             {
                 return e.Message;
             }
 
             finally
             {
-                ms.Close();
-                ms.Dispose();
             }
-        }
-
-        public DataContractJsonSerializer AQTJSONSerializer()
-        {
-            List<Type> knownTypeList = new List<Type> { typeof(TStateVariable), typeof(T10PctDecrease), typeof(TExpIncrease), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(MorphRecord),
-                                                          typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
-                                                          typeof(SortedList<DateTime, double>), typeof(TStates)};
-
-            return new DataContractJsonSerializer(
-                typeof(AQUATOXSegment), new DataContractJsonSerializerSettings
-                {
-                    DateTimeFormat = new DateTimeFormat(Globals.Consts.DateFormatString),
-                    KnownTypes = knownTypeList,
-
-                });
-
         }
 
 
@@ -130,30 +120,30 @@ namespace AQUATOX.AQTSegment
 
     }
 
-    [DataContract]
-    [KnownType(typeof(AQUATOXITSOutput))]
     public class AQUATOXITSOutput : ITimeSeriesOutput
     {
 
         /// <summary>
         /// Dataset for the time series.
         /// </summary>
-        [DataMember] public string Dataset { get; set; }
+        public string Dataset { get; set; }
 
         /// <summary>
         /// Source of the dataset.
         /// </summary>
-        [DataMember] public string DataSource { get; set; }
+        public string DataSource { get; set; }
 
         /// <summary>
         /// Metadata dictionary providing details for the time series.
         /// </summary>
-        [DataMember] public Dictionary<string, string> Metadata { get; set; }
+        [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
+        public Dictionary<string, string> Metadata { get; set; }
 
         /// <summary>
         /// Time series data.
         /// </summary>
-        [DataMember] public Dictionary<string, List<string>> Data { get; set; }
+        [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
+        public Dictionary<string, List<string>> Data { get; set; }
 
         public AQUATOXITSOutput ()
         {
@@ -164,45 +154,43 @@ namespace AQUATOX.AQTSegment
         }
     }
 
-    [DataContract]
-    [KnownType(typeof(TStateVariable))]
     public class TStateVariable
     {
-        [DataMember] public double InitialCond = 0;     // Initial condition
-        [DataMember] public double State = 0;           // Current Value, usually concentration
-        [DataMember] public AllVariables NState;        // List of Organisms and Toxicants
-        [DataMember] public T_SVType SVType;            // StV, OrgTox
-        [DataMember] public T_SVLayer Layer;               // Relevant for sed detr, inorg sed., and pore water types
-        [DataMember] public string PName = "";          // Text Name
-        [IgnoreDataMember] public double yhold = 0;           // holds State value during derivative cycle
-        [IgnoreDataMember] double yorig = 0;                  // used to restore state to beginning of time step
-        [IgnoreDataMember] double yout = 0;                    // use in Integration
-        [IgnoreDataMember] public double[] StepRes = new double[7];  // Holds Step Results
-        [IgnoreDataMember] public double yerror = 0;          // holds error term from RKCK
-        [IgnoreDataMember] public double yscale = 0;          // use in Integration
-        [IgnoreDataMember] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
-        [DataMember] public AQUATOXITSOutput output;  // public and evenly-spaced results following integration / interpolation
+        public double InitialCond = 0;     // Initial condition
+        public double State = 0;           // Current Value, usually concentration
+        public AllVariables NState;        // List of Organisms and Toxicants
+        public T_SVType SVType;            // StV, OrgTox
+        public T_SVLayer Layer;               // Relevant for sed detr, inorg sed., and pore water types
+        public string PName = "";          // Text Name
+        [JsonIgnore] public double yhold = 0;           // holds State value during derivative cycle
+        [JsonIgnore] double yorig;                  // used to restore state to beginning of time step
+        [JsonIgnore] double yout;                    // use in Integration
+        [JsonIgnore] public double[] StepRes = new double[7];  // Holds Step Results
+        [JsonIgnore] public double yerror = 0;          // holds error term from RKCK
+        [JsonIgnore] public double yscale = 0;          // use in Integration
+        [JsonIgnore] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
+        public AQUATOXITSOutput output;  // public and evenly-spaced results following integration / interpolation
 
-        [IgnoreDataMember] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
-        [DataMember] public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
-        [IgnoreDataMember] public double Loading = 0;         // Loading of State Variable This time step
-        [DataMember] bool RequiresData = false;
-        [DataMember] bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
-        [DataMember] public string StateUnit;
-        [DataMember] public string LoadingUnit;       // Units 
+        [JsonIgnore] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
+        public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
+        [JsonIgnore] public double Loading = 0;         // Loading of State Variable This time step
+//        bool RequiresData = false;
+//        bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
+        public string StateUnit;
+        public string LoadingUnit;       // Units 
 
-        [IgnoreDataMember] public TAQTSite Location = null;    // Pointer to Site in which I'm located
+        [JsonIgnore] public TAQTSite Location = null;    // Pointer to Site in which I'm located
                                                                //      public bool PShowRates = true;      // Does the user want rates written for this SV?
                                                                //      public TCollection RateColl = null; // Collection of saved rates for current timestep
                                                                //      public int RateIndex = 0;
 
-        [DataMember] public string LoadNotes1;
-        [DataMember] public string LoadNotes2;           // Notes associated with loadings
-        [DataMember] public bool TrackResults = true;      // Does the user want to save results for this variable?
+        public string LoadNotes1;
+        public string LoadNotes2;           // Notes associated with loadings
+        public bool TrackResults = true;      // Does the user want to save results for this variable?
                                                            //public bool IsTemplate = false;       // Is this a member of the template study in a linked system?  True if single study run.
                                                            //public double[] WashoutStep = new double[7];     // Saved Washout Variables for use in outputting Cascade Outflow, nosave
-        [DataMember] double WashoutAgg = 0;
-        [DataMember] double LastTimeWrit = 0;
+//        double WashoutAgg = 0;
+//        double LastTimeWrit = 0;
 
 
         public virtual void Derivative(ref double DB)
@@ -270,7 +258,6 @@ namespace AQUATOX.AQTSegment
     }  // end TStateVariable
 
         
-    [DataContract, KnownType(typeof(TExpIncrease))]
     public class TExpIncrease : TStateVariable  //temporary test class for differentiation test
     {
         public override void Derivative(ref double DB)
@@ -279,8 +266,6 @@ namespace AQUATOX.AQTSegment
         }
     }
 
-    [DataContract]
-    [KnownType(typeof(T10PctDecrease))]
     public class T10PctDecrease : TStateVariable  //temporary test class for differentiation test
 
     {
@@ -292,12 +277,9 @@ namespace AQUATOX.AQTSegment
 
     }
 
-    [Serializable]
-    [KnownType(typeof(TStateVariable))]
-    [DataContract]  //[CollectionDataContract]  // 1/31/2018 inconsistency between .NET Core & .NET Framework
     public class TStates : List<TStateVariable>
         {
-           [IgnoreDataMember] public List<DateTime> restimes = new List<DateTime>();
+           [JsonIgnore] public List<DateTime> restimes = new List<DateTime>();
 
         public void WriteResults(DateTime TimeIndex)
             {
@@ -312,26 +294,23 @@ namespace AQUATOX.AQTSegment
 
 
 
-//    [Serializable]
-    [KnownType(typeof(AQUATOXSegment))]
-    [DataContract]
     public class AQUATOXSegment 
     {
-        [DataMember] public TAQTSite Location = new TAQTSite();       // Site data structure
+        public TAQTSite Location = new TAQTSite();       // Site data structure
 
-        [DataMember] public TStates SV = new TStates();    // State Variables
-        [DataMember] public DateTime TPresent;
-        [DataMember] public Setup_Record PSetup;
+        public TStates SV = new TStates();    // State Variables
+        public DateTime TPresent;
+        public Setup_Record PSetup;
 
-        [DataMember] public bool UseConstEvap = true;
-        [DataMember] public TLoadings DynEvap = null;
-        [DataMember] public TLoadings DynZMean;
+        public bool UseConstEvap = true;
+        public TLoadings DynEvap = null;
+        public TLoadings DynZMean;
 
-        [IgnoreDataMember] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
+        [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
-        [IgnoreDataMember] public DateTime SimulationDate;  // time integration started
-        [IgnoreDataMember] public DateTime VolumeUpdated;  // 
-        [IgnoreDataMember] public double Volume_Last_Step;    //Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
+        [JsonIgnore] public DateTime SimulationDate;  // time integration started
+        [JsonIgnore] public DateTime VolumeUpdated;  // 
+        [JsonIgnore] public double Volume_Last_Step;    //Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
 
 
         public AQUATOXSegment()
@@ -1027,16 +1006,16 @@ namespace AQUATOX.AQTSegment
         return result;
     }
 
-      public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
+        public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
         {
             foreach (TStateVariable TSV in SV)
                 if ((TSV.NState == S) && (TSV.SVType == T) && (TSV.Layer == L))  // needs optimization!
                 {
                     return TSV;
                 }
-            
             return null;
-    }
+        }
+
 
 
         //public void calchradius(bool averaged)
@@ -1168,6 +1147,29 @@ namespace AQUATOX.AQTSegment
         //}
 
     }  // end TAQUATOXSegment
+
+public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder
+{
+    public IList<Type> KnownTypes { get; set; }
+
+    public Type BindToType(string assemblyName, string typeName)
+    {
+        return KnownTypes.SingleOrDefault(t => t.Name == typeName);
+    }
+
+    public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+    {
+        assemblyName = null;
+        typeName = serializedType.Name;
+    }
+
+    public AQTKnownTypesBinder()
+    {
+            KnownTypes = new List<Type> { typeof(TStateVariable), typeof(T10PctDecrease), typeof(TExpIncrease), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(MorphRecord),
+                                          typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
+                                          typeof(SortedList<DateTime, double>), typeof(AQUATOXITSOutput) };  // , typeof(Dictionary<string,string>), typeof(Dictionary<string, List<string>>) };
+    }
+}
 
 }
 
