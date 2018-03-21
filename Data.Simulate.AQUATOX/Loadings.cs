@@ -67,17 +67,12 @@ namespace AQUATOX.Loadings
         [DataMember] public double MultLdg = 1;           // to perturb loading
         [IgnoreDataMember] int lastindexread = -1;
 
-        public double ReturnLoad(DateTime TimeIndex)
+        public double ReturnTSLoad(DateTime TimeIndex)
         {
 
             double RetLoad;
             DateTime TIHolder;
 
-            if (UseConstant)
-            {
-                RetLoad = ConstLoad;
-            }
-            else
             {
                 RetLoad = 0;
                 bool foundopt = false;
@@ -198,21 +193,18 @@ namespace AQUATOX.Loadings
         // -------------------------------------------------------------------
         public double ReturnLoad(DateTime TimeIndex)
         {
-            double RetLoad;
-            // Hold Result
-            if (Loadings.UseConstant)
-            {
-                RetLoad = Loadings.ConstLoad;
-            }
-            else
-            {
+            double RetLoad; // Hold Result
+
+            if (Loadings.NoUserLoad) return 0;
+            if (Loadings.UseConstant) return Loadings.ConstLoad * Loadings.MultLdg;
+
+            { //otherwise
                 RetLoad = 0;
                 if (Loadings != null)
                 {
-                    RetLoad = Loadings.ReturnLoad(TimeIndex);
+                    RetLoad = Loadings.ReturnTSLoad(TimeIndex);
                 }
             }
-            // else
             RetLoad = RetLoad * Loadings.MultLdg;
             return RetLoad;
         }
@@ -220,18 +212,16 @@ namespace AQUATOX.Loadings
         // -------------------------------------------------------------------
         public double ReturnAltLoad(DateTime TimeIndex, int AltLdg)
         {
-            double RetLoad;
-            // Hold Result
-            if (Alt_Loadings[AltLdg].UseConstant)
-            {
-                RetLoad = Alt_Loadings[AltLdg].ConstLoad;
-            }
-            else
+            double RetLoad;     // Hold Result
+
+            if (Alt_Loadings[AltLdg].NoUserLoad) return 0; // not usually relevant for alt loadings
+            if (Alt_Loadings[AltLdg].UseConstant) return Alt_Loadings[AltLdg].ConstLoad * Alt_Loadings[AltLdg].MultLdg;
+
             {
                 RetLoad = 0;
                 if (Alt_Loadings[AltLdg] != null)
                 {
-                    RetLoad = Alt_Loadings[AltLdg].ReturnLoad(TimeIndex);
+                    RetLoad = Alt_Loadings[AltLdg].ReturnTSLoad(TimeIndex);
                 }
             }
             // else

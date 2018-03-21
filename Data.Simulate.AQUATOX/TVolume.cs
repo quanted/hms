@@ -118,7 +118,6 @@ namespace AQUATOX.Volume
         // ------------------------------------------------------------------------------------------------
         public double Evaporation()
         {
-            double result;
             if (AQTSeg.UseConstEvap)
             {
                 return Location.Locale.MeanEvap * (0.0254 / 365) * Location.Locale.SurfArea;
@@ -127,7 +126,7 @@ namespace AQUATOX.Volume
             else
             {
                 // Use Time-Series ("dynamic") Evaporation
-                return AQTSeg.DynEvap.ReturnLoad(AQTSeg.TPresent);
+                return AQTSeg.DynEvap.ReturnTSLoad(AQTSeg.TPresent);
                 // cu m/d
             }
         }
@@ -209,14 +208,14 @@ namespace AQUATOX.Volume
             if (!(Calc_Method == VolumeMethType.Manning))
             {
                 // 0 is inflow in this case
-                InflowLoad = (LoadsRec.Alt_Loadings[0].ReturnLoad(TimeIndex));
+                InflowLoad = (LoadsRec.Alt_Loadings[0].ReturnTSLoad(TimeIndex));
             }
 
             // Calculate Discharge
             if ((Calc_Method == VolumeMethType.Manning) || (Calc_Method == VolumeMethType.Dynam))
             {
                 // 1 is discharge in this case
-                DischargeLoad = (LoadsRec.Alt_Loadings[1].ReturnLoad(TimeIndex));
+                DischargeLoad = (LoadsRec.Alt_Loadings[1].ReturnTSLoad(TimeIndex));
             }
 
 
@@ -224,7 +223,7 @@ namespace AQUATOX.Volume
             KnownValueLoad = 0;
             if (Calc_Method == VolumeMethType.KnownVal)
             {
-                KnownValueLoad = LoadsRec.Loadings.ReturnLoad(TimeIndex);
+                KnownValueLoad = LoadsRec.Loadings.ReturnTSLoad(TimeIndex);
             }
 
             DeltaVolume();

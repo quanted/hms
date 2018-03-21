@@ -159,12 +159,14 @@ namespace Globals
         NullStateVar
     } // end AllVariables
 
-//    public enum Alt_LoadingsType
-//    
-//0        PointSource,  Inflow
-//1        DirectPrecip, Discharge
-//2        NonPointSource
-//    } // end Alt_LoadingsType
+    //    public enum Alt_LoadingsType
+    //    
+    //0        PointSource,  or Inflow(TVolume)
+    //1        DirectPrecip, or Discharge(TVolume)
+    //2        NonPointSource
+    //    } // end Alt_LoadingsType
+
+
 
 
     public enum T_SVType
@@ -255,6 +257,9 @@ namespace Globals
         public const double Minimum_Stepsize = 1.0e-5;
         public const string DateFormatString = "yyyy-MM-dd'T'HH:mm:ss";
         public const string ValFormatString = "E";  // e.g. 1.043700E+021
+
+        public const AllVariables FirstDetr = AllVariables.SedmRefrDetr;
+        public const AllVariables LastDetr = AllVariables.SuspLabDetr;
 
     }
 }

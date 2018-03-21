@@ -128,6 +128,9 @@ namespace AQUATOX.AQTSegment
         // ITimeSeries AQTSim.ReturnResults(SV-Type)
         // ITimeSeries AQTSim.ReturnResults(SV-Type) (StartDate, EndDate)
 
+
+
+
     }
 
     [DataContract]
@@ -155,7 +158,7 @@ namespace AQUATOX.AQTSegment
         /// </summary>
         [DataMember] public Dictionary<string, List<string>> Data { get; set; }
 
-        public AQUATOXITSOutput ()
+        public AQUATOXITSOutput()
         {
             Data = new Dictionary<string, List<string>>();
             Dataset = "";
@@ -163,6 +166,7 @@ namespace AQUATOX.AQTSegment
             Metadata = new Dictionary<string, string>();
         }
     }
+
 
     [DataContract]
     [KnownType(typeof(TStateVariable))]
@@ -210,14 +214,17 @@ namespace AQUATOX.AQTSegment
             DB = 0;
         }
 
+
+
+
         public virtual void SetToInitCond()
         {
             int j;
             State = InitialCond;
             // init risk conc, internal nutrients, toxicants
 
-            yhold= 0;
-            yorig= 0;
+            yhold = 0;
+            yorig = 0;
 
             for (j = 1; j <= 6; j++)
             {
@@ -234,42 +241,68 @@ namespace AQUATOX.AQTSegment
         public TStateVariable()
         { }
 
-    //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC)
-    public TStateVariable(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC)
-    {
-        int j;
-        PName = aName;
-        NState = Ns;
-        SVType = SVT;
-        Layer = L;
-        InitialCond = IC;
-        State = 0;
-
-        AQTSeg = P;
-        if (P != null)
+        //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC)
+        public TStateVariable(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC)
         {
-            Location = P.Location;
-        }
-        LoadNotes1 = "";
-        LoadNotes2 = "";
+            int j;
+            PName = aName;
+            NState = Ns;
+            SVType = SVT;
+            Layer = L;
+            InitialCond = IC;
+            State = 0;
 
-        yhold = 0;
-        yorig = 0;
-        for (j = 1; j <= 6; j++)
-        {
-            StepRes[j] = 0;
+            AQTSeg = P;
+            if (P != null)
+            {
+                Location = P.Location;
+            }
+            LoadNotes1 = "";
+            LoadNotes2 = "";
+
+            yhold = 0;
+            yorig = 0;
+            for (j = 1; j <= 6; j++)
+            {
+                StepRes[j] = 0;
+            }
         }
-    }
 
         public virtual void CalculateLoad(DateTime TimeIndex)
         {
-            Loading = 0;    
+            Loading = 0;
         }
+
+        public virtual double GetInflowLoad(DateTime TimeIndex)
+        {
+            // This Procedure returns inflow loadings only
+            // In the case of stratification, the user may specify which segment the inflow goes to 2-6-2007
+
+            return LoadsRec.ReturnLoad(TimeIndex);
+        }
+
+
+        public virtual double Washout()
+        {
+            double result;
+            // Downstream Washout of all dissolved or floating immobile SVs.
+            // Virtual method that is overridden if necessary
+            double Disch = Location.Discharge;
+            if (Disch < Globals.Consts.Small) return 0;
+            result = Disch * State / AQTSeg.SegVol();
+            // unit / d // m3/d // unit           // cu m.
+
+            // WashoutStep[AllStates.DerivStep] = result * AllStates.SegVol(); // FIXME MB Tracking 
+            // 1000*mass                   // mass/L*d            // m3
+
+            return result;
+        }
+
 
 
     }  // end TStateVariable
 
-        
+
     [DataContract, KnownType(typeof(TExpIncrease))]
     public class TExpIncrease : TStateVariable  //temporary test class for differentiation test
     {
@@ -288,7 +321,7 @@ namespace AQUATOX.AQTSegment
 
         {
             DB = -State * 0.1;
-        } 
+        }
 
     }
 
@@ -296,26 +329,26 @@ namespace AQUATOX.AQTSegment
     [KnownType(typeof(TStateVariable))]
     [DataContract]  //[CollectionDataContract]  // 1/31/2018 inconsistency between .NET Core & .NET Framework
     public class TStates : List<TStateVariable>
-        {
-           [IgnoreDataMember] public List<DateTime> restimes = new List<DateTime>();
+    {
+        [IgnoreDataMember] public List<DateTime> restimes = new List<DateTime>();
 
         public void WriteResults(DateTime TimeIndex)
+        {
+            if ((restimes.Count == 0) || (TimeIndex - restimes[restimes.Count - 1]).TotalDays > Consts.VSmall)
             {
-                if ((restimes.Count == 0) || (TimeIndex - restimes[restimes.Count - 1]).TotalDays > Consts.VSmall)
-                {
-                    restimes.Add(TimeIndex);
-                    foreach (TStateVariable TSV in this)
-                        TSV.Results.Add(TSV.State);
-                }
+                restimes.Add(TimeIndex);
+                foreach (TStateVariable TSV in this)
+                    TSV.Results.Add(TSV.State);
             }
         }
+    }
 
 
 
-//    [Serializable]
+    //    [Serializable]
     [KnownType(typeof(AQUATOXSegment))]
     [DataContract]
-    public class AQUATOXSegment 
+    public class AQUATOXSegment
     {
         [DataMember] public TAQTSite Location = new TAQTSite();       // Site data structure
 
@@ -398,7 +431,7 @@ namespace AQUATOX.AQTSegment
             SVD.PName = "10% decrease";
             TStateVariable SVF = new TStateVariable();
             SVF.PName = "Flat";
-//            TVolume SVTV = new TVolume(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol, "Water Volume", this, 1000);
+            //            TVolume SVTV = new TVolume(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol, "Water Volume", this, 1000);
 
             SV.Add(SVI);
             SV.Add(SVD);
@@ -443,7 +476,7 @@ namespace AQUATOX.AQTSegment
             TPresent = X;
 
             DerivStep = Step;
-                                              // Zero_Utility_Variables();  animal trophic level only
+            // Zero_Utility_Variables();  animal trophic level only
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
 
             foreach (TStateVariable TSV in SV)
@@ -836,7 +869,7 @@ namespace AQUATOX.AQTSegment
             if (rti > vals.Count - 1) { ErrMsg = "TrapezoidalIntegration index error rti >count"; return -99; };
             bool firststep = true;
 
-            for (int i=rti-1; (firststep||SV.restimes[i]<End_Interval_Time); i++)
+            for (int i = rti - 1; (firststep || SV.restimes[i] < End_Interval_Time); i++)
             {
                 firststep = false;
                 DateTime Start_SI_Time = SV.restimes[i];
@@ -847,25 +880,25 @@ namespace AQUATOX.AQTSegment
                 if (End_SI_Time > End_Interval_Time)
                 {
                     // Linearly interpolate to get the end sub-interval point
-                    End_SI_Val = LinearInterpolate(ref ErrMsg,Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, End_Interval_Time);
-                    if (ErrMsg!="") return -99;
+                    End_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, End_Interval_Time);
+                    if (ErrMsg != "") return -99;
                     End_SI_Time = End_Interval_Time;
                 }
 
-            if (Start_SI_Time < Start_Interval_Time)
-            {
-                // Linearly interpolate to get the beginning sub-interval point
-                Start_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, Start_Interval_Time);
-                if (ErrMsg != "") return -99;
-                Start_SI_Time = Start_Interval_Time;
+                if (Start_SI_Time < Start_Interval_Time)
+                {
+                    // Linearly interpolate to get the beginning sub-interval point
+                    Start_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, Start_Interval_Time);
+                    if (ErrMsg != "") return -99;
+                    Start_SI_Time = Start_Interval_Time;
+                }
+
+                SumThusFar = SumThusFar + ((Start_SI_Val + End_SI_Val) / 2) * (End_SI_Time - Start_SI_Time).TotalDays;
+                // The area of the relevant trapezoid is calculated above
+
             }
 
-            SumThusFar = SumThusFar + ((Start_SI_Val + End_SI_Val) / 2) * (End_SI_Time - Start_SI_Time).TotalDays;
-             // The area of the relevant trapezoid is calculated above
-
-            }
-
-            return SumThusFar/ (End_Interval_Time - Start_Interval_Time).TotalDays; 
+            return SumThusFar / (End_Interval_Time - Start_Interval_Time).TotalDays;
         }
 
         public double LinearInterpolate(ref string ErrMsg, double OldVal, double NewVal, DateTime OldTime, DateTime NewTime, DateTime InterpTime)
@@ -874,17 +907,17 @@ namespace AQUATOX.AQTSegment
             if ((InterpTime > NewTime) || (InterpTime < OldTime)) { ErrMsg = "Linear Interpolation Timestamp Error"; return -99; };
 
             return OldVal + ((NewVal - OldVal) / (NewTime - OldTime).TotalDays) * (InterpTime - OldTime).TotalDays;
-                   // y1    // Slope  (dy/dx)                                      // Delta X
+            // y1    // Slope  (dy/dx)                                      // Delta X
         }
 
         public double InstantaneousConc(ref string ErrMsg, DateTime steptime, List<double> vals, int rti)
         {
             if (rti <= 0) { ErrMsg = "Linear interpolation index error, rti<=0"; return -99; };
-            if (rti > vals.Count-1) { ErrMsg = "Linear interpolation index error rti >count"; return -99; };
+            if (rti > vals.Count - 1) { ErrMsg = "Linear interpolation index error rti >count"; return -99; };
 
             double OldVal = vals[rti - 1];
             double NewVal = vals[rti];
-            DateTime OldTime = SV.restimes[rti-1];
+            DateTime OldTime = SV.restimes[rti - 1];
             DateTime NewTime = SV.restimes[rti];
 
             return LinearInterpolate(ref ErrMsg, OldVal, NewVal, OldTime, NewTime, steptime);
@@ -895,7 +928,7 @@ namespace AQUATOX.AQTSegment
         public string PostProcessResults()
         {
             double val;
-            string errmsg="";
+            string errmsg = "";
             double stepsize = (PSetup.StoreStepSize);  // step size in days or hours
             if (!PSetup.StepSizeInDays) stepsize = stepsize / 24;  // convert to step size in days
             int NumDays = (PSetup.LastDay - PSetup.FirstDay).Days; // number of days in simulation
@@ -931,7 +964,7 @@ namespace AQUATOX.AQTSegment
                 }
 
             }
-            
+
             foreach (TStateVariable TSV in SV)
             {
                 if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
@@ -953,7 +986,7 @@ namespace AQUATOX.AQTSegment
                 for (int i = 1; i <= numsteps; i++)
                 {
                     DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
-                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(ref errmsg,steptime.AddDays(-stepsize) ,steptime, TSV.Results, StartIndices[i - 1]);
+                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(ref errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
                     else val = InstantaneousConc(ref errmsg, steptime, TSV.Results, StartIndices[i - 1]);
                     vallist = new List<string>();
                     vallist.Add(val.ToString(Consts.ValFormatString));
@@ -976,30 +1009,30 @@ namespace AQUATOX.AQTSegment
         }
 
 
-    public void SVsToInitConds()
+        public void SVsToInitConds()
         {
             foreach (TStateVariable TSV in SV)
                 TSV.SetToInitCond();
         }
 
 
-    public double DynamicZMean()
-    {
-        double result;
-        // Variable ZMean of segment or both segments if dynamic stratification
-        if (!Location.Locale.UseBathymetry)
+        public double DynamicZMean()
         {
-            result = Volume_Last_Step / Location.Locale.SurfArea;
+            double result;
+            // Variable ZMean of segment or both segments if dynamic stratification
+            if (!Location.Locale.UseBathymetry)
+            {
+                result = Volume_Last_Step / Location.Locale.SurfArea;
+                return result;
+            }
+            result = DynZMean.ReturnTSLoad(TPresent);
+
+            if (result == 0)
+            {
+                result = Location.Locale.ICZMean;
+            }
             return result;
         }
-        result = DynZMean.ReturnLoad(TPresent);
-
-        if (result == 0)
-        {
-            result = Location.Locale.ICZMean;
-        }
-        return result;
-    }
 
         public void SetupLinks()
         {
@@ -1011,32 +1044,128 @@ namespace AQUATOX.AQTSegment
             }
         }
 
-    public double GetState(AllVariables S, T_SVType T, T_SVLayer L)
-    {
-        double result;
-        TStateVariable p;
-        p = GetStatePointer(S, T, L);
-        if (!(p == null))
+        public double GetState(AllVariables S, T_SVType T, T_SVLayer L)
         {
-            result = p.State;
+            double result;
+            TStateVariable p;
+            p = GetStatePointer(S, T, L);
+            if (!(p == null))
+            {
+                result = p.State;
+            }
+            else
+            {
+                result = -1;
+            }
+            return result;
         }
-        else
-        {
-            result = -1;
-        }
-        return result;
-    }
 
-      public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
+        public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
         {
             foreach (TStateVariable TSV in SV)
                 if ((TSV.NState == S) && (TSV.SVType == T) && (TSV.Layer == L))  // needs optimization!
                 {
                     return TSV;
                 }
-            
+
             return null;
-    }
+        }
+
+        public double SegVol()        // volume of segment or individual layer if stratified
+        {
+            return Volume_Last_Step;
+            //if  (LinkedMode) or (!Stratified) return Volume_Last_Step; // or linked mode
+            // else return Location.Morph.SegVolum[VSeg];
+
+        }
+
+
+        // ***  Process Equations  ***
+        // *******************************************************
+        // Stroganov Function
+        // Limits the rate for non-optimal temp - biolog10ical
+        // based on O'Neill et al., 1972; Kitchell et al., 1972
+        // and Bloomfield et al., 1973
+        // *******************************************************
+        public double TCorr(double Q10, double TRef, double TOpt, double TMax)
+        {
+            double result;
+            const double XM = 2.0;
+            const double KT = 0.5;
+            const double Minus = -1.0;
+            // tcorr
+            double Sign = 1.0;
+            // initialize
+            double Temp = GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((Temp - TRef) < 0.0) Sign = Minus;
+
+            double Acclimation = Sign * XM * (1.0 - Math.Exp(-KT * Math.Abs(Temp - TRef)));
+            // Kitchell et al., 1972
+            double TMaxAdapt = TMax + Acclimation;
+            // C          C     C
+            double TOptAdapt = TOpt + Acclimation;
+            if (Q10 <= 1.0)
+            {
+                // JSC added "=" to "<=" otherwise YT=0, division by zero
+                Q10 = 2.0;
+            }
+            // rate of change per 10 degrees
+            if (TMaxAdapt <= TOptAdapt)
+            {
+                TMaxAdapt = TOptAdapt + Consts.VSmall;
+            }
+            double WT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt);
+            double YT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt + 2.0);
+            // NOT IN CEM MODELS
+            double XT = (Math.Pow(WT, 2) * Math.Pow(1.0 + Math.Sqrt(1.0 + 40.0 / YT), 2)) / 400.0;
+            double VT = (TMaxAdapt - Temp) / (TMaxAdapt - TOptAdapt);
+            if (VT < 0.0) result = 0.0;
+            else result = Math.Pow(VT, XT) * Math.Exp(XT * (1.0 - VT));
+            // unitless
+            return result;
+        }
+
+
+
+        // ----------------------------------------------------------------------------------
+        //public void SetMemLocRec()
+        //{
+        //    int SVLoop;
+        //    T_SVType TypeLoop;
+        //    T_SVLayer LayerLoop;
+        //    int i;
+        //    object p;
+        //    TStateVariable PSV;
+        //    PSV = new TStateVariable(Global.AllVariables.NullStateVar, Global.T_SVType.StV, Global.T_SVLayer.WaterCol, "", this, 0, true);
+        //    for (TypeLoop = Global.T_SVType.StV; TypeLoop <= Global.T_SVType.PIntrnl; TypeLoop++)
+        //    {
+        //        for (SVLoop = Global.Units.Global.FirstState; SVLoop <= Global.Units.Global.LastState; SVLoop++)
+        //        {
+        //            for (LayerLoop = Global.T_SVLayer.WaterCol; LayerLoop <= Global.T_SVLayer.SedLayer10; LayerLoop++)
+        //            {
+        //                PSV.NState = SVLoop;
+        //                PSV.SVType = TypeLoop;
+        //                PSV.Layer = LayerLoop;
+        //                // Set Indexes
+        //                if (!this.Search(PSV, ref i))
+        //                {
+        //                    i = -1;
+        //                }
+        //                MemLocRec.Indx[SVLoop, TypeLoop, LayerLoop] = i;
+        //                // Set Pointers
+        //                p = null;
+        //                if (i >= 0)
+        //                {
+        //                    p = this.At(i);
+        //                }
+        //                MemLocRec.Ptr[SVLoop, TypeLoop, LayerLoop] = p;
+        //            }
+        //        }
+        //    }
+        //    // SvLoop
+        //    PSV.Destroy();
+        //}
+
 
 
         //public void calchradius(bool averaged)
