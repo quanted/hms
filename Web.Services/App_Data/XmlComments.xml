@@ -610,6 +610,11 @@
             Valid formats are: an ID for type huc, commid, and catchmentid; geojson for types catchment and flowline; and points for type points
             </summary>
         </member>
+        <member name="F:Web.Services.Models.TotalFlowInput.GeometryInputs">
+            <summary>
+            Contains the type as key and input as value, used when multiple inputs are needed for a request
+            </summary>
+        </member>
         <member name="T:Web.Services.Models.GeometryResponse">
             <summary>
             Response from HMS-GIS

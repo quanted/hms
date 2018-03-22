@@ -26,6 +26,11 @@ namespace Web.Services.Models
         /// Valid formats are: an ID for type huc, commid, and catchmentid; geojson for types catchment and flowline; and points for type points
         /// </summary>
         public string GeometryInput;
+
+        /// <summary>
+        /// Contains the type as key and input as value, used when multiple inputs are needed for a request
+        /// </summary>
+        public Dictionary<string, string> GeometryInputs;
     }
 
     /// <summary>
@@ -119,56 +124,75 @@ namespace Web.Services.Models
             // 8 - set metadata (request inputs, catchment data, aggregation data, output structure)
             // 9 - return output
 
-            // TODO: Add metadata
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
-            string baseUrl = "";
-            switch (input.GeometryType.ToLower())
+            // local testing
+            string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
+            // deployment url
+            // string baseUrl = "https//qedinternal.epa.gov/gis/rest/hms/percentage
+            if (input.GeometryInputs != null)
             {
-                case "huc":
-                    // use case 1
-                    // use case 2
-                    string hucID = input.GeometryInput;
-                    using( var client = new HttpClient())
-                    {
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/" + hucID).Result);
-                    }
-                    break;
-                case "commid":
-                    // use case 3
-                    string commid = input.GeometryInput;
+                if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
+                {
                     using (var client = new HttpClient())
                     {
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/commid/" + commid).Result);
+                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"]).Result);
                     }
-                    break;
-                case "catchmentid":
-                    // use case 3
-                    string catchmentID = input.GeometryInput;
-                    using (var client = new HttpClient())
-                    {
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
-                    }
-                    break;
-                case "catchment":
-                    // use case 4
-                    // Use POST call with geometry 
-                    break;
-                case "flowline":
-                    // use case 5
-                    // Use POST call with geometry
-                    break;
-                case "points":
-                    // use case 6
-                    // use case 7
-                    // GET call with points, hms-gis will get geometries
-                    break;
-                case "test":
-                    string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
-                    geo = JsonConvert.DeserializeObject<GeometryResponse>(testGeometry);
-                    break;
-                default:
-                    return err.ReturnError("Input error - GeometryType provided is invalid. Provided value = " + input.GeometryType);
+                }
+                else
+                {
+                    return err.ReturnError("Input error - GeometryInputs provided is invalid.");
+                }
+            }
+            else
+            {
+                switch (input.GeometryType.ToLower())
+                {
+                    case "huc":
+                        // use case 1
+                        // use case 2
+                        string hucID = input.GeometryInput;
+                        using (var client = new HttpClient())
+                        {
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?huc_8_id=" + hucID).Result);
+                        }
+                        break;
+                    case "commid":
+                        // use case 3
+                        string commid = input.GeometryInput;
+                        using (var client = new HttpClient())
+                        {
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?com_id=" + commid).Result);
+                        }
+                        break;
+                    case "catchmentid":
+                        // use case 3
+                        string catchmentID = input.GeometryInput;
+                        using (var client = new HttpClient())
+                        {
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
+                        }
+                        break;
+                    case "catchment":
+                        // use case 4
+                        // Use POST call with geometry 
+                        break;
+                    case "flowline":
+                        // use case 5
+                        // Use POST call with geometry
+                        break;
+                    case "points":
+                        // use case 6
+                        // use case 7
+                        // GET call with points, hms-gis will get geometries
+                        break;
+                    case "test":
+                        string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
+                        geo = JsonConvert.DeserializeObject<GeometryResponse>(testGeometry);
+                        break;
+                    default:
+                        return err.ReturnError("Input error - GeometryType provided is invalid. Provided value = " + input.GeometryType);
+                }
             }
 
             // Collect all unique points in Catchment
