@@ -41,45 +41,56 @@ namespace Web.Services.Models
         /// <summary>
         /// Geometry component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, List<CatchmentPoint>> Geometry;
+        public Dictionary<string, Catchment> geometry;
 
         /// <summary>
         /// Metadata component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, string> Metadata;
+        public Dictionary<string, string> metadata;
+    }
+
+    /// <summary>
+    /// Catchments
+    /// </summary>
+    public class Catchment
+    {
+        /// <summary>
+        /// List of points in the Catchment
+        /// </summary>
+        public List<Point> points;
     }
 
     /// <summary>
     /// Catchment point data
     /// </summary>
-    public class CatchmentPoint
+    public class Point
     {
         /// <summary>
         /// Latitude of centroid
         /// </summary>
-        public double Latitude;
+        public double latitude;
         /// <summary>
         /// Longitude of centroid
         /// </summary>
-        public double Longitude;
+        public double longitude;
         /// <summary>
         /// Total cell area
         /// </summary>
-        public double CellArea;
+        public double cellArea;
         /// <summary>
         /// Cell area that intersects the catchment
         /// </summary>
-        public double ContainedArea;
+        public double containedArea;
         /// <summary>
         /// Percent coverage of the intersection
         /// </summary>
-        public double PercentArea;
+        public double percentArea;
     }
 
     /// <summary>
     /// Point object
     /// </summary>
-    public class Point
+    public class GeometryPoint
     {
         /// <summary>
         /// Point latitude
@@ -127,16 +138,18 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
             // local testing
-            string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
+            // string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
             // deployment url
-            // string baseUrl = "https//qedinternal.epa.gov/gis/rest/hms/percentage
+            string baseUrl = "https//qedinternal.epa.gov/gis/rest/hms/percentage
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
                 {
+                    string queryUrl = baseUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
                     using (var client = new HttpClient())
                     {
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"]).Result);
+                        client.Timeout = TimeSpan.FromMinutes(10);
+                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
                     }
                 }
                 else
@@ -154,7 +167,9 @@ namespace Web.Services.Models
                         string hucID = input.GeometryInput;
                         using (var client = new HttpClient())
                         {
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?huc_8_id=" + hucID).Result);
+                            string queryUrl = baseUrl + "?huc_8_id=" + hucID;
+                            client.Timeout = TimeSpan.FromMinutes(10);
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
                         }
                         break;
                     case "commid":
@@ -162,16 +177,18 @@ namespace Web.Services.Models
                         string commid = input.GeometryInput;
                         using (var client = new HttpClient())
                         {
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "?com_id=" + commid).Result);
+                            string queryUrl = baseUrl + "?com_id=" + commid;
+                            client.Timeout = TimeSpan.FromMinutes(10);
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
                         }
                         break;
                     case "catchmentid":
                         // use case 3
-                        string catchmentID = input.GeometryInput;
-                        using (var client = new HttpClient())
-                        {
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
-                        }
+                        // string catchmentID = input.GeometryInput;
+                        //using (var client = new HttpClient())
+                        //{
+                        //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
+                        //}
                         break;
                     case "catchment":
                         // use case 4
@@ -187,7 +204,8 @@ namespace Web.Services.Models
                         // GET call with points, hms-gis will get geometries
                         break;
                     case "test":
-                        string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
+                        string testGeometry = "{\"geometry\":{\"9311911\": { \"points\": [ { \"cellArea\": 0.015624999999992895,  \"containedArea\": 4.178630503273804e-05,  \"longitude\": -71.43749999999996,  \"latitude\": 44.18749999999999,  \"percentArea\": 0.26743235220964506 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.005083393397351494,  \"longitude\": -71.31249999999997,  \"latitude\": 44.18750000000001,  \"percentArea\": 32.53371774305696 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.0002419268603100419,  \"longitude\": -71.31249999999997,  \"latitude\": 44.31249999999997,  \"percentArea\": 1.5483319059846201 } ] } },  \"metadata\": { \"execution time\": 86.99717831611633,  \"nldas source\": \"https://ldas.gsfc.nasa.gov/nldas/gis/NLDAS_Grid_Reference.zip\",  \"number of points\": 3,  \"request date\": \"Thu, 22 Mar 2018 11:46:44 GMT\",  \"shapefile source\": \"ftp://newftp.epa.gov/exposure/BasinsData/NHDPlus21/NHDPlus01060002.zip\" } }";
+                        //string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
                         geo = JsonConvert.DeserializeObject<GeometryResponse>(testGeometry);
                         break;
                     default:
@@ -196,15 +214,15 @@ namespace Web.Services.Models
             }
 
             // Collect all unique points in Catchment
-            List<Point> points = new List<Point>();
+            List<GeometryPoint> points = new List<GeometryPoint>();
             List<string> pointsSTR = new List<string>();
-            foreach (KeyValuePair<string, List<CatchmentPoint>> k in geo.Geometry)
+            foreach (KeyValuePair<string, Catchment> k in geo.geometry)
             {
-                foreach (CatchmentPoint cp in k.Value)
+                foreach (Point cp in k.Value.points)
                 {
-                    Point p = new Point();
-                    p.Latitude = cp.Latitude;
-                    p.Longitude = cp.Longitude;
+                    GeometryPoint p = new GeometryPoint();
+                    p.Latitude = cp.latitude;
+                    p.Longitude = cp.longitude;
                     if (!points.Contains(p))
                     {
                         points.Add(p);
@@ -219,7 +237,7 @@ namespace Web.Services.Models
             // Initialize all surface and subsurface points
             Dictionary<string, SurfaceRunoff.SurfaceRunoff> surfaceFlow = new Dictionary<string, SurfaceRunoff.SurfaceRunoff>();
             Dictionary<string, SubSurfaceFlow.SubSurfaceFlow> subsurfaceFlow = new Dictionary<string, SubSurfaceFlow.SubSurfaceFlow>();
-            foreach (Point point in points)
+            foreach (GeometryPoint point in points)
             {
                 string key = point.Latitude.ToString() + "," + point.Longitude.ToString();
                 TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
@@ -284,21 +302,22 @@ namespace Web.Services.Models
             List<ITimeSeriesOutput> catchmentFlow = new List<ITimeSeriesOutput>();
             ITimeSeriesOutput iOutput = outputFactory.Initialize();
             var options2 = new ParallelOptions { MaxDegreeOfParallelism = 1 };
-            Parallel.ForEach(geo.Geometry, options2, (KeyValuePair<string, List<CatchmentPoint>> catchment) => {
-                string catchmentID = catchment.Key;
+            Dictionary<string, string> catchmentMeta = new Dictionary<string, string>();
+            Parallel.ForEach(geo.geometry, options2, (KeyValuePair<string, Catchment> catchments) => {
+                string catchmentID = catchments.Key;
                 List<ITimeSeriesOutput> catchmentPoints = new List<ITimeSeriesOutput>();
-                foreach (CatchmentPoint cp in catchment.Value)
+                foreach (Point cp in catchments.Value.points)
                 {
                     IPointCoordinate point = new PointCoordinate()
                     {
-                        Latitude = cp.Latitude,
-                        Longitude = cp.Longitude
+                        Latitude = cp.latitude,
+                        Longitude = cp.longitude
                     };
                     string key = point.Latitude.ToString() + "," + point.Longitude.ToString();
-                    ITimeSeriesOutput output1 = Utilities.Merger.ModifyTimeSeries(surfaceFlow[key].Output, cp.PercentArea / 100);
-                    ITimeSeriesOutput output2 = Utilities.Merger.ModifyTimeSeries(subsurfaceFlow[key].Output, cp.PercentArea / 100);
+                    ITimeSeriesOutput output1 = Utilities.Merger.ModifyTimeSeries(surfaceFlow[key].Output, cp.percentArea / 100);
+                    ITimeSeriesOutput output2 = Utilities.Merger.ModifyTimeSeries(subsurfaceFlow[key].Output, cp.percentArea / 100);
 
-                    if(iOutput.Data.Count == 0)
+                    if (iOutput.Data.Count == 0)
                     {
                         iOutput = output1;
                         iOutput = Utilities.Merger.MergeTimeSeries(iOutput, output2);
@@ -308,9 +327,12 @@ namespace Web.Services.Models
                         iOutput = Utilities.Merger.MergeTimeSeries(iOutput, output1);
                         iOutput = Utilities.Merger.MergeTimeSeries(iOutput, output2);
                     }
-                    catchmentPoints.Add(Utilities.Merger.AddTimeSeries(output1, output2, "TotalFlow"));                    
+                    catchmentPoints.Add(Utilities.Merger.AddTimeSeries(output1, output2, "TotalFlow"));
                 }
+                
                 output.Data = (Utilities.Merger.MergeTimeSeries(catchmentPoints).Data);
+                int currentCatchment = catchmentMeta.Count + 1;
+                catchmentMeta.Add("catchment_column_" + currentCatchment.ToString() + "_ID", catchments.Key);
             });
             // Testing
             // output.Data = iOutput.Data;
@@ -325,6 +347,32 @@ namespace Web.Services.Models
             output.Metadata.Remove(input.Source + "_param_short_name");
             output.Metadata.Remove(input.Source + "_param_name");
             output.Metadata[input.Source + "_points"] = string.Join(", ", pointsSTR);
+
+            // Adding geometry metadata to output metadata
+            foreach(KeyValuePair<string, string> kv in geo.metadata)
+            {
+                if (!output.Metadata.ContainsKey(kv.Key))
+                {
+                    output.Metadata.Add(kv.Key, kv.Value);
+                }
+            }
+
+            // Cleaning up output metadata
+            Dictionary<string, string> cleanedMetaData = new Dictionary<string, string>();
+            foreach(KeyValuePair<string, string> kv in output.Metadata)
+            {
+                if (!kv.Key.Contains("column"))
+                {
+                    cleanedMetaData.Add(kv.Key, kv.Value);
+                }
+            }
+            output.Metadata = cleanedMetaData;
+
+            // Add catchments metadata to output metadata
+            foreach(KeyValuePair<string, string> kv in catchmentMeta)
+            {
+                output.Metadata.Add(kv.Key, kv.Value);
+            }
 
             return output;
         }
