@@ -17,11 +17,11 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the Precipitation component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckPrecipEndpoints()
+        public async static Task<Dictionary<string, Dictionary<string, string>>> CheckPrecipEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<Precipitation.Precipitation> precips = new List<Precipitation.Precipitation>();
-            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet" };
+            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet"};
             ITimeSeriesInput testInput = new TimeSeriesInput()
             {
                 Source = "nldas",
@@ -65,7 +65,7 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the Evapotranspiration component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckEvapoEndpoints()
+        public static async Task<Dictionary<string, Dictionary<string, string>>> CheckEvapoEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<Evapotranspiration.Evapotranspiration> evapos = new List<Evapotranspiration.Evapotranspiration>();
@@ -108,7 +108,7 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the Soil Moisture component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckSoilMEndpoints()
+        public static async Task<Dictionary<string, Dictionary<string, string>>> CheckSoilMEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<SoilMoisture.SoilMoisture> soils = new List<SoilMoisture.SoilMoisture>();
@@ -157,7 +157,7 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the Sub-Surface Flow component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckSubsurfaceEndpoints()
+        public static async Task<Dictionary<string, Dictionary<string, string>>> CheckSubsurfaceEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<SubSurfaceFlow.SubSurfaceFlow> subsurfaces = new List<SubSurfaceFlow.SubSurfaceFlow>();
@@ -200,7 +200,7 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the SurfaceRunoff component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckRunoffEndpoints()
+        public static async Task<Dictionary<string, Dictionary<string, string>>> CheckRunoffEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<SurfaceRunoff.SurfaceRunoff> runoffs = new List<SurfaceRunoff.SurfaceRunoff>();
@@ -243,7 +243,7 @@ namespace Web.Services.Models
         /// Checks the data endpoints for the Temperature component.
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, Dictionary<string, string>> CheckTempEndpoints()
+        public static async Task<Dictionary<string, Dictionary<string, string>>> CheckTempEndpoints()
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<Temperature.Temperature> temps = new List<Temperature.Temperature>();

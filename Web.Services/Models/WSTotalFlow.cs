@@ -140,7 +140,7 @@ namespace Web.Services.Models
             // local testing
             // string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
             // deployment url
-            string baseUrl = "https//qedinternal.epa.gov/gis/rest/hms/percentage
+            string baseUrl = "https//qedinternal.epa.gov/gis/rest/hms/percentage";
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
