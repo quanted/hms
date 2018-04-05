@@ -28,9 +28,9 @@ namespace AQUATOX.AQSite
         public string XZMean;
         public double ZMax;
         public string XZMax;
-        public double[] TempMean;
+        public double TempMean;
         public string XTempMean;
-        public double[] TempRange;
+        public double TempRange;
         public string XTempRange;
         public double Latitude;
         public string XLatitude;

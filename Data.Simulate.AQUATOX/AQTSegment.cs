@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using Globals;
 using AQUATOX.AQSite;
 using AQUATOX.Loadings;
-
+using AQUATOX.Nutrients;
+using AQUATOX.Volume;
 
 using System.Linq;
 using Newtonsoft.Json;
-using System.IO;
-using System.Text;
-using System.Runtime.Serialization.Json;
 using Data;
 
 namespace AQUATOX.AQTSegment
@@ -338,11 +336,18 @@ namespace AQUATOX.AQTSegment
         public TLoadings DynEvap = null;
         public TLoadings DynZMean;
 
+        public bool CalcVelocity = true;
+        public TLoadings DynVelocity = null;
+        public double MeanDischarge = 0;
+
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
         [JsonIgnore] public DateTime SimulationDate;  // time integration started
         [JsonIgnore] public DateTime VolumeUpdated;  // 
+        [JsonIgnore] public double MeanVolume;       // 
         [JsonIgnore] public double Volume_Last_Step;    //Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
+        [JsonIgnore] public bool Anoxic = false;        // Is System Anoxic , nosave
+
 
 
         public AQUATOXSegment()
@@ -401,10 +406,11 @@ namespace AQUATOX.AQTSegment
 
         public void RunTest()
         {
-
+            //            Nutrients.TRemineralize SVI = new Nutrients.TRemineralize(AllVariables.Ammonia,T_SVType.StV,T_SVLayer.WaterCol, "Total Ammonia as N", this, 1000);
+            //            SVI.PName = "TRemin";
+            //            SVI.LoadsRec = new LoadingsRecord();
             TExpIncrease SVI = new TExpIncrease();
-            SVI.PName = "4% increase";
-            SVI.LoadsRec = new LoadingsRecord();
+            SVI.PName = "Exp Increase";
             T10PctDecrease SVD = new T10PctDecrease();
             SVD.PName = "10% decrease";
             TStateVariable SVF = new TStateVariable();
@@ -414,7 +420,7 @@ namespace AQUATOX.AQTSegment
             SV.Add(SVI);
             SV.Add(SVD);
             SV.Add(SVF);
-            //          SV.Add(SVTV);
+            //         SV.Add(SVTV);
 
             SVI.InitialCond = 10;
             SVI.State = 10;
@@ -516,7 +522,7 @@ namespace AQUATOX.AQTSegment
             double[] A = { 0, 0, 0.2, 0.3, 0.6, 1, 0.875 };
             double[] B5 = { 0, 0.09788359788, 0, 0.40257648953, 0.21043771044, 0, 0.28910220215 };
             double[] B4 = { 0, 0.10217737269, 0, 0.38390790344, 0.24459273727, 0.01932198661, 0.25 };  // Butcher Tableau
-            double[,] Tableau = { { 0.2, 0, 0, 0, 0 }, { 3 / 40, 9 / 40, 0, 0, 0 }, { 3 / 10, -9 / 10, 6 / 5, 0, 0 }, { -11 / 54, 5 / 2, -70 / 27, 35 / 27, 0 }, { 1631 / 55296, 175 / 512, 575 / 13824, 44275 / 110592, 253 / 4096 } };
+            double[,] Tableau = { { 0.2, 0, 0, 0, 0 }, { 0.075, 0.225, 0, 0, 0 }, { 0.3, -0.9, 1.2, 0, 0 }, { -0.2037037037037, 2.5, -2.5925925925926, 1.2962962963, 0 }, { 0.029495804398148, 0.341796875000000, 0.041594328703704, 0.400345413773148, 0.061767578125000 } };
             int Steps;
             int SubStep;
             double YFourth;
@@ -577,7 +583,7 @@ namespace AQUATOX.AQTSegment
 
             MaxStep = 1.0;
 
-            //            if (SV.PModelTimeStep == Global.TimeStepType.TSDaily)
+            //            if (SV.PModelTimeStep == TimeStepType.TSDaily)
             //            {
             //                MaxStep = 1.0;
             //            }
@@ -701,7 +707,8 @@ namespace AQUATOX.AQTSegment
                 // reasonable error, so copy results of differentiation saved in YHolders
                 TSV.State = TSV.yhold;
             }
-            //            Perform_Dilute_or_Concentrate(x);
+
+            Perform_Dilute_or_Concentrate(x);
         }
 
 
@@ -835,6 +842,229 @@ namespace AQUATOX.AQTSegment
             return PostProcessResults();
 
         }  // integrate
+
+        // *************************************
+        // Modifies Concentration to
+        // account for a change in volume
+        // Executed after successful rkqs step
+        // coded by JSC, 10/5/99
+        // Added pore waters, 11/29/00
+        // Added delta thermocline 7/16/07
+        // *************************************
+
+        public void Perform_Dilute_or_Concentrate(DateTime TimeIndex)
+        {
+            double Vol_Prev_Step;
+            double NewVolume;
+            double FracChange;
+            double VolInitCond;
+
+            TVolume TV = (TVolume)(GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol));
+            if (TV == null) return;
+
+            VolInitCond = TV.InitialCond;
+            NewVolume = TV.State;
+
+            //// Check for Water Volume Zero and Move On
+            //if (NewVolume <= VolInitCond * Location.Locale.Min_Vol_Frac)
+            //    {
+            //        WaterVolZero = true;
+            //        Water_Was_Zero = true;
+            //        Volume_Last_Step = GetState(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+            //        return;
+            //    }
+
+            //if (Water_Was_Zero)  { Volume_Last_Step = Last_Non_Zero_Vol;  }
+
+            // // Recover from Water Volume Zero State
+            // Water_Was_Zero = false;
+            // WaterVolZero = false;
+
+             Vol_Prev_Step = Volume_Last_Step;
+
+            // FIXME Stratification code here if and when relevant
+
+            NewVolume = GetState(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+            Volume_Last_Step = NewVolume;
+            //LossVol = 0;
+            //GainVol = 0;
+            //PrevSegVol = 0;
+            //NewSegVol = 0;
+//          NewVolFrac = 1;
+
+            // FIXME Stratification code here if and when relevant
+
+//          Last_Non_Zero_Vol = NewVolume;
+            FracChange = (NewVolume / Vol_Prev_Step);
+//          VolFrac_Last_Step = NewVolFrac;
+
+            TV.DeltaVolume();  // Update SegVolum Calculations
+
+            foreach (TStateVariable TSV in SV)
+            {
+                    // PERFORM DILUTE-CONCENTRATE
+               if (TSV.Layer == T_SVLayer.WaterCol)
+                  //if (((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota))||
+                  //   ((TSV.NState >= Globals.Consts.FirstTox) && (TSV.NState <= Globals.Consts.LastTox))||
+                  if   ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr))
+                        {
+                            TSV.State = TSV.State / FracChange;
+                        }
+                    // dilute/concentrate
+            }
+
+        //if ((LossVol > 0) || (GainVol > 0))
+        //        {
+        //            for (i = 0; i < Count; i++)
+        //            {
+        //                PSV = At(i);
+        //                if (PSV.Layer == T_SVLayer.WaterCol)
+        //                {
+        //                    if ((new ArrayList(new object[] { Units.FirstBiota, Units.FirstTox, AllVariables.Ammonia }).Contains(PSV.NState)) && !((PSV.NState >= Units.FirstTox && PSV.NState <= Units.LastTox) && SetupRec.ChemsDrivingVars))
+        //                    {
+        //                        // move water based on delta z thermocline 7-27-07
+        //                        MassT0 = PSV.State * PrevSegVol;
+        //                        // g
+        //                        // g/m3
+        //                        // m3
+        //                        if (VSeg == VerticalSegments.Epilimnion)
+        //                        {
+        //                            OtherSegState = HypoSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
+        //                        }
+        //                        else
+        //                        {
+        //                            OtherSegState = EpiSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
+        //                        }
+        //                        if (LossVol > 0)
+        //                        {
+        //                            mass = (PSV.State * PrevSegVol) - (LossVol * PSV.State);
+        //                        }
+        //                        else
+        //                        {
+        //                            mass = (PSV.State * PrevSegVol) + (GainVol * OtherSegState);
+        //                        }
+        //                        // gainvol>0
+        //                        // g
+        //                        // g/m3
+        //                        // m3
+        //                        // m3
+        //                        // g/m3
+        //                        PSV.State = mass / NewSegVol;
+        //                        // g/m3
+        //                        // g
+        //                        // m3
+        //                        Perform_Dilute_or_Concentrate_Track_Nutrient_Exchange(PSV.NState, mass - MassT0, WorkingTStates);
+        //                        // net mass transfer
+        //                        // g
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        if ((LossVol > 0) || (GainVol > 0)) TV.DeltaVolume();
+
+                // pore waters also dilute/concentrate
+                //for (LayerLoop = T_SVLayer.SedLayer1; LayerLoop <= Units.LowestLayer; LayerLoop++)
+                //{
+                //    if (GetStatePointer(AllVariables.PoreWater, T_SVType.StV, LayerLoop) != null)
+                //    {
+                //        NewVolume = GetState(AllVariables.PoreWater, T_SVType.StV, LayerLoop);
+                //        if (NewVolume * SV.SedLayerArea() > Units.Tiny)
+                //        {
+                //            // m3/m2
+                //            // m2
+                //            if (PWVol_Last_Step[LayerLoop] < Units.Tiny)
+                //            {
+                //                FracChange = 1;
+                //            }
+                //            else
+                //            {
+                //                FracChange = (NewVolume / PWVol_Last_Step[LayerLoop]);
+                //            }
+                //            if (FracChange != 1.0)
+                //            {
+                //                for (VarLoop = AllVariables.PoreWater; VarLoop <= AllVariables.LaDOMPore; VarLoop++)
+                //                {
+                //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Units.LastToxTyp; ToxLoop++)
+                //                    {
+                //                        PSV = GetStatePointer(VarLoop, ToxLoop, LayerLoop);
+                //                        if ((PSV != null) && !((VarLoop == AllVariables.PoreWater) && (ToxLoop == T_SVType.StV)))
+                //                        {
+                //                            PSV.State = PSV.State / FracChange;
+                //                        }
+                //                    }
+                //                }
+                //            }
+                //            PWVol_Last_Step[LayerLoop] = NewVolume;
+                //        }
+                //        else
+                //        {
+                //            if (PWVol_Last_Step[LayerLoop] > 0)
+                //            {
+                //                // need to handle residual toxicant dissolved in pore water
+                //                for (PoreLoop = AllVariables.PoreWater; PoreLoop <= AllVariables.LaDOMPore; PoreLoop++)
+                //                {
+                //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Units.LastOrgTxTyp; ToxLoop++)
+                //                    {
+                //                        PTox = SV.GetStatePointer(PoreLoop, ToxLoop, LayerLoop);
+                //                        if (PTox != null)
+                //                        {
+                //                            if (ToxLoop > T_SVType.StV)
+                //                            {
+                //                                PWater = SV.GetStatePointer(Units.AssocToxSV(ToxLoop), T_SVType.StV, T_SVLayer.WaterCol);
+                //                                PWater.State = PWater.State + PTox.State * SV.PWVol_Last_Step[LayerLoop] * SV.SedLayerArea() / SV.SegVol();
+                //                                // ug/L wc
+                //                                // ug/L wc
+                //                                // ug/L pw
+                //                                // m3/m2 pw
+                //                                // m2
+                //                                // m3 wc
+                //                            }
+                //                            PTox.State = 0;
+                //                        }
+                //                    }
+                //                }
+                //            }
+                //            PWVol_Last_Step[LayerLoop] = 0;
+                //            // newvolume < tiny
+                //        }
+                //    }
+            
+        }
+        
+        // -------------------------------------------------------------------------------------------------------------------------------
+
+        public double Ice_Cover_Temp()
+        {
+            double result;
+            double Sal;
+            switch (Location.SiteType)
+            {
+                case SiteTypes.Estuary:
+                case SiteTypes.Marine:
+                    result = -1.8;
+                    // default if salinity state variable not found {Ocean water with a typical salinity of 35 parts per thousand freezes only at -1.8 degC (28.9 deg F).}
+                    Sal = GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (Sal > 0)
+                    {
+                        result = (-0.0575 * Sal) + (0.001710523 * Math.Pow(Sal, 1.5)) - (0.0002154996 * Math.Pow(Sal, 2)); // UNESCO (1983), 4/8/2015
+                    }
+                    break;
+                case SiteTypes.Stream:
+                    
+                    result = 0.0;
+                    break;
+                default:
+                    // Temperature at which ice cover occurs in moving water
+                    result = 3.0;
+                    break;
+                    // Temperature at which ice cover occurs in fresh water
+            }
+            // case
+
+            return result;
+        }
+
 
         public double TrapezoidalIntegration(ref string ErrMsg, DateTime Start_Interval_Time, DateTime End_Interval_Time, List<double> vals, int rti)
         {
@@ -979,9 +1209,12 @@ namespace AQUATOX.AQTSegment
 
         public void CalculateAllLoads(DateTime TimeIndex)
         // If EstuarySegment then TSalinity(GetStatePointer(Salinity, StV, WaterCol)).CalculateLoad(TimeIndex); {get salinity vals for salt balance}
-        // TVolume(GetStatePointer(Volume, StV, WaterCol)).CalculateLoad(TimeIndex);
-        // TVolume(GetStatePointer(Volume, StV, WaterCol)).Derivative(Junk);
+
         {
+            double junk = 0;
+            TVolume TV = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+            TV.CalculateLoad(TimeIndex);
+            TV.Derivative(ref junk);
             foreach (TStateVariable TSV in SV)
                 TSV.CalculateLoad(TimeIndex);
         }
@@ -1003,7 +1236,8 @@ namespace AQUATOX.AQTSegment
                 result = Volume_Last_Step / Location.Locale.SurfArea;
                 return result;
             }
-            result = DynZMean.ReturnTSLoad(TPresent);
+            if (DynZMean == null) result = 0;
+            else result = DynZMean.ReturnTSLoad(TPresent);  // time series only
 
             if (result == 0)
             {
@@ -1027,13 +1261,11 @@ namespace AQUATOX.AQTSegment
             double result;
             TStateVariable p;
             p = GetStatePointer(S, T, L);
-            if (!(p == null))
-            {
-                result = p.State;
-            }
+            if (!(p == null))  {   result = p.State;   }
             else
             {
-                result = -1;
+                throw new ArgumentException("GetState called for non-existant state variable: "+S.ToString() , "original");
+                // result = -1;
             }
             return result;
         }
@@ -1113,12 +1345,12 @@ namespace AQUATOX.AQTSegment
         //    int i;
         //    object p;
         //    TStateVariable PSV;
-        //    PSV = new TStateVariable(Global.AllVariables.NullStateVar, Global.T_SVType.StV, Global.T_SVLayer.WaterCol, "", this, 0, true);
-        //    for (TypeLoop = Global.T_SVType.StV; TypeLoop <= Global.T_SVType.PIntrnl; TypeLoop++)
+        //    PSV = new TStateVariable(AllVariables.NullStateVar, T_SVType.StV, T_SVLayer.WaterCol, "", this, 0, true);
+        //    for (TypeLoop = T_SVType.StV; TypeLoop <= T_SVType.PIntrnl; TypeLoop++)
         //    {
-        //        for (SVLoop = Global.Units.Global.FirstState; SVLoop <= Global.Units.Global.LastState; SVLoop++)
+        //        for (SVLoop = Units.FirstState; SVLoop <= Units.LastState; SVLoop++)
         //        {
-        //            for (LayerLoop = Global.T_SVLayer.WaterCol; LayerLoop <= Global.T_SVLayer.SedLayer10; LayerLoop++)
+        //            for (LayerLoop = T_SVLayer.WaterCol; LayerLoop <= T_SVLayer.SedLayer10; LayerLoop++)
         //            {
         //                PSV.NState = SVLoop;
         //                PSV.SVType = TypeLoop;
@@ -1187,95 +1419,92 @@ namespace AQUATOX.AQTSegment
         //// ---------------------------------------------------------------
 
 
-        //public double velocity(ref string errstr, double pctriffle, double pctpool, bool averaged)
-        //{
-        //    double xsecarea;
-        //    double avgflow;
-        //    double upflow;
-        //    double downflow;
-        //    double pctrun;
-        //    double runvel;
-        //    double rifflevel;
-        //    double poolvel;
-        //    double vol;
-        //    // ----------------------------------------------------------------------------------------------------
-        //    if (averaged) vol = meanvolume;
-        //    else vol = volume_last_step;
+        public double Velocity(double pctriffle, double pctpool, bool averaged)
+        {
+            double xsecarea;
+            double avgflow;
+            double upflow;
+            double downflow;
+            double pctrun;
+            double runvel;
+            double rifflevel;
+            double poolvel;
+            double vol;
+            // ----------------------------------------------------------------------------------------------------
+            if (averaged) vol = MeanVolume;
+            else vol = Volume_Last_Step;
 
-        //    if ((location.sitetype == sitetypes.stream))
-        //    {
-        //        calchradius(averaged);
-        //        xsecarea = sed_data.width * sed_data.channel_depth;
-        //        // m2               // m                // m
-        //        if (averaged)
-        //        {
-        //            calchradius(false);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        xsecarea = vol / (location.locale.sitelength * 1000);
-        //        // m3                    // km      // m/km
-        //    }
-        //    pctrun = 100 - pctriffle - pctpool;
-        //    if ((calcvelocity || averaged))
-        //    {
-        //        morphrecord _wvar3 = location.morph;
-        //        upflow = _wvar3.inflowh2o[vseg];
-        //        downflow = location.discharge[vseg];
-        //        if (averaged)
-        //        {
-        //            upflow = meandischarge;
-        //            // m3/d
-        //            downflow = meandischarge;
-        //        }
-        //        avgflow = (upflow + downflow) / 2;
-        //        // m3/d   // m3/d    // m3/d
-        //        runvel = avgflow / xsecarea * (1 / 86400) * 100;
-        //        // cm/s  // m3/d    // m2         // d/s  // cm/m
+            //if (Location.SiteType == SiteTypes.Stream)
+            //{
+            //    calchradius(averaged);
+            //    xsecarea = sed_data.width * sed_data.channel_depth;
+            //    // m2               // m                // m
+            //    if (averaged)
+            //    {
+            //        calchradius(false);
+            //    }
+            //}
+            //else
+            {
+                xsecarea = vol / (Location.Locale.SiteLength * 1000);
+                // m3                    // km      // m/km
+            }
+            pctrun = 100 - pctriffle - pctpool;
+            if ((CalcVelocity || averaged))
+            {
+                upflow = Location.Morph.InflowH2O;  //vseg
+                downflow = Location.Discharge;      //vseg
+                if (averaged)
+                {
+                    upflow = MeanDischarge;        // m3/d
+                    downflow = MeanDischarge;
+                }
+                avgflow = (upflow + downflow) / 2;
+                // m3/d   // m3/d    // m3/d
+                runvel = avgflow / xsecarea * (1 / 86400) * 100;
+                // cm/s  // m3/d    // m2         // d/s  // cm/m
 
-        //        if (runvel < 0) runvel = 0;
-        //    }
-        //    else
-        //    {
-        //        // user entered velocity
-        //        runvel = dynvelocity.getload(tpresent, true);
-        //        // cm/s
-        //        avgflow = runvel * xsecarea * 86400 * 0.01;
-        //        // m3/d  // cm/s   // m2    // s/d  // m/cm
-        //    }
-        //    if (avgflow < 2.59e5)
-        //    {
-        //        // q < 2.59e5 m3/d
-        //        rifflevel = 1.60 * runvel;
-        //        poolvel = 0.36 * runvel;
-        //    }
-        //    else if (avgflow < 5.18e5)
-        //    {
-        //        // 2.59e5 m3/d < q < 5.18e5 m3/d
-        //        rifflevel = 1.30 * runvel;
-        //        poolvel = 0.46 * runvel;
-        //    }
-        //    else if (avgflow < 7.77e5)
-        //    {
-        //        // 5.18e5 m3/d q < 7.77e5 m3/d
-        //        rifflevel = 1.10 * runvel;
-        //        poolvel = 0.56 * runvel;
-        //    }
-        //    else
-        //    {
-        //        // q >= 7.77e5 m3/d
-        //        rifflevel = 1.00 * runvel;
-        //        poolvel = 0.66 * runvel;
-        //    }
-        //    // cm/s
+                if (runvel < 0) runvel = 0;
+            }
+            else
+            {
+                // user entered velocity
+                runvel = DynVelocity.ReturnTSLoad(TPresent);  // cm/s
+                avgflow = runvel * xsecarea * 86400 * 0.01;
+                // m3/d  // cm/s   // m2    // s/d  // m/cm
+            }
+            if (avgflow < 2.59e5)
+            {
+                // q < 2.59e5 m3/d
+                rifflevel = 1.60 * runvel;
+                poolvel = 0.36 * runvel;
+            }
+            else if (avgflow < 5.18e5)
+            {
+                // 2.59e5 m3/d < q < 5.18e5 m3/d
+                rifflevel = 1.30 * runvel;
+                poolvel = 0.46 * runvel;
+            }
+            else if (avgflow < 7.77e5)
+            {
+                // 5.18e5 m3/d q < 7.77e5 m3/d
+                rifflevel = 1.10 * runvel;
+                poolvel = 0.56 * runvel;
+            }
+            else
+            {
+                // q >= 7.77e5 m3/d
+                rifflevel = 1.00 * runvel;
+                poolvel = 0.66 * runvel;
+            }
+            // cm/s
 
-        //    return (rifflevel * (pctriffle / 100)) + (runvel * (pctrun / 100)) + (poolvel * (pctpool / 100));
-        //}
+            return (rifflevel * (pctriffle / 100)) + (runvel * (pctrun / 100)) + (poolvel * (pctpool / 100));
+        }
 
     }  // end TAQUATOXSegment
 
-public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder
+    public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder
 {
     public IList<Type> KnownTypes { get; set; }
 
@@ -1294,7 +1523,8 @@ public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationB
     {
             KnownTypes = new List<Type> { typeof(TStateVariable), typeof(T10PctDecrease), typeof(TExpIncrease), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(MorphRecord),
                                           typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
-                                          typeof(SortedList<DateTime, double>), typeof(AQUATOXITSOutput) };  // , typeof(Dictionary<string,string>), typeof(Dictionary<string, List<string>>) };
+                                          typeof(SortedList<DateTime, double>), typeof(AQUATOXITSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
+                                          typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj)  }; 
     }
 }
 

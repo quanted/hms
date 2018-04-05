@@ -2,9 +2,7 @@
 
 
 namespace Globals
-{
-
-
+{    
     public enum AllVariables
     {
         H2OTox1,

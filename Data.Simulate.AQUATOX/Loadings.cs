@@ -64,6 +64,19 @@ namespace AQUATOX.Loadings
         public double MultLdg = 1;           // to perturb loading
         [JsonIgnore] int lastindexread = -1;
 
+        public double ReturnLoad(DateTime TimeIndex)
+        {
+            double RetLoad; // Hold Result
+
+            if (NoUserLoad) return 0;
+            if (UseConstant) return ConstLoad * MultLdg;
+
+            //otherwise
+            RetLoad = ReturnTSLoad(TimeIndex); 
+            RetLoad = RetLoad * MultLdg;
+            return RetLoad;
+        }
+
         public double ReturnTSLoad(DateTime TimeIndex)
         {
 
@@ -187,20 +200,9 @@ namespace AQUATOX.Loadings
         // -------------------------------------------------------------------
         public double ReturnLoad(DateTime TimeIndex)
         {
-            double RetLoad; // Hold Result
-
-            if (Loadings.NoUserLoad) return 0;
-            if (Loadings.UseConstant) return Loadings.ConstLoad * Loadings.MultLdg;
-
-            { //otherwise
-                RetLoad = 0;
-                if (Loadings != null)
-                {
-                    RetLoad = Loadings.ReturnTSLoad(TimeIndex);
-                }
-            }
-            RetLoad = RetLoad * Loadings.MultLdg;
-            return RetLoad;
+           double RetLoad = 0;
+           if (Loadings != null) RetLoad = Loadings.ReturnLoad(TimeIndex);
+           return RetLoad;
         }
 
         // -------------------------------------------------------------------
