@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Solar\Solar.csproj" />
+    <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
+    <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
   </ItemGroup>
 
 </Project>

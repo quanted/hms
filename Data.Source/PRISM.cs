@@ -62,7 +62,7 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             string data = DownloadData(url, parameters).Result;
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (data.Contains("ERROR")) { errorMsg = data; return null; }
 
             // TESTING
             //string data = "{\n  \"metainfo\": {\n    \"status\": \"Finished\",\n    \"suid\": \"f3d2cb7e-d480-11e7-9329-2917bf2217fc\",\n    \"cloud_node\": \"10.1.85.2\",\n    \"request_ip\": \"73.118.95.127\",\n    \"service_url\": \"http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0\",\n    \"csip-climate.version\": \"$version: 2.0.13 28d288481f83 2017-11-03 Mark Haas <mark.haas@ars.usda.gov>, built at 2017-11-03 12:26 by jenkins$\",\n    \"csip.version\": \"$version: 2.2.1 7bf35fce9e13 2017-09-15 od, built at 2017-11-03 12:26 by jenkins$\",\n    \"tstamp\": \"2017-11-28 14:13:16\",\n    \"cpu_time\": 27,\n    \"expiration_date\": \"2017-11-28 14:13:47\"\n  },\n  \"parameter\": [\n    {\n      \"name\": \"input_zone_features\",\n      \"value\": {\n        \"type\": \"FeatureCollection\",\n        \"features\": [{\n          \"type\": \"Feature\",\n          \"properties\": {\n            \"name\": \"pt one\",\n            \"gid\": 1\n          },\n          \"geometry\": {\n            \"type\": \"Point\",\n            \"coordinates\": [\n              -83.355723,\n              33.925673\n            ],\n            \"crs\": {\n              \"type\": \"name\",\n              \"properties\": {\"name\": \"EPSG:4326\"}\n            }\n          }\n        }]\n      }\n    },\n    {\n      \"name\": \"units\",\n      \"value\": \"metric\"\n    },\n    {\n      \"name\": \"climate_data\",\n      \"value\": [\"ppt\"]\n    },\n    {\n      \"name\": \"start_date\",\n      \"value\": \"2015-01-01\"\n    },\n    {\n      \"name\": \"end_date\",\n      \"value\": \"2015-01-08\"\n    }\n  ],\n  \"result\": [{\n    \"name\": \"output\",\n    \"value\": [{\n      \"cell_index\": [\n        999,\n        384\n      ],\n      \"data\": [\n        [\n          \"date\",\n          \"ppt (mm)\"\n        ],\n        [\n          \"2015-01-01\",\n          0\n        ],\n        [\n          \"2015-01-02\",\n          1.46\n        ],\n        [\n          \"2015-01-03\",\n          15.35\n        ],\n        [\n          \"2015-01-04\",\n          17.16\n        ],\n        [\n          \"2015-01-05\",\n          12.98\n        ],\n        [\n          \"2015-01-06\",\n          0\n        ],\n        [\n          \"2015-01-07\",\n          0\n        ],\n        [\n          \"2015-01-08\",\n          0\n        ]\n      ],\n      \"name\": \"pt one\"\n    }]\n  }]\n}";
@@ -129,7 +129,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                return "ERROR: Unable to download requested nldas data.\n" + ex.Message;
+                return "ERROR: Unable to download requested prism data. " + ex.Message;
             }
             return data;
         }

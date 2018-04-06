@@ -48,6 +48,8 @@ namespace Data.Source
         /// <returns></returns>
         public static IDateTimeSpan AdjustForOffset(out string errorMsg, ITimeSeriesInput cInput)
         {
+            //TODO: Add error handling for Timezone.Offset 
+
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
@@ -162,7 +164,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data.\n" + ex.Message;
+                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
                 return null;
             }
             return data;

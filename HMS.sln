@@ -33,6 +33,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solar.Tests", "Solar.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Tests", "Data.Tests\Data.Tests.csproj", "{88410378-C651-432C-A44B-6A9AC6FA0BD8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Source.Tests", "Data.Source.Tests\Data.Source.Tests.csproj", "{B8CFE5C5-8EDE-4B34-9E3B-BC6F97D5C0C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities.Tests", "Utilities.Tests\Utilities.Tests.csproj", "{E04D105F-88A3-49A4-929E-EF6E862A5D67}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stream.Hydrology.AQUATOX", "Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj", "{90240887-987A-4C44-88FE-AD7B601C7343}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Simulate.AQUATOX", "Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj", "{4E8926D5-9C2E-4AEE-929A-407B5E4B04A2}"
@@ -107,6 +111,14 @@ Global
 		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88410378-C651-432C-A44B-6A9AC6FA0BD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8CFE5C5-8EDE-4B34-9E3B-BC6F97D5C0C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8CFE5C5-8EDE-4B34-9E3B-BC6F97D5C0C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8CFE5C5-8EDE-4B34-9E3B-BC6F97D5C0C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8CFE5C5-8EDE-4B34-9E3B-BC6F97D5C0C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -11,6 +11,7 @@ using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using Swashbuckle.AspNetCore.Examples;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.Extensions.Logging;
 
 namespace Web.Services
 {
@@ -64,7 +65,7 @@ namespace Web.Services
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             //if (env.IsDevelopment())
             //{
@@ -95,12 +96,13 @@ namespace Web.Services
             {
                 // Routing through IIS as a subdomain requires the following  line for swagger.json to be accessible.
                 //c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
-                //c.RoutePrefix = "HMSWS/swagger";
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
                 c.DocExpansion("none");
                 c.ShowRequestHeaders();
                 //c.ShowJsonEditor();
             });
+
+            // Logger setup and configuration
         }
     }
 }

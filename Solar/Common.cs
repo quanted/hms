@@ -178,7 +178,7 @@ namespace GCSOLAR
             if (wave != 0)
             {
                 double[] waves = this.getWave();
-                int iMax = waves.Count();
+                int iMax = waves.Count() - 1;
                 for (int i = 1; i <= iMax; i++)
                 {
                     double t1 = waves[i];

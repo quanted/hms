@@ -71,7 +71,8 @@ namespace Data.Tests
             badSource = validInput;
             badSource.Source = "";
             ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(badSource, new List<string>() { "PRECIP" }, out errorMsg);
-            Assert.AreEqual("ERROR: Required 'Source' parameter was not found or is invalid.", errorMsg);
+            string expectedError = "ERROR: Required 'Source' parameter was not found or is invalid., ERROR: Provided source is not valid. Unable to construct base url.";
+            Assert.AreEqual(expectedError, errorMsg);
         }
 
         /// <summary>
@@ -143,7 +144,8 @@ namespace Data.Tests
             noPoint = validInput;
             noPoint.Geometry.Point = null;
             ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noPoint, new List<string>() { "PRECIP" }, out errorMsg);
-            Assert.AreEqual("ERROR: No geometry values found in the provided parameters.", errorMsg);
+            string expectedError = "ERROR: No geometry values found in the provided parameters., ERROR: Latitude or Longitude value is not a valid coordinate.";
+            Assert.AreEqual(expectedError, errorMsg);
         }
 
         /// <summary>
