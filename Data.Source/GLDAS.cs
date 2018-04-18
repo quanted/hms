@@ -184,11 +184,12 @@ namespace Data.Source
             List<string> timestepData;
             double offset = (localTime == true) ? tzDetails.Offset : 0.0;
             string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < tsLines.Length; i++)
+            //for (int i = 0; i < tsLines.Length; i++)
+            for (int i = 0; i < tsLines.Length-1; i++)
             {
                 timestepData = new List<string>();
-                string[] lineData = tsLines[i].Split(new string[] { "T", "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                //string[] lineData = tsLines[i].Split(new string[] { "T", "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] lineData = tsLines[i].Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
                 timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
                 dataDict[NLDAS.SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
             }

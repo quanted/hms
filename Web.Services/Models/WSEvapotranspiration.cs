@@ -12,7 +12,7 @@ namespace Web.Services.Models
     public class WSEvapotranspiration
     {
 
-        private enum EvapoSources { nldas, gldas }
+        private enum EvapoSources { nldas, gldas, hamon, priestlytaylor, grangergray, penpan, mcjannett, penmanopenwater, penmandaily, penmanhourly, mortoncrae, mortoncrwe, shuttleworthwallace, hspf }
 
         /// <summary>
         /// Gets evapotranspiration data using the given TimeSeriesInput parameters.
@@ -45,7 +45,6 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             return result;
-
         }
     }
 }
