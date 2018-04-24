@@ -5,6 +5,7 @@ using Web.Services.Models;
 using Swashbuckle.AspNetCore.Examples;
 using System.Net.Http;
 using Data;
+using System.Threading.Tasks;
 
 namespace Web.Services.Controllers
 {
@@ -141,11 +142,11 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("run/")]
-        public Dictionary<string, object> GETDefaultOutput()
+        public async Task<IActionResult> GETDefaultOutput()
         {
             WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = solar.GetGCSolarOutput();
-            return result;
+            Dictionary<string, object> result = await solar.GetGCSolarOutput();
+            return new ObjectResult(result);
         }
 
         /// <summary>
@@ -155,11 +156,11 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/")]
-        public Dictionary<string, object> GETDefaultInput()
+        public async Task<IActionResult> GETDefaultInput()
         {
             WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = solar.GetGCSolarDefaultInput();
-            return result;
+            Dictionary<string, object> result = await solar.GetGCSolarDefaultInput();
+            return new ObjectResult(result);
         }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace Web.Services.Controllers
         [Route("run/")]
         //[SwaggerResponseExample(200, typeof(SolarOutputExample))]
         [SwaggerRequestExample(typeof(SolarInput), typeof(SolarInputExample))]
-        public Dictionary<string, object> POSTCustomInput([FromBody]SolarInput input)
+        public async Task<IActionResult> POSTCustomInput([FromBody]SolarInput input)
         {
             WSSolar solar = new WSSolar();
             if (input is null)
@@ -181,12 +182,12 @@ namespace Web.Services.Controllers
                 {
                     { "Input Error:", "No inputs found in the request or inputs contain invalid formatting." }
                 };
-                return errorMsg;
+                return new ObjectResult(errorMsg);
             }
             else
             {
-                Dictionary<string, object> result = solar.GetGCSolarOutput(input.input);
-                return result;
+                Dictionary<string, object> result = await solar.GetGCSolarOutput(input.input);
+                return new ObjectResult(result);
             }
         }
 
@@ -196,12 +197,12 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/metadata")]
-        public Dictionary<string, object> GetInputMetadata()
+        public async Task<IActionResult> GetInputMetadata()
         {
             WSSolar solar = new WSSolar();
             Dictionary<string, object> metadata = new Dictionary<string, object>();
-            metadata["Input Variables"] = solar.GetMetadata();
-            return metadata;
+            metadata["Input Variables"] = await solar.GetMetadata();
+            return new ObjectResult(metadata);
         }
     }
 
@@ -259,18 +260,21 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("")]
         [SwaggerRequestExample(typeof(SolarCalculatorInput), typeof(SolarCalcInputExample))]
-        public ITimeSeriesOutput POSTSolarCalculator([FromBody]SolarCalculatorInput i)
+        public async Task<IActionResult> POSTSolarCalculator([FromBody]SolarCalculatorInput i)
         {
             WSSolar solar = new WSSolar();
             Utilities.ErrorOutput error = new Utilities.ErrorOutput();
+            ITimeSeriesOutput result;
             if(i is null)
             {
-                return error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
+                result = error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
             }
             else
             {
-                return solar.RunSolarCalculator(i);
+                result = await solar.RunSolarCalculator(i);
+                
             }
+            return new ObjectResult(result);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetWorkFlowData(WorkFlowCompareInput input)
+        public async Task<ITimeSeriesOutput> GetWorkFlowData(WorkFlowCompareInput input)
         {
             string errorMsg = "";
 

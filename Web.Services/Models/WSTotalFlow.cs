@@ -115,7 +115,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetTotalFlowData(TotalFlowInput input)
+        public async Task<ITimeSeriesOutput> GetTotalFlowData(TotalFlowInput input)
         {
             // Steps:
             // 1 - determine geometry
@@ -138,9 +138,9 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
             // local testing
-            // string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
+            string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
             // deployment url
-            string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/gis/percentage/";
+            //string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/gis/percentage/";
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
