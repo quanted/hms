@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Web.Services.Models
@@ -37,6 +38,17 @@ namespace Web.Services.Models
     /// Response from HMS-GIS
     /// </summary>
     public class GeometryResponse
+    {
+        public string id;
+        public string status;
+        public GeometryData data;
+    }
+
+
+    /// <summary>
+    /// Response from HMS-GIS
+    /// </summary>
+    public class GeometryData
     {
         /// <summary>
         /// Geometry component of HMS-GIS response
@@ -134,23 +146,25 @@ namespace Web.Services.Models
             // 7 - return aggregated data as a timeseries in the form of { datetime : [ catchment1, catchment2, catchment3, ... ]}
             // 8 - set metadata (request inputs, catchment data, aggregation data, output structure)
             // 9 - return output
-
+            string error = "";
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
             // local testing
-            string baseUrl = "http://localhost:5000/gis/rest/hms/percentage/";
+            //string baseUrl = "http://localhost:8000/hms/rest/api/v2/hms/gis/percentage/";
             // deployment url
-            //string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/gis/percentage/";
+            string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/gis/percentage/";
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
                 {
+                    Dictionary<string, string> taskID;
                     string queryUrl = baseUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
                     using (var client = new HttpClient())
                     {
-                        client.Timeout = TimeSpan.FromMinutes(10);
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
+                        taskID = JsonConvert.DeserializeObject<Dictionary<string, string>>(client.GetStringAsync(queryUrl).Result);
                     }
+                    geo = this.RequestData(taskID["job_id"], out error);
+
                 }
                 else
                 {
@@ -164,23 +178,25 @@ namespace Web.Services.Models
                     case "huc":
                         // use case 1
                         // use case 2
-                        string hucID = input.GeometryInput;
-                        using (var client = new HttpClient())
-                        {
-                            string queryUrl = baseUrl + "?huc_8_id=" + hucID;
-                            client.Timeout = TimeSpan.FromMinutes(10);
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
-                        }
+                        //string hucID = input.GeometryInput;
+                        //using (var client = new HttpClient())
+                        //{
+                        //    string queryUrl = baseUrl + "?huc_8_id=" + hucID;
+                        //    client.Timeout = TimeSpan.FromMinutes(10);
+                        //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
+                        //}
+                        goto default;
                         break;
                     case "commid":
                         // use case 3
-                        string commid = input.GeometryInput;
-                        using (var client = new HttpClient())
-                        {
-                            string queryUrl = baseUrl + "?com_id=" + commid;
-                            client.Timeout = TimeSpan.FromMinutes(10);
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
-                        }
+                        //string commid = input.GeometryInput;
+                        //using (var client = new HttpClient())
+                        //{
+                        //    string queryUrl = baseUrl + "?com_id=" + commid;
+                        //    client.Timeout = TimeSpan.FromMinutes(10);
+                        //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
+                        //}
+                        goto default;
                         break;
                     case "catchmentid":
                         // use case 3
@@ -189,19 +205,23 @@ namespace Web.Services.Models
                         //{
                         //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
                         //}
+                        goto default;
                         break;
                     case "catchment":
                         // use case 4
                         // Use POST call with geometry 
+                        goto default;
                         break;
                     case "flowline":
                         // use case 5
                         // Use POST call with geometry
+                        goto default;
                         break;
                     case "points":
                         // use case 6
                         // use case 7
                         // GET call with points, hms-gis will get geometries
+                        goto default;
                         break;
                     case "test":
                         string testGeometry = "{\"geometry\":{\"9311911\": { \"points\": [ { \"cellArea\": 0.015624999999992895,  \"containedArea\": 4.178630503273804e-05,  \"longitude\": -71.43749999999996,  \"latitude\": 44.18749999999999,  \"percentArea\": 0.26743235220964506 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.005083393397351494,  \"longitude\": -71.31249999999997,  \"latitude\": 44.18750000000001,  \"percentArea\": 32.53371774305696 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.0002419268603100419,  \"longitude\": -71.31249999999997,  \"latitude\": 44.31249999999997,  \"percentArea\": 1.5483319059846201 } ] } },  \"metadata\": { \"execution time\": 86.99717831611633,  \"nldas source\": \"https://ldas.gsfc.nasa.gov/nldas/gis/NLDAS_Grid_Reference.zip\",  \"number of points\": 3,  \"request date\": \"Thu, 22 Mar 2018 11:46:44 GMT\",  \"shapefile source\": \"ftp://newftp.epa.gov/exposure/BasinsData/NHDPlus21/NHDPlus01060002.zip\" } }";
@@ -212,11 +232,16 @@ namespace Web.Services.Models
                         return err.ReturnError("Input error - GeometryType provided is invalid. Provided value = " + input.GeometryType);
                 }
             }
+            // Check for any errors
+            if (!String.IsNullOrWhiteSpace(error))
+            {
+                return err.ReturnError(error);
+            }
 
             // Collect all unique points in Catchment
             List<GeometryPoint> points = new List<GeometryPoint>();
             List<string> pointsSTR = new List<string>();
-            foreach (KeyValuePair<string, Catchment> k in geo.geometry)
+            foreach (KeyValuePair<string, Catchment> k in geo.data.geometry)
             {
                 foreach (Point cp in k.Value.points)
                 {
@@ -303,7 +328,7 @@ namespace Web.Services.Models
             ITimeSeriesOutput iOutput = outputFactory.Initialize();
             var options2 = new ParallelOptions { MaxDegreeOfParallelism = 1 };
             Dictionary<string, string> catchmentMeta = new Dictionary<string, string>();
-            Parallel.ForEach(geo.geometry, options2, (KeyValuePair<string, Catchment> catchments) => {
+            Parallel.ForEach(geo.data.geometry, options2, (KeyValuePair<string, Catchment> catchments) => {
                 string catchmentID = catchments.Key;
                 List<ITimeSeriesOutput> catchmentPoints = new List<ITimeSeriesOutput>();
                 foreach (Point cp in catchments.Value.points)
@@ -349,7 +374,7 @@ namespace Web.Services.Models
             output.Metadata[input.Source + "_points"] = string.Join(", ", pointsSTR);
 
             // Adding geometry metadata to output metadata
-            foreach(KeyValuePair<string, string> kv in geo.metadata)
+            foreach(KeyValuePair<string, string> kv in geo.data.metadata)
             {
                 if (!output.Metadata.ContainsKey(kv.Key))
                 {
@@ -375,6 +400,53 @@ namespace Web.Services.Models
             }
 
             return output;
+        }
+
+
+        /// <summary>
+        /// Using the received taskID, the function long-polls the server until the max requests is reached or the status returns success.
+        /// </summary>
+        /// <param name="taskID"></param>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        public GeometryResponse RequestData(string taskID, out string error)
+        {
+            error = "";
+
+            GeometryResponse result = new GeometryResponse();
+
+            // local testing
+            //string dataUrl = "http://localhost:8000/hms/rest/api/v2/hms/data" + "?job_id=" + taskID;
+            // deployment url
+            string dataUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/data" + "?job_id=" + taskID;
+            string status = "PENDING";
+            int maxCount = 50;
+            int count = 0;
+
+            while( !(status == "SUCCESS") && !(status == "FAILURE") && count < maxCount)
+            {
+                if(count > 0)
+                {
+                    Task.Delay(5000).Wait();
+                }
+
+                using (var client = new HttpClient())
+                {
+                    result = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(dataUrl).Result);
+                }
+                status = result.status;
+                count++;
+            }
+            if(count >= maxCount)
+            {
+                error = "Max number of requests reached in attempting to get geometry results. Max count:" + maxCount.ToString();
+            }
+            if (status.Equals("FAILURE"))
+            {
+                error = "Task to retrieve all gridpoints encountered an error.";
+            }
+
+            return result;
         }
     }
 }
