@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Examples;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -104,7 +105,22 @@ namespace Web.Services.Controllers
                 TemporalResolution = "default",
                 TimeLocalized = true,
                 Units = "default",
-                OutputFormat = "json"
+                OutputFormat = "json",
+                Albedo = 0.23,
+                CentralLongitude = 75.0,
+                SunAngle = 17.2,
+                Emissivity = 0.92,
+                Model = "ETP",
+                Zenith = 0.05,
+                LakeSurfaceArea = 0.005,
+                LakeDepth = 0.2,
+                SubsurfaceResistance = 500.0,
+                StomatalResistance = 400.0,
+                LeafWidth = 0.02,
+                RoughnessLength = 0.02,
+                VegetationHeight = 0.12,
+                LeafAreaIndices = new Hashtable { { 1, 2.51 }, { 2, 2.51 }, { 3, 2.51 }, { 4, 2.51 }, { 5, 2.51 }, { 6, 2.51 }, { 7, 2.51 }, { 8, 2.51 }, { 9, 2.51 }, { 10, 2.51 }, { 11, 2.51 }, { 12, 2.51 } },
+                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } }
             };
             return example;
         }
