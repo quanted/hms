@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -184,12 +185,12 @@ namespace Web.Services.Controllers
         //[SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExample))]
         [SwaggerResponseExample(200, typeof(TemperatureOutputExample))]
         [SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]TemperatureInput tempInput)
+        public async Task<IActionResult> POST([FromBody]TemperatureInput tempInput)
         {
             WSTemperature temp = new WSTemperature();
-            ITimeSeriesOutput results = temp.GetTemperature(tempInput);
+            ITimeSeriesOutput results = await temp.GetTemperature(tempInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

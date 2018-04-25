@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -200,12 +201,12 @@ namespace Web.Services.Controllers
         //[SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExample))]
         [SwaggerResponseExample(200, typeof(SoilMoistureOutputExample))]
         [SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]SoilMoistureInput evapoInput)
+        public async Task<IActionResult> POST([FromBody]SoilMoistureInput evapoInput)
         {
             WSSoilMoisture evapo = new WSSoilMoisture();
-            ITimeSeriesOutput results = evapo.GetSoilMoisture(evapoInput);
+            ITimeSeriesOutput results = await evapo.GetSoilMoisture(evapoInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

@@ -620,12 +620,17 @@
             Response from HMS-GIS
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryResponse.geometry">
+        <member name="T:Web.Services.Models.GeometryData">
+            <summary>
+            Response from HMS-GIS
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.GeometryData.geometry">
             <summary>
             Geometry component of HMS-GIS response
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryResponse.metadata">
+        <member name="F:Web.Services.Models.GeometryData.metadata">
             <summary>
             Metadata component of HMS-GIS response
             </summary>
@@ -695,6 +700,14 @@
             Default function for retrieving Total Flow data
             </summary>
             <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSTotalFlow.RequestData(System.String,System.String@)">
+            <summary>
+            Using the received taskID, the function long-polls the server until the max requests is reached or the status returns success.
+            </summary>
+            <param name="taskID"></param>
+            <param name="error"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSUtilities">

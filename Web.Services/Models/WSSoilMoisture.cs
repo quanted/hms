@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using Web.Services.Controllers;
 
@@ -20,7 +21,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetSoilMoisture(SoilMoistureInput input)
+        public async Task<ITimeSeriesOutput> GetSoilMoisture(SoilMoistureInput input)
         {
             string errorMsg = "";
 

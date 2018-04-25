@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Solar;
 using Data;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Web.Services.Models
 {
@@ -34,7 +35,7 @@ namespace Web.Services.Models
         /// equivlanet to selectin the first option from the windows start form.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarDefaultInput()
+        public async Task<Dictionary<string, object>> GetGCSolarDefaultInput()
         {
             GCSolar gcS = new GCSolar();
             return gcS.GetDefaultInputs();
@@ -45,7 +46,7 @@ namespace Web.Services.Models
         /// equivalent to selecting the third option from the windows start form.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarOutput()
+        public async Task<Dictionary<string, object>> GetGCSolarOutput()
         {
             GCSolar gcS = new GCSolar();
             return gcS.GetOutput();
@@ -56,7 +57,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarOutput(Dictionary<string, object> input)
+        public async Task<Dictionary<string, object>> GetGCSolarOutput(Dictionary<string, object> input)
         {
             GCSolar gcS = new GCSolar();
             List<string> errors = new List<string>();
@@ -75,7 +76,7 @@ namespace Web.Services.Models
         /// Constructs input metadata for GCSolar module.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetMetadata()
+        public async Task<Dictionary<string, object>> GetMetadata()
         {
             GCSolar gcS = new GCSolar();
 
@@ -211,7 +212,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput RunSolarCalculator(SolarCalculatorInput input)
+        public async Task<ITimeSeriesOutput> RunSolarCalculator(SolarCalculatorInput input)
         {
             Solar.SolarCalculator soCal = new SolarCalculator();
             soCal.Input = input;

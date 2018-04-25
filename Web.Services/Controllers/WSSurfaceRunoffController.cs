@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -184,12 +185,12 @@ namespace Web.Services.Controllers
         //[SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExample))]
         [SwaggerResponseExample(200, typeof(SurfaceRunoffOutputExample))]
         [SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]SurfaceRunoffInput runoffInput)
+        public async Task<IActionResult> POST([FromBody]SurfaceRunoffInput runoffInput)
         {
             WSSurfaceRunoff runoff = new WSSurfaceRunoff();
-            ITimeSeriesOutput results = runoff.GetSurfaceRunoff(runoffInput);
+            ITimeSeriesOutput results = await runoff.GetSurfaceRunoff(runoffInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

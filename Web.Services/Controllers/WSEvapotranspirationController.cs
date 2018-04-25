@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -198,15 +199,14 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("")]                 // Default endpoint
         [Route("v1.0")]             // Version 1.0 endpoint 
-        //[SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExample))]
         [SwaggerResponseExample(200, typeof(EvapotranspirationOutputExample))]
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]EvapotranspirationInput evapoInput)
+        public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
         {
             WSEvapotranspiration evapo = new WSEvapotranspiration();
-            ITimeSeriesOutput results = evapo.GetEvapotranspiration(evapoInput);
+            ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }
