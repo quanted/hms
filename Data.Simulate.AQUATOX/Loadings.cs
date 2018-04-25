@@ -170,10 +170,7 @@ namespace AQUATOX.Loadings
                                 }
 
                             }
-
-
                         }
-
                     }
                 }
             }
@@ -186,14 +183,20 @@ namespace AQUATOX.Loadings
       public class LoadingsRecord
     {
         public TLoadings Loadings = new TLoadings();
+
         // Alt_Loadings is reserved for point source, non pont source and
         // direct precipitation loadings; these vars are relevant only for
-        // nstate in [H2OTox,MeHg,HgII,Hg0,Phosphate,Ammonia,Nitrate,All SuspDetr]
         // Has_Alt_Loadings(nstate) is a boolean function in GLOBALS
-        public TLoadings[] Alt_Loadings = new TLoadings[3];   // Time series loading
+        public TLoadings[] Alt_Loadings = new TLoadings[]
+            {
+                new TLoadings(),
+                new TLoadings(),
+                new TLoadings()
+            };   // Time series loading
 
         public LoadingsRecord()
             {
+              
             }
 
         

@@ -1,6 +1,7 @@
 ﻿using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
+using AQUATOX.OrgMatter;
 using Globals;
 
 namespace AQUATOX.Nutrients
@@ -158,7 +159,6 @@ namespace AQUATOX.Nutrients
                         return Location.Remin.P2OrgDissLab;
                     else
                         return Location.Remin.N2OrgDissLab;
-
             }
         }
 
@@ -171,32 +171,31 @@ namespace AQUATOX.Nutrients
         // Ammonia to Diss. inorg. nitrogen, 12% in nonpoint-source loadings 3/27/08
 
         // ------------------------------------------------------------------------------------------------
-        public void CalculateLoad_TotNutrient_Alt_Ldg(ref double AddLoad, int LdType)
+        public void CalculateLoad_TotNutrient_Alt_Ldg(ref double AddLoad, int LdType, ref DateTime TimeIndex, ref double SegVolume)
         {
             double CNutrient;
-            //AllVariables nsloop;
-            //double DetrAltLdg;
-            // TDetritus TDetr;
+            AllVariables nsloop;
+            double DetrAltLdg;
+            TDetritus TDetr;
             int LDType2;
-            // DetritalInputRecordType PInputRec;  FIXME ORGANIC MATTER LINKAGE
-            // PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
+            DetritalInputRecordType PInputRec; 
+            PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
 
             CNutrient = AddLoad;
-            LDType2 = LdType;
 
-            //for (nsloop = AllVariables.DissRefrDetr; nsloop <= AllVariables.SuspLabDetr; nsloop++)
-            //{  FIXME ORGANIC MATTER LINKAGE
-            //    TDetr = AQTSeg.GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    if (TDetr != null)
-            //    {
-            //        DetrAltLdg = Loadings.Consts.Loadings.ReturnAltLoad(TimeIndex, PInputRec.Load, LdType) * TDetr.MultFrac(TimeIndex, true, LDType2);
-            //        // g/d                                                                                               // unitless
-            //        DetrAltLdg = DetrAltLdg / SegVolume;
-            //        // mg/L d      // g/d      // cu m
-            //        CNutrient = CNutrient - DetrAltLdg * CalculateLoad_DetrNutr2Org(nsloop);
-            //        // mg/L       // mg/L    // mg/L                   // Nut2Org
-            //    }
-            //}
+            for (nsloop = AllVariables.DissRefrDetr; nsloop <= AllVariables.SuspLabDetr; nsloop++)
+            {
+                TDetr = AQTSeg.GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+                if (TDetr != null)
+                {
+                    DetrAltLdg = PInputRec.Load.ReturnAltLoad(TimeIndex, LdType); 
+                    // g/d                                                       
+                    DetrAltLdg = DetrAltLdg / SegVolume;
+                    // mg/L d      // g/d     // cu m
+                    CNutrient = CNutrient - DetrAltLdg * CalculateLoad_DetrNutr2Org(nsloop);
+                    // mg/L       // mg/L    // mg/L                   // Nut2Org
+                }
+            }
 
             if (LdType == 0) // Alt_LoadingsType.PointSource
             {
@@ -219,30 +218,30 @@ namespace AQUATOX.Nutrients
         }
 
         // ------------------------------------------------------------------------------------------------
-        public void CalculateLoad_TotNutrient_Dynamic_Inflow()
+        public void CalculateLoad_TotNutrient_Dynamic_Inflow(ref DateTime TimeIndex, ref double Inflow, ref double SegVolume)
         {
             double CNutrient;
             //double PlantInflow;
-            //double DetrInflow;
-            //TStateVariable PSV;
-            //AllVariables nsLoop;
-            //double InflLoad;
+            double DetrInflow;
+            TStateVariable PSV;
+            AllVariables nsLoop;
+            double InflLoad;
             CNutrient = Loading;
             // Total Nutrient loading in mg/L d
 
-            //for (nsLoop = AllVariables.DissRefrDetr; nsLoop <= AllVariables.SuspLabDetr; nsLoop++)  // FIXME DETRITUS LINKAGE
-            //{
-            //    PSV = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    if (PSV != null)
-            //    {
-            //        InflLoad = ((PSV) as TDetritus).GetInflowLoad(TimeIndex);
-            //        // Inflow Loadings Only
-            //        DetrInflow = InflLoad * Inflow / SegVolume; // Inflow Loadings Only
-            //        // mg/L d   // mg/L d  // m3/d     // m3
-            //        CNutrient = CNutrient - DetrInflow * CalculateLoad_DetrNutr2Org(nsLoop);
-            //        // mg/L d  // mg/L d     // mg/L d                // Nut2Org
-            //    }
-            //}
+            for (nsLoop = AllVariables.DissRefrDetr; nsLoop <= AllVariables.SuspLabDetr; nsLoop++)  
+            {
+                PSV = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (PSV != null)
+                {
+                    InflLoad = ((PSV) as TDetritus).GetInflowLoad(TimeIndex);
+                    // Inflow Loadings Only
+                    DetrInflow = InflLoad * Inflow / SegVolume; // Inflow Loadings Only
+                    // mg/L d   // mg/L d  // m3/d     // m3
+                    CNutrient = CNutrient - DetrInflow * CalculateLoad_DetrNutr2Org(nsLoop);
+                    // mg/L d  // mg/L d     // mg/L d                // Nut2Org
+                }
+            }
 
             //for (nsLoop = Consts.FirstPlant; nsLoop <= Consts.LastPlant; nsLoop++)  // FIXME PLANT LINKAGE
             //{
@@ -263,10 +262,7 @@ namespace AQUATOX.Nutrients
             //            {
             //                CNutrient = CNutrient - PlantInflow * ((PSV) as TPlant).N_2_Org();
             //            }
-            //            // mg/L d
-            //            // mg/L d
-            //            // mg/L d
-            //            // N2Org
+            //            // mg/L d         // mg/L d   // mg/L d                    // N2Org
             //        }
             //    }
             //}
@@ -314,21 +310,21 @@ namespace AQUATOX.Nutrients
                     Loading = PNO3.GetInflowLoad(TimeIndex);
                     Loading = Loading * Inflow / SegVolume;
                     // unit/d   unit     cu m/d    cu m
-                    CalculateLoad_TotNutrient_Dynamic_Inflow();
+                    CalculateLoad_TotNutrient_Dynamic_Inflow(ref TimeIndex, ref Inflow, ref SegVolume);
                 }
             }
             if ((NState == AllVariables.Nitrate))
             {
                 if (PNO3.TN_Inflow)
                 {
-                    CalculateLoad_TotNutrient_Dynamic_Inflow();
+                    CalculateLoad_TotNutrient_Dynamic_Inflow(ref TimeIndex, ref Inflow, ref SegVolume);
                 }
             }
             if ((NState == AllVariables.Phosphate))
             {
                 if (((this) as TPO4Obj).TP_Inflow)
                 {
-                    CalculateLoad_TotNutrient_Dynamic_Inflow();
+                    CalculateLoad_TotNutrient_Dynamic_Inflow(ref TimeIndex, ref Inflow, ref SegVolume);
                 }
                 Loading = Loading * ((this) as TPO4Obj).FracAvail;
             }
@@ -358,14 +354,14 @@ namespace AQUATOX.Nutrients
                                 TPO4Obj _TP = ((this) as TPO4Obj);
                                 if (((Loop == 0) && _TP.TP_PS) || ((Loop == 2) && _TP.TP_NPS))
                                 {
-                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop);
+                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop, ref TimeIndex, ref SegVolume);
                                 }
                             }
                             if (NState == AllVariables.Nitrate)
                             {
                                 if (((Loop == 0) && PNO3.TN_PS) || ((Loop == 2) && PNO3.TN_NPS))
                                 {
-                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop);
+                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop, ref TimeIndex, ref SegVolume);
                                 }
                             }
                             if (NState == AllVariables.Ammonia)
@@ -375,7 +371,7 @@ namespace AQUATOX.Nutrients
                                     AddLoad = PNO3.LoadsRec.ReturnAltLoad(TimeIndex, Loop);
                                     AddLoad = AddLoad / SegVolume;
                                     // mg/L d   // g/d    // cu m
-                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop);
+                                    CalculateLoad_TotNutrient_Alt_Ldg(ref AddLoad, Loop, ref TimeIndex, ref SegVolume);
                                 }
                             }
                             if (NState == AllVariables.Phosphate)
@@ -412,67 +408,65 @@ namespace AQUATOX.Nutrients
         // -------------------------------------------------------------------------------------------------------
         public double SumDetrDecomp(T_SVType OType, bool SedOnly)
         {
-            return 0; // fixme detrital linkage
-            //double result;
-            //// If OType=NTrack returns sum of detrital decomp into ammonia
-            //// If OType=NTrack returns sum detrital decomp into dissolved phosphorus
-            //// otherwise returns sum of detrital decomposition in terms of organic matter
-            //// Sum of Labile Detritus Decomposition
-            //TRemineralize RP;
-            //AllVariables EndLoop;
-            //AllVariables Loop;
-            //double SumDecomp;
-            //double FracAerobic;
-            //double Decomp;
-            //SumDecomp = 0;
-            //if (SedOnly)
-            //{
-            //    EndLoop = AllVariables.SedmLabDetr;
-            //}
-            //else
-            //{
-            //    EndLoop = Consts.LastDetr;
-            //}
-            //return 0; //FIXME DETR DECOMPOSITION LINKAGE
+            double result;
+            // If OType=NTrack returns sum of detrital decomp into ammonia
+            // If OType=NTrack returns sum detrital decomp into dissolved phosphorus
+            // otherwise returns sum of detrital decomposition in terms of organic matter
+            // Sum of Labile Detritus Decomposition
+            TRemineralize RP;
+            AllVariables EndLoop;
+            AllVariables Loop;
+            double SumDecomp;
+            double FracAerobic=0;
+            double Decomp;
+            SumDecomp = 0;
+            if (SedOnly)
+            {
+                EndLoop = AllVariables.SedmLabDetr;
+            }
+            else
+            {
+                EndLoop = Consts.LastDetr;
+            }
 
-            //for (Loop = Consts.FirstDetr; Loop <= EndLoop; Loop++)
-            //{
-            //    ReminRecord _wvar1 = Location.Remin;
-            //    RP = (TRemineralize)AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    if ((RP == null))
-            //    {
-            //        Decomp = 0;
-            //    }
-            //    else
-            //    {
-            //        Decomp = RP.Decomposition(_wvar1.DecayMax_Lab, KAnaerobic, ref FracAerobic);
-            //    }
-            //    if (OType == T_SVType.NTrack)
-            //    {
-            //        if (Loop == AllVariables.DissLabDetr)
-            //        {
-            //            Decomp = Decomp * _wvar1.N2OrgDissLab;
-            //        }
-            //        else
-            //        {
-            //            Decomp = Decomp * _wvar1.N2OrgLab;
-            //        }
-            //    }
-            //    if (OType == T_SVType.PTrack)
-            //    {
-            //        if (Loop == AllVariables.DissLabDetr)
-            //        {
-            //            Decomp = Decomp * _wvar1.P2OrgDissLab;
-            //        }
-            //        else
-            //        {
-            //            Decomp = Decomp * _wvar1.P2OrgLab;
-            //        }
-            //    }
-            //    SumDecomp = SumDecomp + Decomp;
-            //}
-            //result = SumDecomp;
-            //return result;
+            for (Loop = Consts.FirstDetr; Loop <= EndLoop; Loop++)
+            {
+                ReminRecord _wvar1 = Location.Remin;
+                RP = (TRemineralize)AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol);
+                if ((RP == null))
+                {
+                    Decomp = 0;
+                }
+                else
+                {
+                    Decomp = RP.Decomposition(_wvar1.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                }
+                if (OType == T_SVType.NTrack)
+                {
+                    if (Loop == AllVariables.DissLabDetr)
+                    {
+                        Decomp = Decomp * _wvar1.N2OrgDissLab;
+                    }
+                    else
+                    {
+                        Decomp = Decomp * _wvar1.N2OrgLab;
+                    }
+                }
+                if (OType == T_SVType.PTrack)
+                {
+                    if (Loop == AllVariables.DissLabDetr)
+                    {
+                        Decomp = Decomp * _wvar1.P2OrgDissLab;
+                    }
+                    else
+                    {
+                        Decomp = Decomp * _wvar1.P2OrgLab;
+                    }
+                }
+                SumDecomp = SumDecomp + Decomp;
+            }
+            result = SumDecomp;
+            return result;
         }
 
         //public void CalcAnimPredn_NutrPred(TAnimal P)
@@ -836,53 +830,45 @@ namespace AQUATOX.Nutrients
         //    return result;
         //}
         // -------------------------------------------------------------------------------------------------------
-        //public double NutrRelColonization()   FIXME Organic Matter Linkage
-        //{
-        //    double result;
-        //    // When organic matter is colonized from Refr--> Labile, nutrients
-        //    // must be accounted for in case the nutrient to organic ratio differs between
-        //    // the refractory and labile compartments
-        //    double Nut2Org_Refr;
-        //    double Nut2Org_Lab;
-        //    double Nut2Org_DissRefr;
-        //    double SumColonize;
-        //    AllVariables ns;
-        //    TDetritus PD;
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_Refr = _wvar1.N2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.N2OrgLab;
-        //        Nut2Org_DissRefr = _wvar1.N2OrgDissRefr;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_Refr = _wvar1.P2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.P2OrgLab;
-        //        Nut2Org_DissRefr = _wvar1.P2OrgDissRefr;
-        //    }
-        //    SumColonize = 0;
-        //    for (ns = AllVariables.SedmRefrDetr; ns <= AllVariables.SuspLabDetr; ns++)
-        //    {
-        //        if (new ArrayList(new object[] { AllVariables.SedmRefrDetr, AllVariables.SuspRefrDetr, AllVariables.DissRefrDetr }).Contains(ns))
-        //        {
-        //            PD = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (PD != null)
-        //            {
-        //                if (ns == AllVariables.DissRefrDetr)
-        //                {
-        //                    SumColonize = SumColonize + PD.Colonization() * (Nut2Org_DissRefr - Nut2Org_Lab);
-        //                }
-        //                else
-        //                {
-        //                    SumColonize = SumColonize + PD.Colonization() * (Nut2Org_Refr - Nut2Org_Lab);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    result = SumColonize;
-        //    return result;
-        //}
+        public double NutrRelColonization()  
+        {
+        // When organic matter is colonized from Refr--> Labile, nutrients
+        // must be accounted for in case the nutrient to organic ratio differs between
+        // the refractory and labile compartments
+        double Nut2Org_Refr;
+        double Nut2Org_Lab;
+        double Nut2Org_DissRefr;
+        double SumColonize;
+        AllVariables ns;
+        TDetritus PD;
+        ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+            }
+            else
+            {
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+            }
+            SumColonize = 0;
+            for (ns = AllVariables.SedmRefrDetr; ns <= AllVariables.SuspLabDetr; ns++)
+            {
+                if ((ns== AllVariables.SedmRefrDetr) || (ns == AllVariables.SuspRefrDetr) || (ns == AllVariables.DissRefrDetr))
+                {
+                    PD = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+                    if (PD != null)
+                    {
+                        if (ns == AllVariables.DissRefrDetr) SumColonize = SumColonize + PD.Colonization() * (Nut2Org_DissRefr - Nut2Org_Lab);
+                        else                                 SumColonize = SumColonize + PD.Colonization() * (Nut2Org_Refr - Nut2Org_Lab);
+                    }
+                }
+            }
+            return SumColonize;
+        }
 
         //public double NutrRelDefecation()  // FIXME ANIMAL LINKAGE
         //{
@@ -1254,7 +1240,7 @@ namespace AQUATOX.Nutrients
             if (Animal_Remin_Link != null) Remin = Remin + Animal_Remin_Link.ReturnLoad(AQTSeg.TPresent);
             if (Plant_Remin_Link != null) Remin = Remin + Plant_Remin_Link.ReturnLoad(AQTSeg.TPresent);
 
-            Remin = Remin + SumDetrDecomp(T_SVType.PTrack, false);  // FIXME DETRITAL LINKAGE
+            Remin = Remin + SumDetrDecomp(T_SVType.PTrack, false);  
             // mg P/ L       // mg P/ L
                 
             //Remin = Remin + CalcPhotoResp();   // FIXME PLANT LINKAGE
@@ -1262,7 +1248,7 @@ namespace AQUATOX.Nutrients
             //Remin = Remin + CalcAnimResp_Excr();    // FIXME ANIMAL LINKAGE
             //Remin = Remin + CalcAnimPredn();        // FIXME ANIMAL LINKAGE
             //Remin = Remin + NutrRelDefecation();    // FIXME ANIMAL LINKAGE
-            //Remin = Remin + NutrRelColonization();  // FIXME DETRITAL LINKAGE
+            Remin = Remin + NutrRelColonization();  
             //Remin = Remin + NutrRelPlantSink();  // FIXME PLANT LINKAGE
             //Remin = Remin + NutrRelMortality();  // FIXME ANIMAL, PLANT LINKAGE
             //Remin = Remin + NutrRelGamLoss();    // FIXME ANIMAL LINKAGE
@@ -1526,10 +1512,10 @@ namespace AQUATOX.Nutrients
                 //PhotoResp = CalcPhotoResp();  // When photorespiration takes place in plants, excess nutrients are converted into NH4  // FIXME Plant Linkage
                 //DarkResp = CalcDarkResp();  // When dark respiration occurs, excess nutrients are converted into NH4. // FIXME Plant Linkage
 
-                //AnimExcr = CalcAnimResp_Excr();  // FIXME Detrital Linkage       // direct respiration losses plus excess nutrient losses from excretion to detritus
-                //AnimPredn = CalcAnimPredn();  // FIXME Animal Linkage            // When predation occurs, differences in nutrients are refelcted in W.C.
+                //AnimExcr = CalcAnimResp_Excr(); // FIXME Animal Linkage // direct respiration losses plus excess nutrient losses from excretion to detritus
+                //AnimPredn = CalcAnimPredn();   // FIXME Animal Linkage  // When predation occurs, differences in nutrients are refelcted in W.C.
 
-                //SvNutrRelColonization = NutrRelColonization();  // FIXME Detrital LInkage
+                SvNutrRelColonization = NutrRelColonization();  
                 //SvNutrRelMortality = NutrRelMortality(); // FIXME Animal and Plant LInkage
                 //SvNutrRelGamLoss = NutrRelGamLoss();  // FIXME Animal Linkage
                 //SvNutrRelPeriScr = NutrRelPeriScr();  // FIXME Plant Linkage
@@ -2028,7 +2014,7 @@ namespace AQUATOX.Nutrients
             double T, CCO2, DOM, pH2CO3, Alpha, A, B, C;
 
             T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
-            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  FIXME OM Linkage
+            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
             DOM = 0;  //   AQTSeg.GetState(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);       // mg/L
             pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
             Alpha = pH2CO3 * CCO2 + pkw;

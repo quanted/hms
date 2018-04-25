@@ -247,6 +247,13 @@ namespace Globals
         public bool TSedDetrIsDriving;     // to 3.94
     } // end Setup_Record
 
+    public enum DetrDataType
+    {
+        CBOD,
+        Org_Carb,
+        Org_Matt
+    } // end DetrDataType
+
     public class Consts
     {
         public const double Tiny = 5.0e-19;   // mach. accuracy = 1.0e-19
@@ -255,6 +262,10 @@ namespace Globals
         public const double Minimum_Stepsize = 1.0e-5;
         public const string DateFormatString = "yyyy-MM-dd'T'HH:mm:ss";
         public const string ValFormatString = "E";  // e.g. 1.043700E+021
+
+        public const double Def2SedLabDetr = 0.5;  // Defecation that is labile 
+        public const double Detr_OM_2_OC = 1.90;
+        public const double KAnaerobic = 0.3;  //  (1/d)  decomp reduction - check Sanders, Gunnison
 
         public const AllVariables FirstDetr = AllVariables.SedmRefrDetr;
         public const AllVariables LastDetr = AllVariables.SuspLabDetr;

@@ -170,6 +170,7 @@ namespace AQUATOX.Volume
             Location.MeanThick = AQTSeg.DynamicZMean();
             Location.Discharge = Discharg;
             Location.Morph.InflowH2O = Inflow;
+            Location.TotDischarge = Discharg;  // used for summing epilimnion and hypolimnion if stratification code enabled
 
             if ((Location.SiteType == SiteTypes.Stream))
             {
@@ -286,6 +287,256 @@ namespace AQUATOX.Volume
             }
             AQTSeg.VolumeUpdated = AQTSeg.TPresent;
         } //TVolume.Derivative
+
+        // ------------------------------------------------------
+        public void SetMeanDischarge_AverageVolumeLoads(ref DateTime TimeIndex, ref double AverageDischargeLoad, ref double AverageInflowLoad)
+        {
+            DateTime DateIndex;
+            double N;
+            double Sum_Dl;
+            double Sum_IL;
+            Sum_Dl = 0;
+            Sum_IL = 0;
+            N = 0;
+            DateIndex = TimeIndex.AddDays(-1);
+            do
+            {
+                DateIndex.AddDays(1);
+                N = N + 1;
+                CalculateLoad(DateIndex);
+                Sum_Dl = Sum_Dl + DischargeLoad;
+                Sum_IL = Sum_IL + InflowLoad;
+            } while (!((DateIndex.AddDays( -365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+
+            AverageDischargeLoad = Sum_Dl / N;
+            AverageInflowLoad = Sum_IL / N;
+            CalculateLoad(TimeIndex);
+            // reset TVolume values
+
+        }
+
+        // ------------------------------------------------------
+        public double SetMeanDischarge_CalcKnownValueMD(ref DateTime TimeIndex, ref double MV)
+        {
+            double result;
+            // Calculates the discharge for every time step then averages over a year
+            // Given that KnownValLoad - State = Inflow - Discharge - Evap
+            // and that for each day, State should = KnownValLoad(T-1) then
+            // Discharge = Inflow - KnownValLoad + KnownValLoad(T-1) - Evap
+            DateTime DateIndex;
+            double N;
+            double KnownVal_Tminus1;
+            double Sum_Disch;
+            double SumVol;
+            Sum_Disch = 0;
+            SumVol = 0;
+            KnownVal_Tminus1 = InitialCond;
+            N = 0;
+            DateIndex = TimeIndex.AddDays(-1);
+            do
+            {
+                DateIndex = DateIndex.AddDays( 1);
+                N = N + 1;
+                CalculateLoad(DateIndex);
+                Sum_Disch = Sum_Disch + InflowLoad - KnownValueLoad + KnownVal_Tminus1 - Evaporation();
+                // handle dynamic evaporation properly
+                KnownVal_Tminus1 = KnownValueLoad;
+                SumVol = SumVol + KnownValueLoad;
+            } while (!(((DateIndex.AddDays(-365)) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+            result = Sum_Disch / N;
+            MV = SumVol / N;
+            if (result < 0)
+            {
+                result = 0;
+            }
+            CalculateLoad(TimeIndex);
+            // reset TVolume values
+
+            return result;
+        }
+
+        // ------------------------------------------------------
+        //public void SetMeanDischarge_CalcEstMeanVars()
+        //{
+        //    // Calculate MeanDischarge and MeanEstVel for Estuaries
+        //    double N;
+        //    double DateIndex;
+        //    double SumEstVel;
+        //    double SumDisch;
+        //    double TTPres;
+        //    TSalinity TS;
+        //    N = 0;
+        //    TTPres = TPresent;
+        //    TS = GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+        //    SumEstVel = 0;
+        //    SumDisch = 0;
+        //    DateIndex = TimeIndex - 1;
+        //    do
+        //    {
+        //        DateIndex = DateIndex + 1;
+        //        N = N + 1;
+        //        TPresent = DateIndex;
+        //        CalculateLoad(DateIndex);
+        //        TS.CalculateLoad(DateIndex);
+        //        Location.Discharge[VerticalSegments.Epilimnion] = UpperOutflow();
+        //        SumEstVel = SumEstVel + Velocity(0, 0, false);
+        //        SumDisch = SumDisch + Location.Discharge[VerticalSegments.Epilimnion];
+        //    } while (!(((DateIndex - 365) >= TimeIndex) || (DateIndex >= SetupRec.LastDay)));
+        //    MeanDischarge = SumDisch / N;
+        //    MeanEstVel = SumEstVel / N;
+        //    TPresent = TTPres;
+        //    CalculateLoad(TimeIndex);
+        //    // reset TVolume values
+        //    TS.CalculateLoad(TimeIndex);
+        //    Location.Discharge[VerticalSegments.Epilimnion] = UpperOutflow();
+        //}
+
+        // ------------------------------------------------------
+        public double SetMeanDischarge_CalcDynamicMV(ref DateTime TimeIndex)
+        {
+            double result;
+            // Calculates the volume for every time step then averages over a year
+            DateTime DateIndex;
+            double N;
+            double DynamVol;
+            double SumVol;
+            SumVol = 0;
+            DynamVol = State;
+            N = 0;
+            DateIndex = TimeIndex.AddDays ( -1);
+            do
+            {
+                DateIndex.AddDays(1);
+                N = N + 1;
+                CalculateLoad(DateIndex);
+                DynamVol = DynamVol + InflowLoad - DischargeLoad - Evaporation();
+                // handle dynamic evaporation properly
+                SumVol = SumVol + DynamVol;
+            } while (!((DateIndex.AddDays(-365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+            result = SumVol / N;
+            if (result < 0)
+            {
+                result = 0;
+            }
+            CalculateLoad(TimeIndex);
+            // reset TVolume values
+
+            return result;
+        }
+
+        public void SetMeanDischarge(DateTime TimeIndex)
+        {
+            double MD;
+            double MV;
+            double AverageDischargeLoad=0;
+            double AverageInflowLoad=0;
+            // ------------------------------------------------------
+            double Temp;
+            MD = 0;
+            MV = 0;
+            AQTSeg.MeanDischarge = 0;
+            AQTSeg.MeanVolume = 0;
+
+            // AQTSeg.MeanEstVel = 0;
+            //if (EstuarySegment)
+            //{
+            //    // 5-30-2008
+            //    MeanVolume = InitialCond;
+            //    // for entire system
+            //    SetMeanDischarge_CalcEstMeanVars();
+            //    return;
+            //}
+
+            if ((Calc_Method==VolumeMethType.Dynam)|| (Calc_Method == VolumeMethType.KeepConst)|| (Calc_Method == VolumeMethType.Manning))
+            {
+                SetMeanDischarge_AverageVolumeLoads(ref TimeIndex,ref AverageDischargeLoad,ref AverageInflowLoad);
+            }
+            switch (Calc_Method)
+            {
+                case VolumeMethType.Manning:
+                    // Meandischarge is set, depending on the volume calculation method
+                    MD = AverageDischargeLoad;
+                    Temp = Discharg;
+                    // calculate manning's volume based on mean discharge
+                    Discharg = MD;
+                    MV = Manning_Volume();
+                    Discharg = Temp;
+                    break;
+                case VolumeMethType.Dynam:
+                    MD = AverageDischargeLoad;
+                    MV = SetMeanDischarge_CalcDynamicMV(ref TimeIndex );
+                    break;
+                case VolumeMethType.KeepConst:
+                    MD = AverageInflowLoad - Evaporation();
+                    // Currently Assuming Evap is constant over the year
+                    // need to handle dynamic evaporation properly
+                    if (MD < 0)  { MD = 0; }
+                    MV = InitialCond;
+                    break;
+                case VolumeMethType.KnownVal:
+                    MD = SetMeanDischarge_CalcKnownValueMD(ref TimeIndex, ref MV);
+                    break;
+                    // Also Assuming Evap is constant over the year, this can be changed
+                    // MV Calculated in CalcKnownValueMD as well
+            }
+            // Case
+
+            //if (Stratified && !LinkedMode)
+            //{
+            //    MorphRecord _wvar1 = Location.Morph;
+            //    switch (StratOutflow)
+            //    {
+            //        case FlowType.FTBoth:
+            //            MeanDischarge = MD * (SegVol() / Volume_Last_Step);
+            //            break;
+            //        case FlowType.FTEpi:
+            //            // Discharge is split up between Epi & Hyp segments weighted by volume
+            //            if (VSeg == VerticalSegments.Epilimnion)
+            //            {
+            //                MeanDischarge = MD;
+            //            }
+            //            else
+            //            {
+            //                MeanDischarge = 0;
+            //            }
+            //            break;
+            //        case FlowType.FTHyp:
+            //            if (VSeg == VerticalSegments.Hypolimnion)
+            //            {
+            //                MeanDischarge = MD;
+            //            }
+            //            else
+            //            {
+            //                MeanDischarge = 0;
+            //            }
+            //            break;
+            //    }
+            //    // Case
+            //}
+            //else
+            //{
+                AQTSeg.MeanDischarge = MD;
+
+            //}
+            //if (Stratified && !LinkedMode)
+            //{
+            //    MorphRecord _wvar2 = Location.Morph;
+            //    // Volume is split up between Epi & Hyp segments
+            //    MeanVolume = MV * (SegVol() / Volume_Last_Step);
+            //}
+            //else
+            //{
+                AQTSeg.MeanVolume = MV;
+            //}
+
+            if (AQTSeg.MeanVolume == 0)
+            {
+                SetMeanDischarge_CalcDynamicMV(ref TimeIndex);
+            }
+        }
+
+
+
 
     } // end TVolume
 

@@ -141,6 +141,7 @@ namespace AQUATOX.GUI.Test
                 ser.ChartType = SeriesChartType.Line;
                 ser.BorderWidth = 2;
                 ser.MarkerStyle = MarkerStyle.Diamond;
+                ser.Enabled = false;
                 sercnt++;
 
                 SuppressText = (TSV.output.Data.Keys.Count > 5000);
@@ -181,7 +182,7 @@ namespace AQUATOX.GUI.Test
                             writedate = false;
                         }
                         Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                        outtxt = outtxt+Val.ToString() + "; ";
+                        outtxt = outtxt+Val.ToString() + ", ";
                     }
                     outtxt = outtxt + Environment.NewLine;
                 }
@@ -190,14 +191,6 @@ namespace AQUATOX.GUI.Test
             textBox1.Text = outtxt;
         }
 
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            aQTS = new AQTSim();
-            aQTS.AQTSeg = new AQUATOXSegment();
-            aQTS.AQTSeg.RunTest();
-            DisplaySVs();
-
-        }
 
         private void label1_Click(object sender, EventArgs e)
         {
@@ -254,7 +247,6 @@ namespace AQUATOX.GUI.Test
         }
 
  
-
         private void chart1_MouseDown(object sender, MouseEventArgs e)
         {
             HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
