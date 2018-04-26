@@ -450,7 +450,7 @@ namespace Utilities
                 case "ETW":
                     return 1;
                 case "ETA":
-                    return 2;
+                    return 2;//Not in CRWE
             }
             return -1;
         }
