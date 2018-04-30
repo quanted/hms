@@ -121,6 +121,10 @@ namespace Web.Services.Models
                     }
                 });
 
+                if(errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1){
+                    return err.ReturnError(string.Join(",", errorList.ToArray()));
+                }
+
 
                 foreach (ITimeSeriesOutput result in outputList)
                 {

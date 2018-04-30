@@ -164,7 +164,7 @@ namespace Precipitation
                 for (int i = 0; i < tsLines.Length; i++)
                 {
                     string[] lineData = tsLines[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                    DateTime date = new DateTime(Convert.ToInt16(lineData[0]), 1, 1);
+                    DateTime date = new DateTime(Convert.ToInt16(Convert.ToDouble(lineData[0])), 1, 1);
 
                     // Leap year dates have to be shifted by -1 day after Feb 28, due to Daymet not including Feb 29th
                     if (DateTime.IsLeapYear(date.Year) && date > new DateTime(date.Year, 2, 28))
@@ -173,7 +173,7 @@ namespace Precipitation
                     };
 
                     DateTime date2;
-                    if (i > 0) { date2 = date.AddDays(Convert.ToInt16(lineData[1]) - 1); }
+                    if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
                     else { date2 = date; }
                     data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
                 }
@@ -183,9 +183,9 @@ namespace Precipitation
                 for (int i = 0; i < tsLines.Length; i++)
                 {
                     string[] lineData = tsLines[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                    DateTime date = new DateTime(Convert.ToInt16(lineData[0]), 1, 1);
+                    DateTime date = new DateTime(Convert.ToInt16(Convert.ToDouble(lineData[0])), 1, 1);
                     DateTime date2;
-                    if (i > 0) { date2 = date.AddDays(Convert.ToInt16(lineData[1]) - 1); }
+                    if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
                     else { date2 = date; }
                     data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
                 }
