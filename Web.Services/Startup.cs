@@ -42,8 +42,8 @@ namespace Web.Services
 
             //Set the comments path for the swagger json and ui.
             var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-            var xmlPath = Path.Combine(basePath, "App_Data\\XmlComments.xml");
-            var xmlDataPath = Path.Combine(basePath, "App_Data\\XmlCommentsData.xml");
+            var xmlPath = Path.Combine(basePath, "XmlComments.xml");
+            var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
 
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>

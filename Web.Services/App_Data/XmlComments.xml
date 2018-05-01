@@ -9,6 +9,81 @@
             Evapotranspiration Input that implements TimeSeriesInput object
             </summary>
         </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Albedo">
+            <summary>
+            REQUIRED: Albedo coefficient.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.CentralLongitude">
+            <summary>
+            REQUIRED: Central Longitude of Time Zone in degrees.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.SunAngle">
+            <summary>
+            REQUIRED: Angle of the sun in degrees.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Emissivity">
+            <summary>
+            REQUIRED: The ability of a surface to emit radiant energy.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Model">
+            <summary>
+            REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Zenith">
+            <summary>
+            REQUIRED: Zenith Albedo coefficient.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LakeSurfaceArea">
+            <summary>
+            REQUIRED: Surface area of lake in square kilometers.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LakeDepth">
+            <summary>
+            REQUIRED: Average depth of lake in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.SubsurfaceResistance">
+            <summary>
+            REQUIRED: Subsurface Resistance.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.StomatalResistance">
+            <summary>
+            REQUIRED: Stomatal Resistance.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LeafWidth">
+            <summary>
+            REQUIRED: Leaf Width in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.RoughnessLength">
+            <summary>
+            REQUIRED: Roughness Length in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.VegetationHeight">
+            <summary>
+            REQUIRED: Vegetation Height in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LeafAreaIndices">
+            <summary>
+            REQUIRED: Monthly leaf area indices.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.AirTemperature">
+            <summary>
+            REQUIRED: Monthly air temperature coefficients.
+            </summary>
+        </member>
         <member name="T:Web.Services.Controllers.EvapotranspirationInputExample">
             <summary>
             Swashbuckle Evapotranspiration POST request example
@@ -413,6 +488,7 @@
         <member name="M:Web.Services.Controllers.WSUtilitiesController.DatasetEndpointsCheck(System.String)">
             <summary>
             Checks endpoints for a specified dataset.
+            Valid datasets: "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature"
             </summary>
             <param name="dataset"></param>
             <returns></returns>

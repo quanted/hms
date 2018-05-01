@@ -57,6 +57,7 @@ namespace Web.Services.Controllers
 
         /// <summary>
         /// Checks endpoints for a specified dataset.
+        /// Valid datasets: "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature"
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
