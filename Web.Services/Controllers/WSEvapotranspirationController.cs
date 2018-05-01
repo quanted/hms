@@ -18,6 +18,81 @@ namespace Web.Services.Controllers
     public class EvapotranspirationInput : TimeSeriesInput
     {
         // Add extra evapotranspiration specific variables here
+
+        /// <summary>
+        /// REQUIRED: Albedo coefficient.
+        /// </summary>
+        public double Albedo { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Central Longitude of Time Zone in degrees.
+        /// </summary>
+        public double CentralLongitude { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Angle of the sun in degrees.
+        /// </summary>
+        public double SunAngle { get; set; }
+
+        /// <summary>
+        /// REQUIRED: The ability of a surface to emit radiant energy.
+        /// </summary>
+        public double Emissivity { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
+        /// </summary>
+        public string Model { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Zenith Albedo coefficient.
+        /// </summary>
+        public double Zenith { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Surface area of lake in square kilometers.
+        /// </summary>
+        public double LakeSurfaceArea { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Average depth of lake in meters.
+        /// </summary>
+        public double LakeDepth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Subsurface Resistance.
+        /// </summary>
+        public double SubsurfaceResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Stomatal Resistance.
+        /// </summary>
+        public double StomatalResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Leaf Width in meters.
+        /// </summary>
+        public double LeafWidth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Roughness Length in meters.
+        /// </summary>
+        public double RoughnessLength { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Vegetation Height in meters.
+        /// </summary>
+        public double VegetationHeight { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly leaf area indices.
+        /// </summary>
+        public Hashtable LeafAreaIndices { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly air temperature coefficients.
+        /// </summary>
+        public Hashtable AirTemperature { get; set; }
     }
 
 

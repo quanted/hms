@@ -1,5 +1,6 @@
 ﻿using Data;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -15,7 +16,80 @@ namespace Evapotranspiration
         // -------------- Evapotranspiration Variables -------------- //
 
         // Evapotranspiration specific variables are listed here.
+        /// <summary>
+        /// REQUIRED: Albedo coefficient.
+        /// </summary>
+        public double Albedo { get; set; }
 
+        /// <summary>
+        /// REQUIRED: Central Longitude of Time Zone in degrees.
+        /// </summary>
+        public double CentralLongitude { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Angle of the sun in degrees.
+        /// </summary>
+        public double SunAngle { get; set; }
+
+        /// <summary>
+        /// REQUIRED: The ability of a surface to emit radiant energy.
+        /// </summary>
+        public double Emissivity { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
+        /// </summary>
+        public string Model { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Zenith Albedo coefficient.
+        /// </summary>
+        public double Zenith { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Surface area of lake in square kilometers.
+        /// </summary>
+        public double LakeSurfaceArea { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Average depth of lake in meters.
+        /// </summary>
+        public double LakeDepth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Subsurface Resistance.
+        /// </summary>
+        public double SubsurfaceResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Stomatal Resistance.
+        /// </summary>
+        public double StomatalResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Leaf Width in meters.
+        /// </summary>
+        public double LeafWidth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Roughness Length in meters.
+        /// </summary>
+        public double RoughnessLength { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Vegetation Height in meters.
+        /// </summary>
+        public double VegetationHeight { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly leaf area indices.
+        /// </summary>
+        public Hashtable LeafAreaIndices { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly air temperature coefficients.
+        /// </summary>
+        public Hashtable AirTemperature { get; set; }
 
         // TimeSeries Output variable 
         public ITimeSeriesOutput Output { get; set; }
@@ -83,7 +157,7 @@ namespace Evapotranspiration
                     PriestleyTaylor priestleyTaylor = new PriestleyTaylor();
                     priestleyTaylor.Latitude = this.Input.Geometry.Point.Latitude;
                     priestleyTaylor.Longitude = this.Input.Geometry.Point.Longitude;
-                    priestleyTaylor.Albedo = this.Input.Albedo;
+                    priestleyTaylor.Albedo = this.Albedo;
                     priestleyTaylor.Elevation = elev.getElevation(out errorMsg);
                     this.Output = priestleyTaylor.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -94,7 +168,7 @@ namespace Evapotranspiration
                     GrangerGray grangerGray = new GrangerGray();
                     grangerGray.Latitude = this.Input.Geometry.Point.Latitude;
                     grangerGray.Longitude = this.Input.Geometry.Point.Longitude;
-                    grangerGray.Albedo = this.Input.Albedo;
+                    grangerGray.Albedo = this.Albedo;
                     grangerGray.Elevation = elev.getElevation(out errorMsg);
                     this.Output = grangerGray.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -104,7 +178,7 @@ namespace Evapotranspiration
                     Penpan penpan = new Penpan();
                     penpan.Latitude = this.Input.Geometry.Point.Latitude;
                     penpan.Longitude = this.Input.Geometry.Point.Longitude;
-                    penpan.Albedo = this.Input.Albedo;
+                    penpan.Albedo = this.Albedo;
                     penpan.Elevation = elev.getElevation(out errorMsg);
                     this.Output = penpan.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -114,22 +188,22 @@ namespace Evapotranspiration
                     McJannett mcjannett = new McJannett();
                     mcjannett.Latitude = this.Input.Geometry.Point.Latitude;
                     mcjannett.Longitude = this.Input.Geometry.Point.Longitude;
-                    mcjannett.Albedo = this.Input.Albedo;
+                    mcjannett.Albedo = this.Albedo;
                     mcjannett.Elevation = elev.getElevation(out errorMsg);
-                    mcjannett.SurfaceArea = this.Input.LakeSurfaceArea;
-                    mcjannett.LakeDepth = this.Input.LakeDepth;
-                    mcjannett.airToWaterTempFactor[1] = Convert.ToDouble(this.Input.AirTemperature["1"]);
-                    mcjannett.airToWaterTempFactor[2] = Convert.ToDouble(this.Input.AirTemperature["2"]);
-                    mcjannett.airToWaterTempFactor[3] = Convert.ToDouble(this.Input.AirTemperature["3"]);
-                    mcjannett.airToWaterTempFactor[4] = Convert.ToDouble(this.Input.AirTemperature["4"]);
-                    mcjannett.airToWaterTempFactor[5] = Convert.ToDouble(this.Input.AirTemperature["5"]);
-                    mcjannett.airToWaterTempFactor[6] = Convert.ToDouble(this.Input.AirTemperature["6"]);
-                    mcjannett.airToWaterTempFactor[7] = Convert.ToDouble(this.Input.AirTemperature["7"]);
-                    mcjannett.airToWaterTempFactor[8] = Convert.ToDouble(this.Input.AirTemperature["8"]);
-                    mcjannett.airToWaterTempFactor[9] = Convert.ToDouble(this.Input.AirTemperature["9"]);
-                    mcjannett.airToWaterTempFactor[10] = Convert.ToDouble(this.Input.AirTemperature["10"]);
-                    mcjannett.airToWaterTempFactor[11] = Convert.ToDouble(this.Input.AirTemperature["11"]);
-                    mcjannett.airToWaterTempFactor[12] = Convert.ToDouble(this.Input.AirTemperature["12"]);
+                    mcjannett.SurfaceArea = this.LakeSurfaceArea;
+                    mcjannett.LakeDepth = this.LakeDepth;
+                    mcjannett.airToWaterTempFactor[1] = Convert.ToDouble(this.AirTemperature["1"]);
+                    mcjannett.airToWaterTempFactor[2] = Convert.ToDouble(this.AirTemperature["2"]);
+                    mcjannett.airToWaterTempFactor[3] = Convert.ToDouble(this.AirTemperature["3"]);
+                    mcjannett.airToWaterTempFactor[4] = Convert.ToDouble(this.AirTemperature["4"]);
+                    mcjannett.airToWaterTempFactor[5] = Convert.ToDouble(this.AirTemperature["5"]);
+                    mcjannett.airToWaterTempFactor[6] = Convert.ToDouble(this.AirTemperature["6"]);
+                    mcjannett.airToWaterTempFactor[7] = Convert.ToDouble(this.AirTemperature["7"]);
+                    mcjannett.airToWaterTempFactor[8] = Convert.ToDouble(this.AirTemperature["8"]);
+                    mcjannett.airToWaterTempFactor[9] = Convert.ToDouble(this.AirTemperature["9"]);
+                    mcjannett.airToWaterTempFactor[10] = Convert.ToDouble(this.AirTemperature["10"]);
+                    mcjannett.airToWaterTempFactor[11] = Convert.ToDouble(this.AirTemperature["11"]);
+                    mcjannett.airToWaterTempFactor[12] = Convert.ToDouble(this.AirTemperature["12"]);
                     this.Output = mcjannett.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
@@ -138,7 +212,7 @@ namespace Evapotranspiration
                     PenmanOpenWater penmanOpenWater = new PenmanOpenWater();
                     penmanOpenWater.Latitude = this.Input.Geometry.Point.Latitude;
                     penmanOpenWater.Longitude = this.Input.Geometry.Point.Longitude;
-                    penmanOpenWater.Albedo = this.Input.Albedo;
+                    penmanOpenWater.Albedo = this.Albedo;
                     penmanOpenWater.Elevation = elev.getElevation(out errorMsg);
                     this.Output = penmanOpenWater.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -148,7 +222,7 @@ namespace Evapotranspiration
                     PenmanDaily penmanDaily = new PenmanDaily();
                     penmanDaily.Latitude = this.Input.Geometry.Point.Latitude;
                     penmanDaily.Longitude = this.Input.Geometry.Point.Longitude;
-                    penmanDaily.Albedo = this.Input.Albedo;
+                    penmanDaily.Albedo = this.Albedo;
                     penmanDaily.Elevation = elev.getElevation(out errorMsg);
                     this.Output = penmanDaily.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -158,10 +232,10 @@ namespace Evapotranspiration
                     PenmanHourly penmanHourly = new PenmanHourly();
                     penmanHourly.Latitude = this.Input.Geometry.Point.Latitude;
                     penmanHourly.Longitude = this.Input.Geometry.Point.Longitude;
-                    penmanHourly.Albedo = this.Input.Albedo;
+                    penmanHourly.Albedo = this.Albedo;
                     penmanHourly.Elevation = elev.getElevation(out errorMsg);
-                    penmanHourly.TimeZoneCentralLongitude = this.Input.CentralLongitude;
-                    penmanHourly.SunAngle = this.Input.SunAngle;
+                    penmanHourly.TimeZoneCentralLongitude = this.CentralLongitude;
+                    penmanHourly.SunAngle = this.SunAngle;
                     this.Output = penmanHourly.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
@@ -170,10 +244,10 @@ namespace Evapotranspiration
                     MortonCRAE mortonCRAE = new MortonCRAE();
                     mortonCRAE.Latitude = this.Input.Geometry.Point.Latitude;
                     mortonCRAE.Longitude = this.Input.Geometry.Point.Longitude;
-                    mortonCRAE.Albedo = this.Input.Albedo;
+                    mortonCRAE.Albedo = this.Albedo;
                     mortonCRAE.Elevation = elev.getElevation(out errorMsg);
-                    mortonCRAE.Emissivity = this.Input.Emissivity;
-                    int model = Utilities.Utility.CalculateMortonMethod(this.Input.Model);
+                    mortonCRAE.Emissivity = this.Emissivity;
+                    int model = Utilities.Utility.CalculateMortonMethod(this.Model);
                     double aprecip = 0.0;
                     mortonCRAE.AnnualPrecipitation = aprecip;
                     this.Output = mortonCRAE.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model, out aprecip, out errorMsg);
@@ -184,11 +258,11 @@ namespace Evapotranspiration
                     MortonCRWE mortonCRWE = new MortonCRWE();
                     mortonCRWE.Latitude = this.Input.Geometry.Point.Latitude;
                     mortonCRWE.Longitude = this.Input.Geometry.Point.Longitude;
-                    mortonCRWE.Albedo = this.Input.Albedo;
+                    mortonCRWE.Albedo = this.Albedo;
                     mortonCRWE.Elevation = elev.getElevation(out errorMsg);
-                    mortonCRWE.Emissivity = this.Input.Emissivity;
-                    mortonCRWE.Azenith = this.Input.Zenith;
-                    int model2 = Utilities.Utility.CalculateMortonMethod(this.Input.Model);
+                    mortonCRWE.Emissivity = this.Emissivity;
+                    mortonCRWE.Azenith = this.Zenith;
+                    int model2 = Utilities.Utility.CalculateMortonMethod(this.Model);
                     double aprecip2 = 0.0;
                     mortonCRWE.AnnualPrecipitation = aprecip2;
                     this.Output = mortonCRWE.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model2, out aprecip2, out errorMsg);
@@ -199,25 +273,25 @@ namespace Evapotranspiration
                     ShuttleworthWallace shuttleworthWallace = new ShuttleworthWallace();
                     shuttleworthWallace.Latitude = this.Input.Geometry.Point.Latitude;
                     shuttleworthWallace.Longitude = this.Input.Geometry.Point.Longitude;
-                    shuttleworthWallace.Albedo = this.Input.Albedo;
+                    shuttleworthWallace.Albedo = this.Albedo;
                     shuttleworthWallace.Elevation = elev.getElevation(out errorMsg);
-                    shuttleworthWallace.ResistanceSurfaceSoil = this.Input.SubsurfaceResistance;
-                    shuttleworthWallace.ResistanceStomatal = this.Input.StomatalResistance;
-                    shuttleworthWallace.WidthLeaf = this.Input.LeafWidth;
-                    shuttleworthWallace.GroundRoughnessLength = this.Input.RoughnessLength;
-                    shuttleworthWallace.VegetationHeight = this.Input.VegetationHeight;
-                    shuttleworthWallace.leafAreaIndex[1] = Convert.ToDouble(this.Input.LeafAreaIndices["1"]);
-                    shuttleworthWallace.leafAreaIndex[2] = Convert.ToDouble(this.Input.LeafAreaIndices["2"]);
-                    shuttleworthWallace.leafAreaIndex[3] = Convert.ToDouble(this.Input.LeafAreaIndices["3"]);
-                    shuttleworthWallace.leafAreaIndex[4] = Convert.ToDouble(this.Input.LeafAreaIndices["4"]);
-                    shuttleworthWallace.leafAreaIndex[5] = Convert.ToDouble(this.Input.LeafAreaIndices["5"]);
-                    shuttleworthWallace.leafAreaIndex[6] = Convert.ToDouble(this.Input.LeafAreaIndices["6"]);
-                    shuttleworthWallace.leafAreaIndex[7] = Convert.ToDouble(this.Input.LeafAreaIndices["7"]);
-                    shuttleworthWallace.leafAreaIndex[8] = Convert.ToDouble(this.Input.LeafAreaIndices["8"]);
-                    shuttleworthWallace.leafAreaIndex[9] = Convert.ToDouble(this.Input.LeafAreaIndices["9"]);
-                    shuttleworthWallace.leafAreaIndex[10] = Convert.ToDouble(this.Input.LeafAreaIndices["10"]);
-                    shuttleworthWallace.leafAreaIndex[11] = Convert.ToDouble(this.Input.LeafAreaIndices["11"]);
-                    shuttleworthWallace.leafAreaIndex[12] = Convert.ToDouble(this.Input.LeafAreaIndices["12"]);
+                    shuttleworthWallace.ResistanceSurfaceSoil = this.SubsurfaceResistance;
+                    shuttleworthWallace.ResistanceStomatal = this.StomatalResistance;
+                    shuttleworthWallace.WidthLeaf = this.LeafWidth;
+                    shuttleworthWallace.GroundRoughnessLength = this.RoughnessLength;
+                    shuttleworthWallace.VegetationHeight = this.VegetationHeight;
+                    shuttleworthWallace.leafAreaIndex[1] = Convert.ToDouble(this.LeafAreaIndices["1"]);
+                    shuttleworthWallace.leafAreaIndex[2] = Convert.ToDouble(this.LeafAreaIndices["2"]);
+                    shuttleworthWallace.leafAreaIndex[3] = Convert.ToDouble(this.LeafAreaIndices["3"]);
+                    shuttleworthWallace.leafAreaIndex[4] = Convert.ToDouble(this.LeafAreaIndices["4"]);
+                    shuttleworthWallace.leafAreaIndex[5] = Convert.ToDouble(this.LeafAreaIndices["5"]);
+                    shuttleworthWallace.leafAreaIndex[6] = Convert.ToDouble(this.LeafAreaIndices["6"]);
+                    shuttleworthWallace.leafAreaIndex[7] = Convert.ToDouble(this.LeafAreaIndices["7"]);
+                    shuttleworthWallace.leafAreaIndex[8] = Convert.ToDouble(this.LeafAreaIndices["8"]);
+                    shuttleworthWallace.leafAreaIndex[9] = Convert.ToDouble(this.LeafAreaIndices["9"]);
+                    shuttleworthWallace.leafAreaIndex[10] = Convert.ToDouble(this.LeafAreaIndices["10"]);
+                    shuttleworthWallace.leafAreaIndex[11] = Convert.ToDouble(this.LeafAreaIndices["11"]);
+                    shuttleworthWallace.leafAreaIndex[12] = Convert.ToDouble(this.LeafAreaIndices["12"]);
                     this.Output = shuttleworthWallace.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
@@ -226,10 +300,10 @@ namespace Evapotranspiration
                     HSPF hspf = new HSPF();
                     hspf.Latitude = this.Input.Geometry.Point.Latitude;
                     hspf.Longitude = this.Input.Geometry.Point.Longitude;
-                    hspf.Albedo = this.Input.Albedo;
+                    hspf.Albedo = this.Albedo;
                     hspf.Elevation = elev.getElevation(out errorMsg);
-                    hspf.TimeZoneCentralLongitude = this.Input.CentralLongitude;
-                    hspf.SunAngle = this.Input.SunAngle;
+                    hspf.TimeZoneCentralLongitude = this.CentralLongitude;
+                    hspf.SunAngle = this.SunAngle;
                     this.Output = hspf.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;

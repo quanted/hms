@@ -65,80 +65,7 @@ namespace Data
         /// </summary>
         List<string> BaseURL { get; set; }
 
-        /// <summary>
-        /// REQUIRED: Albedo coefficient.
-        /// </summary>
-        double Albedo { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Central Longitude of Time Zone in degrees.
-        /// </summary>
-        double CentralLongitude { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Angle of the sun in degrees.
-        /// </summary>
-        double SunAngle { get; set; }
-
-        /// <summary>
-        /// REQUIRED: The ability of a surface to emit radiant energy.
-        /// </summary>
-        double Emissivity { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
-        /// </summary>
-        string Model { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Zenith Albedo coefficient.
-        /// </summary>
-        double Zenith { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Surface area of lake in square kilometers.
-        /// </summary>
-        double LakeSurfaceArea { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Average depth of lake in meters.
-        /// </summary>
-        double LakeDepth { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Subsurface Resistance.
-        /// </summary>
-        double SubsurfaceResistance { get; set; }
         
-        /// <summary>
-        /// REQUIRED: Stomatal Resistance.
-        /// </summary>
-        double StomatalResistance { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Leaf Width in meters.
-        /// </summary>
-        double LeafWidth { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Roughness Length in meters.
-        /// </summary>
-        double RoughnessLength { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Vegetation Height in meters.
-        /// </summary>
-        double VegetationHeight { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Monthly leaf area indices.
-        /// </summary>
-        Hashtable LeafAreaIndices { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Monthly air temperature coefficients.
-        /// </summary>
-        Hashtable AirTemperature { get; set; }
     }
 
 
@@ -203,80 +130,6 @@ namespace Data
         /// </summary>
         public List<string> BaseURL { get; set; }
 
-        /// <summary>
-        /// REQUIRED: Albedo coefficient.
-        /// </summary>
-        public double Albedo { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Central Longitude of Time Zone in degrees.
-        /// </summary>
-        public double CentralLongitude { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Angle of the sun in degrees.
-        /// </summary>
-        public double SunAngle { get; set; }
-
-        /// <summary>
-        /// REQUIRED: The ability of a surface to emit radiant energy.
-        /// </summary>
-        public double Emissivity { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
-        /// </summary>
-        public string Model { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Zenith Albedo coefficient.
-        /// </summary>
-        public double Zenith { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Surface area of lake in square kilometers.
-        /// </summary>
-        public double LakeSurfaceArea { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Average depth of lake in meters.
-        /// </summary>
-        public double LakeDepth { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Subsurface Resistance.
-        /// </summary>
-        public double SubsurfaceResistance { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Stomatal Resistance.
-        /// </summary>
-        public double StomatalResistance { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Leaf Width in meters.
-        /// </summary>
-        public double LeafWidth { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Roughness Length in meters.
-        /// </summary>
-        public double RoughnessLength { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Vegetation Height in meters.
-        /// </summary>
-        public double VegetationHeight { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Monthly leaf area indices.
-        /// </summary>
-        public Hashtable LeafAreaIndices { get; set; }
-
-        /// <summary>
-        /// REQUIRED: Monthly air temperature coefficients.
-        /// </summary>
-        public Hashtable AirTemperature { get; set; }
     }
 
 
@@ -555,23 +408,6 @@ namespace Data
                 }
             }
 
-            //Get evapo parameters
-            newInput.Albedo = input.Albedo;
-            newInput.CentralLongitude = input.CentralLongitude;
-            newInput.SunAngle = input.SunAngle;
-            newInput.Emissivity = input.Emissivity;
-            newInput.Model = input.Model;
-            newInput.Zenith = input.Zenith;
-            newInput.LakeSurfaceArea = input.LakeSurfaceArea;
-            newInput.LakeDepth = input.LakeDepth;
-            newInput.SubsurfaceResistance = input.SubsurfaceResistance;
-            newInput.StomatalResistance = input.StomatalResistance;
-            newInput.LeafWidth = input.LeafWidth;
-            newInput.RoughnessLength = input.RoughnessLength;
-            newInput.VegetationHeight = input.VegetationHeight;
-            newInput.LeafAreaIndices = input.LeafAreaIndices;
-            newInput.AirTemperature = input.AirTemperature;
-            errorMsg = string.Join(", ",errors);
             return newInput;
         }
 
