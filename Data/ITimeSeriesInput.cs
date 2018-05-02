@@ -65,6 +65,11 @@ namespace Data
         /// </summary>
         List<string> BaseURL { get; set; }
 
+        //------------------------//
+        /// <summary>
+        /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
+        /// </summary>
+        Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
         
     }
 
@@ -129,6 +134,12 @@ namespace Data
         /// Internal: Holds base url for data retrieval depending on the specified source and dataset.
         /// </summary>
         public List<string> BaseURL { get; set; }
+
+        //------------------------//
+        /// <summary>
+        /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
+        /// </summary>
+        public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
 
     }
 
@@ -406,6 +417,17 @@ namespace Data
                     //errorMsg += tempError;
                     errors.Add(tempError);
                 }
+            }
+
+            // Assign ITimeSeriesInput, if null assign empty ITimeSeriesOutput
+            if (input.InputTimeSeries == null)
+            {
+                ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+                newInput.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+            }
+            else
+            {
+                newInput.InputTimeSeries = input.InputTimeSeries;
             }
 
             return newInput;
