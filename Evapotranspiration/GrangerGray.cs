@@ -266,16 +266,18 @@ namespace Evapotranspiration
 
         }
 
-        public ITimeSeriesOutput Compute(double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
+        public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
         {
             errorMsg = "";
             double relHMax = 0;
             double relHMin = 0.0;
-
-            NLDAS2 nldas = new NLDAS2(lat, lon, startDate, endDate);
             double petGG = 0;
 
+            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+            
             DataTable dt = nldas.getData4(timeZoneOffset, out errorMsg);
+
+
             if (errorMsg != "")
             {
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -326,7 +328,7 @@ namespace Evapotranspiration
                 dr["RHmin"] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                 dr["RHmax"] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
                 dr["GrangerGrayPET_In"] = petGG.ToString("F4", CultureInfo.InvariantCulture);
-                
+
             }
 
             dt.Columns.Remove("SHmin");

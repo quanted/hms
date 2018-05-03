@@ -488,11 +488,11 @@ namespace Evapotranspiration
 
         }
 
-        public ITimeSeriesOutput Compute(double lat, double lon, string startDate, string endDate, int timeZoneOffset, int model,
+        public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, int model,
                                  out double aprecip, out string errorMsg)
         {
             errorMsg = "";
-            NLDAS2 nldas = new NLDAS2(lat, lon, startDate, endDate);
+            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
             aprecip = nldas.getAnnualPrecipitation();
             AnnualPrecipitation = aprecip;
             double relHMax = 0;

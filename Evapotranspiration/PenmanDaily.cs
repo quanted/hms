@@ -257,10 +257,10 @@ namespace Evapotranspiration
 
         }
 
-        public ITimeSeriesOutput Compute(double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
+        public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
         {
             errorMsg = "";
-            NLDAS2 nldas = new NLDAS2(lat, lon, startDate, endDate);
+            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
             double relHMax = 0;
             double relHMin = 0.0;
             double petPMD = 0;

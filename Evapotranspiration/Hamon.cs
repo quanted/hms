@@ -113,16 +113,16 @@ namespace Evapotranspiration
 
         }
 
-        public ITimeSeriesOutput Compute(double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
+        public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
         {
             errorMsg = "";
-
-            NLDAS2 nldas = new NLDAS2(lat, lon, startDate, endDate);
             double petHamon = 0;
             double sunshineHours = 0;
+            
+            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+            DataTable dt = new DataTable();
+            dt = nldas.getData1(timeZoneOffset, out errorMsg); 
 
-            DataTable dt = nldas.getData1(timeZoneOffset, out errorMsg);
-           
             if (errorMsg != "")
             {
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -153,7 +153,7 @@ namespace Evapotranspiration
 
             foreach (DataRow dr in dt.Rows)
             {
-                double tmean = Convert.ToDouble(dr["TMean_C"].ToString());
+                double tmean = Convert.ToDouble(dr["TMean_C"].ToString());//double tmean = Convert.ToDouble(dr["TMean_C"].ToString());
                 int jday = Convert.ToInt32(dr["Julian_Day"].ToString());
                 HamonMethod(tmean, jday, out petHamon, out sunshineHours, out errorMsg);
                 dr["Sunshine_Hours"] = sunshineHours.ToString("F2", CultureInfo.InvariantCulture);

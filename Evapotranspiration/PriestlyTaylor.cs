@@ -215,14 +215,16 @@ namespace Evapotranspiration
 
         }
 
-        public ITimeSeriesOutput Compute(double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
+        public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
         {
             errorMsg = "";
-
-            NLDAS2 nldas = new NLDAS2(lat, lon, startDate, endDate);
             double petPT = 0;
 
-            DataTable dt = nldas.getData2(timeZoneOffset, out errorMsg);
+            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                        
+            DataTable dt = new DataTable();
+            dt = nldas.getData2(timeZoneOffset, out errorMsg);
+
             if (errorMsg != "")
             {
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -269,6 +271,106 @@ namespace Evapotranspiration
                 output.Data.Add(dr[0].ToString(), lv);
             }
             return output;
+        }
+
+        public DataTable priestGLDASData(ITimeSeriesOutput outpt, ITimeSeriesInput inpt)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Date");
+            dt.Columns.Add("Hour");
+            dt.Columns.Add("Value");
+            foreach (KeyValuePair<string, List<string>> entry in outpt.Data)
+            {
+                DataRow dr = dt.NewRow(); 
+                string[] datetime = entry.Key.Split(' ');
+                dr["Date"] = datetime[0];
+                dr["Hour"] = datetime[1];
+                dr["Value"] = Convert.ToDouble(entry.Value[0]) - 273.15;
+                dt.Rows.Add(dr);
+            }
+            if (inpt.Geometry.Timezone.Offset == 0) //No need to adjust time series for time zone offset
+            {
+                return dt;
+            }
+            for (int i = 0; i < inpt.Geometry.Timezone.Offset; i++)
+            {
+                dt.Rows[0].Delete();
+            }
+            string date = "";
+            DataTable dtMinMax = new DataTable();
+            int remainder = 0;
+            dtMinMax.Columns.Add("Date");
+            dtMinMax.Columns.Add("Julian_Day");
+            dtMinMax.Columns.Add("TMin_C");
+            dtMinMax.Columns.Add("TMax_C");
+            dtMinMax.Columns.Add("TMean_C");
+
+            DataRow dr1 = null;
+            double meanTemp = 0;
+            DateTime startDate = inpt.DateTimeSpan.StartDate;
+            int startYear = startDate.Year - 1;
+            double elapsedJulianDate = Convert.ToDateTime(startYear.ToString() + "-12-31").ToOADate();
+            int julianDayOfYear = 0;
+            List<Double> list = new List<double>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Math.DivRem(i, 8, out remainder);
+                if (remainder == 0)
+                {
+                    date = dt.Rows[i]["Date"].ToString();
+                    dr1 = dtMinMax.NewRow();
+                    list = new List<double>();
+
+                }
+                dt.Rows[i]["Date"] = date;
+                dt.Rows[i]["Hour"] = remainder;
+                list.Add(Convert.ToDouble(dt.Rows[i]["Value"].ToString()));
+
+                if (remainder == 7)
+                {
+                    dr1["Date"] = date;
+                    dr1["TMin_C"] = list.Min().ToString("F2", CultureInfo.InvariantCulture);
+                    dr1["TMax_C"] = list.Max().ToString("F2", CultureInfo.InvariantCulture);
+                    meanTemp = (list.Min() + list.Max()) / 2.0;
+                    dr1["TMean_C"] = meanTemp.ToString("F2", CultureInfo.InvariantCulture);
+
+                    startDate = Convert.ToDateTime(date);
+                    startYear = startDate.Year - 1;
+                    elapsedJulianDate = Convert.ToDateTime(startYear.ToString() + "-12-31").ToOADate();
+                    julianDayOfYear = Convert.ToInt32(Convert.ToDateTime(date).ToOADate() - elapsedJulianDate);
+                    dr1["Julian_Day"] = julianDayOfYear;
+                    dtMinMax.Rows.Add(dr1);
+                }
+            }
+
+            //Finding Solar Radiation
+            dtMinMax.Columns.Add("SolarRadMean_MJm2day");
+            remainder = 0;
+
+            double meanSR = 0;
+            DataRow dr2 = null;
+            List<Double> listSR = new List<double>();
+            int rowindx = 0;
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Math.DivRem(i, 8, out remainder);
+                if (remainder == 0)
+                {
+                    dr2 = dtMinMax.NewRow();
+                    listSR = new List<double>();
+                }
+
+                listSR.Add(Convert.ToDouble(dt.Rows[i]["Value"].ToString()));
+
+                if (remainder == 7)
+                {
+                    meanSR = listSR.Average();
+                    meanSR = meanSR * 0.0864;  // Convert units from W/s to MJ/(m^2 day)
+                    dr2["SolarRadMean_MJm2day"] = meanSR.ToString("F2", CultureInfo.InvariantCulture);
+                    dtMinMax.Rows[rowindx++]["SolarRadMean_MJm2day"] = dr2["SolarRadMean_MJm2day"];
+                }
+            }
+            return dtMinMax;
         }
     }
 }
