@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 
 namespace Data
@@ -439,16 +440,14 @@ namespace Data
             errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
 
-            // TODO: Find alternative solution for HttpContext.Current to only load url_info.txt on application startup. HttpContext behavior altered in .Net Core
-            //if (HttpContext.Current == null)
-            //{
-            urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
-
-            //}
-            //else
-            //{
-            //    urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];    
-            //}
+            try
+            {
+                urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+            }
+            catch (FileNotFoundException ex)
+            {
+                urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
+            }
 
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
 
