@@ -229,22 +229,19 @@ namespace AQUATOX.AQSite
         TribInput,
         Marine
     } // end SiteTypes
-
-
+    
 
     public class TAQTSite
     {
         public SiteRecord Locale;
-        public double Discharge;
-        // cu m/day
+        [JsonIgnore] public double Discharge;     // cu m/day
         public ReminRecord Remin;
         public SiteTypes SiteType;
-        public double MeanThick;
-        public double P_Shape = 0;
-        public double TotDischarge = 0;
-        // was originally Q in older code
+        [JsonIgnore] public double MeanThick;
+        [JsonIgnore] public double P_Shape = 0;
+        [JsonIgnore] public double TotDischarge = 0;    // was originally Q in older code
         [JsonIgnore] public MorphRecord Morph;  // variable morphometry results, NoSave
-        public double ICSurfArea = 0;
+        [JsonIgnore] public double ICSurfArea = 0;
 
         // DeltaMorph procedures have been moved to TVOLUME.DELTAVOLUME found in STATE.INC
         // ----------------------------------------------------------------------------------------

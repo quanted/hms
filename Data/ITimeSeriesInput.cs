@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+// using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 
 namespace Data
@@ -63,7 +65,15 @@ namespace Data
         /// Internal: Base url for data retrieval depending on the specified source and dataset.
         /// </summary>
         List<string> BaseURL { get; set; }
+
+        //------------------------//
+        /// <summary>
+        /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
+        /// </summary>
+        Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
+        
     }
+
 
     /// <summary>
     /// Concrete class for timeseries inputs.
@@ -129,6 +139,13 @@ namespace Data
         /// Internal: Holds base url for data retrieval depending on the specified source and dataset.
         /// </summary>
         public List<string> BaseURL { get; set; }
+
+        //------------------------//
+        /// <summary>
+        /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
+        /// </summary>
+        public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
+
     }
 
 
@@ -406,7 +423,18 @@ namespace Data
                     errors.Add(tempError);
                 }
             }
-            errorMsg = string.Join(", ",errors);
+
+            // Assign ITimeSeriesInput, if null assign empty ITimeSeriesOutput
+            if (input.InputTimeSeries == null)
+            {
+                ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+                newInput.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+            }
+            else
+            {
+                newInput.InputTimeSeries = input.InputTimeSeries;
+            }
+
             return newInput;
         }
 
@@ -416,16 +444,14 @@ namespace Data
             errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
 
-            // TODO: Find alternative solution for HttpContext.Current to only load url_info.txt on application startup. HttpContext behavior altered in .Net Core
-            //if (HttpContext.Current == null)
-            //{
+            try
+            {
             urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
-
-            //}
-            //else
-            //{
-            //    urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];    
-            //}
+            }
+            catch (FileNotFoundException ex)
+            {
+                urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
+            }
 
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
 
@@ -449,6 +475,19 @@ namespace Data
                 case "prism":
                     src = "PRISM";
                     break;
+                case "hamon":
+                case "priestlytaylor":
+                case "grangergray":
+                case "penpan":
+                case "mcjannett":
+                case "penmanopenwater":
+                case "penmandaily":
+                case "penmanhourly":
+                case "mortoncrae":
+                case "mortoncrwe":
+                case "shuttleworthwallace":
+                case "hspf":
+                    return "";
                 default:
                     errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
                     return "";

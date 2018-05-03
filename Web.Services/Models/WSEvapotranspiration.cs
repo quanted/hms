@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Web.Services.Models
@@ -12,14 +13,14 @@ namespace Web.Services.Models
     public class WSEvapotranspiration
     {
 
-        private enum EvapoSources { nldas, gldas }
+        private enum EvapoSources { nldas, gldas, hamon, priestlytaylor, grangergray, penpan, mcjannett, penmanopenwater, penmandaily, penmanhourly, mortoncrae, mortoncrwe, shuttleworthwallace, hspf }
 
         /// <summary>
         /// Gets evapotranspiration data using the given TimeSeriesInput parameters.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetEvapotranspiration(ITimeSeriesInput input)
+        public async Task<ITimeSeriesOutput> GetEvapotranspiration(ITimeSeriesInput input)
         {
             string errorMsg = "";
 
@@ -45,7 +46,6 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             return result;
-
         }
     }
 }

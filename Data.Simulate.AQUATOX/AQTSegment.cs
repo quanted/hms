@@ -387,11 +387,12 @@ namespace AQUATOX.AQTSegment
 
         public bool UseConstEvap = true;
         public TLoadings DynEvap = null;
+        public bool UseConstZMean = true;
         public TLoadings DynZMean;
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;
+        public double MeanDischarge = 0;    // output only
 
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
@@ -1410,21 +1411,16 @@ namespace AQUATOX.AQTSegment
 
         public double DynamicZMean()
         {
-            double result;
             // Variable ZMean of segment or both segments if dynamic stratification
             if (!Location.Locale.UseBathymetry)
-            {
-                result = Volume_Last_Step / Location.Locale.SurfArea;
-                return result;
-            }
-            if (DynZMean == null) result = 0;
-            else result = DynZMean.ReturnTSLoad(TPresent);  // time series only
+              return Volume_Last_Step / Location.Locale.SurfArea;
 
-            if (result == 0)
-            {
-                result = Location.Locale.ICZMean;
-            }
-            return result;
+            if (UseConstZMean) 
+                  return Location.Locale.ICZMean;
+
+            if (DynZMean != null) return DynZMean.ReturnTSLoad(TPresent);  // time series only
+
+            return Location.Locale.ICZMean;  // DynZMean is null
         }
 
         public void SetupLinks()

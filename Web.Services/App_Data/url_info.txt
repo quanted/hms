@@ -1,14 +1,14 @@
-NLDAS_PRECIP_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:
+NLDAS_PRECIP_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:
 
-GLDAS_PRECIP_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Rainf_f_tavg&location=GEOM:POINT
+GLDAS_PRECIP_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:precip&location=GEOM:POINT
 
-NLDAS_SURFFLOW_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SSRUNsfc&location=NLDAS:
+NLDAS_SURFFLOW_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SSRUNsfc&location=NLDAS:
 
-GLDAS_SURFFLOW_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:Qs_acc&location=GEOM:POINT
+GLDAS_SURFFLOW_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Qs&location=GEOM:POINT
 
-NLDAS_BASEFLOW_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:BGRUNsfc&location=NLDAS:
+NLDAS_BASEFLOW_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:BGRUNsfc&location=NLDAS:
 
-GLDAS_BASEFLOW_URL https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:Qsb_acc&location=GEOM:POINT
+GLDAS_BASEFLOW_URL http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H_v2.1:Qsb&location=GEOM:POINT
 
 NLDAS_EVAPOT_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:EVPsfc&location=NLDAS:
 

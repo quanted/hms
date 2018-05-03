@@ -3,11 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\</OutputPath>
-    <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
+    <DocumentationFile>bin\netcoreapp2.0\XmlComments.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -38,14 +39,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.6.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.9.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

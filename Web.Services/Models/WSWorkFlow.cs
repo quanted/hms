@@ -21,7 +21,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetWorkFlowData(WorkFlowCompareInput input)
+        public async Task<ITimeSeriesOutput> GetWorkFlowData(WorkFlowCompareInput input)
         {
             string errorMsg = "";
 
@@ -120,6 +120,10 @@ namespace Web.Services.Models
                         outputList.Add(result);
                     }
                 });
+
+                if(errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1){
+                    return err.ReturnError(string.Join(",", errorList.ToArray()));
+                }
 
 
                 foreach (ITimeSeriesOutput result in outputList)

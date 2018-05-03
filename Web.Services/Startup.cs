@@ -29,7 +29,10 @@ namespace Web.Services
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+            });
             services.AddLogging();
 
             services.AddCors();
@@ -39,8 +42,8 @@ namespace Web.Services
 
             //Set the comments path for the swagger json and ui.
             var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-            var xmlPath = Path.Combine(basePath, "App_Data\\XmlComments.xml");
-            var xmlDataPath = Path.Combine(basePath, "App_Data\\XmlCommentsData.xml");
+            var xmlPath = Path.Combine(basePath, "XmlComments.xml");
+            var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
 
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -67,15 +70,6 @@ namespace Web.Services
         /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
-
-            //app.Run(async (context) =>
-            //{
-            //    await context.Response.WriteAsync("Hello World!");
-            //});
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
@@ -83,12 +77,7 @@ namespace Web.Services
             app.UseStaticFiles();
             app.UseMvc();
             //app.UseMvcWithDefaultRoute();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            //app.UseSwagger(c =>
-            //{
-            //    c.RouteTemplate = "HMSWS/swagger/{documentName}/swagger.json";
-            //});
+;
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
@@ -97,9 +86,6 @@ namespace Web.Services
                 // Routing through IIS as a subdomain requires the following  line for swagger.json to be accessible.
                 //c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
-                c.DocExpansion("none");
-                c.ShowRequestHeaders();
-                //c.ShowJsonEditor();
             });
 
             // Logger setup and configuration

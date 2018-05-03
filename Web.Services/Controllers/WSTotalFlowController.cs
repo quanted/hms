@@ -55,11 +55,11 @@ namespace Web.Services.Controllers
         [Route("")]
         [Route("v1.0")]
         [SwaggerRequestExample(typeof(TotalFlowInput), typeof(TotalFlowInputExample))]
-        public ITimeSeriesOutput POST([FromBody]TotalFlowInput tfInput)
+        public async Task<IActionResult> POST([FromBody]TotalFlowInput tfInput)
         {
             WSTotalFlow tFlow = new WSTotalFlow();
-            ITimeSeriesOutput results = tFlow.GetTotalFlowData(tfInput);
-            return results;
+            ITimeSeriesOutput results = await tFlow.GetTotalFlowData(tfInput);
+            return new ObjectResult(results);
         }
 
 

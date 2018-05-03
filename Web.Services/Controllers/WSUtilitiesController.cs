@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Web.Services.Controllers
 {
@@ -21,29 +22,50 @@ namespace Web.Services.Controllers
         [Route("utilities/status")]
         [Route("utilities/status/v1.0")]
         [HttpGet]
-        public Dictionary<string, Dictionary<string, Dictionary<string, string>>> AllDatasetEndpointsCheck()
+        //public Dictionary<string, Dictionary<string, Dictionary<string, string>>> AllDatasetEndpointsCheck()
+        public async Task<IActionResult> AllDatasetEndpointsCheck()
         {
+            Task<Dictionary<string, Dictionary<string, string>>> evapo = Models.WSUtilities.CheckEvapoEndpoints();
+            Dictionary<string, Dictionary<string, string>> evapoResults = await evapo;
+
+            Task<Dictionary<string, Dictionary<string, string>>> precip = Models.WSUtilities.CheckPrecipEndpoints();
+            Dictionary<string, Dictionary<string, string>> precipResults = await precip;
+
+            Task<Dictionary<string, Dictionary<string, string>>> soilM = Models.WSUtilities.CheckSoilMEndpoints();
+            Dictionary<string, Dictionary<string, string>> soilMResults = await soilM;
+
+            Task<Dictionary<string, Dictionary<string, string>>> subsurface = Models.WSUtilities.CheckSubsurfaceEndpoints();
+            Dictionary<string, Dictionary<string, string>> subsurfaceResults = await subsurface;
+
+            Task<Dictionary<string, Dictionary<string, string>>> runoff = Models.WSUtilities.CheckRunoffEndpoints();
+            Dictionary<string, Dictionary<string, string>> runoffResults = await runoff;
+
+            Task<Dictionary<string, Dictionary<string, string>>> temp = Models.WSUtilities.CheckTempEndpoints();
+            Dictionary<string, Dictionary<string, string>> tempResults = await temp;
+
             Dictionary<string, Dictionary<string, Dictionary<string, string>>> endpointStatus = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>
             {
-                { "Evapotranspiration", Models.WSUtilities.CheckEvapoEndpoints() },
-                { "Precipitation", Models.WSUtilities.CheckPrecipEndpoints() },
-                { "Soil Moisture", Models.WSUtilities.CheckSoilMEndpoints() },
-                { "Subsurface Flow", Models.WSUtilities.CheckSubsurfaceEndpoints() },
-                { "Surface Runoff", Models.WSUtilities.CheckRunoffEndpoints() },
-                { "Temperature", Models.WSUtilities.CheckTempEndpoints() }
+                { "Evapotranspiration", evapoResults },
+                { "Precipitation", precipResults },
+                { "Soil Moisture", soilMResults },
+                { "Subsurface Flow", subsurfaceResults },
+                { "Surface Runoff", runoffResults },
+                { "Temperature", tempResults }
             };
-            return endpointStatus;
+            return new ObjectResult(endpointStatus);
         }
 
         /// <summary>
         /// Checks endpoints for a specified dataset.
+        /// Valid datasets: "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature"
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
         [Route("utilities/status/{dataset}")]
         [Route("utilities/status/{dataset}/v1.0")]
         [HttpGet]
-        public List<Dictionary<string, Dictionary<string, string>>> DatasetEndpointsCheck(string dataset)
+        //public List<Dictionary<string, Dictionary<string, string>>> DatasetEndpointsCheck(string dataset)
+        public async Task<IActionResult> DatasetEndpointsCheck(string dataset)
         {
             List<string> validEndpoints = new List<string>() { "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature" };
             List<Dictionary<string, Dictionary<string, string>>> endpointStatus = new List<Dictionary<string, Dictionary<string, string>>>();
@@ -51,27 +73,39 @@ namespace Web.Services.Controllers
             {
                 case "evapo":
                 case "evapotranspiration":
-                    endpointStatus.Add(Models.WSUtilities.CheckEvapoEndpoints());
+                    Task<Dictionary<string, Dictionary<string, string>>> evapo = Models.WSUtilities.CheckEvapoEndpoints();
+                    Dictionary<string, Dictionary<string, string>> evapoResults = await evapo;
+                    endpointStatus.Add(evapoResults);
                     break;
                 case "precip":
                 case "precipitation":
-                    endpointStatus.Add(Models.WSUtilities.CheckPrecipEndpoints());  
+                    Task<Dictionary<string, Dictionary<string, string>>> precip = Models.WSUtilities.CheckPrecipEndpoints();
+                    Dictionary<string, Dictionary<string, string>> precipResults = await precip;
+                    endpointStatus.Add(precipResults);  
                     break;
                 case "soilm":
                 case "soilmoisture":
-                    endpointStatus.Add(Models.WSUtilities.CheckSoilMEndpoints());
+                    Task<Dictionary<string, Dictionary<string, string>>> soilM = Models.WSUtilities.CheckSoilMEndpoints();
+                    Dictionary<string, Dictionary<string, string>> soilMResults = await soilM;
+                    endpointStatus.Add(soilMResults);
                     break;
                 case "subsurface":
                 case "subsurfaceflow":
-                    endpointStatus.Add(Models.WSUtilities.CheckSubsurfaceEndpoints());
+                    Task<Dictionary<string, Dictionary<string, string>>> subsurface = Models.WSUtilities.CheckSubsurfaceEndpoints();
+                    Dictionary<string, Dictionary<string, string>> subsurfaceResults = await subsurface;
+                    endpointStatus.Add(subsurfaceResults);
                     break;
                 case "runoff":
                 case "surfacerunoff":
-                    endpointStatus.Add(Models.WSUtilities.CheckRunoffEndpoints());
+                    Task<Dictionary<string, Dictionary<string, string>>> runoff = Models.WSUtilities.CheckRunoffEndpoints();
+                    Dictionary<string, Dictionary<string, string>> runoffResults = await runoff;
+                    endpointStatus.Add(runoffResults);
                     break;
                 case "temp":
                 case "temperature":
-                    endpointStatus.Add(Models.WSUtilities.CheckTempEndpoints());
+                    Task<Dictionary<string, Dictionary<string, string>>> temp = Models.WSUtilities.CheckTempEndpoints();
+                    Dictionary<string, Dictionary<string, string>> tempResults = await temp;
+                    endpointStatus.Add(tempResults);
                     break;
                 default:
                     endpointStatus.Add(new Dictionary<string, Dictionary<string, string>>() { { "UNKNOWN DATASET", new Dictionary<string, string>() {
@@ -81,7 +115,7 @@ namespace Web.Services.Controllers
                     } } });
                     break;
             }
-            return endpointStatus;
+            return new ObjectResult(endpointStatus);
         }
     }
 }

@@ -3,6 +3,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.Loadings;
 using AQUATOX.Nutrients;
+using Newtonsoft.Json;
 using Globals;
 
 namespace AQUATOX.OrgMatter
@@ -815,7 +816,7 @@ public class TDetritus : TRemineralize
 
     public class TSuspendedDetr : TDetritus
     {
-        public double DetrSinkToHypo = 0;
+        [JsonIgnore] public double DetrSinkToHypo = 0;
         public Loadings.TLoadings Predation_Link = null;
 
         public TSuspendedDetr(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)

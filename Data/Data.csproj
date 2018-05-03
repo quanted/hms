@@ -8,7 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>..\Web.Services\bin\netcoreapp2.0\XmlCommentsData.xml</DocumentationFile>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
 
@@ -34,11 +34,15 @@
     </Content>
   </ItemGroup>
 
+  <!--<ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.2" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
       <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.http.abstractions\2.0.0\lib\netstandard2.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
+      <Private>true</Private>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
-
-  </Project>
+</Project>

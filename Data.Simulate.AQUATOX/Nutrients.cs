@@ -2,6 +2,7 @@
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.OrgMatter;
+using Newtonsoft.Json;
 using Globals;
 
 namespace AQUATOX.Nutrients
@@ -1436,17 +1437,17 @@ namespace AQUATOX.Nutrients
 
         public class TNH4Obj : TRemineralize
         {
-        public double PhotoResp = 0;
-        public double DarkResp = 0;
-        public double AnimExcr = 0;
-        public double AnimPredn = 0;
-        public double SvNutrRelColonization = 0;
-        public double SvNutrRelMortality = 0;
-        public double SvNutrRelGamLoss = 0;
-        public double SvNutrRelPeriScr = 0;
-        public double SvNutrRelPlantSink = 0;
-        public double SvNutrRelDefecation = 0;
-        public double SvSumDetrDecomp = 0;
+        [JsonIgnore] public double PhotoResp = 0;
+        [JsonIgnore] public double DarkResp = 0;
+        [JsonIgnore] public double AnimExcr = 0;
+        [JsonIgnore] public double AnimPredn = 0;
+        [JsonIgnore] public double SvNutrRelColonization = 0;
+        [JsonIgnore] public double SvNutrRelMortality = 0;
+        [JsonIgnore] public double SvNutrRelGamLoss = 0;
+        [JsonIgnore] public double SvNutrRelPeriScr = 0;
+        [JsonIgnore] public double SvNutrRelPlantSink = 0;
+        [JsonIgnore] public double SvNutrRelDefecation = 0;
+        [JsonIgnore] public double SvSumDetrDecomp = 0;
 
         public Loadings.TLoadings Assimilation_Link = null;  // optional linkage from JSON if plants, animals, or OM not modeled
         public Loadings.TLoadings Animal_Remin_Link = null;
@@ -1724,12 +1725,9 @@ namespace AQUATOX.Nutrients
 
         public class TNO3Obj : TRemineralize
         {
-        public double NotUsed = 0;
-        public double[] Alt_NotUsed;
         public bool TN_IC = false;
         public bool TN_Inflow = false;
         public bool TN_PS = false;
-        public bool unused = false;
         public bool TN_NPS = false;
 
         public Loadings.TLoadings Assimilation_Link = null;  // optional linkage from JSON if plants, animals, or OM not modeled
