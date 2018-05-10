@@ -471,19 +471,6 @@ namespace Data
                 case "prism":
                     src = "PRISM";
                     break;
-                case "hamon":
-                case "priestlytaylor":
-                case "grangergray":
-                case "penpan":
-                case "mcjannett":
-                case "penmanopenwater":
-                case "penmandaily":
-                case "penmanhourly":
-                case "mortoncrae":
-                case "mortoncrwe":
-                case "shuttleworthwallace":
-                case "hspf":
-                    return "";
                 default:
                     errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
                     return "";
