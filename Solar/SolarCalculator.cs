@@ -112,12 +112,13 @@ namespace Solar
             
             currentDate = this.Input.DateTimeSpan.StartDate;
 
-            //double time = 0.0;
-            //Double.TryParse( this.LocalTime.Split(":")[0], out time);
+            DateTime end = new DateTime();
+            end = this.Input.DateTimeSpan.EndDate.AddDays(1);
+
             TimeSpan hour = TimeSpan.Parse(this.LocalTime);
             currentDate = currentDate.Add(hour);
-            while (currentDate.CompareTo(this.Input.DateTimeSpan.EndDate) <= 0)
-            {                
+            while (!(currentDate.CompareTo(end) > 0))
+            {
                 List<string> data = new List<string>();
                 data.Add(this.LocalTime);
 

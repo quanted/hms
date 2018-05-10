@@ -27,7 +27,7 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// GLDAS precipitation request json string for testing a valid request
+        /// GLDAS request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
             "{\"source\": \"gldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
@@ -47,14 +47,14 @@ namespace Web.Services.Tests
         }
 
         /// <summary>
-        /// Evapotranspiration controller integration tests for each precip data source. All tests should pass.
+        /// Evapotranspiration controller integration tests for each evapotranspiration data source. All tests should pass.
         /// </summary>
         /// <param name="evapoInputString"></param>
         /// <returns></returns>
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]
-        public async Task SuccessRequests(string evapoInputString)
+        public async Task ValidRequests(string evapoInputString)
         {
             string endpoint = "api/hydrology/evapotranspiration";
             EvapotranspirationInput input = JsonConvert.DeserializeObject<EvapotranspirationInput>(evapoInputString);

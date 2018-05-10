@@ -129,6 +129,8 @@ namespace Web.Services.Models
         /// <returns></returns>
         public async Task<ITimeSeriesOutput> GetTotalFlowData(TotalFlowInput input)
         {
+            //TODO: Extract the geometry percentage from following code and place in Utility class, for possible use by all controllers.
+
             // Steps:
             // 1 - determine geometry
             // type case ID: is equal to "huc", "commid", or "catchmentid"
@@ -151,8 +153,10 @@ namespace Web.Services.Models
             GeometryResponse geo = new GeometryResponse();
             // local testing
             //string baseUrl = "http://localhost:8000/hms/rest/api/v2/hms/gis/percentage/";
+            // qedinternal url
+            //string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/gis/percentage/";
             // deployment url
-            string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/gis/percentage/";
+            string baseUrl = "http://172.20.100.11/hms/rest/api/v2/hms/gis/percentage/";
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
@@ -178,14 +182,14 @@ namespace Web.Services.Models
                     case "huc":
                         // use case 1
                         // use case 2
-                        //string hucID = input.GeometryInput;
-                        //using (var client = new HttpClient())
-                        //{
-                        //    string queryUrl = baseUrl + "?huc_8_id=" + hucID;
-                        //    client.Timeout = TimeSpan.FromMinutes(10);
-                        //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
-                        //}
-                        goto default;
+                        string hucID = input.GeometryInput;
+                        using (var client = new HttpClient())
+                        {
+                            string queryUrl = baseUrl + "?huc_8_id=" + hucID;
+                            client.Timeout = TimeSpan.FromMinutes(10);
+                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
+                        }
+                        //goto default;
                         break;
                     case "commid":
                         // use case 3

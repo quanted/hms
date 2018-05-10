@@ -135,6 +135,9 @@ namespace Evapotranspiration
             this.Output = iFactory.Initialize();
             Elevation elev = new Elevation(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude);
             Utilities.Time offsets = new Utilities.Time();
+
+            this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
+
             switch (this.Algorithm)
             {
                 case "nldas":

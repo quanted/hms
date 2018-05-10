@@ -9,7 +9,7 @@
             Evapotranspiration Input that implements TimeSeriesInput object
             </summary>
         </member>
-		<member name="P:Web.Services.Controllers.EvapotranspirationInput.Algorithm">
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Algorithm">
             <summary>
             REQUIRED: Algorithm used for Evapotranspiration.
             </summary>
@@ -553,7 +553,7 @@
             HMS Web Service Evapotranspiration Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSEvapotranspiration.GetEvapotranspiration(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSEvapotranspiration.GetEvapotranspiration(Web.Services.Controllers.EvapotranspirationInput)">
             <summary>
             Gets evapotranspiration data using the given TimeSeriesInput parameters.
             </summary>
