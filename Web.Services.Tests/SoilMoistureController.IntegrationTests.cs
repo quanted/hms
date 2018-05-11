@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace Web.Services.Tests
 {
-    public class SolarMoistureControllerIntegrationTests
+    public class SoilMoistureControllerIntegrationTests
     {
         private readonly TestServer _server;
         private readonly HttpClient _client;
@@ -40,7 +40,7 @@ namespace Web.Services.Tests
         /// <summary>
         /// Integration test constructor creates test server and test client.
         /// </summary>
-        public SolarMoistureControllerIntegrationTests()
+        public SoilMoistureControllerIntegrationTests()
         {
             _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             _client = _server.CreateClient();

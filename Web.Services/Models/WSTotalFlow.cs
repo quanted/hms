@@ -122,6 +122,15 @@ namespace Web.Services.Models
     public class WSTotalFlow
     {
 
+        // local testing
+        // private string baseUrl = "http://localhost:8000";
+        // qedinternal url
+        // private string baseUrl = "https://qedinternal.epa.gov";
+        // deployment url
+        private string baseUrl = "http://172.20.100.11";
+
+
+
         /// <summary>
         /// Default function for retrieving Total Flow data
         /// </summary>
@@ -151,18 +160,15 @@ namespace Web.Services.Models
             string error = "";
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
-            // local testing
-            //string baseUrl = "http://localhost:8000/hms/rest/api/v2/hms/gis/percentage/";
-            // qedinternal url
-            //string baseUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/gis/percentage/";
-            // deployment url
-            string baseUrl = "http://172.20.100.11/hms/rest/api/v2/hms/gis/percentage/";
+
+            string requestUrl = this.baseUrl + "/hms/rest/api/v2/hms/gis/percentage/";
+
             if (input.GeometryInputs != null)
             {
                 if(input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
                 {
                     Dictionary<string, string> taskID;
-                    string queryUrl = baseUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
+                    string queryUrl = requestUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
                     using (var client = new HttpClient())
                     {
                         taskID = JsonConvert.DeserializeObject<Dictionary<string, string>>(client.GetStringAsync(queryUrl).Result);
@@ -419,10 +425,8 @@ namespace Web.Services.Models
 
             GeometryResponse result = new GeometryResponse();
 
-            // local testing
-            //string dataUrl = "http://localhost:8000/hms/rest/api/v2/hms/data" + "?job_id=" + taskID;
-            // deployment url
-            string dataUrl = "https://qedinternal.epa.gov/hms/rest/api/v2/hms/data" + "?job_id=" + taskID;
+            string dataUrl = this.baseUrl + "/hms/rest/api/v2/hms/data" + "?job_id=" + taskID;
+
             string status = "PENDING";
             int maxCount = 50;
             int count = 0;
