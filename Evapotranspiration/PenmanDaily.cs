@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Globalization;
 using Data;
+using System.Net;
+using System.IO;
+using System.Threading;
 
 namespace Evapotranspiration
 {
@@ -260,12 +263,35 @@ namespace Evapotranspiration
         public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
         {
             errorMsg = "";
-            NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+            //NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
             double relHMax = 0;
             double relHMin = 0.0;
             double petPMD = 0;
 
-            DataTable dt = nldas.getData4(timeZoneOffset, out errorMsg);
+            //DataTable dt = nldas.getData4(timeZoneOffset, out errorMsg);
+            DataTable dt = new DataTable();
+            DataTable daymets = new DataTable();
+            if (inpt.Source == "daymet")
+            {
+                daymets = daymetData(inpt, outpt);
+                inpt.Source = "nldas";
+                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                dt = nldas.getData4(timeZoneOffset, out errorMsg);
+                for (int i = 0; i < daymets.Rows.Count; i++)
+                {
+                    DataRow dr = dt.Rows[i];
+                    dr["TMin_C"] = daymets.Rows[i]["TMin_C"];
+                    dr["TMax_C"] = daymets.Rows[i]["TMax_C"];
+                    dr["TMean_C"] = daymets.Rows[i]["TMean_C"];
+                    dr["SolarRadMean_MJm2day"] = daymets.Rows[i]["SolarRadMean_MJm2day"];
+                }
+                daymets = null;
+            }
+            else
+            {
+                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                dt = nldas.getData4(timeZoneOffset, out errorMsg);
+            }
             if (errorMsg != "")
             {
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -331,6 +357,87 @@ namespace Evapotranspiration
                 output.Data.Add(dr[0].ToString(), lv);
             }
             return output;
+        }
+
+        public DataTable daymetData(ITimeSeriesInput inpt, ITimeSeriesOutput outpt)
+        {
+            string errorMsg = "";
+            string data = "";
+            StringBuilder st = new StringBuilder();
+            int yearDif = (inpt.DateTimeSpan.EndDate.Year - inpt.DateTimeSpan.StartDate.Year);
+            for (int i = 0; i <= yearDif; i++)
+            {
+                string year = inpt.DateTimeSpan.StartDate.AddYears(i).Year.ToString();
+                st.Append(year + ",");
+            }
+            st.Remove(st.Length - 1, 1);
+
+            string url = "https://daymet.ornl.gov/data/send/saveData?" + "lat=" + inpt.Geometry.Point.Latitude + "&lon=" + inpt.Geometry.Point.Longitude
+                + "&measuredParams=" + "tmax,tmin,srad,dayl" + "&years=" + st.ToString();
+            WebClient myWC = new WebClient();
+            try
+            {
+                int retries = 5;                                        // Max number of request retries
+                string status = "";                                     // response status code
+
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    Thread.Sleep(100);
+                    WebRequest wr = WebRequest.Create(url);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data = reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsg = "ERROR: Unable to download data from Daymet. " + ex.Message;
+                return null;
+            }
+
+            DataTable tab = new DataTable();
+            tab.Columns.Add("Date");
+            tab.Columns.Add("Julian_Day");
+            tab.Columns.Add("TMin_C");
+            tab.Columns.Add("TMax_C");
+            tab.Columns.Add("TMean_C");
+            tab.Columns.Add("SolarRadMean_MJm2day");
+
+            string[] splitData = data.Split(new string[] { "year,yday,prcp (mm/day)", "year,yday,tmax (deg c),tmin (deg c)", "year,yday,dayl (s),srad (W/m^2),tmax (deg c),tmin (deg c)" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = splitData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Boolean julianflag = false;
+            foreach (string line in lines)
+            {
+                string[] linedata = line.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                if (Convert.ToInt32(Convert.ToDouble(linedata[1])) >= inpt.DateTimeSpan.StartDate.DayOfYear && (Convert.ToInt32(Convert.ToDouble(linedata[0])) == inpt.DateTimeSpan.StartDate.Year))
+                {
+                    julianflag = true;
+                }
+                if (Convert.ToInt32(Convert.ToDouble(linedata[1])) > inpt.DateTimeSpan.EndDate.DayOfYear && (Convert.ToInt32(Convert.ToDouble(linedata[0])) == inpt.DateTimeSpan.EndDate.Year))
+                {
+                    julianflag = false;
+                    break;
+                }
+                if (julianflag)
+                {
+                    DataRow tabrow = tab.NewRow();
+                    tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString(inpt.DateTimeSpan.DateTimeFormat);
+                    tabrow["Julian_Day"] = Convert.ToInt32(Convert.ToDouble(linedata[1]));
+                    tabrow["TMin_C"] = linedata[5];
+                    tabrow["TMax_C"] = linedata[4];
+                    tabrow["TMean_C"] = (Convert.ToDouble(linedata[4]) + Convert.ToDouble(linedata[5])) / 2.0;
+                    double srad = Convert.ToDouble(linedata[3]);
+                    double dayl = Convert.ToDouble(linedata[2]);
+                    tabrow["SolarRadMean_MJm2day"] = Math.Round((srad * dayl) / 1000000, 2);
+                    tab.Rows.Add(tabrow);
+                }
+            }
+            return tab;
         }
     }
 }

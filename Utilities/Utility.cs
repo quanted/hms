@@ -415,7 +415,7 @@ namespace Utilities
         {
             // Calculate minimum relative humidity here.
             double RHmin = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5));
+            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
             RHmin = 100 * (e / es);
             return RHmin;
@@ -425,7 +425,7 @@ namespace Utilities
         {
             // Calculate maximum relative humidity here.
             double RHmax = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
+            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
             RHmax = 100 * (e / es);
             return RHmax;

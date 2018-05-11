@@ -576,7 +576,7 @@ namespace Evapotranspiration
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                Math.DivRem(i, remaindermax, out remainder);           //24??
+                Math.DivRem(i, remaindermax, out remainder);           //24?
                 if (remainder == 0)
                 {
                     date = dt.Rows[i]["Date"].ToString();
@@ -588,7 +588,7 @@ namespace Evapotranspiration
                 dt.Rows[i]["Hour"] = remainder;
                 list.Add(Convert.ToDouble(dt.Rows[i]["Value"].ToString()));
 
-                if (remainder == remaindermin)                         //23????
+                if (remainder == remaindermin)                         //23?
                 {
                     dr1["Date"] = date;
                     dr1["TMin_C"] = list.Min().ToString("F2", CultureInfo.InvariantCulture);
@@ -881,10 +881,6 @@ namespace Evapotranspiration
                     url = _urlBasePF + _parameter + "&location=GEOM:POINT" + @"%28" + _longitude + @",%20" + _latitude + @"%29" +
                         "&startDate=" + _startDate + "T06" + "&endDate=" + _endDate + "T23" + _type; // "X298" + "-" + "Y152" + _type;
                     break;
-                case "daymet":
-                    break;
-                case "ncdc":
-                    break;
                 case "wgen":
                     break;
                 case "prism":
@@ -1011,7 +1007,7 @@ namespace Evapotranspiration
                             string[] delimiter = { "T", "\t", " ", ":00:00" };
                             string[] dateAndTime = values[0].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
                             valuep = (Double)Decimal.Parse(dateAndTime[2], System.Globalization.NumberStyles.Any);
-                            list.Add(valuep);
+                            list.Add(valuep * 60 * 60);//gldas precip is in kg/m^2/s rather than kg/m^2 hourly
                         }
                     }
                 }
