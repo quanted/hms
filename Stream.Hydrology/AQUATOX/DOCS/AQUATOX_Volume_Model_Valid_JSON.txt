@@ -42,7 +42,7 @@
       "XPctRiffle": null,
       "PctPool": 0,
       "XPctPool": null,
-      "UseBathymetry": false,
+      "UseBathymetry": false
 
     },
     "Discharge": 75844.2528,
@@ -65,7 +65,7 @@
       "Layer": 0,
       "PName": "Water Volume",
       "output": {
-        "$type": "AQUATOXITSOutput",
+        "$type": "AQUATOXTSOutput",
 		"Comment": "AQUATOXITSOutput is where integratedmodel outputs for this state variable are stored.",
         "Dataset": "",
         "DataSource": "AQUATOX",

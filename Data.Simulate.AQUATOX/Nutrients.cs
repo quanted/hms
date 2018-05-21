@@ -178,7 +178,6 @@ namespace AQUATOX.Nutrients
             AllVariables nsloop;
             double DetrAltLdg;
             TDetritus TDetr;
-            int LDType2;
             DetritalInputRecordType PInputRec; 
             PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
 
@@ -2492,15 +2491,15 @@ namespace AQUATOX.Nutrients
         public double Reaeration()
         {
             double result;
-            const double MPH2MPS = 0.447;
-            const double Theta = 1.024;
+            //const double MPH2MPS = 0.447;
+            //const double Theta = 1.024;
             // temp adjustment, Churchill et al., 1962
             // MolWt = 44.0;
-            double BlG;
-            double Other;
+            //double BlG;
+            //double Other;
             double ZDepth;
             double ZZDepth;
-            AllVariables AlgLoop;
+            //AllVariables AlgLoop;
             // ---------------------------------
             double O2S;
             // Reaeration
@@ -2508,7 +2507,7 @@ namespace AQUATOX.Nutrients
             // a positive number is oxygen from the air to the WC
             // a negative number is oxygen from the WC to the air
             ZDepth = Location.MeanThick; // [VerticalSegments.Epilimnion];
-            BlG = 0;
+            //BlG = 0;
             // count cyanobacteria (blue-greens) biomass
             //for (AlgLoop = FirstBlGreen; AlgLoop <= LastBlGreen; AlgLoop++)  fixme plants
             //{
@@ -2517,7 +2516,7 @@ namespace AQUATOX.Nutrients
             //        BlG = BlG + GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
             //    }
             //}
-            Other = 0;
+            //Other = 0;
             // count other algae biomass, excluding macrophytes
             //for (AlgLoop = FirstDiatom; AlgLoop <= LastGreens; AlgLoop++)
             //{
@@ -2696,7 +2695,7 @@ namespace AQUATOX.Nutrients
 
         public override void Derivative(ref double DB)
         {
-            const double O2Photo = 1.6;
+            //const double O2Photo = 1.6;
             // see Bowie et al., 1985 for numerous references
             double Lo = 0;
             double TD = 0;
@@ -2711,7 +2710,7 @@ namespace AQUATOX.Nutrients
             double WaO = 0;
             double WaI = 0;
             double En = 0;
-            double DarkResp = 0;
+            //double DarkResp = 0;
             //            TStates OtherSegment;
             // --------------------------------------------------
             // TO2Obj.Deriv
@@ -2733,7 +2732,10 @@ namespace AQUATOX.Nutrients
             // Resp = _wvar2.O2Biomass * SumRespiration(false);            // fixme animal, plant linkage 
             if (Respiration_Link != null) Resp = Respiration_Link.ReturnLoad(AQTSeg.TPresent);
 
-            Nitr = RR.O2N * ((AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol)) as TNH4Obj).Nitrification();
+            TNH4Obj PNH4  = (TNH4Obj)(AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol));
+            if (PNH4 != null) Nitr = RR.O2N * PNH4.Nitrification();
+               else Nitr = 0;
+
             if (Nitrification_Link != null) Nitr = Nitrification_Link.ReturnLoad(AQTSeg.TPresent);
 
     //      AQTSeg.TOTResp[AQTSeg.DerivStep] = (Resp + BOD + SOD2 + Nitr) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;

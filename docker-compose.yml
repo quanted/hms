@@ -1,8 +1,0 @@
-version: '3'
-
-services:
-  web.services:
-    image: webservices
-    build:
-      context: .
-      dockerfile: Web.Services/Dockerfile

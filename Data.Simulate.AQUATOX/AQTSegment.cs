@@ -95,10 +95,10 @@ namespace AQUATOX.AQTSegment
                 AQTSeg.Integrate(AQTSeg.PSetup.FirstDay, AQTSeg.PSetup.LastDay, 0.1, 1e-5, 1);
                 return "";
             }
-            //catch (Exception e)
-            //{
-            //    return e.Message;
-            //}
+            catch (Exception e)
+            {
+                return e.Message;
+            }
 
             finally
             {
@@ -114,15 +114,10 @@ namespace AQUATOX.AQTSegment
             return Integrate();
         }
 
-        // ITimeSeries AQTSim.ReturnResults(SV-Type)
-        // ITimeSeries AQTSim.ReturnResults(SV-Type) (StartDate, EndDate)
-
-
-
-
     }
 
-    public class AQUATOXITSOutput : ITimeSeriesOutput
+    
+    public class AQUATOXTSOutput : ITimeSeriesOutput
     {
 
         /// <summary>
@@ -147,7 +142,7 @@ namespace AQUATOX.AQTSegment
         [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
         public Dictionary<string, List<string>> Data { get; set; }
 
-        public AQUATOXITSOutput()
+        public AQUATOXTSOutput()
         {
             Data = new Dictionary<string, List<string>>();
             Dataset = "";
@@ -165,26 +160,25 @@ namespace AQUATOX.AQTSegment
         public T_SVLayer Layer;               // Relevant for sed detr, inorg sed., and pore water types
         public string PName = "";          // Text Name
         [JsonIgnore] public double yhold = 0;           // holds State value during derivative cycle
-        [JsonIgnore] double yorig;                  // used to restore state to beginning of time step
-        [JsonIgnore] double yout;                    // use in Integration
         [JsonIgnore] public double[] StepRes = new double[7];  // Holds Step Results
         [JsonIgnore] public double yerror = 0;          // holds error term from RKCK
         [JsonIgnore] public double yscale = 0;          // use in Integration
         [JsonIgnore] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
-        public AQUATOXITSOutput output;  // public and evenly-spaced results following integration / interpolation
+        public AQUATOXTSOutput output;  // public and evenly-spaced results following integration / interpolation
 
         [JsonIgnore] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
         public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
+        public bool UseLoadsRecAsDriver = false; // If user sets this to true, no integration is used but time series driving data from "loadsrec"
         [JsonIgnore] public double Loading = 0;         // Loading of State Variable This time step
-//        bool RequiresData = false;
-//        bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
+//      bool RequiresData = false;
+//      bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
         public string StateUnit;
         public string LoadingUnit;       // Units 
 
         [JsonIgnore] public TAQTSite Location = null;    // Pointer to Site in which I'm located
-                                                               //      public bool PShowRates = true;      // Does the user want rates written for this SV?
-                                                               //      public TCollection RateColl = null; // Collection of saved rates for current timestep
-                                                               //      public int RateIndex = 0;
+//      public bool PShowRates = true;      // Does the user want rates written for this SV?
+//      public TCollection RateColl = null; // Collection of saved rates for current timestep
+//      public int RateIndex = 0;
 
         public string LoadNotes1;
         public string LoadNotes2;           // Notes associated with loadings
@@ -213,14 +207,18 @@ namespace AQUATOX.AQTSegment
               // g/m3      // g/m2                     // m2                   // m3
 
             yhold = 0;
-            yorig = 0;
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
         }
-
+        
         public void TakeDerivative(int Step)
-        {
-            Derivative(ref StepRes[Step]);
+        {   // commment
+            if (UseLoadsRecAsDriver)  // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
+            {
+                State = LoadsRec.ReturnLoad(AQTSeg.TPresent);
+                StepRes[Step] = 0;
+            }
+            else Derivative(ref StepRes[Step]);
         }
 
         public TStateVariable()
@@ -246,7 +244,6 @@ namespace AQUATOX.AQTSegment
             LoadNotes2 = "";
 
             yhold = 0;
-            yorig = 0;
             for (j = 1; j <= 6; j++)
             {
                 StepRes[j] = 0;
@@ -414,7 +411,7 @@ namespace AQUATOX.AQTSegment
         public string Verify_Runnable()
         {
             if (SV.Count < 1) return "No State Variables Are Included in this Simulation.";
-            if (Equals(PSetup, default(Setup_Record))) return "PSetup data structure must be initiailized.";
+            if (Equals(PSetup, default(Setup_Record))) return "PSetup data structure must be initialized.";
             if (PSetup.StoreStepSize < Consts.Tiny) return "PSetup.StoreStepSize must be greater than zero.";
             if (PSetup.FirstDay >= PSetup.LastDay) return "In PSetup Record, Last Day must be after First Day.";
 
@@ -1156,7 +1153,7 @@ namespace AQUATOX.AQTSegment
 
         public bool Convert_g_m2_to_mg_L(AllVariables S, T_SVType T, T_SVLayer L)
         {
-            TStateVariable P;
+          //  TStateVariable P;
             bool Convert;
             Convert = false;
             // P = GetStatePointer(S, T, L);
@@ -1356,7 +1353,7 @@ namespace AQUATOX.AQTSegment
                 if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
                 if (TSV.Results.Count == 0) return "No results saved for SV " + TSV.PName;
 
-                TSV.output = new AQUATOXITSOutput();
+                TSV.output = new AQUATOXTSOutput();
                 TSV.output.Dataset = TSV.PName;
                 TSV.output.DataSource = "AQUATOX";
                 TSV.output.Metadata = new Dictionary<string, string>()
@@ -1769,9 +1766,10 @@ namespace AQUATOX.AQTSegment
     {
             KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(MorphRecord),
                                           typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
-                                          typeof(SortedList<DateTime, double>), typeof(AQUATOXITSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
+                                          typeof(SortedList<DateTime, double>), typeof(AQUATOXTSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
                                           typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj), typeof(DetritalInputRecordType),
-                                          typeof(TDissRefrDetr), typeof(TDissLabDetr), typeof(TSuspRefrDetr), typeof(TSuspLabDetr), typeof(TSedRefrDetr), typeof(TSedLabileDetr) }; 
+                                          typeof(TDissRefrDetr), typeof(TDissLabDetr), typeof(TSuspRefrDetr), typeof(TSuspLabDetr), typeof(TSedRefrDetr), typeof(TSedLabileDetr),
+                                          typeof(TimeSeriesInput), typeof(TimeSeriesOutput)}; 
     }
 }
 

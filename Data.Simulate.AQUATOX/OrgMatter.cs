@@ -515,7 +515,7 @@ public class TDetritus : TRemineralize
             double result;
             double Def;
             double Sed;
-            int I;
+            //int I;
             // ------------------------------------------------------
             Def = 0;
             Sed = 0;
@@ -699,14 +699,14 @@ public class TDetritus : TRemineralize
             double DFS=0;
             double DFG=0;
             // TDOMPoreWater DetrActiveLayer;
-            AllVariables DOMState;
+            //AllVariables DOMState;
             // TrackMB
             // --------------------------------------------------
             double FracAerobic=0;
             // DissDetr.Derivative
 
-            if (NState == AllVariables.DissRefrDetr) DOMState = AllVariables.ReDOMPore;
-            else                                     DOMState = AllVariables.LaDOMPore; // NState = DissLabDetr
+            //if (NState == AllVariables.DissRefrDetr) DOMState = AllVariables.ReDOMPore;
+            //else                                     DOMState = AllVariables.LaDOMPore; // NState = DissLabDetr
 
             Lo = Loading;
             if (NState == AllVariables.DissLabDetr)  DE = Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
@@ -763,7 +763,7 @@ public class TDetritus : TRemineralize
         //Constructor  Init( Ns,  SVT,  aName,  P,  IC,  IsTempl)
         public TDissRefrDetr(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            T_SVType ToxLoop;
+            //T_SVType ToxLoop;
             int Alt_Loop;
             InputRecord.DataType = DetrDataType.Org_Matt;
             InputRecord.InitCond = 0;
@@ -863,8 +863,8 @@ public class TDetritus : TRemineralize
             double Decel;
             double SedState;
             double DensFactor;
-            double FracDep;
-            double DepVel;
+            //double FracDep;
+            //double DepVel;
             //TBottomCohesives PTopC;
             //TSuspSediment PSuspC;
 
@@ -1370,7 +1370,7 @@ public class TDetritus : TRemineralize
             double DFG=0;
             // TrackMB
             // --------------------------------------------------
-            double M2_M3=0;
+            //double M2_M3=0;
             
             // TSedimentedDetr.Derivative
             if ((NState == AllVariables.SedmLabDetr))

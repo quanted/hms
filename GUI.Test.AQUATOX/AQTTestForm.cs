@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Windows.Forms.DataVisualization.Charting;
 using Data;
+
 using System.Drawing;
 
 namespace AQUATOX.GUI.Test
@@ -74,7 +75,7 @@ namespace AQUATOX.GUI.Test
             // 
             // loadJSON
             // 
-            this.loadJSON.Location = new System.Drawing.Point(342, 12);
+            this.loadJSON.Location = new System.Drawing.Point(35, 12);
             this.loadJSON.Name = "loadJSON";
             this.loadJSON.Size = new System.Drawing.Size(94, 23);
             this.loadJSON.TabIndex = 4;
@@ -84,7 +85,7 @@ namespace AQUATOX.GUI.Test
             // 
             // saveJSON
             // 
-            this.saveJSON.Location = new System.Drawing.Point(453, 12);
+            this.saveJSON.Location = new System.Drawing.Point(146, 12);
             this.saveJSON.Name = "saveJSON";
             this.saveJSON.Size = new System.Drawing.Size(94, 23);
             this.saveJSON.TabIndex = 5;
@@ -94,7 +95,7 @@ namespace AQUATOX.GUI.Test
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(563, 12);
+            this.button4.Location = new System.Drawing.Point(256, 12);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(94, 23);
             this.button4.TabIndex = 6;

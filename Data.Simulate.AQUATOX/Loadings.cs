@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
-
+using Data;
+using Globals;
 
 namespace AQUATOX.Loadings
 {
@@ -55,30 +57,68 @@ namespace AQUATOX.Loadings
 
     public class TLoadings
 
-        {
+    {
         public SortedList<DateTime, double> list = new SortedList<DateTime, double>();
         public bool Hourly = false;
         public double ConstLoad = 0;         // User Input constant load
         public bool UseConstant = true;      // Flag for using constant load
         public bool NoUserLoad = false;      // Flag for using user input load, or ignoring  the load and using annual ranges and means.  Relevant to Temp, Light, pH, and Nutrients
         public double MultLdg = 1;           // to perturb loading
+        public TimeSeriesInput ITSI = null;
+        [JsonIgnore] bool ITSI_Translated = false;
         [JsonIgnore] int lastindexread = -1;
+
+        public void Translate_ITimeSeriesInput()
+        {
+          if (ITSI!=null)
+            {
+                UseConstant = false;
+                MultLdg = 1;
+                NoUserLoad = false;
+                Hourly = true;  // don't assume truncated to day -- interpolate between date stamps
+
+                if (ITSI.InputTimeSeries == null)
+                    throw new ArgumentException("An ITimeSeries as an AQUATOX Loading must have an associated InputTimeSeries");
+                    ITimeSeriesOutput TSO = ITSI.InputTimeSeries.FirstOrDefault().Value;
+
+                list.Clear();
+                list.Capacity = TSO.Data.Count;
+
+                foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
+                {
+                    if (!(DateTime.TryParse(entry.Key, out DateTime date)))
+                          throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
+                    if (!(Double.TryParse(entry.Value[0], out double val)))
+                        throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+                    list.Add(date, val);
+                }
+
+            }
+
+            ITSI_Translated = true;
+        }
+
 
         public double ReturnLoad(DateTime TimeIndex)
         {
+            if (!ITSI_Translated) Translate_ITimeSeriesInput();
+
             double RetLoad; // Hold Result
 
             if (NoUserLoad) return 0;
             if (UseConstant) return ConstLoad * MultLdg;
 
             //otherwise
-            RetLoad = ReturnTSLoad(TimeIndex); 
+            RetLoad = ReturnTSLoad(TimeIndex);
             RetLoad = RetLoad * MultLdg;
             return RetLoad;
         }
 
+
         public double ReturnTSLoad(DateTime TimeIndex)
         {
+
+            if (!ITSI_Translated) Translate_ITimeSeriesInput();
 
             double RetLoad;
             DateTime TIHolder;

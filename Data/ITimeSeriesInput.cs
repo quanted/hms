@@ -4,6 +4,7 @@ using System.Collections.Generic;
 // using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Data
 {
@@ -144,6 +145,7 @@ namespace Data
         /// <summary>
         /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
         /// </summary>
+        [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
         public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
 
     }
@@ -448,7 +450,7 @@ namespace Data
             {
             urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException)
             {
                 urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
             }

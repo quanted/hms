@@ -301,7 +301,7 @@ namespace AQUATOX.Volume
             DateIndex = TimeIndex.AddDays(-1);
             do
             {
-                DateIndex.AddDays(1);
+                DateIndex = DateIndex.AddDays(1);
                 N = N + 1;
                 CalculateLoad(DateIndex);
                 Sum_Dl = Sum_Dl + DischargeLoad;

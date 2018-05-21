@@ -65,8 +65,8 @@
       "Layer": 0,
       "PName": "Water Volume",
       "output": {
-        "$type": "AQUATOXITSOutput",
-		"Comment": "AQUATOXITSOutput is where integratedmodel outputs for this state variable are stored.",
+        "$type": "AQUATOXTSOutput",
+		"Comment": "AQUATOXTSOutput is where integratedmodel outputs for this state variable are stored.",
         "Dataset": "",
         "DataSource": "AQUATOX",
         "Metadata": {
