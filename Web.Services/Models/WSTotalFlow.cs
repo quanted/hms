@@ -169,11 +169,15 @@ namespace Web.Services.Models
                 {
                     Dictionary<string, string> taskID;
                     string queryUrl = requestUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
-                    using (var client = new HttpClient())
+                    using (var httpClientHandler = new HttpClientHandler())
                     {
-                        taskID = JsonConvert.DeserializeObject<Dictionary<string, string>>(client.GetStringAsync(queryUrl).Result);
+                        httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                        using (var client = new HttpClient(httpClientHandler))
+                        {
+                            taskID = JsonConvert.DeserializeObject<Dictionary<string, string>>(client.GetStringAsync(queryUrl).Result);
+                        }
+                        geo = this.RequestData(taskID["job_id"], out error);
                     }
-                    geo = this.RequestData(taskID["job_id"], out error);
 
                 }
                 else
@@ -243,7 +247,7 @@ namespace Web.Services.Models
                 }
             }
             // Check for any errors
-            if (!String.IsNullOrWhiteSpace(error))
+            if (!String.IsNullOrWhiteSpace(error) || !geo.status.Equals("SUCCESS"))
             {
                 return err.ReturnError(error);
             }
@@ -437,10 +441,13 @@ namespace Web.Services.Models
                 {
                     Task.Delay(5000).Wait();
                 }
-
-                using (var client = new HttpClient())
+                using (var httpClientHandler = new HttpClientHandler())
                 {
-                    result = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(dataUrl).Result);
+                    httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                    using (var client = new HttpClient(httpClientHandler))
+                    {
+                        result = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(dataUrl).Result);
+                    }
                 }
                 status = result.status;
                 count++;
