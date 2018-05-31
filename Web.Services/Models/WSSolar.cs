@@ -1,14 +1,29 @@
 ﻿using System;
-using System.Data;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Solar;
-using GCSOLAR;
-using Newtonsoft.Json;
+using Data;
+using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Web.Services.Models
 {
+    /// <summary>
+    /// Solar Calculator Input object
+    /// </summary>
+    public class SolarCalculatorInput : TimeSeriesInput
+    {
+        /// <summary>
+        /// Calculator model: 'Day' or 'Year'
+        /// </summary>
+        public string Model;
+
+        /// <summary>
+        /// Calculation localtime for when model='year', default='12:00:00'
+        /// </summary>
+        public string LocalTime;
+
+    }
+
     /// <summary>
     /// Model for the WSSolar controller
     /// </summary>
@@ -20,7 +35,7 @@ namespace Web.Services.Models
         /// equivlanet to selectin the first option from the windows start form.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarDefaultInput()
+        public async Task<Dictionary<string, object>> GetGCSolarDefaultInput()
         {
             GCSolar gcS = new GCSolar();
             return gcS.GetDefaultInputs();
@@ -31,7 +46,7 @@ namespace Web.Services.Models
         /// equivalent to selecting the third option from the windows start form.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarOutput()
+        public async Task<Dictionary<string, object>> GetGCSolarOutput()
         {
             GCSolar gcS = new GCSolar();
             return gcS.GetOutput();
@@ -42,7 +57,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public Dictionary<string, object> GetGCSolarOutput(Dictionary<string, object> input)
+        public async Task<Dictionary<string, object>> GetGCSolarOutput(Dictionary<string, object> input)
         {
             GCSolar gcS = new GCSolar();
             List<string> errors = new List<string>();
@@ -61,7 +76,7 @@ namespace Web.Services.Models
         /// Constructs input metadata for GCSolar module.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, object> GetMetadata()
+        public async Task<Dictionary<string, object>> GetMetadata()
         {
             GCSolar gcS = new GCSolar();
 
@@ -190,6 +205,50 @@ namespace Web.Services.Models
                 { "Description", "" }
             });
             return metadata;
+        }
+
+        /// <summary>
+        /// Model for accessing NOAA Solar Calculator 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<ITimeSeriesOutput> RunSolarCalculator(SolarCalculatorInput input)
+        {
+            Solar.SolarCalculator soCal = new SolarCalculator();
+            soCal.Input = input;
+            soCal.Model = input.Model.ToLower();
+            Utilities.ErrorOutput error = new Utilities.ErrorOutput();
+            //Validate unique solar calculator inputs
+            if (String.IsNullOrWhiteSpace(input.DateTimeSpan.StartDate.ToString()) || input.DateTimeSpan.StartDate == DateTime.MinValue)
+            {
+                return error.ReturnError("DateTimeSpan has no StartDate. StartDate is a required parameter.");
+            }
+            if (string.IsNullOrWhiteSpace(input.DateTimeSpan.EndDate.ToString()) || input.DateTimeSpan.EndDate == DateTime.MinValue)
+            {
+                soCal.Input.DateTimeSpan.EndDate = soCal.Input.DateTimeSpan.StartDate.AddYears(1);
+            }
+            if (String.IsNullOrWhiteSpace(input.Model))
+            {
+                return error.ReturnError("Model parameter not defined in request.");
+            }
+            if (String.IsNullOrWhiteSpace(input.LocalTime) && input.Model.ToLower().Equals("year"))
+            {
+                soCal.LocalTime = "12:00:00";
+            }
+            else if(input.Model.ToLower().Equals("year"))
+            {
+                try
+                {
+                    DateTime testDate = DateTime.ParseExact(input.LocalTime, "hh:mm:ss", CultureInfo.InvariantCulture);
+                }
+                catch(FormatException fe){
+                    return error.ReturnError("LocalTime parameter provided is a not a valid hour time. LocalTime format must be hh:mm:ss");
+                }
+                soCal.LocalTime = input.LocalTime;
+            }
+
+            soCal.GetCalculatorData();
+            return soCal.Output;
         }
     }
 }

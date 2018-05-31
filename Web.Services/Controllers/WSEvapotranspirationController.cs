@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Examples;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -16,6 +18,85 @@ namespace Web.Services.Controllers
     public class EvapotranspirationInput : TimeSeriesInput
     {
         // Add extra evapotranspiration specific variables here
+        /// <summary>
+        /// REQUIRED: Algorithm used for Evapotranspiration.
+        /// </summary>
+        public string Algorithm { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Albedo coefficient.
+        /// </summary>
+        public double Albedo { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Central Longitude of Time Zone in degrees.
+        /// </summary>
+        public double CentralLongitude { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Angle of the sun in degrees.
+        /// </summary>
+        public double SunAngle { get; set; }
+
+        /// <summary>
+        /// REQUIRED: The ability of a surface to emit radiant energy.
+        /// </summary>
+        public double Emissivity { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
+        /// </summary>
+        public string Model { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Zenith Albedo coefficient.
+        /// </summary>
+        public double Zenith { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Surface area of lake in square kilometers.
+        /// </summary>
+        public double LakeSurfaceArea { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Average depth of lake in meters.
+        /// </summary>
+        public double LakeDepth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Subsurface Resistance.
+        /// </summary>
+        public double SubsurfaceResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Stomatal Resistance.
+        /// </summary>
+        public double StomatalResistance { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Leaf Width in meters.
+        /// </summary>
+        public double LeafWidth { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Roughness Length in meters.
+        /// </summary>
+        public double RoughnessLength { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Vegetation Height in meters.
+        /// </summary>
+        public double VegetationHeight { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly leaf area indices.
+        /// </summary>
+        public Hashtable LeafAreaIndices { get; set; }
+
+        /// <summary>
+        /// REQUIRED: Monthly air temperature coefficients.
+        /// </summary>
+        public Hashtable AirTemperature { get; set; }
     }
 
 
@@ -53,7 +134,28 @@ namespace Web.Services.Controllers
                         Offset = -5,
                         DLS = false
                     }
-                }
+                },
+                Algorithm = "nldas",
+                DataValueFormat = "E3",
+                TemporalResolution = "default",
+                TimeLocalized = true,
+                Units = "default",
+                OutputFormat = "json",
+                Albedo = 0.23,
+                CentralLongitude = 75.0,
+                SunAngle = 17.2,
+                Emissivity = 0.92,
+                Model = "ETP",
+                Zenith = 0.05,
+                LakeSurfaceArea = 0.005,
+                LakeDepth = 0.2,
+                SubsurfaceResistance = 500.0,
+                StomatalResistance = 400.0,
+                LeafWidth = 0.02,
+                RoughnessLength = 0.02,
+                VegetationHeight = 0.12,
+                LeafAreaIndices = new Hashtable { { 1, 2.51 }, { 2, 2.51 }, { 3, 2.51 }, { 4, 2.51 }, { 5, 2.51 }, { 6, 2.51 }, { 7, 2.51 }, { 8, 2.51 }, { 9, 2.51 }, { 10, 2.51 }, { 11, 2.51 }, { 12, 2.51 } },
+                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } }
             };
             return example;
         }
@@ -100,11 +202,27 @@ namespace Web.Services.Controllers
                         DLS = false
                     }
                 },
+                Algorithm = "nldas",
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
                 TimeLocalized = true,
                 Units = "default",
-                OutputFormat = "json"
+                OutputFormat = "json",
+                Albedo = 0.23,
+                CentralLongitude = 75.0,
+                SunAngle = 17.2,
+                Emissivity = 0.92,
+                Model = "ETP",
+                Zenith = 0.05,
+                LakeSurfaceArea = 0.005,
+                LakeDepth = 0.2,
+                SubsurfaceResistance = 500.0,
+                StomatalResistance = 400.0,
+                LeafWidth = 0.02,
+                RoughnessLength = 0.02,
+                VegetationHeight = 0.12,
+                LeafAreaIndices = new Hashtable { { 1, 2.51 }, { 2, 2.51 }, { 3, 2.51 }, { 4, 2.51 }, { 5, 2.51 }, { 6, 2.51 }, { 7, 2.51 }, { 8, 2.51 }, { 9, 2.51 }, { 10, 2.51 }, { 11, 2.51 }, { 12, 2.51 } },
+                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } }
             };
             return example;
         }
@@ -182,15 +300,14 @@ namespace Web.Services.Controllers
         [HttpPost]
         [Route("")]                 // Default endpoint
         [Route("v1.0")]             // Version 1.0 endpoint 
-        //[SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExample))]
         [SwaggerResponseExample(200, typeof(EvapotranspirationOutputExample))]
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]EvapotranspirationInput evapoInput)
+        public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
         {
             WSEvapotranspiration evapo = new WSEvapotranspiration();
-            ITimeSeriesOutput results = evapo.GetEvapotranspiration(evapoInput);
+            ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

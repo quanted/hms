@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Web.Services.Models;
-using Newtonsoft.Json;
 
 namespace Web.Services.Controllers
 {
@@ -184,12 +184,12 @@ namespace Web.Services.Controllers
         //[SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
         [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
-        public ITimeSeriesOutput POST([FromBody]PrecipitationInput precipInput)
+        public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
             WSPrecipitation precip = new WSPrecipitation();
-            ITimeSeriesOutput results = precip.GetPrecipitation(precipInput);
+            ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

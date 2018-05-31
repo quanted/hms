@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Web.Services.Models;
 using Swashbuckle.AspNetCore.Examples;
 using System.Net.Http;
+using Data;
+using System.Threading.Tasks;
 
 namespace Web.Services.Controllers
 {
@@ -126,7 +128,7 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// HMS API controller for solar data.
+    /// HMS API controller for GC Solar data.
     /// </summary>
     [Produces("application/json")]
     [Route("api/water-quality/solar")]                      // Default endpoint
@@ -140,11 +142,11 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("run/")]
-        public Dictionary<string, object> GETDefaultOutput()
+        public async Task<IActionResult> GETDefaultOutput()
         {
             WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = solar.GetGCSolarOutput();
-            return result;
+            Dictionary<string, object> result = await solar.GetGCSolarOutput();
+            return new ObjectResult(result);
         }
 
         /// <summary>
@@ -154,11 +156,11 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/")]
-        public Dictionary<string, object> GETDefaultInput()
+        public async Task<IActionResult> GETDefaultInput()
         {
             WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = solar.GetGCSolarDefaultInput();
-            return result;
+            Dictionary<string, object> result = await solar.GetGCSolarDefaultInput();
+            return new ObjectResult(result);
         }
 
         /// <summary>
@@ -171,7 +173,7 @@ namespace Web.Services.Controllers
         [Route("run/")]
         //[SwaggerResponseExample(200, typeof(SolarOutputExample))]
         [SwaggerRequestExample(typeof(SolarInput), typeof(SolarInputExample))]
-        public Dictionary<string, object> POSTCustomInput([FromBody]SolarInput input)
+        public async Task<IActionResult> POSTCustomInput([FromBody]SolarInput input)
         {
             WSSolar solar = new WSSolar();
             if (input is null)
@@ -180,12 +182,12 @@ namespace Web.Services.Controllers
                 {
                     { "Input Error:", "No inputs found in the request or inputs contain invalid formatting." }
                 };
-                return errorMsg;
+                return new ObjectResult(errorMsg);
             }
             else
             {
-                Dictionary<string, object> result = solar.GetGCSolarOutput(input.input);
-                return result;
+                Dictionary<string, object> result = await solar.GetGCSolarOutput(input.input);
+                return new ObjectResult(result);
             }
         }
 
@@ -195,12 +197,84 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/metadata")]
-        public Dictionary<string, object> GetInputMetadata()
+        public async Task<IActionResult> GetInputMetadata()
         {
             WSSolar solar = new WSSolar();
             Dictionary<string, object> metadata = new Dictionary<string, object>();
-            metadata["Input Variables"] = solar.GetMetadata();
-            return metadata;
+            metadata["Input Variables"] = await solar.GetMetadata();
+            return new ObjectResult(metadata);
+        }
+    }
+
+    /// <summary>
+    /// Input example for NOAA Solar Calculator POST
+    /// </summary>
+    public class SolarCalcInputExample : IExamplesProvider
+    {
+        /// <summary>
+        /// Get example function
+        /// </summary>  
+        /// <returns></returns>
+        public object GetExamples()
+        {
+            SolarCalculatorInput example = new SolarCalculatorInput()
+            {
+
+                Model = "year",
+                LocalTime = "12:00:00",
+                DateTimeSpan = new DateTimeSpan()
+                {
+                    StartDate = new DateTime(2010, 01, 01),
+                    EndDate = new DateTime(2010, 12, 31)
+                },
+                Geometry = new TimeSeriesGeometry()
+                {
+                    Point = new PointCoordinate()
+                    {
+                        Latitude = 40,
+                        Longitude = -105
+                    },
+                    Timezone = new Timezone()
+                    {
+                        Offset = -7,
+                    }
+                }
+            };
+            return example;
+        }
+    }
+
+    /// <summary>
+    /// Meterology Solar HMS endpoint class
+    /// </summary>
+    [Produces("application/json")]
+    [Route("api/meteorology/solar")]
+    [Route("api/meteorology/solar/v1.0")]
+    public class WSMeteorolgySolarController : Controller
+    {
+        /// <summary>
+        /// NOAA Solar Calculator 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("")]
+        [SwaggerRequestExample(typeof(SolarCalculatorInput), typeof(SolarCalcInputExample))]
+        public async Task<IActionResult> POSTSolarCalculator([FromBody]SolarCalculatorInput i)
+        {
+            WSSolar solar = new WSSolar();
+            Utilities.ErrorOutput error = new Utilities.ErrorOutput();
+            ITimeSeriesOutput result;
+            if(i is null)
+            {
+                result = error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
+            }
+            else
+            {
+                result = await solar.RunSolarCalculator(i);
+                
+            }
+            return new ObjectResult(result);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -224,13 +225,16 @@ namespace Web.Services.Controllers
         [Route("v1.0")]         // Version 1.0 endpoint
         [SwaggerRequestExample(typeof(WorkFlowCompareInput), typeof(WorkFlowCompareInputExample))]
         [SwaggerResponseExample(200, typeof(WorkFlowCompareOutputExample))]
-        public ITimeSeriesOutput POST([FromBody]WorkFlowCompareInput workflowInput)
+        public async Task<IActionResult> POST([FromBody]WorkFlowCompareInput workflowInput)
         {
 
             WSWorkFlow workFlow = new WSWorkFlow();
-            ITimeSeriesOutput results = workFlow.GetWorkFlowData(workflowInput);
+            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+            ITimeSeriesOutput results =  await workFlow.GetWorkFlowData(workflowInput);
+            stpWatch.Stop();
+            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return results;
+            return new ObjectResult(results);
         }
     }
 }

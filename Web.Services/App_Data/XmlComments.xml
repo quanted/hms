@@ -9,6 +9,86 @@
             Evapotranspiration Input that implements TimeSeriesInput object
             </summary>
         </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Algorithm">
+            <summary>
+            REQUIRED: Algorithm used for Evapotranspiration.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Albedo">
+            <summary>
+            REQUIRED: Albedo coefficient.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.CentralLongitude">
+            <summary>
+            REQUIRED: Central Longitude of Time Zone in degrees.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.SunAngle">
+            <summary>
+            REQUIRED: Angle of the sun in degrees.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Emissivity">
+            <summary>
+            REQUIRED: The ability of a surface to emit radiant energy.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Model">
+            <summary>
+            REQUIRED: Specifies if potential, actual, or wet environment evaporation are used.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.Zenith">
+            <summary>
+            REQUIRED: Zenith Albedo coefficient.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LakeSurfaceArea">
+            <summary>
+            REQUIRED: Surface area of lake in square kilometers.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LakeDepth">
+            <summary>
+            REQUIRED: Average depth of lake in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.SubsurfaceResistance">
+            <summary>
+            REQUIRED: Subsurface Resistance.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.StomatalResistance">
+            <summary>
+            REQUIRED: Stomatal Resistance.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LeafWidth">
+            <summary>
+            REQUIRED: Leaf Width in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.RoughnessLength">
+            <summary>
+            REQUIRED: Roughness Length in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.VegetationHeight">
+            <summary>
+            REQUIRED: Vegetation Height in meters.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.LeafAreaIndices">
+            <summary>
+            REQUIRED: Monthly leaf area indices.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.AirTemperature">
+            <summary>
+            REQUIRED: Monthly air temperature coefficients.
+            </summary>
+        </member>
         <member name="T:Web.Services.Controllers.EvapotranspirationInputExample">
             <summary>
             Swashbuckle Evapotranspiration POST request example
@@ -172,7 +252,7 @@
         </member>
         <member name="T:Web.Services.Controllers.WSSolarController">
             <summary>
-            HMS API controller for solar data.
+            HMS API controller for GC Solar data.
             </summary>
         </member>
         <member name="M:Web.Services.Controllers.WSSolarController.GETDefaultOutput">
@@ -201,6 +281,29 @@
             <summary>
             GET request for metadata on the inputs for the GCSolar module.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.SolarCalcInputExample">
+            <summary>
+            Input example for NOAA Solar Calculator POST
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.SolarCalcInputExample.GetExamples">
+            <summary>
+            Get example function
+            </summary>  
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSMeteorolgySolarController">
+            <summary>
+            Meterology Solar HMS endpoint class
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSMeteorolgySolarController.POSTSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
+            <summary>
+            NOAA Solar Calculator 
+            </summary>
+            <param name="i"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInput">
@@ -353,6 +456,29 @@
             <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
+        <member name="T:Web.Services.Controllers.TotalFlowInputExample">
+            <summary>
+            Swashbuckle TotalFlow POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.TotalFlowInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSTotalFlowController">
+            <summary>
+            Total Flow controller for HMS
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSTotalFlowController.POST(Web.Services.Models.TotalFlowInput)">
+            <summary>
+            POST method for getting total flow data.
+            </summary>
+            <param name="tfInput"></param>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
         <member name="T:Web.Services.Controllers.WSUtilitiesController">
             <summary>
             Utility REST endpoints for HMS components.
@@ -367,6 +493,7 @@
         <member name="M:Web.Services.Controllers.WSUtilitiesController.DatasetEndpointsCheck(System.String)">
             <summary>
             Checks endpoints for a specified dataset.
+            Valid datasets: "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature"
             </summary>
             <param name="dataset"></param>
             <returns></returns>
@@ -426,7 +553,7 @@
             HMS Web Service Evapotranspiration Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSEvapotranspiration.GetEvapotranspiration(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSEvapotranspiration.GetEvapotranspiration(Web.Services.Controllers.EvapotranspirationInput)">
             <summary>
             Gets evapotranspiration data using the given TimeSeriesInput parameters.
             </summary>
@@ -456,6 +583,21 @@
             </summary>
             <param name="input"></param>
             <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.SolarCalculatorInput">
+            <summary>
+            Solar Calculator Input object
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.SolarCalculatorInput.Model">
+            <summary>
+            Calculator model: 'Day' or 'Year'
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.SolarCalculatorInput.LocalTime">
+            <summary>
+            Calculation localtime for when model='year', default='12:00:00'
+            </summary>
         </member>
         <member name="T:Web.Services.Models.WSSolar">
             <summary>
@@ -487,6 +629,13 @@
             <summary>
             Constructs input metadata for GCSolar module.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSSolar.RunSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
+            <summary>
+            Model for accessing NOAA Solar Calculator 
+            </summary>
+            <param name="input"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSSubSurfaceFlow">
@@ -523,6 +672,123 @@
             Gets temperature data using the given TimeSeriesInput parameters.
             </summary>
             <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.TotalFlowInput">
+            <summary>
+            Input class for Total Flow (subsurface flow and surface flow)
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.TotalFlowInput.GeometryType">
+            <summary>
+            Specifies the type of geometry provided
+            Valid values: "huc", "commid", "catchmentid", "catchment", "flowline", "points"
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.TotalFlowInput.GeometryInput">
+            <summary>
+            Contains the geometry data, type specified by geometry Type. 
+            Valid formats are: an ID for type huc, commid, and catchmentid; geojson for types catchment and flowline; and points for type points
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.TotalFlowInput.GeometryInputs">
+            <summary>
+            Contains the type as key and input as value, used when multiple inputs are needed for a request
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.GeometryResponse">
+            <summary>
+            Response from HMS-GIS
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.GeometryData">
+            <summary>
+            Response from HMS-GIS
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.GeometryData.geometry">
+            <summary>
+            Geometry component of HMS-GIS response
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.GeometryData.metadata">
+            <summary>
+            Metadata component of HMS-GIS response
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.Catchment">
+            <summary>
+            Catchments
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Catchment.points">
+            <summary>
+            List of points in the Catchment
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.Point">
+            <summary>
+            Catchment point data
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Point.latitude">
+            <summary>
+            Latitude of centroid
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Point.longitude">
+            <summary>
+            Longitude of centroid
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Point.cellArea">
+            <summary>
+            Total cell area
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Point.containedArea">
+            <summary>
+            Cell area that intersects the catchment
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.Point.percentArea">
+            <summary>
+            Percent coverage of the intersection
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.GeometryPoint">
+            <summary>
+            Point object
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.GeometryPoint.Latitude">
+            <summary>
+            Point latitude
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.GeometryPoint.Longitude">
+            <summary>
+            Point longitude
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.WSTotalFlow">
+            <summary>
+            Model for Total Flow controller
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSTotalFlow.GetTotalFlowData(Web.Services.Models.TotalFlowInput)">
+            <summary>
+            Default function for retrieving Total Flow data
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSTotalFlow.RequestData(System.String,System.String@)">
+            <summary>
+            Using the received taskID, the function long-polls the server until the max requests is reached or the status returns success.
+            </summary>
+            <param name="taskID"></param>
+            <param name="error"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSUtilities">
@@ -607,7 +873,7 @@
             </summary>
             <param name="services"></param>
         </member>
-        <member name="M:Web.Services.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment)">
+        <member name="M:Web.Services.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment,Microsoft.Extensions.Logging.ILoggerFactory)">
             <summary>
             Configure function
             </summary>

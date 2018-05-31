@@ -1,10 +1,9 @@
 ﻿using GCSOLAR;
-using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Utilities;
 
 namespace Solar
 {
@@ -23,8 +22,6 @@ namespace Solar
             DataTable dtKL = new DataTable();
             Depend dp = new Depend();
             dp.CalculatePhotolysisRatesHalfLivesTDay(out dtDay, out dtKL, common);
-            //Dictionary<string, object> t1 = ToDictionary(dtDay);
-            //Dictionary<string, object> t2 = ToDictionary(dtKL);
             object[] t1 = ToOutputArray(dtDay);
             object[] t2 = ToOutputArray(dtKL);
             Dictionary<string, object> result = new Dictionary<string, object>
@@ -67,7 +64,6 @@ namespace Solar
 
             DataTable inputTable = new DataTable();
             common.Listing(out inputTable);
-            //result.Add("wavelength table", ToOutputArray(inputTable));
             result.Add("wavelength table", ToDictionary(inputTable));
 
             return result;
@@ -118,11 +114,8 @@ namespace Solar
                     string v = row.ItemArray[j].ToString();
                     rowDict.Add(k, v);
                 }
-                //string key = dt.Rows[i][0].ToString();
-                string value = JsonConvert.SerializeObject(rowDict);
-                values[i] = rowDict;
-                //dic.Add(i.ToString(), rowDict);
 
+                values[i] = rowDict;
             }
             return values;
         }
@@ -221,7 +214,8 @@ namespace Solar
                         double[] latitudeArray;
                         try
                         {
-                            latitudeArray = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+                            latitudeArray = JSON.Deserialize<double[]>(p.Value.ToString());
+
                         }
                         catch(FormatException ex)
                         {
@@ -245,7 +239,9 @@ namespace Solar
                         string[] seasonArray;
                         try
                         {
-                            seasonArray = JsonConvert.DeserializeObject<string[]>(p.Value.ToString());
+
+                            seasonArray = JSON.Deserialize<string[]>(p.Value.ToString());
+
                         }
                         catch(FormatException ex)
                         {
@@ -281,7 +277,9 @@ namespace Solar
                         double[] sd_values;
                         try
                         {
-                            sd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            sd_values = JSON.Deserialize<double[]>(p.Value.ToString());
+
                         }
                         catch(FormatException ex)
                         {
@@ -299,7 +297,9 @@ namespace Solar
                         double[] rd_values;
                         try
                         {
-                            rd_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            rd_values = JSON.Deserialize<double[]>(p.Value.ToString());
+
                         }
                         catch(FormatException ex)
                         {
@@ -317,7 +317,9 @@ namespace Solar
                         double[] st_values;
                         try
                         {
-                            st_values = JsonConvert.DeserializeObject<double[]>(p.Value.ToString());
+
+                            st_values = JSON.Deserialize<double[]>(p.Value.ToString());
+
                         }
                         catch(FormatException ex)
                         {
@@ -443,11 +445,15 @@ namespace Solar
                     case "wavelength table":
                         double minWaveTemp = 100000.0;
                         double maxWaveTemp = 0.0;
-                        Dictionary<string, object> waveTable = JsonConvert.DeserializeObject <Dictionary<string, object>>(p.Value.ToString());
-                        foreach(KeyValuePair<string, object> q in waveTable)
+
+                        Dictionary<string, object> waveTable = JSON.Deserialize<Dictionary<string, object>>(p.Value.ToString());
+
+                        foreach (KeyValuePair<string, object> q in waveTable)
                         {
                             int index = Array.IndexOf(waves,Convert.ToDouble(q.Key));
-                            Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(q.Value.ToString());
+
+                            Dictionary<string, object> values = JSON.Deserialize<Dictionary<string, object>>(q.Value.ToString());
+
                             values = new Dictionary<string, object>(values, StringComparer.OrdinalIgnoreCase);
                             double wac;
                             double cac;

@@ -136,9 +136,9 @@ namespace Temperature
             for (int i = 0; i < tsLines.Length; i++)
             {
                 string[] lineData = tsLines[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                DateTime date = new DateTime(Convert.ToInt16(lineData[0]), 1, 1);
+                DateTime date = new DateTime(Convert.ToInt16(Convert.ToDouble(lineData[0])), 1, 1);
                 DateTime date2;
-                if (i > 0) { date2 = date.AddDays(Convert.ToInt16(lineData[1]) - 1); }
+                if (i > 0) { date2 = date.AddDays(Convert.ToInt16(Convert.ToDouble(lineData[1])) - 1); }
                 else { date2 = date; }
                 data.Add(date2.ToString(dateFormat), new List<string>
                 {

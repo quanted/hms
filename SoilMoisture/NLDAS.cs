@@ -71,7 +71,7 @@ namespace SoilMoisture
             for (int i = 0; i < layersData.Count; i++)
             {
                 string layerName = layersData[i].Metadata[source + "_param_short_name"].Substring(layersData[i].Metadata[source + "_param_short_name"].IndexOf('M') + 1);
-                output.Metadata.Add("column_" + (i + 2), layerName);
+                output.Metadata.Add("column_" + (i + 3), layerName);
             }
 
             return output;

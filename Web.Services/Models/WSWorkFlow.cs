@@ -21,7 +21,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetWorkFlowData(WorkFlowCompareInput input)
+        public async Task<ITimeSeriesOutput> GetWorkFlowData(WorkFlowCompareInput input)
         {
             string errorMsg = "";
 
@@ -76,13 +76,12 @@ namespace Web.Services.Models
                 {
                     // Precipitation object
                     Precipitation.Precipitation precip = new Precipitation.Precipitation();
+                    PointCoordinate point = new PointCoordinate();
                     if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
                     {
-                        input.Geometry.Point = new PointCoordinate
-                        {
-                            Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]),
-                            Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"])
-                        };
+                        point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
+                        point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
+                        input.Geometry.Point = point;
                     }
                     else
                     {
@@ -107,14 +106,25 @@ namespace Web.Services.Models
                 }
 
                 List<string> errorList = new List<string>();
-                Parallel.ForEach(precipList, (Precipitation.Precipitation precip) =>
+                object outputListLock = new object();
+                var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+
+                Parallel.ForEach(precipList, options, (Precipitation.Precipitation precip) =>
                 {
                     // Gets the Precipitation data.
                     string errorM = "";
                     ITimeSeriesOutput result = precip.GetData(out errorM);
-                    errorList.Add(errorM);
-                    outputList.Add(result);
+                    lock (outputListLock)
+                    {
+                        errorList.Add(errorM);
+                        outputList.Add(result);
+                    }
                 });
+
+                if(errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1){
+                    return err.ReturnError(string.Join(",", errorList.ToArray()));
+                }
+
 
                 foreach (ITimeSeriesOutput result in outputList)
                 {
