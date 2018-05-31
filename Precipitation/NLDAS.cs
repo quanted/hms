@@ -44,10 +44,6 @@ namespace Precipitation
             {
                 nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             }
-            //if (errorMsg.Contains("ERROR")) { return null; }
-            // Testing json objects
-            //string inputString = Newtonsoft.Json.JsonConvert.SerializeObject(input);
-            //string outputString = Newtonsoft.Json.JsonConvert.SerializeObject(nldasOutput);
 
             nldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
