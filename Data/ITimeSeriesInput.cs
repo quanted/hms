@@ -345,14 +345,6 @@ namespace Data
                     //errorMsg += "ERROR: Start date must be before end date.";
                 }
 
-                //if (!errorMsg.Contains("ERROR"))
-                //{
-                //    if (DateTime.Compare(newInput.DateTimeSpan.StartDate, newInput.DateTimeSpan.EndDate) >= 0)
-                //    {
-                //        errorMsg += "ERROR: Start date must be before end date.";
-                //    }
-                //}
-
                 // Validates DateTime output format
                 newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH" : input.DateTimeSpan.DateTimeFormat;
                 try
@@ -430,6 +422,7 @@ namespace Data
             {
                 newInput.InputTimeSeries = input.InputTimeSeries;
             }
+            errorMsg = string.Join(" ", errors.ToArray());
 
             return newInput;
         }
@@ -450,9 +443,10 @@ namespace Data
             }
 
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+            string source = input.Source.ToLower();
 
             string src = "";
-            switch (input.Source)
+            switch (source)
             {
                 case "nldas":
                     src = "NLDAS";
