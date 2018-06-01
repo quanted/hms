@@ -1,0 +1,8 @@
+language: csharp
+mono: none
+install: 2.0.0
+ - dotnet restore
+ - nuget install xunit.runners -Version 1.9.2 -OutputDirectory testrunner
+script:
+ - xbuild /p:Configuration=Release HMS.sln
+ - mono ./testrunner/xunit.runners.*/tools/xunit.console.clr4.exe ./*.Tests/bin/Release/*.Tests.dll
