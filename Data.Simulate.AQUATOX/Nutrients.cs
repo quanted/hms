@@ -2012,7 +2012,10 @@ namespace AQUATOX.Nutrients
 
             T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
             CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
-            DOM = 0;  //   AQTSeg.GetState(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);       // mg/L
+            TDissRefrDetr PDOM = (TDissRefrDetr)AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PDOM == null) DOM = 0;
+               else DOM = PDOM.State;   // mg/L
+
             pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
             Alpha = pH2CO3 * CCO2 + pkw;
             A = -Math.Log10(Math.Pow(Alpha, 0.5));
@@ -2280,7 +2283,7 @@ namespace AQUATOX.Nutrients
             De = CO2Biomass * SumDetrDecomp(T_SVType.StV, false);
             if (OM_Decomp_Link != null) De = OM_Decomp_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // Re = CO2Biomass * O2P.SumRespiration(false);   // fixme animal linkage
+            // Re = CO2Biomass * O2P.SumRespiration(false);   // fixme animal, plant linkage
             if (Respiration_Link != null) Re = Respiration_Link.ReturnLoad(AQTSeg.TPresent);
 
             // CO2Assim = Assimilation();  fixme plant linkage assimilation

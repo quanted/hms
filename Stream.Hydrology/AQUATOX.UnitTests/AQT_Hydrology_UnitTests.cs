@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AQUATOX.Volume;
+using Stream.Hydrology.AQUATOX;
 using System.IO;
 
 
@@ -41,7 +41,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             string errmsg = "";
 
             AQTVolumeModel AQTM = new AQTVolumeModel(ref json, ref errmsg);
-            errmsg = AQTM.AQTSeg.Verify_Runnable();
+            errmsg = AQTM.AQSim.AQTSeg.Verify_Runnable();
 
             Assert.AreNotEqual("", errmsg);
 
@@ -50,7 +50,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             errmsg = "";
 
             AQTM = new AQTVolumeModel(ref json, ref errmsg);
-            errmsg = AQTM.AQTSeg.Verify_Runnable();
+            errmsg = AQTM.AQSim.AQTSeg.Verify_Runnable();
 
             Assert.AreNotEqual("", errmsg);
 

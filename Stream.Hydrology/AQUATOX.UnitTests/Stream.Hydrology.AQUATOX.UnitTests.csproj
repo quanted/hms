@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
     <ProjectReference Include="..\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
   </ItemGroup>
 
