@@ -94,6 +94,7 @@ namespace Data.Source
                 sb.Append(componentInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd"));
                 sb.Append("}, {'name': 'end_date','value': ");
                 // Append end date
+                componentInput.DateTimeSpan.EndDate.AddDays(1);
                 sb.Append(componentInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd"));
                 sb.Append("}]}");
             }
