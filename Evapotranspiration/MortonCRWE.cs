@@ -512,28 +512,70 @@ namespace Evapotranspiration
             //DataTable dt = nldas.getData3(timeZoneOffset, out errorMsg);
             DataTable dt = new DataTable();
             DataTable daymets = new DataTable();
-            if (inpt.Source == "daymet")
+            switch (inpt.Source)
             {
-                daymets = daymetData(inpt, outpt);
-                inpt.Source = "nldas";
-                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                dt = nldas.getData3(timeZoneOffset, out errorMsg);
-                for (int i = 0; i < daymets.Rows.Count; i++)
-                {
-                    DataRow dr = dt.Rows[i];
-                    dr["TMin_C"] = daymets.Rows[i]["TMin_C"];
-                    dr["TMax_C"] = daymets.Rows[i]["TMax_C"];
-                    dr["TMean_C"] = daymets.Rows[i]["TMean_C"];
-                    dr["SolarRadMean_MJm2day"] = daymets.Rows[i]["SolarRadMean_MJm2day"];
-                }
-                daymets = null;
-            }
-            else
-            {
-                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                dt = nldas.getData3(timeZoneOffset, out errorMsg);
-                aprecip = nldas.getAnnualPrecipitation();
-                AnnualPrecipitation = aprecip;
+                case "daymet":
+                    daymets = daymetData(inpt, outpt);
+                    inpt.Source = "nldas";
+                    NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                    dt = nldas.getData3(timeZoneOffset, out errorMsg);
+                    dt.Columns.Add("VaPress");
+                    for (int i = 0; i < daymets.Rows.Count; i++)
+                    {
+                        DataRow dr = dt.Rows[i];
+                        dr["TMin_C"] = daymets.Rows[i]["TMin_C"];
+                        dr["TMax_C"] = daymets.Rows[i]["TMax_C"];
+                        dr["TMean_C"] = daymets.Rows[i]["TMean_C"];
+                        dr["SolarRadMean_MJm2day"] = daymets.Rows[i]["SolarRadMean_MJm2day"];
+                        dr["VaPress"] = daymets.Rows[i]["VaPress"];
+                    }
+                    daymets = null;
+                    break;
+                case "custom":
+                    CustomData cd = new CustomData();
+                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "mortoncrwe");
+                    break;
+                case "nldas":
+                case "gldas":
+                default:
+                    NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                    if (inpt.TemporalResolution == "hourly")
+                    {
+                        NLDAS2 nldasday = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                        DataTable dtd = nldasday.getData3(timeZoneOffset, out errorMsg);
+                        dt = nldas2.getDataHourly(timeZoneOffset, false, out errorMsg);
+                        dt.Columns["THourly_C"].ColumnName = "TMean_C";
+                        dt.Columns["SolarRad_MJm2day"].ColumnName = "SolarRadMean_MJm2day";
+                        dt.Columns.Remove("WindSpeed_m/s");
+                        //dt.Columns["WindSpeed_m/s"].ColumnName = "WindSpeedMean_m/s";
+                        dt.Columns.Remove("SH_Hourly");
+                        dt.Columns.Add("TMin_C");
+                        dt.Columns.Add("TMax_C");
+                        dt.Columns.Add("SHmin");
+                        dt.Columns.Add("SHmax");
+                        int j = -1;
+                        for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            if ((inpt.Source == "nldas" && (i % 24 == 0)) || (inpt.Source == "gldas" && (i % 8 == 0)))
+                            {
+                                j++;
+                            }
+                            DataRow dr = dtd.Rows[j];
+                            dt.Rows[i]["TMin_C"] = dr["TMin_C"];
+                            dt.Rows[i]["TMax_C"] = dr["TMax_C"];
+                            dt.Rows[i]["SHmin"] = dr["SHmin"];
+                            dt.Rows[i]["SHmax"] = dr["SHmax"];
+                        }
+                        dtd = null;
+                    }
+                    else
+                    {
+                        dt = nldas2.getData3(timeZoneOffset, out errorMsg);
+                    }
+                    //dt = nldas2.getData3(timeZoneOffset, out errorMsg);
+                    aprecip = nldas2.getAnnualPrecipitation();
+                    AnnualPrecipitation = aprecip;
+                    break;
             }
 
             if (errorMsg != "")
@@ -571,6 +613,24 @@ namespace Evapotranspiration
                 { "column_8", "Maximum Relative Humidity" },
                 { "column_9", "Potential Evapotranspiration" }
             };
+            if (inpt.TemporalResolution == "hourly")
+            {
+                output.Metadata = new Dictionary<string, string>()
+                {
+                    { "latitude", latitude.ToString() },
+                    { "longitude", longitude.ToString() },
+                    { "request_time", DateTime.Now.ToString() },
+                    { "column_1", "DateHour" },
+                    { "column_2", "Julian Day" },
+                    { "column_3", "Hourly Temperature" },
+                    { "column_4", "Mean Solar Radiation" },
+                    { "column_5", "Minimum Daily Temperature" },
+                    { "column_6", "Maximum Daily Temperature" },
+                    { "column_7", "Minimum Relative Humidity" },
+                    { "column_8", "Maximum Relative Humidity" },
+                    { "column_9", "Potential Evapotranspiration" }
+                };
+            }
             output.Data = new Dictionary<string, List<string>>();
 
             foreach (DataRow dr in dt.Rows)
@@ -580,19 +640,38 @@ namespace Evapotranspiration
                 double tmax = Convert.ToDouble(dr["TMax_C"].ToString());
                 double shmin = Convert.ToDouble(dr["SHmin"].ToString());
                 double shmax = Convert.ToDouble(dr["SHmax"].ToString());
-                strDate = dr["Date"].ToString();
+                if (inpt.TemporalResolution == "hourly")
+                {
+                    DateTime days = DateTime.Parse(dr["DateHour"].ToString());
+                    strDate = days.ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    strDate = dr["Date"].ToString();
+                }
                 DateTime time = DateTime.ParseExact(strDate, "yyyy-MM-dd", CInfoUS);
                 double solarRad = Convert.ToDouble(dr["SolarRadMean_MJm2day"].ToString());
                 int jday = Convert.ToInt32(dr["Julian_Day"].ToString());
 
                 MortonCRWEMethod(tmin, tmax, tmean, jday, time, shmin, shmax, solarRad, model, out relHMin, out relHMax,
                                  out petMCW, out errorMsg);
-
-                dr["RHmin"] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
-                dr["RHmax"] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                if (inpt.Source == "daymet")
+                {
+                    double vapor = Convert.ToDouble(dr["VaPress"].ToString());
+                    dr["RHmin"] = daymetHumid(tmin, vapor).ToString("F2", CultureInfo.InstalledUICulture);
+                    dr["RHmax"] = daymetHumid(tmax, vapor).ToString("F2", CultureInfo.InstalledUICulture);
+                }
+                else
+                {
+                    dr["RHmin"] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
+                    dr["RHmax"] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                }
                 dr["MortonCRWEPET_in"] = petMCW.ToString("F4", CultureInfo.InvariantCulture);
             }
-
+            if (inpt.Source == "daymet")
+            {
+                dt.Columns.Remove("VaPress");
+            }
             dt.Columns.Remove("SHmin");
             dt.Columns.Remove("SHmax");
 
@@ -606,6 +685,14 @@ namespace Evapotranspiration
                 output.Data.Add(dr[0].ToString(), lv);
             }
             return output;
+        }
+
+        public double daymetHumid(double temp, double vapor)
+        {
+            double humid = 0.0;
+            double es = 611 * Math.Exp((17.27 * temp) / (237.3 + temp));
+            humid = vapor / es;
+            return humid;
         }
 
         public DataTable daymetData(ITimeSeriesInput inpt, ITimeSeriesOutput outpt)
@@ -622,7 +709,7 @@ namespace Evapotranspiration
             st.Remove(st.Length - 1, 1);
 
             string url = "https://daymet.ornl.gov/data/send/saveData?" + "lat=" + inpt.Geometry.Point.Latitude + "&lon=" + inpt.Geometry.Point.Longitude
-                + "&measuredParams=" + "tmax,tmin,srad,dayl" + "&years=" + st.ToString();
+                + "&measuredParams=" + "tmax,tmin,srad,dayl,vp" + "&years=" + st.ToString();
             WebClient myWC = new WebClient();
             try
             {
@@ -656,8 +743,9 @@ namespace Evapotranspiration
             tab.Columns.Add("TMax_C");
             tab.Columns.Add("TMean_C");
             tab.Columns.Add("SolarRadMean_MJm2day");
+            tab.Columns.Add("VaPress");
 
-            string[] splitData = data.Split(new string[] { "year,yday,prcp (mm/day)", "year,yday,tmax (deg c),tmin (deg c)", "year,yday,dayl (s),srad (W/m^2),tmax (deg c),tmin (deg c)" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitData = data.Split(new string[] { "year,yday,prcp (mm/day)", "year,yday,tmax (deg c),tmin (deg c)", "year,yday,dayl (s),srad (W/m^2),tmax (deg c),tmin (deg c),vp (Pa)" }, StringSplitOptions.RemoveEmptyEntries);
             string[] lines = splitData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             Boolean julianflag = false;
             foreach (string line in lines)
@@ -683,6 +771,7 @@ namespace Evapotranspiration
                     double srad = Convert.ToDouble(linedata[3]);
                     double dayl = Convert.ToDouble(linedata[2]);
                     tabrow["SolarRadMean_MJm2day"] = Math.Round((srad * dayl) / 1000000, 2);
+                    tabrow["VaPress"] = linedata[6];
                     tab.Rows.Add(tabrow);
                 }
             }

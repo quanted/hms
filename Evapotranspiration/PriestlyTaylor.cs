@@ -227,15 +227,51 @@ namespace Evapotranspiration
             //NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
                         
             DataTable dt = new DataTable();
-            if (inpt.Source == "daymet")
+
+            switch (inpt.Source)
             {
-                dt = daymetData(inpt, outpt);
+               case "daymet":
+                    dt = daymetData(inpt, outpt);
+                    break;
+                case "custom":
+                    CustomData cd = new CustomData();
+                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "priestlytaylor");
+                    break;
+                case "nldas":
+                case "gldas":
+                default:
+                    NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                    if (inpt.TemporalResolution == "hourly")
+                    {
+                        NLDAS2 nldasday = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                        DataTable dtd = nldasday.getData2(timeZoneOffset, out errorMsg);
+                        dt = nldas.getDataHourly(timeZoneOffset, false, out errorMsg);
+                        dt.Columns["THourly_C"].ColumnName = "TMean_C";
+                        dt.Columns["SolarRad_MJm2day"].ColumnName = "SolarRadMean_MJm2day";
+                        dt.Columns.Remove("SH_Hourly");
+                        dt.Columns.Remove("WindSpeed_m/s");
+                        dt.Columns.Add("TMin_C");
+                        dt.Columns.Add("TMax_C");
+                        int j = -1;
+                        for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            if ((inpt.Source == "nldas" && (i % 24 == 0)) || (inpt.Source == "gldas" && (i % 8 == 0)))
+                            {
+                                j++;
+                            }
+                            DataRow dr = dtd.Rows[j];
+                            dt.Rows[i]["TMin_C"] = dr["TMin_C"];
+                            dt.Rows[i]["TMax_C"] = dr["TMax_C"];
+                        }
+                        dtd = null;
+                    }
+                    else
+                    {
+                        dt = nldas.getData2(timeZoneOffset, out errorMsg);
+                    }
+                    break;
             }
-            else
-            {
-                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                dt = nldas.getData2(timeZoneOffset, out errorMsg);
-            }
+            
             //dt = nldas.getData2(timeZoneOffset, out errorMsg);
 
             if (errorMsg != "")
@@ -265,6 +301,22 @@ namespace Evapotranspiration
                 { "column_6", "Mean Solar Radiation" },
                 { "column_7", "Potential Evapotranspiration" }
             };
+            if (inpt.TemporalResolution == "hourly")
+            {
+                output.Metadata = new Dictionary<string, string>()
+                {
+                    { "latitude", latitude.ToString() },
+                    { "longitude", longitude.ToString() },
+                    { "request_time", DateTime.Now.ToString() },
+                    { "column_1", "DateHour" },
+                    { "column_2", "Julian Day" },
+                    { "column_3", "Hourly Temperature" },
+                    { "column_4", "Mean Solar Radiation" },
+                    { "column_5", "Minimum Daily Temperature" },
+                    { "column_6", "Maximum Daily Temperature" },
+                    { "column_7", "Potential Evapotranspiration" }
+                };
+            }
             output.Data = new Dictionary<string, List<string>>();
 
             foreach (DataRow dr in dt.Rows)

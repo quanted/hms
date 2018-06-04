@@ -14,6 +14,10 @@ NLDAS_EVAPOT_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeserie
 
 GLDAS_EVAPOT_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS:GLDAS_NOAH025_3H.001:Evap&location=GEOM:POINT
 
+DAYMET_EVAPOT_URL https://daymet.ornl.gov/data/send/saveData?
+
+NCDC_EVAPOT_URL https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=
+
 NLDAS_Longwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DLWRFsfc&location=NLDAS:
 
 NLDAS_Shortwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc&location=NLDAS:

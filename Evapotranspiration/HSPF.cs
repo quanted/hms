@@ -423,7 +423,7 @@ namespace Evapotranspiration
             double relHumidityHr = 0.0;
             string strDate;
             CultureInfo CInfoUS = new CultureInfo("en-US");
-
+            bool hour = inpt.TemporalResolution == "hourly" || inpt.TemporalResolution == "default";
             bool flagHSPF = true;
             //DataTable dt = nldas.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);
             DataTable dt = new DataTable();
@@ -455,8 +455,62 @@ namespace Evapotranspiration
             }
             else
             {
-                NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                dt = nldas.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);
+                /*NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                dt = nldas.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);*/
+                NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
+                dt = nldas2.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);
+                if (!hour)
+                {
+                    DataTable daily = dt.Clone();
+                    List<Double> list = new List<double>();
+                    DataRow dr1 = null;
+                    double temp = 0;
+                    double spec = 0;
+                    double wind = 0;
+                    double solar = 0;
+                    double evap = 0;
+                    int j = 0;
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if (j == 0)
+                        {
+                            dr1 = daily.NewRow();
+                            dr1["DateHour"] = dt.Rows[i]["DateHour"].ToString();
+                            dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                            temp = 0;
+                            spec = 0;
+                            wind = 0;
+                            solar = 0;
+                        }
+                        temp += Convert.ToDouble(dt.Rows[i]["THourly_C"]);
+                        spec += Convert.ToDouble(dt.Rows[i]["SH_Hourly"]);
+                        wind += Convert.ToDouble(dt.Rows[i]["WindSpeed_m/s"]);
+                        solar += Convert.ToDouble(dt.Rows[i]["SolarRad_MJm2day"]);
+                        evap += Convert.ToDouble(dt.Rows[i]["Potential_Evaporation"]);
+                        if (inpt.Source == "nldas" && j == 23)
+                        {
+                            dr1["THourly_C"] = Math.Round(temp / 24, 2);
+                            dr1["SH_Hourly"] = Math.Round(spec / 24, 4);
+                            dr1["WindSpeed_m/s"] = Math.Round(wind / 24, 2);
+                            dr1["Potential_Evaporation"] = Math.Round(evap / 24, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(solar / 24, 2);
+                            daily.Rows.Add(dr1);
+                            j = -1;
+                        }
+                        else if (inpt.Source == "gldas" && j == 7)
+                        {
+                            dr1["THourly_C"] = Math.Round(temp / 8, 2);
+                            dr1["SH_Hourly"] = Math.Round(spec / 8, 4);
+                            dr1["WindSpeed_m/s"] = Math.Round(wind / 8, 2);
+                            dr1["Potential_Evaporation"] = Math.Round(evap / 8, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(solar / 8, 2);
+                            daily.Rows.Add(dr1);
+                            j = -1;
+                        }
+                        j++;
+                    }
+                    dt = daily;
+                }
             }
 
             if (errorMsg != "")
@@ -495,6 +549,29 @@ namespace Evapotranspiration
                 { "column_9.1", "Dew Point Temperature" },
                 { "column_9.2", "Cloud Coverage" }
             };
+            if (!hour)
+            {
+                dt.Columns.Remove("Precipitation_Hourly");
+                output.Metadata = new Dictionary<string, string>()
+                {
+                    { "elevation", elevation.ToString() },
+                    { "latitude", latitude.ToString() },
+                    { "longitude", longitude.ToString() },
+                    { "albedo", albedo.ToString() },
+                    { "sun_angle", sunAngle.ToString() },
+                    { "central_longitude", timeZoneCentralLongitude.ToString() },
+                    { "request_time", DateTime.Now.ToString() },
+                    { "column_1", "DateHour" },
+                    { "column_2", "Julian Day" },
+                    { "column_3", "Hourly Temperature" },
+                    { "column_4", "Mean Solar Radiation" },
+                    { "column_5", "Mean Wind Speed" },
+                    { "column_6", "Hourly Relative Humidity" },
+                    { "column_7", "Potential Evapotranspiration" },
+                    { "column_8", "Dew Point Temperature" },
+                    { "column_9", "Cloud Coverage" }
+                };
+            }
             output.Data = new Dictionary<string, List<string>>();
 
             foreach (DataRow dr in dt.Rows)
