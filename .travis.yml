@@ -4,9 +4,9 @@ dist: trusty
 mono: none
 solution: HMS.sln
 script:
- - dotnet restore -nowarn:msb3202,nu1503
  - rm docker-compose.*
+ - dotnet restore -nowarn:msb3202,nu1503
  - dotnet build -c Release
- - sudo mkdir /app/App-Data
+ - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - dotnet test *.Tests/*.Tests.csproj
