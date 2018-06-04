@@ -5,8 +5,8 @@ mono: none
 solution: HMS.sln
 script:
  - rm docker-compose.*
- - ls /Web.Services/
  - dotnet restore -nowarn:msb3202,nu1503
  - dotnet build -c Release
+ - ls
  - cp /Web.Services/App_Data/url_info.txt /app/App_Data/url_info.txt
  - dotnet test *.Tests/*.Tests.csproj
