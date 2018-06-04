@@ -6,5 +6,6 @@ install:
  - nuget restore HMS.sln
  - nuget install xunit.runners -Version 2.0.0 -OutputDirectory testrunners
 script:
+ - dotnet build -c Release
  - xbuild /p:Configuration=Release HMS.sln
  - mono ./testrunners/xunit.runners.*/tools/xunit.console.clr4.exe ./*/bin/Release/*.Tests.dll
