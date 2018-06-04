@@ -9,4 +9,4 @@ script:
  - dotnet build -c Release
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
- - dotnet test *.Tests/*.Tests.csproj
+ - dotnet test
