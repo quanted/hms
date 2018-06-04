@@ -1,10 +1,9 @@
 language: csharp
 dotnet: 2.0.0
 dist: trusty
+mono: none
 solution: HMS.sln
-install:
- - nuget restore HMS.sln
- - nuget install xunit.runners -Version 2.0.0 -OutputDirectory testrunners
 script:
- - dotnet build -c Release */*.csproj
- - mono ./testrunners/xunit.runners.*/tools/xunit.console.clr4.exe ./*/bin/Release/*.Tests.dll
+ - rm docker-compose.dcproj
+ - dotnet build -c Release
+ - dotnet test
