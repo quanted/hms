@@ -5,7 +5,8 @@ mono: none
 solution: HMS.sln
 script:
  - dotnet restore -nowarn:msb3202,nu1503
+ - rm docker-compose.*
  - dotnet build -c Release
- - sudo mkdir /app/App_Data
+ - sudo mkdir /app/App-Data
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - dotnet test *.Tests/*.Tests.csproj
