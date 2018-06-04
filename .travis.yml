@@ -9,4 +9,5 @@ script:
  - dotnet build -c Release
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
+ - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.0/
  - dotnet test -c Release --filter "Priority=1"
