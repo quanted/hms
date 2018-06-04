@@ -4,6 +4,7 @@ dist: trusty
 mono: none
 solution: HMS.sln
 script:
- - rm docker-compose.dcproj
+ - rm docker-compose.*
+ - dotnet restore -nowarn:msb3202,nu1503
  - dotnet build -c Release
  - dotnet test
