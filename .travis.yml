@@ -7,4 +7,5 @@ script:
  - rm docker-compose.*
  - dotnet restore -nowarn:msb3202,nu1503
  - dotnet build -c Release
+ - cp ./Web.Services/App_Data/url_info.txt /app/App_Data/url_info.txt
  - dotnet test
