@@ -16,7 +16,7 @@ namespace Stream.Hydrology.AQUATOX
         /// <summary>
         /// Holds the AQUATOX Simulation
         /// </summary>
-        public AQTSim AQSim;  
+        public AQTSim AQSim;
 
         /// <summary>
         /// Instantiates an AQUATOX Volume model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries
@@ -25,15 +25,17 @@ namespace Stream.Hydrology.AQUATOX
         /// </summary>
         /// <param name="json"></param> string, passed by reference:  a valid json input that is replaced by the model's json output including model results
         /// <param name="errmsg"></param> string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
+        /// <param name="RunModel"></param> bool, if true, the model is run and results saved back to the json string parameter passed by reference. 
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
-        public AQTVolumeModel(ref string json, ref string errmsg)
+        public AQTVolumeModel(ref string json, ref string errmsg, bool RunModel)
 
         {
+            AQSim = new AQTSim();
             errmsg = AQSim.Instantiate(json);
             if (errmsg == "")
             {
                 errmsg = CheckDataRequirements();
-                if (errmsg == "")
+                if ((errmsg == "") && RunModel)
                 {
                     errmsg = AQSim.Integrate();
                     if (errmsg == "")

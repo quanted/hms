@@ -26,8 +26,9 @@ namespace AQUATOXNutrientModel
         /// </summary>
         /// <param name="json"></param> string, passed by reference:  a valid json input that is replaced by the model's json output including model results
         /// <param name="errmsg"></param> string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
+        /// <param name="RunModel"></param> bool, if true, the model is run and results saved back to the json string parameter passed by reference. 
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
-        public AQTNutrientsModel(ref string json, ref string errmsg)
+        public AQTNutrientsModel(ref string json, ref string errmsg, bool RunModel)
 
         {
             AQSim = new AQTSim();
@@ -35,7 +36,7 @@ namespace AQUATOXNutrientModel
             if (errmsg == "")
             {
                 errmsg = CheckDataRequirements();
-                if (errmsg == "")
+                if ((errmsg == "") && RunModel)
                 {
                     errmsg = AQSim.Integrate();
                     if (errmsg == "")
