@@ -506,25 +506,24 @@ namespace Evapotranspiration
 
             //DataTable dt = nldas.getData3(timeZoneOffset, out errorMsg);
             DataTable dt = new DataTable();
-            DataTable daymets = new DataTable();
+            DataTable data3 = new DataTable();
             switch (inpt.Source)
             {
                 case "daymet":
-                    daymets = daymetData(inpt, outpt);
+                    dt = daymetData(inpt, outpt);
+                    dt = Utilities.Utility.aggregateData(inpt, dt, "mortoncrae");
                     inpt.Source = "nldas";
                     NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                    dt = nldas.getData3(timeZoneOffset, out errorMsg);
-                    dt.Columns.Add("VaPress");
-                    for (int i = 0; i < daymets.Rows.Count; i++)
+                    data3 = nldas.getData3(timeZoneOffset, out errorMsg);
+                    dt.Columns.Add("SHmin");
+                    dt.Columns.Add("SHmax");
+                    for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        DataRow dr = dt.Rows[i];
-                        dr["TMin_C"] = daymets.Rows[i]["TMin_C"];
-                        dr["TMax_C"] = daymets.Rows[i]["TMax_C"];
-                        dr["TMean_C"] = daymets.Rows[i]["TMean_C"];
-                        dr["SolarRadMean_MJm2day"] = daymets.Rows[i]["SolarRadMean_MJm2day"];
-                        dr["VaPress"] = daymets.Rows[i]["VaPress"];
+                        dt.Rows[i]["SHmin"] = data3.Rows[i]["SHmin"];
+                        dt.Rows[i]["SHmax"] = data3.Rows[i]["SHmin"];
                     }
-                    daymets = null;
+                    data3 = null;
+                    inpt.Source = "daymet";
                     break;
                 case "custom":
                     CustomData cd = new CustomData();
@@ -566,6 +565,85 @@ namespace Evapotranspiration
                     else
                     {
                         dt = nldas2.getData3(timeZoneOffset, out errorMsg);
+                        DataRow dr1 = null;
+                        List<Double> tList = new List<double>();
+                        List<Double> sList = new List<double>();
+                        double sol = 0.0;
+                        if (inpt.TemporalResolution == "weekly")
+                        {
+                            DataTable wkly = dt.Clone();
+                            int j = 0;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (j == 0)
+                                {
+                                    dr1 = wkly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                    sList = new List<double>();
+                                    sol = 0.0;
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
+                                if (j == 6 || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                                    dr1["SHmin"] = sList.Min().ToString();
+                                    dr1["SHmax"] = sList.Max().ToString();
+                                    wkly.Rows.Add(dr1);
+                                    j = -1;
+                                }
+                                j++;
+                            }
+                            dt = wkly;
+                        }
+                        else if (inpt.TemporalResolution == "monthly")
+                        {
+                            DataTable mnly = dt.Clone();
+                            int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                            int j = 0;
+                            bool newmonth = true;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (newmonth)
+                                {
+                                    dr1 = mnly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                    sList = new List<double>();
+                                    sol = 0.0;
+                                    newmonth = false;
+                                    curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
+                                if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                                    dr1["SHmin"] = sList.Min().ToString();
+                                    dr1["SHmax"] = sList.Max().ToString();
+                                    mnly.Rows.Add(dr1);
+                                    j = -1;
+                                    newmonth = true;
+                                }
+                                j++;
+                            }
+                            dt = mnly;
+                        }
                     }
                     //dt = nldas2.getData3(timeZoneOffset, out errorMsg);
                     aprecip = nldas2.getAnnualPrecipitation();
@@ -685,7 +763,7 @@ namespace Evapotranspiration
             double humid = 0.0;
             double es = 611 * Math.Exp((17.27 * temp) / (237.3 + temp));
             humid = vapor / es;
-            return humid;
+            return humid * 100;
         }
 
         public DataTable daymetData(ITimeSeriesInput inpt, ITimeSeriesOutput outpt)
@@ -756,7 +834,7 @@ namespace Evapotranspiration
                 if (julianflag)
                 {
                     DataRow tabrow = tab.NewRow();
-                    tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString(inpt.DateTimeSpan.DateTimeFormat);
+                    tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString("yyyy-MM-dd");
                     tabrow["Julian_Day"] = Convert.ToInt32(Convert.ToDouble(linedata[1]));
                     tabrow["TMin_C"] = linedata[5];
                     tabrow["TMax_C"] = linedata[4];

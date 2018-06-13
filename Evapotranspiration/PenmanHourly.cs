@@ -442,19 +442,19 @@ namespace Evapotranspiration
                 dt = nldas.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);*/
                 NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
                 dt = nldas2.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);
-                if (inpt.TemporalResolution != "hourly" || inpt.TemporalResolution != "default")
+                DataRow dr1 = null;
+                double sol = 0.0;
+                double wind = 0.0;
+                double temp = 0;
+                double spec = 0;
+                if (inpt.TemporalResolution == "daily")
                 {
                     DataTable daily = dt.Clone();
                     List<Double> list = new List<double>();
-                    DataRow dr1 = null;
-                    double temp = 0;
-                    double spec = 0;
-                    double wind = 0;
-                    double solar = 0;
                     int j = 0;
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        if(j == 0)
+                        if (j == 0)
                         {
                             dr1 = daily.NewRow();
                             dr1["DateHour"] = dt.Rows[i]["DateHour"].ToString();
@@ -462,18 +462,18 @@ namespace Evapotranspiration
                             temp = 0;
                             spec = 0;
                             wind = 0;
-                            solar = 0;
+                            sol = 0;
                         }
                         temp += Convert.ToDouble(dt.Rows[i]["THourly_C"]);
                         spec += Convert.ToDouble(dt.Rows[i]["SH_Hourly"]);
                         wind += Convert.ToDouble(dt.Rows[i]["WindSpeed_m/s"]);
-                        solar += Convert.ToDouble(dt.Rows[i]["SolarRad_MJm2day"]);
+                        sol += Convert.ToDouble(dt.Rows[i]["SolarRad_MJm2day"]);
                         if (inpt.Source == "nldas" && j == 23)
                         {
                             dr1["THourly_C"] = Math.Round(temp / 24, 2);
-                            dr1["SH_Hourly"] = Math.Round(spec /24, 4);
+                            dr1["SH_Hourly"] = Math.Round(spec / 24, 4);
                             dr1["WindSpeed_m/s"] = Math.Round(wind / 24, 2);
-                            dr1["SolarRad_MJm2day"] = Math.Round(solar / 24, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(sol / 24, 2);
                             daily.Rows.Add(dr1);
                             j = -1;
                         }
@@ -482,13 +482,103 @@ namespace Evapotranspiration
                             dr1["THourly_C"] = Math.Round(temp / 8, 2);
                             dr1["SH_Hourly"] = Math.Round(spec / 8, 4);
                             dr1["WindSpeed_m/s"] = Math.Round(wind / 8, 2);
-                            dr1["SolarRad_MJm2day"] = Math.Round(solar / 8, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(sol / 8, 2);
                             daily.Rows.Add(dr1);
                             j = -1;
                         }
                         j++;
                     }
                     dt = daily;
+                }
+                else if (inpt.TemporalResolution == "weekly")
+                {
+                    DataTable wkly = dt.Clone();
+                    int j = 0;
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if (j == 0)
+                        {
+                            dr1 = wkly.NewRow();
+                            dr1["DateHour"] = dt.Rows[i]["DateHour"].ToString();
+                            dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                            temp = 0.0;
+                            spec = 0.0;
+                            wind = 0.0;
+                            sol = 0.0;
+                        }
+                        temp += Convert.ToDouble(dt.Rows[i]["THourly_C"]);
+                        sol += Convert.ToDouble(dt.Rows[i]["SolarRad_MJm2day"]);
+                        wind += Convert.ToDouble(dt.Rows[i]["WindSpeed_m/s"]);
+                        spec += Convert.ToDouble(dt.Rows[i]["SH_Hourly"]);
+                        if (inpt.Source == "nldas" && j == 167)
+                        {
+                            dr1["THourly_C"] = Math.Round(temp / 168, 2);
+                            dr1["SH_Hourly"] = Math.Round(spec / 168, 4);
+                            dr1["WindSpeed_m/s"] = Math.Round(wind / 168, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(sol / 168, 2);
+                            wkly.Rows.Add(dr1);
+                            j = -1;
+                        }
+                        else if (inpt.Source == "gldas" && j == 55)
+                        {
+                            dr1["THourly_C"] = Math.Round(temp / 56, 2);
+                            dr1["SH_Hourly"] = Math.Round(spec / 56, 4);
+                            dr1["WindSpeed_m/s"] = Math.Round(wind / 56, 2);
+                            dr1["SolarRad_MJm2day"] = Math.Round(sol / 56, 2);
+                            wkly.Rows.Add(dr1);
+                            j = -1;
+                        }
+                        j++;
+                    }
+                    dt = wkly;
+                }
+                else if (inpt.TemporalResolution == "monthly")
+                {
+                    DataTable mnly = dt.Clone();
+                    int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                    int j = 0;
+                    bool newmonth = true;
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if (newmonth)
+                        {
+                            dr1 = mnly.NewRow();
+                            dr1["DateHour"] = dt.Rows[i]["DateHour"].ToString();
+                            dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                            temp = 0.0;
+                            spec = 0.0;
+                            wind = 0.0;
+                            sol = 0.0;
+                            newmonth = false;
+                            curmonth = Convert.ToDateTime(dt.Rows[i]["DateHour"]).Month;
+                        }
+                        temp += Convert.ToDouble(dt.Rows[i]["THourly_C"]);
+                        sol += Convert.ToDouble(dt.Rows[i]["SolarRad_MJm2day"]);
+                        wind += Convert.ToDouble(dt.Rows[i]["WindSpeed_m/s"]);
+                        spec += Convert.ToDouble(dt.Rows[i]["SH_Hourly"]);
+                        if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["DateHour"]).Month != curmonth) || i == dt.Rows.Count - 1)
+                        {
+                            if (inpt.Source == "nldas")
+                            {
+                                dr1["THourly_C"] = Math.Round(temp / (j + 1), 2);
+                                dr1["SH_Hourly"] = Math.Round(spec / (j + 1), 4);
+                                dr1["WindSpeed_m/s"] = Math.Round(wind / (j + 1), 2);
+                                dr1["SolarRad_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                            }
+                            else if (inpt.Source == "gldas")
+                            {
+                                dr1["THourly_C"] = Math.Round(temp / (j + 1), 2);
+                                dr1["SH_Hourly"] = Math.Round(spec / (j + 1), 4);
+                                dr1["WindSpeed_m/s"] = Math.Round(wind / (j + 1), 2);
+                                dr1["SolarRad_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                            }
+                            mnly.Rows.Add(dr1);
+                            j = -1;
+                            newmonth = true;
+                        }
+                        j++;
+                    }
+                    dt = mnly;
                 }
             }
 

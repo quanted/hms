@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Net;
 using System.Globalization;
+using Data;
 
 //http://ldas.gsfc.nasa.gov/faq/#Subset
 //ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/1980/004/NLDAS_FORA0125_H.A19800104.0000.002.grb.xml
@@ -395,8 +396,7 @@ namespace Evapotranspiration
                 }
             }
 
-
-
+            
             foreach (DataRow dr in dt.Rows)
             {
                 dr["Value"] = Convert.ToDouble(dr["Value"].ToString()) - 273.15; // Convert Kelvin to Celsius
@@ -441,6 +441,7 @@ namespace Evapotranspiration
             List<Double> listPrep = new List<double>();
             List<Double> listPE = new List<double>();
 
+            
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 Math.DivRem(i, remaindermax, out remainder);
@@ -518,7 +519,6 @@ namespace Evapotranspiration
                 }
 
             }
-
             return dtHourly;
         }
 

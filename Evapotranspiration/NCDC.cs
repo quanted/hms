@@ -87,5 +87,74 @@ namespace Evapotranspiration
             }
             return dtMinMax;
         }
+
+        public DataTable Aggregate(ITimeSeriesInput inpt, DataTable dt)
+        {
+            DataTable aggregated = dt.Clone();
+            DataRow dr2 = null;
+            List<Double> tList = new List<double>();
+            if (inpt.TemporalResolution == "weekly")
+            {
+                int j = 0;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (j == 0)
+                    {
+                        dr2 = aggregated.NewRow();
+                        dr2["Date"] = dt.Rows[i]["Date"].ToString();
+                        dr2["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                        tList = new List<double>();
+                    }
+                    tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                    tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                    if (j == 6 || i == dt.Rows.Count - 1)
+                    {
+                        dr2["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                        dr2["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                        dr2["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                        aggregated.Rows.Add(dr2);
+                        j = -1;
+                    }
+                    j++;
+                }
+                dt = aggregated;
+            }
+            else if (inpt.TemporalResolution == "monthly")
+            {
+                int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                int j = 0;
+                bool newmonth = true;
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    if (newmonth)
+                    {
+                        dr2 = aggregated.NewRow();
+                        dr2["Date"] = dt.Rows[i]["Date"].ToString();
+                        dr2["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                        tList = new List<double>();
+                        newmonth = false;
+                        curmonth = DateTime.ParseExact(dt.Rows[i]["Date"].ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).Month;
+                    }
+                    tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                    tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                    if (i + 1 < dt.Rows.Count && (DateTime.ParseExact(dt.Rows[i + 1]["Date"].ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).Month != curmonth) || i == dt.Rows.Count - 1)
+                    {
+                        dr2["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                        dr2["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                        dr2["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                        aggregated.Rows.Add(dr2);
+                        j = -1;
+                        newmonth = true;
+                    }
+                    j++;
+                }
+                dt = aggregated;
+            }
+            else if (inpt.TemporalResolution == "default" || inpt.TemporalResolution == "daily")
+            {
+                return dt;
+            }
+            return dt;
+        }
     }
 }

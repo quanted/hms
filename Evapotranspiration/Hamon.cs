@@ -128,9 +128,18 @@ namespace Evapotranspiration
                 case "ncdc":
                     NCDC ncd = new NCDC();
                     dt = ncd.DownloadData(outpt, inpt);
+                    if(dt == null)
+                    {
+                        errorMsg = "ERROR: Unable to download data from Daymet. ";
+                    }
+                    else
+                    {
+                        dt = ncd.Aggregate(inpt, dt);
+                    }
                     break;
                 case "daymet":
                     dt = daymetData(inpt, outpt);
+                    dt = Utilities.Utility.aggregateData(inpt, dt, "hamon");
                     break;
                 case "custom":
                     CustomData cd = new CustomData();
@@ -151,6 +160,67 @@ namespace Evapotranspiration
                     else
                     {
                         dt = nldas.getData1(timeZoneOffset, out errorMsg);
+                        DataRow dr1 = null;
+                        List<Double> tList = new List<double>();
+                        if (inpt.TemporalResolution == "weekly")
+                        {
+                            DataTable wkly = dt.Clone();
+                            int j = 0;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (j == 0)
+                                {
+                                    dr1 = wkly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                if (j == 6 || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    wkly.Rows.Add(dr1);
+                                    j = -1;
+                                }
+                                j++;
+                            }
+                            dt = wkly;
+                        }
+                        else if (inpt.TemporalResolution == "monthly")
+                        {
+                            DataTable mnly = dt.Clone();
+                            int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                            int j = 0;
+                            bool newmonth = true;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (newmonth)
+                                {
+                                    dr1 = mnly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                    newmonth = false;
+                                    curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    mnly.Rows.Add(dr1);
+                                    j = -1;
+                                    newmonth = true;
+                                }
+                                j++;
+                            }
+                            dt = mnly;
+                        }
                     }
                     break;
             }
@@ -284,7 +354,7 @@ namespace Evapotranspiration
                 if (julianflag)
                 {
                     DataRow tabrow = tab.NewRow();
-                    tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString(inpt.DateTimeSpan.DateTimeFormat);
+                    tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString("yyyy-MM-dd");
                     tabrow["Julian_Day"] = Convert.ToInt32(Convert.ToDouble(linedata[1]));
                     tabrow["TMin_C"] = linedata[3];
                     tabrow["TMax_C"] = linedata[2];

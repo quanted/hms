@@ -311,9 +311,13 @@ namespace Web.Services.Controllers
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();   //For Debugging
             WSEvapotranspiration evapo = new WSEvapotranspiration();
             ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+            watch.Stop();
+            string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
+            results.Metadata.Add("Time Elapsed", elapsed);
             return new ObjectResult(results);
         }
     }

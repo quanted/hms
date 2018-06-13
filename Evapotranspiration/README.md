@@ -25,7 +25,7 @@ Base Input Parameters
 |Maximum Temperature 		       |Celsius	  			  |11.91	    |
 |Mean Temperature    		       |Celsius	  			  |6.57		    |
 |Hours of Sunshine   		       |Hours	  			    |9.87		    |
-|Potential Evapotranspiration  |Millimeters/Month |0.0275	    |
+|Potential Evapotranspiration  |Millimeters/Day |0.0275	    |
 -----------------------------------------------------------------
 ### 2. Priestly-Taylor
 ##### Input Parameters:
@@ -45,7 +45,7 @@ Base Input Parameters
 |Maximum Temperature 		  |Celsius	      		|11.91	  	|
 |Mean Temperature    		  |Celsius	      		|6.57		|
 |Mean Solar Radiation   	  |Megajoules/Sq. Meter |9.87	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0379	  	|
+|Potential Evapotranspiration |Millimeters/Day    |0.0379	  	|
 -----------------------------------------------------------------
 ### 3. Granger-Gray
 ##### Input Parameters:
@@ -68,7 +68,7 @@ Base Input Parameters
 |Mean Wind Speed			  |Meters/Second  			|2.34 	  	|
 |Minimum Relative Humidity	  |Percentage    	  		|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  		|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    	|0.0115	  	|
+|Potential Evapotranspiration |Millimeters/Day    	|0.0115	  	|
 ---------------------------------------------------------------------
 ### 4. Penpan
 ##### Input Parameters:
@@ -91,7 +91,7 @@ Base Input Parameters
 |Mean Wind Speed			  |Meters/Second  		|2.34 	  	|
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.1352	  	|
+|Potential Evapotranspiration |Millimeters/Day    |0.1352	  	|
 -----------------------------------------------------------------
 ### 5. McJannett
 ##### Input Parameters:
@@ -118,7 +118,7 @@ Base Input Parameters
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
 |Water Temperature    		  |Celsius	      		|6.57	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0490		|
+|Potential Evapotranspiration |Millimeters/Day    |0.0490		|
 -----------------------------------------------------------------
 ### 6. Penman Open Water
 ##### Input Parameters:
@@ -141,7 +141,7 @@ Base Input Parameters
 |Mean Wind Speed			  |Meters/Second  		|2.34 	    |
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0944	    |
+|Potential Evapotranspiration |Millimeters/Day    |0.0944	    |
 -----------------------------------------------------------------
 ### 7. Penman Daily
 ##### Input Parameters:
@@ -164,7 +164,7 @@ Base Input Parameters
 |Mean Wind Speed			  |Meters/Second  		|2.34 	    |
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0932	    |
+|Potential Evapotranspiration |Millimeters/Day    |0.0932	    |
 -----------------------------------------------------------------
 ### 8. Penman Hourly
 ##### Input Parameters:
@@ -186,7 +186,7 @@ Base Input Parameters
 |Mean Solar Radiation   	  |Megajoules/Sq. Meter |9.87	    |
 |Mean Wind Speed			  |Meters/Second  		|1.83 	    |
 |Hourly Relative Humidity	  |Percentage    	  	|78.32 	    |
-|Potential Evapotranspiration |Millimeters/Month   	|0.0009	    |
+|Potential Evapotranspiration |Millimeters/Day   	|0.0009	    |
 -----------------------------------------------------------------
 ### 9. Morton CRAE
 ##### Input Parameters:
@@ -211,7 +211,7 @@ Base Input Parameters
 |Mean Solar Radiation   	  |Megajoules/Sq. Meter |9.87	    |
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0854	    |
+|Potential Evapotranspiration |Millimeters/Day    |0.0854	    |
 -----------------------------------------------------------------
 ### 10. Morton CRWE
 ##### Input Parameters:
@@ -237,7 +237,7 @@ Base Input Parameters
 |Mean Solar Radiation   	  |Megajoules/Sq. Meter |9.87	    |
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.1049	    |
+|Potential Evapotranspiration |Millimeters/Day    |0.1049	    |
 -----------------------------------------------------------------
 ### 11. Shuttleworth-Wallace
 ##### Input Parameters:
@@ -267,7 +267,7 @@ Base Input Parameters
 |Mean Wind Speed			  |Meters/Second  		|2.34 	    |
 |Minimum Relative Humidity	  |Percentage    	  	|85.26	    |
 |Maximum Relative Humidity	  |Percentage    	  	|49.80	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0121		|
+|Potential Evapotranspiration |Millimeters/Day    |0.0121		|
 -----------------------------------------------------------------
 ### 12. HSPF
 ##### Input Parameters:
@@ -289,9 +289,9 @@ Base Input Parameters
 |Mean Solar Radiation   	  |Megajoules/Sq. Meter |9.87	    |
 |Mean Wind Speed			  |Meters/Second  		|1.83 	    |
 |Hourly Precipitation		  |Percentage		   	|0.171	    |
-|Potential Evaporation		  |Millimeters/Month	|0.000051	|
+|Potential Evaporation		  |Millimeters/Day	|0.000051	|
 |Hourly Relative Humidity	  |Percentage   	  	|78.32 	    |
-|Potential Evapotranspiration |Millimeters/Month    |0.0009	    |
+|Potential Evapotranspiration |Millimeters/Day    |0.0009	    |
 |Dew Point Temperature        |Fahrenheit    		|37.5720    |
 |Cloud Coverage 			  |Okta (Percentage)    |1.00	    |
 -----------------------------------------------------------------

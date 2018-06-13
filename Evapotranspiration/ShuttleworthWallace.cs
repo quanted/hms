@@ -564,6 +564,92 @@ namespace Evapotranspiration
                     else
                     {
                         dt = nldas2.getData4(timeZoneOffset, out errorMsg);
+                        DataRow dr1 = null;
+                        List<Double> tList = new List<double>();
+                        List<Double> sList = new List<double>();
+                        double sol = 0.0;
+                        double wind = 0.0;
+                        if (inpt.TemporalResolution == "weekly")
+                        {
+                            DataTable wkly = dt.Clone();
+                            int j = 0;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (j == 0)
+                                {
+                                    dr1 = wkly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                    sList = new List<double>();
+                                    sol = 0.0;
+                                    wind = 0.0;
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
+                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
+                                if (j == 6 || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
+                                    dr1["SHmin"] = sList.Min().ToString();
+                                    dr1["SHmax"] = sList.Max().ToString();
+                                    wkly.Rows.Add(dr1);
+                                    j = -1;
+                                }
+                                j++;
+                            }
+                            dt = wkly;
+                        }
+                        else if (inpt.TemporalResolution == "monthly")
+                        {
+                            DataTable mnly = dt.Clone();
+                            int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                            int j = 0;
+                            bool newmonth = true;
+                            for (int i = 0; i < dt.Rows.Count; i++)
+                            {
+                                if (newmonth)
+                                {
+                                    dr1 = mnly.NewRow();
+                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
+                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                                    tList = new List<double>();
+                                    sList = new List<double>();
+                                    sol = 0.0;
+                                    wind = 0.0;
+                                    newmonth = false;
+                                    curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
+                                }
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
+                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
+                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
+                                if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
+                                {
+                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
+                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
+                                    dr1["SHmin"] = sList.Min().ToString();
+                                    dr1["SHmax"] = sList.Max().ToString();
+                                    mnly.Rows.Add(dr1);
+                                    j = -1;
+                                    newmonth = true;
+                                }
+                                j++;
+                            }
+                            dt = mnly;
+                        }
                     }
                     break;
             }

@@ -195,7 +195,7 @@ namespace Web.Services.Tests
         /// <summary>
         /// McJannett gldas request json string for testing a valid request
         /// </summary>
-        const string mcjannettGldasRequest = "{ \"source\": \"nldas\", \"algorithm\": \"mcjannett\", \"Albedo\": 0.23, \"Lake Surface Area\": 0.005, " +
+        const string mcjannettGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"mcjannett\", \"Albedo\": 0.23, \"Lake Surface Area\": 0.005, " +
             "\"Average Lake Depth\": 0.2, \"AirTemperature\": {\"1\": 1.0, \"2\": 1.0, \"3\": 1.0, \"4\": 1.0, \"5\": 1.0, \"6\": 1.0, \"7\": 1.0, " +
             "\"8\": 1.0, \"9\": 1.0, \"10\": 1.0, \"11\": 1.0, \"12\": 1.0}, \"dateTimeSpan\": { \"startDate\": \"2009-01-01T00:00:00\", \"endDate\": \"2009-12-31T00:00:00\", " +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\" }, \"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
