@@ -127,7 +127,7 @@ namespace Web.Services.Models
         // qedinternal url
         // private string baseUrl = "https://qedinternal.epa.gov";
         // deployment url
-        private string baseUrl = "http://172.20.100.15:7778";
+        private string baseUrl = "http://172.20.100.15";
 
 
 
