@@ -44,7 +44,6 @@ namespace Precipitation
             {
                 nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             }
-            //if (errorMsg.Contains("ERROR")) { return null; }
 
             nldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }

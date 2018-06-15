@@ -10,7 +10,7 @@ namespace Precipitation
     /// <summary>
     /// Precipitation GLDAS class.
     /// </summary>
-    class GLDAS
+    public class GLDAS
     {
         /// <summary>
         /// Makes the GetData call to the base GLDAS class.
@@ -44,7 +44,6 @@ namespace Precipitation
             {
                 gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             }
-            //if (errorMsg.Contains("ERROR")) { return null; }
 
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }

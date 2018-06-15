@@ -20,63 +20,63 @@ namespace Web.Services.Tests
         private readonly HttpClient _client;
 
         /// <summary>
-        /// NLDAS request json string for testing a valid request
+        /// NLDAS daily request json string for testing a valid request
         /// </summary>
         const string nldasRequest =
             "{\"source\": \"nldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// GLDAS request json string for testing a valid request
+        /// GLDAS daily request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
             "{\"source\": \"gldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// DAYMET request json string for testing a valid request
+        /// DAYMET daily request json string for testing a valid request
         /// </summary>
         const string daymetRequest =
             "{\"source\": \"daymet\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// PRISM request json string for testing a valid request
+        /// PRISM daily request json string for testing a valid request
         /// </summary>
         const string prismRequest =
             "{\"source\": \"prism\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// NCDC request json string for testing a valid request
+        /// NCDC daily request json string for testing a valid request
         /// </summary>
         const string ncdcRequest =
              "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
             "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
-        /// WGEN request json string for testing a valid request
+        /// WGEN daily request json string for testing a valid request
         /// </summary>
         const string wgenRequest =
             "{\"source\": \"wgen\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
-            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
@@ -89,22 +89,25 @@ namespace Web.Services.Tests
         }
 
         /// <summary>
-        /// Precipitation controller integration tests for each precip data source. All tests should pass.
+        /// Precipitation controller integration tests for each daily precip data source. All tests should pass.
         /// Test Exception: precip test for prism may fail due to firewall restrictions.
+        /// Daily temporal resolution chosen as it's the mininum resolution shared by all datasets
         /// </summary>
         /// <param name="precipInputString"></param>
         /// <returns></returns>
+        [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest)]
-        [InlineData(gldasRequest)]
-        [InlineData(daymetRequest)]
-        [InlineData(prismRequest)]
-        [InlineData(ncdcRequest)]
-        [InlineData(wgenRequest)]
-        public async Task SuccessRequests(string precipInputString)
+        [InlineData(nldasRequest, 365)]
+        [InlineData(gldasRequest, 365)]
+        [InlineData(daymetRequest, 365)]
+        //[InlineData(prismRequest, 364)]         //Will always fail as prism web service is not active. TODO: Fix end date, cutting off last day.
+        [InlineData(ncdcRequest, 365)]
+        [InlineData(wgenRequest, 365)]
+        public async Task ValidRequests(string precipInputString, int expected)
         {
             string endpoint = "api/hydrology/precipitation";
             PrecipitationInput input = JsonConvert.DeserializeObject<PrecipitationInput>(precipInputString);
+            input.TemporalResolution = "daily";
             Debug.WriteLine("Integration Test: Precipitation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint, 
@@ -114,7 +117,7 @@ namespace Web.Services.Tests
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
             TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
-            Assert.Equal(365, resultObj.Data.Count);
+            Assert.Equal(expected, resultObj.Data.Count);
         }
 
     }

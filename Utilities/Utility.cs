@@ -7,6 +7,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Data;
 using System.Globalization;
+using Data;
 
 namespace Utilities
 {
@@ -415,7 +416,7 @@ namespace Utilities
         {
             // Calculate minimum relative humidity here.
             double RHmin = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5));
+            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
             RHmin = 100 * (e / es);
             return RHmin;
@@ -425,7 +426,7 @@ namespace Utilities
         {
             // Calculate maximum relative humidity here.
             double RHmax = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
+            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
             RHmax = 100 * (e / es);
             return RHmax;
@@ -453,6 +454,117 @@ namespace Utilities
                     return 2;//Not in CRWE
             }
             return -1;
+        }
+
+        public static DataTable aggregateData(ITimeSeriesInput inpt, DataTable dt, string algo)
+        {
+            DataTable aggregated = dt.Clone();
+
+            if (inpt.Source == "daymet")
+            {
+                DataRow dr2 = null;
+                List<Double> tList = new List<double>();
+                List<Double> sList = new List<double>();
+                List<Double> vList = new List<double>();
+                if (inpt.TemporalResolution == "weekly")
+                {
+                    int j = 0;
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if (j == 0)
+                        {
+                            dr2 = aggregated.NewRow();
+                            dr2["Date"] = dt.Rows[i]["Date"].ToString();
+                            dr2["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                            tList = new List<double>();
+                            sList = new List<double>();
+                            vList = new List<double>();
+                        }
+                        tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                        tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                        if(algo != "hamon")
+                        {
+                            sList.Add(Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"].ToString()));
+                        }
+                        if (algo == "mortoncrae" || algo == "mortoncrwe")
+                        {
+                            vList.Add(Convert.ToDouble(dt.Rows[i]["VaPress"].ToString()));
+                        }
+                        if (j == 6 || i == dt.Rows.Count - 1)
+                        {
+                            dr2["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                            dr2["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                            dr2["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                            if (algo != "hamon")
+                            {
+                                dr2["SolarRadMean_MJm2day"] = Math.Round(sList.Average(), 2);
+                            }
+                            if (algo == "mortoncrae" || algo == "mortoncrwe")
+                            {
+                                dr2["VaPress"] = Math.Round(vList.Average(), 2);
+                            }
+                            aggregated.Rows.Add(dr2);
+                            j = -1;
+                        }
+                        j++;
+                    }
+                    dt = aggregated;
+                }
+                else if (inpt.TemporalResolution == "monthly")
+                {
+                    int curmonth = inpt.DateTimeSpan.StartDate.Month;
+                    int j = 0;
+                    bool newmonth = true;
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        if (newmonth)
+                        {
+                            dr2 = aggregated.NewRow();
+                            dr2["Date"] = dt.Rows[i]["Date"].ToString();
+                            dr2["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
+                            tList = new List<double>();
+                            sList = new List<double>();
+                            vList = new List<double>();
+                            newmonth = false;
+                            curmonth = DateTime.ParseExact(dt.Rows[i]["Date"].ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).Month;
+                        }
+                        tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                        tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                        if (algo != "hamon")
+                        {
+                            sList.Add(Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"].ToString()));
+                        }
+                        if (algo == "mortoncrae" || algo == "mortoncrwe")
+                        {
+                            vList.Add(Convert.ToDouble(dt.Rows[i]["VaPress"].ToString()));
+                        }
+                        if (i + 1 < dt.Rows.Count && (DateTime.ParseExact(dt.Rows[i + 1]["Date"].ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).Month != curmonth) || i == dt.Rows.Count - 1)
+                        {
+                            dr2["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                            dr2["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                            dr2["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                            if (algo != "hamon")
+                            {
+                                dr2["SolarRadMean_MJm2day"] = Math.Round(sList.Average(), 2);
+                            }
+                            if (algo == "mortoncrae" || algo == "mortoncrwe")
+                            {
+                                dr2["VaPress"] = Math.Round(vList.Average(), 2);
+                            }
+                            aggregated.Rows.Add(dr2);
+                            j = -1;
+                            newmonth = true;
+                        }
+                        j++;
+                    }
+                    dt = aggregated;
+                }
+                else if (inpt.TemporalResolution == "default" || inpt.TemporalResolution == "daily")
+                {
+                    return dt;
+                }
+            }
+            return aggregated;
         }
     }
 }

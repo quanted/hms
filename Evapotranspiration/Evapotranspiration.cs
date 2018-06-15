@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Evapotranspiration
 {
@@ -16,6 +19,11 @@ namespace Evapotranspiration
         // -------------- Evapotranspiration Variables -------------- //
 
         // Evapotranspiration specific variables are listed here.
+        /// <summary>
+        /// REQUIRED: Algorithm used for Evapotranspiration.
+        /// </summary>
+        public string Algorithm { get; set; }
+
         /// <summary>
         /// REQUIRED: Albedo coefficient.
         /// </summary>
@@ -91,6 +99,11 @@ namespace Evapotranspiration
         /// </summary>
         public Hashtable AirTemperature { get; set; }
 
+        /// <summary>
+        /// OPTIONAL: Data file provided by the user.
+        /// </summary>
+        public string UserData { get; set; }
+
         // TimeSeries Output variable 
         public ITimeSeriesOutput Output { get; set; }
 
@@ -118,8 +131,8 @@ namespace Evapotranspiration
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
-            {
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
+            {                
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -130,7 +143,46 @@ namespace Evapotranspiration
             this.Output = iFactory.Initialize();
             Elevation elev = new Elevation(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude);
             Utilities.Time offsets = new Utilities.Time();
-            switch (this.Input.Source)
+
+            //this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
+
+            //Error checking and data validation
+            if(this.Input.Source != "gldas" && this.Algorithm == "gldas" )
+            {
+                errorMsg = "ERROR: GLDAS algorithm requires GLDAS data source.";
+                return null;
+            }
+            if (this.Input.Source != "nldas" && this.Algorithm == "nldas")
+            {
+                errorMsg = "ERROR: NLDAS algorithm requires NLDAS data source.";
+                return null;
+            }
+            if (this.Input.Source == "daymet" && this.Algorithm != "hamon" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
+            {
+                errorMsg = "ERROR: Algorithm is incompatible with Daymet data source.";
+                return null;
+            }
+            if (this.Input.Source == "ncdc" && this.Algorithm != "hamon")
+            {
+                errorMsg = "ERROR: Algorithm is incompatible with NCDC data source.";
+                return null;
+            }
+            if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
+            {
+                errorMsg = "ERROR: No data available for the requested Source/Algorithm/Date range.";
+                return null;
+            }
+            if (this.Input.Source == "custom")
+            {
+                if (this.Algorithm == "penmanhourly" || this.Algorithm == "hspf")
+                {
+                    errorMsg = "ERROR: Hourly algorithms do not yet support custom data.";
+                    return null;
+                }
+                this.Input.Geometry.GeometryMetadata["userdata"] = UserData;
+            }           
+
+            switch (this.Algorithm)
             {
                 case "nldas":
                     // NLDAS Evapotranspiration Data call
@@ -149,7 +201,7 @@ namespace Evapotranspiration
                     Hamon hamon = new Hamon();
                     hamon.Latitude = this.Input.Geometry.Point.Latitude;
                     hamon.Longitude = this.Input.Geometry.Point.Longitude;
-                    this.Output = hamon.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = hamon.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "priestlytaylor":
@@ -159,7 +211,7 @@ namespace Evapotranspiration
                     priestleyTaylor.Longitude = this.Input.Geometry.Point.Longitude;
                     priestleyTaylor.Albedo = this.Albedo;
                     priestleyTaylor.Elevation = elev.getElevation(out errorMsg);
-                    this.Output = priestleyTaylor.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = priestleyTaylor.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "grangergray":
@@ -170,7 +222,7 @@ namespace Evapotranspiration
                     grangerGray.Longitude = this.Input.Geometry.Point.Longitude;
                     grangerGray.Albedo = this.Albedo;
                     grangerGray.Elevation = elev.getElevation(out errorMsg);
-                    this.Output = grangerGray.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = grangerGray.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "penpan":
@@ -180,7 +232,7 @@ namespace Evapotranspiration
                     penpan.Longitude = this.Input.Geometry.Point.Longitude;
                     penpan.Albedo = this.Albedo;
                     penpan.Elevation = elev.getElevation(out errorMsg);
-                    this.Output = penpan.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = penpan.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "mcjannett":
@@ -204,7 +256,7 @@ namespace Evapotranspiration
                     mcjannett.airToWaterTempFactor[10] = Convert.ToDouble(this.AirTemperature["10"]);
                     mcjannett.airToWaterTempFactor[11] = Convert.ToDouble(this.AirTemperature["11"]);
                     mcjannett.airToWaterTempFactor[12] = Convert.ToDouble(this.AirTemperature["12"]);
-                    this.Output = mcjannett.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = mcjannett.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "penmanopenwater":
@@ -214,7 +266,7 @@ namespace Evapotranspiration
                     penmanOpenWater.Longitude = this.Input.Geometry.Point.Longitude;
                     penmanOpenWater.Albedo = this.Albedo;
                     penmanOpenWater.Elevation = elev.getElevation(out errorMsg);
-                    this.Output = penmanOpenWater.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = penmanOpenWater.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "penmandaily":
@@ -224,7 +276,7 @@ namespace Evapotranspiration
                     penmanDaily.Longitude = this.Input.Geometry.Point.Longitude;
                     penmanDaily.Albedo = this.Albedo;
                     penmanDaily.Elevation = elev.getElevation(out errorMsg);
-                    this.Output = penmanDaily.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = penmanDaily.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "penmanhourly":
@@ -236,7 +288,7 @@ namespace Evapotranspiration
                     penmanHourly.Elevation = elev.getElevation(out errorMsg);
                     penmanHourly.TimeZoneCentralLongitude = this.CentralLongitude;
                     penmanHourly.SunAngle = this.SunAngle;
-                    this.Output = penmanHourly.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = penmanHourly.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "mortoncrae":
@@ -250,7 +302,7 @@ namespace Evapotranspiration
                     int model = Utilities.Utility.CalculateMortonMethod(this.Model);
                     double aprecip = 0.0;
                     mortonCRAE.AnnualPrecipitation = aprecip;
-                    this.Output = mortonCRAE.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model, out aprecip, out errorMsg);
+                    this.Output = mortonCRAE.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model, out aprecip, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "mortoncrwe":
@@ -265,7 +317,7 @@ namespace Evapotranspiration
                     int model2 = Utilities.Utility.CalculateMortonMethod(this.Model);
                     double aprecip2 = 0.0;
                     mortonCRWE.AnnualPrecipitation = aprecip2;
-                    this.Output = mortonCRWE.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model2, out aprecip2, out errorMsg);
+                    this.Output = mortonCRWE.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, model2, out aprecip2, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "shuttleworthwallace":
@@ -292,7 +344,7 @@ namespace Evapotranspiration
                     shuttleworthWallace.leafAreaIndex[10] = Convert.ToDouble(this.LeafAreaIndices["10"]);
                     shuttleworthWallace.leafAreaIndex[11] = Convert.ToDouble(this.LeafAreaIndices["11"]);
                     shuttleworthWallace.leafAreaIndex[12] = Convert.ToDouble(this.LeafAreaIndices["12"]);
-                    this.Output = shuttleworthWallace.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = shuttleworthWallace.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "hspf":
@@ -304,11 +356,11 @@ namespace Evapotranspiration
                     hspf.Elevation = elev.getElevation(out errorMsg);
                     hspf.TimeZoneCentralLongitude = this.CentralLongitude;
                     hspf.SunAngle = this.SunAngle;
-                    this.Output = hspf.Compute(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    this.Output = hspf.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
-                    errorMsg = "ERROR: 'Source' for evapotranspiration was not found among available sources or is invalid.";
+                    errorMsg = "ERROR: 'Algorithm' for evapotranspiration was not found among available sources or is invalid.";
                     break;
             };
 
@@ -316,14 +368,14 @@ namespace Evapotranspiration
             this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
-            this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
-            this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+            this.Output.Metadata.Add(this.Algorithm + "_timeZone", this.Input.Geometry.Timezone.Name);
+            this.Output.Metadata.Add(this.Algorithm + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
 
             //TODO: Add output format control
 
             return this.Output;
         }
-
+        
         /// <summary>
         /// Check evapotranspiration data endpoints.
         /// </summary>

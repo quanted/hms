@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-// using System.ComponentModel.DataAnnotations;
+//using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -351,14 +351,6 @@ namespace Data
                     //errorMsg += "ERROR: Start date must be before end date.";
                 }
 
-                //if (!errorMsg.Contains("ERROR"))
-                //{
-                //    if (DateTime.Compare(newInput.DateTimeSpan.StartDate, newInput.DateTimeSpan.EndDate) >= 0)
-                //    {
-                //        errorMsg += "ERROR: Start date must be before end date.";
-                //    }
-                //}
-
             // Validates DateTime output format
                 newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH" : input.DateTimeSpan.DateTimeFormat;
                 try
@@ -436,6 +428,7 @@ namespace Data
             {
                 newInput.InputTimeSeries = input.InputTimeSeries;
             }
+            errorMsg = string.Join(" ", errors.ToArray());
 
             return newInput;
         }
@@ -456,9 +449,10 @@ namespace Data
             }
 
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
+            string source = input.Source.ToLower();
 
             string src = "";
-            switch (input.Source)
+            switch (source)
             {
                 case "nldas":
                     src = "NLDAS";
@@ -477,19 +471,6 @@ namespace Data
                 case "prism":
                     src = "PRISM";
                     break;
-                case "hamon":
-                case "priestlytaylor":
-                case "grangergray":
-                case "penpan":
-                case "mcjannett":
-                case "penmanopenwater":
-                case "penmandaily":
-                case "penmanhourly":
-                case "mortoncrae":
-                case "mortoncrwe":
-                case "shuttleworthwallace":
-                case "hspf":
-                    return "";
                 default:
                     errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
                     return "";

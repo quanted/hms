@@ -54,9 +54,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nutrients.AQUATOX", "Nutrie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nutrients.AQUATOX.UnitTests", "Nutrients\Nutrients.AQUATOX.UnitTests\Nutrients.AQUATOX.UnitTests.csproj", "{1B6F7AB3-CA7D-475D-83AE-3ED8C8FC168A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrganicMatter.AQUATOX", "OrganicMatter\OrganicMatter.AQUATOX\OrganicMatter.AQUATOX.csproj", "{72CD3C50-BEA6-4DD0-BC99-9ABF39342413}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrganicMatter.AQUATOX", "OrganicMatter\OrganicMatter.AQUATOX\OrganicMatter.AQUATOX.csproj", "{72CD3C50-BEA6-4DD0-BC99-9ABF39342413}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrganicMatter.AQUATOX.UnitTests", "OrganicMatter\OrganicMatter.AQUATOX.UnitTests\OrganicMatter.AQUATOX.UnitTests.csproj", "{2C2812C8-0353-4C68-B88E-195A19CFB8E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrganicMatter.AQUATOX.UnitTests", "OrganicMatter\OrganicMatter.AQUATOX.UnitTests\OrganicMatter.AQUATOX.UnitTests.csproj", "{2C2812C8-0353-4C68-B88E-195A19CFB8E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -173,7 +173,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45;packages\EnterpriseLibrary.Data.6.0.1304.0\lib\NET45
 		SolutionGuid = {FBF70946-6D07-4036-B94E-A02FBC95703F}
 	EndGlobalSection
 EndGlobal

@@ -16,7 +16,7 @@ namespace Data.Source
         /// <summary>
         /// Get data function for gldas.
         /// </summary>
-        /// <param name="errorMsg"></param>
+        /// <param name="errorMsg"></param>s
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>

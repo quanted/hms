@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Net;
 using System.Globalization;
+using Data;
 
 //http://ldas.gsfc.nasa.gov/faq/#Subset
 //ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/1980/004/NLDAS_FORA0125_H.A19800104.0000.002.grb.xml
@@ -21,6 +22,7 @@ namespace Evapotranspiration
         protected string _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
         protected string _type = "&type=asc2";
         protected string _parameter = "";
+        protected string _source = "";
         protected string _latitude = "";
         protected string _longitude = "";
         protected string _startDate = "";
@@ -41,6 +43,7 @@ namespace Evapotranspiration
 
         public NLDAS2(double latitude, double longitude, string startDate, string endDate)
         {
+            _source = "nldas";
             _parameter = "TMP2m";
             _latitude = latitude.ToString();
             _longitude = longitude.ToString();
@@ -52,6 +55,7 @@ namespace Evapotranspiration
         }
         public NLDAS2(parameter param, double latitude, double longitude, string startDate, string endDate)
         {
+            _source = "nldas";
             _parameter = getNLDASParameterName(param);
             _latitude = latitude.ToString();
             _longitude = longitude.ToString();
@@ -60,6 +64,34 @@ namespace Evapotranspiration
             cleanStartAndEndDates();
             _NLDASX = Convert.ToInt32((longitude - pWestmostGridCenter) / pDegreesPerGridCell);
             _NLDASY = Convert.ToInt32((latitude - pSouthmostGridCenter) / pDegreesPerGridCell);
+        }
+        public NLDAS2(string source, double latitude, double longitude, string startDate, string endDate)
+        {
+            _source = source;
+            _parameter = "Tair_f_inst";
+            _latitude = latitude.ToString();
+            _longitude = longitude.ToString();
+            _startDate = startDate;
+            _endDate = endDate;
+            cleanStartAndEndDates();
+            _NLDASX = Convert.ToInt32((longitude - pWestmostGridCenter) / pDegreesPerGridCell);
+            _NLDASY = Convert.ToInt32((latitude - pSouthmostGridCenter) / pDegreesPerGridCell);
+            switch (source)
+            {
+                case "nldas":
+                    _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
+                    break;
+                case "gldas":
+                    _urlBasePF = @"http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:";
+                    break;
+                case "daymet":
+                case "ncdc":
+                case "wgen":
+                case "prism":
+                default:
+                    _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
+                    break;
+            }
         }
 
         public DataTable getData1(int timeZoneOffsetFromGMT_Hours, out string errorMsg)
@@ -150,6 +182,15 @@ namespace Evapotranspiration
                 errorMsg = "Temperature data for specified dates are not available." + errorMsg1;
                 return dt;
             }
+                        
+            // Get table with specific humidity data.  
+            dtSH = getSpecificHumidity(timeZoneOffsetFromGMT_Hours, out errorMsg1);
+
+            if ((dtSH == null) || (dtSH.Rows.Count <= 0) || (errorMsg1 != ""))
+            {
+                errorMsg = "Specific humidity data for specified dates are not available." + errorMsg1;
+                return dt;
+            }
 
             // Get table with solar radiation data.  
             dtSR = getSolarRad(timeZoneOffsetFromGMT_Hours, out errorMsg1);
@@ -157,15 +198,6 @@ namespace Evapotranspiration
             if ((dtSR == null) || (dtSR.Rows.Count <= 0) || (errorMsg1 != ""))
             {
                 errorMsg = "Solar radiation data for specified dates are not available." + errorMsg1;
-                return dt;
-            }
-
-            // Get table with specific humidity data.  
-            dtSH = getSpecificHumidity(timeZoneOffsetFromGMT_Hours, out errorMsg1);
-
-            if ((dtSH == null) || (dtSH.Rows.Count <= 0) || (errorMsg1 != ""))
-            {
-                errorMsg = "Specific humidity data for specified dates are not available." + errorMsg1;
                 return dt;
             }
 
@@ -210,16 +242,7 @@ namespace Evapotranspiration
                 errorMsg = "Temperature data for specified dates are not available." + errorMsg1;
                 return dt;
             }
-
-            // Get table with solar radiation data.  
-            dtSR = getSolarRad(timeZoneOffsetFromGMT_Hours, out errorMsg1);
-
-            if ((dtSR == null) || (dtSR.Rows.Count <= 0) || (errorMsg1 != ""))
-            {
-                errorMsg = "Solar radiation data for specified dates are not available." + errorMsg1;
-                return dt;
-            }
-
+                        
             // Get table with specific humidity data.  
             dtSH = getSpecificHumidity(timeZoneOffsetFromGMT_Hours, out errorMsg1);
 
@@ -235,6 +258,15 @@ namespace Evapotranspiration
             if ((dtWS == null) || (dtWS.Rows.Count <= 0) || (errorMsg1 != ""))
             {
                 errorMsg = "Wind speed data for specified dates are not available." + errorMsg1;
+                return dt;
+            }
+
+            // Get table with solar radiation data.  
+            dtSR = getSolarRad(timeZoneOffsetFromGMT_Hours, out errorMsg1);
+
+            if ((dtSR == null) || (dtSR.Rows.Count <= 0) || (errorMsg1 != ""))
+            {
+                errorMsg = "Solar radiation data for specified dates are not available." + errorMsg1;
                 return dt;
             }
 
@@ -259,7 +291,7 @@ namespace Evapotranspiration
             double wsu, wsv, windSpeed;
 
             DateTime startDate = Convert.ToDateTime(_startDate);
-            startDate = startDate.AddDays(-1.0);
+            //startDate = startDate.AddDays(-1.0);
             _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
             DateTime endDate = Convert.ToDateTime(_endDate);
             endDate = endDate.AddDays(1.0);
@@ -284,25 +316,60 @@ namespace Evapotranspiration
             }
 
             timeZoneOffsetFromGMT_Hours = Math.Abs(timeZoneOffsetFromGMT_Hours);
+            if(_source == "nldas")
+            {
+                startDate = startDate.AddDays(-1.0);
+                _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
+                // Get temperature and dates.
+                _parameter = getNLDASParameterName(parameter.Temperature2mAboveGround_K);
+                dt = getData();
 
-            // Get temperature and dates.
-            _parameter = getNLDASParameterName(parameter.Temperature2mAboveGround_K);
-            dt = getData();
+                // Get Solar Radiation data.  
+                _parameter = getNLDASParameterName(parameter.ShortWaveRadiationFluxDownwards_WPerM2);
+                dtSR = getData();
 
-            // Get Solar Radiation data.  
-            _parameter = getNLDASParameterName(parameter.ShortWaveRadiationFluxDownwards_WPerM2);
-            dtSR = getData();
+                // Get specific humidity.  
+                _parameter = getNLDASParameterName(parameter.SpecificHumidity2mAboveGround_KgPerKg);
+                dtSH = getData();
 
-            // Get specific humidity.  
-            _parameter = getNLDASParameterName(parameter.SpecificHumidity2mAboveGround_KgPerKg);
-            dtSH = getData();
+                // Get wind data.  
+                _parameter = getNLDASParameterName(parameter.WindSpeedZonal10mAboveGround_MPerS);
+                dtWU = getData();
 
-            // Get wind data.  
-            _parameter = getNLDASParameterName(parameter.WindSpeedZonal10mAboveGround_MPerS);
-            dtWU = getData();
+                _parameter = getNLDASParameterName(parameter.WindSpeedMeridional10mAboveGround_MPerS);
+                dtWV = getData();
+            }
+            else
+            {
+                if (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010)
+                {
+                    errorMsg = "No GLDAS data is available for this time frame.";
+                    return dt;
+                    /*_source = "nldas";
+                    startDate = startDate.AddDays(-1.0);
+                    _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
+                    _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";*/
+                }
+                // Get temperature and dates.
+                _parameter = getNLDASParameterName(parameter.Temperature2mAboveGround_K);
+                dt = getData();
+                                
+                // Get specific humidity.  
+                _parameter = getNLDASParameterName(parameter.SpecificHumidity2mAboveGround_KgPerKg);
+                dtSH = getData();
 
-            _parameter = getNLDASParameterName(parameter.WindSpeedMeridional10mAboveGround_MPerS);
-            dtWV = getData();
+                // Get wind data.  
+                _parameter = getNLDASParameterName(parameter.WindSpeedZonal10mAboveGround_MPerS);
+                dtWU = getData();
+
+                _parameter = getNLDASParameterName(parameter.WindSpeedMeridional10mAboveGround_MPerS);
+                dtWV = getData();
+
+                // Get Solar Radiation data.  
+                _parameter = getNLDASParameterName(parameter.ShortWaveRadiationFluxDownwards_WPerM2);
+                dtSR = getData();
+            }
+            
 
             if (flagHSPF)
             {
@@ -329,8 +396,7 @@ namespace Evapotranspiration
                 }
             }
 
-
-
+            
             foreach (DataRow dr in dt.Rows)
             {
                 dr["Value"] = Convert.ToDouble(dr["Value"].ToString()) - 273.15; // Convert Kelvin to Celsius
@@ -347,7 +413,7 @@ namespace Evapotranspiration
                 dtHourly.Columns.Add("Precipitation_Hourly");
                 dtHourly.Columns.Add("Potential_Evaporation");
             }
-
+            
             string date = "", datej = "";
             int startYear;
             double solarRad;
@@ -357,6 +423,13 @@ namespace Evapotranspiration
             int julianDayOfYear;
             int hour;
             int remainder;
+            int remaindermax = 24;
+            int remaindermin = 23;
+            if (_source == "gldas")
+            {
+                remaindermax = 8;
+                remaindermin = 7;
+            }
             DataRow dr1 = null;
             List<Double> listdt = new List<double>();
             List<String> listDate = new List<String>();
@@ -368,9 +441,10 @@ namespace Evapotranspiration
             List<Double> listPrep = new List<double>();
             List<Double> listPE = new List<double>();
 
+            
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);
 
                 if (remainder == 0)
                 {
@@ -404,9 +478,9 @@ namespace Evapotranspiration
                     listPE.Add(Convert.ToDouble(dtPE.Rows[i]["Value"].ToString()));
                 }
 
-                if (remainder == 23)
+                if (remainder == remaindermin)
                 {
-                    for (int j = 0; j < 24; j++)
+                    for (int j = 0; j < remaindermax; j++)
                     {
                         dr1 = dtHourly.NewRow();
                         hour = listHour[j];
@@ -445,14 +519,22 @@ namespace Evapotranspiration
                 }
 
             }
-
             return dtHourly;
         }
 
         public DataTable getDatesTemperatures(int timeZoneOffsetFromGMT_Hours, out string errorMsg)
         {
             DateTime startDate = Convert.ToDateTime(_startDate);
-            startDate = startDate.AddDays(-1.0);
+            int remaindermax = 8;
+            int remaindermin = 7;
+            if(_source == "nldas")
+            {
+                remaindermax = 24;
+                remaindermin = 23;
+                startDate = startDate.AddDays(-1.0);
+            }
+            
+            
             _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
             DateTime endDate = Convert.ToDateTime(_endDate);
             endDate = endDate.AddDays(1.0);
@@ -503,7 +585,7 @@ namespace Evapotranspiration
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);           //24?
                 if (remainder == 0)
                 {
                     date = dt.Rows[i]["Date"].ToString();
@@ -515,7 +597,7 @@ namespace Evapotranspiration
                 dt.Rows[i]["Hour"] = remainder;
                 list.Add(Convert.ToDouble(dt.Rows[i]["Value"].ToString()));
 
-                if (remainder == 23)
+                if (remainder == remaindermin)                         //23?
                 {
                     dr1["Date"] = date;
                     dr1["TMin_C"] = list.Min().ToString("F2", CultureInfo.InvariantCulture);
@@ -537,7 +619,29 @@ namespace Evapotranspiration
         public DataTable getSolarRad(int timeZoneOffsetFromGMT_Hours, out string errorMsg)
         {
             errorMsg = "";
+            int remaindermax = 8;
+            int remaindermin = 7;
+
             DataTable dtSR = new DataTable();
+
+            if (_source == "gldas" && (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010))
+            {
+                errorMsg = "No GLDAS data is available for this time frame.";
+                return dtSR;
+                /*_source = "nldas";
+                DateTime startDate = Convert.ToDateTime(_startDate);
+                startDate = startDate.AddDays(-1.0);
+                _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
+                _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";*/
+            }
+
+            if (_source == "nldas")
+            {
+                remaindermax = 24;
+                remaindermin = 23;
+            }
+
+            
 
             // Get Solar Radiation data.  
             _parameter = getNLDASParameterName(parameter.ShortWaveRadiationFluxDownwards_WPerM2);
@@ -558,7 +662,7 @@ namespace Evapotranspiration
 
             for (int i = 0; i < dtSR.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);
                 if (remainder == 0)
                 {
                     dr1 = dtMinMax.NewRow();
@@ -567,7 +671,7 @@ namespace Evapotranspiration
 
                 listSR.Add(Convert.ToDouble(dtSR.Rows[i]["Value"].ToString()));
 
-                if (remainder == 23)
+                if (remainder == remaindermin)
                 {
                     meanSR = listSR.Average();
                     meanSR = meanSR * 0.0864;  // Convert units from W/s to MJ/(m^2 day)
@@ -583,6 +687,14 @@ namespace Evapotranspiration
         public DataTable getSpecificHumidity(int timeZoneOffsetFromGMT_Hours, out string errorMsg)
         {
             errorMsg = "";
+            int remaindermax = 8;
+            int remaindermin = 7;
+
+            if (_source == "nldas")
+            {
+                remaindermax = 24;
+                remaindermin = 23;
+            }
             DataTable dtSH = new DataTable();
 
             // Get specific humidity.  
@@ -604,7 +716,7 @@ namespace Evapotranspiration
 
             for (int i = 0; i < dtSH.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);
                 if (remainder == 0)
                 {
                     dr1 = dtMinMax.NewRow();
@@ -613,7 +725,7 @@ namespace Evapotranspiration
 
                 listSH.Add(Convert.ToDouble(dtSH.Rows[i]["Value"].ToString()));
 
-                if (remainder == 23)
+                if (remainder == remaindermin)
                 {
                     dr1["SHmin"] = listSH.Min().ToString("F6", CultureInfo.InvariantCulture);
                     dr1["SHmax"] = listSH.Max().ToString("F6", CultureInfo.InvariantCulture);
@@ -627,6 +739,15 @@ namespace Evapotranspiration
         public DataTable getWindSpeed(int timeZoneOffsetFromGMT_Hours, out string errorMsg)
         {
             errorMsg = "";
+            int remaindermax = 8;
+            int remaindermin = 7;
+
+            if (_source == "nldas")
+            {
+                remaindermax = 24;
+                remaindermin = 23;
+            }
+
             DataTable dtWU = new DataTable();
             DataTable dtWV = new DataTable();
 
@@ -654,7 +775,7 @@ namespace Evapotranspiration
 
             for (int i = 0; i < dtWU.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);
                 if (remainder == 0)
                 {
                     dr1 = dtMinMax.NewRow();
@@ -666,7 +787,7 @@ namespace Evapotranspiration
                 windS = Math.Sqrt(wsu * wsu + wsv * wsv);
                 listWS.Add(windS);
 
-                if (remainder == 23)
+                if (remainder == remaindermin)
                 {
                     meanWS = listWS.Average();
                     dr1["WindSpeedMean_m/s"] = meanWS.ToString("F2", CultureInfo.InvariantCulture);
@@ -681,37 +802,78 @@ namespace Evapotranspiration
         {
             //Parameter reference from http://ldas.gsfc.nasa.gov/nldas/NLDAS1forcing.php
             string NLDASParam = "";
-            switch (param)
+            if(_source == "nldas")
             {
-                case parameter.PrecipitationTotal_kgPerM2:
-                    NLDASParam = "APCPsfc"; //kg per m2
-                    break;
-                case parameter.SpecificHumidity2mAboveGround_KgPerKg:
-                    NLDASParam = "SPFH2m"; //kg per kg
-                    break;
-                case parameter.Temperature2mAboveGround_K:
-                    NLDASParam = "TMP2m";  //Kelvin
-                    break;
-                case parameter.WindSpeedZonal10mAboveGround_MPerS:
-                    NLDASParam = "UGRD10m"; //m per s
-                    break;
-                case parameter.WindSpeedMeridional10mAboveGround_MPerS:
-                    NLDASParam = "VGRD10m"; //m per s
-                    break;
-                case parameter.ShortWaveRadiationFluxDownwards_WPerM2:
-                    NLDASParam = "DSWRFsfc";
-                    break;
-                case parameter.LongWaveRadiationFluxDownwards_WPerM2:
-                    NLDASParam = "DLWRFsfc";
-                    break;
-                case parameter.PotentialEvaporationHourlyTotal_KgPerM2:
-                    NLDASParam = "PEVAPsfc"; //kg per m2
-                    break;
-                case parameter.SurfacePressure_Pa:
-                    NLDASParam = "PRESsfc"; //pascal
-                    break;
-                    throw new System.Exception("Unknow parameter.");
+                switch (param)
+                {
+                    case parameter.PrecipitationTotal_kgPerM2:
+                        NLDASParam = "APCPsfc"; //kg per m2
+                        break;
+                    case parameter.SpecificHumidity2mAboveGround_KgPerKg:
+                        NLDASParam = "SPFH2m"; //kg per kg
+                        break;
+                    case parameter.Temperature2mAboveGround_K:
+                        NLDASParam = "TMP2m";  //Kelvin
+                        break;
+                    case parameter.WindSpeedZonal10mAboveGround_MPerS:
+                        NLDASParam = "UGRD10m"; //m per s
+                        break;
+                    case parameter.WindSpeedMeridional10mAboveGround_MPerS:
+                        NLDASParam = "VGRD10m"; //m per s
+                        break;
+                    case parameter.ShortWaveRadiationFluxDownwards_WPerM2:
+                        NLDASParam = "DSWRFsfc";
+                        break;
+                    case parameter.LongWaveRadiationFluxDownwards_WPerM2:
+                        NLDASParam = "DLWRFsfc";
+                        break;
+                    case parameter.PotentialEvaporationHourlyTotal_KgPerM2:
+                        NLDASParam = "PEVAPsfc"; //kg per m2
+                        break;
+                    case parameter.SurfacePressure_Pa:
+                        NLDASParam = "PRESsfc"; //pascal
+                        break;
+                        throw new System.Exception("Unknow parameter.");
+                }
             }
+            else if(_source == "gldas")
+            {
+                switch (param)
+                {
+                    case parameter.PrecipitationTotal_kgPerM2:
+                        NLDASParam = "Rainf_f_tavg"; //kg per m2
+                        break;
+                    case parameter.PotentialEvaporationHourlyTotal_KgPerM2:
+                        NLDASParam = "PotEvap_tavg"; //kg per m2
+                        _urlBasePF = @"http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:";
+                        break;
+                    case parameter.SpecificHumidity2mAboveGround_KgPerKg:
+                        NLDASParam = "Qair_f_inst"; //kg per kg
+                        break;
+                    case parameter.Temperature2mAboveGround_K:
+                        NLDASParam = "Tair_f_inst";  //Kelvin
+                        break;
+                    case parameter.WindSpeedZonal10mAboveGround_MPerS:
+                        NLDASParam = "Wind_f_inst"; //m per s
+                        break;
+                    case parameter.WindSpeedMeridional10mAboveGround_MPerS:
+                        NLDASParam = "Wind_f_inst"; //m per s
+                        break;
+                    case parameter.ShortWaveRadiationFluxDownwards_WPerM2:
+                        NLDASParam = "SWdown_f_tavg";
+                        _urlBasePF = @"http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:";
+                        break;
+                    case parameter.LongWaveRadiationFluxDownwards_WPerM2:
+                        NLDASParam = "LWdown_f_tavg";
+                        _urlBasePF = @"http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:";
+                        break;
+                    case parameter.SurfacePressure_Pa:
+                        NLDASParam = "PRESsfc"; //pascal
+                        break;
+                        throw new System.Exception("Unknow parameter.");
+                }
+            }
+            
             return NLDASParam;
         }
 
@@ -721,8 +883,26 @@ namespace Evapotranspiration
             dt.Columns.Add("Date");
             dt.Columns.Add("Hour");
             dt.Columns.Add("Value");
-            string url = _urlBasePF + _parameter + "&startDate=" + _startDate + "T24" + "&endDate=" + _endDate + "T24" +
+            string url = "";
+            switch (_source)
+            {
+                case "nldas":
+                    url = _urlBasePF + _parameter + "&startDate=" + _startDate + "T24" + "&endDate=" + _endDate + "T24" +
                          "&location=NLDAS:X" + _NLDASX.ToString() + "-Y" + _NLDASY.ToString() + _type; // "X298" + "-" + "Y152" + _type;
+                    break;
+                case "gldas":
+                    url = _urlBasePF + _parameter + "&location=GEOM:POINT" + @"%28" + _longitude + @",%20" + _latitude + @"%29" +
+                        "&startDate=" + _startDate + "T06" + "&endDate=" + _endDate + "T23" + _type; // "X298" + "-" + "Y152" + _type;
+                    break;
+                case "wgen":
+                    break;
+                case "prism":
+                default:
+                    url = _urlBasePF + _parameter + "&startDate=" + _startDate + "T24" + "&endDate=" + _endDate + "T24" +
+                         "&location=NLDAS:X" + _NLDASX.ToString() + "-Y" + _NLDASY.ToString() + _type; // "X298" + "-" + "Y152" + _type;
+                    break;
+                    
+            }
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
             byte[] bytes = client.DownloadData(url);
@@ -749,7 +929,18 @@ namespace Evapotranspiration
                     if (blnDataStart == true)
                     {
                         values = System.Text.RegularExpressions.Regex.Split(cleanLine, @"\s\s+");
-                        if (values != null)
+                        if (values != null && _source != "nldas")
+                        {
+                            dr = dt.NewRow();
+                            string[] delimiter = { "T", "\t", " ", ":00:00" };
+                            string[] dateAndTime = values[0].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                            dr["Date"] = dateAndTime[0];
+                            dr["Hour"] = Convert.ToInt32(dateAndTime[1].Replace("Z", ""));
+                            //dr["Date"] = values[0];
+                            dr["Value"] = Decimal.Parse(dateAndTime[2], System.Globalization.NumberStyles.Any);
+                            dt.Rows.Add(dr);
+                        }
+                        else if (values != null && _source == "nldas")
                         {
                             dr = dt.NewRow();
                             char[] delimiter = { ' ' };
@@ -776,10 +967,18 @@ namespace Evapotranspiration
             string _parameter1 = "APCPsfc";
             string _startDate1 = "1981-01-01";
             string _endDate1 = "2010-12-31";
+            string url = "";
             List<Double> list = new List<double>();
-
-            string url = _urlBasePF + _parameter1 + "&startDate=" + _startDate1 + "T00" + "&endDate=" + _endDate1 + "T23" +
+            if(_source == "nldas")
+            {
+                url = _urlBasePF + _parameter1 + "&startDate=" + _startDate1 + "T00" + "&endDate=" + _endDate1 + "T23" +
                          "&location=NLDAS:X" + _NLDASX.ToString() + "-Y" + _NLDASY.ToString() + _type;
+            }
+            else if(_source == "gldas")
+            {
+                url = _urlBasePF + "Rainf_f_tavg" + "&location=GEOM:POINT" + @"%28" + _longitude + @",%20" + _latitude + @"%29" +
+                        "&startDate=" + _startDate + "T06" + "&endDate=" + _endDate + "T23" + _type; // "X298" + "-" + "Y152" + _type;
+            }
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
             byte[] bytes = client.DownloadData(url);
@@ -806,7 +1005,7 @@ namespace Evapotranspiration
                     if (blnDataStart == true)
                     {
                         values = System.Text.RegularExpressions.Regex.Split(cleanLine, @"\s\s+");
-                        if (values != null)
+                        if (values != null && _source == "nldas")
                         {
                             char[] delimiter = { ' ' };
                             string[] dateAndTime = values[0].Split(delimiter);
@@ -815,6 +1014,13 @@ namespace Evapotranspiration
                                 valuep = (Double)Decimal.Parse(values[1], System.Globalization.NumberStyles.Any);
                                 list.Add(valuep);
                             }
+                        }
+                        else if(values != null && _source != "nldas")
+                        {
+                            string[] delimiter = { "T", "\t", " ", ":00:00" };
+                            string[] dateAndTime = values[0].Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                            valuep = (Double)Decimal.Parse(dateAndTime[2], System.Globalization.NumberStyles.Any);
+                            list.Add(valuep * 60 * 60);//gldas precip is in kg/m^2/s rather than kg/m^2 hourly
                         }
                     }
                 }
