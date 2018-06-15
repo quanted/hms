@@ -37,6 +37,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Source.Tests", "Data.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utilities.Tests", "Utilities.Tests\Utilities.Tests.csproj", "{E04D105F-88A3-49A4-929E-EF6E862A5D67}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{60A53B4E-6648-4EE9-BF56-67771EE027AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Precipitation.Tests", "Precipitation.Tests\Precipitation.Tests.csproj", "{544C46A8-BBBC-49AC-995B-19BBB81B516C}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stream.Hydrology.AQUATOX", "Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj", "{90240887-987A-4C44-88FE-AD7B601C7343}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Simulate.AQUATOX", "Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj", "{4E8926D5-9C2E-4AEE-929A-407B5E4B04A2}"
@@ -130,6 +134,14 @@ Global
 		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{E04D105F-88A3-49A4-929E-EF6E862A5D67}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{60A53B4E-6648-4EE9-BF56-67771EE027AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60A53B4E-6648-4EE9-BF56-67771EE027AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60A53B4E-6648-4EE9-BF56-67771EE027AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60A53B4E-6648-4EE9-BF56-67771EE027AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{544C46A8-BBBC-49AC-995B-19BBB81B516C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{544C46A8-BBBC-49AC-995B-19BBB81B516C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{544C46A8-BBBC-49AC-995B-19BBB81B516C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{544C46A8-BBBC-49AC-995B-19BBB81B516C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90240887-987A-4C44-88FE-AD7B601C7343}.Release|Any CPU.ActiveCfg = Release|Any CPU
