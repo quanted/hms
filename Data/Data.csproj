@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
-    <AssemblyName>HMSData</AssemblyName>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Data</AssemblyName>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
