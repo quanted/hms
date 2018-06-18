@@ -170,34 +170,34 @@ namespace Globals
     public enum T_SVType
     {
         StV,
-        Porewaters,
-        OrgTox1,
-        OrgTox2,
-        OrgTox3,
-        OrgTox4,
-        OrgTox5,
-        OrgTox6,
-        OrgTox7,
-        OrgTox8,
-        OrgTox9,
-        OrgTox10,
-        OrgTox11,
-        OrgTox12,
-        OrgTox13,
-        OrgTox14,
-        OrgTox15,
-        OrgTox16,
-        OrgTox17,
-        OrgTox18,
-        OrgTox19,
-        OrgTox20,
-        NotUsed,
-        NotUsed2,
-        OtherOutput,
+        //Porewaters,
+        //OrgTox1,
+        //OrgTox2,
+        //OrgTox3,
+        //OrgTox4,
+        //OrgTox5,
+        //OrgTox6,
+        //OrgTox7,
+        //OrgTox8,
+        //OrgTox9,
+        //OrgTox10,
+        //OrgTox11,
+        //OrgTox12,
+        //OrgTox13,
+        //OrgTox14,
+        //OrgTox15,
+        //OrgTox16,
+        //OrgTox17,
+        //OrgTox18,
+        //OrgTox19,
+        //OrgTox20,
+        //NotUsed,
+        //NotUsed2,
+        //OtherOutput,
         NTrack,
-        PTrack,
-        NIntrnl,
-        PIntrnl
+        PTrack
+        //NIntrnl,
+        //PIntrnl
     } // end T_SVType
 
 
@@ -206,14 +206,14 @@ namespace Globals
         WaterCol,
         SedLayer1,
         SedLayer2,
-        SedLayer3,
-        SedLayer4,
-        SedLayer5,
-        SedLayer6,
-        SedLayer7,
-        SedLayer8,
-        SedLayer9,
-        SedLayer10
+        //SedLayer3,
+        //SedLayer4,
+        //SedLayer5,
+        //SedLayer6,
+        //SedLayer7,
+        //SedLayer8,
+        //SedLayer9,
+        //SedLayer10
     } // end T_SVLayer
 
     public struct Setup_Record
@@ -271,4 +271,90 @@ namespace Globals
         public const AllVariables LastDetr = AllVariables.SuspLabDetr;
 
     }
+
+    public struct TParameter
+    {
+        public double Val;
+        public object Symbol;
+        public object Name;
+        public object Comment;
+        public object Units;
+    } // end TParameter
+
+    public class Diagenesis_Rec
+    {
+        public TParameter m1;        // = 0.5;           //(kg/L) solids concentration in layer 1
+        public TParameter m2;        // = 0.5;           //(kg/L) solids concentration in layer 2
+        public TParameter H1;        // = 0.001;         // meters, 1 mm aerobic layer
+        public TParameter Dd;        // = 0.001;         //(m^2/d) pore water diffusion coefficient
+        public TParameter w2;        // = 0.0003;        //(m/d) deep burial velocity (Q2K uses 0.000005)
+        public TParameter H2;        // = 0.1;           //(m) thickness of sediment anaerobic layer 2
+        public TParameter KappaNH3f;        // = 0.131;  //(m/d) freshwater nitrification velocity
+        public TParameter KappaNH3s;        // = 0.131;  //(m/d) saltwater nitrification velocity
+        public TParameter KappaNO3_1f;      // = 0.1;  //(m/d) freshwater denitrification velocity
+        public TParameter KappaNO3_1s;      // = 0.1;  //(m/d) saltwater denitrification velocity
+        public TParameter KappaNO3_2;        // = 0.25;  //(m/d) denitrification in the anaerobic layer 2
+        public TParameter KappaCH4;        // = 0.7;     //(m/d) methane oxidation in the aerobic sedliment layer 1
+        public TParameter KM_NH3;        // = 0.728;     //(mgN/L) nitrification half-saturation constant for NH4N
+        public TParameter KM_O2_NH3;        // = 0.37;   //(mgO2/L) nitrification half-saturation constant for O2 (DiToro suggests 0.74)
+        public TParameter KdNH3;        // = 1;          //(L/kg) partition coefficient for ammonium in layer 1 and 2
+        public TParameter KdPO42;        // = 20;        //(L/kg) partition coefficient for inorganic P in anaerobic layer 2
+        public TParameter dKDPO41f;        // = 20;      //(unitless) freshwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient   //gp
+        public TParameter dKDPO41s;        // = 20;      //(unitless) saltwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient    //gp
+        public TParameter O2critPO4;        // = 2;      //(mgO2/L) critical O2 concentration for adjustment of partition coefficient for inorganic P
+        public TParameter Unused_ThtaDp;        // = 1.117;     //for bioturbation particle mixing between layers 1-2
+        public TParameter ThtaDd;        // = 1.08;      //for pore water diffusion between layers 1-2
+        public TParameter ThtaNH3;        // = 1.123;    //for nitrification
+        public TParameter ThtaNO3;        // = 1.08;     //for denitrification
+        public TParameter ThtaCH4;        // = 1.079;    //for methane oxidation
+        public TParameter SALTSW;        // = 1;         //(ppt) salinity above which sulfide rather than methane is produced from C diagenesis
+        public TParameter SALTND;        // = 1;         //(ppt) salinity above which saltwater nitrification/denitrification rates are used for aerobic layer
+        public TParameter KappaH2Sd1;        // = 0.2;   //(m/d) aerobic layer reaction velocity for dissolved sulfide oxidation
+        public TParameter KappaH2Sp1;        // = 0.4;   //(m/d) aerobic layer reaction velocity for particulate sulfide oxidation
+        public TParameter ThtaH2S;        // = 1.08;     //(unitless) temperature coefficient for sulfide oxidation
+        public TParameter KMHSO2;        // = 4;         //(mgO2/L) sulfide oxidation normalization constant for O2
+        public TParameter KdH2S1;        // = 100;       //(L/kg) partition coefficient for sulfide in aerobic layer 1
+        public TParameter KdH2S2;        // = 100;       //(L/kg) partition coefficient for sulfide in anaerobic layer 2
+        public TParameter Unused_frpon1;        // = 0.65;      //fraction of class 1 pon
+        public TParameter Unused_frpon2;        // = 0.25;      //fraction of class 2 pon
+        public TParameter Unused_frpoc1;        // = 0.65;      //fraction of class 1 poc
+        public TParameter Unused_frpoc2;        // = 0.2 ;      //fraction of class 2 poc
+        public TParameter Unused_frpop1;        // = 0.65;      //fraction of class 1 pop
+        public TParameter Unused_frpop2;        // = 0.2 ;      //fraction of class 2 pop
+        public TParameter kpon1;        // = 0.035;      //(1/d) G class 1 pon mineralization
+        public TParameter kpon2;        // = 0.0018;     //(1/d) G class 2 pon mineralization
+        public TParameter kpon3;        // = 0;          //(1/d) G class 2 pon mineralization
+        public TParameter kpoc1;        // = 0.035;      //(1/d) G class 1 poc mineralization
+        public TParameter kpoc2;        // = 0.0018;     //(1/d) G class 2 poc mineralization
+        public TParameter kpoc3;        // = 0;          //(1/d) G class 2 poc mineralization
+        public TParameter kpop1;        // = 0.035;      //(1/d) G class 1 pop mineralization
+        public TParameter kpop2;        // = 0.0018;     //(1/d) G class 2 pop mineralization
+        public TParameter kpop3;        // = 0;          //(1/d) G class 2 pop mineralization
+        public TParameter ThtaPON1;        // = 1.1;     //for G class 1 pon
+        public TParameter ThtaPON2;        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPON3;        // = 1.17;    //for G class 3 pon
+        public TParameter ThtaPOC1;        // = 1.1 ;    //for G class 1 pon
+        public TParameter ThtaPOC2;        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPOC3;        // = 1.17;    //for G class 3 pon
+        public TParameter ThtaPOP1;        // = 1.1 ;    //for G class 1 pon
+        public TParameter ThtaPOP2;        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPOP3;        // = 1.17;    //for G class 3 pon
+        public TParameter Unused_POC1R;        // = 0.1;   //reference G1 at which w12base = Dp / H2 at 20 degC for DiToro eqn 13.1
+        public TParameter kBEN_STR;        // = 0.03;    //first-order decay rate constant for benthic stress (1/d) for DiToro eqn 13.3
+        public TParameter Unused_KM_O2_Dp;        // = 4;
+        public TParameter ksi;        // First order dissolution rate for particulate biogenic silica (PSi) at 20 degC in layer 2 (1/day)
+        public TParameter ThtaSi;        // Constant for temperature adjustment of KSi (unitless)
+        public TParameter KMPSi;        // Silica dissolution half-saturation constant for PSi (g Si/m^3)
+        public TParameter SiSat;        // Saturation concentration of silica in pore water (g Si/m^3)
+        public TParameter KDSi2;        // Partition coefficient for Si in Layer 2, controls sorption of dissolved silica to solids (L/Kg d)
+        public TParameter DKDSi1;        // factor that enhances sorption of silica in layer 1 when D.O. exceeds DOcSi (unitless)
+        public TParameter O2critSi;        // Critical dissolved oxygen for silica sorption in layer 1 (mg/L)
+        public TParameter LigninDetr;        // Fraction of suspended detritus that is non-reactive (frac.)
+        // Unused_Dp : TParameter;   = 0.00012;       //(m^2/d) bioturbation particle mixing diffusion coefficient
+        public TParameter Si_Diatom;
+        public double W12;
+        public double KL12;
+    } // end Diagenesis_Rec
+
 }
+

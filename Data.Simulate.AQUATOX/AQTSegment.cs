@@ -6,6 +6,7 @@ using AQUATOX.Loadings;
 using AQUATOX.Nutrients;
 using AQUATOX.Volume;
 using AQUATOX.OrgMatter;
+using AQUATOX.Diagenesis;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -85,8 +86,9 @@ namespace AQUATOX.AQTSegment
         {
             if (AQTSeg == null) return "AQTSeg not Instantiated";
 
-            try
+          //  try
             {
+                AQTSeg.SetMemLocRec();
                 string errmsg = AQTSeg.Verify_Runnable();
                 if (errmsg != "") return errmsg;
 
@@ -95,14 +97,14 @@ namespace AQUATOX.AQTSegment
                 AQTSeg.Integrate(AQTSeg.PSetup.FirstDay, AQTSeg.PSetup.LastDay, 0.1, 1e-5, 1);
                 return "";
             }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
+     //       catch (Exception e)
+     //       {
+     //           return e.Message;
+     //       }
 
-            finally
-            {
-            }
+     //       finally
+      //      {
+      //      }
         }
 
         public string Integrate(DateTime StartDate, DateTime EndDate)
@@ -173,7 +175,7 @@ namespace AQUATOX.AQTSegment
 //      bool RequiresData = false;
 //      bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
         public string StateUnit;
-        public string LoadingUnit;       // Units 
+        public string LoadingUnit;       // Consts 
 
         [JsonIgnore] public TAQTSite Location = null;    // Pointer to Site in which I'm located
 //      public bool PShowRates = true;      // Does the user want rates written for this SV?
@@ -391,6 +393,10 @@ namespace AQUATOX.AQTSegment
         public TLoadings DynVelocity = null;
         public double MeanDischarge = 0;    // output only
 
+        public Diagenesis_Rec Diagenesis_Params;
+        public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
+
+        [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
         [JsonIgnore] public DateTime SimulationDate;  // time integration started
@@ -764,7 +770,7 @@ namespace AQUATOX.AQTSegment
             //DoThisEveryStep_FishRecruit();
             //// add effects of recruitment to all fish vars.  Must be called after multifish promote.
             //DoThisEveryStep_Anadromous_Migr();
-            //if (GetStatePointer(Global.AllVariables.Sand, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null)
+            //if (GetStatePointer(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) != null)
             //{
             //    Update_Sed_Bed(TPresent - TPreviousStep);
             //}
@@ -805,7 +811,7 @@ namespace AQUATOX.AQTSegment
 
             YearNum_PrevStep = CurrentYearNum;
 
-            //if (VSeg == Global.VerticalSegments.Epilimnion)
+            //if (VSeg == VerticalSegments.Epilimnion)
             //{
             //    // Only change yearnum once
             //    YearNum_PrevStep = CurrentYearNum;
@@ -1171,14 +1177,14 @@ namespace AQUATOX.AQTSegment
                 //}
 
                 //// ZooBenthos and nekton must be converted from mg/L to g/sq.m  FIXME Animal linkage
-                //if ((T == Global.T_SVType.StV) && (P.IsAnimal()))
+                //if ((T == T_SVType.StV) && (P.IsAnimal()))
                 //{ if (!((P) as TAnimal).IsPlanktonInvert())
                 //}                    
 
-                // if ((S >= Global.AllVariables.Veliger1 && S <= Global.AllVariables.Veliger2)) Convert = false; FIXME Animal linkage
+                // if ((S >= AllVariables.Veliger1 && S <= AllVariables.Veliger2)) Convert = false; FIXME Animal linkage
             }
 
-            //if ((T == Global.T_SVType.OtherOutput) && (((TAddtlOutput)(S)) == Global.TAddtlOutput.MultiFishConc)) convert = true;
+            //if ((T == T_SVType.OtherOutput) && (((TAddtlOutput)(S)) == TAddtlOutput.MultiFishConc)) convert = true;
             // Sum of multifish concs. needs to be converted for output
 
             return Convert;
@@ -1194,8 +1200,8 @@ namespace AQUATOX.AQTSegment
             //if (!LinkedMode && Stratified && (Location.Locale.UseBathymetry))
             //{
             //    SiteRecord LL = Location.Locale;
-            //    double EpiFrac = LL.AreaFrac(Location.MeanThick[Global.VerticalSegments.Epilimnion], LL.ZMax);
-            //    if (VSeg == Global.VerticalSegments.Epilimnion)
+            //    double EpiFrac = LL.AreaFrac(Location.MeanThick[VerticalSegments.Epilimnion], LL.ZMax);
+            //    if (VSeg == VerticalSegments.Epilimnion)
             //    {
             //        result = result * EpiFrac;
             //    }
@@ -1446,55 +1452,22 @@ namespace AQUATOX.AQTSegment
 
         public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
         {
-
-
-            // result = MemLocRec.Ptr[S, T, L];
-
-            foreach (TStateVariable TSV in SV)
-                if ((TSV.NState == S) && (TSV.SVType == T) && (TSV.Layer == L))  // needs optimization!
-                {
-                    return TSV;
-                }
-            return null;
+            return MemLocRec[(int)S, (int)T, (int)L];
         }
 
-        //public void SetMemLocRec()
-        //{
-        //    int SVLoop;
-        //    T_SVType TypeLoop;
-        //    T_SVLayer LayerLoop;
-        //    int i;
-        //    object p;
-        //    TStateVariable PSV;
-        //    PSV = new TStateVariable(AllVariables.NullStateVar, T_SVType.StV, T_SVLayer.WaterCol, "", this, 0, true);
-        //    for (TypeLoop = T_SVType.StV; TypeLoop <= T_SVType.PIntrnl; TypeLoop++)
-        //    {
-        //        for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++)
-        //        {
-        //            for (LayerLoop = T_SVLayer.WaterCol; LayerLoop <= T_SVLayer.SedLayer10; LayerLoop++)
-        //            {
-        //                PSV.NState = SVLoop;
-        //                PSV.SVType = TypeLoop;
-        //                PSV.Layer = LayerLoop;
-        //                // Set Indexes
-        //                if (!this.Search(PSV, ref i))
-        //                {
-        //                    i = -1;
-        //                }
-        //                MemLocRec.Indx[SVLoop, TypeLoop, LayerLoop] = i;
-        //                // Set Pointers
-        //                p = null;
-        //                if (i >= 0)
-        //                {
-        //                    p = this.At(i);
-        //                }
-        //                MemLocRec.Ptr[SVLoop, TypeLoop, LayerLoop] = p;
-        //            }
-        //        }
-        //    }
-        //    // SvLoop
-        //    PSV.Destroy();
-        //}
+        public void SetMemLocRec()
+        {
+            int NumS = Enum.GetNames(typeof(AllVariables)).Length;
+            int NumT = Enum.GetNames(typeof(T_SVType)).Length;
+            int NumL = Enum.GetNames(typeof(T_SVLayer)).Length;
+
+            MemLocRec = new TStateVariable[NumS, NumT, NumL];
+
+            foreach (TStateVariable TSV in SV)
+                MemLocRec[(int)TSV.NState, (int)TSV.SVType, (int)TSV.Layer] = TSV;
+
+
+        }
 
 
         public double SegVol()        // volume of segment or individual layer if stratified
@@ -1578,45 +1551,6 @@ namespace AQUATOX.AQTSegment
             if (GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) == null) return 1;
             return WaterDensity(true, KSTemp, KSSalt) / WaterDensity(false, KSTemp, KSSalt);
         }
-
-        // ----------------------------------------------------------------------------------
-        //public void SetMemLocRec()
-        //{
-        //    int SVLoop;
-        //    T_SVType TypeLoop;
-        //    T_SVLayer LayerLoop;
-        //    int i;
-        //    object p;
-        //    TStateVariable PSV;
-        //    PSV = new TStateVariable(AllVariables.NullStateVar, T_SVType.StV, T_SVLayer.WaterCol, "", this, 0, true);
-        //    for (TypeLoop = T_SVType.StV; TypeLoop <= T_SVType.PIntrnl; TypeLoop++)
-        //    {
-        //        for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++)
-        //        {
-        //            for (LayerLoop = T_SVLayer.WaterCol; LayerLoop <= T_SVLayer.SedLayer10; LayerLoop++)
-        //            {
-        //                PSV.NState = SVLoop;
-        //                PSV.SVType = TypeLoop;
-        //                PSV.Layer = LayerLoop;
-        //                // Set Indexes
-        //                if (!this.Search(PSV, ref i))
-        //                {
-        //                    i = -1;
-        //                }
-        //                MemLocRec.Indx[SVLoop, TypeLoop, LayerLoop] = i;
-        //                // Set Pointers
-        //                p = null;
-        //                if (i >= 0)
-        //                {
-        //                    p = this.At(i);
-        //                }
-        //                MemLocRec.Ptr[SVLoop, TypeLoop, LayerLoop] = p;
-        //            }
-        //        }
-        //    }
-        //    // SvLoop
-        //    PSV.Destroy();
-        //}
 
 
 
@@ -1745,6 +1679,692 @@ namespace AQUATOX.AQTSegment
             return (rifflevel * (pctriffle / 100)) + (runvel * (pctrun / 100)) + (poolvel * (pctpool / 100));
         }
 
+
+        // Diagenesis Model
+        // -----------------------------------------------------------------------------------------
+        
+        // Is diagenesis model included?
+        public bool Diagenesis_Included()
+        {
+            bool result;
+            result = GetStatePointer(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2) != null;
+            return result;
+        }
+
+        // -----------------------------------------------------------------------------------------
+        public double Diagenesis(T_SVLayer Layer)
+        {
+            double result;
+            double s;
+            double Jc;
+            double Jn;
+            AllVariables ns;
+            TPOC_Sediment ppc;
+            TNO3_Sediment PNO31;
+            TNO3_Sediment PNO32;
+            result = 0;
+            if ((Layer == T_SVLayer.SedLayer1))
+            {
+                return result;
+            }
+            // determine diagenesis fluxes
+            Jc = 0;
+            Diagenesis_Rec DR = Diagenesis_Params;
+            for (ns = AllVariables.POC_G1; ns <= AllVariables.POC_G3; ns++)
+            {
+                ppc = (TPOC_Sediment)GetStatePointer(ns, T_SVType.StV, T_SVLayer.SedLayer2);
+                Jc = Jc + ppc.Mineralization() * 32 / 12;
+            }
+            // gO2/ m3 d             // g C / m3             // g O2/ g C
+            PNO31 = (TNO3_Sediment)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
+            PNO32 = (TNO3_Sediment)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
+            s = MassTransfer();
+            // m/d            // g/m3 d            // m2/d2            // m/d            // g/m3
+            Jn = 2.86 * (PNO31.Denit_Rate(PNO31.State) / s * PNO31.State + PNO32.Denit_Rate(PNO32.State) * PNO32.State) / DR.H2.Val;
+            // m/d            // g/m3            // m
+            result = Jc - Jn;
+            // g O2/m3 d  // g O2/m3 d
+
+            return result;
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        public double DiagenesisVol(int Layer)
+        {
+            double result;
+            // Sed Volume Diagensis
+            double EpiFrac;
+            if (Layer == 1)
+                result = Location.Locale.SurfArea * Diagenesis_Params.H1.Val;
+            else
+                result = Location.Locale.SurfArea * Diagenesis_Params.H2.Val;
+                 // m3                // m2                     // m
+
+
+            //if (Stratified)
+            //{
+            //    MorphRecord RR = Location.Morph;
+            //    EpiFrac = Location.AreaFrac(Location.MeanThick[VerticalSegments.Epilimnion], Location.Locale.ZMax);
+            //    // 10-14-2010 Note that ZMax parameter pertains to both segments in event of stratification
+            //    if (VSeg == VerticalSegments.Epilimnion)
+            //    {
+            //        result = result * EpiFrac;
+            //    }
+            //    else
+            //    {
+            //        result = result * (1 - EpiFrac);
+            //    }
+            //}
+
+            return result;
+        }
+
+        // vol of sed bed in m3
+        // -----------------------------------------------------------------------------------------
+        public double MassTransfer()
+        {
+            double result;
+            double O2;
+            const double MAX_S = 1;
+            // m/d
+            O2 = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((O2 < Consts.Tiny))
+            {
+                // max mass transfer if o2 goes to zero
+                result = MAX_S;
+            }
+            else result = SOD   / O2;
+             // m/d =  go2/m2 d /  gO2/m3
+
+            // mass transfer coeff
+            if (result > MAX_S)
+                result = MAX_S;
+            if (result < Consts.Tiny)
+                result = Consts.Tiny;
+            // avoid divide by zero error
+
+            return result;
+        }
+        
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        //public void CalcDeposition_SumDef(TAnimal PA)  // fixme animal linkage
+        //{
+        //    double NFrac;
+        //    double Def2Detr;
+        //    // all defecation goes to sediment
+        //    if (NS == AllVariables.Avail_Silica)
+        //    {
+        //        return;
+        //    }
+        //    if (PA.IsAnimal())
+        //    {
+        //        switch (NS)
+        //        {
+        //            case AllVariables.PON_G1:
+        //            case AllVariables.POP_G1:
+        //            case AllVariables.POC_G1:
+        //                // G1 equivalent to labile
+        //                Def2Detr = Consts.Def2SedLabDetr * (1 - Def_to_G3);
+        //                break;
+        //            case AllVariables.PON_G2:
+        //            case AllVariables.POP_G2:
+        //            case AllVariables.POC_G2:
+        //                // G2 equivalent to refractory
+        //                Def2Detr = (1 - Consts.Def2SedLabDetr) * (1 - Def_to_G3);
+        //                break;
+        //            default:
+        //                Def2Detr = Def_to_G3;
+        //                break;
+        //                // G3 class is inert
+        //        }
+        //        switch (NS)
+        //        {
+        //            // case
+        //            // Modify the A .. B: AllVariables.PON_G1 .. AllVariables.PON_G3
+        //            case AllVariables.PON_G1:
+        //                NFrac = Location.Remin.N2OrgLab;
+        //                break;
+        //            // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
+        //            // Modify the A .. B: AllVariables.POP_G1 .. AllVariables.POP_G3
+        //            case AllVariables.POP_G1:
+        //                NFrac = Location.Remin.P2OrgLab;
+        //                break;
+        //            default:
+        //                // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
+        //                // POC_G1..POC_G3:
+        //                NFrac = 1 / Consts.Detr_OM_2_OC;
+        //                break;
+        //                // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
+        //        }
+        //        // Case
+        //        if ((Typ == T_SVType.StV))
+        //        {
+        //            // g/m3
+        //            // g/m3
+        //            Def = Def + Def2Detr * PA.Defecation() * NFrac;
+        //        }
+        //        else
+        //        {
+        //            Def = Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;
+        //        }
+        //        // ug/m3
+        //        // unitless
+        //        // ug/L
+        //        // L/m3
+        //    }
+        //}
+
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        public void CalcDeposition_SumSed(TStateVariable P, AllVariables NS, T_SVType Typ, ref double Sed  )
+        {
+//            const double PlantSinkLabile = 0.92;
+//            TPlant PP;    FIXME Plant Linkage
+            double NFrac;
+            // double Frac;
+            // Ignore the N and P content in G3 because it is so small.
+            // Currently No Macrophyte Linkage through mortality & breakage
+            if ((P.SVType != T_SVType.StV))
+            {
+                return;
+            }
+            //if (P.IsAlgae())
+            //{
+            //    PP = ((P) as TPlant);
+            //    switch (NS)
+            //    {
+            //        case AllVariables.Avail_Silica:
+            //            Frac = 1.0;
+            //            break;
+            //        case AllVariables.PON_G1:
+            //        case AllVariables.POP_G1:
+            //        case AllVariables.POC_G1:
+            //            // G1 equivalent to labile
+            //            Frac = PlantSinkLabile;
+            //            break;
+            //        case AllVariables.PON_G2:
+            //        case AllVariables.POP_G2:
+            //        case AllVariables.POC_G2:
+            //            // G2 equivalent to refractory
+            //            Frac = (1 - PlantSinkLabile);
+            //            break;
+            //        default:
+            //            Frac = 0;
+            //            break;
+            //            // G3 class is inert, no plant sink to G3 for now
+            //    }
+            //    switch (NS)
+            //    {
+            //        case AllVariables.Avail_Silica:
+            //            // Case
+            //            // taxonomic type diatoms
+            //            if (PP.NState >= Consts.FirstDiatom && PP.NState <= Consts.LastDiatom)
+            //                NFrac = Diagenesis_Params.Si_Diatom.Val;
+            //            else NFrac = 0;
+            //            break;
+            //        // Modify the A .. B: AllVariables.PON_G1 .. AllVariables.PON_G3
+            //        case AllVariables.PON_G1:
+            //            NFrac = PP.N_2_Org();
+            //            break;
+            //        // Modify the A .. B: AllVariables.POP_G1 .. AllVariables.POP_G3
+            //        case AllVariables.POP_G1:
+            //            NFrac = PP.P_2_Org();
+            //            break;
+            //        default:
+            //            // POCG1..POCG3:
+            //            NFrac = 1 / Consts.Detr_OM_2_OC;
+            //            break;
+            //            // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
+            //    }
+            //    // case
+            //    // in which case all deposition goes to the periphyton directly
+            //    if (!PP.IsLinkedPhyto())
+            //    {
+            //        if ((Typ == T_SVType.StV))
+            //        {
+            //            // g/m3
+            //            // g/m3
+            //            Sed = Sed + PP.Sedimentation() * Frac * NFrac;
+            //        }
+            //        else
+            //        {
+            //            Sed = Sed + PP.Sedimentation() * Frac * GetPPB(PP.NState, Typ, PP.Layer) * 1e-3;
+            //        }
+            //        // ug/m3
+            //        // g/m3
+            //        // ug/kg
+            //        // kg/g
+            //    }
+            //    // not linkedphyto
+            //}
+            //// algae
+            // G1 equivalent to labile
+            if (((P.NState == AllVariables.SuspLabDetr) &&((NS==AllVariables.PON_G1) || (NS == AllVariables.POP_G1) || (NS ==AllVariables.POC_G1))) ||  //  G1 equivalent to labile
+                ((P.NState == AllVariables.SuspRefrDetr)&&((NS == AllVariables.PON_G2) || (NS == AllVariables.POP_G2) || (NS == AllVariables.POC_G2) || (NS == AllVariables.POC_G3))))
+             {
+                if ((Typ == T_SVType.StV))
+                {
+                    ReminRecord RR = Location.Remin;
+                    switch (NS)
+                    {
+                        case AllVariables.PON_G1:
+                            NFrac = RR.N2OrgLab;
+                            break;
+                        case AllVariables.PON_G2:
+                            NFrac = RR.N2Org_Refr;
+                            break;
+                        case AllVariables.POP_G1:
+                            NFrac = RR.P2OrgLab;
+                            break;
+                        case AllVariables.POP_G2:
+                            NFrac = RR.P2Org_Refr;
+                            break;
+                        case AllVariables.POC_G3:
+                            NFrac = 1 / Consts.Detr_OM_2_OC * Diagenesis_Params.LigninDetr.Val;
+                            break;
+                        case AllVariables.POC_G2:
+                            NFrac = 1 / Consts.Detr_OM_2_OC * (1 - Diagenesis_Params.LigninDetr.Val);
+                            break;
+                        default:
+                            // POCG1:
+                            NFrac = 1 / Consts.Detr_OM_2_OC;
+                            break;
+                    }
+                    // Case
+                }
+                else
+                {
+                    // If (Typ <> StV) then
+                    switch (NS)
+                    {
+                        case AllVariables.POC_G3:
+                            NFrac = Diagenesis_Params.LigninDetr.Val;
+                            break;
+                        case AllVariables.POC_G2:
+                            NFrac = (1 - Diagenesis_Params.LigninDetr.Val);
+                            break;
+                        default:
+                            // POCG1:
+                            NFrac = 1;
+                            break;
+                    }
+                }
+                // Case
+                if ((Typ == T_SVType.StV))
+                    Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac;
+                //else
+                //    // ug/m3                      g/m3                      ug/kg                     kg/g
+                //    Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac * GetPPB(P.NState, Typ, P.Layer) * 1e-3;
+            }
+            // Detritus
+
+        }
+
+        // "s" in m/d
+        // -----------------------------------------------------------------------------------------
+        public double CalcDeposition(AllVariables NS, T_SVType Typ)
+        {
+            double result;
+            // Calc deposition input into diagenesis model
+            // Calculate Deposition for each sed carbon & nutrient class in  (gC/m2 d) (gN/m2 d) (gP/m2 d) (gSi/m2 d
+            const double Def_to_G3 = 0.00;
+            // 0% of defecation to G3
+            double Def;
+            double Sed;
+            // - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            int i;
+            Def = 0;
+            Sed = 0;
+            foreach (TStateVariable TSV in SV)
+            {
+                CalcDeposition_SumSed(TSV,NS,Typ,ref Sed);
+               //  CalcDeposition_SumDef(TSV,NS,Typ,ref Sedthis.At(i));  fixme animal linkage
+            }
+            MorphRecord MR = Location.Morph;
+            result = (Sed + Def) * MR.SegVolum / DiagenesisVol(2) * Diagenesis_Params.H2.Val;
+//        (g / m2 d) (g / m3 w )        (m3 w)        (m3 sed)         (m sed)
+//        (ug / m2 d)(ug / m3 w)        (m3 w)        (m3 sed)         (m sed)  (toxicant deposition units)
+            return result;
+        }
+
+
+
+        // AQUATOX has been modified to include a representation of the sediment bed as
+        // presented in Di Toro’s Sediment Flux Modeling (2001).
+        public void CalculateSOD_SetL1State(AllVariables NS, double Val)
+        {
+            TStateVariable PSV;
+            PSV = GetStatePointer(NS, T_SVType.StV, T_SVLayer.SedLayer1);
+            PSV.State = Val;
+        }
+
+        public static void Linear_System(double a11, double a12, double a21, double a22, double b1, double b2, ref double x1, ref double x2)
+        {
+            x1 = (a22 * b1 - a12 * b2) / (a11 * a22 - a12 * a21);
+            x2 = (a11 * b2 - a21 * b1) / (a11 * a22 - a12 * a21);
+        }
+
+        // -----------------------------------------------------------------------------------------
+        public void CalculateSOD()
+        {
+            double SOD_test;
+            double s;
+            double Temp;
+            double O2;
+            double CSOD;
+            double NSOD;
+            AllVariables IV;
+            AllVariables ns;
+//          TAnimal TInv;
+            double BenthicBiomass;
+            bool ErrorOK;
+            double Jc;
+            double Jn;
+            double Jp;
+            double Jc_O2Equiv;
+            // diagenesis tracking
+            TPOC_Sediment ppc;
+            TPON_Sediment ppn;
+            TPOP_Sediment ppp;
+            double JO2NO3, K2NH4, K2Denit_1, KDenit_2, NH3_0, NO3_0, NO3_1, NO3_2, NH4_1, NH4_2, PO4_0, PO4_1, PO4_2, COD_0;
+            double HST1=0, HST2, a11, a12, b1, a21, a22, b2, Sech_Arg, CH4toCO2, CH4Sat, CSODmax;
+            double fda1, fpa1, fda2, fpa2;   // ammonia
+            double fd1, fp1, fd2, fp2;        // H2S
+            double k1h1d, k1h1p, k2Oxid, k2h2d, k2h2p, F12, F21, xk1, xk2;
+
+            int IterCount;
+            // CalculateSOD
+            if (!Diagenesis_Included())
+            {
+                return;
+            }
+            // No Diagenesis Model attached
+            O2 = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            Temp = GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            // determine diagenesis fluxes
+            Jc = 0;
+            Jn = 0;
+            Jp = 0;
+            for (ns = AllVariables.POC_G1; ns <= AllVariables.POC_G3; ns++)
+            {
+                ppc = (TPOC_Sediment)GetStatePointer(ns, T_SVType.StV, T_SVLayer.SedLayer2);
+                Jc = Jc + ppc.Mineralization() * Diagenesis_Params.H2.Val * 32 / 12;
+         // gO2/m2 d           // g C / m3 d                     // m    // g O2/ g C
+                // CSOD
+            }
+            for (ns = AllVariables.PON_G1; ns <= AllVariables.PON_G3; ns++)
+            {
+                ppn = (TPON_Sediment)GetStatePointer(ns, T_SVType.StV, T_SVLayer.SedLayer2);
+                Jn = Jn + ppn.Mineralization() * Diagenesis_Params.H2.Val;
+                // NSOD in N Consts
+            }
+            // gN/ m2 d
+            // gN / m3 d
+            // m
+            for (ns = AllVariables.POP_G1; ns <= AllVariables.POP_G3; ns++)
+            {
+                ppp = (TPOP_Sediment)GetStatePointer(ns, T_SVType.StV, T_SVLayer.SedLayer2);
+                Jp = Jp + ppp.Mineralization() * Diagenesis_Params.H2.Val;
+                // p mineralization
+            }
+            // gP/ m2 d
+            // gP / m3 d
+            // m
+            if (SOD < 0)
+            {
+                // start with an initial esitmate of SOD
+                // gO2 /m2 d
+                // gO2/d
+                // gN2/d
+                // gO2/gN
+                SOD_test = Jc + (Jn * 4.57);
+            }
+            else
+            {
+                SOD_test = SOD;
+            }
+            // use SOD prev. time step
+            // POCG1_2 := GetState(POC_G1,StV,SedLayer2) * 32 / 12 ;
+            // {mg O2/L            // mg C /            // mg O2/ mg C
+
+            BenthicBiomass = 0;
+            //for (IV = Consts.FirstInvert; IV <= Consts.LastInvert; IV++)  // FIXME ANIMAL LINKAGE
+            //{
+            //    TInv = GetStatePointer(IV, T_SVType.StV, T_SVLayer.WaterCol);
+            //    if (TInv != null)
+            //    {
+            //        LL = Location.Locale;
+            //        if (TInv.IsBenthos())
+            //        {
+            //            BenthicBiomass = BenthicBiomass + TInv.State * Volume_Last_Step / LL.SurfArea;
+            //            // g/m2               g/m2             g/m3          m3                m2
+            //        }
+            //    }
+            //}
+            if (BenthicBiomass < 0.001)
+            {
+                BenthicBiomass = 0.001;
+            }
+            // corresponds to min particle mixing of 1.67E-06 cm/d
+
+            Diagenesis_Rec DR = Diagenesis_Params;
+
+            DR.W12 = Math.Pow(10.0, Math.Log10(BenthicBiomass) - 2.778151) * 0.0001 / DR.H2.Val;
+            //  (m/d)    (cm2 / d)                 (g / m2)                    (m2/cm2)        (m)
+
+            //w12 := (Dp.val * POWER(ThtaDp.val, (Temp - 20)) / (H2.Val * POC1R.Val + 1e-18)) * (POCG1_2(/ POC1R.Val))
+            //(m / d)(m2 / d)(m)
+            //                * (O2 / (Km_O2_Dp.val + O2 + 1e-18)) + (DpMin.Val)0.00006 / H2.Val ;
+            //(min bioturb)  (m2 / d)(m) 
+
+            DR.KL12 = DR.Dd.Val * Math.Pow(Convert.ToDouble(DR.ThtaDd.Val), (Temp - 20)) / (DR.H2.Val);
+            // m/d      // m2/d                                                                 // m
+            // ** NO Dissolved Phase Mixing Coefficient Due to Organism Activities  **
+
+            IterCount = 0;
+            do
+            {
+                NH3_0 = GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);                // dissolved ammonia water column
+                NH4_1 = GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1);                // ammonia Layer 1
+                NH4_2 = GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer2);                // ammonia Layer 2
+                NO3_0 = GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);                // nitrate water column
+                NO3_1 = GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);                // nitrate Layer 1
+                NO3_2 = GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
+                PO4_0 = GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);                // phosphate water column
+                PO4_1 = GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);
+                PO4_2 = GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2);
+                // compute s
+                if ((O2 < Consts.Tiny))  s = 1e6;
+                else                    s = SOD_test / O2;
+       // mass transfer coeff        // m/d  go2/m2 d  gO2/m3
+                if (s < Consts.Tiny)
+                {
+                    s = Consts.Tiny;
+                }
+                // avoid crash solving linear eqns.
+                // Solve for Ammonia
+                fda1 = 1 / (1 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdNH3.Val);
+                fpa1 = 1 - fda1;
+                fda2 = 1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdNH3.Val);
+                fpa2 = 1 - fda2;
+                if (NH4_1 < Consts.Tiny)
+                {
+                    K2NH4 = 0;
+                }
+                else
+                {
+                    K2NH4 = ((TNH4_Sediment)(GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1))).Nitr_Rate(NH4_1);
+                }
+                // Write linear system of equations around Ammonia
+                a11 = -fda1 * Diagenesis_Params.KL12 - fpa1 * Diagenesis_Params.W12 - K2NH4 / s - fda1 * s - Diagenesis_Params.w2.Val;
+                a12 = fda2 * Diagenesis_Params.KL12 + fpa2 * Diagenesis_Params.W12;
+                b1 = -s * NH3_0;
+                a21 = fda1 * Diagenesis_Params.KL12 + fpa1 * Diagenesis_Params.W12 + Diagenesis_Params.w2.Val;
+                a22 = -fda2 * Diagenesis_Params.KL12 - fpa2 * Diagenesis_Params.W12 - Diagenesis_Params.w2.Val - Diagenesis_Params.H2.Val / (0.002);
+                // If Layer2 Steady State then a22 := -fda2 * KL12 - fpa2 * w12 - w2.Val;
+                b2 = -Jn - Diagenesis_Params.H2.Val / (0.002) * NH4_2;
+                // If Layer2 Steady State then b2 := -Jn;
+                Linear_System(a11, a12, a21, a22, b1, b2, ref NH4_1, ref NH4_2);
+                NSOD = 4.57 * K2NH4 / s * NH4_1;
+                // gO2/gN
+                // Solve for Nitrate
+                K2Denit_1 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1))).Denit_Rate(NO3_1);
+                // m2/d2
+                KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate(NO3_2);
+                // m/d
+                a11 = -Diagenesis_Params.KL12 - K2Denit_1 / s - Diagenesis_Params.w2.Val - s;
+             //                         (m/d)   (m2/d2)   (m/d)                  (m/d)
+
+                a12 = Diagenesis_Params.KL12;
+                b1 = -s * NO3_0 - K2NH4 / s * NH4_1;
+                //  (m/d) (g/m3)   (  m/d  )   (g/m3)
+                a21 = Diagenesis_Params.KL12 + Diagenesis_Params.w2.Val;
+                a22 = -Diagenesis_Params.KL12 - KDenit_2 - Diagenesis_Params.w2.Val - Diagenesis_Params.H2.Val / (0.002);
+                //                      (m/d)     (m/d)                     (m/d)                        (m/d)
+                // If Layer2 Steady_State then a22 := -w12 - kDenit_2 - w2.Val;
+                b2 = -Diagenesis_Params.H2.Val / (0.002) * NO3_2;
+                // If Layer2 Steady State then b2 := 0;
+                Linear_System(a11, a12, a21, a22, b1, b2, ref NO3_1, ref NO3_2);
+                // Solve for Methane / Sulfide
+                JO2NO3 = 2.86 * (K2Denit_1 / s * NO3_1 + KDenit_2 * NO3_2);
+              //(g/m2d)          (m2/d2)   (m/d) (g/m3)   (m/d)     (g/m3)
+                Jc_O2Equiv = Jc - JO2NO3;
+                // ppt
+                if (GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) < Diagenesis_Params.SALTSW.Val)
+                {
+                    // Solve for Methane
+                    if (Jc_O2Equiv < 0)
+                    {
+                        Jc_O2Equiv = 0;
+                    }
+                    CH4Sat = 100 * (1 + DynamicZMean() / 10) * Math.Pow(1.024, (20 - Temp));
+                    // m
+                    CSODmax = Math.Min(Math.Sqrt(2 * Diagenesis_Params.KL12 * CH4Sat * Jc_O2Equiv), Jc_O2Equiv);
+                    Sech_Arg = (Diagenesis_Params.KappaCH4.Val * Math.Pow(Diagenesis_Params.ThtaCH4.Val, (Temp - 20))) / s;
+                    // CSOD Equation 10.35 from DiTorro
+                    // The hyperbolic secant is defined as HSec(X) = 2 / (Exp(X) + Exp(-X))
+                    if ((Sech_Arg < 400))
+                    {
+                        CSOD = CSODmax * (1 - (2 / (Math.Exp(Sech_Arg) + Math.Exp(-Sech_Arg))));
+                    }
+                    else
+                    {
+                        CSOD = CSODmax;
+                    }
+                    // HSec(SECH_ARG) < 3.8E-174 ~ 0
+                }
+                else
+                {
+                    // solve for sulfide
+                    HST1 = GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer1);
+                    HST2 = GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer2);
+                    COD_0 = GetState(AllVariables.COD, T_SVType.StV, T_SVLayer.WaterCol);
+                    fd1 = 1 / (1 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdH2S1.Val);
+                    fp1 = 1 - fd1;
+                    fd2 = 1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdH2S2.Val);
+                    fp2 = 1 - fd2;
+                    k2Oxid = ((TSulfide_Sediment)(GetStatePointer(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer1))).k2Oxid();
+                    F12 = Diagenesis_Params.W12 * fp1 + Diagenesis_Params.KL12 * fd1;
+                    F21 = Diagenesis_Params.W12 * fp2 + Diagenesis_Params.KL12 * fd2;
+                    a11 = -F12 - k2Oxid / s - Diagenesis_Params.w2.Val - fd1 * s;
+                    a12 = F21;
+                    b1 = -s * COD_0;
+                    a21 = F12 + Diagenesis_Params.w2.Val;
+                    a22 = -F21 - Diagenesis_Params.w2.Val - Diagenesis_Params.H2.Val / 0.002;
+                    b2 = -Jc_O2Equiv - Diagenesis_Params.H2.Val / 0.002 * HST2;
+                    Linear_System(a11, a12, a21, a22, b1, b2, ref HST1, ref HST2);
+                    // CSOD
+                    CSOD = (k2Oxid / s) * HST1;
+                }
+                // Test Derived SOD_Test
+                SOD = (SOD_test + CSOD + NSOD) / 2;
+                // g O2/m2 d
+                if (SOD == 0)
+                {
+                    ErrorOK = true;
+                }
+                else
+                {
+                    ErrorOK = Math.Abs((SOD - SOD_test) / SOD) <= PSetup.RelativeError;
+                }
+                IterCount++;
+                if (IterCount > 5000)
+                {
+                    ErrorOK = true;
+                }
+                SOD_test = SOD;
+            } while (!(ErrorOK));
+            if (Diagenesis_Steady_State)
+            {
+                // STEADY STATE IN LAYER 1
+                CalculateSOD_SetL1State(AllVariables.Ammonia, NH4_1);
+                CalculateSOD_SetL1State(AllVariables.Nitrate, NO3_1);
+                CalculateSOD_SetL1State(AllVariables.Sulfide, HST1);
+                // Solve PO4
+                fd1 = ((TPO4_Sediment)(GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1))).fdp1();
+                fp1 = 1 - fd1;
+                fd2 = (1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdPO42.Val));
+                fp2 = 1 - fd2;
+                a11 = -fd1 * Diagenesis_Params.KL12 - fp1 * Diagenesis_Params.W12 - fd1 * s - Diagenesis_Params.w2.Val;
+                a12 = fd2 * Diagenesis_Params.KL12 + fp2 * Diagenesis_Params.W12;
+                b1 = -s * PO4_0;
+                a21 = fd1 * Diagenesis_Params.KL12 + fp1 * Diagenesis_Params.W12 + Diagenesis_Params.w2.Val;
+                a22 = -fd2 * Diagenesis_Params.KL12 - fp2 * Diagenesis_Params.W12 - Diagenesis_Params.w2.Val - Diagenesis_Params.H2.Val / 0.002;
+                b2 = -Jp - Diagenesis_Params.H2.Val / 0.002 * PO4_2;
+                // If Layer2 steadystate Then
+                // Begin
+                // a22 := -fd2 * KL12 - fp2 * w12 - w2.val;
+                // b2  := -Jp;
+                // End;
+                Linear_System(a11, a12, a21, a22, b1, b2, ref PO4_1, ref PO4_2);
+                CalculateSOD_SetL1State(AllVariables.Phosphate, PO4_1);
+                // SetL1State(Silica,Si_1);
+                // steady state for silica not complete
+            }
+        }
+
+        // Iterative Solution Scheme to calculate SOD before derivatives are solved
+        // CalculateSOD
+        // -----------------------------------------------------------------------------------------
+        public double Diagenesis_Detr(AllVariables NS)
+        {
+            double result;
+            // quantity of sedimented detritus in diagenesis model in mg/L(wc)
+            double OM;
+            double SedN_OM;
+            double SedP_OM;
+            double SedC_OM;
+            ReminRecord RR = Location.Remin;
+            if (NS == AllVariables.SedmRefrDetr)
+            {
+                SedN_OM = GetState(AllVariables.PON_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2Org_Refr;
+                SedP_OM = GetState(AllVariables.POP_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2Org_Refr;
+                // g OM/m3 s               // g P or N / m3                                // g P or N / g OM
+                SedC_OM = GetState(AllVariables.POC_G2, T_SVType.StV, T_SVLayer.SedLayer2) * Consts.Detr_OM_2_OC;
+                // g OM/m3 s                 // g OC/m3                                   // g OM / g OC
+            }
+            else
+            {
+                // SedmLabDetr
+                SedN_OM = GetState(AllVariables.PON_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2OrgLab;
+                SedP_OM = GetState(AllVariables.POP_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2OrgLab;
+                // g OM/m3                // g P or N / m3                          // g P or N / g OM
+                SedC_OM = GetState(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2) * Consts.Detr_OM_2_OC;
+                // g OM/m3                // g OC/m3                                // g OM / g OC
+            }
+            OM = Math.Min(SedN_OM, Math.Min(SedP_OM, SedC_OM));
+            // g OM /m3
+            MorphRecord MR = Location.Morph;
+            result = OM * DiagenesisVol(2) / MR.SegVolum;
+// g OM/m3 water    // g/m3         // m3       // m3 water
+
+            return result;
+        }
+
+        // ---------------------------------------------------------------
+
+
     }  // end TAQUATOXSegment
 
     public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder
@@ -1769,7 +2389,9 @@ namespace AQUATOX.AQTSegment
                                           typeof(SortedList<DateTime, double>), typeof(AQUATOXTSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
                                           typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj), typeof(DetritalInputRecordType),
                                           typeof(TDissRefrDetr), typeof(TDissLabDetr), typeof(TSuspRefrDetr), typeof(TSuspLabDetr), typeof(TSedRefrDetr), typeof(TSedLabileDetr),
-                                          typeof(TimeSeriesInput), typeof(TimeSeriesOutput)}; 
+                                          typeof(TimeSeriesInput), typeof(TimeSeriesOutput), typeof(TNH4_Sediment), typeof(TNO3_Sediment), typeof(TPO4_Sediment),
+                                          typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
+                                          typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec)}; 
     }
 }
 
