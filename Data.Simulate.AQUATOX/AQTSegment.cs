@@ -480,6 +480,7 @@ namespace AQUATOX.AQTSegment
 
             DerivStep = Step;
             // Zero_Utility_Variables();  animal trophic level only
+            if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
 
             foreach (TStateVariable TSV in SV)
@@ -789,7 +790,7 @@ namespace AQUATOX.AQTSegment
             CurrentYearNum = (int)((dayspassed + 2.0) / 365.0) + 1;
             if (CurrentYearNum > YearNum_PrevStep)   // (!EstuarySegment && (CurrentYearNum > YearNum_PrevStep))
             { TVolume PV = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-              PV.SetMeanDischarge(TPresent);   }
+                PV.SetMeanDischarge(TPresent); }
 
             // days
             //if (TPresent - LastPctEmbedCalc > 60)
@@ -886,7 +887,7 @@ namespace AQUATOX.AQTSegment
                 //                    if (FinishPoint) // if it is time to write rates
                 //                    {      xsav = x;      }
 
-                if ((x.AddDays(h) - TEnd).TotalDays > 0.0)  
+                if ((x.AddDays(h) - TEnd).TotalDays > 0.0)
                 {
                     // if stepsize can overshoot, decrease
                     h = (TEnd - x).TotalDays;
@@ -981,7 +982,7 @@ namespace AQUATOX.AQTSegment
             // Water_Was_Zero = false;
             // WaterVolZero = false;
 
-             Vol_Prev_Step = Volume_Last_Step;
+            Vol_Prev_Step = Volume_Last_Step;
 
             // FIXME Stratification code here if and when relevant
 
@@ -991,146 +992,146 @@ namespace AQUATOX.AQTSegment
             //GainVol = 0;
             //PrevSegVol = 0;
             //NewSegVol = 0;
-//          NewVolFrac = 1;
+            //          NewVolFrac = 1;
 
             // FIXME Stratification code here if and when relevant
 
-//          Last_Non_Zero_Vol = NewVolume;
+            //          Last_Non_Zero_Vol = NewVolume;
             FracChange = (NewVolume / Vol_Prev_Step);
-//          VolFrac_Last_Step = NewVolFrac;
+            //          VolFrac_Last_Step = NewVolFrac;
 
             TV.DeltaVolume();  // Update SegVolum Calculations
 
             foreach (TStateVariable TSV in SV)
             {
-                    // PERFORM DILUTE-CONCENTRATE
-               if (TSV.Layer == T_SVLayer.WaterCol)
-                  //if (((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota))||
-                  //   ((TSV.NState >= Globals.Consts.FirstTox) && (TSV.NState <= Globals.Consts.LastTox))||
-                  if   ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr))
-                        {
-                            TSV.State = TSV.State / FracChange;
-                        }
-                    // dilute/concentrate
+                // PERFORM DILUTE-CONCENTRATE
+                if (TSV.Layer == T_SVLayer.WaterCol)
+                    //if (((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota))||
+                    //   ((TSV.NState >= Globals.Consts.FirstTox) && (TSV.NState <= Globals.Consts.LastTox))||
+                    if ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr))
+                    {
+                        TSV.State = TSV.State / FracChange;
+                    }
+                // dilute/concentrate
             }
 
-        //if ((LossVol > 0) || (GainVol > 0))
-        //        {
-        //            for (i = 0; i < Count; i++)
-        //            {
-        //                PSV = At(i);
-        //                if (PSV.Layer == T_SVLayer.WaterCol)
-        //                {
-        //                    if ((new ArrayList(new object[] { Consts.FirstBiota, Consts.FirstTox, AllVariables.Ammonia }).Contains(PSV.NState)) && !((PSV.NState >= Consts.FirstTox && PSV.NState <= Consts.LastTox) && SetupRec.ChemsDrivingVars))
-        //                    {
-        //                        // move water based on delta z thermocline 7-27-07
-        //                        MassT0 = PSV.State * PrevSegVol;
-        //                        // g
-        //                        // g/m3
-        //                        // m3
-        //                        if (VSeg == VerticalSegments.Epilimnion)
-        //                        {
-        //                            OtherSegState = HypoSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
-        //                        }
-        //                        else
-        //                        {
-        //                            OtherSegState = EpiSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
-        //                        }
-        //                        if (LossVol > 0)
-        //                        {
-        //                            mass = (PSV.State * PrevSegVol) - (LossVol * PSV.State);
-        //                        }
-        //                        else
-        //                        {
-        //                            mass = (PSV.State * PrevSegVol) + (GainVol * OtherSegState);
-        //                        }
-        //                        // gainvol>0
-        //                        // g
-        //                        // g/m3
-        //                        // m3
-        //                        // m3
-        //                        // g/m3
-        //                        PSV.State = mass / NewSegVol;
-        //                        // g/m3
-        //                        // g
-        //                        // m3
-        //                        Perform_Dilute_or_Concentrate_Track_Nutrient_Exchange(PSV.NState, mass - MassT0, WorkingTStates);
-        //                        // net mass transfer
-        //                        // g
-        //                    }
-        //                }
-        //            }
-        //        }
+            //if ((LossVol > 0) || (GainVol > 0))
+            //        {
+            //            for (i = 0; i < Count; i++)
+            //            {
+            //                PSV = At(i);
+            //                if (PSV.Layer == T_SVLayer.WaterCol)
+            //                {
+            //                    if ((new ArrayList(new object[] { Consts.FirstBiota, Consts.FirstTox, AllVariables.Ammonia }).Contains(PSV.NState)) && !((PSV.NState >= Consts.FirstTox && PSV.NState <= Consts.LastTox) && SetupRec.ChemsDrivingVars))
+            //                    {
+            //                        // move water based on delta z thermocline 7-27-07
+            //                        MassT0 = PSV.State * PrevSegVol;
+            //                        // g
+            //                        // g/m3
+            //                        // m3
+            //                        if (VSeg == VerticalSegments.Epilimnion)
+            //                        {
+            //                            OtherSegState = HypoSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
+            //                        }
+            //                        else
+            //                        {
+            //                            OtherSegState = EpiSegment.GetState(PSV.NState, PSV.SVType, PSV.Layer);
+            //                        }
+            //                        if (LossVol > 0)
+            //                        {
+            //                            mass = (PSV.State * PrevSegVol) - (LossVol * PSV.State);
+            //                        }
+            //                        else
+            //                        {
+            //                            mass = (PSV.State * PrevSegVol) + (GainVol * OtherSegState);
+            //                        }
+            //                        // gainvol>0
+            //                        // g
+            //                        // g/m3
+            //                        // m3
+            //                        // m3
+            //                        // g/m3
+            //                        PSV.State = mass / NewSegVol;
+            //                        // g/m3
+            //                        // g
+            //                        // m3
+            //                        Perform_Dilute_or_Concentrate_Track_Nutrient_Exchange(PSV.NState, mass - MassT0, WorkingTStates);
+            //                        // net mass transfer
+            //                        // g
+            //                    }
+            //                }
+            //            }
+            //        }
 
-        //        if ((LossVol > 0) || (GainVol > 0)) TV.DeltaVolume();
+            //        if ((LossVol > 0) || (GainVol > 0)) TV.DeltaVolume();
 
-                // pore waters also dilute/concentrate
-                //for (LayerLoop = T_SVLayer.SedLayer1; LayerLoop <= Consts.LowestLayer; LayerLoop++)
-                //{
-                //    if (GetStatePointer(AllVariables.PoreWater, T_SVType.StV, LayerLoop) != null)
-                //    {
-                //        NewVolume = GetState(AllVariables.PoreWater, T_SVType.StV, LayerLoop);
-                //        if (NewVolume * SV.SedLayerArea() > Consts.Tiny)
-                //        {
-                //            // m3/m2
-                //            // m2
-                //            if (PWVol_Last_Step[LayerLoop] < Consts.Tiny)
-                //            {
-                //                FracChange = 1;
-                //            }
-                //            else
-                //            {
-                //                FracChange = (NewVolume / PWVol_Last_Step[LayerLoop]);
-                //            }
-                //            if (FracChange != 1.0)
-                //            {
-                //                for (VarLoop = AllVariables.PoreWater; VarLoop <= AllVariables.LaDOMPore; VarLoop++)
-                //                {
-                //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Consts.LastToxTyp; ToxLoop++)
-                //                    {
-                //                        PSV = GetStatePointer(VarLoop, ToxLoop, LayerLoop);
-                //                        if ((PSV != null) && !((VarLoop == AllVariables.PoreWater) && (ToxLoop == T_SVType.StV)))
-                //                        {
-                //                            PSV.State = PSV.State / FracChange;
-                //                        }
-                //                    }
-                //                }
-                //            }
-                //            PWVol_Last_Step[LayerLoop] = NewVolume;
-                //        }
-                //        else
-                //        {
-                //            if (PWVol_Last_Step[LayerLoop] > 0)
-                //            {
-                //                // need to handle residual toxicant dissolved in pore water
-                //                for (PoreLoop = AllVariables.PoreWater; PoreLoop <= AllVariables.LaDOMPore; PoreLoop++)
-                //                {
-                //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-                //                    {
-                //                        PTox = SV.GetStatePointer(PoreLoop, ToxLoop, LayerLoop);
-                //                        if (PTox != null)
-                //                        {
-                //                            if (ToxLoop > T_SVType.StV)
-                //                            {
-                //                                PWater = SV.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, T_SVLayer.WaterCol);
-                //                                PWater.State = PWater.State + PTox.State * SV.PWVol_Last_Step[LayerLoop] * SV.SedLayerArea() / SV.SegVol();
-                //                                // ug/L wc
-                //                                // ug/L wc
-                //                                // ug/L pw
-                //                                // m3/m2 pw
-                //                                // m2
-                //                                // m3 wc
-                //                            }
-                //                            PTox.State = 0;
-                //                        }
-                //                    }
-                //                }
-                //            }
-                //            PWVol_Last_Step[LayerLoop] = 0;
-                //            // newvolume < tiny
-                //        }
-                //    }
-            
+            // pore waters also dilute/concentrate
+            //for (LayerLoop = T_SVLayer.SedLayer1; LayerLoop <= Consts.LowestLayer; LayerLoop++)
+            //{
+            //    if (GetStatePointer(AllVariables.PoreWater, T_SVType.StV, LayerLoop) != null)
+            //    {
+            //        NewVolume = GetState(AllVariables.PoreWater, T_SVType.StV, LayerLoop);
+            //        if (NewVolume * SV.SedLayerArea() > Consts.Tiny)
+            //        {
+            //            // m3/m2
+            //            // m2
+            //            if (PWVol_Last_Step[LayerLoop] < Consts.Tiny)
+            //            {
+            //                FracChange = 1;
+            //            }
+            //            else
+            //            {
+            //                FracChange = (NewVolume / PWVol_Last_Step[LayerLoop]);
+            //            }
+            //            if (FracChange != 1.0)
+            //            {
+            //                for (VarLoop = AllVariables.PoreWater; VarLoop <= AllVariables.LaDOMPore; VarLoop++)
+            //                {
+            //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Consts.LastToxTyp; ToxLoop++)
+            //                    {
+            //                        PSV = GetStatePointer(VarLoop, ToxLoop, LayerLoop);
+            //                        if ((PSV != null) && !((VarLoop == AllVariables.PoreWater) && (ToxLoop == T_SVType.StV)))
+            //                        {
+            //                            PSV.State = PSV.State / FracChange;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            PWVol_Last_Step[LayerLoop] = NewVolume;
+            //        }
+            //        else
+            //        {
+            //            if (PWVol_Last_Step[LayerLoop] > 0)
+            //            {
+            //                // need to handle residual toxicant dissolved in pore water
+            //                for (PoreLoop = AllVariables.PoreWater; PoreLoop <= AllVariables.LaDOMPore; PoreLoop++)
+            //                {
+            //                    for (ToxLoop = T_SVType.StV; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+            //                    {
+            //                        PTox = SV.GetStatePointer(PoreLoop, ToxLoop, LayerLoop);
+            //                        if (PTox != null)
+            //                        {
+            //                            if (ToxLoop > T_SVType.StV)
+            //                            {
+            //                                PWater = SV.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, T_SVLayer.WaterCol);
+            //                                PWater.State = PWater.State + PTox.State * SV.PWVol_Last_Step[LayerLoop] * SV.SedLayerArea() / SV.SegVol();
+            //                                // ug/L wc
+            //                                // ug/L wc
+            //                                // ug/L pw
+            //                                // m3/m2 pw
+            //                                // m2
+            //                                // m3 wc
+            //                            }
+            //                            PTox.State = 0;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            PWVol_Last_Step[LayerLoop] = 0;
+            //            // newvolume < tiny
+            //        }
+            //    }
+
         }
 
         // -------------------------------------------------------------------------------------------------------------------------------
@@ -1146,7 +1147,7 @@ namespace AQUATOX.AQTSegment
                     if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
                     {
                         res = res * SegVol() / SurfaceArea();
-                      //g/m2  g/m3     m3         m2
+                        //g/m2  g/m3     m3         m2
 
                         //If(NS in [FirstFish..LastFish]) and(Typ = StV) then   // fixme Animal code
                         //      res = res * Volume_Last_Step / Locale.SurfArea;
@@ -1159,7 +1160,7 @@ namespace AQUATOX.AQTSegment
 
         public bool Convert_g_m2_to_mg_L(AllVariables S, T_SVType T, T_SVLayer L)
         {
-          //  TStateVariable P;
+            //  TStateVariable P;
             bool Convert;
             Convert = false;
             // P = GetStatePointer(S, T, L);
@@ -1232,7 +1233,7 @@ namespace AQUATOX.AQTSegment
                     }
                     break;
                 case SiteTypes.Stream:
-                    
+
                     result = 0.0;
                     break;
                 default:
@@ -1416,10 +1417,10 @@ namespace AQUATOX.AQTSegment
         {
             // Variable ZMean of segment or both segments if dynamic stratification
             if (!Location.Locale.UseBathymetry)
-              return Volume_Last_Step / Location.Locale.SurfArea;
+                return Volume_Last_Step / Location.Locale.SurfArea;
 
-            if (UseConstZMean) 
-                  return Location.Locale.ICZMean;
+            if (UseConstZMean)
+                return Location.Locale.ICZMean;
 
             if (DynZMean != null) return DynZMean.ReturnTSLoad(TPresent);  // time series only
 
@@ -1441,10 +1442,10 @@ namespace AQUATOX.AQTSegment
             double result;
             TStateVariable p;
             p = GetStatePointer(S, T, L);
-            if (!(p == null))  {   result = p.State;   }
+            if (!(p == null)) { result = p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: "+S.ToString() , "original");
+                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");
                 // result = -1;
             }
             return result;
@@ -1525,7 +1526,7 @@ namespace AQUATOX.AQTSegment
         }
 
 
-        public double WaterDensity(bool Reference,  double KSTemp,  double KSSalt)
+        public double WaterDensity(bool Reference, double KSTemp, double KSSalt)
         {
             double result;
             double Salt;
@@ -1682,7 +1683,7 @@ namespace AQUATOX.AQTSegment
 
         // Diagenesis Model
         // -----------------------------------------------------------------------------------------
-        
+
         // Is diagenesis model included?
         public bool Diagenesis_Included()
         {
@@ -1739,7 +1740,7 @@ namespace AQUATOX.AQTSegment
                 result = Location.Locale.SurfArea * Diagenesis_Params.H1.Val;
             else
                 result = Location.Locale.SurfArea * Diagenesis_Params.H2.Val;
-                 // m3                // m2                     // m
+            // m3                // m2                     // m
 
 
             //if (Stratified)
@@ -1774,8 +1775,8 @@ namespace AQUATOX.AQTSegment
                 // max mass transfer if o2 goes to zero
                 result = MAX_S;
             }
-            else result = SOD   / O2;
-             // m/d =  go2/m2 d /  gO2/m3
+            else result = SOD / O2;
+            // m/d =  go2/m2 d /  gO2/m3
 
             // mass transfer coeff
             if (result > MAX_S)
@@ -1786,7 +1787,7 @@ namespace AQUATOX.AQTSegment
 
             return result;
         }
-        
+
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - -
         //public void CalcDeposition_SumDef(TAnimal PA)  // fixme animal linkage
@@ -1857,10 +1858,10 @@ namespace AQUATOX.AQTSegment
         //}
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        public void CalcDeposition_SumSed(TStateVariable P, AllVariables NS, T_SVType Typ, ref double Sed  )
+        public void CalcDeposition_SumSed(TStateVariable P, AllVariables NS, T_SVType Typ, ref double Sed)
         {
-//            const double PlantSinkLabile = 0.92;
-//            TPlant PP;    FIXME Plant Linkage
+            //            const double PlantSinkLabile = 0.92;
+            //            TPlant PP;    FIXME Plant Linkage
             double NFrac;
             // double Frac;
             // Ignore the N and P content in G3 because it is so small.
@@ -1940,9 +1941,9 @@ namespace AQUATOX.AQTSegment
             //}
             //// algae
             // G1 equivalent to labile
-            if (((P.NState == AllVariables.SuspLabDetr) &&((NS==AllVariables.PON_G1) || (NS == AllVariables.POP_G1) || (NS ==AllVariables.POC_G1))) ||  //  G1 equivalent to labile
-                ((P.NState == AllVariables.SuspRefrDetr)&&((NS == AllVariables.PON_G2) || (NS == AllVariables.POP_G2) || (NS == AllVariables.POC_G2) || (NS == AllVariables.POC_G3))))
-             {
+            if (((P.NState == AllVariables.SuspLabDetr) && ((NS == AllVariables.PON_G1) || (NS == AllVariables.POP_G1) || (NS == AllVariables.POC_G1))) ||  //  G1 equivalent to labile
+                ((P.NState == AllVariables.SuspRefrDetr) && ((NS == AllVariables.PON_G2) || (NS == AllVariables.POP_G2) || (NS == AllVariables.POC_G2) || (NS == AllVariables.POC_G3))))
+            {
                 if ((Typ == T_SVType.StV))
                 {
                     ReminRecord RR = Location.Remin;
@@ -2018,13 +2019,13 @@ namespace AQUATOX.AQTSegment
             Sed = 0;
             foreach (TStateVariable TSV in SV)
             {
-                CalcDeposition_SumSed(TSV,NS,Typ,ref Sed);
-               //  CalcDeposition_SumDef(TSV,NS,Typ,ref Sedthis.At(i));  fixme animal linkage
+                CalcDeposition_SumSed(TSV, NS, Typ, ref Sed);
+                //  CalcDeposition_SumDef(TSV,NS,Typ,ref Sedthis.At(i));  fixme animal linkage
             }
             MorphRecord MR = Location.Morph;
             result = (Sed + Def) * MR.SegVolum / DiagenesisVol(2) * Diagenesis_Params.H2.Val;
-//        (g / m2 d) (g / m3 w )        (m3 w)        (m3 sed)         (m sed)
-//        (ug / m2 d)(ug / m3 w)        (m3 w)        (m3 sed)         (m sed)  (toxicant deposition units)
+            //        (g / m2 d) (g / m3 w )        (m3 w)        (m3 sed)         (m sed)
+            //        (ug / m2 d)(ug / m3 w)        (m3 w)        (m3 sed)         (m sed)  (toxicant deposition units)
             return result;
         }
 
@@ -2056,7 +2057,7 @@ namespace AQUATOX.AQTSegment
             double NSOD;
             AllVariables IV;
             AllVariables ns;
-//          TAnimal TInv;
+            //          TAnimal TInv;
             double BenthicBiomass;
             bool ErrorOK;
             double Jc;
@@ -2068,7 +2069,7 @@ namespace AQUATOX.AQTSegment
             TPON_Sediment ppn;
             TPOP_Sediment ppp;
             double JO2NO3, K2NH4, K2Denit_1, KDenit_2, NH3_0, NO3_0, NO3_1, NO3_2, NH4_1, NH4_2, PO4_0, PO4_1, PO4_2, COD_0;
-            double HST1=0, HST2, a11, a12, b1, a21, a22, b2, Sech_Arg, CH4toCO2, CH4Sat, CSODmax;
+            double HST1 = 0, HST2, a11, a12, b1, a21, a22, b2, Sech_Arg, CH4toCO2, CH4Sat, CSODmax;
             double fda1, fpa1, fda2, fpa2;   // ammonia
             double fd1, fp1, fd2, fp2;        // H2S
             double k1h1d, k1h1p, k2Oxid, k2h2d, k2h2p, F12, F21, xk1, xk2;
@@ -2090,7 +2091,7 @@ namespace AQUATOX.AQTSegment
             {
                 ppc = (TPOC_Sediment)GetStatePointer(ns, T_SVType.StV, T_SVLayer.SedLayer2);
                 Jc = Jc + ppc.Mineralization() * Diagenesis_Params.H2.Val * 32 / 12;
-         // gO2/m2 d           // g C / m3 d                     // m    // g O2/ g C
+                // gO2/m2 d           // g C / m3 d                     // m    // g O2/ g C
                 // CSOD
             }
             for (ns = AllVariables.PON_G1; ns <= AllVariables.PON_G3; ns++)
@@ -2175,9 +2176,9 @@ namespace AQUATOX.AQTSegment
                 PO4_1 = GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);
                 PO4_2 = GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2);
                 // compute s
-                if ((O2 < Consts.Tiny))  s = 1e6;
-                else                    s = SOD_test / O2;
-       // mass transfer coeff        // m/d  go2/m2 d  gO2/m3
+                if ((O2 < Consts.Tiny)) s = 1e6;
+                else s = SOD_test / O2;
+                // mass transfer coeff        // m/d  go2/m2 d  gO2/m3
                 if (s < Consts.Tiny)
                 {
                     s = Consts.Tiny;
@@ -2214,7 +2215,7 @@ namespace AQUATOX.AQTSegment
                 KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate(NO3_2);
                 // m/d
                 a11 = -Diagenesis_Params.KL12 - K2Denit_1 / s - Diagenesis_Params.w2.Val - s;
-             //                         (m/d)   (m2/d2)   (m/d)                  (m/d)
+                //                         (m/d)   (m2/d2)   (m/d)                  (m/d)
 
                 a12 = Diagenesis_Params.KL12;
                 b1 = -s * NO3_0 - K2NH4 / s * NH4_1;
@@ -2228,10 +2229,10 @@ namespace AQUATOX.AQTSegment
                 Linear_System(a11, a12, a21, a22, b1, b2, ref NO3_1, ref NO3_2);
                 // Solve for Methane / Sulfide
                 JO2NO3 = 2.86 * (K2Denit_1 / s * NO3_1 + KDenit_2 * NO3_2);
-              //(g/m2d)          (m2/d2)   (m/d) (g/m3)   (m/d)     (g/m3)
+                //(g/m2d)          (m2/d2)   (m/d) (g/m3)   (m/d)     (g/m3)
                 Jc_O2Equiv = Jc - JO2NO3;
                 // ppt
-                if (GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) < Diagenesis_Params.SALTSW.Val)
+                if (!Sulfide_System())
                 {
                     // Solve for Methane
                     if (Jc_O2Equiv < 0)
@@ -2327,7 +2328,16 @@ namespace AQUATOX.AQTSegment
         // Iterative Solution Scheme to calculate SOD before derivatives are solved
         // CalculateSOD
         // -----------------------------------------------------------------------------------------
-        public double Diagenesis_Detr(AllVariables NS)
+        public bool Sulfide_System()
+        {
+            double Salt;
+            TSalinity PSalt = (TSalinity) GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PSalt== null) Salt = -1.0; 
+                         else Salt = PSalt.State;
+            return (Salt > Diagenesis_Params.SALTND.Val);
+        }
+
+    public double Diagenesis_Detr(AllVariables NS)
         {
             double result;
             // quantity of sedimented detritus in diagenesis model in mg/L(wc)

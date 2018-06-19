@@ -286,23 +286,23 @@ namespace AQUATOX.GUI.Test
         {
             
                 e.LegendItems.Clear();
-                foreach (var series in this.chart1.Series)
-                {
-                    var legendItem = new LegendItem();
-                    legendItem.SeriesName = series.Name;
-                    legendItem.ImageStyle = LegendImageStyle.Rectangle;
-                    legendItem.BorderColor = Color.Transparent;
-                    legendItem.Name = series.Name + "_legend_item";
+            foreach (var series in this.chart1.Series)
+            {
+                var legendItem = new LegendItem();
+                legendItem.SeriesName = series.Name;
+                legendItem.ImageStyle = LegendImageStyle.Rectangle;
+                legendItem.BorderColor = Color.Transparent;
+                legendItem.Name = series.Name + "_legend_item";
 
-                    int i = legendItem.Cells.Add(LegendCellType.SeriesSymbol, "", ContentAlignment.MiddleCenter);
-                    legendItem.Cells.Add(LegendCellType.Text, series.Name, ContentAlignment.MiddleCenter);
+                int i = legendItem.Cells.Add(LegendCellType.SeriesSymbol, "", ContentAlignment.MiddleCenter);
+                legendItem.Cells.Add(LegendCellType.Text, series.Name, ContentAlignment.MiddleCenter);
 
-                    if (series.Enabled)
-                        legendItem.Color = series.Color;
-                    else
-                        legendItem.Color = Color.FromArgb(100, series.Color);
+                if (series.Enabled)
+                { legendItem.Color = series.Color; legendItem.BorderColor = Color.Black; }
+                else
+                { legendItem.Color = Color.FromArgb(100, series.Color); legendItem.BorderColor = Color.White; }
 
-                    legendItem.Tag = series;
+                legendItem.Tag = series;
                     e.LegendItems.Add(legendItem);
                 }
             

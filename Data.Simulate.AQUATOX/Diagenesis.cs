@@ -21,15 +21,13 @@ namespace AQUATOX.Diagenesis
             double result;
             // K1 nh4, oxic layer reaction velocity
             double Temp;
-            double Salt;
             double KappaNH3;
             double O2;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
 
             O2 = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            Salt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
-            if (Salt > DR.SALTND.Val)
+            if (AQTSeg.Sulfide_System())
                 KappaNH3 = DR.KappaNH3s.Val;
             else
                 KappaNH3 = DR.KappaNH3f.Val;
@@ -159,14 +157,12 @@ namespace AQUATOX.Diagenesis
             // eqns 5.23&24
             // m2/d2, L1, m/d L2
             double Temp;
-            double Salt;
             double KappaNO3;
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            Salt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             if (Layer == T_SVLayer.SedLayer1)
             {
-                if (Salt > DR.SALTND.Val)
+                if (AQTSeg.Sulfide_System())
                 {
                     KappaNO3 = DR.KappaNO3_1s.Val;
                 }
@@ -362,12 +358,11 @@ namespace AQUATOX.Diagenesis
             double result;
             double dKDPO41;
             double KDPO41;
-            double Salt;
             double O2;
-            Salt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);  fixmecheckforpointerfirst
+
             O2 = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            if (Salt > DR.SALTND.Val)
+            if (AQTSeg.Sulfide_System())
             {
                 dKDPO41 = DR.dKDPO41s.Val;
             }
@@ -894,7 +889,8 @@ namespace AQUATOX.Diagenesis
             double JO2NO3;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             // ppt
-            if (AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) >= DR.SALTSW.Val)
+
+            if (AQTSeg.Sulfide_System())
             {
                 // Goes to Sulfide Instead
                 Dia_Flux = 0;
@@ -1025,7 +1021,8 @@ namespace AQUATOX.Diagenesis
             double fdh2s2;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             // ppt
-            if (AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) < DR.SALTSW.Val)
+
+            if (!AQTSeg.Sulfide_System())
             {
                 // Goes to Methane Instead
                 Dia_Flux = 0;
@@ -1247,7 +1244,7 @@ namespace AQUATOX.Diagenesis
             if (NState == AllVariables.Silica)
             {
                 // Silica
-                Si_0 = AQTSeg.GetState(AllVariables.Silica, T_SVType.StV, T_SVLayer.WaterCol);
+                Si_0 = 0; // AQTSeg.GetState(AllVariables.Silica, T_SVType.StV, T_SVLayer.WaterCol);  assumes silica in water column is zero
                 Si_1 = AQTSeg.GetState(AllVariables.Silica, T_SVType.StV, T_SVLayer.SedLayer1);
                 Si_2 = AQTSeg.GetState(AllVariables.Silica, T_SVType.StV, T_SVLayer.SedLayer2);
                 Flux2Anaerobic = -((DR.W12 * (fpsi2 * Si_2 - fpsi1 * Si_1) + DR.KL12 * (fdsi2 * Si_2 - fdsi1 * Si_1)));
