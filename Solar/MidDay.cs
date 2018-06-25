@@ -465,11 +465,11 @@ namespace GCSOLAR
                         // 1091 FORMAT  ('1XENOBIOTIC NAME: ',5A4,/,' WATER IDENTIFICATION: ',5A4)
                         if (common.iatmos == 1)
                         {
-                            string str1 = "Type of atmosphere: terrestrial.";
+                            //string str1 = "Type of atmosphere: terrestrial.";
                         }
                         else if (common.iatmos == 2)
                         {
-                            string str2 = "Type of atmosphere: marine.";
+                            //string str2 = "Type of atmosphere: marine.";
                         }
 
                     }

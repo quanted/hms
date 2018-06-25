@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.0\OrganicMatter.AQUATOX.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
+    <ProjectReference Include="..\..\Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
+  </ItemGroup>
+
+</Project>

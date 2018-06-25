@@ -297,6 +297,7 @@
             <summary>
             Lat/lon point for when a coordinates are used as the geometry type.
             </summary>
+            
         </member>
         <member name="P:Data.TimeSeriesGeometry.GeometryMetadata">
             <summary>

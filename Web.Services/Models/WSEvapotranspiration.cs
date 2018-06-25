@@ -14,7 +14,7 @@ namespace Web.Services.Models
     public class WSEvapotranspiration
     {
 
-        private enum EvapoSources { nldas, gldas, daymet, wgen, prism, ncdc }
+        private enum EvapoSources { nldas, gldas, daymet, wgen, prism, ncdc, custom }
 
         /// <summary>
         /// Gets evapotranspiration data using the given TimeSeriesInput parameters.
@@ -50,7 +50,8 @@ namespace Web.Services.Models
                 RoughnessLength = input.RoughnessLength,
                 VegetationHeight = input.VegetationHeight,
                 LeafAreaIndices = input.LeafAreaIndices,
-                AirTemperature = input.AirTemperature
+                AirTemperature = input.AirTemperature,
+                UserData = input.UserData
         };
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.

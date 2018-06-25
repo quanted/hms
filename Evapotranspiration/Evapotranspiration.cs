@@ -99,6 +99,11 @@ namespace Evapotranspiration
         /// </summary>
         public Hashtable AirTemperature { get; set; }
 
+        /// <summary>
+        /// OPTIONAL: Data file provided by the user.
+        /// </summary>
+        public string UserData { get; set; }
+
         // TimeSeries Output variable 
         public ITimeSeriesOutput Output { get; set; }
 
@@ -126,7 +131,7 @@ namespace Evapotranspiration
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
             {                
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
@@ -139,7 +144,43 @@ namespace Evapotranspiration
             Elevation elev = new Elevation(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude);
             Utilities.Time offsets = new Utilities.Time();
 
-            this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
+            //this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
+
+            //Error checking and data validation
+            if(this.Input.Source != "gldas" && this.Algorithm == "gldas" )
+            {
+                errorMsg = "ERROR: GLDAS algorithm requires GLDAS data source.";
+                return null;
+            }
+            if (this.Input.Source != "nldas" && this.Algorithm == "nldas")
+            {
+                errorMsg = "ERROR: NLDAS algorithm requires NLDAS data source.";
+                return null;
+            }
+            if (this.Input.Source == "daymet" && this.Algorithm != "hamon" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
+            {
+                errorMsg = "ERROR: Algorithm is incompatible with Daymet data source.";
+                return null;
+            }
+            if (this.Input.Source == "ncdc" && this.Algorithm != "hamon")
+            {
+                errorMsg = "ERROR: Algorithm is incompatible with NCDC data source.";
+                return null;
+            }
+            if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
+            {
+                errorMsg = "ERROR: No data available for the requested Source/Algorithm/Date range.";
+                return null;
+            }
+            if (this.Input.Source == "custom")
+            {
+                if (this.Algorithm == "penmanhourly" || this.Algorithm == "hspf")
+                {
+                    errorMsg = "ERROR: Hourly algorithms do not yet support custom data.";
+                    return null;
+                }
+                this.Input.Geometry.GeometryMetadata["userdata"] = UserData;
+            }           
 
             switch (this.Algorithm)
             {

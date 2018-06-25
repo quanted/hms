@@ -89,6 +89,11 @@
             REQUIRED: Monthly air temperature coefficients.
             </summary>
         </member>
+        <member name="P:Web.Services.Controllers.EvapotranspirationInput.UserData">
+            <summary>
+            OPTIONAL: Data file provided by the user.
+            </summary>
+        </member>
         <member name="T:Web.Services.Controllers.EvapotranspirationInputExample">
             <summary>
             Swashbuckle Evapotranspiration POST request example

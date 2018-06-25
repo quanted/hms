@@ -97,6 +97,11 @@ namespace Web.Services.Controllers
         /// REQUIRED: Monthly air temperature coefficients.
         /// </summary>
         public Hashtable AirTemperature { get; set; }
+
+        /// <summary>
+        /// OPTIONAL: Data file provided by the user.
+        /// </summary>
+        public string UserData { get; set; }
     }
 
 
@@ -155,7 +160,8 @@ namespace Web.Services.Controllers
                 RoughnessLength = 0.02,
                 VegetationHeight = 0.12,
                 LeafAreaIndices = new Hashtable { { 1, 2.51 }, { 2, 2.51 }, { 3, 2.51 }, { 4, 2.51 }, { 5, 2.51 }, { 6, 2.51 }, { 7, 2.51 }, { 8, 2.51 }, { 9, 2.51 }, { 10, 2.51 }, { 11, 2.51 }, { 12, 2.51 } },
-                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } }
+                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } },
+                UserData = "2015-01-01 00Z    -2.7000E-03\n2015 - 01 - 01 01Z - 1.9000E-03\n2015 - 01 - 01 02Z - 1.3000E-03\n2015 - 01 - 01 03Z - 9.0000E-04\n2015 - 01 - 01 04Z - 3.0000E-04"
             };
             return example;
         }
@@ -222,7 +228,8 @@ namespace Web.Services.Controllers
                 RoughnessLength = 0.02,
                 VegetationHeight = 0.12,
                 LeafAreaIndices = new Hashtable { { 1, 2.51 }, { 2, 2.51 }, { 3, 2.51 }, { 4, 2.51 }, { 5, 2.51 }, { 6, 2.51 }, { 7, 2.51 }, { 8, 2.51 }, { 9, 2.51 }, { 10, 2.51 }, { 11, 2.51 }, { 12, 2.51 } },
-                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } }
+                AirTemperature = new Hashtable { { 1, 1.0 }, { 2, 1.0 }, { 3, 1.0 }, { 4, 1.0 }, { 5, 1.0 }, { 6, 1.0 }, { 7, 1.0 }, { 8, 1.0 }, { 9, 1.0 }, { 10, 1.0 }, { 11, 1.0 }, { 12, 1.0 } },
+                UserData = "2015-01-01 00Z\t-2.7000E-03\n2015 - 01 - 01 01Z\t- 1.9000E-03\n2015 - 01 - 01 02Z\t- 1.3000E-03\n2015 - 01 - 01 03Z\t- 9.0000E-04\n2015 - 01 - 01 04Z\t- 3.0000E-04"
             };
             return example;
         }
@@ -304,9 +311,13 @@ namespace Web.Services.Controllers
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();   //For Debugging
             WSEvapotranspiration evapo = new WSEvapotranspiration();
             ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+            watch.Stop();
+            string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
+            results.Metadata.Add("Time Elapsed", elapsed);
             return new ObjectResult(results);
         }
     }

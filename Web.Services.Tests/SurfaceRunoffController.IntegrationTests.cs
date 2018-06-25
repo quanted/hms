@@ -53,6 +53,7 @@ namespace Web.Services.Tests
         /// </summary>
         /// <param name="evapoInputString"></param>
         /// <returns></returns>
+        [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]

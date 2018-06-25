@@ -52,6 +52,7 @@ namespace Web.Services.Tests
         /// </summary>
         /// <param name="soilmoistureInputString"></param>
         /// <returns></returns>
+        [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]

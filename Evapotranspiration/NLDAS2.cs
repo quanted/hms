@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Net;
 using System.Globalization;
+using Data;
 
 //http://ldas.gsfc.nasa.gov/faq/#Subset
 //ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/1980/004/NLDAS_FORA0125_H.A19800104.0000.002.grb.xml
@@ -342,10 +343,12 @@ namespace Evapotranspiration
             {
                 if (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010)
                 {
-                    _source = "nldas";
+                    errorMsg = "No GLDAS data is available for this time frame.";
+                    return dt;
+                    /*_source = "nldas";
                     startDate = startDate.AddDays(-1.0);
                     _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
-                    _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
+                    _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";*/
                 }
                 // Get temperature and dates.
                 _parameter = getNLDASParameterName(parameter.Temperature2mAboveGround_K);
@@ -393,8 +396,7 @@ namespace Evapotranspiration
                 }
             }
 
-
-
+            
             foreach (DataRow dr in dt.Rows)
             {
                 dr["Value"] = Convert.ToDouble(dr["Value"].ToString()) - 273.15; // Convert Kelvin to Celsius
@@ -411,7 +413,7 @@ namespace Evapotranspiration
                 dtHourly.Columns.Add("Precipitation_Hourly");
                 dtHourly.Columns.Add("Potential_Evaporation");
             }
-
+            
             string date = "", datej = "";
             int startYear;
             double solarRad;
@@ -421,6 +423,13 @@ namespace Evapotranspiration
             int julianDayOfYear;
             int hour;
             int remainder;
+            int remaindermax = 24;
+            int remaindermin = 23;
+            if (_source == "gldas")
+            {
+                remaindermax = 8;
+                remaindermin = 7;
+            }
             DataRow dr1 = null;
             List<Double> listdt = new List<double>();
             List<String> listDate = new List<String>();
@@ -432,9 +441,10 @@ namespace Evapotranspiration
             List<Double> listPrep = new List<double>();
             List<Double> listPE = new List<double>();
 
+            
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                Math.DivRem(i, 24, out remainder);
+                Math.DivRem(i, remaindermax, out remainder);
 
                 if (remainder == 0)
                 {
@@ -468,9 +478,9 @@ namespace Evapotranspiration
                     listPE.Add(Convert.ToDouble(dtPE.Rows[i]["Value"].ToString()));
                 }
 
-                if (remainder == 23)
+                if (remainder == remaindermin)
                 {
-                    for (int j = 0; j < 24; j++)
+                    for (int j = 0; j < remaindermax; j++)
                     {
                         dr1 = dtHourly.NewRow();
                         hour = listHour[j];
@@ -509,7 +519,6 @@ namespace Evapotranspiration
                 }
 
             }
-
             return dtHourly;
         }
 
@@ -613,13 +622,17 @@ namespace Evapotranspiration
             int remaindermax = 8;
             int remaindermin = 7;
 
-            if(_source == "gldas" && (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010))
+            DataTable dtSR = new DataTable();
+
+            if (_source == "gldas" && (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010))
             {
-                _source = "nldas";
+                errorMsg = "No GLDAS data is available for this time frame.";
+                return dtSR;
+                /*_source = "nldas";
                 DateTime startDate = Convert.ToDateTime(_startDate);
                 startDate = startDate.AddDays(-1.0);
                 _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
-                _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
+                _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";*/
             }
 
             if (_source == "nldas")
@@ -628,7 +641,7 @@ namespace Evapotranspiration
                 remaindermin = 23;
             }
 
-            DataTable dtSR = new DataTable();
+            
 
             // Get Solar Radiation data.  
             _parameter = getNLDASParameterName(parameter.ShortWaveRadiationFluxDownwards_WPerM2);

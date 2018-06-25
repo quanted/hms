@@ -41,6 +41,7 @@ namespace Web.Services.Tests
         /// </summary>
         /// <param name="inputString"></param>
         /// <returns></returns>
+        [Trait("Priority", "1")]
         [Theory]
         [InlineData(requestString)]
         public async Task MeteorologyValidRequests(string inputString)
