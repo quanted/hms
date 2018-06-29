@@ -341,11 +341,11 @@ namespace AQUATOX.Nutrients
                         {
 
                             AddLoad = 0;
-                            AddLoad = LoadsRec.ReturnAltLoad(TimeIndex, Loop);
+                            AddLoad = LoadsRec.ReturnAltLoad(TimeIndex, Loop);  //multiplied by multldg factor here
                             // g/d or g/sq m. d
 
-                            AddLoad = AddLoad * LoadsRec.Alt_Loadings[Loop].MultLdg / SegVolume;
-                            // mg/L d    // g/d         // unitless                   // cu m      // note if direct precip result is mg/(sq m.*L*d)
+                            AddLoad = AddLoad / SegVolume;
+                            // mg/L d  // g/d     // cu m      // note if direct precip result is mg/(sq m.*L*d)
 
                             if (Loop == 1) AddLoad = AddLoad * Location.Locale.SurfArea;  // Loop = 1 is DirectPrecip loadings type
                                                                                           // mg/L d // mg/(sq m.*L*d)            // sq m.

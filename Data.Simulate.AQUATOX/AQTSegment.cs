@@ -480,8 +480,9 @@ namespace AQUATOX.AQTSegment
 
             DerivStep = Step;
             // Zero_Utility_Variables();  animal trophic level only
-            if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
+
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
+            if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
 
             foreach (TStateVariable TSV in SV)
             {
@@ -866,9 +867,9 @@ namespace AQUATOX.AQTSegment
             ModelStartTime = TStart;
             //            TPreviousStep = TStart;
             TPresent = TStart;
-            WriteResults(TStart); // Write Initial Conditions as the first data Point
 
-            Derivs(x, 1);
+            Derivs(x, 1);   
+            WriteResults(TStart); // Write Initial Conditions as the first data Point
 
             // (**  Start stepping the RungeKutta.....**)
             while (!simulation_done)
@@ -1409,6 +1410,7 @@ namespace AQUATOX.AQTSegment
             foreach (TStateVariable TSV in SV)
                 TSV.SetToInitCond();
 
+            SOD = -99;
             YearNum_PrevStep = 0;
         }
 
@@ -2078,9 +2080,9 @@ namespace AQUATOX.AQTSegment
             // CalculateSOD
             if (!Diagenesis_Included())
             {
-                return;
+                return; // No Diagenesis Model attached
             }
-            // No Diagenesis Model attached
+            
             O2 = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             Temp = GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
             // determine diagenesis fluxes
@@ -2115,11 +2117,9 @@ namespace AQUATOX.AQTSegment
             if (SOD < 0)
             {
                 // start with an initial esitmate of SOD
-                // gO2 /m2 d
-                // gO2/d
-                // gN2/d
-                // gO2/gN
-                SOD_test = Jc + (Jn * 4.57);
+                SOD_test = Jc +   (Jn * 4.57);
+         // (gO2/m2 d)=(gO2/d)+ (gN2/d)*(gO2/gN)
+
             }
             else
             {

@@ -1080,12 +1080,9 @@ namespace AQUATOX.Diagenesis
             else
             {
                 Flux2Wat = s * (fdh2s1 * State - COD_0) / DR.H1.Val;
+             // (mg/L d) (m/d)          (mg/L)   (mg/L)         (m)
+
             }
-            // mg/L d
-            // m/d
-            // mg/L
-            // mg/L
-            // m
             if (Layer == T_SVLayer.SedLayer2)
             {
                 Burial = DR.w2.Val / DR.H2.Val * State;
@@ -1093,11 +1090,9 @@ namespace AQUATOX.Diagenesis
             else
             {
                 Burial = DR.w2.Val / DR.H1.Val * State;
+             // (g/m3 d)  (m/d)       (m)        (g/m3)
+
             }
-            // g/m3 d
-            // m/d
-            // m
-            // g/m3
             if (Layer == T_SVLayer.SedLayer1)
             {
                 if (AQTSeg.Diagenesis_Steady_State)
@@ -1153,8 +1148,7 @@ namespace AQUATOX.Diagenesis
             // g/m3 d
             // 1/d
             result = DR.ksi.Val * Math.Pow(DR.ThtaSi.Val, (Temp - 20)) * (PSi / (PSi + DR.KMPSi.Val)) * (DR.SiSat.Val - fdsi2 * Si2);
-            // g/m3
-            // g/m3
+            // g/m3     // g/m3
 
             return result;
         }
