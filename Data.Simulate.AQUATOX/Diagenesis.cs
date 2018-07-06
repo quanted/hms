@@ -532,6 +532,9 @@ namespace AQUATOX.Diagenesis
 
     public class TPOC_Sediment : TStateVariable
     {
+        public Loadings.TLoadings Deposition_Link = null;  // additive linkage from JSON if plants, animals, or OM not modeled
+        public Loadings.TLoadings Predation_Link = null;   // linkage from JSON if detritivores not explicitly modeled
+
         // TPOC_Sediment
         public override void CalculateLoad(DateTime TimeIndex)
         {
@@ -612,19 +615,22 @@ namespace AQUATOX.Diagenesis
             double Pred;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             Deposition = AQTSeg.CalcDeposition(NState, T_SVType.StV) / DR.H2.Val;
-            // mg C/L            // g O2/m2                                 // m
+            // mg C/L            // g/m2                                  // m
+            if (Deposition_Link != null) Deposition = Deposition + Deposition_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                    (g/m3 d sediment) = (g/m3 d sediment) + (g/d) / (m3 sediment)
 
-//          AQTSeg.Diag_Track[TAddtlOutput.POC_Dep, DR.DerivStep] = DR.Diag_Track[TAddtlOutput.POC_Dep, DR.DerivStep] + Deposition * DR.H2.Val * 1e3;
+            //          AQTSeg.Diag_Track[TAddtlOutput.POC_Dep, DR.DerivStep] = DR.Diag_Track[TAddtlOutput.POC_Dep, DR.DerivStep] + Deposition * DR.H2.Val * 1e3;
             // mg/m2 d                                                // g/m3 sed             // m sed             // mg/g   
             Minrl = Mineralization();
             Bury = Burial();
             Pred = Predn();
             MorphRecord MR = AQTSeg.Location.Morph;
             Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
-            // g/m3 s
-            // g/m3 w
-            // m3 w
-            // m3 s
+            // ( g/m3 s) = ( g/m3 w) * ( m3 w ) / ( m3 s)
+
+            if (Predation_Link != null) Pred = Predation_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
+
             DB = Deposition - Minrl - Burial() - Pred;
          //   Derivative_WriteRates();
         }
@@ -638,6 +644,10 @@ namespace AQUATOX.Diagenesis
 
     public class TPON_Sediment : TStateVariable
     {
+        public Loadings.TLoadings Deposition_Link = null;  // additive linkage from JSON if plants, animals, or OM not modeled
+        public Loadings.TLoadings Predation_Link = null;   // linkage from JSON if detritivores not explicitly modeled
+
+
         // TPON_Sediment
         public override void CalculateLoad(DateTime TimeIndex)
         {
@@ -709,12 +719,16 @@ namespace AQUATOX.Diagenesis
             Minerl = Mineralization();
             Deposition =AQTSeg.CalcDeposition(NState, T_SVType.StV) / DR.H2.Val;
             // mg/L            // g/m2             // m
+
+            if (Deposition_Link != null) Deposition = Deposition + Deposition_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                    (g/m3 d sediment) = (g/m3 d sediment) + (g/d) / (m3 sediment)
+
             // Diag_Track[TAddtlOutput.PON_Dep, DR.DerivStep] = Diag_Track[TAddtlOutput.PON_Dep, DR.DerivStep] + Deposition * DR.H2.Val * 1e3;
             // mg/m2 d             // g/m3 sed            // m sed            // mg/g
             Burial = DR.w2.Val / DR.H2.Val * State;
-                      // m/d         // m   // mg/L
-            Pred = 0;
+            // m/d         // m   // mg/L
 
+            Pred = 0;
             //if (NState == AllVariables.PON_G1)   // fixme animal predation linkage
             //{
             //    Pred = ((TOrganism)(this)).Predation() * Location.Remin.N2OrgLab;
@@ -724,10 +738,13 @@ namespace AQUATOX.Diagenesis
             //    Pred = ((TOrganism)(this)).Predation() * Location.Remin.N2Org_Refr;
             //// g N/m3 w            // g OM /m3             // g N / g OM
             //}
+            //MorphRecord MR = AQTSeg.Location.Morph;
+            //Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
+            // g/m3 s  g/m3 w      // m3 w            // m3 s
 
-            MorphRecord MR = AQTSeg.Location.Morph;
-            Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
-         // g/m3 s  g/m3 w      // m3 w            // m3 s
+            if (Predation_Link != null) Pred = Predation_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
+
             DB = Deposition - Minerl - Burial - Pred;
 
          // Derivative_WriteRates();
@@ -743,6 +760,9 @@ namespace AQUATOX.Diagenesis
 
     public class TPOP_Sediment : TStateVariable
     {
+        public Loadings.TLoadings Deposition_Link = null;  // additive linkage from JSON if plants, animals, or OM not modeled
+        public Loadings.TLoadings Predation_Link = null;   // linkage from JSON if detritivores not explicitly modeled
+
         // TPOP_Sediment
         public override void CalculateLoad(DateTime TimeIndex)
         {
@@ -818,14 +838,21 @@ namespace AQUATOX.Diagenesis
             Minerl = Mineralization();
             Deposition = AQTSeg.CalcDeposition(NState, T_SVType.StV) / DR.H2.Val;
             // mg/L d            // g/m2 d
-            // m
-//            AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] = AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] + Deposition * DR.H2.Val * 1e3;
+
+            if (Deposition_Link != null) Deposition = Deposition + Deposition_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                    (g/m3 d sediment) = (g/m3 d sediment) + (g/d) / (m3 sediment)
+
+                        // m
+            //            AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] = AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] + Deposition * DR.H2.Val * 1e3;
             // mg/m2 d            // g/m3 sed            // m sed            // mg/g
             Burial = DR.w2.Val / DR.H2.Val * State;
             // g/m3    // m/d      // m       // g/m3
-            Pred = 0;
 
-            //if (NState == AllVariables.POP_G1)   // FIXME ANIMAL LINKAGE
+            Pred = 0;
+            if (Predation_Link != null) Pred = Predation_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
+            //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
+           
+            //if (NState == AllVariables.POP_G1)   // FIXME ANIMAL Predation LINKAGE
             //{   Pred = ((TOrganism)(this)).Predation() * Location.Remin.P2OrgLab;
             //}
             //if (NState == AllVariables.POP_G2)
@@ -833,10 +860,10 @@ namespace AQUATOX.Diagenesis
             //}
             //// g P/m3 w             // g P /m3             // g P / g OM
 
-        //    TStates DR = AQTSeg;
-        //    MorphRecord DR = DR.Location.Morph;
-        //    Pred = Pred * DR.SegVolum[DR.VSeg] / DR.DiagenesisVol(2);
-        //// g/m3 s // g/m3 w       // m3 w                     // m3 s
+            //    TStates DR = AQTSeg;
+            //    MorphRecord DR = DR.Location.Morph;
+            //    Pred = Pred * DR.SegVolum[DR.VSeg] / DR.DiagenesisVol(2);
+            //// g/m3 s // g/m3 w       // m3 w                     // m3 s
 
             DB = Deposition - Minerl - Burial - Pred;
             // g/m3 d

@@ -396,6 +396,9 @@ namespace AQUATOX.AQTSegment
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
 
+        public Loadings.TLoadings BenthicBiomass_Link = null; // optional linkage for diagenesis simulations when benthos not directly simulated, g/m2
+        public Loadings.TLoadings AnimalDef_Link = null; // optional linkage to sediment from animal defecation for diagenesis simulations when animals not directly simulated, g/m2
+
         [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
@@ -1150,7 +1153,7 @@ namespace AQUATOX.AQTSegment
                         res = res * SegVol() / SurfaceArea();
                         //g/m2  g/m3     m3         m2
 
-                        //If(NS in [FirstFish..LastFish]) and(Typ = StV) then   // fixme Animal code
+                        //If(NS in [FirstFish..LastFish]) and(Typ = StV) then   // fixme Animal code units
                         //      res = res * Volume_Last_Step / Locale.SurfArea;
                         ////    g/m2  g/m3   { m3, entire sys}    { m2, entire sys}
                     }
@@ -1168,22 +1171,22 @@ namespace AQUATOX.AQTSegment
             if ((L == T_SVLayer.WaterCol)) //  && (P != null))
             {
                 // Fish must be converted from mg/L to g/sq.m
-                // if (((S >= Consts.FirstFish && S <= Consts.LastFish) && (T == T_SVType.StV))) Convert = true;  FIXME Animal linkage
+                // if (((S >= Consts.FirstFish && S <= Consts.LastFish) && (T == T_SVType.StV))) Convert = true;  FIXME Animal units
 
                 // Sedimented Detritus must be converted from mg/L to g/sq.m
                 if (((S == AllVariables.SedmRefrDetr) || (S == AllVariables.SedmLabDetr)) && (T == T_SVType.StV)) Convert = true;
 
-                //// Periphyton & Macrophytes must be converted from mg/L to g/sq.m  FIXME Plant linkage
+                //// Periphyton & Macrophytes must be converted from mg/L to g/sq.m  FIXME Plant units
                 //if ((T == T_SVType.StV) && (P.IsPlant()))
                 //{  if ((((P) as TPlant).PAlgalRec.PlantType != "Phytoplankton")) Convert = true;
                 //}
 
-                //// ZooBenthos and nekton must be converted from mg/L to g/sq.m  FIXME Animal linkage
+                //// ZooBenthos and nekton must be converted from mg/L to g/sq.m  FIXME Animal units
                 //if ((T == T_SVType.StV) && (P.IsAnimal()))
                 //{ if (!((P) as TAnimal).IsPlanktonInvert())
                 //}                    
 
-                // if ((S >= AllVariables.Veliger1 && S <= AllVariables.Veliger2)) Convert = false; FIXME Animal linkage
+                // if ((S >= AllVariables.Veliger1 && S <= AllVariables.Veliger2)) Convert = false; FIXME Animal units
             }
 
             //if ((T == T_SVType.OtherOutput) && (((TAddtlOutput)(S)) == TAddtlOutput.MultiFishConc)) convert = true;
@@ -1852,10 +1855,7 @@ namespace AQUATOX.AQTSegment
         //        {
         //            Def = Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;
         //        }
-        //        // ug/m3
-        //        // unitless
-        //        // ug/L
-        //        // L/m3
+                     // ug/m3    // unitless    // ug/L           // L/m3
         //    }
         //}
 
@@ -2130,7 +2130,9 @@ namespace AQUATOX.AQTSegment
             // {mg O2/L            // mg C /            // mg O2/ mg C
 
             BenthicBiomass = 0;
-            //for (IV = Consts.FirstInvert; IV <= Consts.LastInvert; IV++)  // FIXME ANIMAL LINKAGE
+            if (BenthicBiomass_Link != null) BenthicBiomass = BenthicBiomass_Link.ReturnLoad(TPresent);  // JSON linkage
+
+            //for (IV = Consts.FirstInvert; IV <= Consts.LastInvert; IV++)  
             //{
             //    TInv = GetStatePointer(IV, T_SVType.StV, T_SVLayer.WaterCol);
             //    if (TInv != null)
@@ -2143,6 +2145,8 @@ namespace AQUATOX.AQTSegment
             //        }
             //    }
             //}
+
+
             if (BenthicBiomass < 0.001)
             {
                 BenthicBiomass = 0.001;
