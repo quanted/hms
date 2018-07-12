@@ -130,7 +130,7 @@ namespace Evapotranspiration
                     dt = ncd.DownloadData(outpt, inpt);
                     if(dt == null)
                     {
-                        errorMsg = "ERROR: Unable to download data from Daymet. ";
+                        errorMsg = "ERROR: Unable to download data. ";
                     }
                     else
                     {
