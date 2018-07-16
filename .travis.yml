@@ -10,7 +10,7 @@ script:
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.0/
- - sudo cp OrganicMatter/DOCS/*.txt /home/travis/build/quanted/hms/OrganicMatter/DOCS/
+ - sudo cp /app/OrganicMatter/DOCS/* /home/travis/build/quanted/hms/OrganicMatter/DOCS/
  - dotnet test Data.Tests/Data.Tests.csproj -c Release --filter Priority=1
  - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --filter Priority=1
  - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --filter Priority=1
