@@ -42,7 +42,6 @@ FROM build AS publish
 RUN dotnet publish -c Release -o /app
 
 FROM base AS final
-CMD ls
 WORKDIR /app
 COPY --from=publish /app .
 COPY test_reports/ /src/
