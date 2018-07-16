@@ -93,6 +93,7 @@ namespace Utilities
             double lat = input.Geometry.Point.Latitude;
             double lon = input.Geometry.Point.Longitude;
             string baseURL = "";
+            bool entireh8 = false;
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             List<string> comIDS = new List<string>();
             //Check for huc arguments otherwise use lat long
@@ -100,16 +101,17 @@ namespace Utilities
             {
                 //baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=01060002&com_id_num=9311911";
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + metadata["huc_8_num"];
-                
+
                 if (metadata.ContainsKey("com_id_num") && metadata.Count == 2)
                 {
                     baseURL += "&com_id_num=" + metadata["com_id_num"];
+                    comIDS.Add(metadata["com_id_num"]);
                 }
                 else if (metadata.Count > 2)
                 {
-                    foreach(string val in metadata.Values)
+                    foreach (string val in metadata.Values)
                     {
-                        if(val != metadata["huc_8_num"])
+                        if (val != metadata["huc_8_num"])
                         {
                             comIDS.Add(val);
                         }
@@ -154,7 +156,7 @@ namespace Utilities
             }
             GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(data);
 
-            if(comIDS.Count > 0)
+            if (comIDS.Count > 0)
             {
                 Dictionary<string, Catchment> newgeodata = new Dictionary<string, Catchment>();
                 for (int x = 0; x < comIDS.Count; x++)
@@ -165,6 +167,10 @@ namespace Utilities
                 }
                 geodata.geometry = newgeodata;
             }
+            else
+            {
+                entireh8 = true;
+            }
 
             //
             List<Point> ptsList = new List<Point>();
@@ -172,28 +178,35 @@ namespace Utilities
             {
                 foreach (Point point in points.Value.points)
                 {
+                    if (entireh8)
+                    {
+                        comIDS.Add(points.Key);
+                    }
                     ptsList.Add(point);
                 }
             }
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-
+            int i = 0;
             foreach (var entry in result.Data)
             {
-                int i = 0;
+                int j = 0;
                 foreach (Point pt in ptsList)
                 {
                     List<string> outList = new List<string>();
+                    //outList.Add(entry.Key.ToString());//Date
+                    outList.Add(comIDS[j].ToString());//ComID
                     outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
-                    outList.Add(comIDS[i].ToString());
                     outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
                     outList.Add(Math.Round((Convert.ToDouble(entry.Value[0]) * pt.percentArea / 100), 8).ToString());//% runoff
                     outList.Add(pt.latitude.ToString());//lat
                     outList.Add(pt.longitude.ToString());//long
                     string key = entry.Key.ToString() + i.ToString();
-                    output.Data.Add(key, outList);//huc8/comid plus list
+                    //string key = i.ToString();//Index
+                    output.Data.Add(key, outList);
                     i++;
+                    j++;
                 }
             }
 
@@ -246,13 +259,14 @@ namespace Utilities
 
             string types = input.GetType().Name;
             types = types.Remove(types.Length - 5);
-            
+
+
             output.Metadata = new Dictionary<string, string>()
             {
                 { "request_time", DateTime.Now.ToString() },
                 { "column_1", "Date" },
-                { "column_2", types },
-                { "column_3", "COMID" },
+                { "column_2", "COMID" },
+                { "column_3", types },
                 { "column_4", "Percent Area" },
                 { "column_5", "Percent " + types },
                 { "column_6", "Latitude" },
