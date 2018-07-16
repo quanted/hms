@@ -22,7 +22,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string path2 = path + "\\..\\..\\..\\..\\DOCS\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string path2 = path + "/../../../../DOCS/AQUATOX_OM_Model_Valid_JSON.txt";
 
             string json = File.ReadAllText(path2);
             string errmsg = "";
