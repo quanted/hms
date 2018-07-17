@@ -5,16 +5,16 @@ mono: none
 solution: HMS.sln
 script:
  - rm docker-compose.*
+ - dotnet --version
  - dotnet restore -nowarn:msb3202,nu1503
  - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.0/
- - ls OrganicMatter/
  - sudo cp OrganicMatter/DOCS/* /home/travis/build/quanted/hms/OrganicMatter/DOCS/
- - dotnet test Data.Tests/Data.Tests.csproj -c Release --filter Priority=1
- - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --filter Priority=1
- - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --filter Priority=1
+ - dotnet test Data.Tests/Data.Tests.csproj -c Release
+ - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release
+ - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests -c Release
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests -c Release
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests -c Release
