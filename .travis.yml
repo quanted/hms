@@ -1,7 +1,7 @@
 language: csharp
 dotnet: 2.0.0
 dist: trusty
-mono: none
+mono: latest
 solution: HMS.sln
 script:
  - rm docker-compose.*
