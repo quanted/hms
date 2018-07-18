@@ -8,6 +8,7 @@ using System.Net;
 using System.Globalization;
 using Data;
 using System.Threading;
+using System.IO;
 
 //http://ldas.gsfc.nasa.gov/faq/#Subset
 //ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/1980/004/NLDAS_FORA0125_H.A19800104.0000.002.grb.xml
@@ -936,15 +937,50 @@ namespace Evapotranspiration
                     break;
 
             }
+            // Response status message
+            //string status = "";
+            //string data = null;
+            //int retries = 5;
+            //while (retries > 0 && !status.Contains("OK"))
+            //{
+            //    Thread.Sleep(1000);
+            //    WebRequest wr = WebRequest.Create(url);
+            //    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+            //    status = response.StatusCode.ToString();
+            //    Stream dataStream = response.GetResponseStream();
+            //    StreamReader reader = new StreamReader(dataStream);
+            //    data = reader.ReadToEnd();
+            //    reader.Close();
+            //    response.Close();
+            //    retries -= 1;
+            //}
             byte[] bytes = null;
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            int retries = 5;                                        // Max number of request retries
-            while (retries > 0 && bytes == null)
+            int retries = 10;                                        // Max number of request retries
+            try
             {
-                bytes = client.DownloadData(url);
-                retries -= 1;
-                Thread.Sleep(1000);
+                while (retries > 0 && bytes == null)
+                {
+                    bytes = client.DownloadData(url);
+                    retries -= 1;
+                    if (bytes == null)
+                    {
+                        Thread.Sleep(2000);
+                    }
+                }
+            }
+            catch(System.Net.WebException)
+            {
+                if (retries != 0)
+                {
+                    getData(out errorMsg);
+                }
+                else
+                {
+                    errorMsg = "ERROR attempting to get data from " + _source + ". Server returned 404 error.";
+                    return dt;
+                }
             }
             if (bytes != null)
             {
@@ -961,6 +997,7 @@ namespace Evapotranspiration
                     if (cleanLine.Contains("Date&Time"))
                     {
                         blnDataStart = true;
+                        continue;
                     }
                     if ((cleanLine.Contains("Date&Time")) || (cleanLine.Contains("MEAN")) || (cleanLine == ""))
                     {
