@@ -6,7 +6,7 @@ solution: HMS.sln
 script:
  - rm docker-compose.*
  # - dotnet restore -nowarn:msb3202,nu1503
- - dotnet build -c Release HMS.sln
+ - dotnet build -c Release --no-dependencies --force HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.0/
