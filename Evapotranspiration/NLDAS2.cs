@@ -957,7 +957,7 @@ namespace Evapotranspiration
             byte[] bytes = null;
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            int retries = 10;                                        // Max number of request retries
+            int retries = 5;                                        // Max number of request retries
             try
             {
                 while (retries > 0 && bytes == null)
