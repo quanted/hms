@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using AQUATOXOrganicMatter;
+using System.Diagnostics;
 
 namespace OrganicMatter.AQUATOX.UnitTests
 {
@@ -22,8 +23,8 @@ namespace OrganicMatter.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
-
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string path2 = Path.Combine(path, filePath);
             string json = File.ReadAllText(path2);
             string errmsg = "";
 
@@ -37,8 +38,8 @@ namespace OrganicMatter.AQUATOX.UnitTests
         public void AQTNutrients_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
-
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string path2 = Path.Combine(path, filePath);
             string json = File.ReadAllText(path2);
             string errmsg = "";
 
@@ -47,28 +48,32 @@ namespace OrganicMatter.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_NoVolume.txt";
+            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_NoVolume.txt";
+            path2 = Path.Combine(path, filePath);
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, ref errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_MissingSV.txt";
+            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_MissingSV.txt";
+            path2 = Path.Combine(path, filePath);
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, ref errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_pH.txt";
+            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_pH.txt";
+            path2 = Path.Combine(path, filePath);
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, ref errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_O2.txt";
+            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_O2.txt";
+            path2 = Path.Combine(path, filePath);
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, ref errmsg, false);
