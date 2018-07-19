@@ -966,21 +966,14 @@ namespace Evapotranspiration
                     retries -= 1;
                     if (bytes == null)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(1000);
                     }
                 }
             }
             catch(System.Net.WebException)
             {
-                if (retries != 0)
-                {
-                    getData(out errorMsg);
-                }
-                else
-                {
-                    errorMsg = "ERROR attempting to get data from " + _source + ". Server returned 404 error.";
-                    return dt;
-                }
+                errorMsg = "ERROR attempting to get data from " + _source + ". Server returned 404 error.";
+                return dt;
             }
             if (bytes != null)
             {
