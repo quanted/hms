@@ -21,7 +21,7 @@ namespace Nutrients.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\DOCS\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\DOCS\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
             string path2 = Path.Combine(path, filePath);
             string json = File.ReadAllText(path2);
             string errmsg = "";
