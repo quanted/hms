@@ -33,8 +33,8 @@ namespace OrganicMatter.AQUATOX.UnitTests
             }
             catch (System.IO.FileNotFoundException)
             {
-
-                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/", Path.GetFileName(filePath));
+                var fileName = filePath.Split("\\");
+                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/", fileName[fileName.Length]);
                 json = File.ReadAllText(path2);
             }
             string errmsg = "";
