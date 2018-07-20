@@ -981,7 +981,7 @@ namespace Evapotranspiration
             }
             if (bytes != null)
             {
-                string str = Encoding.UTF8.GetString(bytes);
+                string str = Enco ding.UTF8.GetString(bytes);
                 char[] delimiterChars = { '\n' };
                 string[] lines = str.Split(delimiterChars);
                 string cleanLine = "";
