@@ -23,8 +23,8 @@ namespace OrganicMatter.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "../../../../TEST/AQUATOX_OM_Model_Valid_JSON.txt";
-            string filePath2 = "/home/travis/build/quanted/hms/OrganicMatter/TEST/AQUATOX_OM_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            //string filePath2 = "TEST/AQUATOX_OM_Model_Valid_JSON.txt";
             string path2 = Path.Combine(path, filePath);
             string json;
             try
@@ -33,7 +33,9 @@ namespace OrganicMatter.AQUATOX.UnitTests
             }
             catch (System.IO.FileNotFoundException)
             {
-                json = File.ReadAllText(filePath2);
+
+                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/", Path.GetFileName(filePath));
+                json = File.ReadAllText(path2);
             }
             string errmsg = "";
 
