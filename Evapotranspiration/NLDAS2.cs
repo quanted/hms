@@ -970,8 +970,12 @@ namespace Evapotranspiration
                     }
                 }
             }
-            catch(System.Net.WebException)
+            catch(System.Net.WebException ex)
             {
+                if(ex.Message.Contains("404"))
+                {
+                    return getData(out errorMsg);
+                }
                 errorMsg = "Error attempting to collection data from external server.";
                 return null;
             }
