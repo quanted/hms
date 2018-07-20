@@ -24,8 +24,17 @@ namespace OrganicMatter.AQUATOX.UnitTests
         {
             string path = System.Environment.CurrentDirectory;
             string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string filePath2 = "/home/travis/bulid/quanted/hms/OrganicMatter/TEST/AQUATOX_OM_Model_Valid_JSON.txt";
             string path2 = Path.Combine(path, filePath);
-            string json = File.ReadAllText(path2);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                json = File.ReadAllText(filePath2);
+            }
             string errmsg = "";
 
             new AQTOrganicMatter(ref json, ref errmsg, false);
