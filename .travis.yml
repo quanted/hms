@@ -14,7 +14,7 @@ script:
 # - dotnet test Data.Tests/Data.Tests.csproj -c Release
 # - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release
 # - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release
- - sudo cp OrganicMatter/Tests /home/travis/build/quanted/hms/OrganicMatter/
+ - sudo cp OrganicMatter/TEST/ /home/travis/build/quanted/hms/OrganicMatter/
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release
