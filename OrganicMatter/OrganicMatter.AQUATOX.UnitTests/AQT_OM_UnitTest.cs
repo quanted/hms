@@ -24,7 +24,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
         {
             string path = System.Environment.CurrentDirectory;
             string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
-            string filePath2 = "/home/travis/bulid/quanted/hms/OrganicMatter/TEST/AQUATOX_OM_Model_Valid_JSON.txt";
+            string filePath2 = "/home/travis/build/quanted/hms/OrganicMatter/TEST/AQUATOX_OM_Model_Valid_JSON.txt";
             string path2 = Path.Combine(path, filePath);
             string json;
             try

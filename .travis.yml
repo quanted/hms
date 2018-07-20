@@ -3,6 +3,8 @@ dotnet: 2.0.0
 dist: trusty
 mono: none
 solution: HMS.sln
+before_depoly:
+ - cd ~
 script:
  - rm docker-compose.*
  - dotnet build -c Release Data/
