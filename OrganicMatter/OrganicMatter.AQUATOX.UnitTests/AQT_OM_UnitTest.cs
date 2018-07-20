@@ -22,21 +22,20 @@ namespace OrganicMatter.AQUATOX.UnitTests
         [TestMethod]
         public void AQTNutrients_ValidJSON()
         {
-            string path = System.Environment.CurrentDirectory;
+            //string path = System.Environment.CurrentDirectory;
             string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
-            //string filePath2 = "TEST/AQUATOX_OM_Model_Valid_JSON.txt";
-            string path2 = Path.Combine(path, filePath);
-            string json;
-            try
-            {
-                json = File.ReadAllText(path2);
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                var fileName = filePath.Split("\\");
-                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/", fileName[fileName.Length - 1]);
-                json = File.ReadAllText(path2);
-            }
+            //string path2 = Path.Combine(path, filePath);
+            string json = GetTestFile(filePath);
+            //try
+            //{
+            //    json = File.ReadAllText(path2);
+            //}
+            //catch (System.IO.FileNotFoundException)
+            //{
+            //    var fileName = filePath.Split("\\");
+            //    path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/TEST/", fileName[fileName.Length - 1]);
+            //    json = File.ReadAllText(path2);
+            //}
             string errmsg = "";
 
             new AQTOrganicMatter(ref json, ref errmsg, false);
@@ -90,6 +89,24 @@ namespace OrganicMatter.AQUATOX.UnitTests
             AQTM = new AQTOrganicMatter(ref json, ref errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
+        }
+
+        private string GetTestFile(string filePath)
+        {
+            string path = System.Environment.CurrentDirectory;
+            string path2 = Path.Combine(path, filePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                var fileName = filePath.Split("\\");
+                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/TEST/", fileName[fileName.Length - 1]);
+                json = File.ReadAllText(path2);
+            }
+            return json;
         }
 
     }
