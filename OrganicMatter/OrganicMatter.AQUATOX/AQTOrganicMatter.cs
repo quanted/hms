@@ -51,6 +51,8 @@ namespace AQUATOXOrganicMatter
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
+            AQSim.AQTSeg.SetMemLocRec();
+
             AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;

@@ -61,6 +61,7 @@ namespace Stream.Hydrology.AQUATOX
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
+            AQSim.AQTSeg.SetMemLocRec();
             TVolume TVol = (TVolume)AQSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
             if (TVol == null) return "A Volume State Variable must be included in the simulation. ";
             if (AQSim.AQTSeg.Location == null) return "The 'Location' object must be populated with site data. ";

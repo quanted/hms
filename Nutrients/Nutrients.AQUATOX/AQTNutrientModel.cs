@@ -47,11 +47,21 @@ namespace AQUATOXNutrientModel
         }
 
         /// <summary>
+        /// Instantiates an AQUATOX Nutrients model given an existing AQUATOX Simulation insim.  Used for testing multi-purpose models.
+        /// </summary>
+        /// <param name="insim"></param> AQTSim.  The AQUATOX simulation being typecast or tested as an AQUATOX Nutrients Model
+        public AQTNutrientsModel(AQTSim insim)
+        { AQSim = insim; }
+
+
+        /// <summary>
         /// Checks for data requirements for an AQTNutrientsModel including state variable requirements and parameter values.
         /// </summary>
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
+            AQSim.AQTSeg.SetMemLocRec();
+
             AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
