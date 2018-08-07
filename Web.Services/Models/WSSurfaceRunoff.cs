@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Web.Services.Controllers;
 
 namespace Web.Services.Models
 {
@@ -20,7 +21,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetSurfaceRunoff(ITimeSeriesInput input)
+        public async Task<ITimeSeriesOutput> GetSurfaceRunoff(SurfaceRunoffInput input)
         {
             string errorMsg = "";
 
@@ -32,21 +33,23 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SurfaceRunoff object
-            SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
+            SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff()
+            {
+                CurveSource = input.CurveSource
+            };
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             runoff.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "SURFFLOW" }, out errorMsg);
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (errorMsg.Contains("ERROR") && input.Source != "curvenumber") { return err.ReturnError(errorMsg); }
 
             // Gets the SurfaceRunoff data.
             ITimeSeriesOutput result = runoff.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             return result;
-
         }
     }
 }

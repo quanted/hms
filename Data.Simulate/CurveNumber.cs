@@ -5,6 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Web;
+using System.Data.SQLite;
+using System.Data;
+using System.Text.RegularExpressions;
 
 namespace Data.Simulate
 {
@@ -26,13 +29,13 @@ namespace Data.Simulate
         {
             errorMsg = "";
 
-            string url = ConstructURL(out errorMsg);
+            string comID = getComID(out errorMsg, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            byte[] body = ConstructPOST(out errorMsg, input);
+            string query = ConstructQuery(out errorMsg, input, comID);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(out errorMsg, url, body);
+            string data = DownloadData(out errorMsg, query);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -43,22 +46,11 @@ namespace Data.Simulate
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg)
+        private string ConstructQuery(out string errorMsg, ITimeSeriesInput input, string com)
         {
             errorMsg = "";
-            //string source_url = "CURVE_NUMBER_INT";
-            try
-            {
-                // TODO: Update url retrieval for curve number
-                //Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-                //return urls[source_url];
-                return "REPLACE";
-            }
-            catch(Exception ex)
-            {
-                errorMsg = "ERROR: Unable to curve number url to retrieve data." + ex.Message;
-                return null;
-            }
+            string sql = "SELECT DISTINCT CURVENUM FROM HUC12_PU_COMIDs_CONUS WHERE COMID = '" + com + "';";
+            return sql;
         }
 
         /// <summary>
@@ -67,12 +59,39 @@ namespace Data.Simulate
         /// <param name="errorMsg"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private byte[] ConstructPOST(out string errorMsg, ITimeSeriesInput input)
+        private string getComID(out string errorMsg, ITimeSeriesInput input)
         {
             errorMsg = "";
-            string parameters = "startdate={" + input.DateTimeSpan.StartDate.ToString() + "}&enddate={" + input.DateTimeSpan.EndDate.ToString() +
-                "}&latitude={" + input.Geometry.Point.Latitude.ToString() + "}&longitude={" + input.Geometry.Point.Longitude.ToString() + "}";
-            return Encoding.UTF8.GetBytes(parameters);
+            string url = "https://ofmpub.epa.gov/waters10/SpatialAssignment.Service?pGeometry=POINT(" + input.Geometry.Point.Longitude + "+" + input.Geometry.Point.Latitude + ")&pLayer=NHDPLUS_CATCHMENT&pSpatialSnap=TRUE&pReturnGeometry=TRUE";
+            byte[] bytes = null;
+            WebClient client = new WebClient();
+            client.Credentials = CredentialCache.DefaultNetworkCredentials;
+            int retries = 5;                                        // Max number of request retries
+            try
+            {
+                while (retries > 0 && bytes == null)
+                {
+                    bytes = client.DownloadData(url);
+                    retries -= 1;
+                }
+            }
+            catch (System.Net.WebException ex)
+            {
+                errorMsg = "Error attempting to collection data from external server.";
+                return null;
+            }
+            string str = Encoding.UTF8.GetString(bytes);
+            string pattern = @"[0-9]{2,}";
+            Match result = Regex.Match(str, pattern);
+            if (result.Success)
+            {
+                str = result.Value;
+            }
+            else
+            {
+                errorMsg = "ERROR: Could not find valid geometry.";
+            }
+            return str;
         }
 
         /// <summary>
@@ -82,43 +101,32 @@ namespace Data.Simulate
         /// <param name="url"></param>
         /// <param name="postBody"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url, byte[] postBody)
+        private string DownloadData(out string errorMsg, string query)//, byte[] postBody)
         {
+            //Curve number will be stored in sql database so replace this method with SELECT statement  
             errorMsg = "";
             string data = "";
+            
+            //Create SQLite connection
+            SQLiteConnection sqlite = new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
+            SQLiteDataAdapter ad;
+            DataTable dt = new DataTable();
+            
             try
             {
-                int retries = 5;
-                string status = "";
-                while (retries > 0 && !status.Contains("OK"))
-                {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(url);
-
-                    wr.Method = "POST";
-                    wr.ContentType = "application/x-www-form-urlencoded";
-                    wr.ContentLength = postBody.Length;
-                    using (Stream stream = wr.GetRequestStream())
-                    {
-                        stream.Write(postBody, 0, postBody.Length);
-                    }
-
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                }
+                SQLiteCommand cmd;
+                sqlite.Open();  //Initiate connection to the db
+                cmd = sqlite.CreateCommand();
+                cmd.CommandText = query;  //set the passed query
+                ad = new SQLiteDataAdapter(cmd);
+                ad.Fill(dt); //fill the datasource
             }
-            catch (Exception ex)
+            catch (SQLiteException ex)
             {
-                errorMsg = "ERROR: Unable to download requested curve number data. " + ex.Message;
                 return null;
             }
-
+            sqlite.Close();
+            data = dt.Rows[0][0].ToString();
             return data;
         }
 

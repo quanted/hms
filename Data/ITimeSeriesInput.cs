@@ -72,7 +72,7 @@ namespace Data
         /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
         /// </summary>
         Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
-        
+
     }
 
 
@@ -210,44 +210,44 @@ namespace Data
             }
             else
             {
-            // Validates that the Latitude parameter is not invalid
-            if (!input.Source.Contains("ncdc") && !input.Source.Contains("compare"))
-            {
-                if (input.Geometry.Point == null)
+                // Validates that the Latitude parameter is not invalid
+                if (!input.Source.Contains("ncdc") && !input.Source.Contains("compare"))
                 {
+                    if (input.Geometry.Point == null)
+                    {
                         errors.Add("ERROR: No geometry values found in the provided parameters.");
                         //errorMsg += "ERROR: No geometry values found in the provided parameters.";
                         //return newInput;
-                }
+                    }
                     else if (Double.IsNaN(input.Geometry.Point.Latitude))
-                {
+                    {
                         errors.Add("ERROR: Required 'Latitude' parameter was not found or is invalid.");
                         //errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
-                }
-                // Validates that the Longitude parameter is not invalid
+                    }
+                    // Validates that the Longitude parameter is not invalid
                     else if (Double.IsNaN(input.Geometry.Point.Longitude))
-                {
+                    {
                         errors.Add("ERROR: Required 'Longitude' parameter was not found or is invalid.");
                         //errorMsg += "ERROR: Required 'Longitude' parameter was not found or is invalid.";
-                    }                   
-                    
-                    if (!(errors.Any(s => s.Contains("Latitude")) || errors.Any(s => s.Contains("Longitude")) || errors.Any(s => s.Contains("geometry"))))
-                {
-                    if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
-                    input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
-                    {
-                        IPointCoordinate pC = new PointCoordinate()
-                        {
-                            Latitude = input.Geometry.Point.Latitude,
-                            Longitude = input.Geometry.Point.Longitude
-                        };
-                        newInput.Geometry = new TimeSeriesGeometry()
-                        {
-                            Point = (PointCoordinate)pC
-                        };
                     }
-                    else
+
+                    if (!(errors.Any(s => s.Contains("Latitude")) || errors.Any(s => s.Contains("Longitude")) || errors.Any(s => s.Contains("geometry"))))
                     {
+                        if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
+                        input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
+                        {
+                            IPointCoordinate pC = new PointCoordinate()
+                            {
+                                Latitude = input.Geometry.Point.Latitude,
+                                Longitude = input.Geometry.Point.Longitude
+                            };
+                            newInput.Geometry = new TimeSeriesGeometry()
+                            {
+                                Point = (PointCoordinate)pC
+                            };
+                        }
+                        else
+                        {
                             IPointCoordinate pC = new PointCoordinate()
                             {
                                 Latitude = 0,
@@ -258,8 +258,8 @@ namespace Data
                                 Point = (PointCoordinate)pC
                             };
                             errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
+                        }
                     }
-                }
                     else
                     {
                         IPointCoordinate pC = new PointCoordinate()
@@ -272,49 +272,49 @@ namespace Data
                             Point = (PointCoordinate)pC
                         };
                         errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
-            }
+                    }
                 }
-            else
-            {
-                if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+                else
                 {
+                    if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+                    {
                         errors.Add("ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.");
                         //errorMsg += "ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.";
+                    }
+
+                    IPointCoordinate pC = new PointCoordinate()
+                    {
+                        Latitude = 0.0,
+                        Longitude = 0.0
+                    };
+                    newInput.Geometry = new TimeSeriesGeometry() { Point = (PointCoordinate)pC };
                 }
 
-                IPointCoordinate pC = new PointCoordinate()
-                {
-                    Latitude = 0.0,
-                    Longitude = 0.0
-                };
-                newInput.Geometry = new TimeSeriesGeometry() { Point = (PointCoordinate)pC };
-            }
+                newInput.Geometry.GeometryMetadata = input.Geometry.GeometryMetadata ?? new Dictionary<string, string>();
+                newInput.Geometry.Description = input.Geometry.Description ?? "";
 
-            newInput.Geometry.GeometryMetadata = input.Geometry.GeometryMetadata ?? new Dictionary<string, string>();
-            newInput.Geometry.Description = input.Geometry.Description ?? "";
-
-            // Validates and sets Timezone information
-            if (input.Geometry.Timezone == null)
-            {
-                newInput.Geometry.Timezone = new Timezone()
+                // Validates and sets Timezone information
+                if (input.Geometry.Timezone == null)
                 {
-                    Name = "",
-                    Offset = 0.0,
-                    DLS = false
-                };
-            }
-            else
-            {
-                newInput.Geometry.Timezone = new Timezone() { };
-                newInput.Geometry.Timezone.Name = (String.IsNullOrWhiteSpace(input.Geometry.Timezone.Name)) ? "TZNotSet" : input.Geometry.Timezone.Name;
-                newInput.Geometry.Timezone.Offset = (Double.IsNaN(input.Geometry.Timezone.Offset)) ? 0.0 : input.Geometry.Timezone.Offset;
+                    newInput.Geometry.Timezone = new Timezone()
+                    {
+                        Name = "",
+                        Offset = 0.0,
+                        DLS = false
+                    };
+                }
+                else
+                {
+                    newInput.Geometry.Timezone = new Timezone() { };
+                    newInput.Geometry.Timezone.Name = (String.IsNullOrWhiteSpace(input.Geometry.Timezone.Name)) ? "TZNotSet" : input.Geometry.Timezone.Name;
+                    newInput.Geometry.Timezone.Offset = (Double.IsNaN(input.Geometry.Timezone.Offset)) ? 0.0 : input.Geometry.Timezone.Offset;
                     if (newInput.Geometry.Timezone.Offset > 12 || newInput.Geometry.Timezone.Offset < -12)
                     {
                         errors.Add("ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + newInput.Geometry.Timezone.Offset.ToString());
                         //errorMsg += "ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + newInput.Geometry.Timezone.Offset.ToString();
                     }
-                newInput.Geometry.Timezone.DLS = (input.Geometry.Timezone.DLS == true) ? true : false;
-            }
+                    newInput.Geometry.Timezone.DLS = (input.Geometry.Timezone.DLS == true) ? true : false;
+                }
             }
 
             if (input.DateTimeSpan == null)
@@ -325,33 +325,33 @@ namespace Data
             }
             else
             {
-            // Validates that the StartDate parameter is not invalid
-            if (input.DateTimeSpan.StartDate.Equals(DateTime.MinValue))
-            {
+                // Validates that the StartDate parameter is not invalid
+                if (input.DateTimeSpan.StartDate.Equals(DateTime.MinValue))
+                {
                     errors.Add("ERROR: Required 'StartDate' parameter was not found or is invalid.");
                     //errorMsg += "ERROR: Required 'StartDate' parameter was not found or is invalid.";
-            }
-            // Validates that the EndDate parameter is not invalid
-            if (input.DateTimeSpan.EndDate.Equals(DateTime.MinValue))
-            {
+                }
+                // Validates that the EndDate parameter is not invalid
+                if (input.DateTimeSpan.EndDate.Equals(DateTime.MinValue))
+                {
                     errors.Add("ERROR: Required 'EndDate' parameter was not found or is invalid.");
                     //errorMsg += "ERROR: Required 'EndDate' parameter was not found or is invalid.";
-            }
-            if (!errorMsg.Contains("StartDate") || !errorMsg.Contains("EndDate"))
-            {
-                newInput.DateTimeSpan = new DateTimeSpan()
+                }
+                if (!errorMsg.Contains("StartDate") || !errorMsg.Contains("EndDate"))
                 {
-                    StartDate = input.DateTimeSpan.StartDate,
-                    EndDate = input.DateTimeSpan.EndDate
-                };
-            }
+                    newInput.DateTimeSpan = new DateTimeSpan()
+                    {
+                        StartDate = input.DateTimeSpan.StartDate,
+                        EndDate = input.DateTimeSpan.EndDate
+                    };
+                }
                 if (DateTime.Compare(newInput.DateTimeSpan.StartDate, newInput.DateTimeSpan.EndDate) >= 0)
                 {
                     errors.Add("ERROR: Start date must be before end date.");
                     //errorMsg += "ERROR: Start date must be before end date.";
                 }
 
-            // Validates DateTime output format
+                // Validates DateTime output format
                 newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH" : input.DateTimeSpan.DateTimeFormat;
                 try
                 {
@@ -372,7 +372,7 @@ namespace Data
                 double testValue = 12345.678901;
                 string testString = testValue.ToString(newInput.DataValueFormat);
             }
-            catch(FormatException fe)
+            catch (FormatException fe)
             {
                 errors.Add("ERROR: Problem with the DateValueFormat. Provded DataValueFormat: " + newInput.DataValueFormat + ". ErrorMessage: " + fe.Message);
                 //errorMsg += "ERROR: Problem with the DateValueFormat. Provded DataValueFormat: " + newInput.DataValueFormat + ". ErrorMessage: " + fe.Message;
@@ -382,7 +382,7 @@ namespace Data
             newInput.TemporalResolution = (String.IsNullOrWhiteSpace(input.TemporalResolution)) ? "default" : input.TemporalResolution.ToLower();
             string[] validTemporalResolutions = new string[] { "hourly", "daily", "weekly", "monthly", "seasonal", "yearly", "default" };
             // For non-uniform timeseries, leave as default.
-            if(!Array.Exists(validTemporalResolutions, element => element == newInput.TemporalResolution))
+            if (!Array.Exists(validTemporalResolutions, element => element == newInput.TemporalResolution))
             {
                 newInput.TemporalResolution = "default";
             }
@@ -393,7 +393,7 @@ namespace Data
             // Validates Units parameter
             newInput.Units = (String.IsNullOrWhiteSpace(input.Units)) ? "metric" : input.Units;
             string[] validUnits = new string[] { "metric", "imperial", "default" };
-            if(!Array.Exists(validUnits, element => element == newInput.Units))
+            if (!Array.Exists(validUnits, element => element == newInput.Units))
             {
                 newInput.Units = "default";
             }
@@ -401,7 +401,7 @@ namespace Data
             // Validates OutputFormat parameter
             newInput.OutputFormat = (String.IsNullOrWhiteSpace(input.OutputFormat)) ? "json" : input.OutputFormat;
             string[] validOutputFormat = new string[] { "json", "default" };
-            if(!Array.Exists(validOutputFormat, element => element == newInput.OutputFormat))
+            if (!Array.Exists(validOutputFormat, element => element == newInput.OutputFormat))
             {
                 newInput.OutputFormat = "default";
             }
@@ -441,7 +441,7 @@ namespace Data
 
             try
             {
-            urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+                urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
             }
             catch (FileNotFoundException)
             {
@@ -475,7 +475,7 @@ namespace Data
                     errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
                     return "";
             }
-            string url_key = (src == "PRISM") ? src + "_URL": src + "_" + dataset + "_URL";
+            string url_key = (src == "PRISM") ? src + "_URL" : src + "_" + dataset + "_URL";
             try
             {
                 return caselessUrls[url_key];
@@ -606,7 +606,7 @@ namespace Data
         /// <summary>
         /// Timezone information for the input geometry.
         /// </summary>
-        Timezone Timezone { get; set; }        
+        Timezone Timezone { get; set; }
     }
 
     /// <summary>

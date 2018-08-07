@@ -59,7 +59,7 @@ namespace Web.Services.Models
             evapo.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "EVAPOT" }, out errorMsg);
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (errorMsg.Contains("ERROR") && input.Source != "custom") { return err.ReturnError(errorMsg); }
 
             // Gets the Evapotranspiration data.
             ITimeSeriesOutput result = evapo.GetData(out errorMsg);

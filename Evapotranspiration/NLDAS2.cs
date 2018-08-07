@@ -8,6 +8,7 @@ using System.Net;
 using System.Globalization;
 using Data;
 using System.Threading;
+using System.IO;
 
 //http://ldas.gsfc.nasa.gov/faq/#Subset
 //ftp://hydro1.sci.gsfc.nasa.gov/data/s4pa/NLDAS/NLDAS_FORA0125_H.002/1980/004/NLDAS_FORA0125_H.A19800104.0000.002.grb.xml
@@ -940,11 +941,26 @@ namespace Evapotranspiration
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
             int retries = 5;                                        // Max number of request retries
-            while (retries > 0 && bytes == null)
+            try
             {
-                bytes = client.DownloadData(url);
-                retries -= 1;
-                Thread.Sleep(1000);
+                while (retries > 0 && bytes == null)
+                {
+                    bytes = client.DownloadData(url);
+                    retries -= 1;
+                    if (bytes == null)
+                    {
+                        Thread.Sleep((10 / retries) * 1000);
+                    }
+                }
+            }
+            catch (System.Net.WebException ex)
+            {
+                if (ex.Message.Contains("404"))
+                {
+                    return getData(out errorMsg);
+                }
+                errorMsg = "Error attempting to collection data from external server.";
+                return null;
             }
             if (bytes != null)
             {

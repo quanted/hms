@@ -14,8 +14,11 @@ namespace SurfaceRunoff
         // -------------- SurfaceRunoff Variables -------------- //
 
         // SurfaceRunoff specific variables are listed here.
-
-
+        /// <summary>
+        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// </summary>
+        public string CurveSource { get; set; }
+        
         // TimeSeries Output variable 
         public ITimeSeriesOutput Output { get; set; }
 
@@ -65,6 +68,13 @@ namespace SurfaceRunoff
                     // GLDAS SurfaceRunoff Data call
                     GLDAS gldas = new GLDAS();
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "curvenumber":
+                    //Curve Number SurfaceRunoff not yet working
+                    CurveNumber curve = new CurveNumber();
+                    this.Input.Source = this.CurveSource;
+                    this.Output = curve.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
