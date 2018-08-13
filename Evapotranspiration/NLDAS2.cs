@@ -938,22 +938,6 @@ namespace Evapotranspiration
 
             }
             // Response status message
-            //string status = "";
-            //string data = null;
-            //int retries = 5;
-            //while (retries > 0 && !status.Contains("OK"))
-            //{
-            //    Thread.Sleep(1000);
-            //    WebRequest wr = WebRequest.Create(url);
-            //    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-            //    status = response.StatusCode.ToString();
-            //    Stream dataStream = response.GetResponseStream();
-            //    StreamReader reader = new StreamReader(dataStream);
-            //    data = reader.ReadToEnd();
-            //    reader.Close();
-            //    response.Close();
-            //    retries -= 1;
-            //}
             byte[] bytes = null;
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
