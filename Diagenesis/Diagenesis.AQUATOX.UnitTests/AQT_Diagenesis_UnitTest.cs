@@ -11,7 +11,7 @@ namespace Diagenesis.AQUATOX.UnitTests
         {
             string json = "{ invalid JSON }";
             string errmsg = "";
-            new AQTDiagenesisModel(ref json, ref errmsg, false);
+            new AQTDiagenesisModel(ref json, out errmsg, false);
             Assert.AreNotEqual("", errmsg);
 
         }
@@ -23,9 +23,9 @@ namespace Diagenesis.AQUATOX.UnitTests
             string path2 = path + "\\..\\..\\..\\..\\DOCS\\Diagenesis_Model_Valid_JSON.txt";
 
             string json = File.ReadAllText(path2);
-            string errmsg = "";
 
-            new AQTDiagenesisModel(ref json, ref errmsg, false);
+            string errmsg;
+            new AQTDiagenesisModel(ref json, out errmsg, false);
             Assert.AreEqual("", errmsg);
 
         }
@@ -38,7 +38,7 @@ namespace Diagenesis.AQUATOX.UnitTests
             string path2 = path + "\\..\\..\\..\\..\\TEST\\Diagenesis_MissingSVs.JSON";
             string json = File.ReadAllText(path2);
             string errmsg = "";
-            AQTDiagenesisModel AQTM = new AQTDiagenesisModel(ref json, ref errmsg, false);
+            AQTDiagenesisModel AQTM = new AQTDiagenesisModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 

@@ -196,7 +196,7 @@ public class TDetritus : TRemineralize
             ReminRecord w1 = Location.Remin;
             // T := AQTSeg.TCorr(Q10, TRef, TOpt, TMax);
             T = Colonization_DecTCorr();
-            p = pHCorr(w1.pHMin, w1.pHMax);
+            p = AQTSeg.pHCorr(w1.pHMin, w1.pHMax);
             // anoxic
             if ((NState == AllVariables.SedmRefrDetr) && (State > 50))
                   DOCorr = 0.001;

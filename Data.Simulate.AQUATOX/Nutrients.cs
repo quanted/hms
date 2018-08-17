@@ -392,21 +392,6 @@ namespace AQUATOX.Nutrients
         }
 
         // ---------------------------process equations--------------------------
-        // --------------------------------
-        // correction for non-optimal pH
-        // --------------------------------
-        public double pHCorr(double pHMin, double pHMax)
-        {
-            const double KpH = 1.0;
-            double ppH = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            double result = 1.0;
-            if (ppH <= pHMin) result = KpH * Math.Exp(ppH - pHMin);
-            if (ppH > pHMax) result = KpH * Math.Exp(pHMax - ppH);
-            return result;
-        }
-
-        // phcorr
-        // -------------------------------------------------------------------------------------------------------
         public double SumDetrDecomp(T_SVType OType, bool SedOnly)
         {
             double result;
@@ -1478,7 +1463,7 @@ namespace AQUATOX.Nutrients
                 {
                     ReminRecord RR = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
-                    p = pHCorr(7.0, 9.0);
+                    p = AQTSeg.pHCorr(7.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
                     {
                         // 5/6/2013
@@ -1750,7 +1735,7 @@ namespace AQUATOX.Nutrients
                 {
                     ReminRecord _wvar1 = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
-                    p = pHCorr(5.0, 9.0);
+                    p = AQTSeg.pHCorr(5.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
                     {
                         // 5/6/2013
@@ -1956,170 +1941,6 @@ namespace AQUATOX.Nutrients
             }
 
         } // TNO3Obj
-
-            public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
-            {
-                public double SalinityUpper = 0;
-                public double SalinityLower = 0;
-                public TSalinity(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-                }
-
-                public override void Derivative(ref double DB)
-                {
-                base.Derivative(ref DB);
-                    DB = 0;
-                }
-
-                public override void CalculateLoad(DateTime TimeIndex)
-                {
-                    Loading = 0;
-                    State = LoadsRec.ReturnLoad(TimeIndex);
-                    SalinityUpper = State;
-                    SalinityLower = LoadsRec.ReturnAltLoad(TimeIndex, 0);
-
-                    //if (AQTSeg != null)
-                    //{
-                    //    if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)
-                    //    {
-                    //        State = SalinityLower;
-                    //    }
-                    //}
-                }
-
-            } // end TSalinity
-
-
-    public class TpHObj : TStateVariable
-    {
-        public double Alkalinity = 0;
-        // -------------------------------------------------------------------------------
-        //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
-        public TpHObj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-            Alkalinity = 1000;   // ( default ueq CaCO3/L)
-
-        }
-        public double CalculateLoad_asinh(double x)
-        {
-            double result;
-            result = Math.Log(Math.Sqrt(Math.Pow(x, 2) + 1) + x);
-            return result;
-        }
-
-        // pH calculation based on Marmorek et al., 1996 (modified Small and Sutton, 1986)
-        public double CalculateLoad_pHCalc()
-        {
-            double result;
-            const double pkw = 1E-14;
-            // ionization constant water
-            double T, CCO2, DOM, pH2CO3, Alpha, A, B, C;
-
-            T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
-            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
-            TDissRefrDetr PDOM = (TDissRefrDetr)AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            if (PDOM == null) DOM = 0;
-               else DOM = PDOM.State;   // mg/L
-
-            pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
-            Alpha = pH2CO3 * CCO2 + pkw;
-            A = -Math.Log10(Math.Pow(Alpha, 0.5));
-            B = 1 / Math.Log(10.0);
-            C = 2 * (Math.Pow(Alpha, 0.5));
-            try
-            {
-                result = A + B * CalculateLoad_asinh((Alkalinity - 5.1 * DOM * 0.5) / C);
-            }
-            catch
-            {
-                result = 7; // default if ASINH function crashes
-            }
-            return result;
-        }
-
-        public override void CalculateLoad(DateTime TimeIndex)
-        {
-            if (LoadsRec.Loadings.NoUserLoad)
-            { 
-                State = CalculateLoad_pHCalc();              // pHCalc
-                if ((State > 8.25)) { State = 8.25; }
-                if ((State < 3.75)) { State = 3.75; }
-            }
-            else State = LoadsRec.ReturnLoad(TimeIndex);            // allows for user input of load
-        }
-
-    } // end TpHObj
-
-
-    public class TTemperature : TStateVariable
-    {
-        public TTemperature(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-
-        }
-
-        // (***********************************)
-        // (* water temperature of segment    *)
-        // (* Ward 1963, ASCE 1989, 6:1-16    *)
-        // (***********************************)
-        public override void CalculateLoad(DateTime TimeIndex)
-        {
-            // Changes State, not Loadings... Rewritten JSC, 22-May-95
-            const int PhaseShift = 90;
-            double Temperature;
-            double MeanTemp;
-            double TempRange;
-            double AdjustedJulian;
-            // Julian date adjusted for hemisphere
-            if (!LoadsRec.Loadings.NoUserLoad)
-            {
-
-                //if ((AQTSeg.VSeg == VerticalSegments.Epilimnion) || (AQTSeg.HypoTempLoads.NoUserLoad))
-                //{
-                    Loading = LoadsRec.ReturnLoad(TimeIndex);
-                //}
-                //else
-                //{
-                //    // hypolimnion: User entered data
-                //    LoadingsRecord _wvar2 = AQTSeg.HypoTempLoads;
-                //    if (_wvar2.UseConstant)   {  Loading = _wvar2.ConstLoad; }
-                //    else
-                //    {
-                //        Loading = 0;
-                //        if (_wvar2.Loadings != null)    { Loading = _wvar2.Loadings.GetLoad(TimeIndex, true);  }
-                //    }
-                //    // else
-                //    Loading = Loading * _wvar2.MultLdg;
-                //}
-                // With HypoTempLoads
-
-                State = Loading;
-            }  // if userload
-            else
-            {
-                // NoUserLoad for both Epi and Hypo Temp Loadings
-                AdjustedJulian = TimeIndex.DayOfYear;
-                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182;
-                MeanTemp = Location.Locale.TempMean;  // AQTSeg.VSeg
-                TempRange = Location.Locale.TempRange; // AQTSeg.VSeg
-                //if (AQTSeg.LinkedMode)
-                //{
-                //    // MeanTemp and Range are stored in "Epilimnion" for each linked segment regardless of stratification
-                //    MeanTemp = Location.Locale.TempMean[VerticalSegments.Epilimnion];
-                //    TempRange = Location.Locale.TempRange[VerticalSegments.Epilimnion];
-                //}
-                
-                Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30))));
-                if (Temperature < 0.0)  { Temperature = 0.0; }
-
-                // Temperature = Temperature * MultLdg;                // allow perturbation JSC 1-23-03
-
-                State = Temperature;
-            }
-            Loading = 0;
-        }
-
-    } // end TTemperature
 
 
 
@@ -2401,13 +2222,9 @@ namespace AQUATOX.Nutrients
                 // m/s         // cm/s                                                                        // m/cm
                 if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
 
-                Wnd = 0;  // FIXME wind state variable
-
-                //Wnd = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
-                //// m/s at 10 m
-                //if (Wnd == -1)
-                //{        Wnd = 0;      }
-                //// If state deleted, jsc
+                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TWind == null) Wnd = 0.1;
+                else Wnd = TWind.State;  // m/s at 10 m
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
                 KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;

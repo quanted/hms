@@ -5,8 +5,8 @@ namespace Globals
 {    
     public enum AllVariables
     {
-        H2OTox1,
-        H2OTox2,
+        H2OTox,
+        H2OTox2,  // H2OTox2-20 no longer used in HMS code
         H2OTox3,
         H2OTox4,
         H2OTox5,
@@ -170,29 +170,27 @@ namespace Globals
     public enum T_SVType
     {
         StV,
-        //Porewaters,
-        //OrgTox1,
-        //OrgTox2,
-        //OrgTox3,
-        //OrgTox4,
-        //OrgTox5,
-        //OrgTox6,
-        //OrgTox7,
-        //OrgTox8,
-        //OrgTox9,
-        //OrgTox10,
-        //OrgTox11,
-        //OrgTox12,
-        //OrgTox13,
-        //OrgTox14,
-        //OrgTox15,
-        //OrgTox16,
-        //OrgTox17,
-        //OrgTox18,
-        //OrgTox19,
-        //OrgTox20,
-        //NotUsed,
-        //NotUsed2,
+        Porewaters,
+        OrgTox1,
+        OrgTox2,
+        OrgTox3,
+        OrgTox4,
+        OrgTox5,
+        OrgTox6,
+        OrgTox7,
+        OrgTox8,
+        OrgTox9,
+        OrgTox10,
+        OrgTox11,
+        OrgTox12,
+        OrgTox13,
+        OrgTox14,
+        OrgTox15,
+        OrgTox16,
+        OrgTox17,
+        OrgTox18,
+        OrgTox19,
+        OrgTox20,
         //OtherOutput,
         NTrack,
         PTrack
@@ -270,6 +268,8 @@ namespace Globals
         public const AllVariables FirstDetr = AllVariables.SedmRefrDetr;
         public const AllVariables LastDetr = AllVariables.SuspLabDetr;
 
+        public const T_SVType FirstOrgTxTyp = T_SVType.OrgTox1;
+        public const T_SVType LastOrgTxTyp = T_SVType.OrgTox20;
     }
 
     public struct TParameter

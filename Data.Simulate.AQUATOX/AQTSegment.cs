@@ -7,6 +7,7 @@ using AQUATOX.Nutrients;
 using AQUATOX.Volume;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
+using AQUATOX.Chemicals;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -15,7 +16,6 @@ using Data;
 namespace AQUATOX.AQTSegment
 
 {
-
     public class AQTSim
     {
         public AQUATOXSegment AQTSeg = null;
@@ -80,7 +80,6 @@ namespace AQUATOX.AQTSegment
             {
             }
         }
-
 
         public string Integrate()
         {
@@ -254,7 +253,7 @@ namespace AQUATOX.AQTSegment
 
         public virtual void CalculateLoad(DateTime TimeIndex)
         {
-            Loading = 0;
+            Loading = GetInflowLoad(TimeIndex); 
         }
 
         public virtual double GetInflowLoad(DateTime TimeIndex)
@@ -347,7 +346,7 @@ namespace AQUATOX.AQTSegment
                 ReminRecord RR = Location.Remin;
                 // T := AllStates.TCorr(Q10, TRef, TOpt, TMax);
                 T = Decomposition_DecTCorr();
-                p = ((this) as TRemineralize).pHCorr(RR.pHMin, RR.pHMax);
+                p = AQTSeg.pHCorr(RR.pHMin, RR.pHMax);
 
                 if (O2Conc == 0) Factor = 0;
                 else Factor = O2Conc / (HalfSatO + O2Conc);
@@ -388,6 +387,7 @@ namespace AQUATOX.AQTSegment
         public TLoadings DynEvap = null;
         public bool UseConstZMean = true;
         public TLoadings DynZMean;
+        public LoadingsRecord Shade;
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
@@ -763,7 +763,7 @@ namespace AQUATOX.AQTSegment
             //// Dothiseverystep
             //for (i = 0; i < SV.Count; i++)
             //{
-            //    DoThisEveryStep_CheckSloughEvent(this.At(i));
+            //    DoThisEveryStep_CheckSloughEvent(At(i));
             //}
             //DoThisEveryStep_UpdateLightVals();
             //// update light history values for calculating effects
@@ -783,9 +783,9 @@ namespace AQUATOX.AQTSegment
             //// After every step, PrevFracKill must be set to Current FracKill for
             //// correct computation of POISONED
             //// Also, for each animal species spawning data must be updated
-            //for (i = 0; i < this.Count; i++)
+            //for (i = 0; i < Count; i++)
             //{
-            //    DoThisEveryStep_SetFracKilled_and_Spawned(this.At(i));
+            //    DoThisEveryStep_SetFracKilled_and_Spawned(At(i));
             //}
             //DoThisEveryStep_SumAggr();
             //// update meandischarge calculation each year
@@ -1011,8 +1011,8 @@ namespace AQUATOX.AQTSegment
                 // PERFORM DILUTE-CONCENTRATE
                 if (TSV.Layer == T_SVLayer.WaterCol)
                     //if (((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota))||
-                    //   ((TSV.NState >= Globals.Consts.FirstTox) && (TSV.NState <= Globals.Consts.LastTox))||
-                    if ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr))
+                    if (((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr)) ||
+                         (TSV.NState == AllVariables.H2OTox))
                     {
                         TSV.State = TSV.State / FracChange;
                     }
@@ -1252,7 +1252,7 @@ namespace AQUATOX.AQTSegment
         }
 
 
-        public double TrapezoidalIntegration(ref string ErrMsg, DateTime Start_Interval_Time, DateTime End_Interval_Time, List<double> vals, int rti)
+        public double TrapezoidalIntegration(out string ErrMsg, DateTime Start_Interval_Time, DateTime End_Interval_Time, List<double> vals, int rti)
         {
             double End_SI_Val;  // ending sub-interval value
             double Start_SI_Val; // starting sub-interval value
@@ -1274,7 +1274,7 @@ namespace AQUATOX.AQTSegment
                 if (End_SI_Time > End_Interval_Time)
                 {
                     // Linearly interpolate to get the end sub-interval point
-                    End_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, End_Interval_Time);
+                    End_SI_Val = LinearInterpolate(out ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, End_Interval_Time);
                     if (ErrMsg != "") return -99;
                     End_SI_Time = End_Interval_Time;
                 }
@@ -1282,7 +1282,7 @@ namespace AQUATOX.AQTSegment
                 if (Start_SI_Time < Start_Interval_Time)
                 {
                     // Linearly interpolate to get the beginning sub-interval point
-                    Start_SI_Val = LinearInterpolate(ref ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, Start_Interval_Time);
+                    Start_SI_Val = LinearInterpolate(out ErrMsg, Start_SI_Val, End_SI_Val, Start_SI_Time, End_SI_Time, Start_Interval_Time);
                     if (ErrMsg != "") return -99;
                     Start_SI_Time = Start_Interval_Time;
                 }
@@ -1295,8 +1295,9 @@ namespace AQUATOX.AQTSegment
             return SumThusFar / (End_Interval_Time - Start_Interval_Time).TotalDays;
         }
 
-        public double LinearInterpolate(ref string ErrMsg, double OldVal, double NewVal, DateTime OldTime, DateTime NewTime, DateTime InterpTime)
+        public double LinearInterpolate(out string ErrMsg, double OldVal, double NewVal, DateTime OldTime, DateTime NewTime, DateTime InterpTime)
         {
+            ErrMsg = "";
             // Interpolates to InterpTime between two points, OldPoint and NewPoint
             if ((InterpTime > NewTime) || (InterpTime < OldTime)) { ErrMsg = "Linear Interpolation Timestamp Error"; return -99; };
 
@@ -1304,8 +1305,9 @@ namespace AQUATOX.AQTSegment
             // y1    // Slope  (dy/dx)                                      // Delta X
         }
 
-        public double InstantaneousConc(ref string ErrMsg, DateTime steptime, List<double> vals, int rti)
+        public double InstantaneousConc(out string ErrMsg, DateTime steptime, List<double> vals, int rti)
         {
+            ErrMsg = "";
             if (rti <= 0) { ErrMsg = "Linear interpolation index error, rti<=0"; return -99; };
             if (rti > vals.Count - 1) { ErrMsg = "Linear interpolation index error rti >count"; return -99; };
 
@@ -1314,7 +1316,7 @@ namespace AQUATOX.AQTSegment
             DateTime OldTime = SV.restimes[rti - 1];
             DateTime NewTime = SV.restimes[rti];
 
-            return LinearInterpolate(ref ErrMsg, OldVal, NewVal, OldTime, NewTime, steptime);
+            return LinearInterpolate(out ErrMsg, OldVal, NewVal, OldTime, NewTime, steptime);
         }
 
 
@@ -1380,8 +1382,8 @@ namespace AQUATOX.AQTSegment
                 for (int i = 1; i <= numsteps; i++)
                 {
                     DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
-                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(ref errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
-                    else val = InstantaneousConc(ref errmsg, steptime, TSV.Results, StartIndices[i - 1]);
+                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
+                    else val = InstantaneousConc(out errmsg, steptime, TSV.Results, StartIndices[i - 1]);
                     vallist = new List<string>();
                     vallist.Add(val.ToString(Consts.ValFormatString));
                     TSV.output.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
@@ -1438,7 +1440,7 @@ namespace AQUATOX.AQTSegment
             {
                 TSV.StepRes = new double[7];
                 TSV.AQTSeg = this;
-                TSV.Location = this.Location;
+                TSV.Location = Location;
             }
         }
 
@@ -1740,7 +1742,7 @@ namespace AQUATOX.AQTSegment
         {
             double result;
             // Sed Volume Diagensis
-            double EpiFrac;
+            // double EpiFrac;
             if (Layer == 1)
                 result = Location.Locale.SurfArea * Diagenesis_Params.H1.Val;
             else
@@ -2011,18 +2013,16 @@ namespace AQUATOX.AQTSegment
             double result;
             // Calc deposition input into diagenesis model
             // Calculate Deposition for each sed carbon & nutrient class in  (gC/m2 d) (gN/m2 d) (gP/m2 d) (gSi/m2 d
-            const double Def_to_G3 = 0.00;
-            // 0% of defecation to G3
+            // const double Def_to_G3 = 0.00;          // 0% of defecation to G3
             double Def;
             double Sed;
             // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            int i;
             Def = 0;
             Sed = 0;
             foreach (TStateVariable TSV in SV)
             {
                 CalcDeposition_SumSed(TSV, NS, Typ, ref Sed);
-                //  CalcDeposition_SumDef(TSV,NS,Typ,ref Sedthis.At(i));  fixme animal linkage
+                //  CalcDeposition_SumDef(TSV,NS,Typ,ref SedAt(i));  fixme animal linkage
             }
             MorphRecord MR = Location.Morph;
             result = (Sed + Def) * MR.SegVolum / DiagenesisVol(2) * Diagenesis_Params.H2.Val;
@@ -2057,7 +2057,7 @@ namespace AQUATOX.AQTSegment
             double O2;
             double CSOD;
             double NSOD;
-            AllVariables IV;
+            // AllVariables IV;
             AllVariables ns;
             //          TAnimal TInv;
             double BenthicBiomass;
@@ -2071,10 +2071,10 @@ namespace AQUATOX.AQTSegment
             TPON_Sediment ppn;
             TPOP_Sediment ppp;
             double JO2NO3, K2NH4, K2Denit_1, KDenit_2, NH3_0, NO3_0, NO3_1, NO3_2, NH4_1, NH4_2, PO4_0, PO4_1, PO4_2, COD_0;
-            double HST1 = 0, HST2, a11, a12, b1, a21, a22, b2, Sech_Arg, CH4toCO2, CH4Sat, CSODmax;
+            double HST1 = 0, HST2, a11, a12, b1, a21, a22, b2, Sech_Arg, CH4Sat, CSODmax;   // CH4toCO2, 
             double fda1, fpa1, fda2, fpa2;   // ammonia
-            double fd1, fp1, fd2, fp2;        // H2S
-            double k1h1d, k1h1p, k2Oxid, k2h2d, k2h2p, F12, F21, xk1, xk2;
+            double fd1, fp1, fd2, fp2, F12, F21, k2Oxid;
+            // double k1h1d, k1h1p,  k2h2d, k2h2p,  xk1, xk2;
 
             int IterCount;
             // CalculateSOD
@@ -2378,8 +2378,462 @@ namespace AQUATOX.AQTSegment
 
         // ---------------------------------------------------------------
 
+        // (************************************)
+        // (* Straskraba, '76; Hutchinson, '57 *)
+        // (* BUT simplify to linear relation  *)
+        // (************************************)
+
+        public double Extinct(bool Incl_Periphyton, bool Incl_BenthicMacro, bool Incl_FloatingMacro, bool IsSurfaceFloater, int OrgFlag)
+        {
+            // Modified to allow for weighted average in the event of linked-mode well-mixed stratification, 2-27-08
+            // orgflag = 0 -- Normal execution,  orgflag = 1, organics only, orgflag = 2, inorganics only, orgflag = 3 phytoplankton only
+            double PhytoExtinction;
+            double TempExt;
+//            int Phyto;
+//          TPlant Pphyto;
+            AllVariables DetrLoop;
+            double DetrState;
+            //bool IncludePlant;
+            //TStates OtherSeg;
+            //double ThisSegThick;
+            //double OtherSegThick;
+  
+            PhytoExtinction = 0.0;
+            // initialize
+            //if ((OrgFlag == 0) || (OrgFlag == 3))
+            //{
+            //    for (Phyto = Consts.FirstPlant; Phyto <= Consts.LastPlant; Phyto++)
+            //    {
+            //        Pphyto = GetStatePointer(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
+            //        if (Pphyto != null)
+            //        {
+            //            PlantRecord PR = Pphyto.PAlgalRec;
+            //            // All Phytoplankton gets included
+            //            IncludePlant = (PR.PlantType == "Phytoplankton");
+            //            // Periphyton & Bryophytes get included if requested
+            //            IncludePlant = IncludePlant || (((PR.PlantType == "Periphyton") || (PR.PlantType == "Bryophytes")) && Incl_Periphyton);
+            //            // Benthic Macrophytes get included if requested
+            //            IncludePlant = IncludePlant || ((PR.PlantType == "Macrophytes") && (Pphyto.MacroType == TMacroType.Benthic) && Incl_BenthicMacro);
+            //            // Floating Macrophytes get included if requested
+            //            IncludePlant = IncludePlant || ((PR.PlantType == "Macrophytes") && (Pphyto.MacroType != TMacroType.Benthic) && Incl_FloatingMacro);
+            //            if (IncludePlant)
+            //            {
+            //                // 3/9/2012 move from "blue-green" to surface floater designation
+            //                // 3-8-06 account for more intense self shading in upper layer of water column due to concentration of cyanobacteria there
+            //                if (IsSurfaceFloater && (Pphyto.PAlgalRec.SurfaceFloating))
+            //                {
+            //                    // 1/m               // 1/m             // 1/(m g/m3)               // g/m3 volume                          // layer, m                                 // thick of algae, m
+            //                    PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto * GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol) * Location.MeanThick[VSeg] / Pphyto.DepthBottom();
+            //                }
+            //                else
+            //                {
+            //                    PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto * Extinct_GetExtState(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
+            //                }
+            //                // 1/m                 // 1/m              // 1/(m g/m3)                // g/m3                    }
+            //        }
+            //    }
+            //}
+
+            TempExt = PhytoExtinction;
+            if ((OrgFlag == 0))
+            {
+                TempExt = PhytoExtinction + Location.Locale.ECoeffWater;
+            }
+            // ---------------------------------------------------------------------------
+            // Organic Suspended Sediment Extinction
+            if ((OrgFlag == 0) || (OrgFlag == 1))
+            {
+                for (DetrLoop = AllVariables.DissRefrDetr; DetrLoop <= Consts.LastDetr; DetrLoop++)
+                {
+                    DetrState = GetState(DetrLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (DetrState > 0)
+                    {
+                        if ((DetrLoop == AllVariables.DissRefrDetr)||(DetrLoop == AllVariables.DissLabDetr))
+                            TempExt = TempExt + Location.Locale.ECoeffDOM * DetrState;
+                        else
+                            TempExt = TempExt + Location.Locale.ECoeffPOM * DetrState;
+                    }
+                }
+            }
+            // ---------------------------------------------------------------------------
+            // Inorganic Suspended SEDIMENT EXTINCTION
+            //if ((OrgFlag == 0) || (OrgFlag == 2))
+            //{
+            //    TempExt = TempExt + InorgSedConc(WeightedAvg) * Location.Locale.ECoeffSed;  // fixme when inorganic sediment / TSS added 
+            //}
+            // ---------------------------------------------------------------------------
+            if (TempExt < Consts.Tiny)  TempExt = Consts.Tiny;
+            if (TempExt > 25.0)         TempExt = 25.0;
+
+            return TempExt;
+        }  // end Extinction
+
+
+        public double Photoperiod_Radians(double X)
+        {
+            double result;
+            result = Math.PI * X / 180;
+            return result;
+        }
+
+        // (*****************************************)
+        // (*     fraction of day with daylight     *)
+        // (*  A = amplitude, from Groden, 1977     *)
+        // (*  P formulated & coded by RAP, 6/26/98 *)
+        // (*****************************************)
+        public double Photoperiod()
+        {
+            TLight PL;
+            double A, P, Sign, X;
+            PL = (TLight) GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PL.CalculatePhotoperiod)
+            {
+                if (Location.Locale.Latitude < 0.0) Sign = -1.0;
+                                               else Sign = 1.0;
+                X = TPresent.DayOfYear; 
+                A = 0.1414 * Location.Locale.Latitude - Sign * 2.413;
+                P = (12.0 + A * Math.Cos(380.0 * Photoperiod_Radians(X) / 365.0 + 248)) / 24.0;
+                return P;
+            }
+            else return PL.UserPhotoPeriod / 24.0;
+        }
+
+        // --------------------------------
+        // correction for non-optimal pH, used for microbial decomposition 
+        // --------------------------------
+        public double pHCorr(double pHMin, double pHMax)
+        {
+            const double KpH = 1.0;
+            double ppH = GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            double result = 1.0;
+            if (ppH <= pHMin) result = KpH * Math.Exp(ppH - pHMin);
+            if (ppH > pHMax) result = KpH * Math.Exp(pHMax - ppH);
+            return result;
+        }
+
+        // phcorr
+        // -------------------------------------------------------------------------------------------------------
+
+
 
     }  // end TAQUATOXSegment
+
+
+    public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
+    {
+        public double SalinityUpper = 0;
+        public double SalinityLower = 0;
+        public TSalinity(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+        }
+
+        public override void Derivative(ref double DB)
+        {
+            base.Derivative(ref DB);
+            DB = 0;
+        }
+
+        public override void CalculateLoad(DateTime TimeIndex)
+        {
+            Loading = 0;
+            State = LoadsRec.ReturnLoad(TimeIndex);
+            SalinityUpper = State;
+            SalinityLower = LoadsRec.ReturnAltLoad(TimeIndex, 0);
+
+            //if (AQTSeg != null)
+            //{
+            //    if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)
+            //    {
+            //        State = SalinityLower;
+            //    }
+            //}
+        }
+
+    } // end TSalinity
+
+
+    public class TpHObj : TStateVariable
+    {
+        public double Alkalinity = 0;
+        // -------------------------------------------------------------------------------
+        //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
+        public TpHObj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+            Alkalinity = 1000;   // ( default ueq CaCO3/L)
+
+        }
+        public double CalculateLoad_asinh(double x)
+        {
+            double result;
+            result = Math.Log(Math.Sqrt(Math.Pow(x, 2) + 1) + x);
+            return result;
+        }
+
+        // pH calculation based on Marmorek et al., 1996 (modified Small and Sutton, 1986)
+        public double CalculateLoad_pHCalc()
+        {
+            double result;
+            const double pkw = 1E-14;
+            // ionization constant water
+            double T, CCO2, DOM, pH2CO3, Alpha, A, B, C;
+
+            T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
+            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
+            TDissRefrDetr PDOM = (TDissRefrDetr)AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PDOM == null) DOM = 0;
+            else DOM = PDOM.State;   // mg/L
+
+            pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
+            Alpha = pH2CO3 * CCO2 + pkw;
+            A = -Math.Log10(Math.Pow(Alpha, 0.5));
+            B = 1 / Math.Log(10.0);
+            C = 2 * (Math.Pow(Alpha, 0.5));
+            try
+            {
+                result = A + B * CalculateLoad_asinh((Alkalinity - 5.1 * DOM * 0.5) / C);
+            }
+            catch
+            {
+                result = 7; // default if ASINH function crashes
+            }
+            return result;
+        }
+
+        public override void CalculateLoad(DateTime TimeIndex)
+        {
+            if (LoadsRec.Loadings.NoUserLoad)
+            {
+                State = CalculateLoad_pHCalc();              // pHCalc
+                if ((State > 8.25)) { State = 8.25; }
+                if ((State < 3.75)) { State = 3.75; }
+            }
+            else State = LoadsRec.ReturnLoad(TimeIndex);            // allows for user input of load
+        }
+
+    } // end TpHObj
+
+
+    public class TTemperature : TStateVariable
+    {
+        public TTemperature(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+
+        }
+
+        // (***********************************)
+        // (* water temperature of segment    *)
+        // (* Ward 1963, ASCE 1989, 6:1-16    *)
+        // (***********************************)
+        public override void CalculateLoad(DateTime TimeIndex)
+        {
+            // Changes State, not Loadings... Rewritten JSC, 22-May-95
+            const int PhaseShift = 90;
+            double Temperature;
+            double MeanTemp;
+            double TempRange;
+            double AdjustedJulian;
+            // Julian date adjusted for hemisphere
+            if (!LoadsRec.Loadings.NoUserLoad)
+            {
+
+                //if ((AQTSeg.VSeg == VerticalSegments.Epilimnion) || (AQTSeg.HypoTempLoads.NoUserLoad))
+                //{
+                Loading = LoadsRec.ReturnLoad(TimeIndex);
+                //}
+                //else
+                //{
+                //    // hypolimnion: User entered data
+                //    LoadingsRecord _wvar2 = AQTSeg.HypoTempLoads;
+                //    if (_wvar2.UseConstant)   {  Loading = _wvar2.ConstLoad; }
+                //    else
+                //    {
+                //        Loading = 0;
+                //        if (_wvar2.Loadings != null)    { Loading = _wvar2.Loadings.GetLoad(TimeIndex, true);  }
+                //    }
+                //    // else
+                //    Loading = Loading * _wvar2.MultLdg;
+                //}
+                // With HypoTempLoads
+
+                State = Loading;
+            }  // if userload
+            else
+            {
+                // NoUserLoad for both Epi and Hypo Temp Loadings
+                AdjustedJulian = TimeIndex.DayOfYear;
+                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182;
+                MeanTemp = Location.Locale.TempMean;  // AQTSeg.VSeg
+                TempRange = Location.Locale.TempRange; // AQTSeg.VSeg
+                                                       //if (AQTSeg.LinkedMode)
+                                                       //{
+                                                       //    // MeanTemp and Range are stored in "Epilimnion" for each linked segment regardless of stratification
+                                                       //    MeanTemp = Location.Locale.TempMean[VerticalSegments.Epilimnion];
+                                                       //    TempRange = Location.Locale.TempRange[VerticalSegments.Epilimnion];
+                                                       //}
+
+                Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30))));
+                if (Temperature < 0.0) { Temperature = 0.0; }
+
+                // Temperature = Temperature * MultLdg;                // allow perturbation JSC 1-23-03
+
+                State = Temperature;
+            }
+            Loading = 0;
+        }
+
+    } // end TTemperature
+
+    
+
+    public class TLight : TStateVariable
+    {
+        public bool CalculatePhotoperiod = false;
+        public double UserPhotoPeriod = 0;
+        public double DailyLight = 0;
+        public double HourlyLight = 0;
+
+        //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
+        public TLight(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+            // TStateVariable.Init(Ns,SVT,Lyr,aName,P,IC,IsTempl);
+            CalculatePhotoperiod = true;
+            UserPhotoPeriod = 12;
+        }
+
+        public override void CalculateLoad(DateTime TimeIndex)
+        {
+            double adjustedjulian, lighttime, light, solar, ShadeVal, pp, fracdaypassed;
+            // Calculates light load at the top layer of the water system, modified
+            // later with LtTop and LtDepth which use DepthTop and DepthBottom
+
+            // allows for user input of light
+            if (!LoadsRec.Loadings.NoUserLoad)
+            {
+                base.CalculateLoad(TimeIndex); // TStateVariable
+                light = Loading;
+            }
+            else
+            {   // NoUserLoad, calculate based on date
+                adjustedjulian = TimeIndex.DayOfYear;
+                if (Location.Locale.Latitude < 0.0) adjustedjulian = adjustedjulian + 182;
+
+                solar = Location.Locale.LightMean + Location.Locale.LightRange / 2.0 * Math.Sin(0.0174533 * adjustedjulian - 1.76);
+
+                light = solar;
+                if (light < 0.0)  light = 0.0;
+
+                light = light * LoadsRec.Loadings.MultLdg;  // allow perturbation JSC 1-23-03
+            }
+
+            // ACCOUNT FOR ICE COVER
+            {   if (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) < AQTSeg.Ice_Cover_Temp())
+                {   // Aug 2007, changed from 33% to 15%
+                    light = light * 0.15;
+                }
+            }
+
+            // Wetzel (2001).
+            // Light:=Light*0.33;   {ave. of values, Wetzel '75, p. 61, Used in Rel2.2 and before
+
+            ShadeVal = 1 - (0.98 * AQTSeg.Shade.ReturnLoad(TimeIndex));   // 11/18/2009  2% of incident radiation is transmitted through canopy
+            light = light * ShadeVal;
+            State = light;
+            DailyLight = light;
+
+            HourlyLight = 0;
+            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays) && (LoadsRec.Loadings.Hourly))
+                { HourlyLight = light; }
+
+            // 12-5-2016 correction to properly model hourly light time-series inputs
+            if ((!AQTSeg.PSetup.ModelTSDays) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
+            {
+                // distribute daily loading over daylight hours
+                pp = AQTSeg.Photoperiod();
+                fracdaypassed = TimeIndex.TimeOfDay.TotalDays;
+                lighttime = fracdaypassed - ((1 - pp) / 2);
+                if ((fracdaypassed < (1 - pp) / 2) || (fracdaypassed > 1 - ((1 - pp) / 2)))  State = 0;
+                else State = (Math.PI / 2) * (light / pp) * Math.Sin(Math.PI * lighttime / pp) * LoadsRec.Loadings.MultLdg * ShadeVal;
+                HourlyLight = State;
+            }
+
+            Loading = 0;     // this procedure sets "state" not "Loading" which is irrelevant for light
+        }
+
+    } // end TLight
+
+
+    public class TWindLoading : TStateVariable
+    {
+        public double MeanValue = 0;
+        // ----------------------------------------
+        // wind, based on 140-day Missouri record
+        // computed using first 10 harmonics
+        // therefore, will have a 140-day repeat
+        // ----------------------------------------
+
+        public TWindLoading(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+            MeanValue = 0;
+        }
+
+        public static double CalculateWindLoading(DateTime TimeIndex, double MeanVal)
+        {             // JSC Modified 4/29/2008 to incorporate 365 day series.
+            double AddVar, Wind, DateVal;
+            int N;
+            //            const double Pi = 3.141592654;
+            //            const double Intercept = 5.043;
+
+            double[] Coeffs = { 0.83408, 0.87256, 0.4245, -0.2871, -0.2158, -0.6634, -0.0264, -0.2766, 0.0236, -0.3492, -0.442, 0.89, -1.4385, 0.634, 0.0935, -1.06, -0.564, -0.291, -0.6484, 0.6162, 0.1083, 0.4047, 0.0268, -0.1209 };
+            double[] Freq = { 1, 1, 2, 2, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64, 128, 128, 200, 200, 300, 300, 6, 6, 3, 3 };
+            if (MeanVal <= 0)
+            {   // default
+                MeanVal = 3.0;
+            }
+            Wind = MeanVal;
+
+            DateVal = 2 * Math.PI * TimeIndex.DayOfYear / 365;
+            for (N = 1; N <= 24; N++)
+            {
+                if (N % 2 == 1)
+                     AddVar = Coeffs[N-1] * Math.Cos(Freq[N-1] * DateVal); // COS Coefficients in odd array registers
+                else AddVar = Coeffs[N-1] * Math.Sin(Freq[N-1] * DateVal); // SIN Coefficients in even array registers
+
+                Wind = Wind + AddVar;
+            }
+            if (Wind < 0.0) Wind = 0.0;
+            
+            return Wind; 
+        }
+
+        public override void CalculateLoad(DateTime TimeIndex)
+        {
+            Loading = 0;
+            if (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) < AQTSeg.Ice_Cover_Temp())
+            {
+                State = 0;  // no wind loading as iced over
+                return;
+            }
+
+            //if (AllStates.VSeg == VerticalSegments.Hypolimnion)
+            //{
+            //    State = 0;
+            //    return;
+            //}
+
+            // allows for user input of load, jsc
+            if (!LoadsRec.Loadings.NoUserLoad)
+            {
+                base.CalculateLoad(TimeIndex);  // TStateVariable
+                State = Loading;
+                return;
+            }
+
+            State = CalculateWindLoading(TimeIndex, MeanValue) * LoadsRec.Loadings.MultLdg;
+        }
+
+
+    } // end TWindLoading
+
 
     public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder
 {
@@ -2405,7 +2859,8 @@ namespace AQUATOX.AQTSegment
                                           typeof(TDissRefrDetr), typeof(TDissLabDetr), typeof(TSuspRefrDetr), typeof(TSuspLabDetr), typeof(TSedRefrDetr), typeof(TSedLabileDetr),
                                           typeof(TimeSeriesInput), typeof(TimeSeriesOutput), typeof(TNH4_Sediment), typeof(TNO3_Sediment), typeof(TPO4_Sediment),
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
-                                          typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec)}; 
+                                          typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
+                                          typeof(ChemicalRecord), typeof(TWindLoading)}; 
     }
 }
 

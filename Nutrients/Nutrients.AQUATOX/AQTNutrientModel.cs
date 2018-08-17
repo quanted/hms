@@ -18,7 +18,6 @@ namespace AQUATOXNutrientModel
         /// </summary>
         public AQTSim AQSim;
 
-
         /// <summary>
         /// Instantiates an AQUATOX Nutrients model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
         /// Valid JSON inputs must include an AQUATOX segment with one or more Nutrients state variables attached, and valid site record, morphometry data, and PSETUP records.
@@ -27,7 +26,7 @@ namespace AQUATOXNutrientModel
         /// <param name="json"></param> string, passed by reference:  a valid json input that is replaced by the model's json output including model results
         /// <param name="errmsg"></param> string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
         /// <param name="RunModel"></param> bool, if true, the model is run and results saved back to the json string parameter passed by reference. 
-        public AQTNutrientsModel(ref string json, ref string errmsg, bool RunModel)
+        public AQTNutrientsModel(ref string json, out string errmsg, bool RunModel)
 
         {
             AQSim = new AQTSim();
