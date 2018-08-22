@@ -176,8 +176,12 @@ namespace Data.Simulate
 
         private dynamic GetNLCDCN()
         {
-            string cnFile = @".\App_Data\curvenumber.json";
-            using(StreamReader r = new StreamReader(cnFile, System.Text.Encoding.UTF8))
+            string filePath = @".\App_Data\curvenumber.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber.json";
+            }
+            using(StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
             {
                 string jsonString = r.ReadToEnd();
                 dynamic cnData = JsonConvert.DeserializeObject(jsonString);
@@ -187,8 +191,12 @@ namespace Data.Simulate
 
         private dynamic GetCNConditions()
         {
-            string cnFile = @".\App_Data\curvenumber_conditions.json";
-            using (StreamReader r = new StreamReader(cnFile))
+            string filePath = @".\App_Data\curvenumber_conditions.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_conditions.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
             {
                 string jsonString = r.ReadToEnd();
                 dynamic cnConditions = JsonConvert.DeserializeObject(jsonString);
@@ -198,8 +206,12 @@ namespace Data.Simulate
 
         private dynamic GetNDVI()
         {
-            string cnFile = @".\App_Data\curvenumber_ndvi.json";
-            using (StreamReader r = new StreamReader(cnFile))
+            string filePath = @".\App_Data\curvenumber_ndvi.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_ndvi.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
             {
                 string jsonString = r.ReadToEnd();
                 dynamic ndvi = JsonConvert.DeserializeObject(jsonString);
