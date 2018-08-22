@@ -16,13 +16,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="App_Data\curvenumber.json" />
+    <Content Remove="App_Data\curvenumber_conditions.json" />
+    <Content Remove="App_Data\curvenumber_ndvi.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="App_Data\url_info.txt" />
+    <None Remove="App_Data\url_info_old.txt" />
     <None Remove="App_Data\XmlComments.xml" />
     <None Remove="App_Data\XmlCommentsData.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="App_Data\url_info.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\url_info_old.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="App_Data\XmlComments.xml">
@@ -36,6 +46,12 @@
   <ItemGroup>
     <Folder Include="wwwroot\" />
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App_Data\curvenumber.json" />
+    <None Include="App_Data\curvenumber_conditions.json" />
+    <None Include="App_Data\curvenumber_ndvi.json" />
   </ItemGroup>
 
   <ItemGroup>

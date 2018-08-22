@@ -25,17 +25,27 @@ namespace SurfaceRunoff
 
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             // TODO: Add options for different precip inputs
-            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "NLDAS" }, out errorMsg);
+            input.Source = "daymet";
+            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
+            
+            // Test comid=718276, latitude=46.69580547, longitude=-69.36054766
+            precipInput.Geometry.Point = new PointCoordinate()
+            {
+                Latitude = 46.69580547,
+                Longitude = -69.36054766
+            };
+            input.Geometry.ComID = 718276;
+
             ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
-            string data = cn.Simulate(out errorMsg, input);
+            ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            ITimeSeriesOutput cnOutput = output;
-            cnOutput = cn.SetDataToOutput(out errorMsg, "SurfaceRunoff", data, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            //ITimeSeriesOutput cnOutput = output;
+            //cnOutput = cn.SetDataToOutput(out errorMsg, "SurfaceRunoff", data, output, input);
+            //if (errorMsg.Contains("ERROR")) { return null; }
 
             //TODO: add temporal resolution function
 

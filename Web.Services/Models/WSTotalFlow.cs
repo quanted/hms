@@ -292,7 +292,7 @@ namespace Web.Services.Models
                 surfaceTempInput = input;
                 surfaceTempInput.Geometry = tsGeometry;            
                 SurfaceRunoff.SurfaceRunoff sFlow = new SurfaceRunoff.SurfaceRunoff();
-                sFlow.Input = inputFactory.SetTimeSeriesInput(surfaceTempInput, new List<string>() { "SURFFLOW" }, out errorMsg);
+                sFlow.Input = inputFactory.SetTimeSeriesInput(surfaceTempInput, new List<string>() { "surfacerunoff" }, out errorMsg);
                 surfaceFlow.Add(key, sFlow);
                 errorMessages.Add(errorMsg);
 
@@ -302,7 +302,7 @@ namespace Web.Services.Models
                 subSurfaceTempInput = input;
                 subSurfaceTempInput.Geometry = tsGeometry;
                 SubSurfaceFlow.SubSurfaceFlow subFlow = new SubSurfaceFlow.SubSurfaceFlow();
-                subFlow.Input = inputFactory.SetTimeSeriesInput(subSurfaceTempInput, new List<string>() { "BASEFLOW" }, out errorMsg);
+                subFlow.Input = inputFactory.SetTimeSeriesInput(subSurfaceTempInput, new List<string>() { "subsurfaceflow" }, out errorMsg);
                 subsurfaceFlow.Add(key, subFlow);
                 errorMessages.Add(errorMsg);
             }
