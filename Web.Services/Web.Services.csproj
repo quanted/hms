@@ -48,6 +48,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="2.4.0" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109" />
   </ItemGroup>
 
   <ItemGroup>

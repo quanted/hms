@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace SurfaceRunoff
@@ -71,7 +72,7 @@ namespace SurfaceRunoff
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "curvenumber":
-                    //Curve Number SurfaceRunoff not yet working
+                    //Curve Number SurfaceRunoff Data call
                     CurveNumber curve = new CurveNumber();
                     this.Input.Source = this.CurveSource;
                     this.Output = curve.GetData(out errorMsg, this.Output, this.Input);

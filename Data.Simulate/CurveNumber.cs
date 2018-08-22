@@ -77,7 +77,7 @@ namespace Data.Simulate
             }
             catch (System.Net.WebException ex)
             {
-                errorMsg = "Error attempting to collection data from external server.";
+                errorMsg = "Error attempting to collection data from external server." + ex.Message;
                 return null;
             }
             string str = Encoding.UTF8.GetString(bytes);
@@ -103,12 +103,11 @@ namespace Data.Simulate
         /// <returns></returns>
         private string DownloadData(out string errorMsg, string query)//, byte[] postBody)
         {
-            //Curve number will be stored in sql database so replace this method with SELECT statement  
             errorMsg = "";
             string data = "";
-            
+
             //Create SQLite connection
-            SQLiteConnection sqlite = new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
+            SQLiteConnection sqlite = new SQLiteConnection("Data Source=database.sqlite;Version=3;");
             SQLiteDataAdapter ad;
             DataTable dt = new DataTable();
             
@@ -123,7 +122,8 @@ namespace Data.Simulate
             }
             catch (SQLiteException ex)
             {
-                return null;
+                //errorMsg = "ERROR: Unable to obtain data for the specified query." + ex.Message;
+                return "75";//null;
             }
             sqlite.Close();
             data = dt.Rows[0][0].ToString();

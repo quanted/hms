@@ -28,7 +28,7 @@ namespace SurfaceRunoff
 
             Precipitation.Precipitation precip = new Precipitation.Precipitation();
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            precip.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
+            precip.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             precip.Input.Geometry.GeometryMetadata.Add("stationID", "USW00013874");
             precip.Input.Geometry.GeometryMetadata.Add("token", "RUYNSTvfSvtosAoakBSpgxcHASBxazzP");
             ITimeSeriesOutput precipOutput = precip.GetData(out errorMsg);
@@ -71,7 +71,7 @@ namespace SurfaceRunoff
                 {
                     runoff = 0.0;
                 }
-                entry.Value[0] = runoff.ToString("#.#####");
+                entry.Value[0] = Math.Round(runoff, 5).ToString();
             }
             return output;
         }

@@ -69,11 +69,59 @@ namespace Utilities
 
     public class CatchmentAggregation
     {
+        private string listToString(List<string> lst, out string errorMsg)
+        {
+            errorMsg = "";
+            if (lst.Count <= 0)
+            {
+                errorMsg = "The list must contain at least one COMID";
+                return null;
+            }
+            StringBuilder sb = new StringBuilder();
+            foreach (string comid in lst)
+            {
+                sb.Append(comid);
+                sb.Append(",");
+            }
+            string comIDs = sb.ToString();
+            int index = comIDs.LastIndexOf(",");
+            if (index > 0)
+            {
+                comIDs.Remove(index, 1);
+            }
+            comIDs = comIDs.Remove(index, 1);
+            return comIDs;
+        }
 
-        public string SQLiteRequest(string query)
+        public List<string> prepareCOMID(string HUCNumber, out string errorMsg)
+        {
+            List<string> lst = new List<string>();
+            //string lst = "";
+            DataTable dt = new DataTable();
+            errorMsg = "";
+            if ((HUCNumber.Length != 12) && (HUCNumber.Length != 8))
+            {
+                //errorMsg = "Invalid HUC Number.  The system works with HUC 8 or HUC12 only.";
+                foreach(string str in HUCNumber.Split(','))
+                {
+                    lst.Add(str);
+                }
+            }
+            if (HUCNumber.Length == 12)
+            {
+                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + HUCNumber + "'");
+            }
+            else if (HUCNumber.Length == 8)
+            {
+                lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)='" + HUCNumber + "'");
+            }
+            return lst;
+        }
+
+        public List<string> SQLiteRequest(string query)
         {
             //Create SQLite connection
-            SQLiteConnection sqlite = new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
+            SQLiteConnection sqlite = new SQLiteConnection("Data Source=database.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
             SQLiteDataAdapter ad;
             DataTable dt = new DataTable();
 
@@ -88,21 +136,20 @@ namespace Utilities
             }
             catch (SQLiteException ex)
             {
-                return null;
+                return null;//"ERROR: Unable to obtain data for the specified query." + ex.Message;
             }
             sqlite.Close();
+
             List<string> comIDs = new List<string>();
-            string comList = "";
             foreach (DataRow dr in dt.Rows)
             {
-                comList += dr["COMID"].ToString() + ",";
+                comIDs.Add(dr["COMID"].ToString());
             }
-            comList = comList.TrimEnd(comList[comList.Length - 1]);
 
-            return comList;
+            return comIDs;
         }
 
-        public GeometryData getData(ITimeSeriesInput input, ITimeSeriesOutput result)
+        public GeometryData getData(ITimeSeriesInput input, ITimeSeriesOutput result, List<string> coms, out string errorMsg)
         {
             /*Sample call of new utility in WS[Module].cs
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
@@ -122,48 +169,29 @@ namespace Utilities
              *      Other cases like huc 8 and huc12 would need to have those values passed in through geometry metadata box (huc_8_num:01060002,com_id_num:9311911)
              * 3. Return table for each [hour, day, week, month] that gives % runoff of each catchment grid cell
             */
-
+            errorMsg = "";
             //Parse geometry data from input page
             double lat = input.Geometry.Point.Latitude;
             double lon = input.Geometry.Point.Longitude;
-            string baseURL = "";
+            string baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             List<string> comIDS = new List<string>();
             //Check for huc arguments otherwise use lat long
-            if (metadata.ContainsKey("huc_8_num") && metadata["huc_8_num"].Length == 8)
-            {
-                //https://ofmpub.epa.gov/waters10/NavigationDelineation.Service?pNavigationType=PP&pStartComid=9310951&pStopComid=166443305
-                //huc_8_num:01060002
-                string query = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12 LIKE '" + metadata["huc_8_num"].ToString() + "%' ORDER BY COMID";
-                string queryResult = SQLiteRequest(query);
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + metadata["huc_8_num"];
-            }
-            else if (metadata.ContainsKey("huc_12_num") && metadata["huc_12_num"].Length == 12)
-            {
-                //huc_12_num:030502040102   huc_12_num:051202070802
-                string query = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12 = '" + metadata["huc_12_num"].ToString() + "' ORDER BY COMID";
-                string queryResult = SQLiteRequest(query);
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?com_id_list=" + queryResult;
-            }
-            else if (metadata.ContainsKey("com_id_list"))
-            {
-                string comList = metadata["com_id_list"].Replace(';', ',');
-                foreach (string val in comList.Split(','))
-                {
-                    comIDS.Add(val);
-                    //comList += val + ",";
-                }
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?com_id_list=" + comList;
-            }
-            else if (metadata.ContainsKey("com_id_num") && metadata.Count == 1)
-            {
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?&com_id_num=" + metadata["com_id_num"];
-                comIDS.Add(metadata["com_id_num"]);
-            }
-            else
+
+            string huc = "";
+
+            string type = metadata["GeometryType"].ToString();
+            huc = metadata[type].ToString();
+            //List<string> coms = prepareCOMID(huc, out errorMsg);
+            string comList = listToString(coms, out errorMsg);
+            baseURL += "com_id_list=" + comList;
+            if(input.Geometry.GeometryMetadata == null)
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
-                //string baseURL = "http://172.20.100.15/hms/rest/api/v2/hms/gis/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
+            }
+            if(type == "huc_8_num")
+            {
+                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + huc;
             }
 
             WebClient myWC = new WebClient();
@@ -178,7 +206,7 @@ namespace Utilities
                 {
                     Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(baseURL);
-                    wr.Timeout = 600000;//10 min
+                    wr.Timeout = 1200000;//20 min
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
@@ -191,7 +219,7 @@ namespace Utilities
             }
             catch (Exception ex)
             {
-                return null;
+                errorMsg =  "ERROR: Unable to obtain data for the specified query." + ex.Message;
             }
             GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(data);
 
