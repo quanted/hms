@@ -91,6 +91,14 @@ namespace AQUATOX.Chemicals
         public ChemicalRecord ChemRec;
         public double Tox_Air;  // toxicant in air (gas-phase concentration) in g/m3
         // [JsonIgnore] public double RecrSave = 0;  // recruitment for dothiseverystep.  (nosave)
+        public Loadings.TLoadings GillUptake_Link = null;  // optional linkage from JSON if chemicals sorbed to plants, animals, or OM not modeled
+        public Loadings.TLoadings Depuration_Link = null;
+        public Loadings.TLoadings Sorption_Link = null;
+        public Loadings.TLoadings Decomposition_Link = null;
+        public Loadings.TLoadings Desorption_Link = null;
+        public Loadings.TLoadings PlantUptake_Link = null;
+
+
         // -------------------------------------
 
         public TToxics(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
@@ -1635,12 +1643,18 @@ namespace AQUATOX.Chemicals
                     //}
                 }
 
-                // If Not Estimate By BCF
+                if (GillUptake_Link != null) GillSorption = GillUptake_Link.ReturnLoad(AQTSeg.TPresent);
+                if (Depuration_Link != null) Dep = Depuration_Link.ReturnLoad(AQTSeg.TPresent);
+                if (Sorption_Link != null) DetrSorption = Sorption_Link.ReturnLoad(AQTSeg.TPresent);
+                if (Decomposition_Link != null) Decomp = Decomposition_Link.ReturnLoad(AQTSeg.TPresent);
+                if (Desorption_Link != null) DetrDesorption = Desorption_Link.ReturnLoad(AQTSeg.TPresent);
+                if (PlantUptake_Link != null) PlantSorp = PlantUptake_Link.ReturnLoad(AQTSeg.TPresent);
+
                 DB = Lo - Hyd - Pho - Mic - Vl - ToxDis + Inflow + TDF + Mic_in_Aer + Mic_in_Anaer + DiffUp + DiffDown + DiffSed + Entr;
                 DB = DB + Decomp - DetrSorption + DetrDesorption - InorgSorpt + InorgDesorpt - GillSorption + Dep - PlantSorp + PoreWUp - PoreWDown;
-            }
-            // with
-//            Derivative_WriteRates();
+            }  // If Not Estimate By BCF
+
+           //  Derivative_WriteRates();
         }
 
     } // end TToxics

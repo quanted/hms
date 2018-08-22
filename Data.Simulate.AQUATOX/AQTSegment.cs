@@ -1314,7 +1314,7 @@ namespace AQUATOX.AQTSegment
             double OldVal = vals[rti - 1];
             double NewVal = vals[rti];
             DateTime OldTime = SV.restimes[rti - 1];
-            DateTime NewTime = SV.restimes[rti];
+            DateTime NewTime = SV.restimes[rti]; 
 
             return LinearInterpolate(out ErrMsg, OldVal, NewVal, OldTime, NewTime, steptime);
         }
