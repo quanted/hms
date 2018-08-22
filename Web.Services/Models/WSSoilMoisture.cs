@@ -41,7 +41,7 @@ namespace Web.Services.Models
             foreach(string layer in soilM.Layers)
             {
                 string l = layer.Replace('-', '_');
-                dataset.Add(l + "_SOILM");
+                dataset.Add(l + "_soilmoisture");
             }
             
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.

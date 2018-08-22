@@ -457,6 +457,11 @@ namespace Evapotranspiration
                 default:
                     NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
                     dt = nldas2.getDataHourly(timeZoneOffset, flagHSPF, out errorMsg);
+                    if (errorMsg != "")
+                    {
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
+                    }
                     DataRow dr1 = null;
                     double temp = 0.0;
                     double spec = 0.0;

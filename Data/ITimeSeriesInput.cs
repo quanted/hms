@@ -158,6 +158,13 @@ namespace Data
     /// </summary>
     public abstract class ITimeSeriesInputFactory
     {
+
+        /// <summary>
+        /// Constructor for empty, non-null, ITimeSeriesInput, abstract function
+        /// </summary>
+        /// <returns></returns>
+        public abstract ITimeSeriesInput Initialize();
+
         /// <summary>
         /// TimeSeriesInput setter abstract function
         /// </summary>
@@ -174,13 +181,81 @@ namespace Data
     public class TimeSeriesInputFactory : ITimeSeriesInputFactory
     {
         /// <summary>
-        /// TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
+        /// Construct empty, non-null, ITimeSeriesInput
+        /// </summary>
+        /// <returns></returns>
+        public override ITimeSeriesInput Initialize()
+        {
+            ITimeSeriesInput defaultInput = new TimeSeriesInput()
+            {
+                Source = "",
+                DateTimeSpan = new DateTimeSpan()
+                {
+                    StartDate = DateTime.Today.AddDays(-1.0),
+                    EndDate = DateTime.Today,
+                    DateTimeFormat = "yyyy-MM-dd HH"
+                },
+                Geometry = new TimeSeriesGeometry()
+                {
+                    ComID = -1,
+                    HucID = -1,
+                    StationID = "",
+                    Point = new PointCoordinate()
+                    {
+                        Latitude = -9999,
+                        Longitude = -9999,
+                    },
+                    Timezone = new Timezone
+                    {
+                        DLS = false,
+                        Name = "",
+                        Offset = 0
+                    },
+                    GeometryMetadata = new Dictionary<string, string>(),
+                    Description = ""
+                },
+                TemporalResolution = "default",
+                TimeLocalized = false,
+                Units = "",
+                BaseURL = new List<string>(),
+                DataValueFormat = "E3",
+                OutputFormat = "json",
+                InputTimeSeries = null   
+            };
+            return defaultInput;
+        }
+
+        /// <summary>
+        /// Refactored TimeseriesInput factory builder method.
         /// </summary>
         /// <param name="input"></param>
         /// <param name="dataset"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
         public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
+        {
+            errorMsg = "";
+            TimeSeriesInput validatedInput = ITimeSeriesValidation.Validate(out errorMsg, dataset, input) as TimeSeriesInput;
+            if (errorMsg.Contains("ERROR"))
+            {
+                return input;
+            }
+            //foreach(string ds in dataset)
+            //{
+            //    validatedInput.BaseURL.Add(GetBaseURL(input.Source, ds, out errorMsg));
+            //}
+            return validatedInput;
+        }
+
+        /// <summary>
+        /// OBSOLETE
+        /// TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="dataset"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
+        public ITimeSeriesInput OBS_SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
         {
             errorMsg = "";
             TimeSeriesInput newInput = new TimeSeriesInput();
@@ -410,7 +485,7 @@ namespace Data
             foreach (string ds in dataset)
             {
                 string tempError = "";
-                newInput.BaseURL.Add(GetBaseURL(input, ds, out tempError));
+                newInput.BaseURL.Add(GetBaseURL(input.Source, ds, out tempError));
                 if (tempError.Contains("ERROR"))
                 {
                     //errorMsg += tempError;
@@ -433,8 +508,7 @@ namespace Data
             return newInput;
         }
 
-
-        private static string GetBaseURL(ITimeSeriesInput input, string dataset, out string errorMsg)
+        private static string GetBaseURL(string source, string dataset, out string errorMsg)
         {
             errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
@@ -449,33 +523,7 @@ namespace Data
             }
 
             Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
-            string source = input.Source.ToLower();
-
-            string src = "";
-            switch (source)
-            {
-                case "nldas":
-                    src = "NLDAS";
-                    break;
-                case "gldas":
-                    src = "GLDAS";
-                    break;
-                case "daymet":
-                    src = "DAYMET";
-                    break;
-                case "ncdc":
-                    src = "NCDC";
-                    break;
-                case "wgen":
-                    return "";
-                case "prism":
-                    src = "PRISM";
-                    break;
-                default:
-                    errorMsg = "ERROR: Provided source is not valid. Unable to construct base url.";
-                    return "";
-            }
-            string url_key = (src == "PRISM") ? src + "_URL": src + "_" + dataset + "_URL";
+            string url_key = source.ToLower() + "_" + dataset.ToLower() + "_url";
             try
             {
                 return caselessUrls[url_key];
@@ -589,9 +637,24 @@ namespace Data
     public interface ITimeSeriesGeometry
     {
         /// <summary>
-        /// Description of the geometry, used to indicate details about the type of location the point represents.
+        /// Description of the geometry type being provided. Valid descriptions: "Point", "HucID", "ComID", and "StationID" in that order.
         /// </summary>
         string Description { get; set; }
+
+        /// <summary>
+        /// Catchment comid
+        /// </summary>
+        int ComID { get; set; }
+
+        /// <summary>
+        /// ID for NHDPlus boundaries
+        /// </summary>
+        int HucID { get; set; }
+  
+        /// <summary>
+        /// ID for NCDC Stations
+        /// </summary>
+        string StationID { get; set; }
 
         /// <summary>
         /// Lat/lon point for when a coordinates are used as the geometry type.
@@ -620,10 +683,24 @@ namespace Data
         public string Description { get; set; }
 
         /// <summary>
+        /// Catchment comid
+        /// </summary>
+        public int ComID { get; set; }
+
+        /// <summary>
+        /// ID for NHDPlus boundaries
+        /// </summary>
+        public int HucID { get; set; }
+
+        /// <summary>
+        /// ID for NCDC Stations
+        /// </summary>
+        public string StationID { get; set; }
+
+        /// <summary>
         /// Lat/lon point for when a coordinates are used as the geometry type.
         /// </summary>
         /// 
-
 #if RUNNING_ON_4  // JSC 1/22/2018
         [Required]   
 #endif

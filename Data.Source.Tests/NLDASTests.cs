@@ -38,7 +38,7 @@ namespace Data.Source.Tests
         {
             string errorMsg = "";
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            timeSeries.Input = iFactory.SetTimeSeriesInput(validInput, new List<string>() { "PRECIP" }, out errorMsg);
+            timeSeries.Input = iFactory.SetTimeSeriesInput(validInput, new List<string>() { "precipitation" }, out errorMsg);
         }
 
         // NLDAS remaining public Methods to be implemented
