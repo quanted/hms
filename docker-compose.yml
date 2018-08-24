@@ -1,4 +1,6 @@
 version: '3.4'
+volumes: 
+  collected_static: {}
 
 services:
   web.services:
@@ -6,3 +8,5 @@ services:
     build:
       context: .
       dockerfile: Web.Services/Dockerfile
+    volumes:
+      - collected_static:/app/collected_static

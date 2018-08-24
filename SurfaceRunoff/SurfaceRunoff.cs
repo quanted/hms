@@ -67,6 +67,11 @@ namespace SurfaceRunoff
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "curvenumber":
+                    CurveNumber cn = new CurveNumber();
+                    this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 default:
                     errorMsg = "ERROR: 'Source' for surfacerunoff was not found among available sources or is invalid.";
                     break;
