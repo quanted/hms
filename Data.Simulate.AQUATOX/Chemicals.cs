@@ -952,7 +952,7 @@ namespace AQUATOX.Chemicals
         public override double Washout()
         {
             double result;
-            if (SVType != T_SVType.StV)
+            if (NState != AllVariables.H2OTox)
             {
                 throw new Exception("Programming Error, TToxics.Washout must be passed Tox Dissolved in Water");
             }

@@ -155,7 +155,7 @@
   "InitialCond":  1.50000000000000E-0002,
   "State":  1.50000000000000E-0002,
   "nState": 20,
-  "SVType": 0,
+  "SVType": 2,
   "Layer": 0,
   "PName": "Total Ammonia as N",
   "LoadsRec": {

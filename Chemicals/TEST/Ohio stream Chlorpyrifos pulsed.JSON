@@ -807,7 +807,7 @@
 
   "State":  4.00000000000000E-0001,
   "nState": 0,
-  "SVType": 0,
+  "SVType": 2,
   "Layer": 0,
   "PName": "Dissolved org. tox 1: [Chlorpyrifos stream]",
   "LoadsRec": {

@@ -79,6 +79,7 @@ namespace AQUATOXNutrientModel
             if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
 
             TpHObj TpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TpH == null) return "A pH loading variable or state variable must be included in a nutrients simulation.";
             if ((!TpH.UseLoadsRecAsDriver)&&(TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
             { TCO2Obj TCO2 = (TCO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
               if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";

@@ -1,11 +1,6 @@
 {
- "Comment": "JSON Export from AQUATOX 3.2",
   "$type": "AQUATOXSegment",
-"VersionWrite": "3.97      ",
-"FileName": "Pond_MN_Chlorpyrifos_Simple2.JSON",
-"LastRun": "2018-08-17T10:55:41",
-"ControlRun": "1899-12-29T00:00:00",
-"StudyName": "CHLORPYRIFOS 6 ug/L",
+"StudyName": "CHLORPYRIFOS 6.3 ug/L",
 "SV": [
   {
   "$type": "TToxics",
@@ -195,7 +190,7 @@
    "XKAcid": "",
    "KBase":  4.33200000000000E+0003,
    "XKBase": "calc. from Pirahna",
-   "PhotolysisRate":  0.00000000000000E+0000,
+   "PhotolysisRate":  1.00000000000000E+0000,
    "XPhotoLysisRate": "",
    "OxRateConst":  0.00000000000000E+0000,
    "XOxRateConst": "",
@@ -1066,48 +1061,6 @@
   "PTrackResults^": true
   },
   {
-  "$type": "TLight",
-  "InitialCond":  3.33000000000000E+0002,
-  "State":  3.20487747419358E+0002,
-  "nState": 147,
-  "SVType": 0,
-  "Layer": 0,
-  "PName": "Light",
-  "LoadsRec": {
-   "$type": "LoadingsRecord",
-   "Loadings": {
-    "$type": "TLoadings",
-    "NoUserLoad": true,
-    "UseConstant": false,
-    "ConstLoad":  0.00000000000000E+0000,
-    "list": {
-     "$type": "SortedList`2",
-     "1993-12-30T00:00:00": 2.03000000000000E+0002,
-     "1994-01-04T00:00:00": 2.00000000000000E+0002,
-     "1994-02-05T00:00:00": 2.29000000000000E+0002
-     },
-    "MultLdg":  1.00000000000000E+0000
-    }
-   },
-  "PRequiresData": false,
-  "PHasData": false,
-  "StateUnit": "Ly/d",
-  "LoadingUnit": "Ly/d",
-  "LoadsRec.MultLdg":  1.00000000000000E+0000,
-  "yHold":  3.20487747419358E+0002,
-  "YOrig":  3.20487747419358E+0002,
-  "yout":  0.00000000000000E+0000,
-  "stepres[1]":  0.00000000000000E+0000,
-  "yError":  0.00000000000000E+0000,
-  "yScale":  3.20487747419358E+0002,
-  "PShowRates^": true,
-  "LoadNotes1": "",
-  "LoadNotes2": "",
-  "PTrackResults^": true,
-  "CalculatePhotoperiod": true,
-  "UserPhotoPeriod":  0.00000000000000E+0000
-  },
-  {
   "$type": "TpHObj",
   "InitialCond":  6.80000000000000E+0000,
   "State":  6.80000000000000E+0000,
@@ -1238,26 +1191,13 @@
  "StoreStepSize":  1.00000000000000E+0000,
  "MinStepSize":  1.00000000000000E+0000,
  "RelativeError":  5.00000000000000E-0003,
- "SaveBRates": true,
- "AlwaysWriteHypo": false,
- "ShowIntegration": false,
- "UseComplexedInBAF": false,
- "DisableLipidCalc": true,
  "KeepDissToxConst": false,
  "AverageOutput": false,
- "UseExternalConcs": false,
  "StepSizeInDays": true,
  "ModelTSDays": true,
- "Spinup_Mode": false,
- "NFix_UseRatio": false,
- "NtoPRatio":  7.00000000000000E+0000,
- "Spin_Nutrients": true,
  "FixStepSize":  1.00000000000000E-0001,
  "UseFixStepSize": false,
- "Internal_Nutrients": false,
  "T1IsAggregate": false,
- "AmmoniaIsDriving": false,
- "TSedDetrIsDriving": false
  },
 "Location": {
  "$type": "TAQTSite",

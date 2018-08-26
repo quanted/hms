@@ -1,11 +1,6 @@
 {
- "Comment": "JSON Export from AQUATOX 3.2",
   "$type": "AQUATOXSegment",
-"VersionWrite": "3.97      ",
-"FileName": "Pond_MN_Chlorpyrifos_Simple2.JSON",
-"LastRun": "2018-08-17T10:55:41",
-"ControlRun": "1899-12-29T00:00:00",
-"StudyName": "CHLORPYRIFOS 6 ug/L",
+"StudyName": "CHLORPYRIFOS 6.3 ug/L",
 "SV": [
   {
   "$type": "TToxics",
@@ -947,74 +942,6 @@
   "PTrackResults^": true
   },
   {
-  "$type": "TVolume",
-  "InitialCond":  1.73600000000000E+0001,
-  "State":  1.73600000000000E+0001,
-  "nState": 144,
-  "SVType": 0,
-  "Layer": 0,
-  "PName": "Water Volume",
-  "LoadsRec": {
-   "$type": "LoadingsRecord",
-   "Loadings": {
-    "$type": "TLoadings",
-    "NoUserLoad": false,
-    "UseConstant": true,
-    "ConstLoad":  0.00000000000000E+0000,
-    "list": {
-     "$type": "SortedList`2",
-     "1988-08-18T00:00:00": 1.73600000000000E+0001,
-     "1988-09-18T00:00:00": 1.73600000000000E+0001,
-     "1988-10-18T00:00:00": 1.73600000000000E+0001
-     },
-    "MultLdg":  1.00000000000000E+0000
-    },
-   "Alt_Loadings": [
-     {
-     "$type": "TLoadings",
-     "UseConstant": true,
-     "ConstLoad":  1.00000000000000E+0000,
-
-     "MultLdg":  1.00000000000000E+0000
-     },
-     {
-     "$type": "TLoadings",
-     "UseConstant": true,
-     "ConstLoad":  0.00000000000000E+0000,
-
-     "MultLdg":  1.00000000000000E+0000
-     },
-     {
-     "$type": "TLoadings",
-     "UseConstant": true,
-     "ConstLoad":  0.00000000000000E+0000,
-
-     "MultLdg":  1.00000000000000E+0000
-     }
-    ]
-   },
-  "PRequiresData": false,
-  "PHasData": false,
-  "StateUnit": "cu.m",
-  "LoadingUnit": "cu.m",
-  "LoadsRec.MultLdg":  1.00000000000000E+0000,
-  "yHold":  3.00000000000000E+0001,
-  "YOrig":  3.00000000000000E+0001,
-  "yout":  0.00000000000000E+0000,
-  "stepres[1]":  0.00000000000000E+0000,
-  "yError":  0.00000000000000E+0000,
-  "yScale":  3.00000000000000E+0001,
-  "PShowRates^": true,
-  "LoadNotes1": "volume is questionable; nominally 30 cu m",
-  "LoadNotes2": "because this is a pond enclosure it fluctuates",
-  "PTrackResults^": true,
-  "Calc_Method": 3,
-  "StratInflow": 2,
-  "StratOutflow": 2,
-  "StratAutomatically": true,
-  "Hourly": false
-  },
-  {
   "$type": "TTemperature",
   "InitialCond":  1.60000000000000E+0001,
   "State":  2.08000000000000E+0001,
@@ -1238,26 +1165,13 @@
  "StoreStepSize":  1.00000000000000E+0000,
  "MinStepSize":  1.00000000000000E+0000,
  "RelativeError":  5.00000000000000E-0003,
- "SaveBRates": true,
- "AlwaysWriteHypo": false,
- "ShowIntegration": false,
- "UseComplexedInBAF": false,
- "DisableLipidCalc": true,
  "KeepDissToxConst": false,
  "AverageOutput": false,
- "UseExternalConcs": false,
  "StepSizeInDays": true,
  "ModelTSDays": true,
- "Spinup_Mode": false,
- "NFix_UseRatio": false,
- "NtoPRatio":  7.00000000000000E+0000,
- "Spin_Nutrients": true,
  "FixStepSize":  1.00000000000000E-0001,
  "UseFixStepSize": false,
- "Internal_Nutrients": false,
  "T1IsAggregate": false,
- "AmmoniaIsDriving": false,
- "TSedDetrIsDriving": false
  },
 "Location": {
  "$type": "TAQTSite",
