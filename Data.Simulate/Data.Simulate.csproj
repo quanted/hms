@@ -11,25 +11,12 @@
   <ItemGroup>
     <PackageReference Include="Accord.Statistics" Version="3.8.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.2" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Data.SQLite">
-      <HintPath>..\Utilities\bin\netcoreapp2.0\sqlite-netFx20-binary-x64-2005-1.0.108.0\System.Data.SQLite.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <!--<ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
-      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.http.abstractions\2.0.0\lib\netstandard2.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-  </ItemGroup>-->
 
 </Project>

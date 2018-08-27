@@ -3,17 +3,19 @@ dotnet: 2.0.0
 dist: trusty
 mono: none
 solution: HMS.sln
+before_depoly:
+ - cd ~
 script:
  - rm docker-compose.*
- - dotnet restore -nowarn:msb3202,nu1503
- - dotnet build -c Release
+ - dotnet build -c Release Data/
+ - dotnet build -c Release Data.Simulate.AQUATOX/
+ - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.0/
- - sudo cp /app/OrganicMatter/DOCS/* /home/travis/build/quanted/hms/OrganicMatter/DOCS/
- - dotnet test Data.Tests/Data.Tests.csproj -c Release --filter Priority=1
- - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --filter Priority=1
- - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --filter Priority=1
- - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests -c Release
- - dotnet test Stream.Hydrology/AQUATOX.UnitTests -c Release
- - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests -c Release
+ - dotnet test Data.Tests/Data.Tests.csproj -c Release
+ - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release
+ - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release
+ - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release
+ - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release
+ - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release

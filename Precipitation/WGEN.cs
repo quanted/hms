@@ -22,17 +22,25 @@ namespace Precipitation
         {
             errorMsg = "";
             Data.Simulate.WGEN wgen = new Data.Simulate.WGEN();
-
+            IDateTimeSpan tempDates = new DateTimeSpan()
+            {
+                StartDate = input.DateTimeSpan.StartDate,
+                EndDate = input.DateTimeSpan.EndDate,
+                DateTimeFormat = input.DateTimeSpan.DateTimeFormat
+            };
             // The number of years of historic data can be customized by includead 'yearsHistoric' in Geometry.GeometryMetadata
             int years = (input.Geometry.GeometryMetadata.ContainsKey("yearsHistoric")) ? Convert.ToInt16(input.Geometry.GeometryMetadata["yearsHistoric"]) : 20;
             // Historic Precipitation data.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput historicInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "WGEN" }, out errorMsg);
+            ITimeSeriesInput tempInput = input;
+            tempInput.Source = "daymet";
+            ITimeSeriesInput historicInput = iFactory.SetTimeSeriesInput(tempInput, new List<string>() { "precipitation" }, out errorMsg);
             ITimeSeriesOutput historicData = GetHistoricData(out errorMsg, years, historicInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Run wgen
             ITimeSeriesOutput outputData = output;
+            input.DateTimeSpan = tempDates as DateTimeSpan;
             outputData = wgen.Simulate(out errorMsg, years, input, output, historicData);
             if (errorMsg.Contains("ERROR")) { return null; }
 
@@ -61,7 +69,7 @@ namespace Precipitation
             // Historic end date set to simulated data start date minus one day.
             precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.StartDate.AddDays(-1);
             // Historic start date set to 20 years before simulated start date.
-            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));          
+            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));
 
             if (input.Geometry.GeometryMetadata.ContainsKey("historicSource"))
             {

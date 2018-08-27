@@ -30,9 +30,13 @@
 
   <ItemGroup>
     <None Remove="App_Data\url_info.txt" />
+    <None Remove="App_Data\url_info_old.txt" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="App_Data\url_info_old.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="App_Data\url_info.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -40,7 +44,6 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109" />
   </ItemGroup>
 
   <!--<ItemGroup>

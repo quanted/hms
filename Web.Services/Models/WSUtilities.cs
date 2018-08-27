@@ -12,7 +12,7 @@ namespace Web.Services.Models
     /// </summary>
     public class WSUtilities
     {
-        
+
         /// <summary>
         /// Checks the data endpoints for the Precipitation component.
         /// </summary>
@@ -21,7 +21,7 @@ namespace Web.Services.Models
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<Precipitation.Precipitation> precips = new List<Precipitation.Precipitation>();
-            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet"};
+            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet" };
             ITimeSeriesInput testInput = new TimeSeriesInput()
             {
                 Source = "nldas",
@@ -41,11 +41,11 @@ namespace Web.Services.Models
                 }
             };
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            foreach(string source in sources)
+            foreach (string source in sources)
             {
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
                 testInput.Source = source;
-                precip.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "PRECIP" }, out string errorMsg);
+                precip.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "precipitation" }, out string errorMsg);
                 if (source.Contains("ncdc"))
                 {
                     precip.Input.Geometry.GeometryMetadata["stationID"] = "GHCND:USW00013874";
@@ -57,7 +57,7 @@ namespace Web.Services.Models
             Parallel.ForEach(precips, (Precipitation.Precipitation precip) =>
             {
                 endpoints.Add(precip.Input.Source, precip.CheckEndpointStatus());
-            });         
+            });
             return endpoints;
         }
 
@@ -93,7 +93,7 @@ namespace Web.Services.Models
             {
                 Evapotranspiration.Evapotranspiration evapo = new Evapotranspiration.Evapotranspiration();
                 testInput.Source = source;
-                evapo.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "EVAPOT" }, out string errorMsg);
+                evapo.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "evapotranspiration" }, out string errorMsg);
                 evapos.Add(evapo);
             }
 
@@ -139,7 +139,7 @@ namespace Web.Services.Models
                 {
                     SoilMoisture.SoilMoisture soil = new SoilMoisture.SoilMoisture();
                     testInput.Source = source;
-                    string l = layer.Replace('-', '_') + "_SOILM";
+                    string l = layer.Replace('-', '_') + "_soilmoisture";
                     soil.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { l }, out string errorMsg);
                     soil.Input.Source = source + "_" + l;
                     soils.Add(soil);
@@ -185,7 +185,7 @@ namespace Web.Services.Models
             {
                 SubSurfaceFlow.SubSurfaceFlow subsurface = new SubSurfaceFlow.SubSurfaceFlow();
                 testInput.Source = source;
-                subsurface.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "BASEFLOW" }, out string errorMsg);
+                subsurface.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "subsurfaceflow" }, out string errorMsg);
                 subsurfaces.Add(subsurface);
             }
 
@@ -228,7 +228,7 @@ namespace Web.Services.Models
             {
                 SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
                 testInput.Source = source;
-                runoff.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "SURFFLOW" }, out string errorMsg);
+                runoff.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "surfacerunoff" }, out string errorMsg);
                 runoffs.Add(runoff);
             }
 
@@ -271,7 +271,7 @@ namespace Web.Services.Models
             {
                 Temperature.Temperature temp = new Temperature.Temperature();
                 testInput.Source = source;
-                temp.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "TEMP" }, out string errorMsg);
+                temp.Input = iFactory.SetTimeSeriesInput(testInput, new List<string>() { "temperature" }, out string errorMsg);
                 temps.Add(temp);
             }
 

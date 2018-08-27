@@ -32,10 +32,13 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SurfaceRunoff object
+            SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
+
+            /*
             SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff()
             {
                 CurveSource = input.CurveSource
-            };
+            };*/
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
@@ -49,6 +52,30 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
 
+            // SubSurfaceFlow object
+            SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
+            input.Source = input.Source == "curvenumber" ? input.Geometry.GeometryMetadata["precipSource"] : input.Source;
+            if (input.Source != "nldas" && input.Source != "gldas")
+            {
+                input.Source = "nldas";//Subflow source should be same as surface. If surface uses curve number (not available to subflow), default to nldas for sub.
+            }
+            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
+            ITimeSeriesInputFactory subiFactory = new TimeSeriesInputFactory();
+            sub.Input = subiFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
+            // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            // Gets the SubSurfaceFlow data.
+            ITimeSeriesOutput subResult = sub.GetData(out errorMsg);
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            //Combine Both runoffs to get total runoff
+            foreach (var entry in result.Data)
+            {
+                string key = entry.Key.ToString();
+                string newval = (Convert.ToDouble(entry.Value[0]) + Convert.ToDouble(subResult.Data[key][0])).ToString();
+                entry.Value[0] = newval;
+            }
+
             //Stream Network Delineation
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
@@ -60,13 +87,13 @@ namespace Web.Services.Models
             {
                 gtype = "huc_12_num";
             }
-            else if (input.Geometry.GeometryMetadata.ContainsKey("com_id_num"))
-            {
-                gtype = "com_id_num";
-            }
             else if (input.Geometry.GeometryMetadata.ContainsKey("com_id_list"))
             {
                 gtype = "com_id_list";
+            }
+            else if (input.Geometry.ComID > 0 || input.Geometry.GeometryMetadata.ContainsKey("com_id_num"))
+            {
+                gtype = "com_id_num";
             }
             input.Geometry.GeometryMetadata.Add("GeometryType", gtype);
             DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.GeometryMetadata[gtype].ToString(), out errorMsg, out lst);
@@ -74,32 +101,11 @@ namespace Web.Services.Models
 
             if (input.Aggregation)
             {
-                // SubSurfaceFlow object
-                SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
-                input.Source = input.Source == "curvenumber" ? input.CurveSource : input.Source;
-                if(input.Source != "nldas" && input.Source != "gldas")
-                {
-                    input.Source = "nldas";//Subflow source should be same as surface. If surface uses curve number (not available to subflow), default to nldas for sub.
-                }
-                // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
-                ITimeSeriesInputFactory subiFactory = new TimeSeriesInputFactory();
-                sub.Input = subiFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
-                // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                // Gets the SubSurfaceFlow data.
-                ITimeSeriesOutput subResult = sub.GetData(out errorMsg);
-                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
                 Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
-                Utilities.GeometryData gd = cd.getData(input, result, lst, out errorMsg);
+                Utilities.GeometryData gd = cd.getData(input, lst, out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-                foreach (var entry in result.Data)
-                {
-                    string key = entry.Key.ToString();
-                    string newval = (Convert.ToDouble(entry.Value[0]) + Convert.ToDouble(subResult.Data[key][0])).ToString();
-                    entry.Value[0] = newval;
-                }
+                
                 ITimeSeriesOutput outs = cd.getCatchmentAggregation(input, result, gd);
                                 
                 ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();

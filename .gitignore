@@ -23,3 +23,5 @@ bld/
 .vs/
 
 *.suo
+
+test_reports/

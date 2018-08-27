@@ -211,7 +211,7 @@ namespace Web.Services.Models
                         //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
                         //}
                         goto default;
-                        //break;
+                        break;
                     case "catchmentid":
                         // use case 3
                         // string catchmentID = input.GeometryInput;
@@ -220,23 +220,23 @@ namespace Web.Services.Models
                         //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(baseUrl + "/api/GridCell/catchmentid/" + catchmentID).Result);
                         //}
                         goto default;
-                        //break;
+                        break;
                     case "catchment":
                         // use case 4
                         // Use POST call with geometry 
                         goto default;
-                        //break;
+                        break;
                     case "flowline":
                         // use case 5
                         // Use POST call with geometry
                         goto default;
-                        //break;
+                        break;
                     case "points":
                         // use case 6
                         // use case 7
                         // GET call with points, hms-gis will get geometries
                         goto default;
-                        //break;
+                        break;
                     case "test":
                         string testGeometry = "{\"geometry\":{\"9311911\": { \"points\": [ { \"cellArea\": 0.015624999999992895,  \"containedArea\": 4.178630503273804e-05,  \"longitude\": -71.43749999999996,  \"latitude\": 44.18749999999999,  \"percentArea\": 0.26743235220964506 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.005083393397351494,  \"longitude\": -71.31249999999997,  \"latitude\": 44.18750000000001,  \"percentArea\": 32.53371774305696 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.0002419268603100419,  \"longitude\": -71.31249999999997,  \"latitude\": 44.31249999999997,  \"percentArea\": 1.5483319059846201 } ] } },  \"metadata\": { \"execution time\": 86.99717831611633,  \"nldas source\": \"https://ldas.gsfc.nasa.gov/nldas/gis/NLDAS_Grid_Reference.zip\",  \"number of points\": 3,  \"request date\": \"Thu, 22 Mar 2018 11:46:44 GMT\",  \"shapefile source\": \"ftp://newftp.epa.gov/exposure/BasinsData/NHDPlus21/NHDPlus01060002.zip\" } }";
                         //string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
@@ -292,7 +292,7 @@ namespace Web.Services.Models
                 surfaceTempInput = input;
                 surfaceTempInput.Geometry = tsGeometry;
                 SurfaceRunoff.SurfaceRunoff sFlow = new SurfaceRunoff.SurfaceRunoff();
-                sFlow.Input = inputFactory.SetTimeSeriesInput(surfaceTempInput, new List<string>() { "SURFFLOW" }, out errorMsg);
+                sFlow.Input = inputFactory.SetTimeSeriesInput(surfaceTempInput, new List<string>() { "surfacerunoff" }, out errorMsg);
                 surfaceFlow.Add(key, sFlow);
                 errorMessages.Add(errorMsg);
 
@@ -302,7 +302,7 @@ namespace Web.Services.Models
                 subSurfaceTempInput = input;
                 subSurfaceTempInput.Geometry = tsGeometry;
                 SubSurfaceFlow.SubSurfaceFlow subFlow = new SubSurfaceFlow.SubSurfaceFlow();
-                subFlow.Input = inputFactory.SetTimeSeriesInput(subSurfaceTempInput, new List<string>() { "BASEFLOW" }, out errorMsg);
+                subFlow.Input = inputFactory.SetTimeSeriesInput(subSurfaceTempInput, new List<string>() { "subsurfaceflow" }, out errorMsg);
                 subsurfaceFlow.Add(key, subFlow);
                 errorMessages.Add(errorMsg);
             }

@@ -149,7 +149,7 @@ namespace Utilities
             return comIDs;
         }
 
-        public GeometryData getData(ITimeSeriesInput input, ITimeSeriesOutput result, List<string> coms, out string errorMsg)
+        public GeometryData getData(ITimeSeriesInput input, List<string> coms, out string errorMsg)
         {
             /*Sample call of new utility in WS[Module].cs
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
@@ -206,7 +206,7 @@ namespace Utilities
                 {
                     Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(baseURL);
-                    wr.Timeout = 1200000;//20 min
+                    wr.Timeout = 900000;//15 min
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();

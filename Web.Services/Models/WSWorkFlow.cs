@@ -40,7 +40,7 @@ namespace Web.Services.Models
             ITimeSeriesOutput output = oFactory.Initialize();
             output.DataSource = string.Join(" - ", input.SourceList.ToArray());
 
-            if (input.Dataset.Contains("Precipitation"))
+            if (input.Dataset.Contains("precipitation"))
             {
                 input.SourceList = new List<string>()
                 {
@@ -60,9 +60,9 @@ namespace Web.Services.Models
                 Precipitation.Precipitation ncdc = new Precipitation.Precipitation();
                 // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                 ITimeSeriesInputFactory nFactory = new TimeSeriesInputFactory();
-                ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
+                ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                
+
                 // Set input to precip object.
                 ncdc.Input = nInput;
                 ncdc.Input.TemporalResolution = "daily";
@@ -121,7 +121,8 @@ namespace Web.Services.Models
                     }
                 });
 
-                if(errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1){
+                if (errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1)
+                {
                     return err.ReturnError(string.Join(",", errorList.ToArray()));
                 }
 

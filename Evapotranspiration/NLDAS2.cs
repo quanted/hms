@@ -937,6 +937,7 @@ namespace Evapotranspiration
                     break;
 
             }
+            // Response status message
             byte[] bytes = null;
             WebClient client = new WebClient();
             client.Credentials = CredentialCache.DefaultNetworkCredentials;
@@ -977,6 +978,7 @@ namespace Evapotranspiration
                     if (cleanLine.Contains("Date&Time"))
                     {
                         blnDataStart = true;
+                        continue;
                     }
                     if ((cleanLine.Contains("Date&Time")) || (cleanLine.Contains("MEAN")) || (cleanLine == ""))
                     {

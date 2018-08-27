@@ -17,11 +17,6 @@ namespace Web.Services.Controllers
     public class WatershedWorkflowInput : TimeSeriesInput
     {
         /// <summary>
-        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
-        /// </summary>
-        public string CurveSource { get; set; }
-
-        /// <summary>
         /// OPTIONAL: States whether or not runoff should be aggregated by catchments
         /// </summary>
         public Boolean Aggregation { get; set; }
@@ -77,7 +72,6 @@ namespace Web.Services.Controllers
                 TimeLocalized = true,
                 Units = "default",
                 OutputFormat = "json",
-                CurveSource = "nldas",
                 Aggregation = true
             };
             return example;

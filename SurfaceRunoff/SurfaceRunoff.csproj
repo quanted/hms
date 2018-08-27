@@ -9,16 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Data.Simulate\Data.Simulate.csproj" />
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
-    <ProjectReference Include="..\WatershedDelineation\WatershedDelineation.csproj" />
   </ItemGroup>
 
 </Project>

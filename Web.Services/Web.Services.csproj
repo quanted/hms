@@ -16,13 +16,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="App_Data\curvenumber.json" />
+    <Content Remove="App_Data\curvenumber_conditions.json" />
+    <Content Remove="App_Data\curvenumber_ndvi.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="App_Data\url_info.txt" />
+    <None Remove="App_Data\url_info_old.txt" />
     <None Remove="App_Data\XmlComments.xml" />
     <None Remove="App_Data\XmlCommentsData.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="App_Data\url_info.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\url_info_old.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="App_Data\XmlComments.xml">
@@ -39,16 +49,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="App_Data\curvenumber.json" />
+    <None Include="App_Data\curvenumber_conditions.json" />
+    <None Include="App_Data\curvenumber_ndvi.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.2" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.9.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="2.4.0" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,6 +76,7 @@
     <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />
     <ProjectReference Include="..\Temperature\Temperature.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\WatershedDelineation\WatershedDelineation.csproj" />
   </ItemGroup>
 
 </Project>

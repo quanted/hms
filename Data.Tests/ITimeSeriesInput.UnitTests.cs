@@ -40,7 +40,7 @@ namespace Data.Tests
         {
             string errorMsg = "";
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(validInput, new List<string>() { "PRECIP" }, out errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(validInput, new List<string>() { "precipitation" }, out errorMsg);
             Assert.Equal("", errorMsg);
         }
 
@@ -51,9 +51,9 @@ namespace Data.Tests
         [InlineData("nldas", "")]
         [InlineData("wgen", "")]
         [InlineData("NLDAS", "")]
-        [InlineData("", "ERROR: Required 'Source' parameter was not found or is invalid. ERROR: Provided source is not valid. Unable to construct base url.")]
-        [InlineData("123456", "ERROR: Provided source is not valid. Unable to construct base url.")]
-        [InlineData("nldasas", "ERROR: Provided source is not valid. Unable to construct base url.")]
+        [InlineData("", "ERROR: Source not found in input.")]
+        [InlineData("123456", "ERROR: Source is not valid or not compatible with dataset. Dataset value(s): precipitation. Source value: 123456")]
+        [InlineData("nldasas", "ERROR: Source is not valid or not compatible with dataset. Dataset value(s): precipitation. Source value: nldasas")]
         public void SetTimeSeriesInput_SourceTest(string source, string expected)
         {
             string errorMsg = "";
@@ -61,7 +61,7 @@ namespace Data.Tests
             TimeSeriesInput badSource = new TimeSeriesInput();
             badSource = validInput;
             badSource.Source = source;
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(badSource, new List<string>() { "PRECIP" }, out errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(badSource, new List<string>() { "precipitation" }, out errorMsg);
             Assert.Equal(expected, errorMsg);
         }
 
@@ -69,9 +69,9 @@ namespace Data.Tests
         /// Test dataset parameter
         /// </summary>
         [Theory]
-        [InlineData("", "ERROR: Unable to construct base url from the specified dataset and provided data source.")]
-        [InlineData("PRECIP", "")]
-        [InlineData("asdfhlkajshd", "ERROR: Unable to construct base url from the specified dataset and provided data source.")]
+        [InlineData("", "ERROR: Dataset is not valid. Dataset value(s): , ERROR: Unable to construct base url from the specified dataset and provided data source.")]
+        [InlineData("precipitation", "")]
+        [InlineData("asdfhlkajshd", "ERROR: Dataset is not valid. Dataset value(s): asdfhlkajshd, ERROR: Unable to construct base url from the specified dataset and provided data source.")]
         public void SetTimeSeriesInput_DatasetTest(string dataset, string expected)
         {
             string errorMsg = "";
@@ -101,7 +101,7 @@ namespace Data.Tests
             {
                 dateTest.DateTimeSpan.StartDate = new DateTime(year, month, day);
             }
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(dateTest, new List<string>() { "PRECIP" }, out errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(dateTest, new List<string>() { "precipitation" }, out errorMsg);
             Assert.Equal(expected, errorMsg);
         }
 
@@ -110,7 +110,7 @@ namespace Data.Tests
         /// </summary>
         [Theory]
         [InlineData(2016, 12, 31, "")]
-        [InlineData(0, 0, 0, "ERROR: Required 'EndDate' parameter was not found or is invalid. ERROR: Start date must be before end date.")]
+        [InlineData(0, 0, 0, "ERROR: Required 'EndDate' parameter was not found or is invalid.")]
         [InlineData(2010, 01, 01, "ERROR: Start date must be before end date.")]
         public void SetTimeSeriesInput_EndDateTest(int year, int month, int day, string expected)
         {
@@ -126,7 +126,7 @@ namespace Data.Tests
             {
                 dateTest.DateTimeSpan.EndDate = new DateTime(year, month, day);
             }
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(dateTest, new List<string>() { "PRECIP" }, out errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(dateTest, new List<string>() { "precipitation" }, out errorMsg);
             Assert.Equal(expected, errorMsg);
         }
 
@@ -141,8 +141,8 @@ namespace Data.Tests
             TimeSeriesInput noSDate = new TimeSeriesInput();
             noSDate = validInput;
             noSDate.DateTimeSpan = null;
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noSDate, new List<string>() { "PRECIP" }, out errorMsg);
-            Assert.Equal("ERROR: DateTimeSpan object is null. DateTimeSpan, with a StartDate and EndDate, is required.", errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noSDate, new List<string>() { "precipitation" }, out errorMsg);
+            Assert.Equal("ERROR: No DateTimeSpan found.", errorMsg);
         }
 
         /// <summary>
@@ -156,24 +156,8 @@ namespace Data.Tests
             TimeSeriesInput noGeom = new TimeSeriesInput();
             noGeom = validInput;
             noGeom.Geometry = null;
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noGeom, new List<string>() { "PRECIP" }, out errorMsg);
-            Assert.Equal("ERROR: No geometry values found in the provided parameters.", errorMsg);
-        }
-
-        /// <summary>
-        /// Test point parameter
-        /// </summary>
-        [Fact]
-        public void SetTimeSeriesInput_PointTest()
-        {
-            string errorMsg = "";
-            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            TimeSeriesInput noPoint = new TimeSeriesInput();
-            noPoint = validInput;
-            noPoint.Geometry.Point = null;
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noPoint, new List<string>() { "PRECIP" }, out errorMsg);
-            string expectedError = "ERROR: No geometry values found in the provided parameters. ERROR: Latitude or Longitude value is not a valid coordinate.";
-            Assert.Equal(expectedError, errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(noGeom, new List<string>() { "precipitation" }, out errorMsg);
+            Assert.Equal("ERROR: No input geometry was found.", errorMsg);
         }
 
         /// <summary>
@@ -181,8 +165,8 @@ namespace Data.Tests
         /// </summary>
         [Theory]
         [InlineData(33.925673, -83.355723, "")]
-        [InlineData(100.0, -83.355723, "ERROR: Latitude or Longitude value is not a valid coordinate.")]
-        [InlineData(33.925673, 200.0, "ERROR: Latitude or Longitude value is not a valid coordinate.")]
+        [InlineData(100.0, -83.355723, "ERROR: Latitude value is not valid. Latitude must be between -90 and 90. Latitude: 100, ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: 0, ERROR: A valid COM ID was not found.")]
+        [InlineData(33.925673, 200.0, "ERROR: Longitude value is not valid. Longitude must be between -180 and 180. Longitude: 200, ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: 0, ERROR: A valid COM ID was not found.")]
         public void SetTimeSeriesInput_LatLongTest(double latitude, double longitude, string expected)
         {
             string errorMsg = "";
@@ -191,7 +175,7 @@ namespace Data.Tests
             latLongTest = validInput;
             latLongTest.Geometry.Point.Latitude = latitude;
             latLongTest.Geometry.Point.Longitude = longitude;
-            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(latLongTest, new List<string>() { "PRECIP" }, out errorMsg);
+            ITimeSeriesInput sampleInput = iFactory.SetTimeSeriesInput(latLongTest, new List<string>() { "precipitation" }, out errorMsg);
             Assert.Equal(expected, errorMsg);
         }
     }

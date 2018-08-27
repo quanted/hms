@@ -120,7 +120,7 @@ namespace Evapotranspiration
             errorMsg = "";
             double petHamon = 0;
             double sunshineHours = 0;
-            
+
             DataTable dt = new DataTable();
 
             switch (inpt.Source)
@@ -128,7 +128,7 @@ namespace Evapotranspiration
                 case "ncdc":
                     NCDC ncd = new NCDC();
                     dt = ncd.DownloadData(outpt, inpt);
-                    if(dt == null)
+                    if (dt == null)
                     {
                         errorMsg = "ERROR: Unable to download data. ";
                     }
@@ -224,7 +224,7 @@ namespace Evapotranspiration
                     }
                     break;
             }
-            
+
             if (errorMsg != "")
             {
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -311,7 +311,6 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -321,6 +320,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
             }
             catch (Exception ex)
@@ -328,7 +331,7 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: Unable to download data from Daymet. " + ex.Message;
                 return null;
             }
-            
+
             DataTable tab = new DataTable();
             tab.Columns.Add("Date");
             tab.Columns.Add("Julian_Day");
@@ -340,7 +343,7 @@ namespace Evapotranspiration
             string[] lines = splitData[1].Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             Boolean julianflag = false;
             foreach (string line in lines)//for (int i = inpt.DateTimeSpan.StartDate.DayOfYear-1; i < inpt.DateTimeSpan.EndDate.DayOfYear; i++)
-            {                
+            {
                 string[] linedata = line.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 if (Convert.ToInt32(Convert.ToDouble(linedata[1])) >= inpt.DateTimeSpan.StartDate.DayOfYear && (Convert.ToInt32(Convert.ToDouble(linedata[0])) == inpt.DateTimeSpan.StartDate.Year))
                 {

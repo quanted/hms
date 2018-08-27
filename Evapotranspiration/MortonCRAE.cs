@@ -726,7 +726,7 @@ namespace Evapotranspiration
 
                 MortonCRAEMethod(tmin, tmax, tmean, jday, time1, shmin, shmax, solarRad, model, out relHMin, out relHMax,
                                  out petMC, out errorMsg);
-                if(inpt.Source == "daymet")
+                if (inpt.Source == "daymet")
                 {
                     double vapor = Convert.ToDouble(dr["VaPress"].ToString());
                     dr["RHmin"] = daymetHumid(tmin, vapor).ToString("F2", CultureInfo.InstalledUICulture);
@@ -789,7 +789,7 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(300);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -799,6 +799,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
             }
             catch (Exception ex)

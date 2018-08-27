@@ -1,23 +1,25 @@
-﻿using System;
+﻿using Data.Source;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Web;
-using System.Data.SQLite;
-using System.Data;
-using System.Text.RegularExpressions;
 
 namespace Data.Simulate
 {
+
     /// <summary>
     /// Curve Number base class.
     /// Classified as simulation data, simulation takes place on a different server so only a standard data call is made.
     /// </summary>
     public class CurveNumber
     {
-
         /// <summary>
         /// Get simulated curve number data.
         /// </summary>
@@ -25,125 +27,188 @@ namespace Data.Simulate
         /// <param name="input"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public string Simulate(out string errorMsg, ITimeSeriesInput input)
+        public ITimeSeriesOutput Simulate(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput precipData)
         {
             errorMsg = "";
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output = oFactory.Initialize();
+            output.Dataset = "Surface Runoff";
+            output.DataSource = "curve number";
+            //output.Metadata = precipData.Metadata;
 
-            string comID = getComID(out errorMsg, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            double cn = CalculateCN(out errorMsg, input);
 
-            string query = ConstructQuery(out errorMsg, input, comID);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            // Curve number algorithm
+            // Runoff calculation: https://en.wikipedia.org/wiki/Runoff_curve_number
+            // Calculate soil moisture retention (S): S = 1000/CN - 10
+            // Calculate initial abstraction (Ia): Ia = 0.2S (old initial abstraction was Ia = 0.05S)
+            // Iterate over precipitation data (P) by date
+            // If precipitation <= Ia: Runoff (Q) = 0
+            // Else precipitation > Ia: Runoff (Q) = (P - Ia)^2/(P- Ia + S)
 
-            string data = DownloadData(out errorMsg, query);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            double s = 1000.0 / cn - 10.0;
 
-            return data;
-        }
+            //int day0 = DateTime.Parse(precipData.Data.Keys.First()).DayOfYear;
+            //int cnI = day0 / 16;
+            //Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
+            //double s = 1000.0 / cn[cnI] - 10.0;
 
-        /// <summary>
-        /// Constructs the url to retrieve curvenumber data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <returns></returns>
-        private string ConstructQuery(out string errorMsg, ITimeSeriesInput input, string com)
-        {
-            errorMsg = "";
-            string sql = "SELECT DISTINCT CURVENUM FROM HUC12_PU_COMIDs_CONUS WHERE COMID = '" + com + "';";
-            return sql;
-        }
+            double ia = 0.2 * s;
 
-        /// <summary>
-        /// Constructs the body of the post for retrieving curvenumber data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private string getComID(out string errorMsg, ITimeSeriesInput input)
-        {
-            errorMsg = "";
-            string url = "https://ofmpub.epa.gov/waters10/SpatialAssignment.Service?pGeometry=POINT(" + input.Geometry.Point.Longitude + "+" + input.Geometry.Point.Latitude + ")&pLayer=NHDPLUS_CATCHMENT&pSpatialSnap=TRUE&pReturnGeometry=TRUE";
-            byte[] bytes = null;
-            WebClient client = new WebClient();
-            client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            int retries = 5;                                        // Max number of request retries
-            try
+
+            foreach (KeyValuePair<string, List<string>> dateValue in precipData.Data)
             {
-                while (retries > 0 && bytes == null)
+                string date = dateValue.Key;
+
+                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 16;
+                //s = 1000.0 / cn[cnI] - 10.0;
+                //ia = 0.2 * s;
+
+                double p = double.Parse(dateValue.Value[0]);
+                double q = (p <= ia) ? 0 : ((p - ia) * (p - ia)) / (p - ia + s);
+                List<string> d = new List<string>();
+                d.Add(q.ToString(input.DataValueFormat));
+                output.Data.Add(date, d);
+            }
+            return output;
+        }
+
+        private Dictionary<int, double> GetCN(out string errorMsg, int comid)
+        {
+            errorMsg = "";
+            string dbPath = "./App_Data/cn.sqlite";
+            string query = "SELECT CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22, CN_23 " +
+                "FROM CN WHERE ComID = " + comid.ToString();
+            Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
+            Dictionary<int, double> cnData = new Dictionary<int, double>();
+            int i = 1;
+            foreach (string key in data.Keys)
+            {
+                cnData.Add(i, double.Parse(data[key]));
+                i++;
+            }
+            return cnData;
+        }
+
+        private double CalculateCN(out string errorMsg, ITimeSeriesInput input)
+        {
+            dynamic cn = GetNLCDCN();
+            dynamic conditions = GetCNConditions();
+            dynamic ndvi = GetNDVI();
+            List<int> ndviCN = new List<int>() { 41, 42, 43, 52, 71, 81, 82 };
+
+            Streamcat sc = new Streamcat();
+            Catchment catchment = sc.GetCatchmentData(out errorMsg, input.Geometry.ComID);
+            double catchmentCN = 0.0;
+
+            foreach (int c in catchment.landcover.Keys)
+            {
+                double v = catchment.landcover[c];
+                var nlcd = cn[c.ToString()];
+                double n = 0.0;
+
+                if (ndviCN.Contains(c))
                 {
-                    bytes = client.DownloadData(url);
-                    retries -= 1;
+                    // TODO: ndviType is currently a placeholder value, but will be determined from modis ndvi data using the ranges found in curvenumber_ndvi.json
+                    string ndviType = "GOOD";
+
+                    switch (catchment.hsg)
+                    {
+                        case "A":
+                            n = conditions[c.ToString()][ndviType].A;
+                            break;
+                        case "B":
+                            n = conditions[c.ToString()][ndviType].B;
+                            break;
+                        case "C":
+                            n = conditions[c.ToString()][ndviType].C;
+                            break;
+                        case "D":
+                            n = conditions[c.ToString()][ndviType].D;
+                            break;
+                        default:
+                            n = conditions[c.ToString()][ndviType].A;
+                            break;
+                    }
                 }
+                else
+                {
+                    switch (catchment.hsg)
+                    {
+                        case "A":
+                            n = nlcd.A;
+                            break;
+                        case "B":
+                            n = nlcd.B;
+                            break;
+                        case "C":
+                            n = nlcd.C;
+                            break;
+                        case "D":
+                            n = nlcd.D;
+                            break;
+                        default:
+                            n = nlcd.A;
+                            break;
+                    }
+                }
+                if (n == -1)
+                {
+                    continue;
+                }
+                catchmentCN += v / 100 * n;
             }
-            catch (System.Net.WebException ex)
+            if (catchmentCN < 30)
             {
-                errorMsg = "Error attempting to collection data from external server." + ex.Message;
-                return null;
+                catchmentCN = 30.0;
             }
-            string str = Encoding.UTF8.GetString(bytes);
-            string pattern = @"[0-9]{2,}";
-            Match result = Regex.Match(str, pattern);
-            if (result.Success)
-            {
-                str = result.Value;
-            }
-            else
-            {
-                errorMsg = "ERROR: Could not find valid geometry.";
-            }
-            return str;
+            return catchmentCN;
         }
 
-        /// <summary>
-        /// Sends request for curvenumber timeseries data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="url"></param>
-        /// <param name="postBody"></param>
-        /// <returns></returns>
-        private string DownloadData(out string errorMsg, string query)//, byte[] postBody)
+        private dynamic GetNLCDCN()
         {
-            errorMsg = "";
-            string data = "";
-
-            //Create SQLite connection
-            SQLiteConnection sqlite = new SQLiteConnection("Data Source=database.sqlite;Version=3;");
-            SQLiteDataAdapter ad;
-            DataTable dt = new DataTable();
-            
-            try
+            string filePath = @".\App_Data\curvenumber.json";
+            if (!File.Exists(filePath))
             {
-                SQLiteCommand cmd;
-                sqlite.Open();  //Initiate connection to the db
-                cmd = sqlite.CreateCommand();
-                cmd.CommandText = query;  //set the passed query
-                ad = new SQLiteDataAdapter(cmd);
-                ad.Fill(dt); //fill the datasource
+                filePath = "/app/App_Data/curvenumber.json";
             }
-            catch (SQLiteException ex)
+            using (StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
             {
-                //errorMsg = "ERROR: Unable to obtain data for the specified query." + ex.Message;
-                return "75";//null;
+                string jsonString = r.ReadToEnd();
+                dynamic cnData = JsonConvert.DeserializeObject(jsonString);
+                return cnData;
             }
-            sqlite.Close();
-            data = dt.Rows[0][0].ToString();
-            return data;
         }
 
-        /// <summary>
-        /// Parse data string and set to output object.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="dataset"></param>
-        /// <param name="data"></param>
-        /// <param name="output"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        private dynamic GetCNConditions()
         {
-            errorMsg = "";
-            //TODO: Format data to output object.
-            return null; 
+            string filePath = @".\App_Data\curvenumber_conditions.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_conditions.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
+            {
+                string jsonString = r.ReadToEnd();
+                dynamic cnConditions = JsonConvert.DeserializeObject(jsonString);
+                return cnConditions;
+            }
         }
+
+        private dynamic GetNDVI()
+        {
+            string filePath = @".\App_Data\curvenumber_ndvi.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_ndvi.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
+            {
+                string jsonString = r.ReadToEnd();
+                dynamic ndvi = JsonConvert.DeserializeObject(jsonString);
+                return ndvi;
+            }
+        }
+
     }
 }
