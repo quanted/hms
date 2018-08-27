@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>Data</AssemblyName>
+    <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
+    <AssemblyName>HMSData</AssemblyName>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
