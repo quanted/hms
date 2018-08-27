@@ -38,6 +38,16 @@ namespace Web.Services.Tests
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
+        /// <summary>
+        /// Curvenumber request json string for testing a valid request
+        /// </summary>
+        const string curvenumberRequest =
+            "{\"source\": \"curvenumber\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"comid\": 718276," +
+            "\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
 
         /// <summary>
         /// Integration test constructor creates test server and test client.
@@ -57,6 +67,7 @@ namespace Web.Services.Tests
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]
+        [InlineData(curvenumberRequest)]
         public async Task ValidRequests(string inputString)
         {
             string endpoint = "api/hydrology/surfacerunoff";

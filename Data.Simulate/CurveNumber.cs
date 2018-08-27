@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Data.Source;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -8,13 +13,13 @@ using System.Web;
 
 namespace Data.Simulate
 {
+
     /// <summary>
     /// Curve Number base class.
     /// Classified as simulation data, simulation takes place on a different server so only a standard data call is made.
     /// </summary>
     public class CurveNumber
     {
-
         /// <summary>
         /// Get simulated curve number data.
         /// </summary>
@@ -22,120 +27,188 @@ namespace Data.Simulate
         /// <param name="input"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public string Simulate(out string errorMsg, ITimeSeriesInput input)
+        public ITimeSeriesOutput Simulate(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput precipData)
         {
             errorMsg = "";
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output = oFactory.Initialize();
+            output.Dataset = "Surface Runoff";
+            output.DataSource = "curve number";
+            //output.Metadata = precipData.Metadata;
 
-            string url = ConstructURL(out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            double cn = CalculateCN(out errorMsg, input);
 
-            byte[] body = ConstructPOST(out errorMsg, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            // Curve number algorithm
+            // Runoff calculation: https://en.wikipedia.org/wiki/Runoff_curve_number
+            // Calculate soil moisture retention (S): S = 1000/CN - 10
+            // Calculate initial abstraction (Ia): Ia = 0.2S (old initial abstraction was Ia = 0.05S)
+            // Iterate over precipitation data (P) by date
+            // If precipitation <= Ia: Runoff (Q) = 0
+            // Else precipitation > Ia: Runoff (Q) = (P - Ia)^2/(P- Ia + S)
 
-            string data = DownloadData(out errorMsg, url, body);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            double s = 1000.0 / cn - 10.0;
 
-            return data;
-        }
+            //int day0 = DateTime.Parse(precipData.Data.Keys.First()).DayOfYear;
+            //int cnI = day0 / 16;
+            //Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
+            //double s = 1000.0 / cn[cnI] - 10.0;
 
-        /// <summary>
-        /// Constructs the url to retrieve curvenumber data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <returns></returns>
-        private string ConstructURL(out string errorMsg)
-        {
-            errorMsg = "";
-            //string source_url = "CURVE_NUMBER_INT";
-            try
+            double ia = 0.2 * s;
+
+
+            foreach (KeyValuePair<string, List<string>> dateValue in precipData.Data)
             {
-                // TODO: Update url retrieval for curve number
-                //Dictionary<string, string> urls = (Dictionary<string, string>)HttpContext.Current.Application["urlList"];
-                //return urls[source_url];
-                return "REPLACE";
+                string date = dateValue.Key;
+
+                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 16;
+                //s = 1000.0 / cn[cnI] - 10.0;
+                //ia = 0.2 * s;
+
+                double p = double.Parse(dateValue.Value[0]);
+                double q = (p <= ia) ? 0 : ((p - ia) * (p - ia)) / (p - ia + s);
+                List<string> d = new List<string>();
+                d.Add(q.ToString(input.DataValueFormat));
+                output.Data.Add(date, d);
             }
-            catch(Exception ex)
+            return output;
+        }
+
+        private Dictionary<int, double> GetCN(out string errorMsg, int comid)
+        {
+            errorMsg = "";
+            string dbPath = "./App_Data/cn.sqlite";
+            string query = "SELECT CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22, CN_23 " +
+                "FROM CN WHERE ComID = " + comid.ToString();
+            Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
+            Dictionary<int, double> cnData = new Dictionary<int, double>();
+            int i = 1;
+            foreach(string key in data.Keys)
             {
-                errorMsg = "ERROR: Unable to curve number url to retrieve data." + ex.Message;
-                return null;
+                cnData.Add(i, double.Parse(data[key]));
+                i++;
             }
+            return cnData;
         }
 
-        /// <summary>
-        /// Constructs the body of the post for retrieving curvenumber data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private byte[] ConstructPOST(out string errorMsg, ITimeSeriesInput input)
+        private double CalculateCN(out string errorMsg, ITimeSeriesInput input)
         {
-            errorMsg = "";
-            string parameters = "startdate={" + input.DateTimeSpan.StartDate.ToString() + "}&enddate={" + input.DateTimeSpan.EndDate.ToString() +
-                "}&latitude={" + input.Geometry.Point.Latitude.ToString() + "}&longitude={" + input.Geometry.Point.Longitude.ToString() + "}";
-            return Encoding.UTF8.GetBytes(parameters);
-        }
+            dynamic cn = GetNLCDCN();
+            dynamic conditions = GetCNConditions();
+            dynamic ndvi = GetNDVI();
+            List<int> ndviCN = new List<int>() { 41, 42, 43, 52, 71, 81, 82 };
 
-        /// <summary>
-        /// Sends request for curvenumber timeseries data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="url"></param>
-        /// <param name="postBody"></param>
-        /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url, byte[] postBody)
-        {
-            errorMsg = "";
-            string data = "";
-            try
+            Streamcat sc = new Streamcat();
+            Catchment catchment = sc.GetCatchmentData(out errorMsg, input.Geometry.ComID);
+            double catchmentCN = 0.0;
+
+            foreach (int c in catchment.landcover.Keys)
             {
-                int retries = 5;
-                string status = "";
-                while (retries > 0 && !status.Contains("OK"))
+                double v = catchment.landcover[c];
+                var nlcd = cn[c.ToString()];
+                double n = 0.0;
+
+                if (ndviCN.Contains(c))
                 {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(url);
+                    // TODO: ndviType is currently a placeholder value, but will be determined from modis ndvi data using the ranges found in curvenumber_ndvi.json
+                    string ndviType = "GOOD";
 
-                    wr.Method = "POST";
-                    wr.ContentType = "application/x-www-form-urlencoded";
-                    wr.ContentLength = postBody.Length;
-                    using (Stream stream = wr.GetRequestStream())
+                    switch (catchment.hsg)
                     {
-                        stream.Write(postBody, 0, postBody.Length);
+                        case "A":
+                            n = conditions[c.ToString()][ndviType].A;
+                            break;
+                        case "B":
+                            n = conditions[c.ToString()][ndviType].B;
+                            break;
+                        case "C":
+                            n = conditions[c.ToString()][ndviType].C;
+                            break;
+                        case "D":
+                            n = conditions[c.ToString()][ndviType].D;
+                            break;
+                        default:
+                            n = conditions[c.ToString()][ndviType].A;
+                            break;
                     }
-
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
                 }
+                else
+                {
+                    switch (catchment.hsg)
+                    {
+                        case "A":
+                            n = nlcd.A;
+                            break;
+                        case "B":
+                            n = nlcd.B;
+                            break;
+                        case "C":
+                            n = nlcd.C;
+                            break;
+                        case "D":
+                            n = nlcd.D;
+                            break;
+                        default:
+                            n = nlcd.A;
+                            break;
+                    }
+                }
+                if (n == -1)
+                {
+                    continue;
+                }
+                catchmentCN += v / 100 * n;
             }
-            catch (Exception ex)
+            if (catchmentCN < 30)
             {
-                errorMsg = "ERROR: Unable to download requested curve number data. " + ex.Message;
-                return null;
+                catchmentCN = 30.0;
             }
-
-            return data;
+            return catchmentCN;
         }
 
-        /// <summary>
-        /// Parse data string and set to output object.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="dataset"></param>
-        /// <param name="data"></param>
-        /// <param name="output"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        private dynamic GetNLCDCN()
         {
-            errorMsg = "";
-            //TODO: Format data to output object.
-            return null; 
+            string filePath = @".\App_Data\curvenumber.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber.json";
+            }
+            using(StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
+            {
+                string jsonString = r.ReadToEnd();
+                dynamic cnData = JsonConvert.DeserializeObject(jsonString);
+                return cnData;
+            }
         }
+
+        private dynamic GetCNConditions()
+        {
+            string filePath = @".\App_Data\curvenumber_conditions.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_conditions.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
+            {
+                string jsonString = r.ReadToEnd();
+                dynamic cnConditions = JsonConvert.DeserializeObject(jsonString);
+                return cnConditions;
+            }
+        }
+
+        private dynamic GetNDVI()
+        {
+            string filePath = @".\App_Data\curvenumber_ndvi.json";
+            if (!File.Exists(filePath))
+            {
+                filePath = "/app/App_Data/curvenumber_ndvi.json";
+            }
+            using (StreamReader r = new StreamReader(filePath))
+            {
+                string jsonString = r.ReadToEnd();
+                dynamic ndvi = JsonConvert.DeserializeObject(jsonString);
+                return ndvi;
+            }
+        }
+
     }
 }

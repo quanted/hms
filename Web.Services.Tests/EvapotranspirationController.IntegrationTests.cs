@@ -325,7 +325,7 @@ namespace Web.Services.Tests
         {
             _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             _client = _server.CreateClient();
-            _client.Timeout = new System.TimeSpan(0, 4, 0); //Many tests were failing due to timeout errors
+            _client.Timeout = new System.TimeSpan(0, 5, 0); //Many tests were failing due to timeout errors
         }
 
         /// <summary>
