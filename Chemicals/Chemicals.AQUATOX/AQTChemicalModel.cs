@@ -23,7 +23,7 @@ namespace AQUATOXChemicals
         /// Example valid JSON inputs and documentation including a list of data requirements may be found in the Chemicals\DOCS directory.
         /// </summary>
         /// <param name="json"></param> string, passed by reference:  a valid json input that is replaced by the model's json output including model results
-        /// <param name="errmsg"></param> string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
+        /// <param name="errmsg"></param> string, output parameter: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
         /// <param name="RunModel"></param> bool, if true, the model is run and results saved back to the json string parameter passed by reference. 
         public AQTChemicalModel(ref string json, out string errmsg, bool RunModel)
 

@@ -24,7 +24,7 @@ namespace Stream.Hydrology.AQUATOX
         /// Example valid JSON inputs with comments may be found in the Stream.Hydrology\AQUATOX\DOCS directory.
         /// </summary>
         /// <param name="json"></param> string, passed by reference:  a valid json input that is replaced by the model's json output including model results
-        /// <param name="errmsg"></param> string, passed by reference: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
+        /// <param name="errmsg"></param> string, output parameter: if blank, no error occured and simulation completed successfully, otherwise error details are provided within the string
         /// <param name="RunModel"></param> bool, if true, the model is run and results saved back to the json string parameter passed by reference. 
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public AQTVolumeModel(ref string json, out string errmsg, bool RunModel)
