@@ -2521,8 +2521,8 @@ namespace AQUATOX.AQTSegment
 
     public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
     {
-        public double SalinityUpper = 0;
-        public double SalinityLower = 0;
+        //public double SalinityUpper = 0;
+        //public double SalinityLower = 0;
         public TSalinity(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
         }
@@ -2537,8 +2537,8 @@ namespace AQUATOX.AQTSegment
         {
             Loading = 0;
             State = LoadsRec.ReturnLoad(TimeIndex);
-            SalinityUpper = State;
-            SalinityLower = LoadsRec.ReturnAltLoad(TimeIndex, 0);
+            //SalinityUpper = State;
+            //SalinityLower = LoadsRec.ReturnAltLoad(TimeIndex, 0);
 
             //if (AQTSeg != null)
             //{
@@ -2554,7 +2554,7 @@ namespace AQUATOX.AQTSegment
 
     public class TpHObj : TStateVariable
     {
-        public double Alkalinity = 0;
+        public double Alkalinity = 1000;
         // -------------------------------------------------------------------------------
         //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
         public TpHObj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
@@ -2687,8 +2687,8 @@ namespace AQUATOX.AQTSegment
 
     public class TLight : TStateVariable
     {
-        public bool CalculatePhotoperiod = false;
-        public double UserPhotoPeriod = 0;
+        public bool CalculatePhotoperiod = true;
+        public double UserPhotoPeriod = 12;
         public double DailyLight = 0;
         public double HourlyLight = 0;
 
@@ -2852,7 +2852,7 @@ namespace AQUATOX.AQTSegment
 
     public AQTKnownTypesBinder()
     {
-            KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(MorphRecord),
+            KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), 
                                           typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
                                           typeof(SortedList<DateTime, double>), typeof(AQUATOXTSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
                                           typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj), typeof(DetritalInputRecordType),

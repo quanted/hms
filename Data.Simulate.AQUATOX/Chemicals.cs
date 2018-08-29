@@ -14,14 +14,14 @@ namespace AQUATOX.Chemicals
         public string ChemName;
         public string CASRegNo;
         public double MolWt;
-        public double Solubility;
-        public string XSolubility;
+        //public double Solubility;
+        //public string XSolubility;
         public double Henry;
         public string XHenry;
         public double pka;
         public string Xpka;
-        public double VPress;
-        public string XVPress;
+        //public double VPress;
+        //public string XVPress;
         public double LogKow;    // Log KOW, log octanol water part. coeff.
         public string XLogKow;
         public double En;        // Activation Energy for Temperature
@@ -38,40 +38,40 @@ namespace AQUATOX.Chemicals
         public string XKBase;
         public double PhotolysisRate;
         public string XPhotoLysisRate;
-        public double OxRateConst;
-        public string XOxRateConst;
+        //public double OxRateConst;
+        //public string XOxRateConst;
         public double KPSed;
         public string XKPSed;
-        public double Weibull_Shape;
-        public string XWeibull_Shape;
+        //public double Weibull_Shape;
+        //public string XWeibull_Shape;
         public bool ChemIsBase;
         public bool CalcKPSed;
-        public double CohesivesK1;
-        public double CohesivesK2;
-        public double CohesivesKp;
-        public string CohesivesRef;
-        public double NonCohK1;
-        public double NonCohK2;
-        public double NonCohKp;
-        public string NonCohRef;
-        public double NonCoh2K1;
-        public double NonCoh2K2;
-        public double NonCoh2Kp;
-        public string NonCoh2Ref;
+        //public double CohesivesK1;
+        //public double CohesivesK2;
+        //public double CohesivesKp;
+        //public string CohesivesRef;
+        //public double NonCohK1;
+        //public double NonCohK2;
+        //public double NonCohKp;
+        //public string NonCohRef;
+        //public double NonCoh2K1;
+        //public double NonCoh2K2;
+        //public double NonCoh2Kp;
+        //public string NonCoh2Ref;
 
-        // PFA Parameters
+        //// PFA Parameters
         public bool IsPFA;
         public string PFAType;
-        public double PFAChainLength;
-        public string XPFAChainLength;
+        //public double PFAChainLength;
+        //public string XPFAChainLength;
         public double PFASedKom;
         public string XPFASedKom;
-        public double PFAAlgBCF;
-        public string XPFAAlgBCF;
-        public double PFAMacroBCF;
-        public string XPFAMacroBCF;
-        public double WeibullSlopeFactor;
-        public string XWeibullSlopeFactor;
+        //public double PFAAlgBCF;
+        //public string XPFAAlgBCF;
+        //public double PFAMacroBCF;
+        //public string XPFAMacroBCF;
+        //public double WeibullSlopeFactor;
+        //public string XWeibullSlopeFactor;
         public bool CalcKOMRefrDOM;
         public double KOMRefrDOM;
         public string XKOMRefrDOM;
@@ -84,6 +84,7 @@ namespace AQUATOX.Chemicals
 
 
     public class TToxics : TStateVariable
+
     {
         [JsonIgnore] public double ppb = 0;
         public AllVariables Carrier = AllVariables.NullStateVar;
@@ -1342,28 +1343,28 @@ namespace AQUATOX.Chemicals
             Desorp = 0;
             if (State <= 0) {  return Desorp;  }
 
-            switch (NState)
-            {
-                case AllVariables.Cohesives:
-                    K2 = ChemRec.CohesivesK2;
-                    break;
-                case AllVariables.NonCohesives:
-                    K2 = ChemRec.NonCohK2;
-                    break;
-                case AllVariables.NonCohesives2:
-                    K2 = ChemRec.NonCoh2K2;
-                    break;
-                default:  // organics
+            //switch (NState)
+            //{
+            //    case AllVariables.Cohesives:
+            //        K2 = ChemRec.CohesivesK2;
+            //        break;
+            //    case AllVariables.NonCohesives:
+            //        K2 = ChemRec.NonCohK2;
+            //        break;
+            //    case AllVariables.NonCohesives2:
+            //        K2 = ChemRec.NonCoh2K2;
+            //        break;
+                //default:  // organics
                     KOM = CalculateKOM();
                     if (KOM == 0)
                     {  K2 = 0; }
                     else
                     {  K2 = ChemRec.K1Detritus / KOM;   }
-                    break;
                     // (1/(0.72 * KPSed))
                     // 9/25/2011 was hard-wired to 1.39
                     // Karickoff's obs.
-            }
+            //break;
+            //}
 
             Desorp =  K2 * State;
         // {ug/L-d}  {1/d} {ug/L}  {water col units}

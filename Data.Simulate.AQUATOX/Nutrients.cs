@@ -1441,7 +1441,6 @@ namespace AQUATOX.Nutrients
         public Loadings.TLoadings Plant_Remin_Link = null;
         public Loadings.TLoadings OM_Remin_Link = null;
 
-
         public TNH4Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             }
@@ -2149,8 +2148,8 @@ namespace AQUATOX.Nutrients
 
     public class TO2Obj : TRemineralize
     {
-        public double Threshhold = 0;
-        public bool CalcDuration = false;
+        //public double Threshhold = 0;
+        //public bool CalcDuration = false;
         public bool NoLoadOrWash = false;
 
         public Loadings.TLoadings Photosynthesis_Link = null;
@@ -2163,8 +2162,8 @@ namespace AQUATOX.Nutrients
         //Constructor  init( Ns,  SVT,  aName,  P,  IC,  IsTempl)
         public TO2Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            CalcDuration = false;
-            Threshhold = 1.0;
+            //CalcDuration = false;
+            //Threshhold = 1.0;
             NoLoadOrWash = false;
             // TRemineralize
 
