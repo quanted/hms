@@ -1,0 +1,1406 @@
+{
+  "$type": "AQUATOXSegment",
+"StudyName": "CHLORPYRIFOS 6.3 ug/L",
+"SV": [
+  {
+  "$type": "TToxics",
+  "InitialCond":  6.30000000000000E+0000,
+  "State":  0.00000000000000E+0000,
+  "nState": 0,
+  "SVType": 2,
+  "Layer": 0,
+  "PName": "Dissolved org. tox 1: [Chlorpyrifos]",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  2.00000000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+     "list": {
+      "$type": "SortedList`2",
+      "1986-06-12T00:00:00": 0.00000000000000E+0000,
+      "1986-06-15T00:00:00": 0.00000000000000E+0000,
+      "1986-06-16T00:00:00": 1.50000000000000E-0002,
+      "1986-06-17T00:00:00": 0.00000000000000E+0000,
+      "1988-07-19T00:00:00": 0.00000000000000E+0000,
+      "1994-05-09T00:00:00": 0.00000000000000E+0000,
+      "1994-05-10T00:00:00": 0.00000000000000E+0000,
+      "1994-05-11T00:00:00": 0.00000000000000E+0000,
+      "1994-05-12T00:00:00": 0.00000000000000E+0000,
+      "1994-05-13T00:00:00": 0.00000000000000E+0000,
+      "1994-05-14T00:00:00": 0.00000000000000E+0000,
+      "1994-05-15T00:00:00": 0.00000000000000E+0000,
+      "1994-05-16T00:00:00": 0.00000000000000E+0000,
+      "1994-05-17T00:00:00": 0.00000000000000E+0000,
+      "1994-05-18T00:00:00": 0.00000000000000E+0000,
+      "1994-05-19T00:00:00": 0.00000000000000E+0000,
+      "1994-05-20T00:00:00": 0.00000000000000E+0000,
+      "1994-05-22T00:00:00": 0.00000000000000E+0000,
+      "1994-05-23T00:00:00": 0.00000000000000E+0000,
+      "1994-05-24T00:00:00": 0.00000000000000E+0000,
+      "1994-05-25T00:00:00": 0.00000000000000E+0000,
+      "1994-05-26T00:00:00": 0.00000000000000E+0000,
+      "1994-05-27T00:00:00": 0.00000000000000E+0000,
+      "1994-05-30T00:00:00": 0.00000000000000E+0000,
+      "1994-05-31T00:00:00": 0.00000000000000E+0000,
+      "1994-06-01T00:00:00": 0.00000000000000E+0000,
+      "1994-06-02T00:00:00": 0.00000000000000E+0000,
+      "1994-06-03T00:00:00": 0.00000000000000E+0000,
+      "1994-06-04T00:00:00": 0.00000000000000E+0000,
+      "1994-06-05T00:00:00": 0.00000000000000E+0000,
+      "1994-06-06T00:00:00": 0.00000000000000E+0000,
+      "1994-06-07T00:00:00": 0.00000000000000E+0000,
+      "1994-06-08T00:00:00": 0.00000000000000E+0000,
+      "1994-06-09T00:00:00": 0.00000000000000E+0000,
+      "1994-06-10T00:00:00": 0.00000000000000E+0000,
+      "1994-06-11T00:00:00": 0.00000000000000E+0000,
+      "1994-06-12T00:00:00": 0.00000000000000E+0000,
+      "1994-06-13T00:00:00": 0.00000000000000E+0000,
+      "1994-06-14T00:00:00": 0.00000000000000E+0000,
+      "1994-06-15T00:00:00": 0.00000000000000E+0000,
+      "1994-06-16T00:00:00": 0.00000000000000E+0000,
+      "1994-06-17T00:00:00": 0.00000000000000E+0000,
+      "1994-06-18T00:00:00": 0.00000000000000E+0000,
+      "1994-06-19T00:00:00": 0.00000000000000E+0000,
+      "1994-06-20T00:00:00": 0.00000000000000E+0000,
+      "1994-06-21T00:00:00": 0.00000000000000E+0000,
+      "1994-07-04T00:00:00": 0.00000000000000E+0000,
+      "1994-07-05T00:00:00": 0.00000000000000E+0000,
+      "1994-07-06T00:00:00": 0.00000000000000E+0000,
+      "1994-07-07T00:00:00": 0.00000000000000E+0000,
+      "1994-07-08T00:00:00": 0.00000000000000E+0000,
+      "1994-07-09T00:00:00": 0.00000000000000E+0000,
+      "1994-07-10T00:00:00": 0.00000000000000E+0000,
+      "1994-07-11T00:00:00": 0.00000000000000E+0000,
+      "1994-07-12T00:00:00": 0.00000000000000E+0000,
+      "1994-07-13T00:00:00": 0.00000000000000E+0000,
+      "1994-09-22T00:00:00": 0.00000000000000E+0000,
+      "1994-09-23T00:00:00": 0.00000000000000E+0000,
+      "1994-09-24T00:00:00": 0.00000000000000E+0000,
+      "1994-09-25T00:00:00": 0.00000000000000E+0000,
+      "1994-09-26T00:00:00": 0.00000000000000E+0000,
+      "1994-09-27T00:00:00": 0.00000000000000E+0000,
+      "1994-10-07T00:00:00": 0.00000000000000E+0000,
+      "1994-10-08T00:00:00": 0.00000000000000E+0000,
+      "1994-10-09T00:00:00": 0.00000000000000E+0000,
+      "1994-10-10T00:00:00": 0.00000000000000E+0000,
+      "1994-10-11T00:00:00": 0.00000000000000E+0000,
+      "1994-10-12T00:00:00": 0.00000000000000E+0000,
+      "1994-10-28T00:00:00": 0.00000000000000E+0000,
+      "1994-10-29T00:00:00": 0.00000000000000E+0000,
+      "1994-10-30T00:00:00": 0.00000000000000E+0000,
+      "1994-10-31T00:00:00": 0.00000000000000E+0000,
+      "1994-11-01T00:00:00": 0.00000000000000E+0000,
+      "1994-11-02T00:00:00": 0.00000000000000E+0000,
+      "1994-11-03T00:00:00": 0.00000000000000E+0000,
+      "1994-11-04T00:00:00": 0.00000000000000E+0000,
+      "1994-11-05T00:00:00": 0.00000000000000E+0000,
+      "1994-11-06T00:00:00": 0.00000000000000E+0000,
+      "1994-11-07T00:00:00": 0.00000000000000E+0000,
+      "1994-11-08T00:00:00": 0.00000000000000E+0000,
+      "1994-11-09T00:00:00": 0.00000000000000E+0000,
+      "1994-11-10T00:00:00": 0.00000000000000E+0000,
+      "1994-11-11T00:00:00": 0.00000000000000E+0000,
+      "1994-11-12T00:00:00": 0.00000000000000E+0000,
+      "1994-11-13T00:00:00": 0.00000000000000E+0000,
+      "1994-11-14T00:00:00": 0.00000000000000E+0000,
+      "1994-11-15T00:00:00": 0.00000000000000E+0000,
+      "1994-11-30T00:00:00": 0.00000000000000E+0000,
+      "1994-12-01T00:00:00": 0.00000000000000E+0000,
+      "1994-12-02T00:00:00": 0.00000000000000E+0000,
+      "1994-12-03T00:00:00": 0.00000000000000E+0000,
+      "1994-12-04T00:00:00": 0.00000000000000E+0000,
+      "1994-12-05T00:00:00": 0.00000000000000E+0000,
+      "1994-12-25T00:00:00": 0.00000000000000E+0000,
+      "1994-12-26T00:00:00": 0.00000000000000E+0000,
+      "1994-12-27T00:00:00": 0.00000000000000E+0000,
+      "1994-12-28T00:00:00": 0.00000000000000E+0000,
+      "1994-12-29T00:00:00": 0.00000000000000E+0000,
+      "1995-04-30T00:00:00": 0.00000000000000E+0000,
+      "1996-04-30T00:00:00": 0.00000000000000E+0000
+      },
+     "MultLdg":  1.26000000000000E+0001
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  1.00000000000000E-0004,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": true,
+  "PHasData": true,
+  "StateUnit": "ug/L",
+  "LoadingUnit": "ug/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  0.00000000000000E+0000,
+  "YOrig":  0.00000000000000E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  0.00000000000000E+0000,
+  "yError":  0.00000000000000E+0000,
+  "yScale":  5.00000000000000E-0019,
+  "PShowRates^": true,
+  "LoadNotes1": "start w/ dose on 6/16/86",
+  "LoadNotes2": "",
+  "PTrackResults^": true,
+  "ppb":  0.00000000000000E+0000,
+  "Carrier": 149,
+  "ChemRec": {
+   "$type": "ChemicalRecord",
+   "ChemName": "Chlorpyrifos",
+   "CASRegNo": "2921-88-2",
+   "MolWt":  3.50620000000000E+0002,
+   "Solubility":  1.18000000000000E+0000,
+   "XSolubility": "ARS Pesticide Properties Database",
+   "Henry":  7.33000000000000E-0006,
+   "XHenry": "ARS Pesticide Properties",
+   "pka":  0.00000000000000E+0000,
+   "Xpka": "insecticide",
+   "VPress":  1.90000000000000E-0005,
+   "XVPress": "McCall, 1983",
+   "LogKow":  5.00000000000000E+0000,
+   "XLogKow": "ARS Pesticide Properties Database",
+   "En":  1.80000000000000E+0004,
+   "XEn": "default",
+   "KMDegrdn":  7.88000000000000E-0003,
+   "XKMDegrdn": "ARS Pesticide Properties",
+   "KMDegrAnaerobic":  4.95000000000000E-0003,
+   "XKMDegrAnaerobic": "ARS Pesticide Properties",
+   "KUnCat":  2.36000000000000E-0002,
+   "XKUncat": "ARS Pesticide Properties Database",
+   "KAcid":  0.00000000000000E+0000,
+   "XKAcid": "",
+   "KBase":  4.33200000000000E+0003,
+   "XKBase": "calc. from Pirahna",
+   "PhotolysisRate":  0.00000000000000E+0000,
+   "XPhotoLysisRate": "",
+   "OxRateConst":  0.00000000000000E+0000,
+   "XOxRateConst": "",
+   "KPSed":  9.13828800000000E+0003,
+   "XKPSed": "Calc. from Octanol Water Coeff",
+   "Weibull_Shape":  3.30000000000000E-0001,
+   "XWeibull_Shape": "Mackay et al., 1992",
+   "ChemIsBase": false,
+   "CalcKPSed": true,
+   "CohesivesK1":  0.00000000000000E+0000,
+   "CohesivesK2":  0.00000000000000E+0000,
+   "CohesivesKp":  0.00000000000000E+0000,
+   "CohesivesRef": "no sorp/desorp",
+   "NonCohK1":  0.00000000000000E+0000,
+   "NonCohK2":  0.00000000000000E+0000,
+   "NonCohKp":  0.00000000000000E+0000,
+   "NonCohRef": "no sorp/desorp",
+   "NonCoh2K1":  0.00000000000000E+0000,
+   "NonCoh2K2":  0.00000000000000E+0000,
+   "NonCoh2Kp":  0.00000000000000E+0000,
+   "NonCoh2Ref": "no sorp/desorp",
+   "IsPFA": false,
+   "PFAType": "",
+   "PFAChainLength":  0.00000000000000E+0000,
+   "XPFAChainLength": "",
+   "PFASedKom":  0.00000000000000E+0000,
+   "XPFASedKom": "",
+   "PFAAlgBCF":  0.00000000000000E+0000,
+   "XPFAAlgBCF": "",
+   "PFAMacroBCF":  0.00000000000000E+0000,
+   "XPFAMacroBCF": "",
+   "WeibullSlopeFactor":  0.00000000000000E+0000,
+   "XWeibullSlopeFactor": "",
+   "CalcKOMRefrDOM": true,
+   "KOMRefrDOM":  0.00000000000000E+0000,
+   "XKOMRefrDOM": "",
+   "K1Detritus":  1.39000000000000E+0000,
+   "XK1Detritus": "default",
+   "BCFUptake": false
+   },
+  "Kow":  1.00000000000000E+0005,
+  "HenryPA":  7.42712250000000E-0001,
+  "Tox_Air":  0.00000000000000E+0000
+  },
+  {
+  "$type": "TNH4Obj",
+  "InitialCond":  8.00000000000000E-0002,
+  "State":  2.98452197017318E-0001,
+  "nState": 20,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Total Ammonia as N",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.00000000000000E-0002,
+    "list": {
+     "$type": "SortedList`2",
+     "1994-01-03T00:00:00": 2.00000000000000E+0000,
+     "1994-01-12T00:00:00": 1.60000000000000E+0001,
+     "1994-01-28T00:00:00": 0.00000000000000E+0000
+     },
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L",
+  "LoadingUnit": "mg/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  2.98452197017318E-0001,
+  "YOrig":  2.98368863975692E-0001,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  1.03057330809841E-0004,
+  "yError":  3.73742802495347E-0007,
+  "yScale":  2.98471921306502E-0001,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TNO3Obj",
+  "InitialCond":  5.00000000000000E-0002,
+  "State":  1.28676498150279E+0000,
+  "nState": 21,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Nitrate as N",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.00000000000000E-0001,
+    "list": {
+     "$type": "SortedList`2",
+     "1994-01-02T00:00:00": 1.40000000000000E+0001,
+     "1994-01-07T00:00:00": 0.00000000000000E+0000,
+     "1994-01-13T00:00:00": 0.00000000000000E+0000,
+     "1994-01-14T00:00:00": 3.00000000000000E+0001,
+     "1994-01-16T00:00:00": 0.00000000000000E+0000,
+     "1994-01-31T00:00:00": 3.00000000000000E+0000
+     },
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L",
+  "LoadingUnit": "mg/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  1.28676498150279E+0000,
+  "YOrig":  1.29334573294068E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -3.32951602870559E-0002,
+  "yError": -2.74886289436514E-0007,
+  "yScale":  1.32664089322773E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true,
+  "TN_IC": false,
+  "TN_Inflow": false,
+  "TN_PS": false,
+  "TN_NPS": false
+  },
+  {
+  "$type": "TPO4Obj",
+  "InitialCond":  5.00000000000000E-0002,
+  "State":  8.58644987179228E-0002,
+  "nState": 22,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Total Soluble P",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.00000000000000E-0002,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L",
+  "LoadingUnit": "mg/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  8.58644987179228E-0002,
+  "YOrig":  8.96868908882690E-0002,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -2.13980114770139E-0002,
+  "yError": -5.29592034815246E-0008,
+  "yScale":  1.11084902365283E-0001,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true,
+  "FracAvail":  1.00000000000000E+0000,
+"Alt_FracAvail":[ 1.00000000000000E+0000, 1.00000000000000E+0000, 1.00000000000000E+0000],
+  "TP_IC": false,
+  "TP_Inflow": false,
+  "TP_PS": false,
+  "TP_NPS": false
+  },
+  {
+  "$type": "TCO2Obj",
+  "ImportCO2Equil": false,
+  "Hourly": false,
+  "InitialCond":  1.50000000000000E+0000,
+  "State":  2.98374047914339E+0000,
+  "nState": 23,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Carbon dioxide",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  0.00000000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    }
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L",
+  "LoadingUnit": "mg/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  2.98374047914339E+0000,
+  "YOrig":  2.98385196148098E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -1.38477871717146E-0003,
+  "yError":  5.73233687019869E-0006,
+  "yScale":  2.98523674019815E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TO2Obj",
+  "Threshhold":  3.00000000000000E+0000,
+  "CalcDuration": false,
+  "NoLoadOrWash": false,
+  "InitialCond":  1.20000000000000E+0001,
+  "State":  2.14752374272548E+0001,
+  "nState": 24,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Oxygen",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.20000000000000E+0001,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L",
+  "LoadingUnit": "mg/L",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  2.14752374272548E+0001,
+  "YOrig":  2.15365608244995E+0001,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -3.13898213229522E-0001,
+  "yError": -1.78331227696647E-0005,
+  "yScale":  2.18504590377290E+0001,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TSedRefrDetr",
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  2.00037967510285E+0003,
+  "nState": 51,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "R detr sed",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  0.00000000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    }
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "g/m2 dry",
+  "LoadingUnit": "N A",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  2.00037967510285E+0003,
+  "YOrig":  2.00038192438464E+0003,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -1.12150951687408E-0002,
+  "yError":  7.92466560475442E-0007,
+  "yScale":  2.00039313947981E+0003,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TSedLabileDetr",
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  5.96927116995114E+0000,
+  "nState": 52,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "L detr sed",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  0.00000000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    }
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "g/m2 dry",
+  "LoadingUnit": "N A",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  5.96927116995114E+0000,
+  "YOrig":  5.93461942934374E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  1.77083497381024E-0001,
+  "yError": -3.92672848777854E-0006,
+  "yScale":  6.11170292672476E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TDissRefrDetr",
+  "InputRecord": {
+   "$type": "DetritalInputRecordType",
+   "DataType": 2,
+   "InitCond":  0.00000000000000E+0000,
+   "Percent_PartIC":  2.80000000000000E+0001,
+   "Percent_RefrIC":  6.00000000000000E+0001,
+   "Load": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+     "$type": "TLoadings",
+     "NoUserLoad": false,
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+    "Alt_Loadings": [
+      {
+      "$type": "TLoadings",
+      "UseConstant": false,
+      "ConstLoad":  0.00000000000000E+0000,
+
+      "MultLdg":  0.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": false,
+      "ConstLoad":  0.00000000000000E+0000,
+
+      "MultLdg":  0.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": false,
+      "ConstLoad":  0.00000000000000E+0000,
+
+      "MultLdg":  0.00000000000000E+0000
+      }
+     ]
+    },
+   "Percent_Part": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+     "$type": "TLoadings",
+     "NoUserLoad": false,
+     "UseConstant": true,
+     "ConstLoad":  2.80000000000000E+0001,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+    "Alt_Loadings": [
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  2.80000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  2.80000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  2.80000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      }
+     ]
+    },
+   "Percent_Refr": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+     "$type": "TLoadings",
+     "NoUserLoad": false,
+     "UseConstant": true,
+     "ConstLoad":  6.00000000000000E+0001,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+    "Alt_Loadings": [
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  5.40000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  5.40000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      },
+      {
+      "$type": "TLoadings",
+      "UseConstant": true,
+      "ConstLoad":  5.40000000000000E+0001,
+
+      "MultLdg":  1.00000000000000E+0000
+      }
+     ]
+    }
+   },
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  1.45131069655652E+0001,
+  "nState": 53,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "R detr diss",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  3.88800000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L dry",
+  "LoadingUnit": "mg/L dry",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  1.45131069655652E+0001,
+  "YOrig":  1.45059510156474E+0001,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  3.62578319235947E-0002,
+  "yError":  1.75254402505190E-0007,
+  "yScale":  1.45422088475710E+0001,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TDissLabDetr",
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  6.13942294604524E+0000,
+  "nState": 54,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "L detr diss",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  3.31200000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L dry",
+  "LoadingUnit": "mg/L dry",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  6.13942294604524E+0000,
+  "YOrig":  6.14704426631811E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -3.90360632101963E-0002,
+  "yError": -1.80752908613786E-0006,
+  "yScale":  6.18608032952830E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TSuspRefrDetr",
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  1.10411301645990E+0000,
+  "nState": 55,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "R detr part",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.51200000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L dry",
+  "LoadingUnit": "mg/L dry",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  1.10411301645990E+0000,
+  "YOrig":  1.10543659545218E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]": -6.67491369185791E-0003,
+  "yError": -8.34646088185598E-0008,
+  "yScale":  1.11211150914403E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TSuspLabDetr",
+  "InitialCond":  0.00000000000000E+0000,
+  "State":  4.99092960008281E+0000,
+  "nState": 56,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "L detr part",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  1.28800000000000E+0000,
+
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": false,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  0.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "mg/L dry",
+  "LoadingUnit": "mg/L dry",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  4.99092960008281E+0000,
+  "YOrig":  4.96990621857389E+0000,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  1.07067112174982E-0001,
+  "yError": -4.85452406923231E-0007,
+  "yScale":  5.07697333074888E+0000,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TVolume",
+  "InitialCond":  1.73600000000000E+0001,
+  "State":  1.73600000000000E+0001,
+  "nState": 144,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Water Volume",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": true,
+    "ConstLoad":  0.00000000000000E+0000,
+    "list": {
+     "$type": "SortedList`2",
+     "1988-08-18T00:00:00": 1.73600000000000E+0001,
+     "1988-09-18T00:00:00": 1.73600000000000E+0001,
+     "1988-10-18T00:00:00": 1.73600000000000E+0001
+     },
+    "MultLdg":  1.00000000000000E+0000
+    },
+   "Alt_Loadings": [
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  1.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     },
+     {
+     "$type": "TLoadings",
+     "UseConstant": true,
+     "ConstLoad":  0.00000000000000E+0000,
+
+     "MultLdg":  1.00000000000000E+0000
+     }
+    ]
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "cu.m",
+  "LoadingUnit": "cu.m",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  3.00000000000000E+0001,
+  "YOrig":  3.00000000000000E+0001,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  0.00000000000000E+0000,
+  "yError":  0.00000000000000E+0000,
+  "yScale":  3.00000000000000E+0001,
+  "PShowRates^": true,
+  "LoadNotes1": "volume is questionable; nominally 30 cu m",
+  "LoadNotes2": "because this is a pond enclosure it fluctuates",
+  "PTrackResults^": true,
+  "Calc_Method": 3,
+  "StratInflow": 2,
+  "StratOutflow": 2,
+  "StratAutomatically": true,
+  "Hourly": false
+  },
+  {
+  "$type": "TTemperature",
+  "InitialCond":  1.60000000000000E+0001,
+  "State":  2.08000000000000E+0001,
+  "nState": 145,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Temperature",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": false,
+    "UseConstant": false,
+    "ConstLoad":  0.00000000000000E+0000,
+    "list": {
+     "$type": "SortedList`2",
+     "1986-06-16T00:00:00": 1.90000000000000E+0001,
+     "1986-06-21T00:00:00": 2.10000000000000E+0001,
+     "1986-06-26T00:00:00": 1.90000000000000E+0001,
+     "1986-07-01T00:00:00": 2.25000000000000E+0001,
+     "1986-07-06T00:00:00": 2.37500000000000E+0001,
+     "1986-07-11T00:00:00": 2.20000000000000E+0001,
+     "1986-07-16T00:00:00": 1.65000000000000E+0001,
+     "1986-07-21T00:00:00": 2.40000000000000E+0001,
+     "1986-07-26T00:00:00": 2.40000000000000E+0001,
+     "1986-07-31T00:00:00": 2.30000000000000E+0001,
+     "1986-08-05T00:00:00": 2.10000000000000E+0001,
+     "1986-08-10T00:00:00": 2.10000000000000E+0001,
+     "1986-08-15T00:00:00": 1.95000000000000E+0001,
+     "1986-08-20T00:00:00": 2.10000000000000E+0001
+     },
+    "MultLdg":  1.00000000000000E+0000
+    }
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "deg. C",
+  "LoadingUnit": "deg. C",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  2.08066666666667E+0001,
+  "YOrig":  2.08066666666667E+0001,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  0.00000000000000E+0000,
+  "yError":  0.00000000000000E+0000,
+  "yScale":  2.08066666666667E+0001,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true
+  },
+  {
+  "$type": "TLight",
+  "InitialCond":  3.33000000000000E+0002,
+  "State":  3.20487747419358E+0002,
+  "nState": 147,
+  "SVType": 0,
+  "Layer": 0,
+  "PName": "Light",
+  "LoadsRec": {
+   "$type": "LoadingsRecord",
+   "Loadings": {
+    "$type": "TLoadings",
+    "NoUserLoad": true,
+    "UseConstant": false,
+    "ConstLoad":  0.00000000000000E+0000,
+    "list": {
+     "$type": "SortedList`2",
+     "1993-12-30T00:00:00": 2.03000000000000E+0002,
+     "1994-01-04T00:00:00": 2.00000000000000E+0002,
+     "1994-02-05T00:00:00": 2.29000000000000E+0002
+     },
+    "MultLdg":  1.00000000000000E+0000
+    }
+   },
+  "PRequiresData": false,
+  "PHasData": false,
+  "StateUnit": "Ly/d",
+  "LoadingUnit": "Ly/d",
+  "LoadsRec.MultLdg":  1.00000000000000E+0000,
+  "yHold":  3.20487747419358E+0002,
+  "YOrig":  3.20487747419358E+0002,
+  "yout":  0.00000000000000E+0000,
+  "stepres[1]":  0.00000000000000E+0000,
+  "yError":  0.00000000000000E+0000,
+  "yScale":  3.20487747419358E+0002,
+  "PShowRates^": true,
+  "LoadNotes1": "",
+  "LoadNotes2": "",
+  "PTrackResults^": true,
+  "CalculatePhotoperiod": true,
+  "UserPhotoPeriod":  0.00000000000000E+0000
+  },
+ ],
+"MeanDischarge":  0.00000000000000E+0000,
+"HypoTempIC":  0.00000000000000E+0000,
+"HypoTempLoads": {
+ "$type": "LoadingsRecord",
+ "Loadings": {
+  "$type": "TLoadings",
+  "NoUserLoad": false,
+  "UseConstant": true,
+  "ConstLoad":  0.00000000000000E+0000,
+
+  "MultLdg":  1.00000000000000E+0000
+  }
+ },
+"Shade": {
+ "$type": "LoadingsRecord",
+ "Loadings": {
+  "$type": "TLoadings",
+  "NoUserLoad": false,
+  "UseConstant": true,
+  "ConstLoad":  0.00000000000000E+0000,
+
+  "MultLdg":  1.00000000000000E+0000
+  }
+ },
+"Z_Thermocline": {
+ "$type": "LoadingsRecord",
+ "Loadings": {
+  "$type": "TLoadings",
+  "NoUserLoad": true,
+  "UseConstant": true,
+  "ConstLoad":  0.00000000000000E+0000,
+
+  "MultLdg":  1.00000000000000E+0000
+  }
+ },
+"CalcVelocity": true,
+"DynVelocity": {
+ "$type": "TLoadings",
+ "Hourly": false,
+
+"SuppressComma": true
+ },
+"N Used Distributions": 0,
+"PControlInfo": {
+ "$type": "Control_Opt_Rec",
+ "Tox.ZeroInitCond": true,
+ "Tox.OmitInflow": true,
+ "Tox.OmitPS": true,
+ "Tox.OmitDP": true,
+ "Tox.OmitNPS": true,
+ "Tox.SetMult": true,
+ "Nutrient.ZeroInitCond": false,
+ "Nutrient.OmitInflow": false,
+ "Nutrient.OmitPS": false,
+ "Nutrient.OmitDP": false,
+ "Nutrient.OmitNPS": false,
+ "Nutrient.SetMult": false,
+ "Sediment.ZeroInitCond": false,
+ "Sediment.OmitInflow": false,
+ "Sediment.OmitPS": false,
+ "Sediment.OmitDP": false,
+ "Sediment.OmitNPS": false,
+ "Sediment.SetMult": false,
+ "Detritus.ZeroInitCond": false,
+ "Detritus.OmitInflow": false,
+ "Detritus.OmitPS": false,
+ "Detritus.OmitDP": false,
+ "Detritus.OmitNPS": false,
+ "Detritus.SetMult": false
+ },
+"PSavePPB^": true,
+"PSaveBAFs^": true,
+"WriteMultiRec": false,
+"WriteSed": false,
+"SedNonReactive": false,
+"UseSSC": false,
+"MaxUpperThick":  5.00000000000000E-0001,
+"BioTurbThick":  2.00000000000000E-0001,
+"NumSeries": 1,
+"CurrentIndex": -1001,
+"NumGraphs": 11,
+"SelectedGraph": 11,
+"UseConstZMean": true,
+
+"UseConstEvap": true,
+
+"Diagenesis_Steady_State": false,
+"PSetup": {
+ "$type": "Setup_Record",
+ "FirstDay": "1986-06-16T00:00:00",
+ "LastDay": "1986-09-19T00:00:00",
+ "StoreStepSize":  1.00000000000000E+0000,
+ "MinStepSize":  1.00000000000000E+0000,
+ "RelativeError":  5.00000000000000E-0003,
+ "KeepDissToxConst": false,
+ "AverageOutput": false,
+ "StepSizeInDays": true,
+ "ModelTSDays": true,
+ "FixStepSize":  1.00000000000000E-0001,
+ "UseFixStepSize": false,
+ "T1IsAggregate": false,
+ },
+"Location": {
+ "$type": "TAQTSite",
+ "Locale": {
+  "$type": "SiteRecord",
+  "SiteName": "Duluth Enclosure",
+  "ECoeffWater":  6.00000000000000E-0001,
+  "SiteLength":  1.00000000000000E-0002,
+  "XLength": "Duluth pond enclosure",
+  "StaticVolume":  3.00000000000000E+0001,
+  "XVolume": "US EPA 1988, p. 77",
+  "SurfArea":  5.00000000000000E+0001,
+  "XSurfArea": "'",
+  "ICZMean":  6.00000000000000E-0001,
+  "XZMean": "mean, '",
+  "ZMax":  1.10000000000000E+0000,
+  "XZMax": "",
+  "TempMean":  1.30000000000000E+0001,
+  "XTempMean": "",
+  "TempRange":  2.40000000000000E+0001,
+  "XTempRange": "",
+  "TempMean[Hypolimnion]":  1.30000000000000E+0001,
+  "XTempMean[Hypolimnion]": "",
+  "TempRange[Hypolimnion]":  2.40000000000000E+0001,
+  "XTempRange[Hypolimnion]": "",
+  "Latitude":  4.70000000000000E+0001,
+  "XLatitude": "",
+  "LightMean":  2.58000000000000E+0002,
+  "XLightMean": "http://solstice.crest.org, converted",
+  "LightRange":  3.87000000000000E+0002,
+  "XLightRange": "http://solstice.crest.org, converted",
+  "AlkCaCO3":  2.40000000000000E+0001,
+  "XAlkCaCO3": "US EPA 1989, App. II, 1.5 meq HCO3",
+  "HardCaCO3":  1.20000000000000E+0002,
+  "XHardCaCO3": "US EPA 1989, App. II",
+  "SiteComment": "Data based on US EPA. 1988. The Effects of Chlorpyrifos on a Natural Aquatic System: A Research Design for Littoral Enclosure Studies and Final Research Report.  Duluth: Environmental Research Laboratory, 194 pp.",
+  "SO4ConC":  1.00000000000000E+0001,
+  "XSO4Conc": "ave. for sed. terranes, Hutchinson '57",
+  "TotalDissSolids":  1.40000000000000E+0002,
+  "XTotalDissSolids": "ave. for N. American rivers, Wetzel '75",
+  "StreamType": 0,
+  "Channel_Slope":  1.00000000000000E-0003,
+  "XChannel_Slope": "Default",
+  "Max_Chan_Depth":  4.00000000000000E+0000,
+  "XMax_Chan_Depth": "Default",
+  "SedDepth":  5.00000000000000E+0000,
+  "XSedDepth": "Default",
+  "EnclWallArea":  1.77000000000000E+0001,
+  "XEnclWallArea": "US EPA 1989",
+  "MeanEvap":  2.00000000000000E+0001,
+  "XMeanEvap": "",
+  "UseEnteredManning": false,
+  "EnteredManning":  0.00000000000000E+0000,
+  "XECoeffWater": "",
+  "PctRiffle":  0.00000000000000E+0000,
+  "XPctRiffle": "",
+  "PctPool":  0.00000000000000E+0000,
+  "XPctPool": "",
+  "UseBathymetry": true,
+  "ts_clay":  6.00000000000000E-0001,
+  "Xts_clay": "default",
+  "ts_silt":  7.00000000000000E-0001,
+  "Xts_silt": "default",
+  "tdep_clay":  7.00000000000000E-0002,
+  "Xtdep_clay": "default",
+  "tdep_silt":  1.00000000000000E-0001,
+  "Xtdep_silt": "default",
+  "FallVel_clay":  1.02000000000000E-0005,
+  "XFallVel_clay": "default",
+  "FallVel_silt":  8.89000000000000E-0005,
+  "XFallVel_silt": "default",
+  "SiteWidth":  0.00000000000000E+0000,
+  "XSiteWidth": "estuaries only",
+  "amplitude1":  0.00000000000000E+0000,
+  "k1":  0.00000000000000E+0000,
+  "ConstRef1": "estuaries only",
+  "amplitude2":  0.00000000000000E+0000,
+  "k2":  0.00000000000000E+0000,
+  "ConstRef2": "estuaries only",
+  "amplitude3":  0.00000000000000E+0000,
+  "k3":  0.00000000000000E+0000,
+  "ConstRef3": "estuaries only",
+  "amplitude4":  0.00000000000000E+0000,
+  "k4":  0.00000000000000E+0000,
+  "ConstRef4": "estuaries only",
+  "amplitude5":  0.00000000000000E+0000,
+  "k5":  0.00000000000000E+0000,
+  "ConstRef5": "estuaries only",
+  "amplitude6":  0.00000000000000E+0000,
+  "k6":  0.00000000000000E+0000,
+  "ConstRef6": "estuaries only",
+  "amplitude7":  0.00000000000000E+0000,
+  "k7":  0.00000000000000E+0000,
+  "ConstRef7": "estuaries only",
+  "amplitude8":  0.00000000000000E+0000,
+  "k8":  0.00000000000000E+0000,
+  "ConstRef8": "estuaries only",
+  "Min_Vol_Frac":  1.00000000000000E-0002,
+  "XMin_Vol_Frac": "default",
+  "WaterShedArea":  0.00000000000000E+0000,
+  "XWaterShedArea": "0 = not used",
+  "EnterTotalLength": true,
+  "TotalLength":  0.00000000000000E+0000,
+  "XTotalLength": "0 = not used",
+  "ECoeffSED":  1.70000000000000E-0001,
+  "XECoeffSED": "mid value from Straskraba & Gnauck, 1985",
+  "ECoeffDOM":  3.00000000000000E-0002,
+  "XECoeffDOM": "calc. from Effler et al., 1985",
+  "ECoeffPOM":  1.20000000000000E-0001,
+  "XECoeffPOM": "Verduin, 1982",
+  "UseCovar": true,
+  "EnteredKReaer":  0.00000000000000E+0000,
+  "XEnteredKReaer": "NA",
+  "UsePhytoRetention": false,
+  "BasePercentEmbed":  0.00000000000000E+0000,
+  "XBasePercentEmbed": "Default, Used for O2Sat",
+  "Altitude":  2.00000000000000E+0002,
+  "XAltitude": "",
+  "FractalD":  1.00000000000000E+0000,
+  "XFractalD": "default",
+  "FD_Refuge_Coeff": -1.50000000000000E-0001,
+  "XFD_Refuge_Coeff": "default",
+  "HalfSatOysterRefuge":  8.00000000000000E+0001,
+  "XHalfSatOysterRefuge": "default"
+  },
+ "Discharge[Epilimnion]":  0.00000000000000E+0000,
+ "Discharge[Hypolimnion]":  0.00000000000000E+0000,
+ "Remin": {
+  "$type": "ReminRecord",
+  "RemRecName": "Default Remin Record",
+  "DecayMax_Lab":  2.90000000000000E-0001,
+  "XDecayMax_Lab": "Saunders in LeCren et al. 1980",
+  "Q10_NotUsed":  2.00000000000000E+0000,
+  "XQ10": "default",
+  "TOpt":  2.50000000000000E+0001,
+  "XTOpt": "Alexander '61",
+  "TMax":  6.50000000000000E+0001,
+  "XTMax": "   '",
+  "TRef_NotUsed":  1.50000000000000E+0001,
+  "XTRef": "prof. judgement",
+  "pHMin":  5.00000000000000E+0000,
+  "XpHMin": "Lyman et al.'82;Francis et al. in Hendrey '84",
+  "pHMax":  8.50000000000000E+0000,
+  "XpHMax": "Lyman et al., '82",
+  "P2OrgLab":  1.80000000000000E-0002,
+  "N2OrgLab":  7.90000000000000E-0002,
+  "XP2OrgLab": "Redfield '58 ratio",
+  "XN2OrgLab": "   '",
+  "O2Biomass":  5.75000000000000E-0001,
+  "XO2Biomass": "Winfield et al., '71 & Redfield '58",
+  "O2N":  4.57000000000000E+0000,
+  "XO2N": "Scavia '80",
+  "KSed":  1.50000000000000E-0001,
+  "XKsed": "Collins & Wlosinski '83 (0.69)",
+  "PSedRelease_NotUsed":  2.00000000000000E-0004,
+  "XPSedrelease": "Imboden & Gachter '78",
+  "NSedRelease_NotUsed":  0.00000000000000E+0000,
+  "XNSedRelease": "assume denitrification is sink",
+  "DecayMax_Refr":  4.00000000000000E-0002,
+  "XDecayMax_Refr": "default",
+  "KSedTemp":  2.00000000000000E+0001,
+  "XKSedTemp": "default",
+  "KSedSalinity":  0.00000000000000E+0000,
+  "XKSedSalinity": "default",
+  "P2Org_Refr":  2.00000000000000E-0004,
+  "XP2Org_Refr": "default",
+  "N2Org_Refr":  2.00000000000000E-0003,
+  "XN2Org_Refr": "default",
+  "Wet2DryPRefr":  5.00000000000000E+0000,
+  "XWet2DryPRefr": "<--- default",
+  "Wet2DryPLab":  5.00000000000000E+0000,
+  "Xet2DryPLab": "<--- default",
+  "Wet2DrySRefr":  5.00000000000000E+0000,
+  "XWet2DrySRefr": "<--- default",
+  "Wet2DrySLab":  5.00000000000000E+0000,
+  "XWet2DrySLab": "<--- default",
+  "N2OrgDissLab":  2.00000000000000E-0003,
+  "XN2OrgDissLab": "default",
+  "P2OrgDissLab":  2.00000000000000E-0004,
+  "XP2OrgDissLab": "default",
+  "N2OrgDissRefr":  2.00000000000000E-0003,
+  "XN2OrgDissRefr": "default",
+  "P2OrgDissRefr":  2.00000000000000E-0004,
+  "XP2OrgDissRefr": "default",
+  "KD_P_Calcite":  3.00000000000000E+0002,
+  "XKD_P_Calcite": "Default",
+  "KNitri":  3.00000000000000E-0001,
+  "XKNitri": "Default",
+  "KDenitri_Bot":  2.00000000000000E-0001,
+  "XKDenitri_Bot": "Default",
+  "KDenitri_Wat":  9.00000000000000E-0002,
+  "XKDenitri_Wat": "Default"
+  },
+ "SiteType": 4,
+ "MeanThick[Epilimnion]":  6.00000000000000E-0001,
+ "MeanThick[Hypolimnion]":  0.00000000000000E+0000,
+ "P_Shape":  2.72727272727272E-0001,
+ "TotDischarge":  0.00000000000000E+0000
+ }
+}

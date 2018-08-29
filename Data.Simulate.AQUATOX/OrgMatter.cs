@@ -196,7 +196,7 @@ public class TDetritus : TRemineralize
             ReminRecord w1 = Location.Remin;
             // T := AQTSeg.TCorr(Q10, TRef, TOpt, TMax);
             T = Colonization_DecTCorr();
-            p = pHCorr(w1.pHMin, w1.pHMax);
+            p = AQTSeg.pHCorr(w1.pHMin, w1.pHMax);
             // anoxic
             if ((NState == AllVariables.SedmRefrDetr) && (State > 50))
                   DOCorr = 0.001;
@@ -1197,8 +1197,8 @@ public class TDetritus : TRemineralize
 
             Se = Sedimentation();
 
-            //if (AQTSeg.Diagenesis_Included() && (Se < 0))
-            //{  Se = 0; }  // no resuspension in diagenesis model
+            if (AQTSeg.Diagenesis_Included() && (Se < 0))
+              {  Se = 0; }  // no resuspension in diagenesis model
 
             // Re = Resuspension(); currently only relevant to multi-layer sediment model
 
@@ -1424,7 +1424,7 @@ public class TDetritus : TRemineralize
 
             Se = SuspP.Sedimentation();
 
-            //if (AQTSeg.Diagenesis_Included() && (Se < 0)) Se = 0;  // no resuspension in diagenesis model
+            if (AQTSeg.Diagenesis_Included() && (Se < 0)) Se = 0;  // no resuspension in diagenesis model
 
             //Re = SuspP.Resuspension();
             Se = Se + Dep;  // Combines deposition into the sedimentation rate
