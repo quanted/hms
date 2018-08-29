@@ -53,7 +53,7 @@ namespace SurfaceRunoff
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS SurfaceRunoff Data call
@@ -73,7 +73,7 @@ namespace SurfaceRunoff
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
-                    errorMsg = "ERROR: 'Source' for surfacerunoff was not found among available sources or is invalid.";
+                    errorMsg = "ERROR: Source for surfacerunoff was not found among available sources or is invalid.";
                     break;
             };
 

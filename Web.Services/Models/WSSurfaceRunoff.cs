@@ -27,10 +27,6 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
-            // Validate SurfaceRunoff sources.
-            errorMsg = (!Enum.TryParse(input.Source, true, out RunoffSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
             // SurfaceRunoff object
             SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
 

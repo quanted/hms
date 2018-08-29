@@ -65,15 +65,15 @@ namespace SoilMoisture
             {
                 case "daily":
                     output.Data = NLDAS.DailyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Daily Average");
+                    //output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = NLDAS.WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Weekly Average");
+                    //output.Metadata.Add("column_2", "Weekly Average");
                     return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Monthly Average");
+                    //output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     return output;

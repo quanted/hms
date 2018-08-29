@@ -109,7 +109,8 @@ namespace Precipitation
         {
             errorMsg = "";
             // seconds to hours
-            double modifier = 3600;
+            //double modifier = 3600;
+            double modifier = 1;
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             for (int i = 0; i < output.Data.Count; i++)
             {

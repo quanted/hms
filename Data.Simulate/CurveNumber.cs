@@ -49,7 +49,7 @@ namespace Data.Simulate
             double s = 1000.0 / cn - 10.0;
 
             //int day0 = DateTime.Parse(precipData.Data.Keys.First()).DayOfYear;
-            //int cnI = day0 / 16;
+            //int cnI = day0 / 23;
             //Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
             //double s = 1000.0 / cn[cnI] - 10.0;
 
@@ -60,7 +60,7 @@ namespace Data.Simulate
             {
                 string date = dateValue.Key;
 
-                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 16;
+                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 23;
                 //s = 1000.0 / cn[cnI] - 10.0;
                 //ia = 0.2 * s;
 
