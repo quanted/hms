@@ -2,6 +2,7 @@
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.OrgMatter;
+using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
 using Globals;
 
@@ -340,11 +341,11 @@ namespace AQUATOX.Nutrients
                         {
 
                             AddLoad = 0;
-                            AddLoad = LoadsRec.ReturnAltLoad(TimeIndex, Loop);
+                            AddLoad = LoadsRec.ReturnAltLoad(TimeIndex, Loop);  //multiplied by multldg factor here
                             // g/d or g/sq m. d
 
-                            AddLoad = AddLoad * LoadsRec.Alt_Loadings[Loop].MultLdg / SegVolume;
-                            // mg/L d    // g/d         // unitless                   // cu m      // note if direct precip result is mg/(sq m.*L*d)
+                            AddLoad = AddLoad / SegVolume;
+                            // mg/L d  // g/d     // cu m      // note if direct precip result is mg/(sq m.*L*d)
 
                             if (Loop == 1) AddLoad = AddLoad * Location.Locale.SurfArea;  // Loop = 1 is DirectPrecip loadings type
                                                                                           // mg/L d // mg/(sq m.*L*d)            // sq m.
@@ -391,21 +392,6 @@ namespace AQUATOX.Nutrients
         }
 
         // ---------------------------process equations--------------------------
-        // --------------------------------
-        // correction for non-optimal pH
-        // --------------------------------
-        public double pHCorr(double pHMin, double pHMax)
-        {
-            const double KpH = 1.0;
-            double ppH = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            double result = 1.0;
-            if (ppH <= pHMin) result = KpH * Math.Exp(ppH - pHMin);
-            if (ppH > pHMax) result = KpH * Math.Exp(pHMax - ppH);
-            return result;
-        }
-
-        // phcorr
-        // -------------------------------------------------------------------------------------------------------
         public double SumDetrDecomp(T_SVType OType, bool SedOnly)
         {
             double result;
@@ -441,6 +427,7 @@ namespace AQUATOX.Nutrients
                 {
                     Decomp = RP.Decomposition(_wvar1.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
                 }
+
                 if (OType == T_SVType.NTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
@@ -1373,8 +1360,8 @@ namespace AQUATOX.Nutrients
             double En =0;
             double DiaFlx=0;
             double CaCO3srb=0;
+            TPO4_Sediment PSed;
 
-            // TPO4_Sediment PSed;
             // TrackMB
             // --------------------------------------------------
             // double PFluxKg;
@@ -1404,22 +1391,23 @@ namespace AQUATOX.Nutrients
             //    En = EstuaryEntrainment();
             //}
 
-            //PSed = AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);  // check for diagenesis model   //FIXME Diagenesis linkage
-            //if (PSed != null)
-            //{
-            //    TStates _wvar6 = AQTSeg;
-            //    Diagenesis_Rec _wvar7 = _wvar6.Diagenesis_Params;
-            //    MorphRecord _wvar8 = _wvar6.Location.Morph;
-            //    DiaFlx = PSed.Flux2Water() * _wvar6.DiagenesisVol(1) / _wvar8.SegVolum[_wvar6.VSeg];
-            //    // mg/L d  // g/m3 sed1 d         // m3 sed1               // m3 water
-            //    _wvar6.Diag_Track[TAddtlOutput.TSP_Diag, _wvar6.DerivStep] = PSed.Flux2Water() * _wvar7.H1.Val * 1e3;
-            //    // mg/m2 d                  //    // g/m3 sed d                //    // m                //    // mg/g
-            //    MBLayerRecord _wvar9 = _wvar6.MBLayerArray[AllVariables.Phosphate];
-            //    // 3/16/2010 track total P flux from diagenesis into water column in kg since start of simulation
-            //    PFluxKg = DiaFlx * _wvar6.SegVol() * 1000.0 * 1e-6;
-            //    // kg     // mg/L        // m3     // L/m3   // kg/mg
-            //    _wvar9.PFluxD[_wvar6.DerivStep] = _wvar9.PFluxD[_wvar6.DerivStep] + PFluxKg;
-            //}
+            PSed = (TPO4_Sediment) AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);  // check for diagenesis model  
+            if (PSed != null)
+            {
+                Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
+                MorphRecord MR = AQTSeg.Location.Morph;
+                DiaFlx = PSed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
+              // mg/L d  // g/m3 sed1 d         // m3 sed1               // m3 water
+
+                //_wvar6.Diag_Track[TAddtlOutput.TSP_Diag, _wvar6.DerivStep] = PSed.Flux2Water() * _wvar7.H1.Val * 1e3;
+                //// mg/m2 d                  //    // g/m3 sed d                //    // m                //    // mg/g
+
+                // MBLayerRecord _wvar9 = _wvar6.MBLayerArray[AllVariables.Phosphate];
+                // 3/16/2010 track total P flux from diagenesis into water column in kg since start of simulation
+                // PFluxKg = DiaFlx * _wvar6.SegVol() * 1000.0 * 1e-6;
+                // kg     // mg/L        // m3     // L/m3   // kg/mg
+                // _wvar9.PFluxD[_wvar6.DerivStep] = _wvar9.PFluxD[_wvar6.DerivStep] + PFluxKg;
+            }
 
             //ReminRecord RR = AQTSeg.Location.Remin;   // FIXME PLANT LINKAGE CALCITE PCPT
             //CaCO3srb = RR.KD_P_Calcite * State * AQTSeg.CalcitePcpt() * 1e-6;
@@ -1475,7 +1463,7 @@ namespace AQUATOX.Nutrients
                 {
                     ReminRecord RR = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
-                    p = pHCorr(7.0, 9.0);
+                    p = AQTSeg.pHCorr(7.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
                     {
                         // 5/6/2013
@@ -1654,7 +1642,8 @@ namespace AQUATOX.Nutrients
                 double DiffDown=0;
                 double En=0;
                 double DiaFlx=0;
-            //            TNH4_Sediment NSed;
+                TNH4_Sediment NSed;
+
             // TrackMB
             // --------------------------------------------------
             // NH4Obj.Derivative
@@ -1677,44 +1666,41 @@ namespace AQUATOX.Nutrients
 
                 WaO = Washout();
 
-                //if (AQTSeg.LinkedMode)
-                //{
-                //    WaI = Washin();
-                //}
-                //if (AQTSeg.LinkedMode && (!AQTSeg.CascadeRunning))
-                //{
-                //    DiffUp = SegmentDiffusion(true);
-                //    DiffDown = SegmentDiffusion(false);
-                //}
-                //else if ((!AQTSeg.LinkedMode))
-                //{
-                //    TD = TurbDiff();
-                //}
+            //if (AQTSeg.LinkedMode)
+            //{
+            //    WaI = Washin();
+            //}
+            //if (AQTSeg.LinkedMode && (!AQTSeg.CascadeRunning))
+            //{
+            //    DiffUp = SegmentDiffusion(true);
+            //    DiffDown = SegmentDiffusion(false);
+            //}
+            //else if ((!AQTSeg.LinkedMode))
+            //{
+            //    TD = TurbDiff();
+            //}
 
-                //if (AQTSeg.EstuarySegment)
-                //{
-                //    En = EstuaryEntrainment();
-                //}
+            //if (AQTSeg.EstuarySegment)
+            //{
+            //    En = EstuaryEntrainment();
+            //}
 
-                //    NSed = AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1); // search for diagenesis model  // FIXME Diagenesis linkage
-                //if (NSed != null)
-                //{
-                //    TStates _wvar6 = AQTSeg;
-                //    Diagenesis_Rec _wvar7 = _wvar6.Diagenesis_Params;
-                //    MorphRecord _wvar8 = _wvar6.Location.Morph;
-                //    DiaFlx = NSed.Flux2Water() * _wvar6.DiagenesisVol(1) / _wvar8.SegVolum[_wvar6.VSeg];
-                //    // mg/L d  // g/m3 sed1 d /    // m3 sed1               // m3 water
-                //    _wvar6.Diag_Track[TAddtlOutput.NH3_Diag, _wvar6.DerivStep] = NSed.Flux2Water() * _wvar7.H1.Val * 1e3;
-                //}
-                //// mg/m2 d
-                //// g/m3 sed d
-                //// m
-                //// mg/g
-                //// if (State < VSmall) and ((Lo + Re + TD + DiffUp + DiffDown + En + DiaFlx) < VSmall)
-                //// then  begin dB := 0.0; Lo:=0;Re:=0;Ni:=0;Assm:=0;WaO:=0;WaI:=0;TD:=0;DiffUp:=0;DiffDown:=0;En:=0;DiaFlx:=0; End
-                //// else
+            NSed = (TNH4_Sediment)AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1); // search for diagenesis model 
+            if (NSed != null)
+            {
+                Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
+                MorphRecord MR = AQTSeg.Location.Morph;
+                DiaFlx = NSed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
+                // mg/L d  // g/m3 sed1 d /    // m3 sed1               // m3 water
+                // _wvar6.Diag_Track[TAddtlOutput.NH3_Diag, _wvar6.DerivStep] = NSed.Flux2Water() * _wvar7.H1.Val * 1e3;
+            }  // mg/m2 d            // g/m3 sed d            // m            // mg/g
 
-                DB = Lo + Re - Ni - Assm - WaO + WaI + TD + DiffUp + DiffDown + En + DiaFlx;
+
+            //// if (State < VSmall) and ((Lo + Re + TD + DiffUp + DiffDown + En + DiaFlx) < VSmall)  commented out in AQUATOX v3.2 code
+            //// then  begin dB := 0.0; Lo:=0;Re:=0;Ni:=0;Assm:=0;WaO:=0;WaI:=0;TD:=0;DiffUp:=0;DiffDown:=0;En:=0;DiaFlx:=0; End
+            //// else
+
+            DB = Lo + Re - Ni - Assm - WaO + WaI + TD + DiffUp + DiffDown + En + DiaFlx;
                 Derivative_WriteRates();
                 Derivative_TrackMB();
             }
@@ -1749,7 +1735,7 @@ namespace AQUATOX.Nutrients
                 {
                     ReminRecord _wvar1 = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
-                    p = pHCorr(5.0, 9.0);
+                    p = AQTSeg.pHCorr(5.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
                     {
                         // 5/6/2013
@@ -1763,6 +1749,7 @@ namespace AQUATOX.Nutrients
                     EnvironLim = (1.0 - DOCorr) * T * p;
                     Denitrify = (_wvar1.KDenitri_Wat * EnvironLim) * State;
                     // 3/13/09 Reformulated
+
                     // (*     With AQTSeg do
                     // {Calculate Correction for Sediment Surface Phenomenon, Unitless}
                     // {Assumed that surface area = sediment area}
@@ -1900,7 +1887,8 @@ namespace AQUATOX.Nutrients
                 double DiffDown = 0;
                 double En = 0;
                 double DiaFlx = 0;
-            //    TNO3_Sediment N2Sed;
+                TNO3_Sediment N2Sed;
+
             // TrackMB
             // --------------------------------------------------
             // NO3Obj.Derivative
@@ -1913,208 +1901,46 @@ namespace AQUATOX.Nutrients
             if (Assimilation_Link != null) NO3Assim = Assimilation_Link.ReturnLoad(AQTSeg.TPresent);
 
             WaO = Washout();
-                //if (AQTSeg.LinkedMode)
-                //{
-                //    WaI = Washin();
-                //}
-                //if (AQTSeg.LinkedMode && (!AQTSeg.CascadeRunning))
-                //{
-                //    DiffUp = SegmentDiffusion(true);
-                //    DiffDown = SegmentDiffusion(false);
-                //}
-                //else if ((!AQTSeg.LinkedMode))
-                //{
-                //    TD = TurbDiff();
-                //}
-                //if (AQTSeg.EstuarySegment)
-                //{
-                //    En = EstuaryEntrainment();
-                //}
+            //if (AQTSeg.LinkedMode)
+            //{
+            //    WaI = Washin();
+            //}
+            //if (AQTSeg.LinkedMode && (!AQTSeg.CascadeRunning))
+            //{
+            //    DiffUp = SegmentDiffusion(true);
+            //    DiffDown = SegmentDiffusion(false);
+            //}
+            //else if ((!AQTSeg.LinkedMode))
+            //{
+            //    TD = TurbDiff();
+            //}
+            //if (AQTSeg.EstuarySegment)
+            //{
+            //    En = EstuaryEntrainment();
+            //}
 
-                //N2Sed = AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
-                //if (N2Sed != null)  // FIXME DIAGENESIS LINKAGE
-                //{
-                //    TStates _wvar6 = AQTSeg;
-                //    Diagenesis_Rec _wvar7 = _wvar6.Diagenesis_Params;
-                //    MorphRecord _wvar8 = _wvar6.Location.Morph;
-                //    DiaFlx = N2Sed.Flux2Water() * _wvar6.DiagenesisVol(1) / _wvar8.SegVolum[_wvar6.VSeg];
-                //    // mg/L d    // g/m3 sed1 d           // m3 sed1                 // m3 water
-                //    _wvar6.Diag_Track[TAddtlOutput.No3_Diag, _wvar6.DerivStep] = N2Sed.Flux2Water() * _wvar7.H1.Val * 1e3;
-                //}
-                // mg/m2 d       // g/m3 sed d        // m        // mg/g
-                // If (State < VSmall) and ((Lo + Nitr + TD + DiffUp + DiffDown + En+ DiaFlx) < VSmall)
-                // then Begin dB := 0.0;  Lo:=0;Nitr:=0;Denitr:=0;NO3Assim:=0;WaO:=0;WaI:=0;TD:=0;DiffUp:=0;DiffDown:=0;En:=0;DiaFlx:=0; End
-                // else
+            N2Sed = (TNO3_Sediment)AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
+            if (N2Sed != null)  
+            {
+                MorphRecord MR = AQTSeg.Location.Morph;
+                DiaFlx = N2Sed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
+                // mg/L d    // g/m3 sed1 d           // m3 sed1                 // m3 water
+
+                //_wvar6.Diag_Track[TAddtlOutput.No3_Diag, _wvar6.DerivStep] = N2Sed.Flux2Water() * _wvar7.H1.Val * 1e3;
+            }    //mg / m2 d       // g/m3 sed d        // m        // mg/g
+
+
+//            If(State < VSmall) and((Lo + Nitr + TD + DiffUp + DiffDown + En + DiaFlx) < VSmall)    commented out in AQUATOX 3.2 code
+//                 then Begin dB:= 0.0; Lo:= 0; Nitr:= 0; Denitr:= 0; NO3Assim:= 0; WaO:= 0; WaI:= 0; TD:= 0; DiffUp:= 0; DiffDown:= 0; En:= 0; DiaFlx:= 0; End
+//                 else   
+            
                 DB = Lo + Nitr - Denitr - NO3Assim - WaO + WaI + TD + DiffUp + DiffDown + En + DiaFlx;
-                Derivative_WriteRates();
+
+                // Derivative_WriteRates();
                 // Derivative_TrackMB();  // FIXME RATES TRACKING
             }
 
         } // TNO3Obj
-
-            public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
-            {
-                public double SalinityUpper = 0;
-                public double SalinityLower = 0;
-                public TSalinity(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-                }
-
-                public override void Derivative(ref double DB)
-                {
-                base.Derivative(ref DB);
-                    DB = 0;
-                }
-
-                public override void CalculateLoad(DateTime TimeIndex)
-                {
-                    Loading = 0;
-                    State = LoadsRec.ReturnLoad(TimeIndex);
-                    SalinityUpper = State;
-                    SalinityLower = LoadsRec.ReturnAltLoad(TimeIndex, 0);
-
-                    //if (AQTSeg != null)
-                    //{
-                    //    if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)
-                    //    {
-                    //        State = SalinityLower;
-                    //    }
-                    //}
-                }
-
-            } // end TSalinity
-
-
-    public class TpHObj : TStateVariable
-    {
-        public double Alkalinity = 0;
-        // -------------------------------------------------------------------------------
-        //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
-        public TpHObj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-            Alkalinity = 1000;   // ( default ueq CaCO3/L)
-
-        }
-        public double CalculateLoad_asinh(double x)
-        {
-            double result;
-            result = Math.Log(Math.Sqrt(Math.Pow(x, 2) + 1) + x);
-            return result;
-        }
-
-        // pH calculation based on Marmorek et al., 1996 (modified Small and Sutton, 1986)
-        public double CalculateLoad_pHCalc()
-        {
-            double result;
-            const double pkw = 1E-14;
-            // ionization constant water
-            double T, CCO2, DOM, pH2CO3, Alpha, A, B, C;
-
-            T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
-            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
-            TDissRefrDetr PDOM = (TDissRefrDetr)AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            if (PDOM == null) DOM = 0;
-               else DOM = PDOM.State;   // mg/L
-
-            pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
-            Alpha = pH2CO3 * CCO2 + pkw;
-            A = -Math.Log10(Math.Pow(Alpha, 0.5));
-            B = 1 / Math.Log(10.0);
-            C = 2 * (Math.Pow(Alpha, 0.5));
-            try
-            {
-                result = A + B * CalculateLoad_asinh((Alkalinity - 5.1 * DOM * 0.5) / C);
-            }
-            catch
-            {
-                result = 7; // default if ASINH function crashes
-            }
-            return result;
-        }
-
-        public override void CalculateLoad(DateTime TimeIndex)
-        {
-            if (LoadsRec.Loadings.NoUserLoad)
-            { 
-                State = CalculateLoad_pHCalc();              // pHCalc
-                if ((State > 8.25)) { State = 8.25; }
-                if ((State < 3.75)) { State = 3.75; }
-            }
-            else State = LoadsRec.ReturnLoad(TimeIndex);            // allows for user input of load
-        }
-
-    } // end TpHObj
-
-
-    public class TTemperature : TStateVariable
-    {
-        public TTemperature(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-
-        }
-
-        // (***********************************)
-        // (* water temperature of segment    *)
-        // (* Ward 1963, ASCE 1989, 6:1-16    *)
-        // (***********************************)
-        public override void CalculateLoad(DateTime TimeIndex)
-        {
-            // Changes State, not Loadings... Rewritten JSC, 22-May-95
-            const int PhaseShift = 90;
-            double Temperature;
-            double MeanTemp;
-            double TempRange;
-            double AdjustedJulian;
-            // Julian date adjusted for hemisphere
-            if (!LoadsRec.Loadings.NoUserLoad)
-            {
-
-                //if ((AQTSeg.VSeg == VerticalSegments.Epilimnion) || (AQTSeg.HypoTempLoads.NoUserLoad))
-                //{
-                    Loading = LoadsRec.ReturnLoad(TimeIndex);
-                //}
-                //else
-                //{
-                //    // hypolimnion: User entered data
-                //    LoadingsRecord _wvar2 = AQTSeg.HypoTempLoads;
-                //    if (_wvar2.UseConstant)   {  Loading = _wvar2.ConstLoad; }
-                //    else
-                //    {
-                //        Loading = 0;
-                //        if (_wvar2.Loadings != null)    { Loading = _wvar2.Loadings.GetLoad(TimeIndex, true);  }
-                //    }
-                //    // else
-                //    Loading = Loading * _wvar2.MultLdg;
-                //}
-                // With HypoTempLoads
-
-                State = Loading;
-            }  // if userload
-            else
-            {
-                // NoUserLoad for both Epi and Hypo Temp Loadings
-                AdjustedJulian = TimeIndex.DayOfYear;
-                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182;
-                MeanTemp = Location.Locale.TempMean;  // AQTSeg.VSeg
-                TempRange = Location.Locale.TempRange; // AQTSeg.VSeg
-                //if (AQTSeg.LinkedMode)
-                //{
-                //    // MeanTemp and Range are stored in "Epilimnion" for each linked segment regardless of stratification
-                //    MeanTemp = Location.Locale.TempMean[VerticalSegments.Epilimnion];
-                //    TempRange = Location.Locale.TempRange[VerticalSegments.Epilimnion];
-                //}
-                
-                Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30))));
-                if (Temperature < 0.0)  { Temperature = 0.0; }
-
-                // Temperature = Temperature * MultLdg;                // allow perturbation JSC 1-23-03
-
-                State = Temperature;
-            }
-            Loading = 0;
-        }
-
-    } // end TTemperature
 
 
 
@@ -2396,13 +2222,9 @@ namespace AQUATOX.Nutrients
                 // m/s         // cm/s                                                                        // m/cm
                 if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
 
-                Wnd = 0;  // FIXME wind state variable
-
-                //Wnd = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
-                //// m/s at 10 m
-                //if (Wnd == -1)
-                //{        Wnd = 0;      }
-                //// If state deleted, jsc
+                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TWind == null) Wnd = 0.1;
+                else Wnd = TWind.State;  // m/s at 10 m
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
                 KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;
@@ -2722,15 +2544,15 @@ namespace AQUATOX.Nutrients
             BOD = RR.O2Biomass * SumDetrDecomp(T_SVType.StV, false);
             if (CBOD_Link != null) BOD = CBOD_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // diagenesis model attached                 FIXME Diagenesis linkage
-            //if (AQTSeg.Diagenesis_Included())
-            //{
-            //    TStates _wvar3 = AQTSeg;
-            //    MorphRecord _wvar4 = _wvar3.Location.Morph;
-            //    Diagenesis_Rec _wvar5 = _wvar3.Diagenesis_Params;
-            //    SOD2 = _wvar3.SOD * (_wvar3.DiagenesisVol(2) / _wvar5.H2.Val) / _wvar4.SegVolum[_wvar3.VSeg];
-            //} // g/m3 w d   g O2/m2 s d         // m3 s             // m s            // m3
-            if (SOD_Link != null) SOD2 = SOD_Link.ReturnLoad(AQTSeg.TPresent);
+            // if diagenesis model attached
+            if (AQTSeg.Diagenesis_Included())
+            {
+                MorphRecord MR = AQTSeg.Location.Morph;
+                Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
+                SOD2 = AQTSeg.SOD * (AQTSeg.DiagenesisVol(2) / DR.H2.Val) / MR.SegVolum;
+            } // g/m3 w d   g O2/m2 s d         // m3 s            // m s        // m3
+
+            if (SOD_Link != null) SOD2 = SOD_Link.ReturnLoad(AQTSeg.TPresent);  // linkage if no diagenesis attached
 
             // Resp = _wvar2.O2Biomass * SumRespiration(false);            // fixme animal, plant linkage 
             if (Respiration_Link != null) Resp = Respiration_Link.ReturnLoad(AQTSeg.TPresent);

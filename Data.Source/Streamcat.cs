@@ -16,48 +16,6 @@ namespace Data.Source
         public string hsg;
     }
 
-    //public class StreamcatData
-    //{
-    //    public Dictionary<string, string> status;
-    //    public CatchmentDataOutput output;
-    //}
-
-    //public class CatchmentDataOutput
-    //{
-    //    public int comid;
-    //    public string streamcat_extract_date;
-    //    public string streamcat_url;
-    //    public Dictionary<string, string> identifier_summary;
-    //    public List<CatchmentMetrics> metrics;
-    //}
-
-    //public class CatchmentDataStatus
-    //{
-    //    public string submission_id;
-    //    public int status_code;
-    //    public string status_message;
-    //    public float execution_time;
-    //    public int output_bytes;
-    //}
-
-    //public class CatchmentMetrics
-    //{
-    //    public string id;
-    //    public string metric_alias;
-    //    public string landscape_layer_agg;
-    //    public string landscape_layer_id;
-    //    public string area_of_interest_id;
-    //    public string full_display_name;
-    //    public string short_display_name;
-    //    public string description;
-    //    public string metric_class;
-    //    public string metric_type;
-    //    public string unit_of_measure;
-    //    public string format_keyword;
-    //    public int metric_value;
-    //    public float landscape_percentage;
-    //}
-
     public class Streamcat
     {
 

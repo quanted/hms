@@ -27,14 +27,18 @@ namespace SurfaceRunoff
             // TODO: Add options for different precip inputs
             input.Source = "daymet";
             ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
-            
-            // Test comid=718276, latitude=46.69580547, longitude=-69.36054766
-            precipInput.Geometry.Point = new PointCoordinate()
+
+            // Static test centroid point
+            IPointCoordinate catchmentCentroid = new PointCoordinate()
             {
                 Latitude = 46.69580547,
                 Longitude = -69.36054766
             };
+            precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
             input.Geometry.ComID = 718276;
+
+            // Database call for centroid data with specified comid.
+            // precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
 
             ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -42,12 +46,6 @@ namespace SurfaceRunoff
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
             if (errorMsg.Contains("ERROR")) { return null; }
-
-            //ITimeSeriesOutput cnOutput = output;
-            //cnOutput = cn.SetDataToOutput(out errorMsg, "SurfaceRunoff", data, output, input);
-            //if (errorMsg.Contains("ERROR")) { return null; }
-
-            //TODO: add temporal resolution function
 
             return cnOutput;
         }
@@ -95,6 +93,27 @@ namespace SurfaceRunoff
             precip.Output = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
             return precip.Output;
+        }
+
+        /// <summary>
+        /// Get the catchment centroid from a specified comid.
+        /// Runs SQL query to sqlite database file.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="comid"></param>
+        /// <returns></returns>
+        private PointCoordinate GetCatchmentCentroid(out string errorMsg, int comid)
+        {
+            errorMsg = "";
+            string dbPath = "./App_Data/catchments.sqlite";
+            string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + comid.ToString();
+            Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
+            IPointCoordinate centroid = new PointCoordinate()
+            {
+                Latitude = double.Parse(centroidDict["CentroidLatitude"]),
+                Longitude = double.Parse(centroidDict["CentroidLongitude"])
+            };
+            return centroid as PointCoordinate;
         }
 
     }

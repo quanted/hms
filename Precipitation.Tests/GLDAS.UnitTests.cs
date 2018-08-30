@@ -28,8 +28,8 @@ namespace Precipitation.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData("2015-01-01 01", 0.0)]
-        [InlineData("2015-06-04 04", 23.98)]
-        [InlineData("2015-12-24 07", 6257)]
+        [InlineData("2015-06-04 04", 0.00666)]
+        [InlineData("2015-12-24 07", 1.738)]
         public void ConvertToHourly(string date, double expected)
         {
             Precipitation precip = new Precipitation

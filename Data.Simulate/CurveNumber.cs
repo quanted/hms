@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -12,44 +13,6 @@ using System.Web;
 
 namespace Data.Simulate
 {
-
-    //public class CN
-    //{
-    //    public Dictionary<string, NLCDClass> NLCD { get; set; }
-    //}
-
-    //public class CNConditions
-    //{
-    //    public Dictionary<string, ConditionGroup> Class { get; set; }
-    //}
-
-    //public class NDVI
-    //{
-    //    public Dictionary<string, NDVIGroup> Class { get; set; }
-    //}
-
-    //public class ConditionGroup
-    //{
-    //    public Dictionary<string, NLCDClass> Condition { get; set; }
-    //}
-
-    //public class NLCDClass
-    //{
-    //    [JsonProperty("A")]
-    //    public int A { get; set; }
-    //    [JsonProperty("B")]
-    //    public int B { get; set; }
-    //    [JsonProperty("C")]
-    //    public int C { get; set; }
-    //    [JsonProperty("D")]
-    //    public int D { get; set; }
-    //}
-
-    //public class NDVIGroup
-    //{
-    //    public int POOR { get; set; }
-    //    public int GOOD { get; set; }
-    //}
 
     /// <summary>
     /// Curve Number base class.
@@ -84,19 +47,47 @@ namespace Data.Simulate
             // Else precipitation > Ia: Runoff (Q) = (P - Ia)^2/(P- Ia + S)
 
             double s = 1000.0 / cn - 10.0;
+
+            //int day0 = DateTime.Parse(precipData.Data.Keys.First()).DayOfYear;
+            //int cnI = day0 / 23;
+            //Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
+            //double s = 1000.0 / cn[cnI] - 10.0;
+
             double ia = 0.2 * s;
-            
-            foreach(KeyValuePair<string, List<string>> dateValue in precipData.Data)
+
+
+            foreach (KeyValuePair<string, List<string>> dateValue in precipData.Data)
             {
                 string date = dateValue.Key;
+
+                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 23;
+                //s = 1000.0 / cn[cnI] - 10.0;
+                //ia = 0.2 * s;
+
                 double p = double.Parse(dateValue.Value[0]);
                 double q = (p <= ia) ? 0 : ((p - ia) * (p - ia)) / (p - ia + s);
-                //Debug.WriteLine(date + ": " + q.ToString("E3"));
                 List<string> d = new List<string>();
                 d.Add(q.ToString(input.DataValueFormat));
                 output.Data.Add(date, d);
             }
             return output;
+        }
+
+        private Dictionary<int, double> GetCN(out string errorMsg, int comid)
+        {
+            errorMsg = "";
+            string dbPath = "./App_Data/cn.sqlite";
+            string query = "SELECT CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22, CN_23 " +
+                "FROM CN WHERE ComID = " + comid.ToString();
+            Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
+            Dictionary<int, double> cnData = new Dictionary<int, double>();
+            int i = 1;
+            foreach(string key in data.Keys)
+            {
+                cnData.Add(i, double.Parse(data[key]));
+                i++;
+            }
+            return cnData;
         }
 
         private double CalculateCN(out string errorMsg, ITimeSeriesInput input)
