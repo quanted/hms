@@ -662,8 +662,8 @@ namespace Evapotranspiration
                 { "column_7", "Potential Evaporation" },
                 { "column_8", "Hourly Relative Humidity" },
                 { "column_9", "Potential Evapotranspiration" },
-                { "column_9.1", "Dew Point Temperature" },
-                { "column_9.2", "Cloud Coverage" }
+                { "column_10", "Dew Point Temperature" },
+                { "column_11", "Cloud Coverage" }
             };
             if (!hour)
             {

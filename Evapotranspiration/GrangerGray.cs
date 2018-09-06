@@ -451,13 +451,13 @@ namespace Evapotranspiration
                 { "column_1", "Date" },
                 { "column_2", "Julian Day" },
                 { "column_3", "Minimum Temperature" },
-                { "column_3.1", "Maximum Temperature" },
-                { "column_3.2", "Mean Temperature" },
-                { "column_4", "Mean Solar Radiation" },
-                { "column_5", "Mean Wind Speed" },
-                { "column_6", "Minimum Relative Humidity" },
-                { "column_7", "Maximum Relative Humidity" },
-                { "column_8", "Potential Evapotranspiration" }
+                { "column_4", "Maximum Temperature" },
+                { "column_5", "Mean Temperature" },
+                { "column_6", "Mean Solar Radiation" },
+                { "column_7", "Mean Wind Speed" },
+                { "column_8", "Minimum Relative Humidity" },
+                { "column_9", "Maximum Relative Humidity" },
+                { "column_10", "Potential Evapotranspiration" }
             };
             if (inpt.TemporalResolution == "hourly")
             {
@@ -472,10 +472,10 @@ namespace Evapotranspiration
                     { "column_4", "Mean Solar Radiation" },
                     { "column_5", "Minimum Daily Temperature" },
                     { "column_6", "Maximum Daily Temperature" },
-                    { "column_6.1", "Mean Wind Speed" },
-                    { "column_7", "Minimum Relative Humidity" },
-                    { "column_8", "Maximum Relative Humidity" },
-                    { "column_9", "Potential Evapotranspiration" }
+                    { "column_7", "Mean Wind Speed" },
+                    { "column_8", "Minimum Relative Humidity" },
+                    { "column_9", "Maximum Relative Humidity" },
+                    { "column_10", "Potential Evapotranspiration" }
                 };
             }
             output.Data = new Dictionary<string, List<string>>();
