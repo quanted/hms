@@ -31,7 +31,8 @@ namespace Data
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
-            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" }
+            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
         };
 
         static string[] validRemoteData =
@@ -68,6 +69,8 @@ namespace Data
             if (errors.Count == 0 && ValidateGeometry(out errorTemp, input.Geometry))
             {
                 validInput.Geometry = input.Geometry;
+                validInput.Geometry.Timezone = ValidateTimezone(out errorTemp, input.Geometry.Timezone);
+                validInput.Geometry.GeometryMetadata = (input.Geometry.GeometryMetadata == null) ? new Dictionary<string, string>() : input.Geometry.GeometryMetadata;
             }
             errors = errors.Concat(errorTemp).ToList();
             errorTemp = new List<string>();
@@ -95,6 +98,33 @@ namespace Data
 
             errorMsg = string.Join(", ", errors.ToArray());
             return validInput;
+        }
+
+        public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
+        {
+            errors = new List<string>();
+            Timezone validTZ = new Timezone();
+            if (input == null)
+            {
+                validTZ = new Timezone()
+                {
+                    Name = "",
+                    Offset = 0.0,
+                    DLS = false
+                };
+            }
+            else
+            {
+                validTZ = new Timezone() { };
+                validTZ.Name = (String.IsNullOrWhiteSpace(input.Name)) ? "TZNotSet" : input.Name;
+                validTZ.Offset = (Double.IsNaN(input.Offset)) ? 0.0 : input.Offset;
+                if (validTZ.Offset > 12 || validTZ.Offset < -12)
+                {
+                    errors.Add("ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + validTZ.Offset.ToString());
+                }
+                validTZ.DLS = (input.DLS == true) ? true : false;
+            }
+            return validTZ;
         }
 
         /// <summary>
@@ -370,7 +400,7 @@ namespace Data
         {
             errors = new List<string>();
             List<string> baseUrls = new List<string>();
-            if (validRemoteData.Contains(source))
+            if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
                 try

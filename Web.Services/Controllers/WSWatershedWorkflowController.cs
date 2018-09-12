@@ -11,16 +11,50 @@ using Web.Services.Models;
 
 namespace Web.Services.Controllers
 {
+    interface WorkflowSources
+    {
+        string RunoffSource { get; set; }
+        string PrecipSource { get; set; }
+        string StreamHydrology { get; set; }
+    }
+
+
     /// <summary>
     /// WorkFlow Input that implements TimeSeriesInput object.
     /// </summary>
-    public class WatershedWorkflowInput : TimeSeriesInput
+    public class WatershedWorkflowInput : TimeSeriesInput, WorkflowSources
     {
+        /// <summary>
+        /// OPTIONAL: Specifies the requested source for Runoff Data
+        /// </summary>
+        public string RunoffSource { get; set; }
+
+        /// <summary>
+        /// OPTIONAL: Specifies the requested source for Precipitation Data
+        /// </summary>
+        public string PrecipSource { get; set; }
+
+        /// <summary>
+        /// OPTIONAL: Specifies the requested Stream Hydrology Algorithm to use
+        /// </summary>
+        public string StreamHydrology { get; set; }
+
         /// <summary>
         /// OPTIONAL: States whether or not runoff should be aggregated by catchments
         /// </summary>
         public Boolean Aggregation { get; set; }
         // Add extra SurfaceRunoff specific variables here
+    }
+
+    /// <summary>
+    /// WorkFlow Output object
+    /// </summary>
+    public class WatershedWorkflowOutput: TimeSeriesOutput
+    {
+        public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }
+        public Dictionary<string, string> metadata { get; set; }
+        public List<Dictionary<string, string>> table { get; set; }
+        //public Dictionary<string, Dictionary<string, string>> table { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -72,7 +106,10 @@ namespace Web.Services.Controllers
                 TimeLocalized = true,
                 Units = "default",
                 OutputFormat = "json",
-                Aggregation = true
+                Aggregation = true,
+                RunoffSource = "nldas",
+                PrecipSource = "nldas",
+                StreamHydrology = "constant"
             };
             return example;
         }
@@ -91,9 +128,10 @@ namespace Web.Services.Controllers
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "Precipitation";
-            output.DataSource = "ncdc, nldas, gldas, daymet";
-            output.Metadata = new Dictionary<string, string>()
+            WatershedWorkflowOutput wsoutput = new WatershedWorkflowOutput();
+            wsoutput.Dataset = "Precipitation";
+            wsoutput.DataSource = "ncdc, nldas, gldas, daymet";
+            wsoutput.metadata = new Dictionary<string, string>()
             {
                 { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
                 { "nldas_param_short_name", "SSRUNsfc" },
@@ -120,16 +158,12 @@ namespace Web.Services.Controllers
                 { "nldas_lon", " -83.3125" },
                 { "nldas_Request_time", "Fri Jun  2 20:00:24 2017" }
             };
-            output.Data = new Dictionary<string, List<string>>()
+            wsoutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>()
             {
-                { "2010-04-08 000", new List<string>() { "10548330", "1.2207", "0.5263", "0.00642458", "33.8125", "-81.5625" } },
-                { "2010-04-08 001", new List<string>() { "10548332", "1.2207", "0.05534", "0.00067557", "33.8125", "-81.5625" } },
-                { "2010-04-08 002", new List<string>() { "10548346", "1.2207", "0.72801", "0.00888676", "33.8125", "-81.5625" } },
-                { "2010-04-08 003", new List<string>() { "10548414", "1.2207", "0.66324", "0.0080962", "33.8125", "-81.5625" } },
-                { "2010-04-08 004", new List<string>() { "10548428", "1.2207", "0.08131", "0.00099251", "33.8125", "-81.5625" } },
-                { "2010-04-08 005", new List<string>() { "10548440", "1.2207", "0.00673", "8.215E-05", "33.8125", "-81.5625" } }
+                { 9311817, new Dictionary<string, ITimeSeriesOutput>(){ { "Precip", output }, { "Subsurf", output }, { "Surface", output }, { "Stream Flow", output } } },
+                { 9311819, new Dictionary<string, ITimeSeriesOutput>(){ { "Precip", output }, { "Subsurf", output }, { "Surface", output }, { "Stream Flow", output } } }
             };
-            return output;
+            return wsoutput;
         }
     }
 

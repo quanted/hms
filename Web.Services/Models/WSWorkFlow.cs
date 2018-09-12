@@ -40,7 +40,7 @@ namespace Web.Services.Models
             ITimeSeriesOutput output = oFactory.Initialize();
             output.DataSource = string.Join(" - ", input.SourceList.ToArray());
 
-            if (input.Dataset.Contains("precipitation"))
+            if (input.Dataset.ToLower().Contains("precipitation"))
             {
                 input.SourceList = new List<string>()
                 {
@@ -90,7 +90,7 @@ namespace Web.Services.Models
                     // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                     ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
                     input.Source = source;
-                    ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "PRECIP" }, out errorMsg);
+                    ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
                     // Set input to precip object.
@@ -132,7 +132,7 @@ namespace Web.Services.Models
                     output = Utilities.Merger.MergeTimeSeries(output, result);
                 }
 
-                output.Metadata.Add("column_1", "date");
+                output.Metadata.Add("column_1", "Date");
                 output.Metadata.Add("column_2", "ncdc");
                 output = Utilities.Statistics.GetStatistics(out errorMsg, output);
 

@@ -41,7 +41,7 @@ namespace WatershedDelineation
             }
             comIDs = comIDs.Remove(index, 1);
 
-            dtPlusFlow = executeQuery("Select A.FROMCOMID, A.TOCOMID, A.FROMHYDSEQ, A.TOHYDSEQ, A.DIRECTION, D.ReachCode, " +
+            dtPlusFlow = executeQuery("Select D.COMID AS COMID, A.FROMCOMID, A.TOCOMID, A.FROMHYDSEQ, A.TOHYDSEQ, A.DIRECTION, D.ReachCode, " +
                 "B.SLOPE, D.AreaSqKM, D.StreamLeve, D.StreamOrde, D.ReachCode, D.LengthKM, " +
                 "E.Q0001E*0.028316847 AS MeanAnnFlowM3PS, E.V0001E*0.3048 AS MeanAnnVelMPS " +
                 "From PlusFlow A, elevslope B, PlusFlowlineVAA D, EROM_MA0001 E " +

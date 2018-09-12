@@ -69,7 +69,7 @@ namespace Utilities
 
     public class CatchmentAggregation
     {
-        private string listToString(List<string> lst, out string errorMsg)
+        public string listToString(List<string> lst, out string errorMsg)
         {
             errorMsg = "";
             if (lst.Count <= 0)
@@ -175,7 +175,6 @@ namespace Utilities
             double lon = input.Geometry.Point.Longitude;
             string baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
-            List<string> comIDS = new List<string>();
             //Check for huc arguments otherwise use lat long
 
             string huc = "";
@@ -188,11 +187,11 @@ namespace Utilities
             if(input.Geometry.GeometryMetadata == null)
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
-            }
+            }/*
             if(type == "huc_8_num")
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + huc;
-            }
+            }*/
 
             WebClient myWC = new WebClient();
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -226,7 +225,7 @@ namespace Utilities
             return geodata;
         }
 
-        public ITimeSeriesOutput getCatchmentAggregation(ITimeSeriesInput input, ITimeSeriesOutput result, GeometryData geodata)
+        public ITimeSeriesOutput getCatchmentAggregation(ITimeSeriesInput input, ITimeSeriesOutput result, GeometryData geodata, Boolean agg)
         {
             List<Tuple<string, Point>> ptsList = new List<Tuple<string, Point>>();
             
@@ -242,35 +241,62 @@ namespace Utilities
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             int i = 0;
-            foreach (var entry in result.Data)
+
+            if (agg)
             {
-                foreach(Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)
+                foreach (var entry in result.Data)
+                {
+                    foreach (Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)
+                    {
+                        List<string> outList = new List<string>();
+                        Point pt = tup.Item2;
+                        DateTime date = new DateTime();
+                        string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
+                        DateTime.TryParse(dateString, out date);
+                        outList.Add(dateString);//Date
+                        outList.Add(tup.Item1.ToString());//ComID
+                        outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
+                        //outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
+                        outList.Add(Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8).ToString());//% runoff
+                        string key = i.ToString();//Arbitrary ID to keep track of dictionary values
+                        output.Data.Add(key, outList);
+                        i++;
+                    }
+                }
+
+                output.Dataset = result.Dataset.ToString();
+                output.DataSource = input.Source.ToString();
+
+                output.Metadata = new Dictionary<string, string>()
+                {
+                    { "request_time", DateTime.Now.ToString() },
+                    { "column_1", "Date" },
+                    { "column_2", "COMID" },
+                    { "column_3", "Total " + result.Dataset.ToString() },
+                    { "column_5", "Percent " + result.Dataset.ToString() }
+                };
+            }
+            else
+            {
+                foreach (var entry in result.Data)
                 {
                     List<string> outList = new List<string>();
-                    Point pt = tup.Item2;
                     DateTime date = new DateTime();
                     string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
                     DateTime.TryParse(dateString, out date);
-                    outList.Add(dateString);//Date
-                    outList.Add(tup.Item1.ToString());//ComID
                     outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
-                    //outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
-                    outList.Add(Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8).ToString());//% runoff
-                    string key = i.ToString();//Arbitrary ID to keep track of dictionary values
-                    output.Data.Add(key, outList);
-                    i++;
+                    output.Data.Add(date.ToShortDateString(), outList);
                 }
+
+                output.Metadata = new Dictionary<string, string>()
+                {
+                    { "request_time", DateTime.Now.ToString() },
+                    { "column_1", "Date" },
+                    { "column_2", result.Dataset.ToString() }
+                };
             }
-                        
-            output.Metadata = new Dictionary<string, string>()
-            {
-                { "request_time", DateTime.Now.ToString() },
-                { "column_1", "Date" },
-                { "column_2", "COMID" },
-                { "column_3", "Total Runoff" },
-                { "column_4", "Percent Area" },
-                { "column_5", "Percent Runoff" }
-            };
+            output.Dataset = result.Dataset.ToString();
+            output.DataSource = input.Source.ToString();
             return output;
         }
     }

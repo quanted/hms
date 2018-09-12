@@ -11,7 +11,7 @@ namespace SurfaceRunoff
     /// </summary>
     class CurveNumber
     {
-
+        private enum precipSources { nldas, gldas, ncdc, daymet, wgen, prism }
         /// <summary>
         /// GetData function for curvenumber.
         /// </summary>
@@ -25,6 +25,7 @@ namespace SurfaceRunoff
 
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             // TODO: Add options for different precip inputs
+            errorMsg = (!Enum.TryParse(input.Source, true, out precipSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             input.Source = "daymet";
             ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 

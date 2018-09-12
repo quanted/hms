@@ -27,7 +27,7 @@ namespace SoilMoisture
                 ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
                 ITimeSeriesOutput tempOutput = new TimeSeriesOutput();
                 tempOutput = oFactory.Initialize();
-                string data = gldas.GetData(out errorMsg, input.Layers[i].Replace('-','_') + "_Soil_Moisture", input.Input);
+                string data = gldas.GetData(out errorMsg, input.Layers[i].Replace('-', '_') + "_Soil_Moisture", input.Input);
                 if (errorMsg.Contains("ERROR")) { return null; }
 
                 tempOutput = gldas.SetDataToOutput(out errorMsg, "SoilMoisture", data, tempOutput, input.Input);
@@ -65,15 +65,15 @@ namespace SoilMoisture
             {
                 case "daily":
                     output.Data = NLDAS.DailyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Daily Average");
+                    //output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = NLDAS.WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Weekly Average");
+                    //output.Metadata.Add("column_2", "Weekly Average");
                     return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Monthly Average");
+                    //output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     return output;

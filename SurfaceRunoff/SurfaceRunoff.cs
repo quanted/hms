@@ -14,7 +14,10 @@ namespace SurfaceRunoff
         // -------------- SurfaceRunoff Variables -------------- //
 
         // SurfaceRunoff specific variables are listed here.
-
+        /// <summary>
+        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// </summary>
+        //public string PrecipSource { get; set; }
 
         // TimeSeries Output variable 
         public ITimeSeriesOutput Output { get; set; }
@@ -41,7 +44,6 @@ namespace SurfaceRunoff
         public ITimeSeriesOutput GetData(out string errorMsg)
         {
             errorMsg = "";
-
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0)
             {
@@ -53,7 +55,7 @@ namespace SurfaceRunoff
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS SurfaceRunoff Data call
@@ -69,11 +71,12 @@ namespace SurfaceRunoff
                     break;
                 case "curvenumber":
                     CurveNumber cn = new CurveNumber();
+                    //this.Input.Source = this.PrecipSource;
                     this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
-                    errorMsg = "ERROR: 'Source' for surfacerunoff was not found among available sources or is invalid.";
+                    errorMsg = "ERROR: Source for surfacerunoff was not found among available sources or is invalid.";
                     break;
             };
 
