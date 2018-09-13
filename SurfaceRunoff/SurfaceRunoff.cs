@@ -70,8 +70,8 @@ namespace SurfaceRunoff
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "curvenumber":
+                    // Curve Number SurfaceRunoff Data call:
                     CurveNumber cn = new CurveNumber();
-                    //this.Input.Source = this.PrecipSource;
                     this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;

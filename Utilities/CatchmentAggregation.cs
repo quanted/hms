@@ -176,18 +176,16 @@ namespace Utilities
             string baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             //Check for huc arguments otherwise use lat long
-
-            string huc = "";
-
-            string type = metadata["GeometryType"].ToString();
-            huc = metadata[type].ToString();
+            //string huc = "";
+            //string type = metadata["GeometryType"].ToString();
+            //huc = input.Geometry.HucID.ToString();
             //List<string> coms = prepareCOMID(huc, out errorMsg);
             string comList = listToString(coms, out errorMsg);
-            baseURL += "com_id_list=" + comList;
-            if(input.Geometry.GeometryMetadata == null)
+            baseURL += "com_id_num=" + comList;
+            /*if(input.Geometry.ComID == 0 && input.Geometry.HucID == 0)
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
-            }/*
+            }
             if(type == "huc_8_num")
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + huc;
@@ -227,23 +225,23 @@ namespace Utilities
 
         public ITimeSeriesOutput getCatchmentAggregation(ITimeSeriesInput input, ITimeSeriesOutput result, GeometryData geodata, Boolean agg)
         {
-            List<Tuple<string, Point>> ptsList = new List<Tuple<string, Point>>();
-            
-            foreach (KeyValuePair<string, Catchment> points in geodata.geometry)
-            {
-                foreach (Point point in points.Value.points)
-                {
-                    var tuple = new Tuple<string, Point>(points.Key, point);
-                    ptsList.Add(tuple);
-                }
-            }
-
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             int i = 0;
 
             if (agg)
             {
+                List<Tuple<string, Point>> ptsList = new List<Tuple<string, Point>>();
+
+                foreach (KeyValuePair<string, Catchment> points in geodata.geometry)
+                {
+                    foreach (Point point in points.Value.points)
+                    {
+                        var tuple = new Tuple<string, Point>(points.Key, point);
+                        ptsList.Add(tuple);
+                    }
+                }
+
                 foreach (var entry in result.Data)
                 {
                     foreach (Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)

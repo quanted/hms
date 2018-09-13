@@ -49,7 +49,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkFlow Output object
     /// </summary>
-    public class WatershedWorkflowOutput: TimeSeriesOutput
+    public class WatershedWorkflowOutput : TimeSeriesOutput
     {
         public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }
         public Dictionary<string, string> metadata { get; set; }
@@ -81,6 +81,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
+                    ComID = -1,
+                    HucID = -1,
                     Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {
@@ -91,8 +93,7 @@ namespace Web.Services.Controllers
                     {
                         { "City", "Athens" },
                         { "State", "Georgia"},
-                        { "Country", "United States" },
-                        { "huc_12_num", "030502040102" }
+                        { "Country", "United States" }
                     },
                     Timezone = new Timezone()
                     {

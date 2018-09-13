@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web.Services", "Web.Services\Web.Services.csproj", "{F49142B6-EB3D-4042-8B84-75C06D8B647C}"
 EndProject
@@ -42,9 +42,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stream.Hydrology.AQUATOX", "Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj", "{90240887-987A-4C44-88FE-AD7B601C7343}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Simulate.AQUATOX", "Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj", "{4E8926D5-9C2E-4AEE-929A-407B5E4B04A2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{20E89F2B-FF65-4648-B1BF-EB2D5F4941C7} = {20E89F2B-FF65-4648-B1BF-EB2D5F4941C7}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stream.Hydrology.AQUATOX.UnitTests", "Stream.Hydrology\AQUATOX.UnitTests\Stream.Hydrology.AQUATOX.UnitTests.csproj", "{B23932B5-642C-4E7A-B76A-4BDCB8B91FE0}"
 EndProject
@@ -57,6 +54,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrganicMatter.AQUATOX", "OrganicMatter\OrganicMatter.AQUATOX\OrganicMatter.AQUATOX.csproj", "{72CD3C50-BEA6-4DD0-BC99-9ABF39342413}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrganicMatter.AQUATOX.UnitTests", "OrganicMatter\OrganicMatter.AQUATOX.UnitTests\OrganicMatter.AQUATOX.UnitTests.csproj", "{2C2812C8-0353-4C68-B88E-195A19CFB8E3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WatershedDelineation", "WatershedDelineation\WatershedDelineation.csproj", "{0743FBBF-23CE-493C-A52C-8CCC7F3E0DF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -168,6 +167,10 @@ Global
 		{2C2812C8-0353-4C68-B88E-195A19CFB8E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C2812C8-0353-4C68-B88E-195A19CFB8E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C2812C8-0353-4C68-B88E-195A19CFB8E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0743FBBF-23CE-493C-A52C-8CCC7F3E0DF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0743FBBF-23CE-493C-A52C-8CCC7F3E0DF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0743FBBF-23CE-493C-A52C-8CCC7F3E0DF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0743FBBF-23CE-493C-A52C-8CCC7F3E0DF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

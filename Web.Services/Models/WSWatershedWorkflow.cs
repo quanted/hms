@@ -127,9 +127,12 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
-            Utilities.GeometryData gd = cd.getData(input, lst, out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
+            Utilities.GeometryData gd = null;
+            // if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (input.Aggregation)
+            {
+                gd = cd.getData(input, lst, out errorMsg);
+            }
             input.Source = input.PrecipSource;
             ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
             input.Source = input.RunoffSource;
@@ -141,7 +144,7 @@ namespace Web.Services.Models
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
-                        
+
             Web.Services.Controllers.WatershedWorkflowOutput totalOutput = new Web.Services.Controllers.WatershedWorkflowOutput();
             totalOutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
             foreach (string com in lst)
