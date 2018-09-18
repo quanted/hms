@@ -35,7 +35,7 @@ namespace SurfaceRunoff
             //    Longitude = -69.36054766
             //};
             //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
-            //input.Geometry.ComID = 8545069;
+            input.Geometry.ComID = 8545069;
 
             // Database call for centroid data with specified comid.
             precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
