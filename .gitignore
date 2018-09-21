@@ -30,4 +30,5 @@ bld/
 .sqlite3
 .sqlite
 
+.zip
 test_reports/
