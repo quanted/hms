@@ -42,7 +42,7 @@ namespace Web.Services.Models
             {
                 gtype = "com_id_list";
             }
-            DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.GeometryMetadata[gtype].ToString(), out errorMsg, out lst);             //list of coms?
+            DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.HucID.ToString(), gtype, out errorMsg, out lst);             //list of coms?
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();

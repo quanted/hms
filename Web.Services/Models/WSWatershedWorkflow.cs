@@ -29,7 +29,7 @@ namespace Web.Services.Models
         {
             DateTime start = input.DateTimeSpan.StartDate;
             DateTime end = input.DateTimeSpan.EndDate;
-
+            
             var watch = System.Diagnostics.Stopwatch.StartNew();
             string errorMsg = "";
 
@@ -65,7 +65,6 @@ namespace Web.Services.Models
 
             // SubSurfaceFlow object
             SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
-            //input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(-1.0);
             input.Source = input.RunoffSource == "curvenumber" ? "nldas" : input.RunoffSource;//Subflow source should be same as surface. If surface uses curve number (not available to subflow), default to nldas for sub.
             string subSource = input.Source;
             input.DateTimeSpan.StartDate = start;
@@ -81,7 +80,6 @@ namespace Web.Services.Models
 
             // SurfaceRunoff object
             SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
-            //input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(-1.0);
             input.DateTimeSpan.StartDate = start;
             input.DateTimeSpan.EndDate = end;
             input.Source = input.RunoffSource;
@@ -94,13 +92,6 @@ namespace Web.Services.Models
             // Gets the SurfaceRunoff data.
             ITimeSeriesOutput surfResult = runoff.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
-            //Get data from Stream Hydrology Algorithms
-            input.Source = input.StreamHydrology;
-            input.DateTimeSpan.StartDate = start;
-            input.DateTimeSpan.EndDate = end;
-            WatershedDelineation.FlowRouting net = new WatershedDelineation.FlowRouting();
-            ITimeSeriesOutput hydrologyResult = net.getData(input, out errorMsg);
 
             //Stream Network Delineation
             List<string> lst = new List<string>();
@@ -123,8 +114,12 @@ namespace Web.Services.Models
                 gtype = "com_id_num";
             }
             input.Geometry.GeometryMetadata.Add("GeometryType", gtype);
-            DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.GeometryMetadata[gtype].ToString(), out errorMsg, out lst);
+            DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.GeometryMetadata[gtype].ToString(), gtype, out errorMsg, out lst);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            //Getting Stream Flow data
+            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, subResult, surfResult, out errorMsg);
+
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
             Utilities.GeometryData gd = null;
@@ -140,7 +135,7 @@ namespace Web.Services.Models
             input.Source = subSource;
             ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
             input.Source = input.StreamHydrology;
-            ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, hydrologyResult, gd, input.Aggregation);
+            ITimeSeriesOutput hydrologyOutput = dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
@@ -192,6 +187,31 @@ namespace Web.Services.Models
             string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
             totalOutput.metadata.Add("Time_elapsed", elapsed);
             return totalOutput;
+        }
+
+        public ITimeSeriesOutput dtToITSOutput (DataTable dt)
+        {
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput itimeoutput = oFactory.Initialize();
+            int i = 0;
+            foreach (DataRow dr in dt.Rows)
+            {
+                List<string> lv = new List<string>();
+                lv.Add(dr[1].ToString());
+                itimeoutput.Data.Add(dr[0].ToString(), lv);
+                i++;
+            }
+            
+            itimeoutput.Metadata = new Dictionary<string, string>()
+            {
+                { "request_time", DateTime.Now.ToString() },
+                { "column_1", "Date" },
+                { "column_2", "Stream Flow" },
+                { "units", "mm" }
+            };
+            itimeoutput.Dataset = "Stream Flow";
+            itimeoutput.DataSource = "curvenumber";
+            return itimeoutput;
         }
     }
 }

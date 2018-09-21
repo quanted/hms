@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -11,7 +12,7 @@ namespace WatershedDelineation
 {
     public class FlowRouting
     {
-        public ITimeSeriesOutput getData(ITimeSeriesInput input, out string errorMsg)
+        /*public ITimeSeriesOutput getData(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
 
@@ -19,7 +20,7 @@ namespace WatershedDelineation
             //TODO: Remove dummy data and integrate algorithms from Flask endpoint
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput flowOutput = iFactory.Initialize();
-            while(input.DateTimeSpan.StartDate <= input.DateTimeSpan.EndDate)
+            while (input.DateTimeSpan.StartDate <= input.DateTimeSpan.EndDate)
             {
                 string date = input.DateTimeSpan.StartDate.ToShortDateString();
                 List<string> data = new List<string>();
@@ -29,52 +30,154 @@ namespace WatershedDelineation
             }
             flowOutput.Dataset = "StreamHydrology";
             return flowOutput;
+        }*/
 
-            //get arguments from input and pass into baseURL
+        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, ITimeSeriesOutput surface, ITimeSeriesOutput subsurface, out string errorMsg)
+        {
+            //This function returns a dataset containing three tables
+            errorMsg = "";
+            DateTime startDateTime = Convert.ToDateTime(startDate);
+            DateTime endDateTime = Convert.ToDateTime(endDate);
 
-            /*
-            string baseURL = "http://localhost:7777/hms/hydrodynamic/constant_volume/?submodel=constant_volume&startDate=2010-01-01&endDate=2010-01-10&timestep=0.5&boundary_flow=0.5&segments=0";
+            //Make sure that dtStreamNetwork is sorted by COMID-SEQ column
+            dtStreamNetwork.DefaultView.Sort = "[COMID_SEQ] ASC";
 
-            WebClient myWC = new WebClient();
-            Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-            string data = "";
-            try
+            //Create a Dataset with three tables: Surface Runoff, Sub-surfaceRunoff, StreamFlow.
+            //Each table has the following columns: DateTime, one column for each COMID with COMID as the columnName
+            DataSet ds = new DataSet();
+            DataTable dtSurfaceRunoff = new DataTable();
+            DataTable dtSubSurfaceRunoff = new DataTable();
+            DataTable dtStreamFlow = new DataTable();
+
+            dtSurfaceRunoff.Columns.Add("DateTime");
+            dtSubSurfaceRunoff.Columns.Add("DateTime");
+            dtStreamFlow.Columns.Add("DateTime");
+            foreach (DataRow dr in dtStreamNetwork.Rows)
             {
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-
-                while (retries > 0 && !status.Contains("OK"))
+                string tocom = dr["TOCOMID"].ToString();
+                if (!dtSurfaceRunoff.Columns.Contains(tocom))
                 {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(baseURL);
-                    wr.Method = "POST";
-                    wr.Timeout = 900000;//15 min
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    dtSurfaceRunoff.Columns.Add(tocom);
+                    dtSubSurfaceRunoff.Columns.Add(tocom);
+                    dtStreamFlow.Columns.Add(tocom);
                 }
             }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Unable to obtain data for the specified query." + ex.Message;
-            }
 
-            //format Data into ITimeSeriesOutput
-            string[] values = data.Split("data");
-            char[] totrim = { '}', '\"', '}' };
-            string trim = values[2].Substring(3).TrimEnd(totrim);
-            List<List<string>> results = JsonConvert.DeserializeObject<List<List<string>>>(trim);
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput flowRoutingOutput = oFactory.Initialize();
-            foreach(List<string> flow in results)
+            //Initialize these tables with 0s
+            DataRow drSurfaceRunoff = null;
+            DataRow drSubSurfaceRunoff = null;
+            DataRow drStreamFlow = null;
+            int indx = 0;
+            for (DateTime date = startDateTime; date <= endDateTime; date = date.AddDays(1))
             {
-                flowRoutingOutput.Data.Add(flow[0], flow);//how to add flow[1:end}?
-            }*/
+                drSurfaceRunoff = dtSurfaceRunoff.NewRow();
+                drSubSurfaceRunoff = dtSubSurfaceRunoff.NewRow();
+                drStreamFlow = dtStreamFlow.NewRow();
+
+                foreach (DataColumn dc in dtStreamFlow.Columns)
+                {
+                    drSurfaceRunoff[dc.ColumnName] = 0;
+                    drSubSurfaceRunoff[dc.ColumnName] = 0;
+                    drStreamFlow[dc.ColumnName] = 0;
+                }
+
+                drSurfaceRunoff["DateTime"] = date.ToShortDateString();
+                drSubSurfaceRunoff["DateTime"] = date.ToShortDateString();
+                drStreamFlow["DateTime"] = date.ToShortDateString();
+
+                dtSurfaceRunoff.Rows.Add(drSurfaceRunoff);
+                dtSubSurfaceRunoff.Rows.Add(drSubSurfaceRunoff);
+                dtStreamFlow.Rows.Add(drStreamFlow);
+                indx++;
+            }
+            //Now add the tables to DataSet
+            ds.Tables.Add(dtSurfaceRunoff);
+            ds.Tables.Add(dtSubSurfaceRunoff);
+            ds.Tables.Add(dtStreamFlow);
+
+            //Iterate through all streams and calculate flows
+            string COMID = "";
+            string fromCOMID = "";
+            for (int i = 0; i < indx - 1; i++) //for (int i = 0; i < dtStreamNetwork.Rows.Count; i++)
+            {
+                for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
+                {
+                    COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
+                    fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
+                    DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
+
+                    List<string> fromCOMIDS = new List<string>();
+                    foreach (DataRow dr2 in drsFromCOMIDs)
+                    {
+                        fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
+                    }
+
+                    //Make call to Curve Number method to calculate Surface and subSurface Runoff.  fill dtSurfaceRunoff and dtSubSurface Runoff table entries\
+                    int j = 0;
+                    foreach (var pair in surface.Data)
+                    {
+                        if (j >= dtSurfaceRunoff.Rows.Count)
+                        {
+                            break;
+                        }
+                        DataRow dr = dtSurfaceRunoff.Rows[j++];
+                        DateTime datekey = DateTime.ParseExact(pair.Key.ToString(), "yyyy-MM-dd HH", null);
+                        string st = dr["DateTime"].ToString();// + " 00";
+                        if (datekey.ToShortDateString() == st)
+                        {
+                            dr[COMID] = pair.Value[0];
+                        }
+                    }
+                    j = 0;
+                    foreach (var pair in subsurface.Data)
+                    {
+                        if (j >= dtSubSurfaceRunoff.Rows.Count)
+                        {
+                            break;
+                        }
+                        DataRow dr = dtSubSurfaceRunoff.Rows[j++];
+                        DateTime datekey = DateTime.ParseExact(pair.Key.ToString(), "yyyy-MM-dd HH", null);
+                        string st = dr["DateTime"].ToString();// + " 00";
+                        if (datekey.ToShortDateString() == st)
+                        {
+                            dr[COMID] = pair.Value[0];
+                        }
+                    }
+
+                    //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
+                    double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
+                    double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
+                    dtStreamFlow.Rows[i][COMID] = dsub + dsur;
+
+                    //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
+                    //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
+                    //  2. dr["FROMCOMID].ToString() = dr["TOCOMID"].ToString().  This can happen at the pour points
+                    //  3. dr["FROMCOMID"].ToString() does not appear in the TOCOMID column of dtStreamNetwork table i.e. FROMCOMID is outside the network
+                    //If multiple streams flow into this stream then add up stream flow time series of the inflow streams.
+                    //There could be multiple bondary condition flows if multiple upstream streams flow into this COMID.            
+                    foreach (string fromCom in fromCOMIDS)
+                    {
+                        if (fromCom == "0")//No boundary condition flows if the stream is a headwater (fromCOMID=0)
+                        {
+                            continue;
+                        }
+                        if (fromCom == COMID)//No boundary condition if fromCOMID=TOCOMID
+                        {
+                            continue;
+                        }
+                        DataRow[] drs = dtStreamNetwork.Select("TOCOMID = " + fromCom);
+                        //No boundary condition if fromCOMID is not present in the streamNetwork table under TOCOMID column.  THis means that fromCOMID is outside our network.
+                        if (drs == null || drs.Length == 0)
+                        {
+                            continue;
+                        }
+                        //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
+                        dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) + Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString());
+                    }
+                }
+            }
+            
+            return ds;
         }
     }
 }

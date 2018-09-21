@@ -44,6 +44,7 @@ namespace SurfaceRunoff
         public ITimeSeriesOutput GetData(out string errorMsg)
         {
             errorMsg = "";
+
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0)
             {

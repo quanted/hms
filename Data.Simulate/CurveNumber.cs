@@ -36,8 +36,6 @@ namespace Data.Simulate
             output.DataSource = "curve number";
             //output.Metadata = precipData.Metadata;
 
-            double cn = CalculateCN(out errorMsg, input);
-
             // Curve number algorithm
             // Runoff calculation: https://en.wikipedia.org/wiki/Runoff_curve_number
             // Calculate soil moisture retention (S): S = 1000/CN - 10
@@ -46,12 +44,16 @@ namespace Data.Simulate
             // If precipitation <= Ia: Runoff (Q) = 0
             // Else precipitation > Ia: Runoff (Q) = (P - Ia)^2/(P- Ia + S)
 
-            double s = 1000.0 / cn - 10.0;
-
-            //int day0 = DateTime.Parse(precipData.Data.Keys.First()).DayOfYear;
-            //int cnI = day0 / 23;
-            //Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
-            //double s = 1000.0 / cn[cnI] - 10.0;
+            int day0 = DateTime.Parse(precipData.Data.Keys.First().Split(' ')[0]).DayOfYear;
+            int cnI = (day0 / 16) + 1;
+            Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
+            if (errorMsg.Contains("ERROR")) { return null; }
+            if (cn.Count == 0)
+            {
+                errorMsg = "ERROR: No curve number values found for the specified catchment. ComID: " + input.Geometry.ComID;
+                return null;
+            }
+            double s = 1000.0 / cn[cnI] - 10.0;
 
             double ia = 0.2 * s;
 
@@ -60,31 +62,32 @@ namespace Data.Simulate
             {
                 string date = dateValue.Key;
 
-                //cnI = DateTime.Parse(dateValue.Key).DayOfYear / 23;
-                //s = 1000.0 / cn[cnI] - 10.0;
-                //ia = 0.2 * s;
-
+                cnI = (DateTime.Parse(dateValue.Key.Split(' ')[0]).DayOfYear / 16) + 1;
+                s = 1000.0 / cn[cnI] - 10.0;
+                ia = 0.2 * s;
                 double p = double.Parse(dateValue.Value[0]);
                 double q = (p <= ia) ? 0 : ((p - ia) * (p - ia)) / (p - ia + s);
                 List<string> d = new List<string>();
                 d.Add(q.ToString(input.DataValueFormat));
                 output.Data.Add(date, d);
             }
+
+            output.Metadata.Add("cnValues", string.Join(", ", cn.Values));
             return output;
         }
 
         private Dictionary<int, double> GetCN(out string errorMsg, int comid)
         {
             errorMsg = "";
-            string dbPath = "./App_Data/cn.sqlite";
-            string query = "SELECT CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22, CN_23 " +
-                "FROM CN WHERE ComID = " + comid.ToString();
+            string dbPath = "./App_Data/hms_database.db";
+            string query = "SELECT CN_00, CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22 " +
+                "FROM CurveNumber WHERE ComID = '" + comid.ToString() + "'";
             Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
             Dictionary<int, double> cnData = new Dictionary<int, double>();
-            int i = 1;
+            int i = 0;
             foreach (string key in data.Keys)
             {
-                cnData.Add(i, double.Parse(data[key]));
+                cnData.Add(i + 1, double.Parse(data[key]));
                 i++;
             }
             return cnData;

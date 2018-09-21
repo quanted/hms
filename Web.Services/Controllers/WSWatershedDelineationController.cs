@@ -16,7 +16,7 @@ namespace Web.Services.Controllers
     /// </summary>
     public class WatershedDelineationInput : TimeSeriesInput
     {
-        
+
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -134,7 +134,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// DelineationCompare controller for HMS.
     /// </summary>
-    [Route("api/delineation/watershed")]
+    [Route("api/hydrology/delineation/")]
     public class WSWatershedDelineationController : Controller
     {
         /// <summary>

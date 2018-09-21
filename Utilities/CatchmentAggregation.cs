@@ -93,13 +93,13 @@ namespace Utilities
             return comIDs;
         }
 
-        public List<string> prepareCOMID(string HUCNumber, out string errorMsg)
+        public List<string> prepareCOMID(string HUCNumber, string geo, out string errorMsg)
         {
             List<string> lst = new List<string>();
             //string lst = "";
             DataTable dt = new DataTable();
             errorMsg = "";
-            if ((HUCNumber.Length != 12) && (HUCNumber.Length != 8))
+            if (geo == "com_id_list" || geo == "com_id_num")
             {
                 //errorMsg = "Invalid HUC Number.  The system works with HUC 8 or HUC12 only.";
                 foreach(string str in HUCNumber.Split(','))
@@ -107,11 +107,11 @@ namespace Utilities
                     lst.Add(str);
                 }
             }
-            if (HUCNumber.Length == 12)
+            if (geo == "huc_12_num")
             {
                 lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + HUCNumber + "'");
             }
-            else if (HUCNumber.Length == 8)
+            else if (geo == "huc_8_num")
             {
                 lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)='" + HUCNumber + "'");
             }
@@ -121,7 +121,7 @@ namespace Utilities
         public List<string> SQLiteRequest(string query)
         {
             //Create SQLite connection
-            SQLiteConnection sqlite = new SQLiteConnection("Data Source=database.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
+            SQLiteConnection sqlite = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
             SQLiteDataAdapter ad;
             DataTable dt = new DataTable();
 
@@ -173,7 +173,7 @@ namespace Utilities
             //Parse geometry data from input page
             double lat = input.Geometry.Point.Latitude;
             double lon = input.Geometry.Point.Longitude;
-            string baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?";
+            string baseURL = "http://localhost:7777/hms/gis/percentage/?";//"http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             //Check for huc arguments otherwise use lat long
             //string huc = "";
@@ -181,7 +181,7 @@ namespace Utilities
             //huc = input.Geometry.HucID.ToString();
             //List<string> coms = prepareCOMID(huc, out errorMsg);
             string comList = listToString(coms, out errorMsg);
-            baseURL += "com_id_num=" + comList;
+            baseURL += "com_id_list=" + comList;
             /*if(input.Geometry.ComID == 0 && input.Geometry.HucID == 0)
             {
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
@@ -290,7 +290,8 @@ namespace Utilities
                 {
                     { "request_time", DateTime.Now.ToString() },
                     { "column_1", "Date" },
-                    { "column_2", result.Dataset.ToString() }
+                    { "column_2", result.Dataset.ToString() },
+                    { "units", "mm" }
                 };
             }
             output.Dataset = result.Dataset.ToString();

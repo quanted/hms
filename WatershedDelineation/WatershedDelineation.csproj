@@ -14,6 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />
+    <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
   

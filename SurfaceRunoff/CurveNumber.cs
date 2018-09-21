@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Precipitation;
+//using Utilities;
 
 namespace SurfaceRunoff
 {
@@ -25,21 +26,22 @@ namespace SurfaceRunoff
 
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             // TODO: Add options for different precip inputs
-            errorMsg = (!Enum.TryParse(input.Source, true, out precipSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            input.Source = "daymet";
-            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
+            //errorMsg = (!Enum.TryParse(input.Source, true, out precipSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+            //input.Source = "daymet";
+
+            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             // Static test centroid point
-            IPointCoordinate catchmentCentroid = new PointCoordinate()
-            {
-                Latitude = 46.69580547,
-                Longitude = -69.36054766
-            };
-            precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
-            input.Geometry.ComID = 718276;//
+            //IPointCoordinate catchmentCentroid = new PointCoordinate()
+            //{
+            //    Latitude = 46.69580547,
+            //    Longitude = -69.36054766
+            //};
+            //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
+            input.Geometry.ComID = 8545069;
 
             // Database call for centroid data with specified comid.
-            // precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
+            precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
 
             ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -47,6 +49,11 @@ namespace SurfaceRunoff
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
             if (errorMsg.Contains("ERROR")) { return null; }
+
+            cnOutput.Metadata.Add("comid", input.Geometry.ComID.ToString());
+            cnOutput.Metadata.Add("startdate", input.DateTimeSpan.StartDate.ToString());
+            cnOutput.Metadata.Add("enddate", input.DateTimeSpan.EndDate.ToString());
+            cnOutput.Metadata.Add("precipSource", precipData.DataSource);
 
             return cnOutput;
         }
@@ -86,29 +93,13 @@ namespace SurfaceRunoff
             }
             else
             {
-                input.Source = "daymet";
+                input.Source = "nldas";
+                input.TemporalResolution = "daily";
             }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             precip.Input = tempInput;
             precip.Output = precip.GetData(out errorMsg);
-
-            //Remove dates from daymet that are not in date time span
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput copy = oFactory.Initialize();
-            foreach (var entry in precip.Output.Data)
-            {
-                DateTime date = Convert.ToDateTime(entry.Key.Substring(0, 10));
-                if ((date.Date >= precip.Input.DateTimeSpan.StartDate.Date) && (date.Date <= precip.Input.DateTimeSpan.EndDate.Date))
-                {
-                    copy.Data.Add(entry.Key, entry.Value);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-            precip.Output = copy;
 
             if (errorMsg.Contains("ERROR")) { return null; }
             return precip.Output;

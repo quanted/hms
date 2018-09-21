@@ -18,12 +18,10 @@ namespace Web.Services.Controllers
         /// <summary>
         /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
         /// </summary>
-        public string CurveSource { get; set; }
+        public string PrecipSource { get; set; }
 
-        /// <summary>
-        /// OPTIONAL: States whether or not runoff should be aggregated by catchments
-        /// </summary>
-        public Boolean Aggregation { get; set; }
+        //Determines whether to use point-based runoff or area-based runoff
+        public string RunoffType { get; set; }
         // Add extra SurfaceRunoff specific variables here
     }
 

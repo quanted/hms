@@ -8,11 +8,11 @@ namespace WatershedDelineation
 {
     public class StreamNetwork
     {        
-        public DataTable prepareStreamNetworkForHUC(string HUCNumber, out string errorMsg, out List<string> lst)
+        public DataTable prepareStreamNetworkForHUC(string HUCNumber, string geometry, out string errorMsg, out List<string> lst)
         {
             DataTable dt = new DataTable();
             Utilities.CatchmentAggregation agg = new Utilities.CatchmentAggregation();
-            lst = agg.prepareCOMID(HUCNumber, out errorMsg);
+            lst = agg.prepareCOMID(HUCNumber, geometry, out errorMsg);
             dt = prepareStreamNetwork(lst, out errorMsg);
             return dt;
         }
@@ -157,7 +157,7 @@ namespace WatershedDelineation
         private static DataTable executeQuery(string cmdText)
         {
             // create a new database connection:
-            SQLiteConnection sqlite_conn = new SQLiteConnection("Data Source=database.sqlite;Version=3;");
+            SQLiteConnection sqlite_conn = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;");
 
             // open the connection:
             sqlite_conn.Open();
@@ -169,6 +169,7 @@ namespace WatershedDelineation
             SQLiteDataAdapter da = new SQLiteDataAdapter(sqlite_cmd);
             DataTable dt = new DataTable();
             da.Fill(dt);
+
 
             // Now lets execute the SQL ;-)
             //sqlite_cmd.ExecuteNonQuery();
