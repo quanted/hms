@@ -10,7 +10,7 @@ namespace SurfaceRunoff
     /// <summary>
     /// SurfaceRunoff curve number class.
     /// </summary>
-    class CurveNumber
+    public class CurveNumber
     {
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SurfaceRunoff
             //    Longitude = -69.36054766
             //};
             //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
-            input.Geometry.ComID = 8545069;
+
 
             // Database call for centroid data with specified comid.
             precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
@@ -90,8 +90,7 @@ namespace SurfaceRunoff
             }
             else
             {
-                input.Source = "nldas";
-                input.TemporalResolution = "daily";
+                input.Source = "daymet";
             }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
@@ -119,6 +118,10 @@ namespace SurfaceRunoff
                 Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                 Longitude = double.Parse(centroidDict["CentroidLongitude"])
             };
+            if(centroidDict.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
+            }
             return centroid as PointCoordinate;
         }
 

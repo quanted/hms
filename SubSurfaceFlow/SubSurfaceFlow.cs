@@ -43,11 +43,15 @@ namespace SubSurfaceFlow
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
+            if (this.Input.Geometry.Timezone.Offset == 0 && this.Input.Geometry.Point != null)
             {
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
+            }
+            else
+            {
+                this.Input.TimeLocalized = false;
             }
 
             //TODO: Check Source and run specific subcomponent class for source
@@ -66,6 +70,12 @@ namespace SubSurfaceFlow
                     // GLDAS SubSurfaceFlow Data call
                     GLDAS gldas = new GLDAS();
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "curvenumber":
+                    // Curve number calculation using surface runoff and baseflow % by comid from streamcat
+                    CurveNumber cn = new CurveNumber();
+                    this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
