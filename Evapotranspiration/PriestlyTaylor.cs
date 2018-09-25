@@ -225,12 +225,12 @@ namespace Evapotranspiration
             double petPT = 0;
 
             //NLDAS2 nldas = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-
+                        
             DataTable dt = new DataTable();
 
             switch (inpt.Source)
             {
-                case "daymet":
+               case "daymet":
                     dt = daymetData(inpt, outpt);
                     dt = Utilities.Utility.aggregateData(inpt, dt, "priestlytaylor");
                     break;
@@ -340,7 +340,7 @@ namespace Evapotranspiration
                     }
                     break;
             }
-
+            
             //dt = nldas.getData2(timeZoneOffset, out errorMsg);
 
             if (errorMsg != "")
@@ -500,7 +500,7 @@ namespace Evapotranspiration
             dt.Columns.Add("Value");
             foreach (KeyValuePair<string, List<string>> entry in outpt.Data)
             {
-                DataRow dr = dt.NewRow();
+                DataRow dr = dt.NewRow(); 
                 string[] datetime = entry.Key.Split(' ');
                 dr["Date"] = datetime[0];
                 dr["Hour"] = datetime[1];

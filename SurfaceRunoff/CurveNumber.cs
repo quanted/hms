@@ -10,9 +10,9 @@ namespace SurfaceRunoff
     /// <summary>
     /// SurfaceRunoff curve number class.
     /// </summary>
-    class CurveNumber
+    public class CurveNumber
     {
-        private enum precipSources { nldas, gldas, ncdc, daymet, wgen, prism }
+
         /// <summary>
         /// GetData function for curvenumber.
         /// </summary>
@@ -27,9 +27,6 @@ namespace SurfaceRunoff
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             // TODO: Add options for different precip inputs
 
-            //errorMsg = (!Enum.TryParse(input.Source, true, out precipSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            //input.Source = "daymet";
-
             ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             // Static test centroid point
             //IPointCoordinate catchmentCentroid = new PointCoordinate()
@@ -38,7 +35,7 @@ namespace SurfaceRunoff
             //    Longitude = -69.36054766
             //};
             //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
-            input.Geometry.ComID = 8545069;
+
 
             // Database call for centroid data with specified comid.
             precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
@@ -93,14 +90,12 @@ namespace SurfaceRunoff
             }
             else
             {
-                input.Source = "nldas";
-                input.TemporalResolution = "daily";
+                input.Source = "daymet";
             }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             precip.Input = tempInput;
             precip.Output = precip.GetData(out errorMsg);
-
             if (errorMsg.Contains("ERROR")) { return null; }
             return precip.Output;
         }
@@ -123,6 +118,10 @@ namespace SurfaceRunoff
                 Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                 Longitude = double.Parse(centroidDict["CentroidLongitude"])
             };
+            if (centroidDict.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
+            }
             return centroid as PointCoordinate;
         }
 

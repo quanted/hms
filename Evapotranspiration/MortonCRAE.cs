@@ -726,7 +726,7 @@ namespace Evapotranspiration
 
                 MortonCRAEMethod(tmin, tmax, tmean, jday, time1, shmin, shmax, solarRad, model, out relHMin, out relHMax,
                                  out petMC, out errorMsg);
-                if (inpt.Source == "daymet")
+                if(inpt.Source == "daymet")
                 {
                     double vapor = Convert.ToDouble(dr["VaPress"].ToString());
                     dr["RHmin"] = daymetHumid(tmin, vapor).ToString("F2", CultureInfo.InstalledUICulture);

@@ -950,13 +950,13 @@ namespace Evapotranspiration
                     retries -= 1;
                     if (bytes == null)
                     {
-                        Thread.Sleep((10 / retries) * 1000);
+                        Thread.Sleep((10/retries) * 1000);
                     }
                 }
             }
-            catch (System.Net.WebException ex)
+            catch(System.Net.WebException ex)
             {
-                if (ex.Message.Contains("404"))
+                if(ex.Message.Contains("404"))
                 {
                     return getData(out errorMsg);
                 }

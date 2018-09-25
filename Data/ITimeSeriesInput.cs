@@ -198,7 +198,7 @@ namespace Data
                 Geometry = new TimeSeriesGeometry()
                 {
                     ComID = -1,
-                    HucID = -1,
+                    HucID = "-1",
                     StationID = "",
                     Point = new PointCoordinate()
                     {
@@ -649,7 +649,7 @@ namespace Data
         /// <summary>
         /// ID for NHDPlus boundaries
         /// </summary>
-        int HucID { get; set; }
+        string HucID { get; set; }
 
         /// <summary>
         /// ID for NCDC Stations
@@ -690,7 +690,7 @@ namespace Data
         /// <summary>
         /// ID for NHDPlus boundaries
         /// </summary>
-        public int HucID { get; set; }
+        public string HucID { get; set; }
 
         /// <summary>
         /// ID for NCDC Stations

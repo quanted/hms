@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -12,26 +13,6 @@ namespace WatershedDelineation
 {
     public class FlowRouting
     {
-        /*public ITimeSeriesOutput getData(ITimeSeriesInput input, out string errorMsg)
-        {
-            errorMsg = "";
-
-
-            //TODO: Remove dummy data and integrate algorithms from Flask endpoint
-            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput flowOutput = iFactory.Initialize();
-            while (input.DateTimeSpan.StartDate <= input.DateTimeSpan.EndDate)
-            {
-                string date = input.DateTimeSpan.StartDate.ToShortDateString();
-                List<string> data = new List<string>();
-                data.Add("1.234");
-                flowOutput.Data.Add(date, data);
-                input.DateTimeSpan.StartDate = input.DateTimeSpan.StartDate.AddDays(1.0);
-            }
-            flowOutput.Dataset = "StreamHydrology";
-            return flowOutput;
-        }*/
-
         public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, ITimeSeriesOutput surface, ITimeSeriesOutput subsurface, out string errorMsg)
         {
             //This function returns a dataset containing three tables
@@ -112,7 +93,6 @@ namespace WatershedDelineation
                         fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
                     }
 
-                    //Make call to Curve Number method to calculate Surface and subSurface Runoff.  fill dtSurfaceRunoff and dtSubSurface Runoff table entries\
                     int j = 0;
                     foreach (var pair in surface.Data)
                     {
@@ -143,6 +123,19 @@ namespace WatershedDelineation
                             dr[COMID] = pair.Value[0];
                         }
                     }
+
+                    /*for(int j = 0; j < dtSurfaceRunoff.Rows.Count; j++)
+                    {
+                        DataRow surfdr = dtSurfaceRunoff.Rows[j];
+                        DataRow subdr = dtSubSurfaceRunoff.Rows[j];
+                        DateTime datekey = DateTime.ParseExact(surface.Data.ElementAt(j).Key.ToString(), "yyyy-MM-dd HH", null);
+                        string st = surfdr["DateTime"].ToString();// + " 00";
+                        if (datekey.ToShortDateString() == st)
+                        {
+                            surfdr[COMID] = surface.Data.ElementAt(j).Value[0];
+                            subdr[COMID] = subsurface.Data.ElementAt(j).Value[0];
+                        }
+                    }*/
 
                     //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
                     double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
@@ -176,7 +169,7 @@ namespace WatershedDelineation
                     }
                 }
             }
-            
+
             return ds;
         }
     }

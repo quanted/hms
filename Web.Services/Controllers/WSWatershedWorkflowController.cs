@@ -14,7 +14,6 @@ namespace Web.Services.Controllers
     interface WorkflowSources
     {
         string RunoffSource { get; set; }
-        string PrecipSource { get; set; }
         string StreamHydrology { get; set; }
     }
 
@@ -28,11 +27,6 @@ namespace Web.Services.Controllers
         /// OPTIONAL: Specifies the requested source for Runoff Data
         /// </summary>
         public string RunoffSource { get; set; }
-
-        /// <summary>
-        /// OPTIONAL: Specifies the requested source for Precipitation Data
-        /// </summary>
-        public string PrecipSource { get; set; }
 
         /// <summary>
         /// OPTIONAL: Specifies the requested Stream Hydrology Algorithm to use
@@ -53,7 +47,7 @@ namespace Web.Services.Controllers
     {
         public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }
         public Dictionary<string, string> metadata { get; set; }
-        public List<Dictionary<string, string>> table { get; set; }
+        public new Dictionary<string, Dictionary<string, string>> table { get; set; }
         //public Dictionary<string, Dictionary<string, string>> table { get; set; }
     }
 
@@ -82,7 +76,7 @@ namespace Web.Services.Controllers
                 Geometry = new TimeSeriesGeometry()
                 {
                     ComID = -1,
-                    HucID = -1,
+                    HucID = "-1",
                     Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {
@@ -109,7 +103,6 @@ namespace Web.Services.Controllers
                 OutputFormat = "json",
                 Aggregation = true,
                 RunoffSource = "nldas",
-                PrecipSource = "nldas",
                 StreamHydrology = "constant"
             };
             return example;

@@ -29,7 +29,7 @@ namespace Web.Services.Models
         {
             DateTime start = input.DateTimeSpan.StartDate;
             DateTime end = input.DateTimeSpan.EndDate;
-            
+
             var watch = System.Diagnostics.Stopwatch.StartNew();
             string errorMsg = "";
 
@@ -39,12 +39,12 @@ namespace Web.Services.Models
             // Validate all sources.
             errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            errorMsg = (!Enum.TryParse(input.PrecipSource, true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+            errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Precipitation object
             // Validate precipitation sources.
-            input.Source = input.PrecipSource;
+            input.Source = input.Geometry.GeometryMetadata["precipSource"];
             input.DateTimeSpan.StartDate = start;
             input.DateTimeSpan.EndDate = end;
             errorMsg = (!Enum.TryParse(input.Source, true, out precipSources preSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
@@ -63,9 +63,9 @@ namespace Web.Services.Models
             ITimeSeriesOutput precipResult = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-            // SubSurfaceFlow object
+            //SubSurfaceFlow object
             SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
-            input.Source = input.RunoffSource == "curvenumber" ? "nldas" : input.RunoffSource;//Subflow source should be same as surface. If surface uses curve number (not available to subflow), default to nldas for sub.
+            input.Source = input.RunoffSource;//Subflow source should be same as surface.
             string subSource = input.Source;
             input.DateTimeSpan.StartDate = start;
             input.DateTimeSpan.EndDate = end;
@@ -87,7 +87,6 @@ namespace Web.Services.Models
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             runoff.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "surfacerunoff" }, out errorMsg);
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            //if (errorMsg.Contains("ERROR") && input.Source != "curvenumber") { return err.ReturnError(errorMsg); }
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             // Gets the SurfaceRunoff data.
             ITimeSeriesOutput surfResult = runoff.GetData(out errorMsg);
@@ -118,7 +117,7 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             //Getting Stream Flow data
-            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, subResult, surfResult, out errorMsg);
+            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, surfResult, subResult, out errorMsg);
 
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
@@ -128,7 +127,7 @@ namespace Web.Services.Models
             {
                 gd = cd.getData(input, lst, out errorMsg);
             }
-            input.Source = input.PrecipSource;
+            input.Source = input.Geometry.GeometryMetadata["precipSource"];
             ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
             input.Source = input.RunoffSource;
             ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
@@ -153,18 +152,26 @@ namespace Web.Services.Models
             }
 
             //Turn delineation table to ITimeseries
-            totalOutput.table = new List<Dictionary<string, string>>();
+            totalOutput.table = new Dictionary<string, Dictionary<string, string>>();
             int i = 0;
             foreach (DataRow dr in dt.Rows)
             {
                 //List<string> lv = new List<string>();
                 Dictionary<string, string> lv = new Dictionary<string, string>();
                 int j = 0;
+                string com = dr["COMID"].ToString();
                 foreach (Object g in dr.ItemArray)
                 {
                     lv.Add(dt.Columns[j++].ToString(), g.ToString());
                 }
-                totalOutput.table.Add(lv);
+                if (totalOutput.table.ContainsKey(com))
+                {
+                    continue;
+                }
+                else
+                {
+                    totalOutput.table.Add(com, lv);
+                }
             }
 
             //Adding delineation data to output
@@ -182,14 +189,14 @@ namespace Web.Services.Models
                 { "NHDPlus_url" , "http://www.horizon-systems.com/nhdplus/NHDPlusV2_data.php"}
             };
             totalOutput.Dataset = "Precipitation, SurfaceRunoff, SubsurfaceRunoff, StreamHydrology";
-            totalOutput.DataSource = input.PrecipSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + subOutput.DataSource.ToString() + ", " + input.StreamHydrology.ToString();
+            totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + subOutput.DataSource.ToString() + ", " + input.StreamHydrology.ToString();
             watch.Stop();
             string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
             totalOutput.metadata.Add("Time_elapsed", elapsed);
             return totalOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput (DataTable dt)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt)
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
@@ -201,7 +208,7 @@ namespace Web.Services.Models
                 itimeoutput.Data.Add(dr[0].ToString(), lv);
                 i++;
             }
-            
+
             itimeoutput.Metadata = new Dictionary<string, string>()
             {
                 { "request_time", DateTime.Now.ToString() },

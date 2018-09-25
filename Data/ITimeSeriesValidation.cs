@@ -29,7 +29,7 @@ namespace Data
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
-            ["subsurfaceflow"] = new List<string> { "nldas", "gldas" },
+            ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
             ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
@@ -283,7 +283,7 @@ namespace Data
         /// <param name="errors"></param>
         /// <param name="hucID"></param>
         /// <returns></returns>
-        private static bool ValidateHucID(out List<string> errors, int hucID)
+        private static bool ValidateHucID(out List<string> errors, string hucID)
         {
             errors = new List<string>();
             if (string.IsNullOrWhiteSpace(hucID.ToString()))
