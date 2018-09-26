@@ -939,18 +939,18 @@ namespace Evapotranspiration
             }
             // Response status message
             byte[] bytes = null;
-            WebClient client = new WebClient();
-            client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            int retries = 5;                                        // Max number of request retries
+            int retries = 10;                                        // Max number of request retries
             try
             {
                 while (retries > 0 && bytes == null)
                 {
+                    WebClient client = new WebClient();
+                    client.Credentials = CredentialCache.DefaultNetworkCredentials;
                     bytes = client.DownloadData(url);
                     retries -= 1;
                     if (bytes == null)
                     {
-                        Thread.Sleep((10/retries) * 100);
+                        Thread.Sleep(100);
                     }
                 }
             }
