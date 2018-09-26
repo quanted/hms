@@ -87,7 +87,7 @@ namespace Precipitation
             if (errorMsg.Contains("ERROR")) { return null; }
 
             double modifier = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-            Dictionary<DateTime, List<string>> outputTemp = SetData(out errorMsg, splitData[1], input.DataValueFormat, input.DateTimeSpan.DateTimeFormat, input.Geometry.GeometryMetadata, modifier);
+            Dictionary<DateTime, List<string>> outputTemp = SetData(out errorMsg, splitData[1], input.DataValueFormat, input.DateTimeSpan.DateTimeFormat, input.Geometry.GeometryMetadata, modifier, input.DateTimeSpan);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             SortedDictionary<DateTime, List<string>> sortedData = new SortedDictionary<DateTime, List<string>>(outputTemp);
@@ -154,7 +154,7 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="modifier"></param>
         /// <returns></returns>
-        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier)
+        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
         {
             errorMsg = "";
             Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>();
@@ -175,7 +175,10 @@ namespace Precipitation
                     DateTime date2;
                     if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
                     else { date2 = date; }
-                    data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
+                    if (date2 >= dateSpan.StartDate && date2 <= dateSpan.EndDate)
+                    {
+                        data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
+                    }
                 }
             }
             else
@@ -187,7 +190,10 @@ namespace Precipitation
                     DateTime date2;
                     if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
                     else { date2 = date; }
-                    data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
+                    if (date2 >= dateSpan.StartDate && date2 <= dateSpan.EndDate)
+                    {
+                        data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
+                    }
                 }
             }
             return data;

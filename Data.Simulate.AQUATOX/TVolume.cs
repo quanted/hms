@@ -18,8 +18,8 @@ namespace AQUATOX.Volume
    
     public class TVolume : TStateVariable
     {
-        [JsonIgnore] double LastCalcTA ;  
-        [JsonIgnore] double LastTimeTA ;        // don't need saving
+        // [JsonIgnore] double // LastCalcTA ;  
+        // [JsonIgnore] double // LastTimeTA ;        // don't need saving
         [JsonIgnore] double Inflow = 0;
         [JsonIgnore] double Discharg = 0;          // don't need saving
         [JsonIgnore] double InflowLoad = 0;
@@ -61,8 +61,8 @@ namespace AQUATOX.Volume
         {
             base.SetToInitCond();
             Inflow = 0;
-            LastTimeTA = 0;
-            LastCalcTA = 0;
+            //LastTimeTA = 0;
+            //LastCalcTA = 0;
             AQTSeg.Volume_Last_Step = InitialCond;
 
 //            AQSite.VolFrac_Last_Step:= VolFrac(MaxEpiThick, Locale.ZMax, P_Shape);
@@ -159,9 +159,9 @@ namespace AQUATOX.Volume
             double WidthCalc;
             double Channel_Depth;
             // ----------------------------------------------------------
-            if (this.State < Consts.Tiny)
+            if (State < Consts.Tiny)
             {
-                this.State = 0;
+                State = 0;
             }            // Volume cannot be negative
 
             // not Stratified

@@ -45,9 +45,9 @@ namespace Data.Simulate
             // Else precipitation > Ia: Runoff (Q) = (P - Ia)^2/(P- Ia + S)
 
             int day0 = DateTime.Parse(precipData.Data.Keys.First().Split(' ')[0]).DayOfYear;
-            int cnI = (day0 / 16) + 1;
+            int cnI = ( day0 / 16 ) + 1;
             Dictionary<int, double> cn = GetCN(out errorMsg, input.Geometry.ComID);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (errorMsg.Contains("ERROR")){ return null; }
             if (cn.Count == 0)
             {
                 errorMsg = "ERROR: No curve number values found for the specified catchment. ComID: " + input.Geometry.ComID;
@@ -86,7 +86,7 @@ namespace Data.Simulate
             Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
             Dictionary<int, double> cnData = new Dictionary<int, double>();
             int i = 0;
-            foreach (string key in data.Keys)
+            foreach(string key in data.Keys)
             {
                 cnData.Add(i + 1, double.Parse(data[key]));
                 i++;
@@ -180,7 +180,7 @@ namespace Data.Simulate
             {
                 filePath = "/app/App_Data/curvenumber.json";
             }
-            using (StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
+            using(StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
             {
                 string jsonString = r.ReadToEnd();
                 dynamic cnData = JsonConvert.DeserializeObject(jsonString);

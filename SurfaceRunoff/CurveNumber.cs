@@ -118,7 +118,8 @@ namespace SurfaceRunoff
                 Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                 Longitude = double.Parse(centroidDict["CentroidLongitude"])
             };
-            if (centroidDict.Count == 0)
+
+            if(centroidDict.Count == 0)
             {
                 errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
             }

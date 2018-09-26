@@ -11,7 +11,7 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-
+        
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
@@ -20,19 +20,19 @@ namespace Data
 
         static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
-            ["precipitation"] = new List<string> { "nldas", "gldas", "daymet", "ncdc", "prism", "wgen" },
+            ["precipitation"] =  new List<string>{ "nldas", "gldas", "daymet", "ncdc", "prism", "wgen" },
             ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "grangergray", "hamon", "hspf",
                 "mcjannett", "mortoncrae", "mortoncrwe", "ncdc", "penmandaily", "penmanhourly",
-                "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" },
+                "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
             ["nutrients"] = new List<string> { "aquatox" },
-            ["organicmatter"] = new List<string> { "aquatox" },
+            ["organicmatter"] = new List<string> { "aquatox"},
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet"}
         };
 
         static string[] validRemoteData =
@@ -99,11 +99,11 @@ namespace Data
             errorMsg = string.Join(", ", errors.ToArray());
             return validInput;
         }
-
+        
         public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
         {
             errors = new List<string>();
-            Timezone validTZ = new Timezone();
+            Timezone validTZ = new Timezone(); 
             if (input == null)
             {
                 validTZ = new Timezone()
@@ -142,7 +142,7 @@ namespace Data
                 errors.Add("ERROR: Dataset is invalid or not found.");
                 return false;
             }
-            foreach (string ds in dataset)
+            foreach(string ds in dataset)
             {
                 string dss = ds.Split(new char[] { '_' }).Last();
                 valid = (validDatasets.Contains(dss.ToLower())) ? true : false;

@@ -1,9 +1,7 @@
-#FROM microsoft/aspnetcore:2.0 AS base
 FROM microsoft/dotnet:2.1-sdk AS base
 WORKDIR /app
 EXPOSE 80
 
-#FROM microsoft/aspnetcore-build:2.0 AS build
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY HMS.sln ./
@@ -33,6 +31,10 @@ COPY Nutrients/Nutrients.AQUATOX/Nutrients.AQUATOX.csproj Nutrients/Nutrients.AQ
 COPY Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj Nutrients/Nutrients.AQUATOX.UnitTests/
 COPY OrganicMatter/OrganicMatter.AQUATOX/OrganicMatter.AQUATOX.csproj OrganicMatter/OrganicMatter.AQUATOX/
 COPY OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj OrganicMatter/OrganicMatter.AQUATOX.UnitTests/
+COPY Chemicals/Chemicals.AQUATOX/Chemicals.AQUATOX.csproj Chemicals/Chemicals.AQUATOX/
+COPY Chemicals/Chemicals.AQUATOX.UnitTests/Chemicals.AQUATOX.UnitTests.csproj Chemicals/Chemicals.AQUATOX.UnitTests/
+COPY Diagenesis/Diagenesis.AQUATOX/Diagenesis.AQUATOX.csproj Diagenesis/Diagenesis.AQUATOX/
+COPY Diagenesis/Diagenesis.AQUATOX.UnitTests/Diagenesis.AQUATOX.UnitTests.csproj Diagenesis/Diagenesis.AQUATOX.UnitTests/
 RUN dotnet restore -nowarn:msb3202,nu1503
 COPY . .
 WORKDIR /src/Web.Services

@@ -119,9 +119,9 @@ namespace Data.Source
                 { 95, -1.0 }
             };
             catchment.landcover = landcover;
-            catchment.soil = new Dictionary<string, double>() { { "sand", -1.0 }, { "clay", -1.0 } };
+            catchment.soil = new Dictionary<string, double>() { {"sand", -1.0 }, {"clay", -1.0 } };
 
-            foreach (dynamic cMetric in output.metrics)
+            foreach(dynamic cMetric in output.metrics)
             {
                 string id = cMetric.id;
                 double value = cMetric.metric_value;
@@ -178,7 +178,7 @@ namespace Data.Source
                         break;
                     case "pcthbwet2011cat":             // Herbaceous Wetland Land Cover Percentage; class: 95
                         catchment.landcover[95] = value;
-                        break;
+                        break;  
                     case "claycat":                     // Statsgo Catchment Clay Mean
                         catchment.soil["clay"] = value;
                         break;
@@ -191,20 +191,18 @@ namespace Data.Source
             }
 
             string hsg = "A";
-            if (catchment.soil["sand"] > 90 && catchment.soil["clay"] < 10)
-            {
+            if (catchment.soil["sand"] > 90 && catchment.soil["clay"] < 10) {
                 hsg = "A";
             }
-            else if (catchment.soil["sand"] > 50 && catchment.soil["sand"] < 90 && catchment.soil["clay"] > 10 && catchment.soil["clay"] < 20)
+            else if( catchment.soil["sand"] > 50 && catchment.soil["sand"] < 90 && catchment.soil["clay"] > 10 && catchment.soil["clay"] < 20)
             {
                 hsg = "B";
             }
-            else if (catchment.soil["sand"] < 50 && catchment.soil["clay"] > 20 && catchment.soil["clay"] < 40)
+            else if(catchment.soil["sand"] < 50 && catchment.soil["clay"] > 20 && catchment.soil["clay"] < 40)
             {
                 hsg = "C";
             }
-            else if (catchment.soil["sand"] < 50 && catchment.soil["clay"] > 40)
-            {
+            else if (catchment.soil["sand"] < 50 && catchment.soil["clay"] > 40 ){
                 hsg = "D";
             }
             catchment.hsg = hsg;

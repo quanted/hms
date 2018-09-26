@@ -16,7 +16,7 @@ namespace Utilities
         /// <returns></returns>
         public static Dictionary<string, string> GetData(string dbPath, string query)
         {
-            if (query.Substring(0, 6).ToUpper() != "SELECT")
+            if (query.Substring(0,6).ToUpper() != "SELECT")
             {
                 return null;
             }
@@ -47,6 +47,12 @@ namespace Utilities
             }
             return data;
         }
+<<<<<<< HEAD
 
     }
 }
+=======
+        
+    }
+}
+>>>>>>> dev
