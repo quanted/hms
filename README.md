@@ -1,6 +1,6 @@
 # HMS
 
-[![Build Status](https://travis-ci.org/quanted/hms.svg?branch=dev)](https://travis-ci.org/quanted/hms)
+[![Build Status](https://travis-ci.org/quanted/hms.svg?branch=dev)](https://travis-ci.org/quanted/hms)    [![Codacy Badge](https://api.codacy.com/project/badge/Grade/41e76175cb5a42bab24562c342f396a2)](https://www.codacy.com/app/dbsmith88/hms?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quanted/hms&amp;utm_campaign=Badge_Grade)
 
 ### Description
 Hydologic Micro Services (HMS) is a collection of services for collecting hydrologic data and executing models that are accessible through a REST API. HMS is written in C#, .netcore2, and developed using [Visual Studio 2017](https://www.visualstudio.com/downloads/). 
