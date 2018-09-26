@@ -25,10 +25,10 @@ bld/
 *.suo
 
 # Database files
-.db
-.csv
-.sqlite3
-.sqlite
+*.db
+*.csv
+*.sqlite3
+*.sqlite
 
-.zip
+*.zip
 test_reports/
