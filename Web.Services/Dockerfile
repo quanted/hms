@@ -46,7 +46,7 @@ RUN dotnet publish -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-COPY test_reports/ /src/
+#COPY test_reports/ /src/
 COPY . /src
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp2.0
 #ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]

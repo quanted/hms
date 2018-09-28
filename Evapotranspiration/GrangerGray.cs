@@ -532,7 +532,7 @@ namespace Evapotranspiration
             WebClient myWC = new WebClient();
             try
             {
-                int retries = 5;                                        // Max number of request retries
+                int retries = 10;                                        // Max number of request retries
                 string status = "";                                     // response status code
 
                 while (retries > 0 && !status.Contains("OK"))

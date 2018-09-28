@@ -666,7 +666,7 @@ namespace Evapotranspiration
                     retries -= 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(200);
+                        Thread.Sleep(100);
                     }
                 }
             }
