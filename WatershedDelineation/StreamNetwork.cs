@@ -8,11 +8,11 @@ namespace WatershedDelineation
 {
     public class StreamNetwork
     {        
-        public DataTable prepareStreamNetworkForHUC(string HUCNumber, string geometry, out string errorMsg, out List<string> lst)
+        public DataTable prepareStreamNetworkForHUC(string geoNumber, string geometry, out string errorMsg, out List<string> lst)
         {
             DataTable dt = new DataTable();
             Utilities.CatchmentAggregation agg = new Utilities.CatchmentAggregation();
-            lst = agg.prepareCOMID(HUCNumber, geometry, out errorMsg);
+            lst = agg.prepareCOMID(geoNumber, geometry, out errorMsg);
             dt = prepareStreamNetwork(lst, out errorMsg);
             return dt;
         }
@@ -47,6 +47,12 @@ namespace WatershedDelineation
                 "From PlusFlow A, elevslope B, PlusFlowlineVAA D, EROM_MA0001 E " +
                 "Where A.TOCOMID = D.COMID And D.COMID IN (" + comIDs + ") And " +
                 "B.COMID = D.COMID And D.COMID = E.COMID ORDER BY A.TOHYDSEQ DESC");
+
+            if (dtPlusFlow == null)
+            {
+                errorMsg = "ERROR: Invalid Query.";
+                return dtPlusFlow;
+            }
 
             dtPlusFlow.Columns.Add("COMMENTS");
             dtPlusFlow.AcceptChanges();
@@ -167,6 +173,10 @@ namespace WatershedDelineation
             sqlite_cmd.CommandText = cmdText;
 
             SQLiteDataAdapter da = new SQLiteDataAdapter(sqlite_cmd);
+            if(da == null)
+            {
+                return null;
+            }
             DataTable dt = new DataTable();
             da.Fill(dt);
 

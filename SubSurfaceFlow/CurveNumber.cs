@@ -29,11 +29,7 @@ namespace SubSurfaceFlow
                     getRunoff = false;
                 }
             }
-<<<<<<< HEAD
-            if (getRunoff)
-=======
             if(getRunoff)
->>>>>>> dev
             {
                 runoffData = GetRunoffData(out errorMsg, input, output);
             }
@@ -134,20 +130,12 @@ namespace SubSurfaceFlow
             errorMsg = "";
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput baseflowOutput = oFactory.Initialize();
-<<<<<<< HEAD
-
-=======
             
->>>>>>> dev
             foreach (KeyValuePair<string, List<string>> dateValue in runoffData.Data)
             {
                 string date = dateValue.Key;
                 double rf = double.Parse(dateValue.Value[0]);
-<<<<<<< HEAD
-                double bf = ((rf) / (1 - (percent / 100))) - rf;
-=======
                 double bf = ((rf)/(1-(percent/100))) - rf;
->>>>>>> dev
 
                 List<string> d = new List<string>();
                 d.Add(bf.ToString(input.DataValueFormat));

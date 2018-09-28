@@ -26,7 +26,8 @@ namespace SurfaceRunoff
 
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             // TODO: Add options for different precip inputs
-
+            string tempSource = input.Source;
+            input.Source = "daymet";
             ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             // Static test centroid point
             //IPointCoordinate catchmentCentroid = new PointCoordinate()
@@ -39,9 +40,11 @@ namespace SurfaceRunoff
 
             // Database call for centroid data with specified comid.
             precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
+            if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
+            input.Source = tempSource;
 
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
@@ -113,16 +116,19 @@ namespace SurfaceRunoff
             string dbPath = "./App_Data/catchments.sqlite";
             string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + comid.ToString();
             Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
+            if (centroidDict.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
+                return null;
+            }
+
             IPointCoordinate centroid = new PointCoordinate()
             {
                 Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                 Longitude = double.Parse(centroidDict["CentroidLongitude"])
             };
 
-            if(centroidDict.Count == 0)
-            {
-                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
-            }
+            
             return centroid as PointCoordinate;
         }
 

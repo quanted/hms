@@ -93,7 +93,7 @@ namespace Utilities
             return comIDs;
         }
 
-        public List<string> prepareCOMID(string HUCNumber, string geo, out string errorMsg)
+        public List<string> prepareCOMID(string geoNumber, string geo, out string errorMsg)
         {
             List<string> lst = new List<string>();
             //string lst = "";
@@ -101,19 +101,19 @@ namespace Utilities
             errorMsg = "";
             if (geo == "com_id_list" || geo == "com_id_num")
             {
-                //errorMsg = "Invalid HUC Number.  The system works with HUC 8 or HUC12 only.";
-                foreach(string str in HUCNumber.Split(','))
+                //errorMsg = "Invalid geometry.  The system works with HUC 8 or HUC12 only.";
+                foreach(string str in geoNumber.Split(','))
                 {
                     lst.Add(str);
                 }
             }
             if (geo == "huc_12_num")
             {
-                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + HUCNumber + "'");
+                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + geoNumber + "'");
             }
             else if (geo == "huc_8_num")
             {
-                lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)='" + HUCNumber + "'");
+                lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)='" + geoNumber + "'");
             }
             return lst;
         }

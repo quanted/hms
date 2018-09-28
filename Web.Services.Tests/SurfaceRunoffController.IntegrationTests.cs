@@ -67,7 +67,7 @@ namespace Web.Services.Tests
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]
-        [InlineData(curvenumberRequest)]
+        //[InlineData(curvenumberRequest)]
         public async Task ValidRequests(string inputString)
         {
             string endpoint = "api/hydrology/surfacerunoff";
