@@ -165,8 +165,8 @@ namespace Data.Tests
         /// </summary>
         [Theory]
         [InlineData(33.925673, -83.355723, "")]
-        [InlineData(100.0, -83.355723, "ERROR: Latitude value is not valid. Latitude must be between -90 and 90. Latitude: 100, ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: 0, ERROR: A valid COM ID was not found.")]
-        [InlineData(33.925673, 200.0, "ERROR: Longitude value is not valid. Longitude must be between -180 and 180. Longitude: 200, ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: 0, ERROR: A valid COM ID was not found.")]
+        [InlineData(100.0, -83.355723, "ERROR: Latitude value is not valid. Latitude must be between -90 and 90. Latitude: 100, ERROR: A valid COM ID was not found.")]
+        [InlineData(33.925673, 200.0, "ERROR: Longitude value is not valid. Longitude must be between -180 and 180. Longitude: 200, ERROR: A valid COM ID was not found.")]
         public void SetTimeSeriesInput_LatLongTest(double latitude, double longitude, string expected)
         {
             string errorMsg = "";

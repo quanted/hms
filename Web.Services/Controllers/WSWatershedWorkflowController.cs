@@ -94,7 +94,7 @@ namespace Web.Services.Controllers
                 Units = "default",
                 OutputFormat = "json",
                 Aggregation = true,
-                RunoffSource = "nldas",
+                RunoffSource = "curvenumber",
                 StreamHydrology = "constant"
             };
             return example;

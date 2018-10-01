@@ -24,15 +24,11 @@ bld/
 
 *.suo
 
-<<<<<<< HEAD
 # Database files
 *.db
 *.csv
 *.sqlite3
 *.sqlite
-
 *.zip
 test_reports/
-=======
-test_reports/
->>>>>>> origin/dev-stream
+

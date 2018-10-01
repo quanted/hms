@@ -36,6 +36,10 @@ namespace Utilities
                     {
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
+                            if (reader.IsDBNull(i))
+                            {
+                                return data;
+                            }
                             var k = reader.GetName(i);
                             var v = reader.GetString(i);
 
@@ -49,3 +53,4 @@ namespace Utilities
         }        
     }
 }
+

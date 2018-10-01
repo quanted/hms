@@ -37,21 +37,9 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate all sources.
-            if (!String.IsNullOrWhiteSpace(input.RunoffSource))
-            {
-                errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            }
-            else
-            {
-                return err.ReturnError("ERROR: No runoff data source found.");
-            }
-            if (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) {
-                errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            }
-            else
-            {
-                return err.ReturnError("ERROR: No precip data source found.");
-            }
+            errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Precipitation object
@@ -75,66 +63,28 @@ namespace Web.Services.Models
             ITimeSeriesOutput precipResult = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-            //SubSurfaceFlow object
-            SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
-            input.Source = input.RunoffSource;//Subflow source should be same as surface.
-            string subSource = input.Source;
-            input.DateTimeSpan.StartDate = start;
-            input.DateTimeSpan.EndDate = end;
-            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
-            ITimeSeriesInputFactory subiFactory = new TimeSeriesInputFactory();
-            sub.Input = subiFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
-            // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            // Gets the SubSurfaceFlow data.
-            ITimeSeriesOutput subResult = sub.GetData(out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
-            // SurfaceRunoff object
-            SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
-            input.DateTimeSpan.StartDate = start;
-            input.DateTimeSpan.EndDate = end;
-            input.Source = input.RunoffSource;
-            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
-            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            runoff.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "surfacerunoff" }, out errorMsg);
-            // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            // Gets the SurfaceRunoff data.
-            ITimeSeriesOutput surfResult = runoff.GetData(out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
             //Stream Network Delineation
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
-            string gtype = "";
-            if (input.Geometry.GeometryMetadata.ContainsKey("huc_8_num"))
+            DataTable dt = new DataTable();
+            if (input.Geometry.ComID != 0)
             {
-                gtype = "huc_8_num";
+                dt = sn.prepareStreamNetworkForHUC(input.Geometry.ComID.ToString(), "com_id_num", out errorMsg, out lst);
             }
-            else if (input.Geometry.GeometryMetadata.ContainsKey("huc_12_num"))
+            else if (input.Geometry.HucID != null)
             {
-                gtype = "huc_12_num";
-            }
-            else if (input.Geometry.GeometryMetadata.ContainsKey("com_id_list"))
-            {
-                gtype = "com_id_list";
-            }
-            else if (input.Geometry.ComID > 0 || input.Geometry.GeometryMetadata.ContainsKey("com_id_num"))
-            {
-                gtype = "com_id_num";
+                string len = input.Geometry.HucID.Length.ToString();
+                dt = sn.prepareStreamNetworkForHUC(input.Geometry.HucID.ToString(), "huc_" + len + "_num", out errorMsg, out lst);
             }
             else
             {
-                return err.ReturnError("ERROR: No valid geometry parameter found. Requires HUC 8, HUC 12 or Comid.");
+                errorMsg = "ERROR: No valid geometry was found";
             }
-            input.Geometry.GeometryMetadata.Add("GeometryType", gtype);
-            DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.GeometryMetadata[gtype].ToString(), gtype, out errorMsg, out lst);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             //Getting Stream Flow data
-            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, surfResult, subResult, out errorMsg);
-
+            input.Source = input.RunoffSource;
+            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, input, out errorMsg);
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
             Utilities.GeometryData gd = null;
@@ -143,12 +93,14 @@ namespace Web.Services.Models
             {
                 gd = cd.getData(input, lst, out errorMsg);
             }
+
+            //Setting all to ITimeSeriesOutput
             input.Source = input.Geometry.GeometryMetadata["precipSource"];
             ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
             input.Source = input.RunoffSource;
-            ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
-            input.Source = subSource;
-            ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+            ITimeSeriesOutput surfOutput = dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+            input.Source = input.RunoffSource;
+            ITimeSeriesOutput subOutput = dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
             input.Source = input.StreamHydrology;
             ITimeSeriesOutput hydrologyOutput = dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
@@ -195,8 +147,8 @@ namespace Web.Services.Models
             totalOutput.metadata = new Dictionary<string, string>()
             {
                 { "request_url", "api/workflow/watershed" },
-                { "geometry_input", gtype },
-                { "geometry_value", input.Geometry.GeometryMetadata[gtype].ToString() },
+                //{ "geometry_input", gtype },
+                //{ "geometry_value", input.Geometry.GeometryMetadata[gtype].ToString() },
                 { "start_date", input.DateTimeSpan.StartDate.ToString() },
                 { "end_date", input.DateTimeSpan.EndDate.ToString() },
                 { "timestep", input.TemporalResolution.ToString() },
@@ -230,7 +182,7 @@ namespace Web.Services.Models
                 { "request_time", DateTime.Now.ToString() },
                 { "column_1", "Date" },
                 { "column_2", "Stream Flow" },
-                { "units", "mm" }
+                { "units", "cubic meters" }
             };
             itimeoutput.Dataset = "Stream Flow";
             itimeoutput.DataSource = "curvenumber";

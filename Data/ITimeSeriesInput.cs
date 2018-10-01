@@ -692,7 +692,6 @@ namespace Data
         /// </summary>
         public string HucID { get; set; }
 
-
         /// <summary>
         /// ID for NCDC Stations
         /// </summary>

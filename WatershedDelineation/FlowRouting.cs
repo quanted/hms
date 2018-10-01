@@ -8,12 +8,13 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WatershedDelineation
 {
     public class FlowRouting
     {
-        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, ITimeSeriesOutput surface, ITimeSeriesOutput subsurface, out string errorMsg)
+        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, List<string> lst, ITimeSeriesInput input, out string errorMsg)
         {
             //This function returns a dataset containing three tables
             errorMsg = "";
@@ -76,71 +77,92 @@ namespace WatershedDelineation
             ds.Tables.Add(dtSubSurfaceRunoff);
             ds.Tables.Add(dtStreamFlow);
 
+
+
+            // Initialize SubSurfaceFlow object
+            SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
+            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
+            ITimeSeriesInputFactory subiFactory = new TimeSeriesInputFactory();
+            sub.Input = subiFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
+
+            // Initialize SurfaceRunoff object
+            SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
+            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
+            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+            runoff.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "surfacerunoff" }, out errorMsg);
+
+
             //Iterate through all streams and calculate flows
             string COMID = "";
             string fromCOMID = "";
-            for (int i = 0; i < indx - 1; i++) //for (int i = 0; i < dtStreamNetwork.Rows.Count; i++)
+            Dictionary<string, List<ITimeSeriesOutput>> comResults = new Dictionary<string, List<ITimeSeriesOutput>>();
+
+            foreach (string com in lst)
             {
-                for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
+                List<ITimeSeriesOutput> runoffResults = new List<ITimeSeriesOutput>();
+                runoff.Input.Geometry.ComID = Convert.ToInt32(com);
+                // Gets the SurfaceRunoff data.
+                ITimeSeriesOutput surfResult = runoff.GetData(out errorMsg);
+                runoffResults.Add(surfResult);
+
+                sub.Input.Geometry.ComID = Convert.ToInt32(com);
+                // Gets the SubSurfaceFlow data.
+                ITimeSeriesOutput subResult = sub.GetData(out errorMsg);
+                runoffResults.Add(subResult);
+                comResults.Add(com, runoffResults);
+            }
+
+
+            for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
+            {
+                COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
+                fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
+                DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
+
+                List<string> fromCOMIDS = new List<string>();
+                foreach (DataRow dr2 in drsFromCOMIDs)
                 {
-                    COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
-                    fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
-                    DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
-
-                    List<string> fromCOMIDS = new List<string>();
-                    foreach (DataRow dr2 in drsFromCOMIDs)
+                    fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
+                }
+                
+                for (int i = 0; i < indx - 1; i++)
+                {
+                    
+                    if (comResults[COMID][1] == null || errorMsg.Contains("ERROR"))
                     {
-                        fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
+                        dtSubSurfaceRunoff.Rows[i][COMID] = 0;
                     }
-
-                    int j = 0;
-                    foreach (var pair in surface.Data)
+                    else
                     {
-                        if (j >= dtSurfaceRunoff.Rows.Count)
+                        if (i >= dtSubSurfaceRunoff.Rows.Count)
                         {
                             break;
                         }
-                        DataRow dr = dtSurfaceRunoff.Rows[j++];
-                        DateTime datekey = DateTime.ParseExact(pair.Key.ToString(), "yyyy-MM-dd HH", null);
-                        string st = dr["DateTime"].ToString();// + " 00";
-                        if (datekey.ToShortDateString() == st)
-                        {
-                            dr[COMID] = pair.Value[0];
-                        }
+                        DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                        string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                        dtSubSurfaceRunoff.Rows[i][COMID] = comResults[COMID][1].Data[date][0];
                     }
-                    j = 0;
-                    foreach (var pair in subsurface.Data)
+                    
+                    if (comResults[COMID][0] == null || errorMsg.Contains("ERROR"))
                     {
-                        if (j >= dtSubSurfaceRunoff.Rows.Count)
+                        dtSurfaceRunoff.Rows[i][COMID] = 0;
+                    }
+                    else
+                    {
+                        if (i >= dtSurfaceRunoff.Rows.Count)
                         {
                             break;
                         }
-                        DataRow dr = dtSubSurfaceRunoff.Rows[j++];
-                        DateTime datekey = DateTime.ParseExact(pair.Key.ToString(), "yyyy-MM-dd HH", null);
-                        string st = dr["DateTime"].ToString();// + " 00";
-                        if (datekey.ToShortDateString() == st)
-                        {
-                            dr[COMID] = pair.Value[0];
-                        }
+                        DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                        string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                        dtSurfaceRunoff.Rows[i][COMID] = comResults[COMID][0].Data[date][0];
                     }
-
-                    /*for(int j = 0; j < dtSurfaceRunoff.Rows.Count; j++)
-                    {
-                        DataRow surfdr = dtSurfaceRunoff.Rows[j];
-                        DataRow subdr = dtSubSurfaceRunoff.Rows[j];
-                        DateTime datekey = DateTime.ParseExact(surface.Data.ElementAt(j).Key.ToString(), "yyyy-MM-dd HH", null);
-                        string st = surfdr["DateTime"].ToString();// + " 00";
-                        if (datekey.ToShortDateString() == st)
-                        {
-                            surfdr[COMID] = surface.Data.ElementAt(j).Value[0];
-                            subdr[COMID] = subsurface.Data.ElementAt(j).Value[0];
-                        }
-                    }*/
-
+                                        
                     //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
                     double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
                     double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
-                    dtStreamFlow.Rows[i][COMID] = dsub + dsur;
+                    double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
+                    dtStreamFlow.Rows[i][COMID] = (dsub * area * 1000) + (dsur * area * 1000);//dsub + dsur;
 
                     //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
                     //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
@@ -165,11 +187,10 @@ namespace WatershedDelineation
                             continue;
                         }
                         //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
-                        dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) + Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString());
+                        dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area * 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()) * area * 1000);
                     }
                 }
             }
-
             return ds;
         }
     }
