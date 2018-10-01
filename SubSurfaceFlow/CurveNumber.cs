@@ -130,7 +130,6 @@ namespace SubSurfaceFlow
             errorMsg = "";
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput baseflowOutput = oFactory.Initialize();
-            
             foreach (KeyValuePair<string, List<string>> dateValue in runoffData.Data)
             {
                 string date = dateValue.Key;

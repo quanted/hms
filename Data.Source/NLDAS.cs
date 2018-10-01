@@ -53,7 +53,8 @@ namespace Data.Source
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
-            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true) {
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true)
+            {
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 1 + Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
@@ -92,7 +93,7 @@ namespace Data.Source
         /// <returns></returns>
         public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
         {
-        
+
             string[] date = dateHour.Split(' ');
             string hourStr = date[1].Substring(0, 2);
             string dateHourStr = date[0] + " " + hourStr;
@@ -125,7 +126,7 @@ namespace Data.Source
             string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
             string[] endDT = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
             sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
-            
+
             return sb.ToString();
         }
 

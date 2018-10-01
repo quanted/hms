@@ -69,7 +69,7 @@ namespace Precipitation
             // Historic end date set to simulated data start date minus one day.
             precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.StartDate.AddDays(-1);
             // Historic start date set to 20 years before simulated start date.
-            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));          
+            precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddYears(-1 * Math.Abs(years));
 
             if (input.Geometry.GeometryMetadata.ContainsKey("historicSource"))
             {

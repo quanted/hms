@@ -56,7 +56,7 @@ namespace SoilMoisture
             errorMsg = "";
             ITimeSeriesOutput output = new TimeSeriesOutput();
             output.Data = new Dictionary<string, List<string>>();
-            for( int i = 0; i < layersData[0].Data.Count; i++)
+            for (int i = 0; i < layersData[0].Data.Count; i++)
             {
                 List<string> data = new List<string>();
                 for (int j = 0; j < layersData.Count; j++)
@@ -99,7 +99,7 @@ namespace SoilMoisture
             {
                 output.Metadata.Add("column_1", "Date");
             };
-            
+
 
             switch (input.TemporalResolution)
             {
@@ -110,7 +110,7 @@ namespace SoilMoisture
                 case "weekly":
                     output.Data = WeeklyValues(out errorMsg, output, input);
                     //output.Metadata.Add("column_2", "Weekly Average");
-                     return output;
+                    return output;
                 case "monthly":
                     output.Data = MonthlyValues(out errorMsg, output, input);
                     //output.Metadata.Add("column_2", "Monthly Average");

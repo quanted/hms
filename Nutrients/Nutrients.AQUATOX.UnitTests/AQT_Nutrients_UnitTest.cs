@@ -30,7 +30,7 @@ namespace Nutrients.AQUATOX.UnitTests
 
         }
 
-    
+
         [TestMethod]
         public void AQTNutrients_Check_Data_Requirements()
         {
@@ -44,7 +44,7 @@ namespace Nutrients.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            filePath ="..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoNutrients.txt";
+            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoNutrients.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
@@ -85,7 +85,7 @@ namespace Nutrients.AQUATOX.UnitTests
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
-            
+
 
         }
 
@@ -113,4 +113,3 @@ namespace Nutrients.AQUATOX.UnitTests
 
 
 }
-

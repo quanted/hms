@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    
+
     <ApplicationIcon />
     <StartupObject />
     <AssemblyName>AQUATOX</AssemblyName>
@@ -18,5 +18,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
-
 </Project>

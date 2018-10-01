@@ -11,7 +11,6 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
@@ -32,7 +31,7 @@ namespace Data
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet"}
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
         };
 
         static string[] validRemoteData =
@@ -100,6 +99,12 @@ namespace Data
             return validInput;
         }
         
+        /// <summary>
+        /// Validates the timezone attribute for ITimeSeriesInput
+        /// </summary>
+        /// <param name="errors"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
         {
             errors = new List<string>();
@@ -283,7 +288,7 @@ namespace Data
         /// <param name="errors"></param>
         /// <param name="hucID"></param>
         /// <returns></returns>
-        private static bool ValidateHucID(out List<string> errors, int hucID)
+        private static bool ValidateHucID(out List<string> errors, string hucID)
         {
             errors = new List<string>();
             if (string.IsNullOrWhiteSpace(hucID.ToString()))

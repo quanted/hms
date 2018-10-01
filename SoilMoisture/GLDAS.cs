@@ -27,7 +27,7 @@ namespace SoilMoisture
                 ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
                 ITimeSeriesOutput tempOutput = new TimeSeriesOutput();
                 tempOutput = oFactory.Initialize();
-                string data = gldas.GetData(out errorMsg, input.Layers[i].Replace('-','_') + "_Soil_Moisture", input.Input);
+                string data = gldas.GetData(out errorMsg, input.Layers[i].Replace('-', '_') + "_Soil_Moisture", input.Input);
                 if (errorMsg.Contains("ERROR")) { return null; }
 
                 tempOutput = gldas.SetDataToOutput(out errorMsg, "SoilMoisture", data, tempOutput, input.Input);

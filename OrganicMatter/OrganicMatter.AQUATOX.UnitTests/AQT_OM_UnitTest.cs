@@ -9,7 +9,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
     [TestClass]
     public class AQT_OM_UnitTest
     {
-                    
+
         [TestMethod]
         public void AQT_OM_InvalidJSON()
         {

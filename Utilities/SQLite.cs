@@ -46,7 +46,6 @@ namespace Utilities
                 con.Close();
             }
             return data;
-        }
-        
+        }        
     }
 }

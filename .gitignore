@@ -24,6 +24,7 @@ bld/
 
 *.suo
 
+<<<<<<< HEAD
 # Database files
 *.db
 *.csv
@@ -32,3 +33,6 @@ bld/
 
 *.zip
 test_reports/
+=======
+test_reports/
+>>>>>>> origin/dev-stream

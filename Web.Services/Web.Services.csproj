@@ -78,6 +78,7 @@
     <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />
     <ProjectReference Include="..\Temperature\Temperature.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\WatershedDelineation\WatershedDelineation.csproj" />
   </ItemGroup>
 
 </Project>

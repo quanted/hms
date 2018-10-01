@@ -68,6 +68,7 @@ namespace Web.Services
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
+        /// <param name="loggerFactory"></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 
