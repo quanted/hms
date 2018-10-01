@@ -85,8 +85,6 @@ namespace Nutrients.AQUATOX.UnitTests
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
-
-
         }
 
         private string GetTestFile(string filePath)
@@ -106,10 +104,5 @@ namespace Nutrients.AQUATOX.UnitTests
             }
             return json;
         }
-
-
     }
-
-
-
 }
