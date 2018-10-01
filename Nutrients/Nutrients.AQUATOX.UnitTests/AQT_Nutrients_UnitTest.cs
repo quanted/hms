@@ -21,7 +21,7 @@ namespace Nutrients.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\DOCS\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -35,7 +35,7 @@ namespace Nutrients.AQUATOX.UnitTests
         public void AQTNutrients_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\DOCS\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
