@@ -122,7 +122,7 @@ namespace Utilities
         public List<string> SQLiteRequest(string query)
         {
             string dbPath = @".\App_Data\catchments.sqlite";
-            if (!File.Exists(filePath))
+            if (!File.Exists(dbPath))
             {
                 dbPath = "/app/App_Data/catchments.sqlite";
             }
