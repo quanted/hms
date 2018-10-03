@@ -81,7 +81,7 @@ namespace Data.Simulate
         {
             errorMsg = "";
             string dbPath = @".\App_Data\hms_database.sqlite3";
-            if (!File.Exists(filePath))
+            if (!File.Exists(dbPath))
             {
                 dbPath = "/app/App_Data/hms_database.sqlite3";
             }
