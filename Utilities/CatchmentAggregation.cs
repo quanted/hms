@@ -121,9 +121,14 @@ namespace Utilities
 
         public List<string> SQLiteRequest(string query)
         {
-
+            string dbPath = @".\App_Data\catchments.sqlite";
+            if (!File.Exists(filePath))
+            {
+                dbPath = "/app/App_Data/catchments.sqlite";
+            }
+            
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = "/app/App_Data/catchments.sqlite";
+            connectionStringBuilder.DataSource = dbPath;
             DataTable dt = new DataTable();
 
             using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
