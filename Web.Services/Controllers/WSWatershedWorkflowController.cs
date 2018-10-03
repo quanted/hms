@@ -75,7 +75,6 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = -1,
                     HucID = "030502040102",
                     GeometryMetadata = new Dictionary<string, string>()
                     {
@@ -93,7 +92,7 @@ namespace Web.Services.Controllers
                 TimeLocalized = true,
                 Units = "default",
                 OutputFormat = "json",
-                Aggregation = true,
+                Aggregation = false,
                 RunoffSource = "curvenumber",
                 StreamHydrology = "constant"
             };

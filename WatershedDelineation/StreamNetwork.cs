@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Data.Sqlite;
 
 namespace WatershedDelineation
 {
@@ -162,28 +163,45 @@ namespace WatershedDelineation
         }
         private static DataTable executeQuery(string cmdText)
         {
-            // create a new database connection:
-            SQLiteConnection sqlite_conn = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;");
+            //// create a new database connection:
+            //SQLiteConnection sqlite_conn = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;");
 
-            // open the connection:
-            sqlite_conn.Open();
-            SQLiteCommand sqlite_cmd = sqlite_conn.CreateCommand();
+            //// open the connection:
+            //sqlite_conn.Open();
+            //SQLiteCommand sqlite_cmd = sqlite_conn.CreateCommand();
 
-            // Let the SQLiteCommand object know our SQL-Query:
-            sqlite_cmd.CommandText = cmdText;
+            //// Let the SQLiteCommand object know our SQL-Query:
+            //sqlite_cmd.CommandText = cmdText;
 
-            SQLiteDataAdapter da = new SQLiteDataAdapter(sqlite_cmd);
-            if(da == null)
-            {
-                return null;
-            }
-            DataTable dt = new DataTable();
-            da.Fill(dt);
+            //SQLiteDataAdapter da = new SQLiteDataAdapter(sqlite_cmd);
+            //if(da == null)
+            //{
+            //    return null;
+            //}
+            //DataTable dt = new DataTable();
+            //da.Fill(dt);
 
 
             // Now lets execute the SQL ;-)
             //sqlite_cmd.ExecuteNonQuery();
-            sqlite_conn.Close();
+            //sqlite_conn.Close();
+
+            DataTable dt = new DataTable();
+
+            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
+            connectionStringBuilder.DataSource = "./App_Data/catchments.sqlite";
+
+            using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
+            {
+                con.Open();
+                SQLiteCommand com = con.CreateCommand();
+                com.CommandText = cmdText;
+                using (SQLiteDataAdapter dr = new SQLiteDataAdapter(com))
+                {
+                    dr.Fill(dt);
+                }
+                con.Close();
+            }
             return dt;
         }
     }

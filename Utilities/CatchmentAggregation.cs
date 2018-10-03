@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.Data;
 using System.Diagnostics;
+using Microsoft.Data.Sqlite;
 
 namespace Utilities
 {
@@ -120,25 +121,43 @@ namespace Utilities
 
         public List<string> SQLiteRequest(string query)
         {
-            //Create SQLite connection
-            SQLiteConnection sqlite = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
-            SQLiteDataAdapter ad;
+
+            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
+            connectionStringBuilder.DataSource = "./App_Data/catchments.sqlite";
             DataTable dt = new DataTable();
 
-            try
+            using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
             {
-                SQLiteCommand cmd;
-                sqlite.Open();  //Initiate connection to the db
-                cmd = sqlite.CreateCommand();
-                cmd.CommandText = query;  //set the passed query
-                ad = new SQLiteDataAdapter(cmd);
-                ad.Fill(dt); //fill the datasource
+                con.Open();
+                SQLiteCommand com = con.CreateCommand();
+                com.CommandText = query;
+                using (SQLiteDataAdapter dr = new SQLiteDataAdapter(com))
+                {
+                    dr.Fill(dt);
+                }
+                con.Close();
             }
-            catch (SQLiteException ex)
-            {
-                return null;//"ERROR: Unable to obtain data for the specified query." + ex.Message;
-            }
-            sqlite.Close();
+            //return dt;
+
+            ////Create SQLite connection
+            //SQLiteConnection sqlite = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
+            //SQLiteDataAdapter ad;
+            //DataTable dt = new DataTable();
+
+            //try
+            //{
+            //    SQLiteCommand cmd;
+            //    sqlite.Open();  //Initiate connection to the db
+            //    cmd = sqlite.CreateCommand();
+            //    cmd.CommandText = query;  //set the passed query
+            //    ad = new SQLiteDataAdapter(cmd);
+            //    ad.Fill(dt); //fill the datasource
+            //}
+            //catch (SQLiteException ex)
+            //{
+            //    return null;//"ERROR: Unable to obtain data for the specified query." + ex.Message;
+            //}
+            //sqlite.Close();
 
             List<string> comIDs = new List<string>();
             foreach (DataRow dr in dt.Rows)
@@ -191,24 +210,57 @@ namespace Utilities
                 baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + huc;
             }*/
 
+            string dataURL = "http://localhost:7777/hms/data?job_id=";
             WebClient myWC = new WebClient();
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             string data = "";
+            dynamic taskData = "";
             try
             {
                 int retries = 5;                                        // Max number of request retries
                 string status = "";                                     // response status code
-
-                while (retries > 0 && !status.Contains("OK"))
+                string jobID = "";
+                while(retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(baseURL);
-                    wr.Timeout = 900000;//15 min
+                    //wr.Timeout = 900000;//15 min
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    jobID = JSON.Deserialize<Dictionary<string,string>>(reader.ReadToEnd())["job_id"];
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+
+                retries = 50;
+                status = "";
+                taskData = "";
+                bool success = false;
+                while (retries > 0 && !success && !jobID.Equals(""))
+                {
+                    Thread.Sleep(6000);
+                    WebRequest wr = WebRequest.Create(dataURL + jobID);
+                    //wr.Timeout = 900000;//15 min
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
+                    taskData = JSON.Deserialize<dynamic>(data);
+                    if(taskData["status"] == "SUCCESS")
+                    {
+                        success = true;
+                    }
+                    else if(taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
+                    {
+                        break;
+                    }
                     reader.Close();
                     response.Close();
                     retries -= 1;
@@ -218,7 +270,8 @@ namespace Utilities
             {
                 errorMsg =  "ERROR: Unable to obtain data for the specified query." + ex.Message;
             }
-            GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(data);
+            //GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(/*data*/);
+            GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(JsonConvert.SerializeObject(taskData["data"]));
 
             return geodata;
         }

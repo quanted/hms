@@ -42,6 +42,11 @@ namespace Web.Services.Models
             errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
+            // SET Attributes to specific values until stack works
+            input.Source = "nldas";
+            input.TemporalResolution = "daily";
+            input.Aggregation = false;
+
             // Precipitation object
             // Validate precipitation sources.
             input.Source = input.Geometry.GeometryMetadata["precipSource"];
@@ -59,6 +64,14 @@ namespace Web.Services.Models
             {
                 precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
+
+            // TEST PRECIP POINT
+            precip.Input.Geometry.Point = new PointCoordinate()
+            {
+                Latitude = 35.7546,
+                Longitude = -81.6057
+            };
+
             // Gets the Precipitation data.
             ITimeSeriesOutput precipResult = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -67,7 +80,7 @@ namespace Web.Services.Models
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
             DataTable dt = new DataTable();
-            if (input.Geometry.ComID != 0)
+            if (input.Geometry.ComID > 0)
             {
                 dt = sn.prepareStreamNetworkForHUC(input.Geometry.ComID.ToString(), "com_id_num", out errorMsg, out lst);
             }

@@ -9,6 +9,7 @@
     <AssemblyName>AQUATOX</AssemblyName>
     <RootNamespace>AQUATOX</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
