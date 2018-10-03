@@ -35,6 +35,7 @@ COPY Chemicals/Chemicals.AQUATOX/Chemicals.AQUATOX.csproj Chemicals/Chemicals.AQ
 COPY Chemicals/Chemicals.AQUATOX.UnitTests/Chemicals.AQUATOX.UnitTests.csproj Chemicals/Chemicals.AQUATOX.UnitTests/
 COPY Diagenesis/Diagenesis.AQUATOX/Diagenesis.AQUATOX.csproj Diagenesis/Diagenesis.AQUATOX/
 COPY Diagenesis/Diagenesis.AQUATOX.UnitTests/Diagenesis.AQUATOX.UnitTests.csproj Diagenesis/Diagenesis.AQUATOX.UnitTests/
+COPY WatershedDelineation/WatershedDelineation.csproj WatershedDelineation/
 RUN dotnet restore -nowarn:msb3202,nu1503
 COPY . .
 WORKDIR /src/Web.Services
