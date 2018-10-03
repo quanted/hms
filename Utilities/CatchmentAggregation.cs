@@ -123,7 +123,7 @@ namespace Utilities
         {
 
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = "./App_Data/catchments.sqlite";
+            connectionStringBuilder.DataSource = "/app/App_Data/catchments.sqlite";
             DataTable dt = new DataTable();
 
             using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
