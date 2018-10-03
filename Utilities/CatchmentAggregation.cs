@@ -333,7 +333,7 @@ namespace Utilities
                 {
                     List<string> outList = new List<string>();
                     DateTime date = new DateTime();
-                    string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
+                    string dateString = entry.Key.ToString();//.Substring(0, entry.Key.ToString().Length - 3);
                     DateTime.TryParse(dateString, out date);
                     outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
                     output.Data.Add(date.ToShortDateString(), outList);

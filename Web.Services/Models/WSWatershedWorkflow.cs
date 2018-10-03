@@ -47,35 +47,6 @@ namespace Web.Services.Models
             input.TemporalResolution = "daily";
             input.Aggregation = false;
 
-            // Precipitation object
-            // Validate precipitation sources.
-            input.Source = input.Geometry.GeometryMetadata["precipSource"];
-            input.DateTimeSpan.StartDate = start;
-            input.DateTimeSpan.EndDate = end;
-            errorMsg = (!Enum.TryParse(input.Source, true, out precipSources preSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            Precipitation.Precipitation precip = new Precipitation.Precipitation();
-            // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
-            ITimeSeriesInputFactory precipiFactory = new TimeSeriesInputFactory();
-            precip.Input = precipiFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
-            // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            if (precip.Input.Source.Contains("ncdc"))
-            {
-                precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-            }
-
-            // TEST PRECIP POINT
-            precip.Input.Geometry.Point = new PointCoordinate()
-            {
-                Latitude = 35.7546,
-                Longitude = -81.6057
-            };
-
-            // Gets the Precipitation data.
-            ITimeSeriesOutput precipResult = precip.GetData(out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
             //Stream Network Delineation
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
@@ -97,6 +68,7 @@ namespace Web.Services.Models
 
             //Getting Stream Flow data
             input.Source = input.RunoffSource;
+
             DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, input, out errorMsg);
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
@@ -109,13 +81,13 @@ namespace Web.Services.Models
 
             //Setting all to ITimeSeriesOutput
             input.Source = input.Geometry.GeometryMetadata["precipSource"];
-            ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+            ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3]), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
             input.Source = input.RunoffSource;
-            ITimeSeriesOutput surfOutput = dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+            ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0]), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
             input.Source = input.RunoffSource;
-            ITimeSeriesOutput subOutput = dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+            ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1]), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
             input.Source = input.StreamHydrology;
-            ITimeSeriesOutput hydrologyOutput = dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+            ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
