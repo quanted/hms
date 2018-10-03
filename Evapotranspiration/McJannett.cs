@@ -650,12 +650,11 @@ namespace Evapotranspiration
             WebClient myWC = new WebClient();
             try
             {
-                int retries = 5;                                        // Max number of request retries
+                int retries = 10;                                        // Max number of request retries
                 string status = "";                                     // response status code
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -665,6 +664,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (Exception ex)

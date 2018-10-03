@@ -172,10 +172,11 @@ namespace Precipitation
                         date = date.AddDays(-1.0);
                     };
 
-                    DateTime date2;
+                    DateTime date2 = new DateTime();
+                    date2 = date;
                     if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
                     else { date2 = date; }
-                    if (date2 >= dateSpan.StartDate && date2 <= dateSpan.EndDate)
+                    if (date2.Date >= dateSpan.StartDate.Date && date2.Date <= dateSpan.EndDate.Date)
                     {
                         data.Add(date2, new List<string> { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) });
                     }

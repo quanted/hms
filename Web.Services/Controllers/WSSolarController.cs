@@ -9,9 +9,14 @@ using System.Threading.Tasks;
 
 namespace Web.Services.Controllers
 {
-    
+    /// <summary>
+    /// Solar Data input object
+    /// </summary>
     public class SolarInput
     {
+        /// <summary>
+        /// Input Dictionary, containing unknown values.
+        /// </summary>
         public Dictionary<string, object> input;
     }
 
@@ -116,8 +121,15 @@ namespace Web.Services.Controllers
         }
     }
 
+    /// <summary>
+    /// Output example for solar data request.
+    /// </summary>
     public class SolarOutputExample : IExamplesProvider
     {
+        /// <summary>
+        /// IExamplesProvider interface override
+        /// </summary>
+        /// <returns></returns>
         public object GetExamples()
         {
             return new Dictionary<string, object>()

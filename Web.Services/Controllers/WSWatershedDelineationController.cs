@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Examples;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -11,29 +12,19 @@ using Web.Services.Models;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SurfaceRunoff Input that implements TimeSeriesInput object
+    /// Delineation Input that implements TimeSeriesInput object.
     /// </summary>
-    public class SurfaceRunoffInput : TimeSeriesInput
+    public class WatershedDelineationInput : TimeSeriesInput
     {
-        /// <summary>
-        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
-        /// </summary>
-        public string PrecipSource { get; set; }
 
-        /// <summary>
-        /// Determines whether to use point-based runoff or area-based runoff
-        /// </summary>
-        public string RunoffType { get; set; }
-        // Add extra SurfaceRunoff specific variables here
     }
-
 
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle SurfaceRunoff POST request example
+    /// Swashbuckle DelineationCompare POST request example
     /// </summary>
-    public class SurfaceRunoffInputExample : IExamplesProvider
+    public class WatershedDelineationInputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -41,45 +32,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            SurfaceRunoffInput example = new SurfaceRunoffInput()
-            {
-                Source = "nldas",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08)
-                },
-                Geometry = new TimeSeriesGeometry()
-                {
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
-                }
-            };
-            return example;
-        }
-    }
-
-    /// <summary>
-    /// Swashbuckle SurfaceRunoff POST request example
-    /// </summary>
-    public class SurfaceRunoffInputExampleFull : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            SurfaceRunoffInput example = new SurfaceRunoffInput()
+            WatershedDelineationInput example = new WatershedDelineationInput()
             {
                 Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
@@ -100,7 +53,8 @@ namespace Web.Services.Controllers
                     {
                         { "City", "Athens" },
                         { "State", "Georgia"},
-                        { "Country", "United States" }
+                        { "Country", "United States" },
+                        { "huc_12_num", "030502040102" }
                     },
                     Timezone = new Timezone()
                     {
@@ -120,9 +74,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbucle SurfaceRunoff Output example
+    /// Swashbucle DelineationCompare Output example
     /// </summary>
-    public class SurfaceRunoffOutputExample : IExamplesProvider
+    public class WatershedDelineationOutputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -132,8 +86,8 @@ namespace Web.Services.Controllers
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "SurfaceRunoff";
-            output.DataSource = "nldas";
+            output.Dataset = "Precipitation";
+            output.DataSource = "ncdc, nldas, gldas, daymet";
             output.Metadata = new Dictionary<string, string>()
             {
                 { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
@@ -163,41 +117,41 @@ namespace Web.Services.Controllers
             };
             output.Data = new Dictionary<string, List<string>>()
             {
-                { "2015-01-01 00Z", new List<string>() { "0.000E+000" } },
-                { "2015-01-01 01Z", new List<string>() { "0.000E+000" } },
-                { "2015-01-01 02Z", new List<string>() { "0.000E+000" } },
-                { "2015-01-01 03Z", new List<string>() { "0.000E+000" } },
-                { "2015-01-01 04Z", new List<string>() { "0.000E+000" } },
-                { "2015-01-01 05Z", new List<string>() { "0.000E+000" } },
+                { "2010-04-08 000", new List<string>() { "10548330", "1.2207", "0.5263", "0.00642458", "33.8125", "-81.5625" } },
+                { "2010-04-08 001", new List<string>() { "10548332", "1.2207", "0.05534", "0.00067557", "33.8125", "-81.5625" } },
+                { "2010-04-08 002", new List<string>() { "10548346", "1.2207", "0.72801", "0.00888676", "33.8125", "-81.5625" } },
+                { "2010-04-08 003", new List<string>() { "10548414", "1.2207", "0.66324", "0.0080962", "33.8125", "-81.5625" } },
+                { "2010-04-08 004", new List<string>() { "10548428", "1.2207", "0.08131", "0.00099251", "33.8125", "-81.5625" } },
+                { "2010-04-08 005", new List<string>() { "10548440", "1.2207", "0.00673", "8.215E-05", "33.8125", "-81.5625" } }
             };
             return output;
         }
     }
 
 
-    // --------------- SurfaceRunoff Controller --------------- //
+    // --------------- DelineationCompare Controller --------------- //
 
     /// <summary>
-    /// SurfaceRunoff controller for HMS.
+    /// DelineationCompare controller for HMS.
     /// </summary>
-    [Route("api/hydrology/surfacerunoff")]
-    public class WSSurfaceRunoffController : Controller
+    [Route("api/hydrology/delineation/")]
+    public class WSWatershedDelineationController : Controller
     {
         /// <summary>
-        /// POST Method for getting SurfaceRunoff data.
+        /// POST Method for getting DelineationCompare data.
+        /// Source parameter must contain a value, but value is not used.
         /// </summary>
-        /// <param name="runoffInput">Parameters for retrieving SurfaceRunoff data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="watershedInput">Parameters for retrieving DelineationCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [Route("")]             // Default endpoint
         [Route("v1.0")]         // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExample))]
-        [SwaggerResponseExample(200, typeof(SurfaceRunoffOutputExample))]
-        [SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExampleFull))]
-        public async Task<IActionResult> POST([FromBody]SurfaceRunoffInput runoffInput)
+        [SwaggerRequestExample(typeof(WatershedDelineationInput), typeof(WatershedDelineationInputExample))]
+        [SwaggerResponseExample(200, typeof(WatershedDelineationOutputExample))]
+        public async Task<IActionResult> POST([FromBody]WatershedDelineationInput watershedInput)
         {
-            WSSurfaceRunoff runoff = new WSSurfaceRunoff();
-            ITimeSeriesOutput results = await runoff.GetSurfaceRunoff(runoffInput);
+            WSWatershedDelineation watershed = new WSWatershedDelineation();
+            ITimeSeriesOutput results = await watershed.GetDelineationData(watershedInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

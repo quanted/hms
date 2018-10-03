@@ -12,7 +12,7 @@ namespace Web.Services.Models
     /// </summary>
     public class WSUtilities
     {
-        
+
         /// <summary>
         /// Checks the data endpoints for the Precipitation component.
         /// </summary>
@@ -21,7 +21,7 @@ namespace Web.Services.Models
         {
             Dictionary<string, Dictionary<string, string>> endpoints = new Dictionary<string, Dictionary<string, string>>();
             List<Precipitation.Precipitation> precips = new List<Precipitation.Precipitation>();
-            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet"};
+            List<string> sources = new List<string>() { "nldas", "gldas", "ncdc", "daymet" };
             ITimeSeriesInput testInput = new TimeSeriesInput()
             {
                 Source = "nldas",
@@ -41,7 +41,7 @@ namespace Web.Services.Models
                 }
             };
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            foreach(string source in sources)
+            foreach (string source in sources)
             {
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
                 testInput.Source = source;
@@ -57,7 +57,7 @@ namespace Web.Services.Models
             Parallel.ForEach(precips, (Precipitation.Precipitation precip) =>
             {
                 endpoints.Add(precip.Input.Source, precip.CheckEndpointStatus());
-            });         
+            });
             return endpoints;
         }
 

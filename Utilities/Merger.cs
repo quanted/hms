@@ -49,7 +49,10 @@ namespace Utilities
             {
                 foreach (string date in result.Data.Keys)
                 {
-                    result.Data[date].Add(secondary.Data[date][0]);
+                    if (secondary.Data.ContainsKey(date))
+                    {
+                        result.Data[date].Add(secondary.Data[date][0]);
+                    }
                 }
             }
 

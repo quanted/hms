@@ -939,18 +939,18 @@ namespace Evapotranspiration
             }
             // Response status message
             byte[] bytes = null;
-            WebClient client = new WebClient();
-            client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            int retries = 5;                                        // Max number of request retries
+            int retries = 10;                                        // Max number of request retries
             try
             {
                 while (retries > 0 && bytes == null)
                 {
+                    WebClient client = new WebClient();
+                    client.Credentials = CredentialCache.DefaultNetworkCredentials;
                     bytes = client.DownloadData(url);
                     retries -= 1;
                     if (bytes == null)
                     {
-                        Thread.Sleep((10/retries) * 1000);
+                        Thread.Sleep(100);
                     }
                 }
             }
@@ -1037,9 +1037,28 @@ namespace Evapotranspiration
                 url = _urlBasePF + "Rainf_f_tavg" + "&location=GEOM:POINT" + @"%28" + _longitude + @",%20" + _latitude + @"%29" +
                         "&startDate=" + _startDate + "T06" + "&endDate=" + _endDate + "T23" + _type; // "X298" + "-" + "Y152" + _type;
             }
-            WebClient client = new WebClient();
-            client.Credentials = CredentialCache.DefaultNetworkCredentials;
-            byte[] bytes = client.DownloadData(url);
+            byte[] bytes = null;
+            int retries = 5;
+            string status = "";
+            while (retries > 0 && !status.Contains("OK"))
+            {
+                WebRequest wr = WebRequest.Create(url);
+                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                status = response.StatusCode.ToString();
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                bytes = Encoding.ASCII.GetBytes(reader.ReadToEnd());
+                reader.Close();
+                response.Close();
+                retries -= 1;
+                if (!status.Contains("OK"))
+                {
+                    Thread.Sleep(100);
+                }
+            }
+            //WebClient client = new WebClient();
+            //client.Credentials = CredentialCache.DefaultNetworkCredentials;
+            //byte[] bytes = client.DownloadData(url);
             if (bytes != null)
             {
                 string str = Encoding.UTF8.GetString(bytes);

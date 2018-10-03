@@ -13,7 +13,7 @@ namespace Web.Services.Models
     public class WSSubSurfaceFlow
     {
 
-        private enum SSFlowSources { nldas, gldas }
+        //private enum SSFlowSources { nldas, gldas }
 
         /// <summary>
         /// Gets subsurfaceflow data using the given TimeSeriesInput parameters.
@@ -28,8 +28,8 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate subsurfaceflow sources.
-            errorMsg = (!Enum.TryParse(input.Source, true, out SSFlowSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            //errorMsg = (!Enum.TryParse(input.Source, true, out SSFlowSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+            //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SubSurfaceFlow object
             SubSurfaceFlow.SubSurfaceFlow evapo = new SubSurfaceFlow.SubSurfaceFlow();

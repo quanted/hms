@@ -69,7 +69,7 @@ namespace Data.Source.Tests
             string errorMsg = "";
 
             string dataset = "Precipitation";
-            timeSeries.Input.BaseURL = new List<string>{ "" };
+            timeSeries.Input.BaseURL = new List<string> { "" };
             string data = nldas.GetData(out errorMsg, dataset, timeSeries.Input);
             Assert.AreEqual("ERROR: Unable to download requested nldas data. Invalid URI: The format of the URI could not be determined.", errorMsg);
         }
