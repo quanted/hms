@@ -25,9 +25,9 @@ namespace SurfaceRunoff
             errorMsg = "";
 
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            // TODO: Add options for different precip inputs
             string tempSource = input.Source;
-            input.Source = "daymet";
+            string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
+            input.Source = precipSource;
             ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             // Static test centroid point
             //IPointCoordinate catchmentCentroid = new PointCoordinate()
@@ -42,6 +42,7 @@ namespace SurfaceRunoff
             precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
             if (errorMsg.Contains("ERROR")) { return null; }
 
+            precipInput.TemporalResolution = "daily";
             ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
             if (errorMsg.Contains("ERROR")) { return null; }
             input.Source = tempSource;

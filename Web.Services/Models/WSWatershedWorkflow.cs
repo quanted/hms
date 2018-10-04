@@ -43,8 +43,8 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SET Attributes to specific values until stack works
-            input.Source = "nldas";
-            input.TemporalResolution = "daily";
+            //input.Source = "nldas";
+            //input.TemporalResolution = "daily";
             //input.Aggregation = false;
 
             //Stream Network Delineation
