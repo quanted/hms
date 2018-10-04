@@ -163,7 +163,13 @@ namespace WatershedDelineation
             Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
             {
                 string errorM = "";
-                subF.Value.GetData(out errorM);
+                //subF.Value.GetData(out errorM);
+                int retries = 5;
+                while (retries > 0 && subF.Value.Output == null)
+                {
+                    subF.Value.GetData(out errorM);
+                    Interlocked.Decrement(ref retries);//retries -= 1;
+                }
                 lock (outputListLock)
                 {
                     subsurfaceError.Add(errorM);
@@ -174,7 +180,13 @@ namespace WatershedDelineation
             Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
             {
                 string errorM = "";
-                surF.Value.GetData(out errorM);
+                //surF.Value.GetData(out errorM);
+                int retries = 5;
+                while (retries > 0 && surF.Value.Output == null)
+                {
+                    surF.Value.GetData(out errorM);
+                    Interlocked.Decrement(ref retries); //retries -= 1;
+                }
                 lock (outputListLock)
                 {
                     surfaceError.Add(errorM);
@@ -193,7 +205,7 @@ namespace WatershedDelineation
                     fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
                 }
 
-                for (int i = 0; i < indx - 1; i++)
+                for (int i = 0; i < indx; i++)
                 {
 
                     if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)

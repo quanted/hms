@@ -45,7 +45,7 @@ namespace Web.Services.Models
             // SET Attributes to specific values until stack works
             input.Source = "nldas";
             input.TemporalResolution = "daily";
-            input.Aggregation = false;
+            //input.Aggregation = false;
 
             //Stream Network Delineation
             List<string> lst = new List<string>();

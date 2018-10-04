@@ -190,8 +190,8 @@ namespace Utilities
             */
             errorMsg = "";
             //Parse geometry data from input page
-            double lat = input.Geometry.Point.Latitude;
-            double lon = input.Geometry.Point.Longitude;
+            //double lat = input.Geometry.Point.Latitude;
+            //double lon = input.Geometry.Point.Longitude;
             string baseURL = "http://localhost:7777/hms/gis/percentage/?";//"http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             //Check for huc arguments otherwise use lat long
