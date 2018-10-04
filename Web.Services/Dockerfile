@@ -49,6 +49,7 @@ WORKDIR /app
 COPY --from=publish /app .
 #COPY test_reports/ /src/
 COPY . /src
+RUN ls /app/App_Data
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp2.0
 #ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]
 ENTRYPOINT ["dotnet", "Web.Services.dll"]

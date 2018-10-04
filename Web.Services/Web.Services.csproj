@@ -33,6 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="App_Data\catchments.sqlite" />
+    <None Remove="App_Data\hms_database.sqlite3" />
     <None Remove="App_Data\url_info.txt" />
     <None Remove="App_Data\url_info_old.txt" />
     <None Remove="App_Data\XmlComments.xml" />
@@ -40,6 +42,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="App_Data\catchments.sqlite">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\hms_database.sqlite3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="App_Data\url_info.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

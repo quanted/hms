@@ -121,10 +121,10 @@ namespace Utilities
 
         public List<string> SQLiteRequest(string query)
         {
-            string dbPath = @".\App_Data\catchments.sqlite";
+            string dbPath = "/app/App_Data/catchments.sqlite";
             if (!File.Exists(dbPath))
             {
-                dbPath = "/app/App_Data/catchments.sqlite";
+                dbPath = @".\App_Data\catchments.sqlite";
             }
             
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
@@ -142,27 +142,6 @@ namespace Utilities
                 }
                 con.Close();
             }
-            //return dt;
-
-            ////Create SQLite connection
-            //SQLiteConnection sqlite = new SQLiteConnection("Data Source=./App_Data/catchments.sqlite;Version=3;"); //new SQLiteConnection("Data Source=M:\\StreamHydrologyFiles\\NHDPlusV2Data\\database.sqlite");
-            //SQLiteDataAdapter ad;
-            //DataTable dt = new DataTable();
-
-            //try
-            //{
-            //    SQLiteCommand cmd;
-            //    sqlite.Open();  //Initiate connection to the db
-            //    cmd = sqlite.CreateCommand();
-            //    cmd.CommandText = query;  //set the passed query
-            //    ad = new SQLiteDataAdapter(cmd);
-            //    ad.Fill(dt); //fill the datasource
-            //}
-            //catch (SQLiteException ex)
-            //{
-            //    return null;//"ERROR: Unable to obtain data for the specified query." + ex.Message;
-            //}
-            //sqlite.Close();
 
             List<string> comIDs = new List<string>();
             foreach (DataRow dr in dt.Rows)

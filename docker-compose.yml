@@ -8,5 +8,3 @@ services:
     build:
       context: .
       dockerfile: Web.Services/Dockerfile
-    volumes:
-      - collected_static:/app/collected_static

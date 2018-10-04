@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Text;
 using Microsoft.Data.Sqlite;
 
@@ -22,15 +23,15 @@ namespace Utilities
             }
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
             Dictionary<string, string> data = new Dictionary<string, string>();
-            SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder();
+            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
             connectionStringBuilder.DataSource = dbPath;
 
-            using (SqliteConnection con = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
             {
                 con.Open();
-                SqliteCommand com = con.CreateCommand();
+                SQLiteCommand com = con.CreateCommand();
                 com.CommandText = query;
-                using (SqliteDataReader reader = com.ExecuteReader())
+                using (SQLiteDataReader reader = com.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -41,7 +42,7 @@ namespace Utilities
                                 return data;
                             }
                             var k = reader.GetName(i);
-                            var v = reader.GetString(i);
+                            var v = reader.GetValue(i).ToString();
 
                             data.Add(k, v);
                         }
