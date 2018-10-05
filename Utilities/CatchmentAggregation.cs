@@ -174,8 +174,8 @@ namespace Utilities
             */
             errorMsg = "";
             //Parse geometry data from input page
-            double lat = input.Geometry.Point.Latitude;
-            double lon = input.Geometry.Point.Longitude;
+            //double lat = input.Geometry.Point.Latitude;
+            //double lon = input.Geometry.Point.Longitude;
             string baseURL = "http://localhost:7777/hms/gis/percentage/?";//"http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             //Check for huc arguments otherwise use lat long
@@ -317,7 +317,7 @@ namespace Utilities
                 {
                     List<string> outList = new List<string>();
                     DateTime date = new DateTime();
-                    string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
+                    string dateString = entry.Key.ToString();//.Substring(0, entry.Key.ToString().Length - 3);
                     DateTime.TryParse(dateString, out date);
                     outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
                     output.Data.Add(date.ToShortDateString(), outList);

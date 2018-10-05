@@ -262,7 +262,7 @@ namespace Web.Services.Controllers
     [Produces("application/json")]
     [Route("api/meteorology/solar")]
     [Route("api/meteorology/solar/v1.0")]
-    public class WSMeteorolgySolarController : Controller
+    public class WSMeteorologySolarController : Controller
     {
         /// <summary>
         /// NOAA Solar Calculator 

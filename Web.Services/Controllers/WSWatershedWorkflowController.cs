@@ -69,8 +69,8 @@ namespace Web.Services.Controllers
                 Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
-                    StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08),
+                    StartDate = new DateTime(2014, 07, 01),
+                    EndDate = new DateTime(2014, 07, 31),
                     DateTimeFormat = "yyyy-MM-dd HH"
                 },
                 Geometry = new TimeSeriesGeometry()
@@ -78,7 +78,7 @@ namespace Web.Services.Controllers
                     HucID = "030502040102",
                     GeometryMetadata = new Dictionary<string, string>()
                     {
-                        { "precipSource", "nldas"}
+                        { "precipSource", "daymet"}
                     },
                     Timezone = new Timezone()
                     {
