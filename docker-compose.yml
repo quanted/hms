@@ -8,3 +8,5 @@ services:
     build:
       context: .
       dockerfile: Web.Services/Dockerfile
+    volumes:
+      - "./Web.Services/App_Data:/app/App_Data"
