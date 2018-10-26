@@ -43,9 +43,7 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SET Attributes to specific values until stack works
-            //input.Source = "nldas";
-            //input.TemporalResolution = "daily";
-            //input.Aggregation = false;
+            input.TemporalResolution = "daily";
 
             //Stream Network Delineation
             List<string> lst = new List<string>();
@@ -68,40 +66,44 @@ namespace Web.Services.Models
 
             //Getting Stream Flow data
             input.Source = input.RunoffSource;
-
-            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, input, out errorMsg);
+            List<string> validList = new List<string>();
+            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, out validList, input, out errorMsg);
+            lst = validList;
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
             Utilities.GeometryData gd = null;
-            // if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             if (input.Aggregation)
             {
                 gd = cd.getData(input, lst, out errorMsg);
             }
-
-            //Setting all to ITimeSeriesOutput
-            input.Source = input.Geometry.GeometryMetadata["precipSource"];
-            ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3]), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
-            input.Source = input.RunoffSource;
-            ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0]), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
-            input.Source = input.RunoffSource;
-            ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1]), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
-            input.Source = input.StreamHydrology;
-            ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
-
+            
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
 
             Web.Services.Controllers.WatershedWorkflowOutput totalOutput = new Web.Services.Controllers.WatershedWorkflowOutput();
             totalOutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
+            int x = 1;
+            Dictionary<string, string> meta = new Dictionary<string, string>();
             foreach (string com in lst)
             {
+                //Setting all to ITimeSeriesOutput
+                input.Source = input.Geometry.GeometryMetadata["precipSource"];
+                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+                input.Source = input.RunoffSource;
+                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+                input.Source = input.RunoffSource;
+                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+                input.Source = input.StreamHydrology;
+                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
                 timeSeriesDict.Add("Precipitation", precipOutput);
                 timeSeriesDict.Add("SurfaceRunoff", surfOutput);
                 timeSeriesDict.Add("SubsurfaceRunoff", subOutput);
                 timeSeriesDict.Add("StreamHydrology", hydrologyOutput);
                 totalOutput.data.Add(Int32.Parse(com), timeSeriesDict);
+                meta = precipOutput.Metadata;
+                x++;
             }
 
             //Turn delineation table to ITimeseries
@@ -128,38 +130,35 @@ namespace Web.Services.Models
             }
 
             //Adding delineation data to output
-            totalOutput.Metadata = precipOutput.Metadata;
+            totalOutput.Metadata = meta;
             totalOutput.metadata = new Dictionary<string, string>()
             {
                 { "request_url", "api/workflow/watershed" },
-                //{ "geometry_input", gtype },
-                //{ "geometry_value", input.Geometry.GeometryMetadata[gtype].ToString() },
                 { "start_date", input.DateTimeSpan.StartDate.ToString() },
                 { "end_date", input.DateTimeSpan.EndDate.ToString() },
                 { "timestep", input.TemporalResolution.ToString() },
+                { "errors", errorMsg },
                 { "catchments", cd.listToString(lst, out errorMsg) },
                 { "connectivity_table_source", "PlusFlowlineVAA" },
                 { "NHDPlus_url" , "http://www.horizon-systems.com/nhdplus/NHDPlusV2_data.php"}
             };
             totalOutput.Dataset = "Precipitation, SurfaceRunoff, SubsurfaceRunoff, StreamHydrology";
-            totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + subOutput.DataSource.ToString() + ", " + input.StreamHydrology.ToString();
+            totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + input.StreamHydrology.ToString();
             watch.Stop();
             string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
             totalOutput.metadata.Add("Time_elapsed", elapsed);
             return totalOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput(DataTable dt)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x)
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
-            int i = 0;
             foreach (DataRow dr in dt.Rows)
             {
                 List<string> lv = new List<string>();
-                lv.Add(dr[1].ToString());
+                lv.Add(dr[x].ToString());
                 itimeoutput.Data.Add(dr[0].ToString(), lv);
-                i++;
             }
 
             itimeoutput.Metadata = new Dictionary<string, string>()

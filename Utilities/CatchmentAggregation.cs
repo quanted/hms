@@ -154,45 +154,28 @@ namespace Utilities
 
         public GeometryData getData(ITimeSeriesInput input, List<string> coms, out string errorMsg)
         {
-            /*Sample call of new utility in WS[Module].cs
-            Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
-            ITimeSeriesOutput outs = cd.getCatchmentAggregation(input, result);
-            return outs;
-            
-            Next runoff Use case: Single catchment use case is already implemented.  
-            Next use case: Calculate surface, subsurface, and total runoff for a collection 
-            of catchments (e.g. HUC12, HUC8, or user supplied lists of NHDPlus catchments)?
-            COMID   DateTime    Surface Runoff  Subsurface Runoff   Total Runoff 
-            */
-
-            /*
-             * Possible workflow: 
-             * 1. Each class would generate its own data (ie Surface Runoff class gets ITimeSeries) and call this method.
-             * 2. Call % area flask endpoint using lat/long to get json of grid cell data
-             *      Other cases like huc 8 and huc12 would need to have those values passed in through geometry metadata box (huc_8_num:01060002,com_id_num:9311911)
-             * 3. Return table for each [hour, day, week, month] that gives % runoff of each catchment grid cell
-            */
             errorMsg = "";
-            //Parse geometry data from input page
-            //double lat = input.Geometry.Point.Latitude;
-            //double lon = input.Geometry.Point.Longitude;
             string baseURL = "http://localhost:7777/hms/gis/percentage/?";//"http://127.0.0.1:5000/gis/rest/hms/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
-            //Check for huc arguments otherwise use lat long
-            //string huc = "";
-            //string type = metadata["GeometryType"].ToString();
-            //huc = input.Geometry.HucID.ToString();
-            //List<string> coms = prepareCOMID(huc, out errorMsg);
-            string comList = listToString(coms, out errorMsg);
-            baseURL += "com_id_list=" + comList;
-            /*if(input.Geometry.ComID == 0 && input.Geometry.HucID == 0)
+            //Check for huc arguments 
+            if(input.Geometry.HucID != null)
             {
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/" + "?lat_long_x=" + lon + "&lat_long_y=" + lat;
+                baseURL += "huc_" + input.Geometry.HucID.Length + "_num=" + input.Geometry.HucID;
             }
-            if(type == "huc_8_num")
+            else
             {
-                baseURL = "http://127.0.0.1:5000/gis/rest/hms/percentage/?huc_8_num=" + huc;
-            }*/
+                string comList = listToString(coms, out errorMsg);
+                baseURL += "com_id_list=" + comList;
+            }
+
+            if(input.Geometry.GeometryMetadata["precipSource"] != null)
+            {
+                baseURL += "&grid_source=" + input.Geometry.GeometryMetadata["precipSource"];
+            }
+            else
+            {
+                baseURL += "&grid_source=nldas";
+            }
 
             string dataURL = "http://localhost:7777/hms/data?job_id=";
             WebClient myWC = new WebClient();
@@ -207,7 +190,6 @@ namespace Utilities
                 while(retries > 0 && !status.Contains("OK"))
                 {
                     WebRequest wr = WebRequest.Create(baseURL);
-                    //wr.Timeout = 900000;//15 min
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
@@ -230,7 +212,6 @@ namespace Utilities
                 {
                     Thread.Sleep(6000);
                     WebRequest wr = WebRequest.Create(dataURL + jobID);
-                    //wr.Timeout = 900000;//15 min
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
@@ -254,9 +235,8 @@ namespace Utilities
             {
                 errorMsg =  "ERROR: Unable to obtain data for the specified query." + ex.Message;
             }
-            //GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(/*data*/);
             GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(JsonConvert.SerializeObject(taskData["data"]));
-
+            
             return geodata;
         }
 
