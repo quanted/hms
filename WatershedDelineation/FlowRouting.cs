@@ -15,7 +15,7 @@ namespace WatershedDelineation
 {
     public class FlowRouting
     {
-        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, List<string> lst, ITimeSeriesInput input, out string errorMsg)
+        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, List<string> lst, out List<string> validList, ITimeSeriesInput input, out string errorMsg)
         {
             //This function returns a dataset containing three tables
             errorMsg = "";
@@ -54,7 +54,7 @@ namespace WatershedDelineation
             DataRow drSurfaceRunoff = null;
             DataRow drSubSurfaceRunoff = null;
             DataRow drStreamFlow = null;
-            int indx = 0;
+            //int indx = 0;
             for (DateTime date = startDateTime; date <= endDateTime; date = date.AddDays(1))
             {
                 drPrecip = dtPrecip.NewRow();
@@ -79,7 +79,7 @@ namespace WatershedDelineation
                 dtSurfaceRunoff.Rows.Add(drSurfaceRunoff);
                 dtSubSurfaceRunoff.Rows.Add(drSubSurfaceRunoff);
                 dtStreamFlow.Rows.Add(drStreamFlow);
-                indx++;
+                //indx++;
             }
             //Now add the tables to DataSet
             ds.Tables.Add(dtSurfaceRunoff);
@@ -90,6 +90,7 @@ namespace WatershedDelineation
             //Iterate through all streams and calculate flows
             string COMID = "";
             string fromCOMID = "";
+
             Dictionary<string, ITimeSeriesOutput> comSubResults = new Dictionary<string, ITimeSeriesOutput>();
             Dictionary<string, ITimeSeriesOutput> comSurfResults = new Dictionary<string, ITimeSeriesOutput>();
             Dictionary<string, ITimeSeriesOutput> comPrecipResults = new Dictionary<string, ITimeSeriesOutput>();
@@ -98,8 +99,24 @@ namespace WatershedDelineation
             Dictionary<string, SubSurfaceFlow.SubSurfaceFlow> subsurfaceFlow = new Dictionary<string, SubSurfaceFlow.SubSurfaceFlow>();
             Dictionary<string, Precipitation.Precipitation> precipitation = new Dictionary<string, Precipitation.Precipitation>();
 
-            ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
+            //Building list of valid centroids as many are null and will cause map errors if set to (0,0) or (null,null)
+            validList = new List<string>();
+            string errComs = "";
             foreach (string com in lst)
+            {
+                PointCoordinate centroidPoint = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                if (centroidPoint != null)
+                {
+                    validList.Add(com);
+                }
+                else
+                {
+                    errComs += com + ", ";
+                }
+            }
+            
+            ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
+            foreach (string com in validList)
             {
                 ITimeSeriesInput tsi = new TimeSeriesInput();
                 tsi.Geometry = input.Geometry;
@@ -164,7 +181,7 @@ namespace WatershedDelineation
             {
                 string errorM = "";
                 //subF.Value.GetData(out errorM);
-                int retries = 5;
+                int retries = 1;
                 while (retries > 0 && subF.Value.Output == null)
                 {
                     subF.Value.GetData(out errorM);
@@ -181,7 +198,7 @@ namespace WatershedDelineation
             {
                 string errorM = "";
                 //surF.Value.GetData(out errorM);
-                int retries = 5;
+                int retries = 1;
                 while (retries > 0 && surF.Value.Output == null)
                 {
                     surF.Value.GetData(out errorM);
@@ -205,19 +222,19 @@ namespace WatershedDelineation
                     fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
                 }
 
-                for (int i = 0; i < indx; i++)
+                for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
                 {
+                    if (!validList.Contains(COMID))
+                    {
+                        continue;
+                    }
 
                     if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)
                     {
-                        dtSubSurfaceRunoff.Rows[i][COMID] = 0;
+                        dtSubSurfaceRunoff.Rows[i][COMID] = -9999;
                     }
                     else
                     {
-                        if (i >= dtSubSurfaceRunoff.Rows.Count)
-                        {
-                            break;
-                        }
                         DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
                         string date = datekey.ToString("yyyy-MM-dd") + " 00";
                         dtSubSurfaceRunoff.Rows[i][COMID] = subsurfaceFlow[COMID].Output.Data[date][0];
@@ -225,14 +242,10 @@ namespace WatershedDelineation
 
                     if (surfaceFlow[COMID].Output == null || surfaceFlow[COMID].Output.Data.Count == 0)
                     {
-                        dtSurfaceRunoff.Rows[i][COMID] = 0;
+                        dtSurfaceRunoff.Rows[i][COMID] = -9999;
                     }
                     else
                     {
-                        if (i >= dtSurfaceRunoff.Rows.Count)
-                        {
-                            break;
-                        }
                         DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
                         string date = datekey.ToString("yyyy-MM-dd") + " 00";
                         dtSurfaceRunoff.Rows[i][COMID] = surfaceFlow[COMID].Output.Data[date][0];
@@ -240,14 +253,10 @@ namespace WatershedDelineation
 
                     if (precipitation[COMID].Output == null || precipitation[COMID].Output.Data.Count == 0)
                     {
-                        dtPrecip.Rows[i][COMID] = 0;
+                        dtPrecip.Rows[i][COMID] = -9999;
                     }
                     else
                     {
-                        if (i >= dtPrecip.Rows.Count)
-                        {
-                            break;
-                        }
                         DateTime datekey = Convert.ToDateTime(dtPrecip.Rows[i]["DateTime"].ToString());
                         string date = datekey.ToString("yyyy-MM-dd") + " 00";
                         dtPrecip.Rows[i][COMID] = precipitation[COMID].Output.Data[date][0];
@@ -257,7 +266,7 @@ namespace WatershedDelineation
                     double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
                     double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
                     double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
-                    dtStreamFlow.Rows[i][COMID] = (dsub * area) + (dsur * area);//dsub + dsur;
+                    dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
 
 
                     //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
@@ -283,9 +292,13 @@ namespace WatershedDelineation
                             continue;
                         }
                         //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
-                        dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area * 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()) * area * 1000);
+                        dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
                     }
                 }
+            }
+            if (!errComs.Equals(""))
+            {
+                errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output.";
             }
             return ds;
         }
@@ -299,12 +312,7 @@ namespace WatershedDelineation
             if (centroidDict.Count == 0)
             {
                 errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
-                IPointCoordinate cent = new PointCoordinate()
-                {
-                    Latitude = 0,
-                    Longitude = 0,
-                };
-                return cent as PointCoordinate;
+                return null;
             }
 
             IPointCoordinate centroid = new PointCoordinate()
