@@ -23,29 +23,28 @@ namespace SurfaceRunoff
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesOutput precipData;
+            if (!CheckForInputTimeseries(out errorMsg, input))
+            {
+                ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+                string tempSource = input.Source;
+                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
+                input.Source = precipSource;
+                ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
-            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            string tempSource = input.Source;
-            string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
-            input.Source = precipSource;
-            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
-            // Static test centroid point
-            //IPointCoordinate catchmentCentroid = new PointCoordinate()
-            //{
-            //    Latitude = 46.69580547,
-            //    Longitude = -69.36054766
-            //};
-            //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
+                // Database call for centroid data with specified comid.
+                precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
+                if (errorMsg.Contains("ERROR")) { return null; }
 
-
-            // Database call for centroid data with specified comid.
-            precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
-            if (errorMsg.Contains("ERROR")) { return null; }
-
-            precipInput.TemporalResolution = "daily";
-            ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
-            if (errorMsg.Contains("ERROR")) { return null; }
-            input.Source = tempSource;
+                precipInput.TemporalResolution = "daily";
+                precipData = GetPrecipData(out errorMsg, precipInput, output);
+                if (errorMsg.Contains("ERROR")) { return null; }
+                input.Source = tempSource;
+            }
+            else
+            {
+                precipData = input.InputTimeSeries["precipitation"];
+            }
 
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
@@ -136,5 +135,36 @@ namespace SurfaceRunoff
             return centroid as PointCoordinate;
         }
 
+
+        /// <summary>
+        /// Check for valid ITimeSeriesOutput in the input object
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private bool CheckForInputTimeseries(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            bool validTSInput = false;
+            if (input.InputTimeSeries != null)
+            {
+                foreach(var e in input.InputTimeSeries)
+                {
+                    string dataset = e.Key;
+                    ITimeSeriesOutput o = e.Value;
+                    if (dataset.ToLower().Equals("precipitation"))
+                    {
+                        // Assuming input TimeSeries has a temporal resolution of 1 day
+                        int inputDays = (input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).Days;
+                        int inputTSDays = o.Data.Keys.Count;
+                        if (inputDays == inputTSDays)
+                        {
+                            validTSInput = true;
+                        }
+                    }
+                }
+            }
+            return validTSInput;
+        }
     }
 }

@@ -56,13 +56,15 @@ namespace Utilities
         /// <returns></returns>
         private static double[] CalculateSums(Dictionary<string, List<string>> data)
         {
+            int p = 4; // Double decimal places
+
             // calculate daily values to get sums
             double[] sums = new double[data.Values.ElementAt(0).Count];
             foreach (var e in data)
             {
                 for (int i = 0; i < e.Value.Count; i++)
                 {
-                    sums[i] += Convert.ToDouble(e.Value.ElementAt(i));
+                    sums[i] += Math.Round(Convert.ToDouble(e.Value.ElementAt(i)), p);
                 }
             }
 
@@ -110,38 +112,39 @@ namespace Utilities
         private static double[] CalculateStandardDeviation(double[] averages, Dictionary<string, List<string>> data)
         {
 
+            int p = 4; // Double decimal places
             double[] sumDif = new double[data.Values.ElementAt(0).Count];
-            //foreach (var el in data)
-            //{
-            //    for(int i = 0; i < el.Value.Count; i++)
-            //    {
-            //        // A. Sum of (daily value - daily average) squared
-            //        sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
-            //    }
-            //}
-
-            Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) =>
+            foreach (var el in data)
             {
                 for (int i = 0; i < el.Value.Count; i++)
                 {
                     // A. Sum of (daily value - daily average) squared
-                    sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
+                    sumDif[i] += Math.Pow(Math.Round(Convert.ToDouble(el.Value[i]), p) - averages[i], 2.0);
                 }
-            });
+            }
+
+            //Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) =>
+            //{
+            //    for (int i = 0; i < el.Value.Count; i++)
+            //    {
+            //        // A. Sum of (daily value - daily average) squared
+            //        sumDif[i] += Math.Pow(Math.Round(Convert.ToDouble(el.Value[i]), p) - averages[i], 2.0);
+            //    }
+            //});
 
             double days = data.Keys.Count;
             double[] stdDev = new double[data.Values.ElementAt(0).Count];
 
             // Standard Deviation = A / #days 
-            //for(int i = 0; i < sumDif.Length; i++)
-            //{
-            //    stdDev[i] = Math.Sqrt(sumDif[i] / days);
-            //}
-
-            Parallel.For(0, sumDif.Length, i =>
+            for (int i = 0; i < sumDif.Length; i++)
             {
-                stdDev[i] = Math.Sqrt(sumDif[i] / days);
-            });
+                stdDev[i] = Math.Round(Math.Sqrt(sumDif[i] / days), p);
+            }
+
+            //Parallel.For(0, sumDif.Length, i =>
+            //{
+            //    stdDev[i] = Math.Round(Math.Sqrt(sumDif[i] / days), p);
+            //});
             
             return stdDev;
         }
