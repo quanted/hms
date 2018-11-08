@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Web.Services.Models;
-using Swashbuckle.AspNetCore.Examples;
 using System.Net.Http;
 using Data;
 using System.Threading.Tasks;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Web.Services.Controllers
 {

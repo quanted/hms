@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections;
 using System.Collections.Generic;

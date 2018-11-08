@@ -173,16 +173,16 @@ namespace Utilities
 
             double[] gore = new double[data.Values.ElementAt(0).Count];
 
-            //for(int i = 1; i < gore.Length; i++)
-            //{
-            //    // Calculate GORE value
-            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            //}
-
-            Parallel.For(1, gore.Length, i =>
+            for (int i = 1; i < gore.Length; i++)
             {
+                // Calculate GORE value
                 gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            });
+            }
+
+            //Parallel.For(1, gore.Length, i =>
+            //{
+            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            //});
 
             return gore;
         }
