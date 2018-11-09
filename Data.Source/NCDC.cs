@@ -145,6 +145,19 @@ namespace Data.Source
 
                     NCDCJson results = JSON.Deserialize<NCDCJson>(json);
 
+                    /*
+                    int days = Convert.ToInt16((input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).TotalDays);
+                    for (int d = 0; d < days; d++)
+                    {
+                        DateTime date = input.DateTimeSpan.StartDate.AddDays(d);
+                        if (results.results[d].date.Substring(0,10) != date.ToString("yyyy-MM-dd"))
+                        {
+                            results.results[d].value = -9999;
+                        }
+                    }
+                    */
+
+
                     double total = results.metadata.resultset.count;        //checking if available results exceed 1000 entry limit.
                     if (total > 1000)
                     {
@@ -251,11 +264,15 @@ namespace Data.Source
             errorMsg = "";
             if (attribute.Contains("[") || attribute.Contains("]"))             // Begin and end of deleted period, during the given hour
             {
-                return 0.0;
+                return -9999;
             }
             else if (attribute.Contains("{") || attribute.Contains("}"))        // Begin and end of missing period, during the given hour
             {
-                return 0.0;
+                return -9999;
+            }
+            else if (attribute.Contains("M"))        // One period of missing data
+            {
+                return -9999;
             }
             else
             {
@@ -391,19 +408,29 @@ namespace Data.Source
             DateTime newDate;
             DateTime.TryParse(data.results[0].date, out newDate);
             double sum = 0.0;
-            for (int i = 0; i < data.results.Count - 1; i++)
+            for (int i = 0; i <= data.results.Count - 1; i++)
             {
                 DateTime.TryParse(data.results[i].date, out iDate);
                 if (iDate.Date == newDate.Date)
                 {
+                    if(sum < 0)
+                    {
+                        sum = 0;
+                    }
                     sum += NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
+                    newDate = newDate.AddHours(-newDate.Hour);
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    if (i == data.results.Count - 1)
+                    {
+                        iDate = iDate.AddHours(-iDate.Hour);
+                        dict.Add(iDate.ToString(dateFormat), sum);
+                    }
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
@@ -464,7 +491,7 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
@@ -481,7 +508,7 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
@@ -496,7 +523,7 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
@@ -513,7 +540,7 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;

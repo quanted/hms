@@ -47,7 +47,7 @@ namespace Web.Services.Controllers
     {
         public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }
         public Dictionary<string, string> metadata { get; set; }
-        public new Dictionary<string, Dictionary<string, string>> table { get; set; }
+        public Dictionary<string, Dictionary<string, string>> table { get; set; }
         //public Dictionary<string, Dictionary<string, string>> table { get; set; }
     }
 
