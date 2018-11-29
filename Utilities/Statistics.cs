@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Accord.Statistics;
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Statistics;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Utilities
 {
@@ -22,6 +24,8 @@ namespace Utilities
         {
             errorMsg = "";
             int notSkipped = 0;
+
+            Matrix<double> matrix = BuildMatrix(data.Data, true);
 
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
@@ -48,6 +52,56 @@ namespace Utilities
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Build a MathNet.Numerics Matrix from timeseries from multiple sources
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="excludeAcrossSources">Exclude data if missing from any source</param>
+        /// <returns></returns>
+        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources)
+        {
+            // calculate daily values to get sums
+            if (data == null || data.Count < 1)
+                return null;
+
+            int rows = data.Count;
+            int cols = data.First().Value.Count;            
+
+            List<List<double>> lstTable = new List<List<double>>();
+            
+            foreach (KeyValuePair<string, List<string>> timeseries in data)
+            {
+                bool missingData = false;
+                List<double> row = new List<double>();
+                for (int i = 0; i < cols; i++)
+                {
+                    double dval;
+                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval))
+                        row.Add(dval);                        
+                    else
+                    {
+                        missingData = true;
+                        row.Add(-9999);
+                    }
+                }
+
+                //If there are missing data and we want to exclude missing data
+                if (missingData && excludeAcrossSources)
+                    continue;
+                else
+                    lstTable.Add(row);               
+            }
+
+            double[][] arrayTable = new double[cols][];
+            for (int i=0; i<cols; i++)            
+                arrayTable[i] = lstTable[i].ToArray();
+            
+
+            var M = Matrix<double>.Build;
+            var matrix = M.DenseOfColumnArrays(arrayTable);
+            return matrix;
         }
 
         /// <summary>
@@ -294,7 +348,8 @@ namespace Utilities
             r2[0] = 0.0;
             for(int i = 1; i < r2.Length; i++)
             {
-                r2[i] = Accord.Statistics.Tools.Determination(datasets[0], datasets[i]);
+                //r2[i] = Accord.Statistics.Tools.Determination(datasets[0], datasets[i]);
+                r2[i] = MathNet.Numerics.GoodnessOfFit.CoefficientOfDetermination(datasets[0], datasets[i]);
             }
 
             return r2;
