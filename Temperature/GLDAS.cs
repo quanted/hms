@@ -22,7 +22,7 @@ namespace Temperature
         {
             errorMsg = "";
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
-            string data = gldas.GetData(out errorMsg, "Temp", input);
+            List<string> data = gldas.GetData(out errorMsg, "Temp", input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput gldasOutput = output;

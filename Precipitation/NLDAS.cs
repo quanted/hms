@@ -64,6 +64,8 @@ namespace Precipitation
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
+            output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
+
             switch (input.TemporalResolution)
             {
                 case "daily":
@@ -79,7 +81,6 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 default:
-                    output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
                     output.Metadata.Add("column_2", "Hourly Total");
                     return output;
             }
