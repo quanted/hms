@@ -65,7 +65,6 @@ namespace Precipitation
             output.Metadata.Add("column_1", "Date");
             output.Data = ConvertToHourly(out errorMsg, output, input);
             if (input.Units.Contains("imperial")) { output.Metadata["gldas_unit"] = "in"; }
-            output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, 3.0, output, input) : output.Data;
 
             // NLDAS static methods used for aggregation as GLDAS is identical in function. Modifier refers to the 3hr different to nldas's hourly resolution.
             switch (input.TemporalResolution)
@@ -83,6 +82,7 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 default:
+                    output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, 3.0, output, input) : output.Data;
                     output.Metadata.Add("column_2", "Hourly Average");
                     return output;
             }
