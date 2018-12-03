@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
     <ApplicationIcon />
     <StartupObject />
     <AssemblyName>AQUATOX</AssemblyName>
     <RootNamespace>AQUATOX</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,5 +19,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
-
 </Project>

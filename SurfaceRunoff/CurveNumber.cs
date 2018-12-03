@@ -10,7 +10,7 @@ namespace SurfaceRunoff
     /// <summary>
     /// SurfaceRunoff curve number class.
     /// </summary>
-    class CurveNumber
+    public class CurveNumber
     {
 
         /// <summary>
@@ -23,25 +23,28 @@ namespace SurfaceRunoff
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesOutput precipData;
+            if (!CheckForInputTimeseries(out errorMsg, input))
+            {
+                ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+                string tempSource = input.Source;
+                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
+                input.Source = precipSource;
+                ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
-            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            // TODO: Add options for different precip inputs
+                // Database call for centroid data with specified comid.
+                precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
+                if (errorMsg.Contains("ERROR")) { return null; }
 
-            ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
-            // Static test centroid point
-            //IPointCoordinate catchmentCentroid = new PointCoordinate()
-            //{
-            //    Latitude = 46.69580547,
-            //    Longitude = -69.36054766
-            //};
-            //precipInput.Geometry.Point = catchmentCentroid as PointCoordinate;
-            //input.Geometry.ComID = 8545069;
-
-            // Database call for centroid data with specified comid.
-            precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
-
-            ITimeSeriesOutput precipData = GetPrecipData(out errorMsg, precipInput, output);
-            if (errorMsg.Contains("ERROR")) { return null; }
+                precipInput.TemporalResolution = "daily";
+                precipData = GetPrecipData(out errorMsg, precipInput, output);
+                if (errorMsg.Contains("ERROR")) { return null; }
+                input.Source = tempSource;
+            }
+            else
+            {
+                precipData = input.InputTimeSeries["precipitation"];
+            }
 
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
@@ -90,8 +93,7 @@ namespace SurfaceRunoff
             }
             else
             {
-                input.Source = "nldas";
-                input.TemporalResolution = "daily";
+                input.Source = "daymet";
             }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
@@ -114,6 +116,11 @@ namespace SurfaceRunoff
             string dbPath = "./App_Data/catchments.sqlite";
             string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + comid.ToString();
             Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
+            if (centroidDict.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
+                return null;
+            }
             IPointCoordinate centroid = new PointCoordinate()
             {
                 Latitude = double.Parse(centroidDict["CentroidLatitude"]),
@@ -122,5 +129,36 @@ namespace SurfaceRunoff
             return centroid as PointCoordinate;
         }
 
+
+        /// <summary>
+        /// Check for valid ITimeSeriesOutput in the input object
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private bool CheckForInputTimeseries(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            bool validTSInput = false;
+            if (input.InputTimeSeries != null)
+            {
+                foreach(var e in input.InputTimeSeries)
+                {
+                    string dataset = e.Key;
+                    ITimeSeriesOutput o = e.Value;
+                    if (dataset.ToLower().Equals("precipitation"))
+                    {
+                        // Assuming input TimeSeries has a temporal resolution of 1 day
+                        int inputDays = (input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).Days;
+                        int inputTSDays = o.Data.Keys.Count;
+                        if (inputDays == inputTSDays)
+                        {
+                            validTSInput = true;
+                        }
+                    }
+                }
+            }
+            return validTSInput;
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -187,7 +187,11 @@ namespace Web.Services.Controllers
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
             WSPrecipitation precip = new WSPrecipitation();
+            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
             ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+            stpWatch.Stop();
+            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString() + " ms", results.Metadata);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

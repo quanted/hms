@@ -11,7 +11,6 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
@@ -29,10 +28,11 @@ namespace Data
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
-            ["subsurfaceflow"] = new List<string> { "nldas", "gldas" },
+            ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet"}
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
+
         };
 
         static string[] validRemoteData =
@@ -100,6 +100,12 @@ namespace Data
             return validInput;
         }
         
+        /// <summary>
+        /// Validates the timezone attribute for ITimeSeriesInput
+        /// </summary>
+        /// <param name="errors"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
         {
             errors = new List<string>();
@@ -208,15 +214,21 @@ namespace Data
                     validGeom = ValidatePoint(out errorTemp, geometry.Point);
                     errors = errors.Concat(errorTemp).ToList();
                 }
-                if (!validGeom && !string.IsNullOrWhiteSpace(geometry.HucID.ToString()))
+                if (!validGeom && !string.IsNullOrWhiteSpace(geometry.HucID))
                 {
-                    validGeom = ValidateHucID(out errorTemp, geometry.HucID);
-                    errors = errors.Concat(errorTemp).ToList();
+                    if (string.Equals("-1", geometry.HucID))
+                    {
+                        validGeom = ValidateHucID(out errorTemp, geometry.HucID);
+                        errors = errors.Concat(errorTemp).ToList();
+                    }
                 }
                 if (!validGeom && !string.IsNullOrWhiteSpace(geometry.ComID.ToString()))
                 {
-                    validGeom = ValidateComID(out errorTemp, geometry.ComID);
-                    errors = errors.Concat(errorTemp).ToList();
+                    if (geometry.ComID > -1)
+                    {
+                        validGeom = ValidateComID(out errorTemp, geometry.ComID);
+                        errors = errors.Concat(errorTemp).ToList();
+                    }
                 }
                 if (!validGeom && !string.IsNullOrWhiteSpace(geometry.StationID))
                 {
@@ -283,18 +295,18 @@ namespace Data
         /// <param name="errors"></param>
         /// <param name="hucID"></param>
         /// <returns></returns>
-        private static bool ValidateHucID(out List<string> errors, int hucID)
+        private static bool ValidateHucID(out List<string> errors, string hucID)
         {
             errors = new List<string>();
-            if (string.IsNullOrWhiteSpace(hucID.ToString()))
+            if (string.IsNullOrWhiteSpace(hucID))
             {
                 errors.Add("ERROR: A valid HUC ID was not found.");
                 return false;
             }
-            int hucType = hucID.ToString().Length;
+            int hucType = hucID.Length;
             if (hucType != 8 || hucType != 12)
             {
-                errors.Add("ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: " + hucID.ToString());
+                errors.Add("ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: " + hucID);
                 return false;
             }
             return true;

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Accord.Statistics;
+using MathNet.Numerics.Distributions;
+using MathNet.Numerics.Statistics;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Utilities
 {
@@ -21,13 +23,16 @@ namespace Utilities
         public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesOutput data)
         {
             errorMsg = "";
+            int notSkipped = 0;
+
+            Matrix<double> matrix = BuildMatrix(data.Data, true);
 
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            double[] sums = CalculateSums(data.Data);
-            double[] dailyAverage = CalculateDailyAverage(sums, data.Data);
-            double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data);
+            double[] sums = CalculateSums(data.Data, out notSkipped);
+            double[] dailyAverage = CalculateDailyAverage(sums, data.Data, notSkipped);
+            double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data, notSkipped);
             double[] gore = CalculateGORE(dailyAverage, data.Data);
             //double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
             double[] rSquared = CalculateDetermination(data.Data);
@@ -50,19 +55,79 @@ namespace Utilities
         }
 
         /// <summary>
+        /// Build a MathNet.Numerics Matrix from timeseries from multiple sources
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="excludeAcrossSources">Exclude data if missing from any source</param>
+        /// <returns></returns>
+        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources)
+        {
+            // calculate daily values to get sums
+            if (data == null || data.Count < 1)
+                return null;
+
+            int rows = data.Count;
+            int cols = data.First().Value.Count;            
+
+            List<List<double>> lstTable = new List<List<double>>();
+            
+            foreach (KeyValuePair<string, List<string>> timeseries in data)
+            {
+                bool missingData = false;
+                List<double> row = new List<double>();
+                for (int i = 0; i < cols; i++)
+                {
+                    double dval;
+                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval))
+                        row.Add(dval);                        
+                    else
+                    {
+                        missingData = true;
+                        row.Add(-9999);
+                    }
+                }
+
+                //If there are missing data and we want to exclude missing data
+                if (missingData && excludeAcrossSources)
+                    continue;
+                else
+                    lstTable.Add(row);               
+            }
+
+            double[][] arrayTable = new double[cols][];
+            for (int i=0; i<cols; i++)            
+                arrayTable[i] = lstTable[i].ToArray();
+            
+
+            var M = Matrix<double>.Build;
+            var matrix = M.DenseOfColumnArrays(arrayTable);
+            return matrix;
+        }
+
+        /// <summary>
         /// Calculates sum for all value sources.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private static double[] CalculateSums(Dictionary<string, List<string>> data)
+        private static double[] CalculateSums(Dictionary<string, List<string>> data, out int notSkipped)
         {
+            int p = 4; // Double decimal places
+            notSkipped = 0; // Track amount of valid data entries for average
+
             // calculate daily values to get sums
             double[] sums = new double[data.Values.ElementAt(0).Count];
             foreach (var e in data)
             {
                 for (int i = 0; i < e.Value.Count; i++)
                 {
-                    sums[i] += Convert.ToDouble(e.Value.ElementAt(i));
+                    if (Convert.ToDouble(e.Value.ElementAt(i)) > -9999)
+                    {
+                        if (i == 0)
+                        {
+                            notSkipped += 1;
+                        }
+                        sums[i] += Math.Round(Convert.ToDouble(e.Value.ElementAt(i)), p);
+                    }
                 }
             }
 
@@ -82,7 +147,7 @@ namespace Utilities
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private static double[] CalculateDailyAverage(double[] sums, Dictionary<string, List<string>> data)
+        private static double[] CalculateDailyAverage(double[] sums, Dictionary<string, List<string>> data, int notSkipped)
         {
             // calculate daily average
             double[] dailyAverage = new double[data.Values.ElementAt(0).Count];
@@ -97,6 +162,7 @@ namespace Utilities
             {
                 dailyAverage[i] = sums[i] / count;
             });
+            dailyAverage[0] = sums[0] / notSkipped;
 
             return dailyAverage;
         }
@@ -107,42 +173,47 @@ namespace Utilities
         /// <param name="averages"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private static double[] CalculateStandardDeviation(double[] averages, Dictionary<string, List<string>> data)
+        private static double[] CalculateStandardDeviation(double[] averages, Dictionary<string, List<string>> data, int notSkipped)
         {
 
+            int p = 4; // Double decimal places
             double[] sumDif = new double[data.Values.ElementAt(0).Count];
-            //foreach (var el in data)
-            //{
-            //    for(int i = 0; i < el.Value.Count; i++)
-            //    {
-            //        // A. Sum of (daily value - daily average) squared
-            //        sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
-            //    }
-            //}
-
-            Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) =>
+            foreach (var el in data)
             {
                 for (int i = 0; i < el.Value.Count; i++)
                 {
                     // A. Sum of (daily value - daily average) squared
-                    sumDif[i] += Math.Pow(Convert.ToDouble(el.Value[i]) - averages[i], 2.0);
+                    if(Convert.ToDouble(el.Value[i]) > -9999)
+                    {
+                        sumDif[i] += Math.Pow(Math.Round(Convert.ToDouble(el.Value[i]), p) - averages[i], 2.0);
+                    }
                 }
-            });
+            }
+
+            //Parallel.ForEach(data, (KeyValuePair<string, List<string>> el) =>
+            //{
+            //    for (int i = 0; i < el.Value.Count; i++)
+            //    {
+            //        // A. Sum of (daily value - daily average) squared
+            //        sumDif[i] += Math.Pow(Math.Round(Convert.ToDouble(el.Value[i]), p) - averages[i], 2.0);
+            //    }
+            //});
 
             double days = data.Keys.Count;
             double[] stdDev = new double[data.Values.ElementAt(0).Count];
 
             // Standard Deviation = A / #days 
-            //for(int i = 0; i < sumDif.Length; i++)
-            //{
-            //    stdDev[i] = Math.Sqrt(sumDif[i] / days);
-            //}
-
-            Parallel.For(0, sumDif.Length, i =>
+            for (int i = 0; i < sumDif.Length; i++)
             {
-                stdDev[i] = Math.Sqrt(sumDif[i] / days);
-            });
-            
+                stdDev[i] = Math.Round(Math.Sqrt(sumDif[i] / days), p);
+            }
+            stdDev[0] = Math.Round(Math.Sqrt(sumDif[0] / notSkipped), p);
+
+            //Parallel.For(0, sumDif.Length, i =>
+            //{
+            //    stdDev[i] = Math.Round(Math.Sqrt(sumDif[i] / days), p);
+            //});
+
             return stdDev;
         }
 
@@ -170,16 +241,16 @@ namespace Utilities
 
             double[] gore = new double[data.Values.ElementAt(0).Count];
 
-            //for(int i = 1; i < gore.Length; i++)
-            //{
-            //    // Calculate GORE value
-            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            //}
-
-            Parallel.For(1, gore.Length, i =>
+            for (int i = 1; i < gore.Length; i++)
             {
+                // Calculate GORE value
                 gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
-            });
+            }
+
+            //Parallel.For(1, gore.Length, i =>
+            //{
+            //    gore[i] = 1.0 - (dailyDif[i] / dailyAvgDif);
+            //});
 
             return gore;
         }
@@ -277,7 +348,8 @@ namespace Utilities
             r2[0] = 0.0;
             for(int i = 1; i < r2.Length; i++)
             {
-                r2[i] = Accord.Statistics.Tools.Determination(datasets[0], datasets[i]);
+                //r2[i] = Accord.Statistics.Tools.Determination(datasets[0], datasets[i]);
+                r2[i] = MathNet.Numerics.GoodnessOfFit.CoefficientOfDetermination(datasets[0], datasets[i]);
             }
 
             return r2;

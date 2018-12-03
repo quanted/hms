@@ -23,14 +23,7 @@ namespace Precipitation
         {
             errorMsg = "";
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
-            string data = gldas.GetData(out errorMsg, "PRECIP", input);
-            //if (errorMsg.Contains("ERROR")) { return null; }
-            //if (data.Contains("ERROR"))
-            //{
-            //    string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            //    errorMsg = lines[0] + " Dataset: precipitation; Source: " + input.Source;
-            //    return null;
-            //}
+            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
 
             ITimeSeriesOutput gldasOutput = output;
             if (errorMsg.Contains("ERROR"))
@@ -82,7 +75,7 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 default:
-                    output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, 3.0, output, input) : output.Data;
+                    output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, 3.0, output, input) : ConvertToThreeHourly(out errorMsg, output, input);
                     output.Metadata.Add("column_2", "Hourly Average");
                     return output;
             }
@@ -110,14 +103,30 @@ namespace Precipitation
             errorMsg = "";
             // seconds to hours
             double modifier = 3600;
-            //double modifier = 1;
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            for (int i = 0; i < output.Data.Count; i++)
+            Dictionary<string, List<string>> tempData = output.Data;
+            foreach(KeyValuePair<string, List<string>> kv in tempData)
             {
-                tempData.Add(output.Data.Keys.ElementAt(i).ToString(), new List<string>()
-                {
-                    ( modifier * Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0])).ToString(input.DataValueFormat)
-                });
+                tempData[kv.Key][0] = (modifier * Convert.ToDouble(kv.Value[0])).ToString(input.DataValueFormat);
+            }
+            return tempData;
+        }
+
+        /// <summary>
+        /// Converts hourly to 3 hourly
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> ConvertToThreeHourly(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            // 1hour to 3 hourly
+            double modifier = 3;
+            Dictionary<string, List<string>> tempData = output.Data;
+            foreach (KeyValuePair<string, List<string>> kv in tempData)
+            {
+                tempData[kv.Key][0] = (modifier * Convert.ToDouble(kv.Value[0])).ToString(input.DataValueFormat);
             }
             return tempData;
         }

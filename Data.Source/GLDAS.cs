@@ -20,7 +20,7 @@ namespace Data.Source
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
         {
             errorMsg = "";
 
@@ -28,11 +28,11 @@ namespace Data.Source
             componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
             // Constructs the url for the NLDAS data request and it's query string.
-            string url = ConstructURL(out errorMsg, dataset, componentInput);
+            List<string> url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(out errorMsg, url);
+            List<string> data = DownloadData(out errorMsg, url);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -44,22 +44,71 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
+        private static List<string> ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
         {
             errorMsg = "";
-            StringBuilder sb = new StringBuilder();
-            sb.Append(cInput.BaseURL[0]);
+            List<string> urls = new List<string>();
+            // Example base url: https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Rainf_f_tavg&location=GEOM:POINT
+            // Cases:
+            // #1 both start and end are in GLDAS 2.0
+            // #2 start is in GLDAS 2.0, end is in GLDAS 2.1
+            // #3 both are in GLDAS 2.1
+            DateTime gldas21 = new DateTime(2010, 01, 01);
+            if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0)            // #3
+            {
+                //Add Start and End Date
+                string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
+                DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
+                string[] endDT = tempDate.ToString("yyyy-MM-dd HH").Split(' ');
 
-            //Add X and Y coordinates
-            sb.Append(@"%28" + cInput.Geometry.Point.Longitude.ToString() + @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29");
+                string url1 = cInput.BaseURL[0] +
+                    @"%28" + cInput.Geometry.Point.Longitude.ToString() +
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" + 
+                    @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2";
+                urls.Add(url1);
+            }
+            else if(DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
+            {
+                string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
 
-            //Add Start and End Date
-            string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-            DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
-            string[] endDT = tempDate.ToString("yyyy-MM-dd HH").Split(' ');
-            sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
+                //Add Start and End Date for GLDAS 2.0
+                string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
+                DateTime tempDate1 = gldas21.AddHours(3);
+                string[] endDT1 = tempDate1.ToString("yyyy-MM-dd HH").Split(' ');
 
-            return sb.ToString();
+                string url1 = gldas2Url +
+                    @"%28" + cInput.Geometry.Point.Longitude.ToString() +
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
+                    @"&startDate=" + startDT1[0] + @"T" + startDT1[1] + @"&endDate=" + endDT1[0] + "T" + endDT1[1] + @"&type=asc2";
+                urls.Add(url1);
+
+                //Add Start and End Date for GLDAS 2.1
+                string[] startDT2 = gldas21.ToString("yyyy-MM-dd HH").Split(' ');
+                DateTime tempDate2 = cInput.DateTimeSpan.EndDate.AddHours(3);
+                string[] endDT2 = tempDate2.ToString("yyyy-MM-dd HH").Split(' ');
+
+                string url2 = cInput.BaseURL[0] +
+                    @"%28" + cInput.Geometry.Point.Longitude.ToString() +
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
+                    @"&startDate=" + startDT2[0] + @"T" + startDT2[1] + @"&endDate=" + endDT2[0] + "T" + endDT2[1] + @"&type=asc2";
+                urls.Add(url2);
+            }
+            else
+            {
+                string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
+
+                //Add Start and End Date for GLDAS 2.0
+                string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
+                DateTime tempDate1 = gldas21.AddHours(3);
+                string[] endDT1 = tempDate1.ToString("yyyy-MM-dd HH").Split(' ');
+
+                string url1 = cInput.BaseURL[0] +
+                    @"%28" + cInput.Geometry.Point.Longitude.ToString() +
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
+                    @"&startDate=" + startDT1[0] + @"T" + startDT1[1] + @"&endDate=" + endDT1[0] + "T" + endDT1[1] + @"&type=asc2";
+                urls.Add(url1);
+            }
+            return urls;
         }
 
         /// <summary>
@@ -69,36 +118,41 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
+        private List<string> DownloadData(out string errorMsg, List<string> urls)
         {
             errorMsg = "";
-            string data = "";
-            try
+            List<string> data = new List<string>();
+            foreach (string url in urls)
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 5;
-
-                // Response status message
-                string status = "";
-
-                while (retries > 0 && !status.Contains("OK"))
+                string _data = "";
+                try
                 {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    // TODO: Read in max retry attempt from config file.
+                    int retries = 5;
+
+                    // Response status message
+                    string status = "";
+
+                    while (retries > 0 && !status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                        WebRequest wr = WebRequest.Create(url);
+                        HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                        status = response.StatusCode.ToString();
+                        Stream dataStream = response.GetResponseStream();
+                        StreamReader reader = new StreamReader(dataStream);
+                        _data = reader.ReadToEnd();
+                        reader.Close();
+                        response.Close();
+                        retries -= 1;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Unable to download requested gldas data.\n" + ex.Message;
-                return null;
+                catch (Exception ex)
+                {
+                    errorMsg = "ERROR: Unable to download requested gldas data.\n" + ex.Message;
+                    return null;
+                }
+                data.Add(_data);
             }
             return data;
         }
@@ -129,15 +183,21 @@ namespace Data.Source
         /// <param name="component"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, List<string> data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-            string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> metadataList = new List<string>();
+            List<string> dataList = new List<string>();
+            foreach (string _data in data)
+            {
+                string[] splitData = _data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+                metadataList.Add(splitData[0]);
+                dataList.Add(splitData[1]);
+            }
             output.Dataset = dataset;
             output.DataSource = input.Source;
-            output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1], input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
-            //output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            output.Metadata = SetMetadata(out errorMsg, metadataList, output);
+            output.Data = SetData(out errorMsg, dataList, input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
             return output;
         }
 
@@ -148,23 +208,32 @@ namespace Data.Source
         /// <param name="data"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetMetadata(out string errorMsg, string metaData, ITimeSeriesOutput output)
+        private Dictionary<string, string> SetMetadata(out string errorMsg, List<string> metaDataList, ITimeSeriesOutput output)
         {
             errorMsg = "";
             Dictionary<string, string> meta = output.Metadata;
-            string[] metaDataLines = metaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < metaDataLines.Length - 1; i++)
+            foreach (string metaData in metaDataList)
             {
-                if (metaDataLines[i].Contains("="))
+                string version = (metaData.Contains("v2.0")) ? "2.0" : "2.1";
+
+                string[] metaDataLines = metaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < metaDataLines.Length - 1; i++)
                 {
-                    string[] line = metaDataLines[i].Split('=');
-                    if (line[0].Contains("column"))
+                    if (metaDataLines[i].Contains("="))
                     {
-                        meta[line[0]] = line[1];
-                    }
-                    else
-                    {
-                        meta["gldas_" + line[0]] = line[1];
+                        string[] line = metaDataLines[i].Split('=');
+                        if (line[0].Contains("column"))
+                        {
+                            meta[line[0]] = line[1];
+                        }
+                        else
+                        {
+                            string key = "gldas_" + version + "_" + line[0];
+                            if (!meta.ContainsKey(key))
+                            {
+                                meta[key] = line[1];
+                            }
+                        }
                     }
                 }
             }
@@ -177,24 +246,30 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> SetData(out string errorMsg, string data, bool localTime, string dateFormat, string dataFormat, ITimezone tzDetails)
+        private Dictionary<string, List<string>> SetData(out string errorMsg, List<string> dataLists, bool localTime, string dateFormat, string dataFormat, ITimezone tzDetails)
         {
             errorMsg = "";
             Dictionary<string, List<string>> dataDict = new Dictionary<string, List<string>>();
             List<string> timestepData;
             double offset = (localTime == true) ? tzDetails.Offset : 0.0;
-            string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < tsLines.Length; i++)
+            foreach (string data in dataLists)
             {
-                if (tsLines[i].Contains("MEAN"))
+                string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < tsLines.Length; i++)
                 {
-                    break;
+                    if (tsLines[i].Contains("MEAN"))
+                    {
+                        break;
+                    }
+                    string[] lineData = tsLines[i].Split(new string[] { "T", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
+                    string key = NLDAS.SetDateToLocal(offset, lineData[0] + " " + lineData[1].Replace("Z", ""), dateFormat);
+                    if (!dataDict.ContainsKey(key))
+                    {
+                        timestepData = new List<string>();
+                        timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
+                        dataDict[key] = timestepData;
+                    }
                 }
-                timestepData = new List<string>();
-                string[] lineData = tsLines[i].Split(new string[] { "T", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
-                //string[] lineData = tsLines[i].Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
-                timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
-                dataDict[NLDAS.SetDateToLocal(offset, lineData[0] + " " + lineData[1].Replace("Z", ""), dateFormat)] = timestepData;
             }
             return dataDict;
         }
@@ -209,7 +284,7 @@ namespace Data.Source
         {
             try
             {
-                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput));
+                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput)[0]);
                 HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                 string status = response.StatusCode.ToString();
                 string description = response.StatusDescription;

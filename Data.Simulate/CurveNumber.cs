@@ -53,7 +53,8 @@ namespace Data.Simulate
                 errorMsg = "ERROR: No curve number values found for the specified catchment. ComID: " + input.Geometry.ComID;
                 return null;
             }
-            double s = 1000.0 / cn[cnI] - 10.0;
+            // Convert [in] to [mm]
+            double s = (1000.0 / cn[cnI] - 10.0) * 25.4;
 
             double ia = 0.2 * s;
 
@@ -63,7 +64,7 @@ namespace Data.Simulate
                 string date = dateValue.Key;
 
                 cnI = (DateTime.Parse(dateValue.Key.Split(' ')[0]).DayOfYear / 16) + 1;
-                s = 1000.0 / cn[cnI] - 10.0;
+                s = (1000.0 / cn[cnI] - 10.0) * 25.4;
                 ia = 0.2 * s;
                 double p = double.Parse(dateValue.Value[0]);
                 double q = (p <= ia) ? 0 : ((p - ia) * (p - ia)) / (p - ia + s);
@@ -79,7 +80,11 @@ namespace Data.Simulate
         private Dictionary<int, double> GetCN(out string errorMsg, int comid)
         {
             errorMsg = "";
-            string dbPath = "./App_Data/hms_database.db";
+            string dbPath = "/app/App_Data/hms_database.sqlite3";
+            if (!File.Exists(dbPath))
+            {
+                dbPath = @".\App_Data\hms_database.sqlite3";
+            }
             string query = "SELECT CN_00, CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22 " +
                 "FROM CurveNumber WHERE ComID = '" + comid.ToString() + "'";
             Dictionary<string, string> data = Utilities.SQLite.GetData(dbPath, query);
@@ -89,6 +94,10 @@ namespace Data.Simulate
             {
                 cnData.Add(i + 1, double.Parse(data[key]));
                 i++;
+            }
+            if (data.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
             }
             return cnData;
         }

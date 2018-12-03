@@ -64,6 +64,7 @@ namespace Precipitation
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
+
             switch (input.TemporalResolution)
             {
                 case "daily":
@@ -98,13 +99,11 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = 0.0393701;
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            for (int i = 0; i < output.Data.Count; i++)
+            Dictionary<string, List<string>> tempData = output.Data;
+
+            foreach(KeyValuePair<string, List<string>> kv in tempData)
             {
-                tempData.Add(output.Data.Keys.ElementAt(i).ToString(), new List<string>()
-                {
-                    ( modifier * unit * Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0])).ToString(input.DataValueFormat)
-                });
+                tempData[kv.Key][0] = (modifier * unit * Convert.ToDouble(kv.Value[0])).ToString(input.DataValueFormat);
             }
             return tempData;
         }
@@ -124,6 +123,7 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
+            if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);

@@ -43,11 +43,15 @@ namespace SurfaceRunoff
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
+            if (this.Input.Geometry.Timezone.Offset == 0 && this.Input.Geometry.Point != null)
             {
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
+            }
+            else
+            {
+                this.Input.TimeLocalized = false;
             }
 
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
@@ -67,11 +71,11 @@ namespace SurfaceRunoff
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
-                //case "curvenumber":
-                //    CurveNumber cn = new CurveNumber();
-                //    this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
-                //    if (errorMsg.Contains("ERROR")) { return null; }
-                //    break;
+                case "curvenumber":
+                    CurveNumber cn = new CurveNumber();
+                    this.Output = cn.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 default:
                     errorMsg = "ERROR: Source for surfacerunoff was not found among available sources or is invalid.";
                     break;

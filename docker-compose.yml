@@ -9,4 +9,4 @@ services:
       context: .
       dockerfile: Web.Services/Dockerfile
     volumes:
-      - collected_static:/app/collected_static
+      - "./Web.Services/App_Data:/app/App_Data"

@@ -21,10 +21,9 @@ namespace Evapotranspiration
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-            string data = "";
             ITimeSeriesOutput gldasOutput = output;
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
-            data = gldas.GetData(out errorMsg, "Evapotrans", input);
+            List<string> data = gldas.GetData(out errorMsg, "Evapotrans", input);
             if (errorMsg.Contains("ERROR")) { return null; }
             /*
             if (input.Algorithm != "gldas")

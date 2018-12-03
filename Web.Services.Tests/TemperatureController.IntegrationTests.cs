@@ -65,10 +65,10 @@ namespace Web.Services.Tests
         /// <returns></returns>
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest)]
-        [InlineData(gldasRequest)]
-        [InlineData(daymetRequest)]
-        public async Task ValidRequests(string inputString)
+        [InlineData(nldasRequest, 368)]
+        [InlineData(gldasRequest, 368)]
+        [InlineData(daymetRequest, 365)]
+        public async Task ValidRequests(string inputString, int expected)
         {
             string endpoint = "api/hydrology/temperature";
             TemperatureInput input = JsonConvert.DeserializeObject<TemperatureInput>(inputString);
@@ -82,7 +82,7 @@ namespace Web.Services.Tests
             Assert.NotNull(result);
             TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
             // New nldas/gldas temperature data contains statistics at the end (+3 required)
-            int expected = (input.Source.Equals("nldas") || input.Source.Equals("gldas")) ? 368 : 365;
+            //int expected = (input.Source.Equals("nldas") || input.Source.Equals("gldas")) ? 368 : 365;
             Assert.Equal(expected, resultObj.Data.Count);
         }
     }

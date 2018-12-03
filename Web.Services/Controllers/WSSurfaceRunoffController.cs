@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,15 @@ namespace Web.Services.Controllers
     /// </summary>
     public class SurfaceRunoffInput : TimeSeriesInput
     {
+        /// <summary>
+        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// </summary>
+        public string PrecipSource { get; set; }
+
+        /// <summary>
+        /// Determines whether to use point-based runoff or area-based runoff
+        /// </summary>
+        public string RunoffType { get; set; }
         // Add extra SurfaceRunoff specific variables here
     }
 

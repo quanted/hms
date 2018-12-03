@@ -2,16 +2,21 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Web.Services.Models;
-using Swashbuckle.AspNetCore.Examples;
 using System.Net.Http;
 using Data;
 using System.Threading.Tasks;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Web.Services.Controllers
 {
-    
+    /// <summary>
+    /// Solar Data input object
+    /// </summary>
     public class SolarInput
     {
+        /// <summary>
+        /// Input Dictionary, containing unknown values.
+        /// </summary>
         public Dictionary<string, object> input;
     }
 
@@ -116,8 +121,15 @@ namespace Web.Services.Controllers
         }
     }
 
+    /// <summary>
+    /// Output example for solar data request.
+    /// </summary>
     public class SolarOutputExample : IExamplesProvider
     {
+        /// <summary>
+        /// IExamplesProvider interface override
+        /// </summary>
+        /// <returns></returns>
         public object GetExamples()
         {
             return new Dictionary<string, object>()
@@ -250,7 +262,7 @@ namespace Web.Services.Controllers
     [Produces("application/json")]
     [Route("api/meteorology/solar")]
     [Route("api/meteorology/solar/v1.0")]
-    public class WSMeteorolgySolarController : Controller
+    public class WSMeteorologySolarController : Controller
     {
         /// <summary>
         /// NOAA Solar Calculator 

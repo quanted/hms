@@ -62,7 +62,7 @@ namespace Web.Services.Models
                 ITimeSeriesInputFactory nFactory = new TimeSeriesInputFactory();
                 ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-                
+
                 // Set input to precip object.
                 ncdc.Input = nInput;
                 ncdc.Input.TemporalResolution = "daily";
@@ -121,7 +121,8 @@ namespace Web.Services.Models
                     }
                 });
 
-                if(errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1){
+                if (errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1)
+                {
                     return err.ReturnError(string.Join(",", errorList.ToArray()));
                 }
 

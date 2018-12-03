@@ -22,7 +22,7 @@ namespace SubSurfaceFlow
         {
             errorMsg = "";
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
-            string data = gldas.GetData(out errorMsg, "Baseflow", input);
+            List<string> data = gldas.GetData(out errorMsg, "Baseflow", input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput gldasOutput = output;
