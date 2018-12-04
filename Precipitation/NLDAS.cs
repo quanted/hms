@@ -79,6 +79,10 @@ namespace Precipitation
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
+                case "yearly":
+                    output.Data = YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Metadata.Add("column_2", "Yearly Total");
+                    return output;
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
                     output.Metadata.Add("column_2", "Hourly Total");
@@ -180,6 +184,10 @@ namespace Precipitation
                 {
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
                     iDate = date;
+                    if(input.Source == "gldas")
+                    {
+                        iDate = iDate.AddHours(-iDate.Hour);//Fixes issue with GLDAS keys being not compatible with other time series in precip compare
+                    }
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                 }
                 else
@@ -228,6 +236,46 @@ namespace Precipitation
             }
             return tempData;
         }
+
+        /// <summary>
+        /// Yearly aggregated sums for precipitation data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+
+            DateTime iDate = new DateTime();
+            double sum = 0.0;
+
+            // Unit conversion coefficient
+            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
+
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
+
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                DateTime date = new DateTime();
+                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out date);
+                if (date.Year != iDate.Year)
+                {
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    iDate = date;
+                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                }
+                else
+                {
+                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                }
+            }
+            return tempData;
+        }
+
 
         /// <summary>
         /// Calls the function in Data.Source.NLDAS that will perform the status check.
