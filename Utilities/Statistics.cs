@@ -13,6 +13,7 @@ namespace Utilities
     public class Statistics
     {
 
+
         /// <summary>
         /// Gets the statistic details for the given data parameter.
         /// </summary>
@@ -39,8 +40,11 @@ namespace Utilities
             double[] mRMS = new double[matrix.ColumnCount];
             double[] mR2 = new double[matrix.ColumnCount];
             double[] m95 = new double[matrix.ColumnCount];
+            double[] m95Count = new double[matrix.ColumnCount];
+            double[] m75 = new double[matrix.ColumnCount];
+            double[] m75Count = new double[matrix.ColumnCount];
 
-            for(int i = 0; i < matrix.ColumnCount; i++)
+            for (int i = 0; i < matrix.ColumnCount; i++)
             {
                 DescriptiveStatistics desc = new DescriptiveStatistics(matrix.Column(i));
                 mMean[i] = desc.Mean;
@@ -62,6 +66,13 @@ namespace Utilities
                 mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
                 mRMS[i] = MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i));
                 m95[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95);
+                m75[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 75);
+
+                Func<double, bool> isAbove95 = (v) => (v >= m95[i]);
+                Func<double, bool> isAbove75 = (v) => (v >= m75[i]);
+                m95Count[i] = matrix.Column(i).Where(isAbove95).Count();
+                m75Count[i] = matrix.Column(i).Where(isAbove75).Count();
+
                 for (int j = 0; j < matrix.ColumnCount; j++)
                 {
                     if(j == 0)
@@ -114,6 +125,9 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_skewness", mSkewness[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_root_mean_square", mRMS[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_95_percentile", m95[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_95_percentile_count", m95Count[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_75_percentile", m75[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_75_percentile_count", m75Count[i].ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
