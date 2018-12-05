@@ -26,28 +26,103 @@ namespace Utilities
             int notSkipped = 0;
 
             Matrix<double> matrix = BuildMatrix(data.Data, true);
+            Vector<double> mSum = matrix.ColumnSums();
+            double[] mMean = new double[matrix.ColumnCount];
+            double[] mMax = new double[matrix.ColumnCount];
+            double[] mSTD = new double[matrix.ColumnCount];
+            double[] mVar = new double[matrix.ColumnCount];
+            double[][] mPearson = new double[matrix.ColumnCount][];
+            double[] mCovariance = new double[matrix.ColumnCount];
+            double[] mEntropy = new double[matrix.ColumnCount];
+            double[] mGeoMean = new double[matrix.ColumnCount];
+            double[] mSkewness = new double[matrix.ColumnCount];
+            double[] mRMS = new double[matrix.ColumnCount];
+            double[] mR2 = new double[matrix.ColumnCount];
+            double[] m95 = new double[matrix.ColumnCount];
+
+            for(int i = 0; i < matrix.ColumnCount; i++)
+            {
+                DescriptiveStatistics desc = new DescriptiveStatistics(matrix.Column(i));
+                mMean[i] = desc.Mean;
+                mMax[i] = desc.Maximum;
+                mSTD[i] = desc.StandardDeviation;
+                mVar[i] = desc.Variance;
+                if(i == 0)
+                {
+                    mCovariance[i] = 0.0;
+                    mR2[i] = 0.0;
+                }
+                else
+                {
+                    mCovariance[i] = MathNet.Numerics.Statistics.Statistics.Covariance(matrix.Column(0), matrix.Column(i));
+                    mR2[i] = MathNet.Numerics.GoodnessOfFit.RSquared(matrix.Column(0), matrix.Column(i));
+                }
+                mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
+                mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
+                mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
+                mRMS[i] = MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i));
+                m95[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95);
+                for (int j = 0; j < matrix.ColumnCount; j++)
+                {
+                    if(j == 0)
+                    {
+                        mPearson[i] = new double[matrix.ColumnCount];
+                    }
+                    if (i == j)
+                    {
+                        mPearson[i][j] = 0.0;
+                    }
+                    else
+                    {
+                        mPearson[i][j] = MathNet.Numerics.Statistics.Correlation.Pearson(matrix.Column(i), matrix.Column(j));
+                    }
+                }
+            }
 
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            double[] gore = CalculateGORE(mMean, data.Data);
 
-            double[] sums = CalculateSums(data.Data, out notSkipped);
-            double[] dailyAverage = CalculateDailyAverage(sums, data.Data, notSkipped);
-            double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data, notSkipped);
-            double[] gore = CalculateGORE(dailyAverage, data.Data);
+            //double[] sums = CalculateSums(data.Data, out notSkipped);
+
+            //double[] dailyAverage = CalculateDailyAverage(sums, data.Data, notSkipped);
+            //double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data, notSkipped);
             //double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
-            double[] rSquared = CalculateDetermination(data.Data);
+            //double[] rSquared = CalculateDetermination(data.Data);
 
             // calculated GORE value
-            for (int i = 0; i < dailyAverage.Length; i++)
+            for (int i = 0; i < matrix.ColumnCount; i++)
             {
                 //data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_sum", sums[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
+                //data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
+                //data.Metadata.Add(sources[i].Trim() + "_sum", sums[i].ToString());
+                //data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", gore[i].ToString());
-                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_R-Squared", rSquared[i].ToString());
+                    //    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_R-Squared", rSquared[i].ToString());
+                }
+
+                // MathNet.Numerics
+                data.Metadata.Add(sources[i].Trim() + "_sum", mSum[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_mean", mMean[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_max", mMax[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_standard_deviation", mSTD[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_variance", mVar[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_entropy", mEntropy[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_geometric_mean", mGeoMean[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_skewness", mSkewness[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_root_mean_square", mRMS[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_95_percentile", m95[i].ToString());
+                if (i != 0)
+                {
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_r_squared", mR2[i].ToString());
+                }
+                for(int j = 0; j < matrix.ColumnCount; j++)
+                {
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_cofficient", mPearson[i][j].ToString());
+
                 }
             }
 
@@ -94,13 +169,13 @@ namespace Utilities
                     lstTable.Add(row);               
             }
 
-            double[][] arrayTable = new double[cols][];
-            for (int i=0; i<cols; i++)            
+            double[][] arrayTable = new double[rows][];
+            for (int i=0; i<rows; i++)            
                 arrayTable[i] = lstTable[i].ToArray();
             
 
             var M = Matrix<double>.Build;
-            var matrix = M.DenseOfColumnArrays(arrayTable);
+            var matrix = M.DenseOfRowArrays(arrayTable);
             return matrix;
         }
 

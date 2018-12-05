@@ -221,7 +221,6 @@ namespace Web.Services.Controllers
         /// <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
         [Route("v1.0")]         // Version 1.0 endpoint
         [SwaggerRequestExample(typeof(WorkFlowCompareInput), typeof(WorkFlowCompareInputExample))]
         [SwaggerResponseExample(200, typeof(WorkFlowCompareOutputExample))]
