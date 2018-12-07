@@ -126,14 +126,14 @@ namespace Data.Source
                 }
                 else if (i != 0 && i == requiredCalls - 1) //url constructed for last call of multiple
                 {
-                    tempStartDate = tempEndDate;
+                    tempStartDate = tempEndDate.AddDays(1);
                     tempEndDate = input.DateTimeSpan.EndDate;
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else                                   //url constructed for calls that are not the start or end
                 {
-                    tempStartDate = tempEndDate;
+                    tempStartDate = tempEndDate.AddDays(1);
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
@@ -144,19 +144,6 @@ namespace Data.Source
                 {
 
                     NCDCJson results = JSON.Deserialize<NCDCJson>(json);
-
-                    /*
-                    int days = Convert.ToInt16((input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).TotalDays);
-                    for (int d = 0; d < days; d++)
-                    {
-                        DateTime date = input.DateTimeSpan.StartDate.AddDays(d);
-                        if (results.results[d].date.Substring(0,10) != date.ToString("yyyy-MM-dd"))
-                        {
-                            results.results[d].value = -9999;
-                        }
-                    }
-                    */
-
 
                     double total = results.metadata.resultset.count;        //checking if available results exceed 1000 entry limit.
                     if (total > 1000)
@@ -315,13 +302,57 @@ namespace Data.Source
                 case "monthly":
                     sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
                     if (errorMsg.Contains("ERROR")) { return null; }
-                    // Weekly aggregation of ncdc data requires daily summed values.
-                    sumValues = SumWeeklyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    // Monthly aggregation of ncdc data requires daily summed values.
+                    sumValues = SumMonthlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "yearly":
+                    sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    // Yearly aggregation of ncdc data requires daily summed values.
+                    sumValues = SumYearlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
             }
             return sumValues;
         }
+
+        /// <summary>
+        /// Sums the values for each recorded value to return a dictionary of monthly summed values.
+        /// Requires summing of daily values first.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Dictionary<string, double> SumYearlyValues(out string errorMsg, string dateFormat, Dictionary<string, double> dailyData)
+        {
+            errorMsg = "";
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = dailyData.Keys.ElementAt(0).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double sum = 0.0;
+            for (int i = 0; i < dailyData.Count; i++)
+            {
+                string dateString = dailyData.Keys.ElementAt(i).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (iDate.Year != newDate.Year || i == dailyData.Count - 1)
+                {
+                    dict.Add(newDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    sum += dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+            }
+            return dict;
+        }
+
 
         /// <summary>
         /// Sums the values for each recorded value to return a dictionary of monthly summed values.
@@ -336,21 +367,27 @@ namespace Data.Source
             Dictionary<string, double> dict = new Dictionary<string, double>();
             DateTime iDate;
             DateTime newDate;
-            DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
+            string dateString0 = dailyData.Keys.ElementAt(0).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            //DateTime.TryParseExact(dailyData.Keys.ElementAt(0), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
+            //DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
             double sum = 0.0;
-            for (int i = 0; i < dailyData.Count - 1; i++)
+            for (int i = 0; i < dailyData.Count; i++)
             {
-                DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
-                if (iDate.Month == newDate.Month)
-                {
-                    sum += dailyData[dailyData.Keys.ElementAt(i)];
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else
+                string dateString = dailyData.Keys.ElementAt(i).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                //DateTime.TryParseExact(dailyData.Keys.ElementAt(i), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out iDate);
+                //DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
+                if (iDate.Month != newDate.Month || i == dailyData.Count-1)
                 {
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    sum += dailyData[dailyData.Keys.ElementAt(i)];
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
@@ -370,13 +407,15 @@ namespace Data.Source
             Dictionary<string, double> dict = new Dictionary<string, double>();
             DateTime iDate;
             DateTime newDate;
-            DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
+            DateTime.TryParseExact(dailyData.Keys.ElementAt(0), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
+            //DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
             double sum = 0.0;
             int week = 0;
             for (int i = 0; i < dailyData.Count - 1; i++)
             {
-                DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
-                if (week == 7)
+                DateTime.TryParseExact(dailyData.Keys.ElementAt(i), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out iDate);
+                //DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
+                if (week < 7)
                 {
                     week++;
                     sum += dailyData[dailyData.Keys.ElementAt(i)];
@@ -413,7 +452,7 @@ namespace Data.Source
                 DateTime.TryParse(data.results[i].date, out iDate);
                 if (iDate.Date == newDate.Date)
                 {
-                    if(sum < 0)
+                    if (sum < 0)
                     {
                         sum = 0;
                     }
@@ -528,12 +567,34 @@ namespace Data.Source
                     }
                     break;
                 case "monthly":
-                    int years = Convert.ToInt16(endDate.Year - endDate.Year);
+                    //int years = Convert.ToInt16(endDate.Year - endDate.Year);
+                    int years = Convert.ToInt16(endDate.Year - startDate.Year);
                     int months = Convert.ToInt16(endDate.Month - startDate.Month);
                     int totalMonths = years * 12 + months;
                     for (int i = 0; i < totalMonths; i++)
                     {
-                        DateTime date = startDate.AddDays(i * 7);
+                        DateTime date = startDate.AddMonths(i);//.AddDays(i * 7);
+                        if (secondDict.ContainsKey(date.ToString(dateFormat)))
+                        {
+                            firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);
+                        }
+                        else
+                        {
+                            firstDict.Add(date.ToString(dateFormat), -9999);
+                        }
+                    }
+                    break;
+                case "yearly":
+                    //int years = Convert.ToInt16(endDate.Year - endDate.Year);
+                    endDate = endDate.AddDays(1.0);
+                    int yrs = Convert.ToInt16(endDate.Year - startDate.Year);
+                    if(yrs == 0)
+                    {
+                        firstDict = secondDict;//Causing overwrite error, need to add dictionaries together instead
+                    }
+                    for (int i = 0; i < yrs; i++)
+                    {
+                        DateTime date = startDate.AddYears(i);
                         if (secondDict.ContainsKey(date.ToString(dateFormat)))
                         {
                             firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);

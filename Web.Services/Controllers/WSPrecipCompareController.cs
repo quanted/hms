@@ -12,9 +12,9 @@ using Web.Services.Models;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// WorkFlow Input that implements TimeSeriesInput object.
+    /// PrecipCompare Input that implements TimeSeriesInput object.
     /// </summary>
-    public class WorkFlowCompareInput : TimeSeriesInput
+    public class PrecipCompareInput : TimeSeriesInput
     {
         /// <summary>
         /// Specified dataset for the workflow
@@ -27,14 +27,30 @@ namespace Web.Services.Controllers
         /// </summary>
         [Required]
         public List<string> SourceList { get; set; }
-    }
+
+        /// <summary>
+        /// States whether or not precip should be aggregated by grid cells (weighted spatial average).
+        /// </summary>
+        [Required]
+        public Boolean Weighted { get; set; }
+
+        /// <summary>
+        /// Daily precip threshold in mm.
+        /// </summary>
+        public double DailyThreshold { get; set; }
+
+        /// <summary>
+        /// Five day total precip threshold in mm.
+        /// </summary>
+        public double FiveDayThreshold { get; set; }
+}
 
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle WorkFlowCompare POST request example
+    /// Swashbuckle PrecipCompare POST request example
     /// </summary>
-    public class WorkFlowCompareInputExample : IExamplesProvider
+    public class PrecipCompareInputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -42,7 +58,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            WorkFlowCompareInput example = new WorkFlowCompareInput()
+            PrecipCompareInput example = new PrecipCompareInput()
             {
                 Dataset = "Precipitation",
                 SourceList = new List<string>()
@@ -53,6 +69,9 @@ namespace Web.Services.Controllers
                     { "daymet" }
                 },
                 Source = "compare",
+                Weighted = false,
+                DailyThreshold = 5,
+                FiveDayThreshold = 10,
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -60,10 +79,9 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    GeometryMetadata = new Dictionary<string, string>()
-                    {
-                        { "stationID", "GHCND:USW00013874" }
-                    },
+                    ComID = 6411690,
+                    StationID = "GHCND:USW00013874",
+                    GeometryMetadata = new Dictionary<string, string>(),
                     Timezone = new Timezone()
                     {
                         Name = "EST",
@@ -71,6 +89,7 @@ namespace Web.Services.Controllers
                         DLS = true
                     }
                 },
+                TemporalResolution = "daily",
                 TimeLocalized = true
             };
             return example;
@@ -78,9 +97,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbucle WorkFlowCompare Output example
+    /// Swashbucle PrecipCompare Output example
     /// </summary>
-    public class WorkFlowCompareOutputExample : IExamplesProvider
+    public class PrecipCompareOutputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -209,27 +228,28 @@ namespace Web.Services.Controllers
     // --------------- WorkFlowCompare Controller --------------- //
 
     /// <summary>
-    /// WorkFlowCompare controller for HMS.
+    /// PrecipCompare controller for HMS.
     /// </summary>
-    [Route("api/workflow/compare")]
-    public class WSWorkFlowCompareController : Controller
+    [Route("api/workflow/compare/")]
+    public class WSPrecipCompareController : Controller
     {
         /// <summary>
-        /// POST Method for getting WorkFlowCompare data.
+        /// POST Method for getting PrecipCompare data.
         /// Source parameter must contain a value, but value is not used.
         /// </summary>
-        /// <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
+        /// <param name="precipInput">Parameters for retrieving PrecipCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("v1.0")]         // Version 1.0 endpoint
-        [SwaggerRequestExample(typeof(WorkFlowCompareInput), typeof(WorkFlowCompareInputExample))]
-        [SwaggerResponseExample(200, typeof(WorkFlowCompareOutputExample))]
-        public async Task<IActionResult> POST([FromBody]WorkFlowCompareInput workflowInput)
+        [Route("")]             // Default endpoint
+        [Route("v2.0")]         // Version 1.0 endpoint
+        [SwaggerRequestExample(typeof(PrecipCompareInput), typeof(PrecipCompareInputExample))]
+        [SwaggerResponseExample(200, typeof(PrecipCompareOutputExample))]
+        public async Task<IActionResult> POST([FromBody]PrecipCompareInput precipInput)
         {
 
-            WSWorkFlow workFlow = new WSWorkFlow();
+            WSPrecipCompare precipComp = new WSPrecipCompare();
             var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-            ITimeSeriesOutput results =  await workFlow.GetWorkFlowData(workflowInput);
+            ITimeSeriesOutput results = await precipComp.GetPrecipCompareData(precipInput);
             stpWatch.Stop();
             results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
