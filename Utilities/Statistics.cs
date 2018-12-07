@@ -38,7 +38,6 @@ namespace Utilities
             double[][] mPearson = new double[matrix.ColumnCount][];
             double[] mCovariance = new double[matrix.ColumnCount];
             double[] mMedian = new double[matrix.ColumnCount];
-            double[] mMode = new double[matrix.ColumnCount];
             double[] mEntropy = new double[matrix.ColumnCount];
             double[] mGeoMean = new double[matrix.ColumnCount];
             double[] mSkewness = new double[matrix.ColumnCount];
@@ -81,7 +80,6 @@ namespace Utilities
                     mR2[i] = MathNet.Numerics.GoodnessOfFit.RSquared(matrix.Column(0), matrix.Column(i));
                 }
                 mMedian[i] = matrix.Column(i).Median();
-                mMode[i] = MathNet.Numerics.Distributions.Normal.Estimate(matrix.Column(i)).Mode;
                 mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
                 mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
                 mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
@@ -156,7 +154,6 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_standard_deviation", mSTD[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_variance", mVar[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_median", mMedian[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_mode", mMode[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_entropy", mEntropy[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_geometric_mean", mGeoMean[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_skewness", mSkewness[i].ToString());
