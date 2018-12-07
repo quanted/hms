@@ -26,6 +26,9 @@ namespace Utilities
             errorMsg = "";
             int notSkipped = 0;
 
+            // Array of sources in the order they were added to the Data object.
+            string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
             Matrix<double> matrix = BuildMatrix(data.Data, true);
             Vector<double> mSum = matrix.ColumnSums();
             double[] mMean = new double[matrix.ColumnCount];
@@ -34,15 +37,31 @@ namespace Utilities
             double[] mVar = new double[matrix.ColumnCount];
             double[][] mPearson = new double[matrix.ColumnCount][];
             double[] mCovariance = new double[matrix.ColumnCount];
+            double[] mMedian = new double[matrix.ColumnCount];
+            double[] mMode = new double[matrix.ColumnCount];
             double[] mEntropy = new double[matrix.ColumnCount];
             double[] mGeoMean = new double[matrix.ColumnCount];
             double[] mSkewness = new double[matrix.ColumnCount];
             double[] mRMS = new double[matrix.ColumnCount];
             double[] mR2 = new double[matrix.ColumnCount];
+            double[] m99 = new double[matrix.ColumnCount];
+            double[] m99Count = new double[matrix.ColumnCount];
             double[] m95 = new double[matrix.ColumnCount];
             double[] m95Count = new double[matrix.ColumnCount];
             double[] m75 = new double[matrix.ColumnCount];
             double[] m75Count = new double[matrix.ColumnCount];
+            double[] mZeroCount = new double[matrix.ColumnCount];
+
+            // Precipitation Comparison Specific Stats
+            // TODO: Break calculations in getStatistics up into separate Methods, by groups (dataset specific and general stats)
+            double[] pDryDays = new double[matrix.ColumnCount];
+            double[] pWetDays = new double[matrix.ColumnCount];
+            double[] pHeavyDays = new double[matrix.ColumnCount];
+            // dry, wet, heavy values are only used on precipitation, the cutoff values can be customized by setting the following keys in data.Metadata ["dryDay", "wetDay", "heavyDay"]
+            // TODO: Add documentation to input request and if precip copy over keys corresponding to these values to the output metadata
+            double dryValue = (data.Metadata.ContainsKey("dryDay")) ? Double.Parse(data.Metadata["dryDay"]) : 1.0;
+            double wetValue = (data.Metadata.ContainsKey("wetDay")) ? Double.Parse(data.Metadata["wetDay"]) : 1.0;
+            double heavyValue = (data.Metadata.ContainsKey("heavyDay")) ? Double.Parse(data.Metadata["heavyDay"]) : 10.0;
 
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
@@ -61,17 +80,35 @@ namespace Utilities
                     mCovariance[i] = MathNet.Numerics.Statistics.Statistics.Covariance(matrix.Column(0), matrix.Column(i));
                     mR2[i] = MathNet.Numerics.GoodnessOfFit.RSquared(matrix.Column(0), matrix.Column(i));
                 }
+                mMedian[i] = matrix.Column(i).Median();
+                mMode[i] = MathNet.Numerics.Distributions.Normal.Estimate(matrix.Column(i)).Mode;
                 mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
                 mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
                 mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
                 mRMS[i] = MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i));
+                m99[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 99);
                 m95[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95);
                 m75[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 75);
 
+                Func<double, bool> isAbove99 = (v) => (v >= m99[i]);
                 Func<double, bool> isAbove95 = (v) => (v >= m95[i]);
                 Func<double, bool> isAbove75 = (v) => (v >= m75[i]);
+                Func<double, bool> isZero = (v) => (v == 0);
+
+                m99Count[i] = matrix.Column(i).Where(isAbove99).Count();
                 m95Count[i] = matrix.Column(i).Where(isAbove95).Count();
                 m75Count[i] = matrix.Column(i).Where(isAbove75).Count();
+                mZeroCount[i] = matrix.Column(i).Where(isZero).Count();
+
+                if (data.Dataset == "Precipitation")
+                {
+                    Func<double, bool> isDryDay = (v) => (v < dryValue);
+                    Func<double, bool> isWetDay = (v) => (v >= wetValue);
+                    Func<double, bool> isHeavyDay = (v) => (v >= heavyValue);
+                    pDryDays[i] = matrix.Column(i).Where(isDryDay).Count();
+                    pWetDays[i] = matrix.Column(i).Where(isWetDay).Count();
+                    pHeavyDays[i] = matrix.Column(i).Where(isHeavyDay).Count();
+                }
 
                 for (int j = 0; j < matrix.ColumnCount; j++)
                 {
@@ -90,8 +127,6 @@ namespace Utilities
                 }
             }
 
-            // Array of sources in the order they were added to the Data object.
-            string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
             double[] gore = CalculateGORE(mMean, data.Data);
 
             //double[] sums = CalculateSums(data.Data, out notSkipped);
@@ -120,14 +155,19 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_max", mMax[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_standard_deviation", mSTD[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_variance", mVar[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_median", mMedian[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_mode", mMode[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_entropy", mEntropy[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_geometric_mean", mGeoMean[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_skewness", mSkewness[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_root_mean_square", mRMS[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_99_percentile", m99[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_99_percentile_count", m99Count[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_95_percentile", m95[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_95_percentile_count", m95Count[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile", m75[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile_count", m75Count[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_zero_count", mZeroCount[i].ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
@@ -136,8 +176,15 @@ namespace Utilities
                 for(int j = 0; j < matrix.ColumnCount; j++)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_cofficient", mPearson[i][j].ToString());
-
                 }
+
+                if (data.Dataset == "Precipitation")
+                {
+                    data.Metadata.Add(sources[i].Trim() + "_dry_days", pDryDays[i].ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_wet_days", pWetDays[i].ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_heavy_days", pHeavyDays[i].ToString());
+                }
+
             }
 
             return data;
