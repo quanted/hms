@@ -175,7 +175,7 @@ namespace Utilities
                 }
                 for(int j = 0; j < matrix.ColumnCount; j++)
                 {
-                    data.Metadata.Add(sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_cofficient", mPearson[i][j].ToString());
+                    data.Metadata.Add(sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_coefficient", mPearson[i][j].ToString());
                 }
 
                 if (data.Dataset == "Precipitation")
