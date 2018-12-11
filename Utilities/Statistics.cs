@@ -116,7 +116,7 @@ namespace Utilities
                     }
                     if (i == j)
                     {
-                        mPearson[i][j] = 0.0;
+                        mPearson[i][j] = 1.0;
                     }
                     else
                     {
