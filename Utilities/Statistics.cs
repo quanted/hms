@@ -24,12 +24,12 @@ namespace Utilities
         public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesOutput data)
         {
             errorMsg = "";
-            int notSkipped = 0;
+            int missingDays = 0;
 
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            Matrix<double> matrix = BuildMatrix(data.Data, true);
+            Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
             Vector<double> mSum = matrix.ColumnSums();
             double[] mMean = new double[matrix.ColumnCount];
             double[] mMax = new double[matrix.ColumnCount];
@@ -184,6 +184,7 @@ namespace Utilities
 
             }
 
+            data.Metadata.Add("missing_days", missingDays.ToString());
             return data;
         }
 
@@ -193,8 +194,10 @@ namespace Utilities
         /// <param name="data"></param>
         /// <param name="excludeAcrossSources">Exclude data if missing from any source</param>
         /// <returns></returns>
-        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources)
+        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources, out int missingDays)
         {
+            missingDays = 0;
+
             // calculate daily values to get sums
             if (data == null || data.Count < 1)
                 return null;
@@ -211,7 +214,7 @@ namespace Utilities
                 for (int i = 0; i < cols; i++)
                 {
                     double dval;
-                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval))
+                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval) && dval >= 0)
                         row.Add(dval);                        
                     else
                     {
@@ -226,6 +229,11 @@ namespace Utilities
                 else
                     lstTable.Add(row);               
             }
+
+
+            missingDays = rows - lstTable.Count;
+            rows = lstTable.Count;
+
 
             double[][] arrayTable = new double[rows][];
             for (int i=0; i<rows; i++)            

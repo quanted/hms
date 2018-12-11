@@ -7,7 +7,7 @@ gldas_subsurfaceflow_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/
 nldas_evapotranspiration_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:EVPsfc&location=NLDAS:
 gldas_evapotranspiration_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Evap_tavg&location=GEOM:POINT
 daymet_evapotranspiration_url https://daymet.ornl.gov/data/send/saveData?
-ncdc_evapotranspiration_url https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=
+ncei_evapotranspiration_url https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=
 NLDAS_Longwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DLWRFsfc&location=NLDAS:
 NLDAS_Shortwave_Rad_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc&location=NLDAS:
 NLDAS_Humidity_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:SPFH2m&location=NLDAS:
@@ -26,8 +26,8 @@ gldas_10_40_soilmoisture_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/acc
 gldas_40_100_soilmoisture_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:SoilMoi40_100cm_inst&location=GEOM:POINT
 daymet_precipitation_url https://daymet.ornl.gov/data/send/saveData?
 daymet_temperature_url https://daymet.ornl.gov/data/send/saveData?
-ncdc_precipitation_url http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
-ncdc_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
+ncei_precipitation_url http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
+ncei_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
 TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/
 prism_precipitation_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0

@@ -12,10 +12,10 @@ using Utilities;
 namespace Data.Source
 {
 
-    // ---------------- NCDC return object ---------------- //
+    // ---------------- NCEI return object ---------------- //
 
     /// <summary>
-    /// Metadata of json string retrieved from ncdc.
+    /// Metadata of json string retrieved from ncei.
     /// </summary>
     public class MetaData
     {
@@ -23,7 +23,7 @@ namespace Data.Source
     }
 
     /// <summary>
-    /// Result structure of the json string retrieved from ncdc.
+    /// Result structure of the json string retrieved from ncei.
     /// </summary>
     public class Result
     {
@@ -45,7 +45,7 @@ namespace Data.Source
     }
 
     /// <summary>
-    /// Complete json object returned from NCDC.
+    /// Complete json object returned from NCEI.
     /// </summary>
     [DataContract]
     public class NCDCJson
@@ -126,8 +126,9 @@ namespace Data.Source
                 }
                 else if (i != 0 && i == requiredCalls - 1) //url constructed for last call of multiple
                 {
-                    tempStartDate = tempEndDate.AddDays(1);
+                    tempStartDate = tempEndDate;
                     tempEndDate = input.DateTimeSpan.EndDate;
+                    if (input.TemporalResolution != "yearly") { tempStartDate = tempEndDate.AddDays(1); }
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
@@ -230,7 +231,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station data. " + ex.Message;
+                errorMsg = "ERROR: Unable to download NCEI station data. " + ex.Message;
                 return null;
             }
         }
@@ -313,12 +314,89 @@ namespace Data.Source
                     sumValues = SumYearlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "extreme_5":
+                    sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    // Aggregation of ncdc data based on user defined parameters for extreme precipitation events.
+                    sumValues = SumExtremeValues(out errorMsg, inputData, inputData.Geometry.GeometryMetadata, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
             }
             return sumValues;
         }
 
         /// <summary>
-        /// Sums the values for each recorded value to return a dictionary of monthly summed values.
+        /// Sums the values for each recorded value to return a dictionary of values based on extreme event parameters.
+        /// Requires summing of daily values first.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Dictionary<string, double> SumExtremeValues(out string errorMsg, ITimeSeriesInput inputData, Dictionary<string, string> metadata, string dateFormat, Dictionary<string, double> dailyData)
+        {
+            errorMsg = "";
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = dailyData.Keys.ElementAt(0).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double sum = 0.0;
+            double fiveDaySum = 0.0;
+            double dailySum = 0.0;
+
+            Queue<KeyValuePair<string, double>> previousFiveDays = GetPreviousFiveDays(out errorMsg, inputData, metadata, newDate);
+            //Add new value at every iteration, and take sum of all items to find the total
+
+            for (int i = 0; i < dailyData.Count; i++)
+            {
+                fiveDaySum = 0.0;
+                foreach (KeyValuePair<string, double> pair in previousFiveDays)
+                {
+                    fiveDaySum += pair.Value;
+                }
+                dailySum = dailyData[dailyData.Keys.ElementAt(i)];
+                string dateString = dailyData.Keys.ElementAt(i).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if(dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //Daily >= thresh, AND 5days >= thresh
+                    sum = dailyData[dailyData.Keys.ElementAt(i)] + fiveDaySum;
+                    dict.Add(iDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else if (dailySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {   
+                    //daily < thresh AND 5days >= thresh
+                    sum = fiveDaySum;
+                    dict.Add(iDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else if (dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //daily >= thresh AND 5days < thresh
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    dict.Add(iDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    sum += dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                previousFiveDays.Dequeue();
+                previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Keys.ElementAt(i), dailyData[dailyData.Keys.ElementAt(i)]));
+            }
+            return dict;
+        }
+
+        /// <summary>
+        /// Sums the values for each recorded value to return a dictionary of yearly summed values.
         /// Requires summing of daily values first.
         /// </summary>
         /// <param name="errorMsg"></param>
@@ -411,7 +489,7 @@ namespace Data.Source
             //DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
             double sum = 0.0;
             int week = 0;
-            for (int i = 0; i < dailyData.Count - 1; i++)
+            for (int i = 0; i <= dailyData.Count - 1; i++)
             {
                 DateTime.TryParseExact(dailyData.Keys.ElementAt(i), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out iDate);
                 //DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
@@ -423,7 +501,14 @@ namespace Data.Source
                 }
                 else
                 {
-                    week = 0;
+                    week = 1;
+                    dict.Add(newDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                if (i == dailyData.Count - 1)
+                {
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = dailyData[dailyData.Keys.ElementAt(i)];
@@ -538,10 +623,14 @@ namespace Data.Source
                 case "default":
                 default:
                     int days = Convert.ToInt16((endDate - startDate).TotalDays);
-                    for (int i = 0; i < days; i++)
+                    for (int i = 0; i <= days; i++)
                     {
                         DateTime date = startDate.AddDays(i);
-                        if (secondDict.ContainsKey(date.ToString(dateFormat)))
+                        if (firstDict.ContainsKey(date.ToString(dateFormat)))
+                        {
+                            continue;
+                        }
+                        else if (secondDict.ContainsKey(date.ToString(dateFormat)))
                         {
                             firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);
                         }
@@ -567,11 +656,12 @@ namespace Data.Source
                     }
                     break;
                 case "monthly":
-                    //int years = Convert.ToInt16(endDate.Year - endDate.Year);
                     int years = Convert.ToInt16(endDate.Year - startDate.Year);
                     int months = Convert.ToInt16(endDate.Month - startDate.Month);
                     int totalMonths = years * 12 + months;
-                    for (int i = 0; i < totalMonths; i++)
+                    if (totalMonths >= 12) { totalMonths -= 1; } //Remove extra month caused by adding extra day
+                    if (totalMonths == 0) { break; }
+                    for (int i = 0; i <= totalMonths; i++)
                     {
                         DateTime date = startDate.AddMonths(i);//.AddDays(i * 7);
                         if (secondDict.ContainsKey(date.ToString(dateFormat)))
@@ -585,14 +675,10 @@ namespace Data.Source
                     }
                     break;
                 case "yearly":
-                    //int years = Convert.ToInt16(endDate.Year - endDate.Year);
-                    endDate = endDate.AddDays(1.0);
                     int yrs = Convert.ToInt16(endDate.Year - startDate.Year);
-                    if(yrs == 0)
-                    {
-                        firstDict = secondDict;//Causing overwrite error, need to add dictionaries together instead
-                    }
-                    for (int i = 0; i < yrs; i++)
+                    if (yrs >= 1) { yrs -= 1; } //Remove extra year caused by adding extra day
+                    if (Convert.ToInt16((endDate - startDate).TotalDays) < 364) { break; } //Check for full years
+                    for (int i = 0; i <= yrs; i++)
                     {
                         DateTime date = startDate.AddYears(i);
                         if (secondDict.ContainsKey(date.ToString(dateFormat)))
@@ -605,15 +691,18 @@ namespace Data.Source
                         }
                     }
                     break;
+                case "extreme_5":
+                    firstDict = secondDict;
+                    break;
             }             
         }
 
         /// <summary>
-        /// Gets NCDC station details.
+        /// Gets NCEI station details.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="stationID"></param>
-        /// <param name="token">Token required for accessing ncdc services.</param>
+        /// <param name="token">Token required for accessing NCEI services.</param>
         /// <returns></returns>
         public Dictionary<string, string> GetStationDetails(out string errorMsg, string url, string stationID, string token)
         {
@@ -622,7 +711,7 @@ namespace Data.Source
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {
-                errorMsg = "ERROR: No token provided for retrieving ncdc station details.";
+                errorMsg = "ERROR: No token provided for retrieving NCEI station details.";
                 return new Dictionary<string, string>();
             }
             try
@@ -647,7 +736,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station details. " + ex.Message;
+                errorMsg = "ERROR: Unable to download NCEI station details. " + ex.Message;
                 return new Dictionary<string, string>();
             }
             return stationDetails;
@@ -686,5 +775,26 @@ namespace Data.Source
             }
         }
 
+        private Queue<KeyValuePair<string, double>> GetPreviousFiveDays(out string errorMsg, ITimeSeriesInput inpt, Dictionary<string, string> metadata, DateTime startDay)
+        {
+            errorMsg = "";
+            DateTime startDate = inpt.DateTimeSpan.StartDate;
+            DateTime endDate = inpt.DateTimeSpan.EndDate;
+            Queue<KeyValuePair<string, double>> fiveDays = new Queue<KeyValuePair<string, double>>();
+            inpt.TemporalResolution = "daily";
+            inpt.DateTimeSpan.EndDate = startDay;
+            inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddDays(-5);
+            Dictionary<string, double> data = GetData(out errorMsg, "precip", inpt);
+            data.Remove(data.Last().Key);
+            data.Remove(data.Last().Key);
+            foreach (KeyValuePair<string, double> pair in data)
+            {
+                fiveDays.Enqueue(pair);
+            }
+            inpt.TemporalResolution = "extreme_5";
+            inpt.DateTimeSpan.StartDate = startDate;
+            inpt.DateTimeSpan.EndDate = endDate;
+            return fiveDays;
+        }
     }
 }

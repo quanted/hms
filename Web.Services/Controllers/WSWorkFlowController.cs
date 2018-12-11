@@ -47,7 +47,7 @@ namespace Web.Services.Controllers
                 Dataset = "Precipitation",
                 SourceList = new List<string>()
                 {
-                    { "ncdc" },
+                    { "ncei" },
                     { "nldas" },
                     { "gldas" },
                     { "daymet" }
@@ -91,22 +91,22 @@ namespace Web.Services.Controllers
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             output.Dataset = "Precipitation";
-            output.DataSource = "ncdc, nldas, gldas, daymet";
+            output.DataSource = "ncei, nldas, gldas, daymet";
             output.Metadata = new Dictionary<string, string>()
             {
-                {"ncdc_elevation", "307.8"},
-                {"ncdc_mindate", "1930-01-01"},
-                {"ncdc_maxdate", "2017-06-07"},
-                {"ncdc_latitude", "33.6301"},
-                {"ncdc_name", "ATLANTA HARTSFIELD INTERNATIONAL AIRPORT}, GA US"},
-                {"ncdc_datacoverage", "1"},
-                {"ncdc_id", "GHCND,USW00013874"},
-                {"ncdc_elevationUnit", "METERS"},
-                {"ncdc_longitude", "-84.4418"},
-                {"ncdc_temporalResolution", "daily"},
-                {"ncdc_units", "mm"},
-                {"ncdc_timeZone", "EST"},
-                {"ncdc_tz_offset", "-5"},
+                {"ncei_elevation", "307.8"},
+                {"ncei_mindate", "1930-01-01"},
+                {"ncei_maxdate", "2017-06-07"},
+                {"ncei_latitude", "33.6301"},
+                {"ncei_name", "ATLANTA HARTSFIELD INTERNATIONAL AIRPORT}, GA US"},
+                {"ncei_datacoverage", "1"},
+                {"ncei_id", "GHCND,USW00013874"},
+                {"ncei_elevationUnit", "METERS"},
+                {"ncei_longitude", "-84.4418"},
+                {"ncei_temporalResolution", "daily"},
+                {"ncei_units", "mm"},
+                {"ncei_timeZone", "EST"},
+                {"ncei_tz_offset", "-5"},
                 {"column_3", "nldas"},
                 {"nldas_prod_name", "NLDAS_FORA0125_H.002"},
                 {"nldas_param_short_name", "APCPsfc"},
@@ -175,22 +175,22 @@ namespace Web.Services.Controllers
                 {"daymet_timeZone", "EST"},
                 {"daymet_tz_offset", "-5"},
                 {"column_1", "date"},
-                {"column_2", "ncdc"},
-                {"ncdc_gore", "0.244015309955546"},
-                {"ncdc_average", "0.166666666666667"},
-                {"ncdc_standard_deviation", "0.471404520791032"},
+                {"column_2", "ncei"},
+                {"ncei_gore", "0.244015309955546"},
+                {"ncei_average", "0.166666666666667"},
+                {"ncei_standard_deviation", "0.471404520791032"},
                 {"nldas_gore", "0.672765848579113"},
                 {"nldas_average", "0.0750555555555556"},
                 {"nldas_standard_deviation", "0.166841462413415"},
-                {"nldas_ncdc_gore", "0.805642410981871"},
+                {"nldas_ncei_gore", "0.805642410981871"},
                 {"gldas_gore", "0.940240702844843"},
                 {"gldas_average", "0.233811111111111"},
                 {"gldas_standard_deviation", "0.361684105399678"},
-                {"gldas_ncdc_gore", "0.282008659975559"},
+                {"gldas_ncei_gore", "0.282008659975559"},
                 {"daymet_gore", "0.296650173373953"},
                 {"daymet_average", "0.222222222222222"},
                 {"daymet_standard_deviation", "0.415739709641549"},
-                {"daymet_ncdc_gore", "-0.75"}
+                {"daymet_ncei_gore", "-0.75"}
             };
             output.Data = new Dictionary<string, List<string>>()
             {

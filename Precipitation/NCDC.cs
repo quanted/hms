@@ -29,18 +29,18 @@ namespace Precipitation
             //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
             if (!input.Geometry.GeometryMetadata.ContainsKey("token"))
             {
-                errorMsg = "ERROR: No ncdc token provided. Please provide a valid ncdc token.";
+                errorMsg = "ERROR: No NCEI token provided. Please provide a valid NCEI token.";
                 return null;
             }
             string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
             if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
             {
-                errorMsg = "ERROR: No ncdc stationID provided. Please provide a valid ncdc stationID.";
+                errorMsg = "ERROR: No NCEI stationID provided. Please provide a valid NCEI stationID.";
                 return null;
             }
-            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncdc", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
-            ncdcOutput.Metadata.Add("ncdc_temporalResolution", input.TemporalResolution);
-            ncdcOutput.Metadata.Add("ncdc_units", "mm");
+            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
+            ncdcOutput.Metadata.Add("ncei", input.TemporalResolution);
+            ncdcOutput.Metadata.Add("ncei_units", "mm");
 
             // Data aggregation takes place within ncdc.GetData
             Dictionary<string, double> data = ncdc.GetData(out errorMsg, "NCDC", input);
@@ -50,7 +50,7 @@ namespace Precipitation
             ncdcOutput.Data = ConvertDict(out errorMsg, input.DataValueFormat, data);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            ncdcOutput.DataSource = "ncdc";
+            ncdcOutput.DataSource = "ncei";
             ncdcOutput.Dataset = "Precipitation";
 
             return ncdcOutput;

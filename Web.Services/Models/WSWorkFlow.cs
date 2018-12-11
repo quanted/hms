@@ -14,7 +14,7 @@ namespace Web.Services.Models
     public class WSWorkFlow
     {
 
-        private enum PrecipSources { compare, nldas, gldas, ncdc, daymet, wgen };
+        private enum PrecipSources { compare, nldas, gldas, ncei, daymet, wgen };
 
         /// <summary>
         /// Gets workflow data.
@@ -30,7 +30,7 @@ namespace Web.Services.Models
 
             input.SourceList = new List<string>()
             {
-                { "ncdc" },
+                { "ncei" },
                 { "nldas" },
                 { "gldas" },
                 { "daymet" }
@@ -48,7 +48,7 @@ namespace Web.Services.Models
                     { "gldas" },
                     { "daymet" }
                 };
-                input.Source = "ncdc";
+                input.Source = "ncei";
                 // Validate precipitation sources.
                 errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -77,15 +77,15 @@ namespace Web.Services.Models
                     // Precipitation object
                     Precipitation.Precipitation precip = new Precipitation.Precipitation();
                     PointCoordinate point = new PointCoordinate();
-                    if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
+                    if (output.Metadata.ContainsKey("ncei_latitude") && output.Metadata.ContainsKey("ncei_longitude"))
                     {
-                        point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
-                        point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
+                        point.Latitude = Convert.ToDouble(output.Metadata["ncei_latitude"]);
+                        point.Longitude = Convert.ToDouble(output.Metadata["ncei_longitude"]);
                         input.Geometry.Point = point;
                     }
                     else
                     {
-                        errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCDC station.";
+                        errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCEI station.";
                     }
                     // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                     ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
@@ -133,7 +133,7 @@ namespace Web.Services.Models
                 }
 
                 output.Metadata.Add("column_1", "Date");
-                output.Metadata.Add("column_2", "ncdc");
+                output.Metadata.Add("column_2", "ncei");
                 output = Utilities.Statistics.GetStatistics(out errorMsg, output);
 
                 return output;
