@@ -134,7 +134,7 @@ namespace Web.Services.Models
 
                 output.Metadata.Add("column_1", "Date");
                 output.Metadata.Add("column_2", "ncei");
-                output = Utilities.Statistics.GetStatistics(out errorMsg, output);
+                output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
 
                 return output;
             }

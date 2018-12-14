@@ -68,17 +68,6 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
-
-            /*TODO:
-            1. DONE: Only make calls to data sources specified by user
-            2. DONE: Find NCDC station nearest to COMID centroid if no station is provided
-            3. Aggregate by weighted spatial average if user chooses to do so
-            4. Aggregate daily/monthly/yearly/extreme events
-               a. If extreme event, handle cases with daily/5 day total thresholds
-            5. Check for errors such as missing NCDC data
-               a. DONE: Number of missing days is reported in metadata
-            */
-
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             input.SourceList.Add("ncei");
@@ -97,7 +86,7 @@ namespace Web.Services.Models
             input.Weighted = false;
 
             //In case of annual comparison, make sure that a valid input must have more than one year (i.e. start and end year are not the same).
-            if(input.TemporalResolution == "yearly" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
+            if(input.TemporalResolution == "annual" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
             {
                 errorMsg = "ERROR: More than one year must be given for annual comparison.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -198,11 +187,14 @@ namespace Web.Services.Models
 
                 // Set input to precip object.
                 precip.Input = sInput;
-                //precip.Input.TemporalResolution = "daily";
                 precip.Input.TemporalResolution = input.TemporalResolution;
                 if(precip.Input.TemporalResolution == "extreme_5")
                 {
                     precip.Input.TemporalResolution = "daily";
+                }
+                else if(precip.Input.TemporalResolution == "annual")
+                {
+                    precip.Input.TemporalResolution = "yearly";
                 }
                 precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
                 if (!precip.Input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
@@ -263,7 +255,7 @@ namespace Web.Services.Models
 
             output.Metadata.Add("column_1", "Date");
             output.Metadata.Add("column_2", "ncei");
-            output = Utilities.Statistics.GetStatistics(out errorMsg, output);
+            output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
 
             return output;
         }

@@ -21,7 +21,7 @@ namespace Utilities
         /// <param name="data"></param>
         /// <param name="compareIndex">Index of the source to be compared against.</param>
         /// <returns></returns>
-        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesOutput data)
+        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data)
         {
             errorMsg = "";
             int missingDays = 0;
@@ -185,6 +185,11 @@ namespace Utilities
             }
 
             data.Metadata.Add("missing_days", missingDays.ToString());
+            if(input.TemporalResolution == "extreme_5")
+            {
+                SumExtremeValues(out errorMsg, input, ref data);
+            }
+
             return data;
         }
 
@@ -229,7 +234,6 @@ namespace Utilities
                 else
                     lstTable.Add(row);               
             }
-
 
             missingDays = rows - lstTable.Count;
             rows = lstTable.Count;
@@ -494,6 +498,106 @@ namespace Utilities
             }
 
             return r2;
+        }
+
+        /// <summary>
+        /// Sums the values for each recorded value to return a dictionary of values based on extreme event parameters.
+        /// Requires summing of daily values first.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static void SumExtremeValues(out string errorMsg, ITimeSeriesInput inputData, ref ITimeSeriesOutput dailyData)
+        {
+            errorMsg = "";
+            List<string> removeDates = new List<string>();
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = dailyData.Data.Keys.ElementAt(0).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            string endstring = dailyData.Data.Keys.ElementAt(dailyData.Data.Keys.Count - 1).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double sum = 0.0;
+            double fiveDaySum = 0.0;
+            double dailySum = 0.0;
+
+            Queue<KeyValuePair<string, double>> previousFiveDays = new Queue<KeyValuePair<string, double>>();
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(0).Key, double.Parse(dailyData.Data.ElementAt(0).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(1).Key, double.Parse(dailyData.Data.ElementAt(1).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(2).Key, double.Parse(dailyData.Data.ElementAt(2).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(3).Key, double.Parse(dailyData.Data.ElementAt(3).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(4).Key, double.Parse(dailyData.Data.ElementAt(4).Value[0])));
+            //Add new value at every iteration, and take sum of all items to find the total
+
+            for (int i = 0; i < dailyData.Data.Count; i++)
+            {
+                fiveDaySum = 0.0;
+                foreach (KeyValuePair<string, double> pair in previousFiveDays)
+                {
+                    double val = pair.Value;
+                    if(val < -1)
+                    {
+                        //If a value is missing for ncdc, take average of all other sources, if that value is negative, just use 0
+                        for(int x = 1; x < dailyData.Data.ElementAt(i).Value.Count-1; x++)
+                        {
+                            val += double.Parse(dailyData.Data.ElementAt(i).Value[x]);
+                        }
+                        val /= dailyData.Data.ElementAt(i).Value.Count;
+                        if (val < -1)
+                        {
+                            val = 0.0;
+                        }
+                    }
+                    fiveDaySum += val;
+                }
+                dailySum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                if(dailySum < -1)
+                {
+                    dailySum = 0.0;
+                }
+                string dateString = dailyData.Data.Keys.ElementAt(i).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //Daily >= thresh, AND 5days >= thresh
+                    sum = dailySum + fiveDaySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else if (dailySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //daily < thresh AND 5days >= thresh
+                    sum = fiveDaySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else if (dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //daily >= thresh AND 5days < thresh
+                    sum = dailySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else
+                {
+                    removeDates.Add(dailyData.Data.Keys.ElementAt(i));//sum += dailySum;
+                }
+                previousFiveDays.Dequeue();
+                previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.Keys.ElementAt(i), double.Parse(dailyData.Data.ElementAt(i).Value[0])));
+            }
+
+            foreach(KeyValuePair<string, double> pair in dict)
+            {
+                dailyData.Data[pair.Key][0] = pair.Value.ToString();
+            }
+
+            foreach (string date in removeDates)
+            {
+                dailyData.Data.Remove(date);
+            }
         }
     }
 }
