@@ -261,6 +261,7 @@ namespace Utilities
 
                 foreach (var entry in result.Data)
                 {
+                    double average = 0.0;
                     foreach (Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)
                     {
                         List<string> outList = new List<string>();
@@ -273,10 +274,12 @@ namespace Utilities
                         outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
                         //outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
                         outList.Add(Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8).ToString());//% runoff
+                        average += Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8);
                         string key = i.ToString();//Arbitrary ID to keep track of dictionary values
-                        output.Data.Add(key, outList);
+                        //output.Data.Add(key, outList);
                         i++;
                     }
+                    output.Data.Add(entry.Key.ToString(), new List<string> { (average / ptsList.Count).ToString("E3") });
                 }
 
                 output.Dataset = result.Dataset.ToString();

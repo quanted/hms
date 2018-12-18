@@ -78,13 +78,12 @@ namespace Web.Services.Models
                 input.Geometry.GeometryMetadata = new Dictionary<string, string>();
             }
 
-            if (input.Weighted)
+            if (input.Weighted && input.Geometry.ComID <= 0)
             {
-                errorMsg = "ERROR: Weighted spatial average is currently unavailable.";
+                errorMsg = "ERROR: ComID required for spatial weighted average.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             }
-            input.Weighted = false;
-
+            
             //In case of annual comparison, make sure that a valid input must have more than one year (i.e. start and end year are not the same).
             if(input.TemporalResolution == "annual" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
             {
@@ -116,7 +115,6 @@ namespace Web.Services.Models
 
                 //Using FLASK NCDC webservice            
                 string data = DownloadData(out errorMsg, nceiBaseURL);
-                //return null;
                 Result result = JSON.Deserialize<Result>(data);
                 //Set NCEI station to closest station regardless of type
                 input.Geometry.StationID = result.data[0].id.ToString();
@@ -229,34 +227,26 @@ namespace Web.Services.Models
 
             foreach (ITimeSeriesOutput result in outputList)
             {
-                /*Spatial weighted average aggregation
-                ITimeSeriesOutput updated = result;
-                if (input.Weighted && updated.Data.Count > 0)
+                ITimeSeriesOutput aggregated = oFactory.Initialize();
+                //Spatial weighted average aggregation
+                if (input.Weighted && result.Data.Count > 0)
                 {
                     Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
                     Utilities.GeometryData gd = null;
                     input.Geometry.GeometryMetadata["precipSource"] = result.DataSource.ToString();
                     gd = cd.getData(input, new List<string> { input.Geometry.ComID.ToString() }, out errorMsg);
-                    ITimeSeriesOutput aggregated = cd.getCatchmentAggregation(input, result, gd, input.Weighted);
-                    ITimeSeriesOutput reduced = oFactory.Initialize();
-                    foreach (var data in aggregated.Data)
-                    {
-                        //TODO: Reformat this to take sum and average of all cell values and use that as data for timeseries.
-                        reduced.Data.Add(data.Value[0], new List<string> { data.Value[3].ToString() });//Will cause crashes
-                    }
+                    aggregated = cd.getCatchmentAggregation(input, result, gd, input.Weighted);
+                    result.Data = aggregated.Data;
                 }
-                output = Utilities.Merger.MergeTimeSeries(output, updated);*/
                 output = Utilities.Merger.MergeTimeSeries(output, result);
                 if (result.Metadata.Values.Contains("ERROR"))
                 {
                     output.Metadata.Add(result.DataSource.ToString() + " ERROR", "The service is unavailable or returned no valid data.");
                 }
             }
-
             output.Metadata.Add("column_1", "Date");
             output.Metadata.Add("column_2", "ncei");
             output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
-
             return output;
         }
 

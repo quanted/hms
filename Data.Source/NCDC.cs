@@ -132,10 +132,6 @@ namespace Data.Source
                     {
                         tempStartDate = tempStartDate.AddDays(1);
                     }
-                    /*else if (input.TemporalResolution != "annual")
-                    {
-                        tempStartDate = tempEndDate.AddDays(1);
-                    }*/
                     else
                     {
                         tempStartDate = tempStartDate.AddDays(1);
