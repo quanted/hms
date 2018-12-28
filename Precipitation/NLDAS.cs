@@ -134,14 +134,18 @@ namespace Precipitation
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             int nHourly = 0;
+            List<string> values = new List<string> { "" };
+            DateTime date = new DateTime();
+
             for (int i = 0; i < output.Data.Count; i++)
             {
-                DateTime date = new DateTime();
+                //DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
                 if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
                 {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    values =  new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     nHourly = 0;
@@ -174,15 +178,18 @@ namespace Precipitation
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            List<string> values = new List<string> { "" };
+            DateTime date = new DateTime();
+
             for (int i = 0; i < output.Data.Count; i++)
             {
-                DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
                 DateTime.TryParse(dateString, out date);
                 int dayDif = (int)(date - iDate).TotalDays;
                 if (dayDif >= 7)
                 {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
                     if(input.Source == "gldas")
                     {
@@ -218,14 +225,17 @@ namespace Precipitation
             DateTime.TryParse(dateString0, out iDate);
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            List<string> values = new List<string>() { "" };
+            DateTime date = new DateTime();
+
             for (int i = 0; i < output.Data.Count; i++)
             {
-                DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
                 if (date.Month != iDate.Month)
                 {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                 }
@@ -257,14 +267,17 @@ namespace Precipitation
             DateTime.TryParse(dateString0, out iDate);
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            List<string> values = new List<string> { "" };
+            DateTime date = new DateTime();
+
             for (int i = 0; i < output.Data.Count; i++)
             {
-                DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
                 if (date.Year != iDate.Year)
                 {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                 }

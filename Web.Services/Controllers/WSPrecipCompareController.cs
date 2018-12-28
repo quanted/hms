@@ -74,8 +74,8 @@ namespace Web.Services.Controllers
                 ExtremeDaily = 10,
                 DateTimeSpan = new DateTimeSpan()
                 {
-                    StartDate = new DateTime(2010),
-                    EndDate = new DateTime(2015)
+                    StartDate = new DateTime(2010, 1, 1),
+                    EndDate = new DateTime(2015, 12, 31)
                 },
                 Geometry = new TimeSeriesGeometry()
                 {

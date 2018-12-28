@@ -120,6 +120,8 @@ namespace Utilities
                     }
                     else
                     {
+                        int test1 = matrix.Column(i).Count;
+                        int test2 = matrix.Column(j).Count;
                         mPearson[i][j] = MathNet.Numerics.Statistics.Correlation.Pearson(matrix.Column(i), matrix.Column(j));
                     }
                 }

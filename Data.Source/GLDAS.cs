@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -31,10 +32,10 @@ namespace Data.Source
             List<string> url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            // Uses the constructed url to download time series data.
+
             List<string> data = DownloadData(out errorMsg, url);
             if (errorMsg.Contains("ERROR")) { return null; }
-
+            
             return data;
         }
 
@@ -198,6 +199,7 @@ namespace Data.Source
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, metadataList, output);
             output.Data = SetData(out errorMsg, dataList, input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+
             return output;
         }
 
@@ -273,6 +275,13 @@ namespace Data.Source
             }
             return dataDict;
         }
+
+        public ITimeSeriesOutput MergeTimeseries(ITimeSeriesOutput firstOutput, ITimeSeriesOutput secondOutput)
+        {
+            firstOutput.Data = firstOutput.Data.Concat(secondOutput.Data).GroupBy(k => k.Key).ToDictionary(g => g.Key, g => g.First().Value);
+            return firstOutput;
+        }
+
 
         /// <summary>
         /// Directly downloads from the source using the testInput object. Used for checking the status of the GLDAS endpoints.

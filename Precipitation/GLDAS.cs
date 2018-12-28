@@ -23,25 +23,85 @@ namespace Precipitation
         {
             errorMsg = "";
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
-            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
 
             ITimeSeriesOutput gldasOutput = output;
-            if (errorMsg.Contains("ERROR"))
-            {
-                Utilities.ErrorOutput err = new ErrorOutput();
-                output = err.ReturnError("Precipitation", "gldas", errorMsg);
-                errorMsg = "";
-                return output;
-            }
-            else
-            {
-                gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            }
+            ITimeSeriesOutput tempOutput = null;
+            int retries = 0;
+            bool dataComplete = false;
+            Dictionary<string, bool> years = GetYears(input);
 
+            while (!dataComplete)
+            {
+
+                List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
+
+                if (errorMsg.Contains("ERROR"))
+                {
+                    Utilities.ErrorOutput err = new ErrorOutput();
+                    output = err.ReturnError("Precipitation", "gldas", errorMsg);
+                    errorMsg = "";
+                    return output;
+                }
+                else
+                {
+                    if (retries > 0)
+                    {
+                        tempOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+                        gldasOutput = gldas.MergeTimeseries(gldasOutput, tempOutput);
+                    }
+                    else
+                    {
+                        gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+                    }
+                    dataComplete = CheckYears(years, gldasOutput);
+                    retries++;
+                }
+            }
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return gldasOutput;
+        }
+
+        private Dictionary<string, bool> GetYears(ITimeSeriesInput input)
+        {
+            Dictionary<string, bool> years = new Dictionary<string, bool>();
+            DateTime startYear = new DateTime(input.DateTimeSpan.StartDate.Year, input.DateTimeSpan.StartDate.Month, input.DateTimeSpan.StartDate.Day);
+            DateTime endYear = new DateTime(input.DateTimeSpan.EndDate.Year, input.DateTimeSpan.EndDate.Month, input.DateTimeSpan.EndDate.Day);
+            if (startYear.Year == endYear.Year)
+            {
+                years.Add(startYear.Year.ToString(), false);
+                return years;
+            }
+            while (startYear.Year != (endYear.Year + 1))
+            {
+                years.Add(startYear.Year.ToString(), false);
+                startYear = startYear.AddYears(1);
+            }
+            return years;
+        }
+
+        private bool CheckYears(Dictionary<string,bool> years, ITimeSeriesOutput output)
+        {
+            bool complete = true;
+            bool checkComplete = false;
+            int i = 0;
+            List<string> keys = output.Data.Keys.ToList();
+            int total = keys.Count;
+            while (!checkComplete)
+            {
+                string year = keys[i].Split("-")[0];
+                years[year] = true;
+                i = i + 2000;
+                if(i > total)
+                    break;
+            }
+            foreach(KeyValuePair<string, bool> keyValue in years)
+            {
+                if (keyValue.Value == false)
+                    complete = false;
+            }
+            return complete;
         }
 
         /// <summary>
