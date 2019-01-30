@@ -241,7 +241,7 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [Route("")]             // Default endpoint
-        [Route("v2.0")]         // Version 1.0 endpoint
+        [Route("v2.0")]         // Version 2.0 endpoint
         [SwaggerRequestExample(typeof(PrecipCompareInput), typeof(PrecipCompareInputExample))]
         [SwaggerResponseExample(200, typeof(PrecipCompareOutputExample))]
         public async Task<IActionResult> POST([FromBody]PrecipCompareInput precipInput)
