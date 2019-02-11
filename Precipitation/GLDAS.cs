@@ -88,6 +88,14 @@ namespace Precipitation
             int i = 0;
             List<string> keys = output.Data.Keys.ToList();
             int total = keys.Count;
+
+            // Check last element 
+            string lastKey = keys[keys.Count - 1].Split("-")[0];
+            if (years.Last().Key == lastKey)
+            {
+                years[lastKey] = true;
+            }
+
             while (!checkComplete)
             {
                 string year = keys[i].Split("-")[0];
