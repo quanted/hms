@@ -48,7 +48,7 @@ namespace Precipitation
                     {
                         tempOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
                         gldasOutput = gldas.MergeTimeseries(gldasOutput, tempOutput);
-                    }
+                    } 
                     else
                     {
                         gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
@@ -100,9 +100,12 @@ namespace Precipitation
             {
                 string year = keys[i].Split("-")[0];
                 years[year] = true;
-                i = i + 2000;
+                i = i + 2920;
                 if(i > total)
+                {
+                    years[keys[total-1].Split("-")[0]] = true;//loop skips over the "extra" days in GLDAS output, causing the check to fail and create unneeded retries.
                     break;
+                }
             }
             foreach(KeyValuePair<string, bool> keyValue in years)
             {
