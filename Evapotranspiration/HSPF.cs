@@ -201,9 +201,9 @@ namespace Evapotranspiration
                 TMAX = thr;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHhourly(shhr, thr);
+                RHmin = Utilities.Utility.CalculateRH(shhr, thr);
                 RHmax = RHmin;
-
+                                
                 // Set relHumidityHr to RHmin or RHmax.
                 relHumidityHr = RHmin;
 

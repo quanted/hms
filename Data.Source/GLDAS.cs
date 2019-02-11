@@ -35,7 +35,7 @@ namespace Data.Source
 
             List<string> data = DownloadData(out errorMsg, url);
             if (errorMsg.Contains("ERROR")) { return null; }
-            
+
             return data;
         }
 
@@ -64,11 +64,11 @@ namespace Data.Source
 
                 string url1 = cInput.BaseURL[0] +
                     @"%28" + cInput.Geometry.Point.Longitude.ToString() +
-                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" + 
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
                     @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2";
                 urls.Add(url1);
             }
-            else if(DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
+            else if (DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
             {
                 string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
 

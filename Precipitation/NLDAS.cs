@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Utilities;
@@ -21,6 +22,8 @@ namespace Precipitation
         /// <returns></returns>
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
+            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
@@ -31,7 +34,7 @@ namespace Precipitation
             //    errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
             //    return null;
             //}
-
+            
             ITimeSeriesOutput nldasOutput = output;
             if (errorMsg.Contains("ERROR"))
             {
@@ -44,9 +47,11 @@ namespace Precipitation
             {
                 nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             }
-
             nldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
+
+            stpWatch.Stop();
+            string elapse = stpWatch.ElapsedMilliseconds.ToString();
 
             return nldasOutput;
         }
@@ -64,6 +69,9 @@ namespace Precipitation
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
+
+            
+
 
             switch (input.TemporalResolution)
             {
@@ -105,7 +113,7 @@ namespace Precipitation
             double unit = 0.0393701;
             Dictionary<string, List<string>> tempData = output.Data;
 
-            foreach(KeyValuePair<string, List<string>> kv in tempData)
+            foreach (KeyValuePair<string, List<string>> kv in tempData)
             {
                 tempData[kv.Key][0] = (modifier * unit * Convert.ToDouble(kv.Value[0])).ToString(input.DataValueFormat);
             }
@@ -121,6 +129,7 @@ namespace Precipitation
         public static Dictionary<string, List<string>> DailyAggregatedSum(out string errorMsg, int hours, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
 
             DateTime iDate = new DateTime();
             double sum = 0.0;
@@ -129,8 +138,8 @@ namespace Precipitation
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
+
+            iDate = aggOut.Data.Keys.ElementAt(0).Date;
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             int nHourly = 0;
@@ -139,20 +148,18 @@ namespace Precipitation
 
             for (int i = 0; i < output.Data.Count; i++)
             {
-                //DateTime date = new DateTime();
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
-                DateTime.TryParse(dateString, out date);
+                date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
                 {
-                    values =  new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
                     nHourly = 0;
                 }
                 else
                 {
-                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
                     nHourly++;
                 }
             }
@@ -168,6 +175,7 @@ namespace Precipitation
         public static Dictionary<string, List<string>> WeeklyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
 
             DateTime iDate = new DateTime();
             double sum = 0.0;
@@ -175,31 +183,30 @@ namespace Precipitation
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
 
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
+            iDate = aggOut.Data.Keys.ElementAt(0).Date;
+
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string> { "" };
             DateTime date = new DateTime();
 
             for (int i = 0; i < output.Data.Count; i++)
             {
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
-                DateTime.TryParse(dateString, out date);
+                date = aggOut.Data.Keys.ElementAt(i).Date;
                 int dayDif = (int)(date - iDate).TotalDays;
                 if (dayDif >= 7)
                 {
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
-                    if(input.Source == "gldas")
+                    if (input.Source == "gldas")
                     {
                         iDate = iDate.AddHours(-iDate.Hour);//Fixes issue with GLDAS keys being not compatible with other time series in precip compare
                     }
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
                 else
                 {
-                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
             }
             return tempData;
@@ -214,6 +221,8 @@ namespace Precipitation
         public static Dictionary<string, List<string>> MonthlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
+
 
             DateTime iDate = new DateTime();
             double sum = 0.0;
@@ -221,8 +230,7 @@ namespace Precipitation
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
 
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
+            iDate = aggOut.Data.Keys.ElementAt(0).Date;
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string>() { "" };
@@ -230,18 +238,17 @@ namespace Precipitation
 
             for (int i = 0; i < output.Data.Count; i++)
             {
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
-                DateTime.TryParse(dateString, out date);
+                date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Month != iDate.Month)
                 {
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
                 else
                 {
-                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
             }
             return tempData;
@@ -256,6 +263,7 @@ namespace Precipitation
         public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
 
             DateTime iDate = new DateTime();
             double sum = 0.0;
@@ -263,8 +271,7 @@ namespace Precipitation
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
 
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
+            iDate = aggOut.Data.Keys.ElementAt(0).Date;
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string> { "" };
@@ -272,18 +279,17 @@ namespace Precipitation
 
             for (int i = 0; i < output.Data.Count; i++)
             {
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
-                DateTime.TryParse(dateString, out date);
+                date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Year != iDate.Year)
                 {
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
                 else
                 {
-                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
                 }
             }
             return tempData;
@@ -298,6 +304,26 @@ namespace Precipitation
         public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
         {
             return Data.Source.NLDAS.CheckStatus("Precipitation", input);
+        }
+
+
+
+        public static ITimeSeriesAggregation ConvertTimeSeries(ITimeSeriesOutput output)
+        {
+            //Create new ITimeSeries and convert Dictionary<string, List<string>> to Dictionary<DateTime, List<double>>
+            ITimeSeriesAggregationFactory aFactory = new TimeSeriesAggregationFactory();
+            ITimeSeriesAggregation aggOutput = aFactory.Initialize();
+            foreach (KeyValuePair<string, List<string>> kv in output.Data)
+            {
+                DateTime iDate = new DateTime();
+                iDate = DateTime.ParseExact(kv.Key, "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
+                aggOutput.Data.Add(iDate, kv.Value.ConvertAll(x => double.Parse(x)));
+            }
+            aggOutput.Dataset = output.Dataset;
+            aggOutput.DataSource = output.DataSource;
+            aggOutput.Metadata = output.Metadata;
+
+            return aggOutput;
         }
     }
 }

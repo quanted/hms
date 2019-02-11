@@ -208,11 +208,11 @@ namespace Web.Services.Tests
         [InlineData(dailyOneYearMissing, 366)]
         [InlineData(monthlyOneYearMissing, 12)]
         [InlineData(annualOneYearMissing, 0)]
-        [InlineData(extremeOneYearMissing, 199)]
+        [InlineData(extremeOneYearMissing, 206)]
         [InlineData(dailyTwoYearMissing, 730)]
         [InlineData(monthlyTwoYearMissing, 24)]
         [InlineData(annualTwoYearMissing, 2)]
-        [InlineData(extremeTwoYearMissing, 402)]
+        [InlineData(extremeTwoYearMissing, 419)]
         [InlineData(dailySevenYear, 7)]
         [InlineData(dailyOneYearWeighted, 366)]
         public async Task ValidRequests(string precipInputString, int expected)

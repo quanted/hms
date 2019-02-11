@@ -412,34 +412,15 @@ namespace Utilities
             return root1;
         }
 
-        public static double CalculateRHmin(double SpecificHumidity, double Temperature)
+        public static double CalculateRH(double SpecificHumidity, double Temperature)
         {
-            // Calculate minimum relative humidity here.
-            double RHmin = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
+            // Calculate relative humidity here.
+            double RH = 0.0;
+            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHmin = 100 * (e / es);
-            return RHmin;
-        }
+            RH = 100 * (e / es);
 
-        public static double CalculateRHmax(double SpecificHumidity, double Temperature)
-        {
-            // Calculate maximum relative humidity here.
-            double RHmax = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHmax = 100 * (e / es);
-            return RHmax;
-        }
-
-        public static double CalculateRHhourly(double SpecificHumidity, double Temperature)
-        {
-            // Calculate hourly relative humidity here.
-            double RHhourly = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHhourly = 100 * (e / es);
-            return RHhourly;
+            return RH;
         }
 
         public static int CalculateMortonMethod(string method)

@@ -144,7 +144,7 @@ namespace Web.Services.Models
 
             List<Precipitation.Precipitation> precipList = new List<Precipitation.Precipitation>();
             List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
-
+                        
             // NCEI Call
             Precipitation.Precipitation ncei = new Precipitation.Precipitation();
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
@@ -159,8 +159,8 @@ namespace Web.Services.Models
             ncei.Input.Geometry.GeometryMetadata["token"] = (ncei.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncei.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            output = nResult;
-
+            output = nResult;          
+            
             // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.
             foreach (string source in input.SourceList)
             {
@@ -202,11 +202,11 @@ namespace Web.Services.Models
 
                 precipList.Add(precip);
             }
-
+            
             List<string> errorList = new List<string>();
             object outputListLock = new object();
             var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
-
+            
             Parallel.ForEach(precipList, options, (Precipitation.Precipitation precip) =>
             {
                 // Gets the Precipitation data.
@@ -223,7 +223,6 @@ namespace Web.Services.Models
             {
                 return err.ReturnError(string.Join(",", errorList.ToArray()));
             }
-
 
             foreach (ITimeSeriesOutput result in outputList)
             {
@@ -247,6 +246,7 @@ namespace Web.Services.Models
             output.Metadata.Add("column_1", "Date");
             output.Metadata.Add("column_2", "ncei");
             output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
+            
             return output;
         }
 

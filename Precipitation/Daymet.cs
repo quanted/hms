@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -52,7 +53,7 @@ namespace Precipitation
             errorMsg = "";
             output.Metadata.Add("daymet_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
-
+                        
             switch (input.TemporalResolution)
             {
                 case "weekly":

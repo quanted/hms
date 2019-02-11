@@ -544,7 +544,8 @@ namespace Utilities
                     if(val < -1)
                     {
                         //If a value is missing for ncdc, take average of all other sources, if that value is negative, just use 0
-                        for(int x = 1; x < dailyData.Data.ElementAt(i).Value.Count-1; x++)
+                        val = 0.0;
+                        for (int x = 1; x < dailyData.Data.ElementAt(i).Value.Count-1; x++)
                         {
                             val += double.Parse(dailyData.Data.ElementAt(i).Value[x]);
                         }

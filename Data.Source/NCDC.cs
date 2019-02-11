@@ -467,7 +467,15 @@ namespace Data.Source
                     {
                         sum = 0;
                     }
-                    sum += NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    double addition = NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    if(addition < 0)
+                    {
+                        sum = addition;
+                    }
+                    else
+                    {
+                        sum += addition;
+                    }
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
@@ -697,6 +705,33 @@ namespace Data.Source
                     { "description", ex.Message }
                 };
             }
+        }
+
+        private Queue<KeyValuePair<string, double>> GetPreviousFiveDays(out string errorMsg, ITimeSeriesInput inpt, Dictionary<string, string> metadata, DateTime startDay, string start, string end)
+        {
+            errorMsg = "";
+            ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
+            ITimeSeriesInput tsi = new TimeSeriesInput();
+            tsi.DateTimeSpan = new DateTimeSpan();
+            tsi.DateTimeSpan.EndDate = startDay;
+            tsi.DateTimeSpan.StartDate = DateTime.Parse(start).AddDays(-5);
+            tsi.TemporalResolution = "daily";
+            tsi.Source = "ncei";
+            tsi.BaseURL = inpt.BaseURL;
+            TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
+            tsGeometry.GeometryMetadata = inpt.Geometry.GeometryMetadata;
+            tsi.Geometry = tsGeometry;
+
+            Queue<KeyValuePair<string, double>> fiveDays = new Queue<KeyValuePair<string, double>>();
+            Dictionary<string, double> data = GetData(out errorMsg, "precip", tsi);
+            data.Remove(data.Last().Key);
+            data.Remove(data.Last().Key);
+            foreach (KeyValuePair<string, double> pair in data)
+            {
+                fiveDays.Enqueue(pair);
+            }
+            inpt.TemporalResolution = "extreme_5";
+            return fiveDays;
         }
     }
 }
