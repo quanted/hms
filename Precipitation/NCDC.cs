@@ -52,7 +52,8 @@ namespace Precipitation
 
             ncdcOutput.DataSource = "ncei";
             ncdcOutput.Dataset = "Precipitation";
-
+            ncdcOutput.Metadata.Add("column_1", "Date");
+            ncdcOutput.Metadata.Add("column_2", "NCEI Total");
             return ncdcOutput;
         }
 

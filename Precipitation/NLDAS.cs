@@ -22,8 +22,6 @@ namespace Precipitation
         /// <returns></returns>
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
@@ -49,10 +47,7 @@ namespace Precipitation
             }
             nldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
-
-            stpWatch.Stop();
-            string elapse = stpWatch.ElapsedMilliseconds.ToString();
-
+            
             return nldasOutput;
         }
 
@@ -146,7 +141,7 @@ namespace Precipitation
             List<string> values = new List<string> { "" };
             DateTime date = new DateTime();
 
-            for (int i = 0; i < output.Data.Count; i++)
+            for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
@@ -189,7 +184,7 @@ namespace Precipitation
             List<string> values = new List<string> { "" };
             DateTime date = new DateTime();
 
-            for (int i = 0; i < output.Data.Count; i++)
+            for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
                 int dayDif = (int)(date - iDate).TotalDays;
@@ -236,7 +231,7 @@ namespace Precipitation
             List<string> values = new List<string>() { "" };
             DateTime date = new DateTime();
 
-            for (int i = 0; i < output.Data.Count; i++)
+            for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Month != iDate.Month)
@@ -277,7 +272,7 @@ namespace Precipitation
             List<string> values = new List<string> { "" };
             DateTime date = new DateTime();
 
-            for (int i = 0; i < output.Data.Count; i++)
+            for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
                 if (date.Year != iDate.Year)
