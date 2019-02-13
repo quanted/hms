@@ -132,8 +132,8 @@ namespace Web.Services.Models
                     output = Utilities.Merger.MergeTimeSeries(output, result);
                 }
 
-                output.Metadata.Add("column_1", "Date");
-                output.Metadata.Add("column_2", "ncei");
+                //output.Metadata.Add("column_1", "Date");
+                //output.Metadata.Add("column_2", "ncei");
                 output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
 
                 return output;
