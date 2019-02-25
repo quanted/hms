@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Utilities;
 using Web.Services.Controllers;
+using System.Diagnostics;
 
 namespace Web.Services.Models
 {
@@ -68,6 +69,7 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
+            Debug.WriteLine("Precip compare request recieved...");
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             input.SourceList.Add("ncei");
@@ -160,6 +162,7 @@ namespace Web.Services.Models
             ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             output = nResult;
+            Debug.WriteLine("Data retrieved for: NCEI");
 
             // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.
             foreach (string source in input.SourceList)
@@ -201,6 +204,8 @@ namespace Web.Services.Models
                 }
 
                 precipList.Add(precip);
+                string debugString = "Input object constructed for: " + source;
+                Debug.WriteLine(debugString);
             }
 
             List<string> errorList = new List<string>();
@@ -217,6 +222,8 @@ namespace Web.Services.Models
                     errorList.Add(errorM);
                     outputList.Add(result);
                 }
+                string debugString = "Data retrieved for: " + precip.Input.Source;
+                Debug.WriteLine(debugString);
             });
 
             if (errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1)
@@ -224,8 +231,11 @@ namespace Web.Services.Models
                 return err.ReturnError(string.Join(",", errorList.ToArray()));
             }
 
+            Debug.WriteLine("Precip Compare data has been collected");
             foreach (ITimeSeriesOutput result in outputList)
             {
+                string debugString = "Total data points from source: " + result.DataSource + " = " + result.Data.Count.ToString();
+                Debug.WriteLine(debugString);
                 ITimeSeriesOutput aggregated = oFactory.Initialize();
                 //Spatial weighted average aggregation
                 if (input.Weighted && result.Data.Count > 0)

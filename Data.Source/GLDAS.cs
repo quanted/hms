@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Web;
+using System.Diagnostics;
 
 namespace Data.Source
 {
@@ -151,6 +152,7 @@ namespace Data.Source
                 catch (Exception ex)
                 {
                     errorMsg = "ERROR: Unable to download requested gldas data.\n" + ex.Message;
+                    Debug.WriteLine(errorMsg);
                     return null;
                 }
                 data.Add(_data);

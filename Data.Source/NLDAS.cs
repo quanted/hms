@@ -5,6 +5,7 @@ using System.Net;
 using System.Web;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace Data.Source
 {
@@ -166,6 +167,7 @@ namespace Data.Source
             catch (Exception ex)
             {
                 errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                Debug.WriteLine(errorMsg);
                 return null;
             }
             return data;
