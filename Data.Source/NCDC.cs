@@ -28,7 +28,7 @@ namespace Data.Source
     public class Result
     {
         public string date { get; set; }
-        public string datatype { get; set; }
+        //public string datatype { get; set; }
         public string station { get; set; }
         public string attributes { get; set; }
         public double value { get; set; }
@@ -45,10 +45,10 @@ namespace Data.Source
     }
 
     /// <summary>
-    /// Complete json object returned from NCEI.
+    /// Complete CSV object returned from NCEI.
     /// </summary>
     [DataContract]
-    public class NCDCJson
+    public class NCDCCSV
     {
         [DataMember]
         public MetaData metadata { get; set; }
@@ -112,6 +112,7 @@ namespace Data.Source
             {
                 if (i == 0 && requiredCalls == 1)       //url constructed for a single call being made
                 {
+                    input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(-1);
                     tempStartDate = input.DateTimeSpan.StartDate;
                     tempEndDate = input.DateTimeSpan.EndDate;
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
@@ -147,25 +148,24 @@ namespace Data.Source
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
-                string json = DownloadData(out errorMsg, token, url);
+                string csv = DownloadData(out errorMsg, token, url);
                 if (errorMsg.Contains("ERROR")) { return null; }
-                if (!json.Equals("{}"))
+                if (!csv.Equals("{}"))
                 {
+                    NCDCCSV results = ReadData(out errorMsg, csv);
 
-                    NCDCJson results = JSON.Deserialize<NCDCJson>(json);
-
-                    double total = results.metadata.resultset.count;        //checking if available results exceed 1000 entry limit.
+                    double total = results.results.Count;//checking if available results exceed 1000 entry limit.
                     if (total > 1000)
                     {
                         for (int j = 1; j < Math.Ceiling(total / 1000); j++)
                         {
                             url = url + "&offset=" + (j) * 1000;
-                            json = DownloadData(out errorMsg, input.Geometry.GeometryMetadata["token"], url);
+                            csv = DownloadData(out errorMsg, input.Geometry.GeometryMetadata["token"], url);
                             if (errorMsg.Contains("ERROR")) { return null; }
 
-                            NCDCJson tempResults = JSON.Deserialize<NCDCJson>(json);
+                            NCDCCSV tempResults = JSON.Deserialize<NCDCCSV>(csv);
 
-                            results.results.AddRange(tempResults.results);                              //Adds the additional calls to the results.results variable
+                            results.results.AddRange(tempResults.results);     //Adds the additional calls to the results.results variable
                         }
                     }
                     Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
@@ -194,12 +194,16 @@ namespace Data.Source
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
             sb.Append(baseURL);
+
             if (station.Contains("GHCND"))
             {
-                sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+                station = station.Remove(0, 6);
+                //sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+                sb.Append("dataset=daily-summaries" + "&dataTypes=PRCP" + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=csv" + "&includeAttributes=true" + "&units=metric" + "&limit=1000");
             }
             else
             {
+                errorMsg = "NCEI web service does not currently support the dataset for this station";
                 sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
             return sb.ToString();
@@ -225,7 +229,7 @@ namespace Data.Source
                 {
                     Thread.Sleep(333);
                     WebRequest wr = WebRequest.Create(url);
-                    wr.Headers.Add("token", token);
+                    //wr.Headers.Add("token", token);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
@@ -257,6 +261,10 @@ namespace Data.Source
             // TODO: include a count of thrown out data entries in meta data.
             // TODO: add attribute column to data output for data entries handling
 
+            //Explanation of quality flags: https://www1.ncdc.noaa.gov/pub/data/cdo/documentation/GHCND_documentation.pdf
+            char[] qualityFlags = new char[] { 'D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'R', 'S', 'T', 'W', 'X', 'Z' };
+            string[] tables = attribute.Split(',');
+
             errorMsg = "";
             if (attribute.Contains("[") || attribute.Contains("]"))             // Begin and end of deleted period, during the given hour
             {
@@ -266,7 +274,7 @@ namespace Data.Source
             {
                 return -9999;
             }
-            else if (attribute.Contains("M"))        // One period of missing data
+            else if (tables[0].Contains("M") || tables[1].IndexOfAny(qualityFlags) != -1)        // One period of missing data or failed QA check
             {
                 return -9999;
             }
@@ -286,7 +294,7 @@ namespace Data.Source
         /// <param name="tempStartDate"></param>
         /// <param name="tempEndDate"></param>
         /// <returns></returns>
-        private Dictionary<string, double> AggregateData(out string errorMsg, ITimeSeriesInput inputData, NCDCJson results, DateTime tempStartDate, DateTime tempEndDate)
+        private Dictionary<string, double> AggregateData(out string errorMsg, ITimeSeriesInput inputData, NCDCCSV results, DateTime tempStartDate, DateTime tempEndDate)
         {
             Dictionary<string, double> sumValues = new Dictionary<string, double>();
             switch (inputData.TemporalResolution)
@@ -450,7 +458,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, double> SumDailyValues(out string errorMsg, string dateFormat, NCDCJson data)
+        private Dictionary<string, double> SumDailyValues(out string errorMsg, string dateFormat, NCDCCSV data)
         {
             errorMsg = "";
             Dictionary<string, double> dict = new Dictionary<string, double>();
@@ -501,7 +509,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, double> SumHourlyValues(out string errorMsg, string dateFormat, NCDCJson data)
+        private Dictionary<string, double> SumHourlyValues(out string errorMsg, string dateFormat, NCDCCSV data)
         {
             errorMsg = "";
             Dictionary<string, double> dict = new Dictionary<string, double>();
@@ -707,31 +715,24 @@ namespace Data.Source
             }
         }
 
-        private Queue<KeyValuePair<string, double>> GetPreviousFiveDays(out string errorMsg, ITimeSeriesInput inpt, Dictionary<string, string> metadata, DateTime startDay, string start, string end)
+        public NCDCCSV ReadData(out string errorMsg, string data)
         {
+            NCDCCSV output = new NCDCCSV();
+            output.results = new List<Result>();
             errorMsg = "";
-            ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput tsi = new TimeSeriesInput();
-            tsi.DateTimeSpan = new DateTimeSpan();
-            tsi.DateTimeSpan.EndDate = startDay;
-            tsi.DateTimeSpan.StartDate = DateTime.Parse(start).AddDays(-5);
-            tsi.TemporalResolution = "daily";
-            tsi.Source = "ncei";
-            tsi.BaseURL = inpt.BaseURL;
-            TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
-            tsGeometry.GeometryMetadata = inpt.Geometry.GeometryMetadata;
-            tsi.Geometry = tsGeometry;
-
-            Queue<KeyValuePair<string, double>> fiveDays = new Queue<KeyValuePair<string, double>>();
-            Dictionary<string, double> data = GetData(out errorMsg, "precip", tsi);
-            data.Remove(data.Last().Key);
-            data.Remove(data.Last().Key);
-            foreach (KeyValuePair<string, double> pair in data)
+            string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 1; i < tsLines.Length; i++)
             {
-                fiveDays.Enqueue(pair);
+                string[] lineData = tsLines[i].Split(new string[] { "\",\"", "\"" }, StringSplitOptions.RemoveEmptyEntries);
+                Result result = new Result();
+                result.station = lineData[0];
+                result.date = lineData[1];
+                result.value = Convert.ToDouble(lineData[2]);
+                result.attributes = lineData[3];
+                output.results.Add(result);
+
             }
-            inpt.TemporalResolution = "extreme_5";
-            return fiveDays;
+            return output;
         }
     }
 }

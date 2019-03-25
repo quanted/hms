@@ -26,7 +26,7 @@ gldas_10_40_soilmoisture_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/acc
 gldas_40_100_soilmoisture_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:SoilMoi40_100cm_inst&location=GEOM:POINT
 daymet_precipitation_url https://daymet.ornl.gov/data/send/saveData?
 daymet_temperature_url https://daymet.ornl.gov/data/send/saveData?
-ncei_precipitation_url http://www.ncdc.noaa.gov/cdo-web/api/v2/data?
+ncei_precipitation_url https://www.ncei.noaa.gov/access/services/data/v1?
 ncei_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
 TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/
