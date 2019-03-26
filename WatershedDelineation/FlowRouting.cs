@@ -181,7 +181,7 @@ namespace WatershedDelineation
             {
                 string errorM = "";
                 //subF.Value.GetData(out errorM);
-                int retries = 1;
+                int retries = 3;
                 while (retries > 0 && subF.Value.Output == null)
                 {
                     subF.Value.GetData(out errorM);
@@ -198,7 +198,7 @@ namespace WatershedDelineation
             {
                 string errorM = "";
                 //surF.Value.GetData(out errorM);
-                int retries = 1;
+                int retries = 3;
                 while (retries > 0 && surF.Value.Output == null)
                 {
                     surF.Value.GetData(out errorM);
