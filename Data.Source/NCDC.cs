@@ -108,6 +108,7 @@ namespace Data.Source
 
             //Check if date difference is greater than one year, if true splits dates apart into multiple requests that are equal to 1y-1day.
             int requiredCalls = Convert.ToInt16(Math.Ceiling((input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).TotalDays / 365));
+
             for (int i = 0; i < requiredCalls; i++)
             {
                 if (i == 0 && requiredCalls == 1)       //url constructed for a single call being made
@@ -147,6 +148,10 @@ namespace Data.Source
                     tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
                     url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
                     if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                if (tempEndDate.CompareTo(tempStartDate) <= 0)
+                {
+                    break;
                 }
                 string csv = DownloadData(out errorMsg, token, url);
                 if (errorMsg.Contains("ERROR")) { return null; }

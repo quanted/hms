@@ -72,7 +72,7 @@ namespace Web.Services.Models
             Debug.WriteLine("Precip compare request recieved...");
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            input.SourceList.Add("ncei");
+            //input.SourceList.Add("ncei");
             output.DataSource = string.Join(" - ", input.SourceList.ToArray());
 
             if(input.Geometry.GeometryMetadata == null)

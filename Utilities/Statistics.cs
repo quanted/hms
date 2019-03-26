@@ -69,7 +69,7 @@ namespace Utilities
                 mMax[i] = desc.Maximum;
                 mSTD[i] = desc.StandardDeviation;
                 mVar[i] = desc.Variance;
-                if(i == 0)
+                if (i == 0)
                 {
                     mCovariance[i] = 0.0;
                     mR2[i] = 0.0;
@@ -110,7 +110,7 @@ namespace Utilities
 
                 for (int j = 0; j < matrix.ColumnCount; j++)
                 {
-                    if(j == 0)
+                    if (j == 0)
                     {
                         mPearson[i] = new double[matrix.ColumnCount];
                     }
@@ -172,7 +172,7 @@ namespace Utilities
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_r_squared", mR2[i].ToString());
                 }
-                for(int j = 0; j < matrix.ColumnCount; j++)
+                for (int j = 0; j < matrix.ColumnCount; j++)
                 {
                     string key = sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_coefficient";
                     if (!data.Metadata.Keys.Contains(key))
@@ -191,13 +191,14 @@ namespace Utilities
             }
 
             data.Metadata.Add("missing_days", missingDays.ToString());
-            if(input.TemporalResolution == "extreme_5")
+            if (input.TemporalResolution == "extreme_5")
             {
                 SumExtremeValues(out errorMsg, input, ref data);
             }
 
             return data;
         }
+
 
         /// <summary>
         /// Build a MathNet.Numerics Matrix from timeseries from multiple sources
