@@ -208,7 +208,7 @@ namespace Data.Source
             }
             else
             {
-                errorMsg = "NCEI web service does not currently support the dataset for this station";
+                errorMsg = "ERROR: NCEI web service does not currently support the dataset for this station.";
                 sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
             return sb.ToString();
@@ -729,6 +729,11 @@ namespace Data.Source
             for (int i = 1; i < tsLines.Length; i++)
             {
                 string[] lineData = tsLines[i].Split(new string[] { "\",\"", "\"" }, StringSplitOptions.RemoveEmptyEntries);
+                if(lineData.Length != 4)
+                {
+                    //Some data skipped over, so mark as missing with null attributes
+                    lineData = new string[]{ lineData[0], lineData[1], "-9999", ",,,"};
+                }
                 Result result = new Result();
                 result.station = lineData[0];
                 result.date = lineData[1];
