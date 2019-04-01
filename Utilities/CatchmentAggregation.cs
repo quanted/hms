@@ -155,7 +155,14 @@ namespace Utilities
         public GeometryData getData(ITimeSeriesInput input, List<string> coms, out string errorMsg)
         {
             errorMsg = "";
-            string baseURL = "http://localhost:7777/hms/gis/percentage/?";//"http://127.0.0.1:5000/gis/rest/hms/percentage/?";
+            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
+            if (flaskURL == null)
+            {
+                flaskURL = "http://localhost:7777";
+            }
+            Debug.WriteLine("Flask Server URL: " + flaskURL);
+
+            string baseURL = flaskURL + "/hms/gis/percentage/?";
             Dictionary<string, string> metadata = input.Geometry.GeometryMetadata;
             //Check for huc arguments 
             if(input.Geometry.HucID != null)
@@ -177,7 +184,7 @@ namespace Utilities
                 baseURL += "&grid_source=nldas";
             }
 
-            string dataURL = "http://localhost:7777/hms/data?job_id=";
+            string dataURL = flaskURL + "/hms/data?job_id=";
             WebClient myWC = new WebClient();
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             string data = "";

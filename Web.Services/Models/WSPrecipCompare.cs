@@ -112,8 +112,15 @@ namespace Web.Services.Models
                     Longitude = double.Parse(centroidDict["CentroidLongitude"])
                 };
 
-                string nceiBaseURL = "http://localhost:7777/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
-                //string nceiBaseURL = "http://localhost:7777/hms/gis/ncdc/stations/?startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326&comid=" + input.Geometry.ComID.ToString();
+                string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
+                if (flaskURL == null)
+                {
+                    flaskURL = "http://localhost:7777";
+                }
+                Debug.WriteLine("Flask Server URL: " + flaskURL);
+
+                string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
+                //string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326&comid=" + input.Geometry.ComID.ToString();
 
                 //Using FLASK NCDC webservice            
                 string data = DownloadData(out errorMsg, nceiBaseURL);
@@ -269,7 +276,14 @@ namespace Web.Services.Models
         private string DownloadData(out string errorMsg, string url)
         {
             errorMsg = "";
-            string dataURL = "http://localhost:7777/hms/data?job_id=";
+            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
+            if (flaskURL == null)
+            {
+                flaskURL = "http://localhost:7777";
+            }
+            Debug.WriteLine("Flask Server URL: " + flaskURL);
+
+            string dataURL = flaskURL + "/hms/data?job_id=";
             WebClient myWC = new WebClient();
             string data = "";
             dynamic taskData = "";
