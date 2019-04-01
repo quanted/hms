@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Web.Services.Controllers;
+using Utilities;
 
 namespace Web.Services.Models
 {
@@ -54,6 +55,9 @@ namespace Web.Services.Models
             // Gets the SoilMoisture data.
             ITimeSeriesOutput result = soilM.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, soilM.Input, result);
 
             return result;
         }

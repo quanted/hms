@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Web.Services.Controllers;
+using Utilities;
 
 namespace Web.Services.Models
 {
@@ -64,6 +65,10 @@ namespace Web.Services.Models
             // Gets the Evapotranspiration data.
             ITimeSeriesOutput result = evapo.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            // Get generic statistics
+            // TODO: Handle negative values
+            // result = Utilities.Statistics.GetStatistics(out errorMsg, evapo.Input, result);
 
             return result;
         }

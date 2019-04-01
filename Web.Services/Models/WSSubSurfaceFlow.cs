@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Utilities;
 
 namespace Web.Services.Models
 {
@@ -32,18 +33,21 @@ namespace Web.Services.Models
             //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // SubSurfaceFlow object
-            SubSurfaceFlow.SubSurfaceFlow evapo = new SubSurfaceFlow.SubSurfaceFlow();
+            SubSurfaceFlow.SubSurfaceFlow subsurf = new SubSurfaceFlow.SubSurfaceFlow();
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            evapo.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
+            subsurf.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "subsurfaceflow" }, out errorMsg);
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Gets the SubSurfaceFlow data.
-            ITimeSeriesOutput result = evapo.GetData(out errorMsg);
+            ITimeSeriesOutput result = subsurf.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, subsurf.Input, result);
 
             return result;
         }

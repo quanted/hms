@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Utilities;
 
 namespace Web.Services.Models
 {
@@ -51,6 +52,8 @@ namespace Web.Services.Models
             ITimeSeriesOutput result = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, precip.Input, result);
             return result;
         }
     }
