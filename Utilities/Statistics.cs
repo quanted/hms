@@ -124,7 +124,7 @@ namespace Utilities
         /// <param name="input"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static ITimeSeriesOutput GetCompareStatistics(out string errorMsg, string dataset, ITimeSeriesInput input, ITimeSeriesOutput data)
+        public static ITimeSeriesOutput GetCompareStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data)
         {
             errorMsg = "";
             int missingDays = 0;
@@ -217,8 +217,6 @@ namespace Utilities
                 datasetCompare = CalculateGORE(mMean, data.Data);
             }
 
-
-            // calculated GORE value
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
                 // MathNet.Numerics
@@ -255,9 +253,8 @@ namespace Utilities
 
                 if (data.Dataset == "Precipitation")
                 {
-
+           
                     // Precipitation Comparison Specific Stats
-                    // TODO: Break calculations in getStatistics up into separate Methods, by groups (dataset specific and general stats)
                     double[] pDryDays = new double[matrix.ColumnCount];
                     double[] pWetDays = new double[matrix.ColumnCount];
                     double[] pHeavyDays = new double[matrix.ColumnCount];
