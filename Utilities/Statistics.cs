@@ -237,6 +237,7 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile", m75[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile_count", m75Count[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_zero_count", mZeroCount[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_missing_days", missingDays.ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
@@ -324,6 +325,12 @@ namespace Utilities
                 for (int i = 0; i < cols; i++)
                 {
                     double dval;
+                    if (i >= timeseries.Value.Count)
+                    {
+                        missingData = true;
+                        row.Add(-9999);
+                        continue;
+                    }
                     if (Double.TryParse(timeseries.Value.ElementAt(i), out dval) && dval >= 0)
                         row.Add(dval);                        
                     else
@@ -637,27 +644,30 @@ namespace Utilities
             for (int i = 0; i < dailyData.Data.Count; i++)
             {
                 fiveDaySum = 0.0;
-                foreach (KeyValuePair<string, double> pair in previousFiveDays)
+                if (i > 4)//Skip first five checks
                 {
-                    double val = pair.Value;
-                    if(val < -1)
+                    foreach (KeyValuePair<string, double> pair in previousFiveDays)
                     {
-                        //If a value is missing for ncdc, take average of all other sources, if that value is negative, just use 0
-                        val = 0.0;
-                        for (int x = 1; x < dailyData.Data.ElementAt(i).Value.Count-1; x++)
+                        double val = pair.Value;
+                        if (val < -1.0)
                         {
-                            val += double.Parse(dailyData.Data.ElementAt(i).Value[x]);
+                            //If a value is missing for ncdc, take average of all other sources, if that value is negative, just use 0
+                            val = 0.0;    //Double arithmetic here may be causing issues with travis build
+                            for (int x = 1; x < dailyData.Data.ElementAt(i).Value.Count - 1; x++)
+                            {
+                                val += double.Parse(dailyData.Data.ElementAt(i).Value[x]);
+                            }
+                            val /= dailyData.Data.ElementAt(i).Value.Count - 1;
+                            if (val < -1.0)
+                            {
+                                val = 0.0;
+                            }
                         }
-                        val /= dailyData.Data.ElementAt(i).Value.Count;
-                        if (val < -1)
-                        {
-                            val = 0.0;
-                        }
+                        fiveDaySum += val;
                     }
-                    fiveDaySum += val;
                 }
                 dailySum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
-                if(dailySum < -1)
+                if (dailySum < -1)
                 {
                     dailySum = 0.0;
                 }
@@ -695,7 +705,7 @@ namespace Utilities
                 previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.Keys.ElementAt(i), double.Parse(dailyData.Data.ElementAt(i).Value[0])));
             }
 
-            foreach(KeyValuePair<string, double> pair in dict)
+            foreach (KeyValuePair<string, double> pair in dict)
             {
                 dailyData.Data[pair.Key][0] = pair.Value.ToString();
             }
