@@ -217,7 +217,7 @@ namespace Web.Services.Tests
         //[InlineData(dailyOneYearWeighted, 366)]
         public async Task ValidRequests(string precipInputString, int expected)
         {
-            string endpoint = "api/workflow/precipitation/precip_compare";
+            string endpoint = "api/workflow/precip_compare";
             PrecipitationCompareInput input = JsonConvert.DeserializeObject<PrecipitationCompareInput>(precipInputString);
             Debug.WriteLine("Integration Test: Precipitation Compare controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
