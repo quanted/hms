@@ -75,22 +75,18 @@ namespace Utilities
             List<string> columns = new List<string>();
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
-                foreach (string key in data.Metadata.Keys)
+                if(data.Metadata.Keys.Contains("column_" + (i + 2)))
                 {
-                    if(key.Contains("column_" + (i + 2) + "_"))
-                    {
-                        columns.Add(key);
-                    }
-
+                    columns.Add(data.Metadata["column_" + (i + 2)] + "_");
                 }
-                if (columns.Count != i + 1 && matrix.ColumnCount > 1)
+                else if (columns.Count != i + 1 && matrix.ColumnCount > 1)
                 {
                     columns.Add("column_" + (i + 2) + "_");
                 }
-                else if (matrix.ColumnCount == 1)
-                {
-                    columns.Add("");
-                }
+                //else if (matrix.ColumnCount == 1)
+                //{
+                //    columns.Add("");
+                //}
             }
 
             for (int i = 0; i < matrix.ColumnCount; i++)

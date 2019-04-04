@@ -14,7 +14,7 @@ namespace Web.Services.Models
     public class WSPrecipExtraction
     {
 
-        private enum PrecipSources { extraction, nldas, gldas, ncei, daymet, wgen };
+        private enum PrecipSources { extraction, nldas, gldas, ncei, daymet, prism };
 
         /// <summary>
         /// Gets workflow data.
@@ -42,6 +42,10 @@ namespace Web.Services.Models
             if (input.SourceList.Contains("ncei"))
             {
                 //Find nearest station to lat/long?
+                if(input.Geometry.GeometryMetadata == null)
+                {
+                    input.Geometry.GeometryMetadata = new Dictionary<string, string>();
+                }
                 input.Geometry.GeometryMetadata["stationID"] = input.Geometry.StationID;
                 input.Geometry.GeometryMetadata["token"] = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
                 input.Source = "ncei";
@@ -64,16 +68,23 @@ namespace Web.Services.Models
                 input.SourceList.Remove("ncei");
             }
 
+            PointCoordinate point = new PointCoordinate()
+            {
+                Latitude = Double.Parse(outputList[0].Metadata["ncei_latitude"]),
+                Longitude = Double.Parse(outputList[0].Metadata["ncei_longitude"])
+            };
+
             // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.
             foreach (string source in input.SourceList)
             {
                 // Precipitation object
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
-                PointCoordinate point = new PointCoordinate();
+
                 // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                 ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
                 input.Source = source;
                 ITimeSeriesInput sInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
+                input.Geometry.Point = point;
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
                 // Set input to precip object.
@@ -118,7 +129,7 @@ namespace Web.Services.Models
             }
 
             //output.Metadata.Add("column_1", "Date");
-            //output.Metadata.Add("column_2", "ncei");
+            output.Metadata["column_2"] = "ncei";
             output = Utilities.Statistics.GetStatistics(out errorMsg, input, output);
 
             return output;
