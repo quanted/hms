@@ -63,7 +63,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetPrecipCompareData(PrecipCompareInput input)
+        public async Task<ITimeSeriesOutput> GetPrecipCompareData(PrecipitationCompareInput input)
         {
             string errorMsg = "";
             // Constructs default error output object containing error message.

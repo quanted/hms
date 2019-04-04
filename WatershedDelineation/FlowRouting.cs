@@ -15,7 +15,7 @@ namespace WatershedDelineation
 {
     public class FlowRouting
     {
-        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, List<string> lst, out List<string> validList, ITimeSeriesInput input, out string errorMsg)
+        public static DataSet calculateStreamFlows(string startDate, string endDate, DataTable dtStreamNetwork, List<string> lst, out List<string> validList, ITimeSeriesInput input, string streamAlgorithm, out string errorMsg)
         {
             //This function returns a dataset containing three tables
             errorMsg = "";
@@ -210,99 +210,110 @@ namespace WatershedDelineation
                 }
             });
 
-            for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
+            switch (streamAlgorithm)
             {
-                COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
-                fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
-                DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
-
-                List<string> fromCOMIDS = new List<string>();
-                foreach (DataRow dr2 in drsFromCOMIDs)
-                {
-                    fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
-                }
-
-                for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
-                {
-                    if (!validList.Contains(COMID))
+                case "changingvolume":
+                case "kinematicwave":
+                    errorMsg = "ERROR: Algorithm is not currently supported.";
+                    break;
+                case "constantvolume":
+                default:
+                    for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
                     {
-                        continue;
-                    }
+                        COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
+                        fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
+                        DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
 
-                    if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)
-                    {
-                        dtSubSurfaceRunoff.Rows[i][COMID] = -9999;
-                    }
-                    else
-                    {
-                        DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
-                        string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                        dtSubSurfaceRunoff.Rows[i][COMID] = subsurfaceFlow[COMID].Output.Data[date][0];
-                    }
-
-                    if (surfaceFlow[COMID].Output == null || surfaceFlow[COMID].Output.Data.Count == 0)
-                    {
-                        dtSurfaceRunoff.Rows[i][COMID] = -9999;
-                    }
-                    else
-                    {
-                        DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
-                        string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                        dtSurfaceRunoff.Rows[i][COMID] = surfaceFlow[COMID].Output.Data[date][0];
-                    }
-
-                    if (precipitation[COMID].Output == null || precipitation[COMID].Output.Data.Count == 0)
-                    {
-                        dtPrecip.Rows[i][COMID] = -9999;
-                    }
-                    else
-                    {
-                        DateTime datekey = Convert.ToDateTime(dtPrecip.Rows[i]["DateTime"].ToString());
-                        string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                        dtPrecip.Rows[i][COMID] = precipitation[COMID].Output.Data[date][0];
-                    }
-
-                    //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
-                    double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
-                    double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
-                    double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
-                    dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
-
-
-                    //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
-                    //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
-                    //  2. dr["FROMCOMID].ToString() = dr["TOCOMID"].ToString().  This can happen at the pour points
-                    //  3. dr["FROMCOMID"].ToString() does not appear in the TOCOMID column of dtStreamNetwork table i.e. FROMCOMID is outside the network
-                    //If multiple streams flow into this stream then add up stream flow time series of the inflow streams.
-                    //There could be multiple bondary condition flows if multiple upstream streams flow into this COMID.            
-                    foreach (string fromCom in fromCOMIDS)
-                    {
-                        if (fromCom == "0")//No boundary condition flows if the stream is a headwater (fromCOMID=0)
+                        List<string> fromCOMIDS = new List<string>();
+                        foreach (DataRow dr2 in drsFromCOMIDs)
                         {
-                            continue;
+                            fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
                         }
-                        if (fromCom == COMID)//No boundary condition if fromCOMID=TOCOMID
+
+                        for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
                         {
-                            continue;
+                            if (!validList.Contains(COMID))
+                            {
+                                continue;
+                            }
+
+                            if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)
+                            {
+                                dtSubSurfaceRunoff.Rows[i][COMID] = -9999;
+                            }
+                            else
+                            {
+                                DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                                string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                                dtSubSurfaceRunoff.Rows[i][COMID] = subsurfaceFlow[COMID].Output.Data[date][0];
+                            }
+
+                            if (surfaceFlow[COMID].Output == null || surfaceFlow[COMID].Output.Data.Count == 0)
+                            {
+                                dtSurfaceRunoff.Rows[i][COMID] = -9999;
+                            }
+                            else
+                            {
+                                DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                                string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                                dtSurfaceRunoff.Rows[i][COMID] = surfaceFlow[COMID].Output.Data[date][0];
+                            }
+
+                            if (precipitation[COMID].Output == null || precipitation[COMID].Output.Data.Count == 0)
+                            {
+                                dtPrecip.Rows[i][COMID] = -9999;
+                            }
+                            else
+                            {
+                                DateTime datekey = Convert.ToDateTime(dtPrecip.Rows[i]["DateTime"].ToString());
+                                string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                                dtPrecip.Rows[i][COMID] = precipitation[COMID].Output.Data[date][0];
+                            }
+
+                            //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
+                            double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
+                            double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
+                            double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
+                            dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
+
+
+                            //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
+                            //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
+                            //  2. dr["FROMCOMID].ToString() = dr["TOCOMID"].ToString().  This can happen at the pour points
+                            //  3. dr["FROMCOMID"].ToString() does not appear in the TOCOMID column of dtStreamNetwork table i.e. FROMCOMID is outside the network
+                            //If multiple streams flow into this stream then add up stream flow time series of the inflow streams.
+                            //There could be multiple bondary condition flows if multiple upstream streams flow into this COMID.            
+                            foreach (string fromCom in fromCOMIDS)
+                            {
+                                if (fromCom == "0")//No boundary condition flows if the stream is a headwater (fromCOMID=0)
+                                {
+                                    continue;
+                                }
+                                if (fromCom == COMID)//No boundary condition if fromCOMID=TOCOMID
+                                {
+                                    continue;
+                                }
+                                DataRow[] drs = dtStreamNetwork.Select("TOCOMID = " + fromCom);
+                                //No boundary condition if fromCOMID is not present in the streamNetwork table under TOCOMID column.  THis means that fromCOMID is outside our network.
+                                if (drs == null || drs.Length == 0)
+                                {
+                                    continue;
+                                }
+                                //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
+                                dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
+                            }
                         }
-                        DataRow[] drs = dtStreamNetwork.Select("TOCOMID = " + fromCom);
-                        //No boundary condition if fromCOMID is not present in the streamNetwork table under TOCOMID column.  THis means that fromCOMID is outside our network.
-                        if (drs == null || drs.Length == 0)
-                        {
-                            continue;
-                        }
-                        //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
-                        dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
                     }
-                }
+                    return ds;
             }
+            
             if (!errComs.Equals(""))
             {
                 errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output.";
             }
             return ds;
         }
-
+        
         private static PointCoordinate GetCatchmentCentroid(out string errorMsg, int comid)
         {
             errorMsg = "";

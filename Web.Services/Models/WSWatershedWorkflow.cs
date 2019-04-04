@@ -19,6 +19,7 @@ namespace Web.Services.Models
         private enum surfaceSources { nldas, gldas, curvenumber }
         private enum subSources { nldas, gldas }
         private enum precipSources { nldas, gldas, ncdc, daymet, wgen, prism }
+        private enum algorithms { constantvolume }//, changingvolume, kinematicwave }
 
         /// <summary>
         /// Gets workflow data.
@@ -37,6 +38,8 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate all sources.
+            //errorMsg = (!Enum.TryParse(input.StreamHydrology, true, out algorithms sAlgos)) ? "ERROR: Algorithm is not currently supported." : "";
+            //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
@@ -67,7 +70,7 @@ namespace Web.Services.Models
             //Getting Stream Flow data
             input.Source = input.RunoffSource;
             List<string> validList = new List<string>();
-            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, out validList, input, out errorMsg);
+            DataSet ds = WatershedDelineation.FlowRouting.calculateStreamFlows(start.ToShortDateString(), end.ToShortDateString(), dt, lst, out validList, input, input.StreamHydrology, out errorMsg);
             lst = validList;
 
             Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
