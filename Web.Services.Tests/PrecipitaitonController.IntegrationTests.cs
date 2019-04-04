@@ -101,7 +101,7 @@ namespace Web.Services.Tests
         [InlineData(gldasRequest, 365)]
         [InlineData(daymetRequest, 365)]
         [InlineData(prismRequest, 364)]         //Will always fail as prism web service is not active. TODO: Fix end date, cutting off last day.
-        [InlineData(ncdcRequest, 366)]
+        [InlineData(ncdcRequest, 365)]
         [InlineData(wgenRequest, 365)]
         public async Task ValidRequests(string precipInputString, int expected)
         {

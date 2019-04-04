@@ -128,73 +128,87 @@ namespace Precipitation
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
-            // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
-            //TimeSpan t0 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+            Boolean mathnet = false;
 
-            //int totalDays = output.Data.Keys.Count / 24;
-            //double[][] dValues = new double[totalDays][];
-            //for (int i = 0; i < totalDays; i++)
-            //{
-            //    dValues[i] = new double[24];
-            //}
-            //int hour = 0;
-            //int day = 0;
-            //for (int i = 0; i < output.Data.Keys.Count; i++)
-            //{
-            //    hour = i % 23;
-            //    day = i / 24;
-            //    dValues[day][hour] = Double.Parse(output.Data.Values.ElementAt(i)[0]);
-            //}
-
-            //var m = Matrix<double>.Build;
-            //Matrix<double> matrix = m.DenseOfRowArrays(dValues);
-            //Vector<double> precipColumnValues = matrix.ColumnSums();
-            //Vector<double> precipRowValues = matrix.RowSums();
-            //Dictionary<string, List<string>> tempData0 = new Dictionary<string, List<string>>();
-            //var tempKeys = output.Data.Keys;
-            //int j = 0;
-            //for(int i = 0; i < output.Data.Count; i += 24)
-            //{
-            //    tempData0.Add(tempKeys.ElementAt(i), new List<string> { (modifier * unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
-            //}
-            //TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-            //Debug.WriteLine("Total MathNet calculation time for " + output.Data.Keys.Count + " records: " + t1.Subtract(t0).ToString());
-
-            // Daily aggregation using updated ITimeSeriesOutput object
-            TimeSpan t2 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
-
-            DateTime iDate = new DateTime();
-            double sum = 0.0;
-
-            iDate = aggOut.Data.Keys.ElementAt(0).Date;
-
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            int nHourly = 0;
-            List<string> values = new List<string> { "" };
-            DateTime date = new DateTime();
-
-            for (int i = 0; i < aggOut.Data.Count; i++)
+            if (mathnet)
             {
-                date = aggOut.Data.Keys.ElementAt(i).Date;
-                if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
+                if (output.Data.Keys.Last().Contains(" 00"))
                 {
-                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
-                    iDate = date;
-                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
-                    nHourly = 0;
+                    output.Data.Remove(output.Data.Keys.Last());
                 }
-                else
-                {
-                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
-                    nHourly++;
-                }
-            }
-            TimeSpan t3 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-            Debug.WriteLine("Total new ITimeSeriesOutput object calculation time for " + output.Data.Keys.Count + " records: " + t3.Subtract(t2).ToString());
+                // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
+                TimeSpan t0 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
 
-            return tempData;
+                hours += 1;
+                int totalDays = output.Data.Keys.Count / hours;
+                double[][] dValues = new double[totalDays][];
+                for (int i = 0; i < totalDays; i++)
+                {
+
+                    dValues[i] = new double[hours];
+                }
+                int hour = 0;
+                int day = 0;
+                for (int i = 0; i < output.Data.Keys.Count; i++)
+                {
+                    hour = i % hours;
+                    day = i / hours;
+                    dValues[day][hour] = Double.Parse(output.Data.Values.ElementAt(i)[0]);
+                }
+
+                var m = Matrix<double>.Build;
+                Matrix<double> matrix = m.DenseOfRowArrays(dValues);
+                Vector<double> precipColumnValues = matrix.ColumnSums();
+                Vector<double> precipRowValues = matrix.RowSums();
+                Dictionary<string, List<string>> tempData0 = new Dictionary<string, List<string>>();
+                var tempKeys = output.Data.Keys;
+                int j = 0;
+                for (int i = 0; i < output.Data.Count; i += hours)
+                {
+                    tempData0.Add(tempKeys.ElementAt(i), new List<string> { (modifier * unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                    j++;
+                }
+                TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+                Debug.WriteLine("Total MathNet calculation time for " + output.Data.Keys.Count + " records: " + t1.Subtract(t0).ToString());
+                return tempData0;
+            }
+            else
+            {
+                // Daily aggregation using updated ITimeSeriesOutput object
+                TimeSpan t2 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+                ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
+
+                DateTime iDate = new DateTime();
+                double sum = 0.0;
+
+                iDate = aggOut.Data.Keys.ElementAt(0).Date;
+
+                Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+                int nHourly = 0;
+                List<string> values = new List<string> { "" };
+                DateTime date = new DateTime();
+
+                for (int i = 0; i < aggOut.Data.Count; i++)
+                {
+                    date = aggOut.Data.Keys.ElementAt(i).Date;
+                    if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
+                    {
+                        values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                        tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
+                        iDate = date;
+                        sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
+                        nHourly = 0;
+                    }
+                    else
+                    {
+                        sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
+                        nHourly++;
+                    }
+                }
+                TimeSpan t3 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+                Debug.WriteLine("Total new ITimeSeriesOutput object calculation time for " + output.Data.Keys.Count + " records: " + t3.Subtract(t2).ToString());
+                return tempData;
+            }
         }
 
         /// <summary>
@@ -270,7 +284,7 @@ namespace Precipitation
             for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
-                if (date.Month != iDate.Month)
+                if (date.Month != iDate.Month || i == aggOut.Data.Count - 1)
                 {
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
@@ -311,7 +325,7 @@ namespace Precipitation
             for (int i = 0; i < aggOut.Data.Count; i++)
             {
                 date = aggOut.Data.Keys.ElementAt(i).Date;
-                if (date.Year != iDate.Year)
+                if (date.Year != iDate.Year || i == aggOut.Data.Count - 1)
                 {
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
