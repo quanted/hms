@@ -128,7 +128,7 @@ namespace Precipitation
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
-            Boolean mathnet = false;
+            Boolean mathnet = true;
 
             if (mathnet)
             {
@@ -140,7 +140,7 @@ namespace Precipitation
                 TimeSpan t0 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
 
                 hours += 1;
-                int totalDays = output.Data.Keys.Count / hours;
+                int totalDays = (output.Data.Keys.Count / hours) + 1;
                 double[][] dValues = new double[totalDays][];
                 for (int i = 0; i < totalDays; i++)
                 {
@@ -149,11 +149,14 @@ namespace Precipitation
                 }
                 int hour = 0;
                 int day = 0;
-                for (int i = 0; i < output.Data.Keys.Count; i++)
+                //Debug.WriteLine("Element Count: " + output.Data.Values.Count.ToString());
+                int i0 = (output.DataSource.Equals("nldas")) ? 1 : 0;
+                for (int i = i0; i < output.Data.Keys.Count; i++)
                 {
-                    hour = i % hours;
-                    day = i / hours;
-                    dValues[day][hour] = Double.Parse(output.Data.Values.ElementAt(i)[0]);
+                    hour = i % (hours);
+                    day = i / (hours);
+                    //Debug.WriteLine("Count: " + (output.Data.Keys.Count).ToString() + "; i: " + i.ToString() + "; day: " + day.ToString() + "; hour: " + hour.ToString() + "; value: " + output.Data.Values.ElementAt(i)[0]);
+                    dValues[day][hour] = modifier * Double.Parse(output.Data.Values.ElementAt(i - i0)[0]);
                 }
 
                 var m = Matrix<double>.Build;
@@ -165,7 +168,7 @@ namespace Precipitation
                 int j = 0;
                 for (int i = 0; i < output.Data.Count; i += hours)
                 {
-                    tempData0.Add(tempKeys.ElementAt(i), new List<string> { (modifier * unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                    tempData0.Add(tempKeys.ElementAt(i), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
                     j++;
                 }
                 TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
