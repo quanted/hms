@@ -112,7 +112,7 @@ namespace Precipitation
         {
             errorMsg = "";
             output.Metadata.Add("wgen_temporalresolution", input.TemporalResolution);
-            output.Metadata.Add("wgen_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
 
             if (!input.Units.Contains("imperial")) { output.Metadata["wgen_unit"] = "mm"; }
 
@@ -120,15 +120,15 @@ namespace Precipitation
             {
                 case "weekly":
                     output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("wgen_column_2", "Weekly Total");
+                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("wgen_column_2", "Monthly Total");
+                    output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 default:
                     output.Data = (!input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
-                    output.Metadata.Add("wgen_column_2", "Daily Total");
+                    output.Metadata.Add("column_2", "Daily Total");
                     return output;
             }
         }
