@@ -43,6 +43,7 @@ namespace Web.Services.Controllers
     /// Total Flow controller for HMS
     /// </summary>
     [Produces("application/json")]
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/totalflow")]
     public class WSTotalFlowController : Controller
     {
@@ -52,8 +53,6 @@ namespace Web.Services.Controllers
         /// <param name="tfInput"></param>
         /// <returns>ITimeSeriesOutput</returns>
         [HttpPost]
-        [Route("")]
-        [Route("v1.0")]
         [SwaggerRequestExample(typeof(TotalFlowInput), typeof(TotalFlowInputExample))]
         public async Task<IActionResult> POST([FromBody]TotalFlowInput tfInput)
         {

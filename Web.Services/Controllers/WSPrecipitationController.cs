@@ -170,6 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Precipitation controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/precipitation")]
     public class WSPrecipitationController : Controller
     {
@@ -179,9 +180,6 @@ namespace Web.Services.Controllers
         /// <param name="precipInput">Parameters for retrieving precipitation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]                 // Default endpoint
-        [Route("v1.0")]             // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
         [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)

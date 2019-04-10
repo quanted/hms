@@ -170,6 +170,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SubSurfaceFlow controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/subsurfaceflow")]
     public class WSSubSurfaceFlowController : Controller
     {
@@ -179,9 +180,6 @@ namespace Web.Services.Controllers
         /// <param name="ssFlowInput">Parameters for retrieving SubSurfaceFlow data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
-        [Route("v1.0")]         // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExample))]
         [SwaggerResponseExample(200, typeof(SubSurfaceFlowOutputExample))]
         [SwaggerRequestExample(typeof(SubSurfaceFlowInput), typeof(SubSurfaceFlowInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]SubSurfaceFlowInput ssFlowInput)

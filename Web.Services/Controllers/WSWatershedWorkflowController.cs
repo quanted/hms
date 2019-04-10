@@ -158,6 +158,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkFlowCompare controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/watershed")]
     public class WSWatershedWorkflowController : Controller
     {
@@ -168,8 +169,6 @@ namespace Web.Services.Controllers
         /// <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
-        [Route("v1.0")]         // Version 1.0 endpoint
         [SwaggerRequestExample(typeof(WatershedWorkflowInput), typeof(WatershedWorkflowInputExample))]
         [SwaggerResponseExample(200, typeof(WatershedWorkflowOutputExample))]
         public async Task<IActionResult> POST([FromBody]WatershedWorkflowInput workflowInput)

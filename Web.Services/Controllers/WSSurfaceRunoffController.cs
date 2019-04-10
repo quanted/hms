@@ -180,7 +180,8 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SurfaceRunoff controller for HMS.
     /// </summary>
-    [Route("api/hydrology/surfacerunoff")]
+    [ApiVersion("0.1")]
+    [Route("api/hydrology/surfacerunoff/")]
     public class WSSurfaceRunoffController : Controller
     {
         /// <summary>
@@ -189,9 +190,6 @@ namespace Web.Services.Controllers
         /// <param name="runoffInput">Parameters for retrieving SurfaceRunoff data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
-        [Route("v1.0")]         // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExample))]
         [SwaggerResponseExample(200, typeof(SurfaceRunoffOutputExample))]
         [SwaggerRequestExample(typeof(SurfaceRunoffInput), typeof(SurfaceRunoffInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]SurfaceRunoffInput runoffInput)

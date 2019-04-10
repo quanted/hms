@@ -11,6 +11,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Utility REST endpoints for HMS components.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api")]             // Default endpoints
     public class WSUtilitiesController : Controller
     {
@@ -20,7 +21,7 @@ namespace Web.Services.Controllers
         /// </summary>
         /// <returns></returns>
         [Route("utilities/status")]
-        [Route("utilities/status/v1.0")]
+        //[Route("utilities/status/v1.0")]
         [HttpGet]
         //public Dictionary<string, Dictionary<string, Dictionary<string, string>>> AllDatasetEndpointsCheck()
         public async Task<IActionResult> AllDatasetEndpointsCheck()
@@ -62,7 +63,7 @@ namespace Web.Services.Controllers
         /// <param name="dataset"></param>
         /// <returns></returns>
         [Route("utilities/status/{dataset}")]
-        [Route("utilities/status/{dataset}/v1.0")]
+        //[Route("utilities/status/{dataset}/v1.0")]
         [HttpGet]
         //public List<Dictionary<string, Dictionary<string, string>>> DatasetEndpointsCheck(string dataset)
         public async Task<IActionResult> DatasetEndpointsCheck(string dataset)

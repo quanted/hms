@@ -296,6 +296,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Evapotranspiration controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/evapotranspiration")]
     public class WSEvapotranspirationController : Controller
     {
@@ -305,8 +306,6 @@ namespace Web.Services.Controllers
         /// <param name="evapoInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]                 // Default endpoint
-        [Route("v1.0")]             // Version 1.0 endpoint 
         [SwaggerResponseExample(200, typeof(EvapotranspirationOutputExample))]
         [SwaggerRequestExample(typeof(EvapotranspirationInput), typeof(EvapotranspirationInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
