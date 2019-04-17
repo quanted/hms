@@ -260,8 +260,9 @@ namespace Web.Services.Controllers
     /// Meterology Solar HMS endpoint class
     /// </summary>
     [Produces("application/json")]
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/solar")]
-    [Route("api/meteorology/solar/v1.0")]
+    //[Route("api/meteorology/solar/v1.0")]
     public class WSMeteorologySolarController : Controller
     {
         /// <summary>

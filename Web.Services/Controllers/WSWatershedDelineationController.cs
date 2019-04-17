@@ -134,6 +134,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// DelineationCompare controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/delineation/")]
     public class WSWatershedDelineationController : Controller
     {
@@ -144,8 +145,6 @@ namespace Web.Services.Controllers
         /// <param name="watershedInput">Parameters for retrieving DelineationCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
-        [Route("v1.0")]         // Version 1.0 endpoint
         [SwaggerRequestExample(typeof(WatershedDelineationInput), typeof(WatershedDelineationInputExample))]
         [SwaggerResponseExample(200, typeof(WatershedDelineationOutputExample))]
         public async Task<IActionResult> POST([FromBody]WatershedDelineationInput watershedInput)

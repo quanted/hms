@@ -171,6 +171,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Temperature controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/temperature")]
     public class WSTemperatureController : Controller
     {
@@ -180,9 +181,6 @@ namespace Web.Services.Controllers
         /// <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]                 // Default endpoint
-        [Route("v1.0")]             // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExample))]
         [SwaggerResponseExample(200, typeof(TemperatureOutputExample))]
         [SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]TemperatureInput tempInput)

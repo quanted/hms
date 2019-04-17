@@ -69,6 +69,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkflowPrecip controller for HMS.
     /// </summary>
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/")]
     public class WSWorkflowPrecipController : Controller
     {
