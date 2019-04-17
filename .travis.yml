@@ -13,7 +13,7 @@ script:
  - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
- - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.1/
+ - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.2/
  - dotnet test Data.Tests/Data.Tests.csproj -c Release
  - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release
  - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release
