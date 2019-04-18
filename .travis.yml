@@ -1,6 +1,6 @@
 language: csharp
 dotnet: 2.2
-dist: xenial
+dist: bionic
 mono: none
 solution: HMS.sln
 before_depoly:
@@ -8,6 +8,7 @@ before_depoly:
 script:
  - "travis_wait 30 sleep 1800 &"
  - rm docker-compose.*
+ - dotnet restore
  - dotnet build -c Release Data/
  - dotnet build -c Release Data.Simulate.AQUATOX/
  - dotnet build -c Release HMS.sln
