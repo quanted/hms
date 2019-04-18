@@ -1,6 +1,6 @@
 language: csharp
 dotnet: 2.2.105
-dist: bionic
+dist: xenial
 mono: none
 solution: HMS.sln
 before_depoly:
