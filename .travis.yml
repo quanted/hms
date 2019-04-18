@@ -11,6 +11,7 @@ script:
  - dotnet build -c Release Data/
  - dotnet build -c Release Data.Simulate.AQUATOX/
  - dotnet build -c Release HMS.sln
+ - dotnet build -c Release Web.Services/
  - dotnet build -c Release Web.Services.Tests/
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
