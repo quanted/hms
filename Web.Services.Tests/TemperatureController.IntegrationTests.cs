@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
@@ -70,6 +71,7 @@ namespace Web.Services.Tests
         [InlineData(daymetRequest, 365)]
         public async Task ValidRequests(string inputString, int expected)
         {
+            Thread.Sleep(5000);
             string endpoint = "api/hydrology/temperature";
             TemperatureInput input = JsonConvert.DeserializeObject<TemperatureInput>(inputString);
             Debug.WriteLine("Integration Test: Temperature controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
