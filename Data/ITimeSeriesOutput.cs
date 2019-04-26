@@ -28,6 +28,12 @@ namespace Data
         /// Time series data.
         /// </summary>
         Dictionary<string, List<string>> Data { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ITimeSeriesOutput Clone();
     }
 
     /// <summary>
@@ -54,6 +60,18 @@ namespace Data
         /// Time series data.
         /// </summary>
         public Dictionary<string, List<string>> Data { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ITimeSeriesOutput Clone()
+        {
+            TimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            TimeSeriesOutput newOutput = (TimeSeriesOutput)oFactory.Initialize();
+            newOutput = this;
+            return newOutput;
+        }
     }
 
     /// <summary>

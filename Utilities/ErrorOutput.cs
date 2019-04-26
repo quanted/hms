@@ -53,6 +53,10 @@ namespace Utilities
             return output;
         }
 
+        public ITimeSeriesOutput Clone()
+        {
+            return this.ReturnError("ERROR: Problem setting up output.");
+        }
 
 
     }
