@@ -130,14 +130,14 @@ namespace Data.Source
                 try
                 {
                     // TODO: Read in max retry attempt from config file.
-                    int retries = 5;
+                    int retries = 10;
 
                     // Response status message
                     string status = "";
 
                     while (retries > 0 && !status.Contains("OK"))
                     {
-                        Thread.Sleep(100);
+                        Thread.Sleep(200);
                         WebRequest wr = WebRequest.Create(url);
                         HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                         status = response.StatusCode.ToString();
