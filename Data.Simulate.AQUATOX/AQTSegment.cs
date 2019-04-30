@@ -150,6 +150,11 @@ namespace AQUATOX.AQTSegment
             DataSource = "";
             Metadata = new Dictionary<string, string>();
         }
+
+        public ITimeSeriesOutput Clone()
+        {
+            return this;
+        }
     }
 
     public class TStateVariable
