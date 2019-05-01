@@ -1,18 +1,14 @@
-﻿using Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Web;
+using Data;
 
-namespace Precipitation
+namespace Wind
 {
-    /// <summary>
-    /// Base precipitation ncdc class.
-    /// </summary>
-    public class NCDC
+    public class NCEI
     {
         /// <summary>
-        /// Makes the GetData call to the base NCDC class.
+        /// Makes the GetData call to the base NCEI class.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
@@ -32,17 +28,24 @@ namespace Precipitation
                 return null;
             }
             string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
-            if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            if (!input.Geometry.GeometryMetadata.ContainsKey("stationID") && input.Geometry.StationID == null)
             {
                 errorMsg = "ERROR: No NCEI stationID provided. Please provide a valid NCEI stationID.";
                 return null;
             }
-            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
+            else if (input.Geometry.StationID != null)
+            {
+                ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.StationID, input.Geometry.GeometryMetadata["token"]));
+            }
+            else
+            {
+                ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
+            }
             ncdcOutput.Metadata.Add("ncei", input.TemporalResolution);
-            ncdcOutput.Metadata.Add("ncei_units", "mm");
+            ncdcOutput.Metadata.Add("ncei_units", "m/s");
 
             // Data aggregation takes place within ncdc.GetData
-            Dictionary<string, double> data = ncdc.GetData(out errorMsg, "PRCP", input);
+            Dictionary<string, double> data = ncdc.GetData(out errorMsg, "AWND", input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Set resulting data to output.Data
@@ -50,9 +53,9 @@ namespace Precipitation
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ncdcOutput.DataSource = "ncei";
-            ncdcOutput.Dataset = "Precipitation";
+            ncdcOutput.Dataset = "Wind";
             ncdcOutput.Metadata.Add("column_1", "Date");
-            ncdcOutput.Metadata.Add("column_2", "NCEI Total");
+            ncdcOutput.Metadata.Add("column_2", "Wind");
             return ncdcOutput;
         }
 
@@ -68,7 +71,7 @@ namespace Precipitation
             errorMsg = "";
 
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
-            foreach(var key in data)
+            foreach (var key in data)
             {
                 result.Add(key.Key.ToString(), new List<string>() { data[key.Key.ToString()].ToString(dataFormat) });
             }
@@ -100,8 +103,7 @@ namespace Precipitation
         /// <returns></returns>
         public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
         {
-            return Data.Source.NCDC.CheckStatus("Precipitation", input);
+            return Data.Source.NCDC.CheckStatus("Wind", input);
         }
-
     }
 }

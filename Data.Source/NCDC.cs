@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.Serialization;
 using Utilities;
-
+using Newtonsoft.Json;
 
 namespace Data.Source
 {
@@ -28,7 +28,7 @@ namespace Data.Source
     public class Result
     {
         public string date { get; set; }
-        //public string datatype { get; set; }
+        public string datatype { get; set; }
         public string station { get; set; }
         public string attributes { get; set; }
         public double value { get; set; }
@@ -71,7 +71,7 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public Dictionary<string, double> GetData(out string errorMsg, string dataset, ITimeSeriesInput input)
+        public Dictionary<string, double> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
         {
             errorMsg = "";
 
@@ -79,7 +79,7 @@ namespace Data.Source
             //input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(1);
 
             // Begins sequence to download ncdc data.
-            Dictionary<string, double> data = BeginDataDownload(out errorMsg, dataset, input);
+            Dictionary<string, double> data = BeginDataDownload(out errorMsg, dataTypeID, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -92,19 +92,26 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private Dictionary<string, double> BeginDataDownload(out string errorMsg, string dataset, ITimeSeriesInput input)
+        private Dictionary<string, double> BeginDataDownload(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
         {
             errorMsg = "";
 
             Dictionary<string, double> data = new Dictionary<string, double>();
             DateTime tempStartDate = input.DateTimeSpan.StartDate;
             DateTime tempEndDate = input.DateTimeSpan.EndDate;
-
-            string station = input.Geometry.GeometryMetadata["stationID"];
+            string stationID = "";
+            if (input.Geometry.StationID != null)
+            {
+                stationID = input.Geometry.StationID;
+            }
+            else
+            {
+                stationID = input.Geometry.GeometryMetadata["stationID"];
+            }
             string token = input.Geometry.GeometryMetadata["token"];
 
             //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
-            string url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
+            string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             string csv = DownloadData(out errorMsg, token, url);
@@ -112,21 +119,7 @@ namespace Data.Source
             if (!csv.Equals("{}"))
             {
                 NCDCCSV results = ReadData(out errorMsg, csv);
-
-                /*double total = results.results.Count;//checking if available results exceed 1000 entry limit.
-                if (total > 1000)
-                {
-                    for (int j = 1; j < Math.Ceiling(total / 1000); j++)
-                    {
-                        url = url + "&offset=" + (j) * 1000;
-                        csv = DownloadData(out errorMsg, input.Geometry.GeometryMetadata["token"], url);
-                        if (errorMsg.Contains("ERROR")) { return null; }
-
-                        NCDCCSV tempResults = JSON.Deserialize<NCDCCSV>(csv);
-
-                        results.results.AddRange(tempResults.results);     //Adds the additional calls to the results.results variable
-                    }
-                }*/
+           
                 Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
                 AppendData(ref data, sumValues, input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -147,7 +140,7 @@ namespace Data.Source
         /// <param name="station">stationID</param>
         /// <param name="dateTime">IDateTimeSpan</param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, string station, string baseURL, DateTime startDate, DateTime endDate)
+        private string ConstructURL(out string errorMsg, string dataTypeID, string station, string baseURL, DateTime startDate, DateTime endDate)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
@@ -156,8 +149,7 @@ namespace Data.Source
             if (station.Contains("GHCND"))
             {
                 station = station.Remove(0, 6);
-                //sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
-                sb.Append("dataset=daily-summaries" + "&dataTypes=PRCP" + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=csv" + "&includeAttributes=true" + "&units=metric");
+                sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=csv" + "&includeAttributes=true" + "&units=metric");
             }
             else
             {
@@ -176,7 +168,7 @@ namespace Data.Source
         /// <returns></returns>
         private string DownloadData(out string errorMsg, string token, string url)
         {
-            errorMsg = "";
+                errorMsg = "";
             try
             {              
                 int retries = 5;                                        // Max number of request retries
@@ -187,7 +179,7 @@ namespace Data.Source
                 {
                     Thread.Sleep(333);
                     WebRequest wr = WebRequest.Create(url);
-                    //wr.Headers.Add("token", token);
+                    wr.Headers.Add("token", token);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();

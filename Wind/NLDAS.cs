@@ -98,7 +98,7 @@ namespace Wind
                     double v = Double.Parse(this.timeseriesData["v"].Data[date][0]);
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
                     double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
-                    timeseries.Add(date, new List<string>() { vel.ToString("E3"), deg.ToString() });
+                    timeseries.Add(date, new List<string>() { vel.ToString("E3"), deg.ToString("N3") });
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "velocity";
@@ -114,7 +114,7 @@ namespace Wind
                     double v = Double.Parse(this.timeseriesData["v"].Data[date][0]);
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
                     double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
-                    timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), deg.ToString() });
+                    timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), deg.ToString("N3") });
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "v";

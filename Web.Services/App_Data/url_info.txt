@@ -15,6 +15,7 @@ nldas_temperature_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/time
 gldas_temperature_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Tair_f_inst&location=GEOM:POINT
 nldas_u_wind_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:UGRD10m&location=NLDAS:
 nldas_v_wind_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:VGRD10m&location=NLDAS:
+gldas_wind_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Wind_f_inst&location=GEOM:POINT
 nldas_0_10_soilmoisture_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM0-10cm&location=NLDAS:
 nldas_10_40_soilmoisture_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM10-40cm&location=NLDAS:
 nldas_40_100_soilmoisture_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SOILM40-100cm&location=NLDAS:
@@ -27,6 +28,7 @@ gldas_40_100_soilmoisture_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/ac
 daymet_precipitation_url https://daymet.ornl.gov/data/send/saveData?
 daymet_temperature_url https://daymet.ornl.gov/data/send/saveData?
 ncei_precipitation_url https://www.ncei.noaa.gov/access/services/data/v1?
+ncei_wind_url https://www.ncei.noaa.gov/access/services/data/v1?
 ncei_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
 TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/

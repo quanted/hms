@@ -15,7 +15,7 @@ namespace Web.Services.Models
     public class WSWind
     {
 
-        private enum WindSources { nldas }
+        //private enum WindSources { nldas }
 
         /// <summary>
         /// Gets wind data using the given TimeSeriesInput parameters.
@@ -30,8 +30,8 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate wind sources.
-            errorMsg = (!Enum.TryParse(input.Source, true, out WindSources pSource)) ? "ERROR: 'Source' was not found or is invalid. Source provided: " + input.Source : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            //errorMsg = (!Enum.TryParse(input.Source, true, out WindSources pSource)) ? "ERROR: 'Source' was not found or is invalid. Source provided: " + input.Source : "";
+            //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Wind object
             Wind.Wind wind = new Wind.Wind();
@@ -43,10 +43,15 @@ namespace Web.Services.Models
 
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) {
-                if (!errorMsg.Contains("base url"))
+                if (!errorMsg.Contains("base url") && wind.Input.Source != "nldas")
                 {
                     return err.ReturnError(errorMsg);
-                }
+                } 
+            }
+
+            if (wind.Input.Source.Contains("ncei"))
+            {
+                wind.Input.Geometry.GeometryMetadata["token"] = (wind.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? wind.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
 
             // Gets the Wind data.

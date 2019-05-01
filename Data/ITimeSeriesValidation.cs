@@ -32,7 +32,7 @@ namespace Data
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
-            ["wind"] = new List<string> { "nldas" }
+            ["wind"] = new List<string> { "nldas", "gldas", "ncei" }
         };
 
         static string[] validRemoteData =

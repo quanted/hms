@@ -65,10 +65,23 @@ namespace Wind
                     NLDAS nldas = new NLDAS();
                     this.Output = nldas.GetData(out errorMsg, this.component, this.Output, this.Input);
                     break;
+                case "gldas":
+                    GLDAS gldas = new GLDAS();
+                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
+                    break;
+                case "ncei":
+                    NCEI ncei = new NCEI();
+                    this.Input.TemporalResolution = (this.Input.TemporalResolution == "default") ? "daily" : this.Input.TemporalResolution;
+                    this.Output = ncei.GetData(out errorMsg, this.Output, this.Input);
+                    break;
                 default:
                     if (errorMsg.Contains("ERROR")) { return null; }
                     errorMsg = "ERROR: 'Source' for wind was not found among available sources or is invalid. Valid sources: " + Enum.GetNames(typeof(validSources)).ToList();
                     break;
+            }
+            if (errorMsg.Contains("ERROR")) {
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return err.ReturnError(errorMsg);
             }
 
             // Adds Geometry metadata to the output metadata. NOT WORKING
