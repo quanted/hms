@@ -1,6 +1,8 @@
 ﻿using Data;
+using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Wind
@@ -46,7 +48,16 @@ namespace Wind
             }
             output.Dataset = "Wind";
             output.DataSource = "nldas";
-            //TODO: Add spatial aggregation options
+
+            switch (input.TemporalResolution)
+            {
+                case "daily":
+                    output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
+                    break;
+                case "hourly":
+                default:
+                    break;
+            }
 
             return output;
 
@@ -127,6 +138,70 @@ namespace Wind
                 output.Metadata["column_5_units"] = "deg";
             }
             output.Data = timeseries;
+        }
+
+        /// <summary>
+        /// Daily average for wind data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> DailyAverage(out string errorMsg, int hours, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+
+            // Unit conversion coefficient
+            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
+            if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
+
+            if (output.Data.Keys.Last().Contains(" 00"))
+            {
+                output.Data.Remove(output.Data.Keys.Last());
+            }
+            // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
+            hours += 1;
+            int totalDays = (output.Data.Keys.Count / hours) + 1;
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            for (int index = 0; index < output.Data.ElementAt(0).Value.Count; index++)
+            {
+                double[][] dValues = new double[totalDays][];
+                for (int i = 0; i < totalDays; i++)
+                {
+                    dValues[i] = new double[hours];
+                }
+                int hour = 0;
+                int day = 0;
+                //int i0 = (output.DataSource.Equals("nldas")) ? 1 : 0;
+                for (int i = 0; i < output.Data.Keys.Count; i++)
+                {
+                    hour = i % (hours);
+                    day = i / (hours);
+                    dValues[day][hour] = modifier * Double.Parse(output.Data.ElementAt(i).Value[index]);
+                }
+
+                var m = Matrix<double>.Build;
+                Matrix<double> matrix = m.DenseOfRowArrays(dValues);
+                Vector<double> precipRowValues = matrix.RowSums();
+                var tempKeys = output.Data.Keys;
+                int j = 0;
+                if (index == 0)
+                {
+                    for (int i = 0; i < output.Data.Count; i += hours)
+                    {
+                        tempData.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j) / matrix.Row(j).Count).ToString(input.DataValueFormat) });
+                        j++;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < output.Data.Count; i += hours)
+                    {
+                        tempData[tempKeys.ElementAt(i).Replace(" 01", " 00")].Add((unit * precipRowValues.ElementAt(j) / matrix.Row(j).Count).ToString(input.DataValueFormat));
+                        j++;
+                    }
+                }
+            }
+            return tempData;
         }
 
     }

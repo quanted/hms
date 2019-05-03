@@ -331,7 +331,7 @@ namespace Utilities
                         row.Add(-9999);
                         continue;
                     }
-                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval) && dval >= 0)
+                    if (Double.TryParse(timeseries.Value.ElementAt(i), out dval))
                         row.Add(dval);                        
                     else
                     {

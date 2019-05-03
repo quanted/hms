@@ -55,6 +55,11 @@ namespace Wind
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
+            if (String.IsNullOrWhiteSpace(this.Input.Units))
+            {
+                this.Input.Units = "metric";
+            }
+            this.Input.DataValueFormat = "E3";
 
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();

@@ -27,13 +27,6 @@ namespace Precipitation
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
-            //if (errorMsg.Contains("ERROR")) { return null; }
-            //if (data.Contains("ERROR"))
-            //{
-            //    string[] lines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            //    errorMsg = lines[0] + " Dataset: precipitation, Source: " + input.Source;
-            //    return null;
-            //}
             
             ITimeSeriesOutput nldasOutput = output;
             if (errorMsg.Contains("ERROR"))

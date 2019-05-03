@@ -259,10 +259,6 @@ namespace Data
             {
                 return input;
             }
-            //foreach(string ds in dataset)
-            //{
-            //    validatedInput.BaseURL.Add(GetBaseURL(input.Source, ds, out errorMsg));
-            //}
             return validatedInput;
         }
 
@@ -299,33 +295,6 @@ namespace Data
                 return "";
             }
         }
-
-        //private static string GetBaseURL(string source, string dataset, out string errorMsg)
-        //{
-        //    errorMsg = "";
-        //    Dictionary<string, string> urls = new Dictionary<string, string>();
-
-        //    try
-        //    {
-        //        urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
-        //    }
-        //    catch (FileNotFoundException)
-        //    {
-        //        urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
-        //    }
-
-        //    Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
-        //    string url_key = source.ToLower() + "_" + dataset.ToLower() + "_url";
-        //    try
-        //    {
-        //        return caselessUrls[url_key];
-        //    }
-        //    catch
-        //    {
-        //        errorMsg = "ERROR: Unable to construct base url from the specified dataset and provided data source.";
-        //        return "";
-        //    }
-        //}
 
     }
 
