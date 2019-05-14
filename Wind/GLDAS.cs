@@ -6,7 +6,7 @@ using Data;
 namespace Wind
 {
     /// <summary>
-    /// Precipitation GLDAS class
+    /// Wind GLDAS class
     /// </summary>
     public class GLDAS
     {

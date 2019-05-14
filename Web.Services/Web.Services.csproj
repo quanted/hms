@@ -86,6 +86,7 @@
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\Radiation\Radiation.csproj" />
     <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj" />
     <ProjectReference Include="..\Solar\Solar.csproj" />
     <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />

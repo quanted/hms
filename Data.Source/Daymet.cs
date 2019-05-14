@@ -99,16 +99,17 @@ namespace Data.Source
         private static string GetMeasuredParam(out string errorMsg, string dataset)
         {
             errorMsg = "";
-            switch (dataset)
+            switch (dataset.ToLower())
             {
-                case "Precip":
                 case "precip":
-                case "Precipitation":
+                case "precipitation":
                     return "prcp";
-                case "Temp":
                 case "temp":
-                case "Temperature":
+                case "temperature":
                     return "tmax,tmin";
+                case "radiation":
+                case "rad":
+                    return "srad";
                 default:
                     errorMsg = "ERROR: Parameter for Daynet did not load.";
                     return null;

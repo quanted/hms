@@ -12,7 +12,7 @@ namespace Data
     public class ITimeSeriesValidation
     {
         static string[] validDatasets = {
-            "precipitation", "evapotranspiration", "nutrients", "organicmatter",
+            "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
             "temperature", "wind"
         };
@@ -25,6 +25,7 @@ namespace Data
                 "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
             ["nutrients"] = new List<string> { "aquatox" },
             ["organicmatter"] = new List<string> { "aquatox"},
+            ["radiation"]  = new List<string> { "nldas", "gldas", "daymet"},
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },

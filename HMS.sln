@@ -65,7 +65,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chemicals.AQUATOX", "Chemic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chemicals.AQUATOX.UnitTests", "Chemicals\Chemicals.AQUATOX.UnitTests\Chemicals.AQUATOX.UnitTests.csproj", "{A17FEC0F-912A-48C6-92B5-0C60C2A956CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wind", "Wind\Wind.csproj", "{FAFF4B6B-8441-4642-8420-B9422A91BE4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wind", "Wind\Wind.csproj", "{FAFF4B6B-8441-4642-8420-B9422A91BE4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radiation", "Radiation\Radiation.csproj", "{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -331,6 +333,14 @@ Global
 		{FAFF4B6B-8441-4642-8420-B9422A91BE4C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FAFF4B6B-8441-4642-8420-B9422A91BE4C}.Release|x64.ActiveCfg = Release|Any CPU
 		{FAFF4B6B-8441-4642-8420-B9422A91BE4C}.Release|x64.Build.0 = Release|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Debug|x64.Build.0 = Debug|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|x64.ActiveCfg = Release|Any CPU
+		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
