@@ -22,6 +22,8 @@ namespace Radiation
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            bool validInputs = ValidateInputs(input, out errorMsg);
+            if (errorMsg.Contains("ERROR")) { return null; }
 
             Data.Source.Daymet daymet = new Data.Source.Daymet();
             string data = daymet.GetData(out errorMsg, "rad", input);
@@ -202,6 +204,46 @@ namespace Radiation
         public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
         {
             return Data.Source.Daymet.CheckStatus("Precip", input);
+        }
+
+        private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
+        {
+            errorMsg = "";
+            List<string> errors = new List<string>();
+            bool valid = true;
+            // Validate Date range
+            // Daymet date range 1980 - Present(- 1 year)
+            DateTime date0 = new DateTime(1980, 1, 1);
+            DateTime yearMax = DateTime.Now;
+            DateTime date1 = new DateTime(yearMax.Year -1, 12, 31);
+            string dateFormat = "yyyy-MM-dd";
+            if (DateTime.Compare(input.DateTimeSpan.StartDate, date0) < 0 || (DateTime.Compare(input.DateTimeSpan.StartDate, date1) > 0))
+            {
+                errors.Add("ERROR: Start date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". Start date provided: " + input.DateTimeSpan.StartDate.ToString(dateFormat));
+            }
+            if (DateTime.Compare(input.DateTimeSpan.EndDate, date0) < 0 || DateTime.Compare(input.DateTimeSpan.EndDate, date1) > 0)
+            {
+                errors.Add("ERROR: End date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". End date provided: " + input.DateTimeSpan.EndDate.ToString(dateFormat));
+            }
+
+            // Validate Spatial range
+            // NLDAS spatial range 125W ~ 63E, 25S ~ 53N
+            if (input.Geometry.Point.Latitude < -25 && input.Geometry.Point.Latitude > 53)
+            {
+                errors.Add("ERROR: Latitude is not valid. Latitude must be between -25 and 53. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
+            }
+            if (input.Geometry.Point.Longitude < -125 && input.Geometry.Point.Longitude > 63)
+            {
+                errors.Add("ERROR: Longitude is not valid. Longitude must be between -125 and 63. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
+            }
+
+            if (errors.Count > 0)
+            {
+                valid = false;
+                errorMsg = String.Join(", ", errors.ToArray());
+            }
+
+            return valid;
         }
     }
 }

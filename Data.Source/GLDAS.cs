@@ -56,8 +56,11 @@ namespace Data.Source
             // #2 start is in GLDAS 2.0, end is in GLDAS 2.1
             // #3 both are in GLDAS 2.1
             DateTime gldas21 = new DateTime(2010, 01, 01);
+            var test = DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21);
             if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0)            // #3
             {
+                //string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
+
                 //Add Start and End Date
                 string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
                 DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
@@ -101,10 +104,10 @@ namespace Data.Source
 
                 //Add Start and End Date for GLDAS 2.0
                 string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-                DateTime tempDate1 = gldas21.AddHours(3);
-                string[] endDT1 = tempDate1.ToString("yyyy-MM-dd HH").Split(' ');
+                //DateTime tempDate1 = gldas21.AddHours(3);
+                string[] endDT1 = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
 
-                string url1 = cInput.BaseURL[0] +
+                string url1 = gldas2Url +
                     @"%28" + cInput.Geometry.Point.Longitude.ToString() +
                     @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
                     @"&startDate=" + startDT1[0] + @"T" + startDT1[1] + @"&endDate=" + endDT1[0] + "T" + endDT1[1] + @"&type=asc2";
