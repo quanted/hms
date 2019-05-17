@@ -22,6 +22,9 @@ namespace Precipitation
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            bool validInputs = ValidateInputs(input, out errorMsg);
+            if (!validInputs) { return null; }
+
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
 
             ITimeSeriesOutput gldasOutput = output;
@@ -203,6 +206,47 @@ namespace Precipitation
                 tempData[kv.Key][0] = (modifier * Convert.ToDouble(kv.Value[0])).ToString(input.DataValueFormat);
             }
             return tempData;
+        }
+
+        private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
+        {
+            errorMsg = "";
+            List<string> errors = new List<string>();
+            bool valid = true;
+            // Validate Date range
+            // GLDAS 2.0 date range 1948-01-01 - 2010-12-31
+            // GLDAS 2.1 date range 2000-01-01 - Present(-2 month)
+            DateTime date0 = new DateTime(1948, 1, 1);
+            DateTime tempDate = DateTime.Now;
+            DateTime date1 = new DateTime(tempDate.Year, tempDate.Month, 1).AddMonths(-2);
+            string dateFormat = "yyyy-MM-dd";
+            if (DateTime.Compare(input.DateTimeSpan.StartDate, date0) < 0 || (DateTime.Compare(input.DateTimeSpan.StartDate, date1) > 0))
+            {
+                errors.Add("ERROR: Start date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". Start date provided: " + input.DateTimeSpan.StartDate.ToString(dateFormat));
+            }
+            if (DateTime.Compare(input.DateTimeSpan.EndDate, date0) < 0 || DateTime.Compare(input.DateTimeSpan.EndDate, date1) > 0)
+            {
+                errors.Add("ERROR: End date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". End date provided: " + input.DateTimeSpan.EndDate.ToString(dateFormat));
+            }
+
+            // Validate Spatial range
+            // GLDAS 2.0/2.1 spatial range 180W ~ 180E, 60S ~ 90N
+            if (input.Geometry.Point.Latitude < -60 && input.Geometry.Point.Latitude > 90)
+            {
+                errors.Add("ERROR: Latitude is not valid. Latitude must be between -60 and 90. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
+            }
+            if (input.Geometry.Point.Longitude < -180 && input.Geometry.Point.Longitude > 180)
+            {
+                errors.Add("ERROR: Longitude is not valid. Longitude must be between -180 and 180. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
+            }
+
+            if (errors.Count > 0)
+            {
+                valid = false;
+                errorMsg = String.Join(", ", errors.ToArray());
+            }
+
+            return valid;
         }
     }
 }

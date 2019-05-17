@@ -24,7 +24,7 @@ namespace Radiation
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (!validInputs) { return null; }
 
             this.timeseriesData = new Dictionary<string, ITimeSeriesOutput>();
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();

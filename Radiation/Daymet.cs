@@ -23,7 +23,7 @@ namespace Radiation
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (!validInputs) { return null; }
 
             Data.Source.Daymet daymet = new Data.Source.Daymet();
             string data = daymet.GetData(out errorMsg, "rad", input);
