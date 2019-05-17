@@ -17,9 +17,9 @@ script:
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.2/
- - dotnet test Data.Tests/Data.Tests.csproj -c Release
- - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release
- - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release
- - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release
- - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release
+ - dotnet test Data.Tests/Data.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
