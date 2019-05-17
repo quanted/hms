@@ -56,6 +56,12 @@ namespace SurfaceRunoff
                 precipData = input.InputTimeSeries["precipitation"];
             }
 
+            if (precipData.Data.GetType().Equals(typeof(Utilities.ErrorOutput)) || precipData.Data.Count <= 0)
+            {
+                errorMsg = "ERROR: Could not obtain valid precipitation data.";
+                return null;
+            }
+
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -208,7 +214,7 @@ namespace SurfaceRunoff
                     if (dataset.ToLower().Equals("precipitation"))
                     {
                         // Assuming input TimeSeries has a temporal resolution of 1 day
-                        int inputDays = (input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).Days;
+                        int inputDays = (input.DateTimeSpan.EndDate.Date - input.DateTimeSpan.StartDate.Date).Days + 1; //int inputDays = (input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).Days;
                         int inputTSDays = o.Data.Keys.Count;
                         if (inputDays == inputTSDays)
                         {

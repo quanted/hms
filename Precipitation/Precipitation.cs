@@ -92,6 +92,12 @@ namespace Precipitation
                     this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "nwm":
+                    // wgen Precipitation Data call
+                    NWM nwm = new NWM();
+                    this.Output = nwm.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 default:
                     errorMsg = "ERROR: 'Source' for precipitation was not found among available sources or is invalid.";
                     break;
