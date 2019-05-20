@@ -29,6 +29,13 @@ namespace Data.Source
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
+            if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
+            {
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy", null);
+                TimeSpan ts = new TimeSpan(23, 00, 0);
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
+            }
+            
             // Constructs the url for the NLDAS data request and it's query string.
             List<string> url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }

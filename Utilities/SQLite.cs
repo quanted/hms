@@ -44,7 +44,10 @@ namespace Utilities
                             var k = reader.GetName(i);
                             var v = reader.GetValue(i).ToString();
 
-                            data.Add(k, v);
+                            if (!data.ContainsKey(k))
+                            {
+                                data.Add(k, v);
+                            }
                         }
                     }
                 }

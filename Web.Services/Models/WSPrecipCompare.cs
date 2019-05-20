@@ -69,6 +69,12 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
+            if (input == null)
+            {
+                errorMsg = "ERROR: Invalid input parameters.";
+                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            }
+            
             Debug.WriteLine("Precip compare request recieved...");
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
@@ -141,10 +147,18 @@ namespace Web.Services.Models
             //Check for extreme events and required parameters
             if (input.TemporalResolution == "extreme_5")
             {
-                input.Geometry.GeometryMetadata.Add("dailyThreshold", input.ExtremeDaily.ToString());
-                input.Geometry.GeometryMetadata.Add("totalThreshold", input.ExtremeTotal.ToString());
-            }      
-
+                try
+                {
+                    input.Geometry.GeometryMetadata.Add("dailyThreshold", input.ExtremeDaily.ToString());
+                    input.Geometry.GeometryMetadata.Add("totalThreshold", input.ExtremeTotal.ToString());
+                }
+                catch(Exception ex)
+                {
+                    errorMsg = "ERROR: One or more threshold values for extreme events were not provided.";
+                    if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+                }
+            }
+            
             input.Source = "ncei";
             input.SourceList.Remove("ncei");
             // Validate precipitation sources.
