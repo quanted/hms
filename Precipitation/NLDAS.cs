@@ -56,7 +56,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("nldas_temporalresolution", input.TemporalResolution);
@@ -124,90 +124,48 @@ namespace Precipitation
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
 
-            Boolean mathnet = true;
-
-            if (mathnet)
+            if (output.Data.Keys.Last().Contains(" 00"))
             {
-                if (output.Data.Keys.Last().Contains(" 00"))
-                {
-                    output.Data.Remove(output.Data.Keys.Last());
-                }
-                // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
-                TimeSpan t0 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-
-                hours += 1;
-                int totalDays = (output.Data.Keys.Count / hours) + 1;
-                double[][] dValues = new double[totalDays][];
-                for (int i = 0; i < totalDays; i++)
-                {
-
-                    dValues[i] = new double[hours];
-                }
-                int hour = 0;
-                int day = 0;
-                //Debug.WriteLine("Element Count: " + output.Data.Values.Count.ToString());
-                int i0 = (output.DataSource.Equals("nldas")) ? 1 : 0;
-                for (int i = i0; i < output.Data.Keys.Count; i++)
-                {
-                    hour = i % (hours);
-                    day = i / (hours);
-                    //Debug.WriteLine("Count: " + (output.Data.Keys.Count).ToString() + "; i: " + i.ToString() + "; day: " + day.ToString() + "; hour: " + hour.ToString() + "; value: " + output.Data.Values.ElementAt(i)[0]);
-                    dValues[day][hour] = modifier * Double.Parse(output.Data.Values.ElementAt(i - i0)[0]);
-                }
-
-                var m = Matrix<double>.Build;
-                Matrix<double> matrix = m.DenseOfRowArrays(dValues);
-                Vector<double> precipColumnValues = matrix.ColumnSums();
-                Vector<double> precipRowValues = matrix.RowSums();
-                Dictionary<string, List<string>> tempData0 = new Dictionary<string, List<string>>();
-                var tempKeys = output.Data.Keys;
-                int j = 0;
-                for (int i = 0; i < output.Data.Count; i += hours)
-                {
-                    tempData0.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
-                    j++;
-                }
-                TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-                Debug.WriteLine("Total MathNet calculation time for " + output.Data.Keys.Count + " records: " + t1.Subtract(t0).ToString());
-                return tempData0;
+                output.Data.Remove(output.Data.Keys.Last());
             }
-            else
+            // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
+            TimeSpan t0 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+
+            hours += 1;
+            int totalDays = (output.Data.Keys.Count / hours) + 1;
+            double[][] dValues = new double[totalDays][];
+            for (int i = 0; i < totalDays; i++)
             {
-                // Daily aggregation using updated ITimeSeriesOutput object
-                TimeSpan t2 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-                ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
 
-                DateTime iDate = new DateTime();
-                double sum = 0.0;
-
-                iDate = aggOut.Data.Keys.ElementAt(0).Date;
-
-                Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-                int nHourly = 0;
-                List<string> values = new List<string> { "" };
-                DateTime date = new DateTime();
-
-                for (int i = 0; i < aggOut.Data.Count; i++)
-                {
-                    date = aggOut.Data.Keys.ElementAt(i).Date;
-                    if (date.Day != iDate.Day || (nHourly >= hours && i > nHourly))
-                    {
-                        values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
-                        tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
-                        iDate = date;
-                        sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
-                        nHourly = 0;
-                    }
-                    else
-                    {
-                        sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
-                        nHourly++;
-                    }
-                }
-                TimeSpan t3 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-                Debug.WriteLine("Total new ITimeSeriesOutput object calculation time for " + output.Data.Keys.Count + " records: " + t3.Subtract(t2).ToString());
-                return tempData;
+                dValues[i] = new double[hours];
             }
+            int hour = 0;
+            int day = 0;
+            //Debug.WriteLine("Element Count: " + output.Data.Values.Count.ToString());
+            int i0 = (output.DataSource.Equals("nldas")) ? 1 : 0;
+            for (int i = i0; i < output.Data.Keys.Count; i++)
+            {
+                hour = i % (hours);
+                day = i / (hours);
+                //Debug.WriteLine("Count: " + (output.Data.Keys.Count).ToString() + "; i: " + i.ToString() + "; day: " + day.ToString() + "; hour: " + hour.ToString() + "; value: " + output.Data.Values.ElementAt(i)[0]);
+                dValues[day][hour] = modifier * Double.Parse(output.Data.Values.ElementAt(i - i0)[0]);
+            }
+
+            var m = Matrix<double>.Build;
+            Matrix<double> matrix = m.DenseOfRowArrays(dValues);
+            Vector<double> precipColumnValues = matrix.ColumnSums();
+            Vector<double> precipRowValues = matrix.RowSums();
+            Dictionary<string, List<string>> tempData0 = new Dictionary<string, List<string>>();
+            var tempKeys = output.Data.Keys;
+            int j = 0;
+            for (int i = 0; i < output.Data.Count; i += hours)
+            {
+                tempData0.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                j++;
+            }
+            TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+            Debug.WriteLine("Total MathNet calculation time for " + output.Data.Keys.Count + " records: " + t1.Subtract(t0).ToString());
+            return tempData0;
         }
 
         /// <summary>
@@ -350,8 +308,11 @@ namespace Precipitation
             return Data.Source.NLDAS.CheckStatus("Precipitation", input);
         }
 
-
-
+        /// <summary>
+        /// Converts ITimeSeriesOutput to ITimeSeriesAggregation (DateTime, List<double>)
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
         public static ITimeSeriesAggregation ConvertTimeSeries(ITimeSeriesOutput output)
         {
             //Create new ITimeSeries and convert Dictionary<string, List<string>> to Dictionary<DateTime, List<double>>
@@ -370,6 +331,12 @@ namespace Precipitation
             return aggOutput;
         }
 
+        /// <summary>
+        /// Validate input dates and coordinates for precipitation nldas data.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
         private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
@@ -391,11 +358,11 @@ namespace Precipitation
 
             // Validate Spatial range
             // NLDAS spatial range 125W ~ 63E, 25S ~ 53N
-            if (input.Geometry.Point.Latitude < -25 && input.Geometry.Point.Latitude > 53)
+            if (input.Geometry.Point.Latitude < -25 || input.Geometry.Point.Latitude > 53)
             {
                 errors.Add("ERROR: Latitude is not valid. Latitude must be between -25 and 53. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
             }
-            if (input.Geometry.Point.Longitude < -125 && input.Geometry.Point.Longitude > 63)
+            if (input.Geometry.Point.Longitude < -125 || input.Geometry.Point.Longitude > 63)
             {
                 errors.Add("ERROR: Longitude is not valid. Longitude must be between -125 and 63. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
             }
