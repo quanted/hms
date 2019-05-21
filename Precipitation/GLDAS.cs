@@ -66,7 +66,12 @@ namespace Precipitation
             return gldasOutput;
         }
 
-        private Dictionary<string, bool> GetYears(ITimeSeriesInput input)
+        /// <summary>
+        /// Gets a list of years between input start date and end date for gldas 2.0/2.1 validation
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public Dictionary<string, bool> GetYears(ITimeSeriesInput input)
         {
             Dictionary<string, bool> years = new Dictionary<string, bool>();
             DateTime startYear = new DateTime(input.DateTimeSpan.StartDate.Year, input.DateTimeSpan.StartDate.Month, input.DateTimeSpan.StartDate.Day);
@@ -84,7 +89,13 @@ namespace Precipitation
             return years;
         }
 
-        private bool CheckYears(Dictionary<string,bool> years, ITimeSeriesOutput output)
+        /// <summary>
+        /// Checks the list of years of the output to make sure all years are present from the expected list.
+        /// </summary>
+        /// <param name="years"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public bool CheckYears(Dictionary<string,bool> years, ITimeSeriesOutput output)
         {
             bool complete = true;
             bool checkComplete = false;
@@ -124,7 +135,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("gldas_temporalresolution", input.TemporalResolution);
@@ -208,6 +219,12 @@ namespace Precipitation
             return tempData;
         }
 
+        /// <summary>
+        /// Validate start/end date and lat/lon inputs
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
         private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
@@ -231,11 +248,11 @@ namespace Precipitation
 
             // Validate Spatial range
             // GLDAS 2.0/2.1 spatial range 180W ~ 180E, 60S ~ 90N
-            if (input.Geometry.Point.Latitude < -60 && input.Geometry.Point.Latitude > 90)
+            if (input.Geometry.Point.Latitude < -60 || input.Geometry.Point.Latitude > 90)
             {
                 errors.Add("ERROR: Latitude is not valid. Latitude must be between -60 and 90. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
             }
-            if (input.Geometry.Point.Longitude < -180 && input.Geometry.Point.Longitude > 180)
+            if (input.Geometry.Point.Longitude < -180 || input.Geometry.Point.Longitude > 180)
             {
                 errors.Add("ERROR: Longitude is not valid. Longitude must be between -180 and 180. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
             }

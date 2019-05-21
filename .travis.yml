@@ -5,6 +5,7 @@ mono: latest
 solution: HMS.sln
 before_depoly:
  - cd ~
+ - dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
 script:
  - "travis_wait 30 sleep 1800 &"
  - rm docker-compose.*
@@ -23,5 +24,5 @@ script:
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
-after_script:
+after_success:
  - mono tools/csmacnz.Coveralls.exe --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
