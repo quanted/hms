@@ -78,7 +78,7 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 case "yearly":
-                    output.Data = YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Data = YearlyAggregatedSum(out errorMsg, 23, 1.0, output, input);
                     output.Metadata.Add("column_2", "Yearly Total");
                     return output;
                 default:
@@ -262,7 +262,7 @@ namespace Precipitation
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, int lastHour, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
@@ -273,25 +273,28 @@ namespace Precipitation
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
 
-            iDate = aggOut.Data.Keys.ElementAt(0).Date;
+            iDate = aggOut.Data.Keys.ElementAt(0);
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string> { "" };
             DateTime date = new DateTime();
-
+            bool last = false;
             for (int i = 0; i < aggOut.Data.Count; i++)
             {
-                date = aggOut.Data.Keys.ElementAt(i).Date;
-                if (date.Year != iDate.Year || i == aggOut.Data.Count - 1)
+                date = aggOut.Data.Keys.ElementAt(i);
+                last = (date.Month == 12 && date.Day == 31 && date.Hour == lastHour) ? true : false;
+                if (last)
                 {
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
                     values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
                     iDate = date;
-                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
+                    sum = 0;
+                    last = false;
                 }
                 else
                 {
-                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
+                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0];
                 }
             }
             return tempData;

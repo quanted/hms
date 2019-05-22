@@ -50,7 +50,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("daymet_temporalresolution", input.TemporalResolution);
@@ -67,7 +67,7 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 case "yearly":
-                    output.Data = NLDAS.YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Data = NLDAS.YearlyAggregatedSum(out errorMsg, 0, 1.0, output, input);
                     output.Metadata.Add("column_2", "Yearly Total");
                     return output;
                 case "daily":

@@ -25,5 +25,27 @@ namespace Precipitation.Tests
             Assert.Equal("OK", status["status"]);
         }
 
+        [Trait("Priority", "1")]
+        [Theory]
+        [InlineData("default", "2015-01-01 00", 0.0)]
+        [InlineData("daily", "2015-01-02 00", 3.0)]
+        [InlineData("weekly", "2015-01-01 00", 50.0)]
+        [InlineData("monthly", "2015-01-01 00", 83.0)]
+        [InlineData("yearly", "2015-01-01 00", 1587)]
+        public void TemporalAggregation(string aggregation, string date, double expected)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
+                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
+            };
+            string errorMsg = "";
+            Daymet daymet = new Daymet();
+            precip.Input.TemporalResolution = aggregation;
+            precip.Output = daymet.TemporalAggregation(out errorMsg, precip.Output, precip.Input);
+            Assert.Equal(expected, Convert.ToDouble(precip.Output.Data[date][0]));
+
+        }
+
     }
 }

@@ -36,7 +36,7 @@ namespace Precipitation.Tests
         [InlineData("daily", "2015-01-01 00", 0.5964)]
         [InlineData("weekly", "2015-01-01 00", 43.1)]
         [InlineData("monthly", "2015-01-01 00", 76.34)]
-        [InlineData("yearly", "2015-01-01 00", 1587)]
+        [InlineData("yearly", "2015-01-01 01", 1587)]
         public void TemporalAggregation(string aggregation, string date, double expected)
         {
             Precipitation precip = new Precipitation
@@ -114,7 +114,7 @@ namespace Precipitation.Tests
                 Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
             };
             string errorMsg = "";
-            Dictionary<string, List<string>>yearlyData = NLDAS.YearlyAggregatedSum(out errorMsg, 1.0, precip.Output, precip.Input);
+            Dictionary<string, List<string>>yearlyData = NLDAS.YearlyAggregatedSum(out errorMsg, 23, 1.0, precip.Output, precip.Input);
             Assert.Equal(expected, Convert.ToDouble(yearlyData[date][0]));
         }
 
