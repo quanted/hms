@@ -159,7 +159,7 @@ namespace Precipitation
                     output.Metadata.Add("column_2", "Monthly Total");
                     return output;
                 case "yearly":
-                    output.Data = NLDAS.YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Data = NLDAS.YearlyAggregatedSum(out errorMsg, 3.0, output, input);
                     output.Metadata.Add("column_2", "Yearly Total");
                     return output;
                 default:
