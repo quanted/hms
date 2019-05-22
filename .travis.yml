@@ -23,4 +23,4 @@ script:
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - mono ./tools/csmacnz.Coveralls.exe --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
+ - mono ./tools/csmacnz.Coveralls --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
