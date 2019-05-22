@@ -31,7 +31,7 @@ namespace Precipitation.Tests
         [InlineData("daily", "2015-01-02 00", 3.0)]
         [InlineData("weekly", "2015-01-01 00", 50.0)]
         [InlineData("monthly", "2015-01-01 00", 83.0)]
-        [InlineData("yearly", "2015-01-01 00", 1587)]
+        [InlineData("yearly", "2015-01-01 00", 1731.0)]
         public void TemporalAggregation(string aggregation, string date, double expected)
         {
             Precipitation precip = new Precipitation

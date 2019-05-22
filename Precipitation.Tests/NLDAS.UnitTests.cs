@@ -105,7 +105,7 @@ namespace Precipitation.Tests
 
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData("2015-01-01 00", 1587)]
+        [InlineData("2015-01-01 01", 1587)]
         public void YearlyAggregatedSum(string date, double expected)
         {
             Precipitation precip = new Precipitation
