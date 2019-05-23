@@ -86,7 +86,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataSet, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataSet, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             string[] splitData = data.Split(new string[] { "year,yday,prcp (mm/day)" }, StringSplitOptions.RemoveEmptyEntries);
@@ -102,7 +102,6 @@ namespace Precipitation
             {
                 // Daymet Leap Year MESS!
                 // Inserts Dec 31st for leap years.
-                // Daymet leap year black magic (DON'T TOUCH)
                 for (int i = 0; i <= (outputTemp.Keys.Last().Year - outputTemp.Keys.First().Year); i++)
                 {
                     DateTime date = sortedData.Keys.First().AddYears(i);
@@ -161,7 +160,7 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="modifier"></param>
         /// <returns></returns>
-        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
+        public Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
         {
             errorMsg = "";
             Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>();
@@ -217,7 +216,13 @@ namespace Precipitation
             return Data.Source.Daymet.CheckStatus("Precip", input);
         }
 
-        private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
+        /// <summary>
+        /// Validate input dates and coordinates for precipitation daymet data.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
+        public Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
             List<string> errors = new List<string>();
@@ -238,12 +243,12 @@ namespace Precipitation
             }
 
             // Validate Spatial range
-            // NLDAS spatial range 125W ~ 63E, 25S ~ 53N
-            if (input.Geometry.Point.Latitude < -25 && input.Geometry.Point.Latitude > 53)
+            // Daymet spatial range 125W ~ 63E, 25S ~ 53N
+            if (input.Geometry.Point.Latitude < -25 || input.Geometry.Point.Latitude > 53)
             {
                 errors.Add("ERROR: Latitude is not valid. Latitude must be between -25 and 53. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
             }
-            if (input.Geometry.Point.Longitude < -125 && input.Geometry.Point.Longitude > 63)
+            if (input.Geometry.Point.Longitude < -125 || input.Geometry.Point.Longitude > 63)
             {
                 errors.Add("ERROR: Longitude is not valid. Longitude must be between -125 and 63. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
             }

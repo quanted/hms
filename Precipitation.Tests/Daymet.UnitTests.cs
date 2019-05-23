@@ -47,5 +47,48 @@ namespace Precipitation.Tests
 
         }
 
+        const string invalidStartDateInput = "{\"Source\":\"daymet\",\"DateTimeSpan\":{\"StartDate\":\"1970-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidStartDateError = "ERROR: Start date is not valid.";
+        const string invalidEndDateInput = "{\"Source\":\"daymet\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2116-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidEndDateError = "ERROR: End date is not valid.";
+        const string invalidLatInput = "{\"Source\":\"daymet\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":-30,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidLatError = "ERROR: Latitude is not valid.";
+        const string invalidLonInput = "{\"Source\":\"daymet\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":70},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidLonError = "ERROR: Longitude is not valid.";
+
+        [Theory]
+        [InlineData(invalidStartDateInput, invalidStartDateError)]
+        [InlineData(invalidEndDateInput, invalidEndDateError)]
+        [InlineData(invalidLatInput, invalidLatError)]
+        [InlineData(invalidLonInput, invalidLonError)]
+        public void ValidateInput(string input, string errorMsg)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
+                Output = null
+            };
+            string error = "";
+            Daymet daymet = new Daymet();
+            precip.Output = daymet.GetData(out error, precip.Output, precip.Input);
+            Assert.Contains(errorMsg, error);
+        }
+
+        [Trait("Priority", "1")]
+        [Theory]
+        [InlineData(365)]
+        public void SetDataToOutput(int count)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
+                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
+            };
+            string errorMsg = "";
+            Daymet daymet = new Daymet();
+            precip.Output = daymet.SetDataToOutput(out errorMsg, "", rawOutput, precip.Output, precip.Input);
+            Assert.Equal(count, precip.Output.Data.Count);
+
+        }
     }
 }
