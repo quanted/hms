@@ -63,7 +63,7 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, double> data)
+        public Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, double> data)
         {
             errorMsg = "";
 
@@ -82,7 +82,7 @@ namespace Precipitation
         /// <param name="source"></param>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetMetadata(out string errorMsg, string source, Dictionary<string, string> metadata)
+        public Dictionary<string, string> SetMetadata(out string errorMsg, string source, Dictionary<string, string> metadata)
         {
             errorMsg = "";
             Dictionary<string, string> newMeta = new Dictionary<string, string>();

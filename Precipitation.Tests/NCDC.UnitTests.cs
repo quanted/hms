@@ -24,5 +24,21 @@ namespace Precipitation.Tests
             Assert.Equal("OK", status["status"]);
         }
 
+        [Trait("Priority", "1")]
+        [Theory]
+        [InlineData(365)]
+        public void GetData(int count)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
+                Output = null
+            };
+            NCDC ncdc = new NCDC();
+            string errorMsg = "";
+            precip.Output = ncdc.GetData(out errorMsg, precip.Output, precip.Input);
+            Assert.Equal(count, precip.Output.Data.Count);
+        }
+
     }
 }
