@@ -32,6 +32,10 @@ namespace Precipitation
                 return null;
             }
             string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
+            if(input.Geometry.StationID != null && !input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            {
+                input.Geometry.GeometryMetadata.Add("stationID", input.Geometry.StationID);
+            }
             if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
             {
                 errorMsg = "ERROR: No NCEI stationID provided. Please provide a valid NCEI stationID.";

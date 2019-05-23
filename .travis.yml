@@ -26,5 +26,5 @@ script:
  - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
  - ls ~/
  - ls ~/tools/
- - chmod +x ~/tools/csmacnz.coveralls.exe
- - mono ~/tools/csmacnz.coveralls.exe --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
+ - chmod +x ~/tools/csmacnz.Coveralls
+ - mono ~/tools/csmacnz.Coveralls --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
