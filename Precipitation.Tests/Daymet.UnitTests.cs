@@ -76,8 +76,9 @@ namespace Precipitation.Tests
 
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(365)]
-        public void SetDataToOutput(int count)
+        [InlineData(365, false)]
+        [InlineData(365, true)]
+        public void SetDataToOutput(int count, bool leap)
         {
             Precipitation precip = new Precipitation
             {
@@ -86,9 +87,12 @@ namespace Precipitation.Tests
             };
             string errorMsg = "";
             Daymet daymet = new Daymet();
+            if (leap)
+            {
+                precip.Input.Geometry.GeometryMetadata.Add("leapYear", "");
+            }
             precip.Output = daymet.SetDataToOutput(out errorMsg, "", rawOutput, precip.Output, precip.Input);
             Assert.Equal(count, precip.Output.Data.Count);
-
         }
     }
 }
