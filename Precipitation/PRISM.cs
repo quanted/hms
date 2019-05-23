@@ -9,6 +9,13 @@ namespace Precipitation
     public class PRISM
     {
 
+        /// <summary>
+        /// PRISM data collection function.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
@@ -44,7 +51,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("prism_temporalresolution", input.TemporalResolution);
@@ -177,6 +184,14 @@ namespace Precipitation
             return tempData;
         }
 
+        /// <summary>
+        /// PRISM yearly aggregation
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="modifier"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
@@ -192,17 +207,20 @@ namespace Precipitation
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string> { "" };
-
+            bool last = false;
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                if (date.Year != iDate.Year || i == output.Data.Count - 1)
+                last = (date.Month == 12 && date.Day == 31) ? true : false;
+                if (last)
                 {
+                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
                     iDate = date;
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    last = false;
+                    sum = 0;
                 }
                 else
                 {
@@ -211,5 +229,6 @@ namespace Precipitation
             }
             return tempData;
         }
+
     }
 }
