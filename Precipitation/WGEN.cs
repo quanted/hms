@@ -108,7 +108,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("wgen_temporalresolution", input.TemporalResolution);
@@ -125,6 +125,10 @@ namespace Precipitation
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");
+                    return output;
+                case "yearly":
+                    output.Data = YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Metadata.Add("column_2", "Yearly Total");
                     return output;
                 default:
                     output.Data = (!input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
@@ -146,6 +150,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = 25.4;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             for (int i = 0; i < output.Data.Count; i++)
             {
@@ -172,6 +183,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
 
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
@@ -211,6 +229,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
 
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
@@ -241,7 +266,7 @@ namespace Precipitation
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, int lastHour, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
 
@@ -249,9 +274,15 @@ namespace Precipitation
             double sum = 0.0;
 
             // Unit conversion coefficient
-            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-
-            iDate = DateTime.Parse(output.Data.Keys.ElementAt(0));
+            double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
+            iDate = DateTime.Parse(output.Data.Keys.ElementAt(0).Split(" ")[0]);
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             List<string> values = new List<string> { "" };
@@ -259,8 +290,8 @@ namespace Precipitation
             bool last = false;
             for (int i = 0; i < output.Data.Count; i++)
             {
-                date = DateTime.Parse(output.Data.Keys.ElementAt(i));
-                last = (date.Month == 12 && date.Day == 31 && date.Hour == lastHour) ? true : false;
+                date = DateTime.Parse(output.Data.Keys.ElementAt(i).Split(" ")[0]);
+                last = (date.Month == 12 && date.Day == 31) ? true : false;
                 if (last)
                 {
                     sum += Double.Parse(output.Data[output.Data.Keys.ElementAt(i)][0]);
