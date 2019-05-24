@@ -3,13 +3,6 @@ dotnet: 2.2
 dist: xenial
 mono: latest
 solution: HMS.sln
-install:
-  - sudo apt-get install gtk-sharp2
-  - curl -sS https://api.nuget.org/packages/mono.cecil.0.9.5.4.nupkg > /tmp/mono.cecil.0.9.5.4.nupkg.zip
-  - unzip /tmp/mono.cecil.0.9.5.4.nupkg.zip -d /tmp/cecil
-  - cp /tmp/cecil/lib/net40/Mono.Cecil.dll .
-  - cp /tmp/cecil/lib/net40/Mono.Cecil.dll /tmp/cecil/
-
 before_depoly:
  - cd ~
 script:
@@ -30,7 +23,5 @@ script:
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - export LD_LIBRARY_PATH=/usr/local/lib
  - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
- - chmod +x ~/tools/csmacnz.Coveralls
- - mono ~/tools/csmacnz.Coveralls --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci" --useRelativePaths
+ - ~/tools/csmacnz.Coveralls --opencover -i ./TestResults/*/* --repoToken $COVERALLS_REPO_TOKEN --commitID $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobID $TRAVIS_JOB_ID --serviceName "travis-ci"
