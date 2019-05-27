@@ -11,20 +11,24 @@ using Web.Services.Models;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Dew Point Input that implements TimeSeriesInput object
+    /// Humidity Input that implements TimeSeriesInput object
     /// </summary>
-    public class DewPointInput : TimeSeriesInput
+    public class HumidityInput : TimeSeriesInput
     {
-        // Add extra Dew Point specific variables here
+        // Add extra Humidity specific variables here
+        /// <summary>
+        /// Relative or Specific Humidity
+        /// </summary>
+        public bool Relative;
     }
 
 
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle Dew Point POST request example
+    /// Swashbuckle Humidity POST request example
     /// </summary>
-    public class DewPointInputExample : IExamplesProvider
+    public class HumidityInputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -32,9 +36,10 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            DewPointInput example = new DewPointInput()
+            HumidityInput example = new HumidityInput()
             {
                 Source = "prism",
+                Relative = true,
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -60,9 +65,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbuckle Dew Point POST request example
+    /// Swashbuckle Humidity POST request example
     /// </summary>
-    public class DewPointInputExampleFull : IExamplesProvider
+    public class HumidityInputExampleFull : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -70,9 +75,10 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            DewPointInput example = new DewPointInput()
+            HumidityInput example = new HumidityInput()
             {
                 Source = "prism",
+                Relative = true,
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -111,9 +117,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbucle DewPoint Output example
+    /// Swashbucle Humidity Output example
     /// </summary>
-    public class DewPointOutputExample : IExamplesProvider
+    public class HumidityOutputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -123,8 +129,8 @@ namespace Web.Services.Controllers
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "Dew Point";
-            output.DataSource = "nldas";
+            output.Dataset = "Relative humidity";
+            output.DataSource = "prism";
             output.Metadata = new Dictionary<string, string>()
             {
                 { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
@@ -166,27 +172,27 @@ namespace Web.Services.Controllers
     }
 
 
-    // --------------- DewPoint Controller --------------- //
+    // --------------- Humidity Controller --------------- //
 
     /// <summary>
-    /// DewPoint controller for HMS.
+    /// Humidity controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api/meteorology/dewpoint")]
-    public class WSDewPointController : Controller
+    [Route("api/meteorology/humidity")]
+    public class WSHumidityController : Controller
     {
         /// <summary>
-        /// POST Method for getting dew point data.
+        /// POST Method for getting humidity data.
         /// </summary>
-        /// <param name="tempInput">Parameters for retrieving dew point data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="tempInput">Parameters for retrieving humidity data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [SwaggerResponseExample(200, typeof(DewPointOutputExample))]
-        [SwaggerRequestExample(typeof(DewPointInput), typeof(DewPointInputExampleFull))]
-        public async Task<IActionResult> POST([FromBody]DewPointInput tempInput)
+        [SwaggerResponseExample(200, typeof(HumidityOutputExample))]
+        [SwaggerRequestExample(typeof(HumidityInput), typeof(HumidityInputExampleFull))]
+        public async Task<IActionResult> POST([FromBody]HumidityInput tempInput)
         {
-            WSDewPoint dPoint = new WSDewPoint();
-            ITimeSeriesOutput results = await dPoint.GetDewPoint(tempInput);
+            WSHumidity humid = new WSHumidity();
+            ITimeSeriesOutput results = await humid.GetHumidity(tempInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

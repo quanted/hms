@@ -14,7 +14,7 @@ namespace Data
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
-            "temperature", "wind"
+            "temperature", "wind", "dewpoint"
         };
 
         static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
@@ -33,7 +33,9 @@ namespace Data
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
-            ["wind"] = new List<string> { "nldas", "gldas", "ncei" }
+            ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
+            ["dewpoint"] = new List<string> { "prism" },
+            ["humidity"] = new List<string> { "prism" }
         };
 
         static string[] validRemoteData =

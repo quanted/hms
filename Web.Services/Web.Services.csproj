@@ -84,7 +84,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\DewPoint\DewPoint.csproj" />
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj" />
+    <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
     <ProjectReference Include="..\Radiation\Radiation.csproj" />
     <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj" />

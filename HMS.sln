@@ -67,7 +67,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chemicals.AQUATOX.UnitTests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wind", "Wind\Wind.csproj", "{FAFF4B6B-8441-4642-8420-B9422A91BE4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radiation", "Radiation\Radiation.csproj", "{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Radiation", "Radiation\Radiation.csproj", "{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DewPoint", "DewPoint\DewPoint.csproj", "{9BA7949A-68DB-484D-BC07-7E418E0941E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Humidity", "Humidity\Humidity.csproj", "{FC57037B-138D-4B43-9E53-28C055D259B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -341,6 +345,22 @@ Global
 		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|x64.ActiveCfg = Release|Any CPU
 		{0977FFC8-7B5E-4F7F-9144-5E6DBFAF4D47}.Release|x64.Build.0 = Release|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Debug|x64.Build.0 = Debug|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Release|x64.ActiveCfg = Release|Any CPU
+		{9BA7949A-68DB-484D-BC07-7E418E0941E3}.Release|x64.Build.0 = Release|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Debug|x64.Build.0 = Debug|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC57037B-138D-4B43-9E53-28C055D259B9}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

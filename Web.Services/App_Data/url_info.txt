@@ -36,3 +36,5 @@ ncei_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/
 TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/
 prism_precipitation_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
+prism_temperature_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
+prism_dewpoint_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
