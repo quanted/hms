@@ -15,39 +15,38 @@ script:
  - dotnet build -c Release Web.Services/
  - dotnet build -c Release Web.Services.Tests/
  - sudo mkdir /app
- - sudo mkdir ../TestResults
  - sudo mkdir ~/Coverage
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.2/
- - sudo dotnet test Data.Tests/Data.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/DataTests.coverage
+ - sudo dotnet test Data.Tests/Data.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/DataTests.coverage
  - rm -rf ~/TestsResults/*
- - sudo dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - sudo export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/WebServicesTests.coverage
+ - sudo dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - sudo export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/WebServicesTests.coverage
  - rm -rf ~/TestsResults/*
- - sudo dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - sudo export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/PrecipitationTests.coverage 
+ - sudo dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - sudo export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/PrecipitationTests.coverage 
  - rm -rf ~/TestsResults/*
- - sudo dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - sudo export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE 
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/OMAquatoxTests.coverage
+ - sudo dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - sudo export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE 
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/OMAquatoxTests.coverage
  - rm -rf ~/TestsResults/* 
- - sudo dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - sudo export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE 
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/SHAquatoxTests.coverage
+ - sudo dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - sudo export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE 
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/SHAquatoxTests.coverage
  - rm -rf ~/TestsResults/* 
- - sudo dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ../TestResults/
- - sudo export COVERALLFILE=$(ls ../TestResults/)
- - sudo ls ../TestResults/$COVERALLFILE 
- - sudo cp ../TestResults/$COVERALLFILE/*.coverage ~/Coverage/DataTests.coverage
+ - sudo dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults
+ - sudo export COVERALLFILE=$(ls ~/TestResults/)
+ - sudo ls ~/TestResults/$COVERALLFILE 
+ - sudo cp ~/TestResults/$COVERALLFILE/*.coverage ~/Coverage/DataTests.coverage
  - rm -rf ~/TestsResults/*
  - sudo ls ~/Coverage 
  - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
