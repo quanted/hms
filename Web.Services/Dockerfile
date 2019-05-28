@@ -22,6 +22,8 @@ COPY SubSurfaceFlow/SubSurfaceFlow.csproj SubSurfaceFlow/
 COPY Solar/Solar.csproj Solar/
 COPY Radiation/Radiation.csproj Radiation/
 COPY Wind/Wind.csproj Wind/
+COPY DewPoint/DewPoint.csproj DewPoint/
+COPY Humidity/Humidity.csproj Humidity/
 COPY Evapotranspiration/Evapotranspiration.csproj Evapotranspiration/
 COPY SurfaceRunoff/SurfaceRunoff.csproj SurfaceRunoff/
 COPY GIS.Operations/GIS.Operations.csproj GIS.Operations/
