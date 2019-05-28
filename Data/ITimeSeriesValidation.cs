@@ -14,7 +14,7 @@ namespace Data
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
-            "temperature", "wind", "dewpoint"
+            "temperature", "wind", "dewpoint", "humidity"
         };
 
         static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
