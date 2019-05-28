@@ -19,12 +19,12 @@ script:
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.2/
  - dotnet test Data.Tests/Data.Tests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - sudo cp Data.Tests/coverage.opencover.xml ~/Coverage/coverage.opencover.xml
- - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="~/Coverage/coverage.opencover.xml"
+ - dotnet test Web.Services.Tests/Web.Services.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="Data.Tests/coverage.opencover.xml"
  - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="~/Coverage/coverage.opencover.xml"
- - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="~/Coverage/coverage.opencover.xml"
- - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="~/Coverage/coverage.opencover.xml"
- - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="~/Coverage/coverage.opencover.xml"
+ - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="Data.Tests/coverage.opencover.xml"
+ - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="Data.Tests/coverage.opencover.xml"
+ - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release /nodeReuse:false --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="Data.Tests/coverage.opencover.xml"
+ - sudo cp Data.Tests/coverage.opencover.xml ~/Coverage/coverage.opencover.xml
  - sudo ls ~/Coverage 
  - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
  - ~/tools/csmacnz.Coveralls --opencover -i ~/Coverage/coverage.opencover.xml --repoToken $COVERALLS_REPO_TOKEN --commitId $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobId $TRAVIS_JOB_ID --serviceName "travis-ci"
