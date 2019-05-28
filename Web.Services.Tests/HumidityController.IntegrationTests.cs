@@ -50,7 +50,7 @@ namespace Web.Services.Tests
         {
             Thread.Sleep(5000);
             string endpoint = "api/meteorology/humidity";
-            TemperatureInput input = JsonConvert.DeserializeObject<TemperatureInput>(inputString);
+            HumidityInput input = JsonConvert.DeserializeObject<HumidityInput>(inputString);
             Debug.WriteLine("Integration Test: Humidity controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint,

@@ -15,6 +15,7 @@ script:
  - dotnet build -c Release Web.Services/
  - dotnet build -c Release Web.Services.Tests/
  - sudo mkdir /app
+ - sudo mkdir ~/Coverage
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - sudo cp Web.Services/App_Data/* /home/travis/build/quanted/hms/Web.Services.Tests/bin/Release/netcoreapp2.2/
  - dotnet test Data.Tests/Data.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -r ~/TestResults/
