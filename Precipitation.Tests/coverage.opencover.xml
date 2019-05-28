@@ -2,9 +2,9 @@
 <CoverageSession>
   <Summary numSequencePoints="10182" visitedSequencePoints="2750" numBranchPoints="4930" visitedBranchPoints="1063" sequenceCoverage="27" branchCoverage="21.56" maxCyclomaticComplexity="2357" minCyclomaticComplexity="174" visitedClasses="123" numClasses="327" visitedMethods="529" numMethods="1787" />
   <Modules>
-    <Module hash="4DAC6793-7946-4C1E-A079-7DDE25824C1F">
+    <Module hash="3B3C274E-DD5E-4BFD-987D-D2A54E4F893D">
       <ModulePath>Data.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>Data</ModuleName>
       <Files>
         <File uid="1" fullPath="C:\git\hms\Data\Files.cs" />
@@ -1089,9 +1089,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="D9721BBB-C74A-4DC3-9A05-22DB7D8A471A">
+    <Module hash="2B6C7A80-0412-4F41-8237-CFBF1CB14683">
       <ModulePath>Data.Simulate.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>Data.Simulate</ModuleName>
       <Files>
         <File uid="6" fullPath="C:\git\hms\Data.Simulate\CurveNumber.cs" />
@@ -1824,9 +1824,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="66DC5B04-8071-4F94-81B3-B451F3EA0D1D">
+    <Module hash="6497F8E1-C4B9-4548-AF9D-D35E6E2AF240">
       <ModulePath>Data.Source.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>Data.Source</ModuleName>
       <Files>
         <File uid="8" fullPath="C:\git\hms\Data.Source\Daymet.cs" />
@@ -4135,9 +4135,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="8D53D508-E499-4C7E-9F71-27AC8728BCED">
+    <Module hash="165312D7-7566-4F91-B83E-9E085FA04286">
       <ModulePath>Precipitation.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>Precipitation</ModuleName>
       <Files>
         <File uid="14" fullPath="C:\git\hms\Precipitation\Daymet.cs" />
@@ -6052,9 +6052,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="37C9CE8C-C6CE-4282-8498-E56259E27DDD">
+    <Module hash="CBD4C161-989D-45AE-81D4-A4022DC96ED1">
       <ModulePath>Utilities.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>Utilities</ModuleName>
       <Files>
         <File uid="22" fullPath="C:\git\hms\Utilities\CatchmentAggregation.cs" />
@@ -7738,9 +7738,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="6CADE6F3-2DB6-4FF1-8D1B-3F54ADD2B3DE">
+    <Module hash="788AC8ED-B34E-42DB-B8B1-7D2F95E5801B">
       <ModulePath>xunit.runner.reporters.netcoreapp10.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>xunit.runner.reporters.netcoreapp10</ModuleName>
       <Files>
         <File uid="32" fullPath="C:\Dev\xunit\xunit\src\xunit.runner.reporters\Utility\EnvironmentHelper.cs" />
@@ -11294,9 +11294,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="4FA0A50C-D603-4195-A215-17E1C8B347D1">
+    <Module hash="42399AFF-0F98-4CA9-AB50-B325AD7A0586">
       <ModulePath>xunit.runner.utility.netcoreapp10.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>xunit.runner.utility.netcoreapp10</ModuleName>
       <Files>
         <File uid="51" fullPath="C:\Dev\xunit\xunit\src\xunit.runner.utility\Extensions\DisposableExtensions.cs" />
@@ -27287,9 +27287,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module hash="8FC02BD7-D138-44C0-AD7D-D9420DF7BABF">
+    <Module hash="E7F5A910-F331-4DE8-B02B-B7DF1ADD914A">
       <ModulePath>xunit.runner.visualstudio.dotnetcore.testadapter.dll</ModulePath>
-      <ModuleTime>2019-05-28T01:09:55</ModuleTime>
+      <ModuleTime>2019-05-28T06:19:23</ModuleTime>
       <ModuleName>xunit.runner.visualstudio.dotnetcore.testadapter</ModuleName>
       <Files>
         <File uid="188" fullPath="C:\Dev\xunit\xunit\src\xunit.runner.visualstudio\Utility\ExceptionExtensions.cs" />
@@ -34346,7 +34346,7 @@
                 <SequencePoint vc="84" uspid="275" ordinal="10" sl="275" sc="1" el="275" ec="2" bec="0" bev="0" fileid="234" />
                 <SequencePoint vc="84" uspid="276" ordinal="11" sl="276" sc="1" el="276" ec="2" bec="0" bev="0" fileid="234" />
                 <SequencePoint vc="84" uspid="279" ordinal="12" sl="279" sc="1" el="279" ec="2" bec="0" bev="0" fileid="234" />
-                <SequencePoint vc="5" uspid="280" ordinal="13" sl="280" sc="1" el="280" ec="2" bec="0" bev="0" fileid="234" />
+                <SequencePoint vc="8" uspid="280" ordinal="13" sl="280" sc="1" el="280" ec="2" bec="0" bev="0" fileid="234" />
                 <SequencePoint vc="84" uspid="282" ordinal="14" sl="282" sc="1" el="282" ec="2" bec="0" bev="0" fileid="234" />
                 <SequencePoint vc="0" uspid="283" ordinal="15" sl="283" sc="1" el="283" ec="2" bec="0" bev="0" fileid="234" />
                 <SequencePoint vc="84" uspid="285" ordinal="16" sl="285" sc="1" el="285" ec="2" bec="0" bev="0" fileid="234" />
@@ -34354,7 +34354,7 @@
               <BranchPoints>
                 <BranchPoint vc="0" uspid="265" ordinal="0" path="0" offset="9" offsetend="11" sl="265" fileid="234" />
                 <BranchPoint vc="84" uspid="265" ordinal="1" path="1" offset="9" offsetend="13" sl="265" fileid="234" />
-                <BranchPoint vc="5" uspid="279" ordinal="2" path="0" offset="81" offsetend="83" sl="279" fileid="234" />
+                <BranchPoint vc="8" uspid="279" ordinal="2" path="0" offset="81" offsetend="83" sl="279" fileid="234" />
                 <BranchPoint vc="84" uspid="279" ordinal="3" path="1" offset="81" offsetend="103" sl="279" fileid="234" />
                 <BranchPoint vc="0" uspid="282" ordinal="4" path="0" offset="110" offsetend="112" sl="282" fileid="234" />
                 <BranchPoint vc="84" uspid="282" ordinal="5" path="1" offset="110" offsetend="135" sl="282" fileid="234" />
