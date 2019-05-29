@@ -24,7 +24,7 @@ script:
  - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:MergeWith="Precipitation.Tests/coverage.json" /p:CollectCoverage=true
  - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:MergeWith="OrganicMatter/OrganicMatter.AQUATOX.UnitTests/coverage.json" /p:CollectCoverage=true
  - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:MergeWith="Stream.Hydrology/AQUATOX.UnitTests/coverage.json" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover 
- - sudo cp Stream.Hydrology/AQUATOX.UnitTests/coverage.opencover.xml ~/Coverage/coverage.opencover.xml
+ - sudo cp Nutrients/Nutrients.AQUATOX.UnitTests/coverage.opencover.xml ~/Coverage/coverage.opencover.xml
  - sudo ls ~/Coverage 
  - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
  - ~/tools/csmacnz.Coveralls --opencover -i ~/Coverage/coverage.opencover.xml --repoToken $COVERALLS_REPO_TOKEN --commitId $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobId $TRAVIS_JOB_ID --serviceName "travis-ci"
