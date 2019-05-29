@@ -107,7 +107,7 @@ namespace Web.Services.Tests
         public async Task ValidRequests(string precipInputString, int expected)
         {
             Thread.Sleep(5000);
-            string endpoint = "api/hydrology/precipitation";
+            string endpoint = "api/meteorology/precipitation";
             PrecipitationInput input = JsonConvert.DeserializeObject<PrecipitationInput>(precipInputString);
             input.TemporalResolution = "daily";
             Debug.WriteLine("Integration Test: Precipitation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

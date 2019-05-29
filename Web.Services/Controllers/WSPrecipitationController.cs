@@ -171,7 +171,7 @@ namespace Web.Services.Controllers
     /// Precipitation controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api/hydrology/precipitation")]
+    [Route("api/meteorology/precipitation")]
     public class WSPrecipitationController : Controller
     {
         /// <summary>
