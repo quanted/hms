@@ -37,72 +37,20 @@ namespace Web.Services.Controllers
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08)
-                },
-                Geometry = new TimeSeriesGeometry()
-                {
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = true
-                    }
-                }
-            };
-            return example;
-        }
-    }
-
-    /// <summary>
-    /// Swashbuckle Precipitation POST request example
-    /// </summary>
-    public class PrecipitationInputExampleFull : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            PrecipitationInput example = new PrecipitationInput()
-            {
-                Source = "nldas",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
                     EndDate = new DateTime(2015, 01, 08),
                     DateTimeFormat = "yyyy-MM-dd HH"
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {
                         Latitude = 33.925673,
                         Longitude = -83.355723
-                    },
-                    GeometryMetadata = new Dictionary<string, string>()
-                    {
-                        { "City", "Athens" },
-                        { "State", "Georgia"},
-                        { "Country", "United States" }
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
                     }
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
-                TimeLocalized = true,
-                Units = "default",
+                Units = "metric",
                 OutputFormat = "json"
             };
             return example;
@@ -181,7 +129,7 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
-        [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
+        [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
             WSPrecipitation precip = new WSPrecipitation();
