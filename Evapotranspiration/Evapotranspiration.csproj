@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>

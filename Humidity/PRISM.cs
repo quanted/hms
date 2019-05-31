@@ -51,6 +51,10 @@ namespace Humidity
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput prismOutput = this.CalculateRelativeHumidity(out errorMsg, input, dewPointData, temperatureData);
+            if (input.Geometry.GeometryMetadata.ContainsKey("evapo"))
+            {
+                prismOutput = this.CalculateMinMaxRelativeHumidity(out errorMsg, input, dewPointData, temperatureData);
+            }
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return prismOutput;
@@ -91,5 +95,36 @@ namespace Humidity
             return output;
         }
 
+        /// <summary>
+        /// Calculate MIN AND MAX relative humidity using temperature and dew point data and the August-Roche-Magnus approximation.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
+        /// <param name="dewPoint"></param>
+        /// <param name="temperature"></param>
+        /// <returns></returns>
+        private ITimeSeriesOutput CalculateMinMaxRelativeHumidity(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput dewPoint, ITimeSeriesOutput temperature)
+        {
+            errorMsg = "";
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output = oFactory.Initialize();
+            output.DataSource = "prism";
+            output.Dataset = "relative humidity";
+            output.Data = new Dictionary<string, List<string>>();
+            for (int i = 0; i < dewPoint.Data.Count; i++)
+            {
+                string date = dewPoint.Data.Keys.ElementAt(i);
+                double mintemp = Double.Parse(temperature.Data.Values.ElementAt(i)[1]); // 0: max temp, 1: min temp, 2: mean temp
+                double maxtemp = Double.Parse(temperature.Data.Values.ElementAt(i)[0]); // 0: max temp, 1: min temp, 2: mean temp
+                double temp = Double.Parse(temperature.Data.Values.ElementAt(i)[2]); // 0: max temp, 1: min temp, 2: mean temp
+                double dew = Double.Parse(dewPoint.Data.Values.ElementAt(i)[0]);
+
+                // August-Roche-Magnus approximation
+                double min = 100 * (Math.Exp((17.625 * dew) / (243.04 + dew)) / Math.Exp((17.625 * mintemp) / (243.04 + mintemp)));
+                double max = 100 * (Math.Exp((17.625 * dew) / (243.04 + dew)) / Math.Exp((17.625 * maxtemp) / (243.04 + maxtemp)));
+                output.Data.Add(date, new List<string> { min.ToString(input.DataValueFormat), max.ToString(input.DataValueFormat), mintemp.ToString(input.DataValueFormat), maxtemp.ToString(input.DataValueFormat), temp.ToString(input.DataValueFormat), dew.ToString(input.DataValueFormat) });
+            }
+            return output;
+        }
     }
 }

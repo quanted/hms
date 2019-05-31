@@ -10,6 +10,11 @@ using Utilities;
 
 namespace Precipitation
 {
+    public class DataDict
+    {
+        public Dictionary<string, string> data { get; set; }
+        public Dictionary<string, string> metadata { get; set; }
+    }
     /// <summary>
     /// Result structure of the json string retrieved from nwm.
     /// </summary>
@@ -17,7 +22,7 @@ namespace Precipitation
     {
         public string id { get; set; }
         public string status { get; set; }
-        public Dictionary<string, string> data { get; set; }
+        public DataDict data;
     }
 
     public class NWM
@@ -171,7 +176,7 @@ namespace Precipitation
             errorMsg = "";
             Result result = JSON.Deserialize<Result>(data);
             
-            foreach (KeyValuePair<string, string> kvp in result.data)
+            foreach (KeyValuePair<string, string> kvp in result.data.data)
             {
                 List<string> timestepData = new List<string>();
                 double mmsval = (Convert.ToDouble(kvp.Value) / 60) / 0.0393701;
@@ -181,6 +186,9 @@ namespace Precipitation
             }
             output.Dataset = "Precipitation";
             output.DataSource = "nwm";
+            output.Metadata.Add("date_of_creation", result.data.metadata["nwm_date_of_creation"].ToString());
+            output.Metadata.Add("dataset_info", result.data.metadata["nwm_dataset_info"].ToString());
+            output.Metadata.Add("units", result.data.metadata["nwm_units"].ToString());
             return output;
         }
     }

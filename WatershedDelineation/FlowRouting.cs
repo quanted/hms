@@ -15,6 +15,12 @@ using Utilities;
 
 namespace WatershedDelineation
 {
+
+    public class DataDict
+    {
+        public Dictionary<string, string> data { get; set; }
+        public Dictionary<string, string> metadata { get; set; }
+    }
     /// <summary>
     /// Result structure of the json string retrieved from nwm.
     /// </summary>
@@ -22,7 +28,7 @@ namespace WatershedDelineation
     {
         public string id { get; set; }
         public string status { get; set; }
-        public Dictionary<string, string> data { get; set; }
+        public DataDict data; 
     }
 
     public class FlowRouting
@@ -253,11 +259,20 @@ namespace WatershedDelineation
                     subsurfaceError.Add(errorM);
                 }
             });
-                       
+
+            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
+            string baseURL = "";
+            if (flaskURL == null)
+            {
+                flaskURL = "http://localhost:7777";
+            }
 
             switch (streamAlgorithm)
             {
                 case "changingvolume":
+                    Debug.WriteLine("Flask Server URL: " + flaskURL);
+                    baseURL = flaskURL + "/hms/hydrodynamic/constant_volume/?submodel=constant_volume&startDate=2019-05-01&endDate=2019-05-08&timestep=1&segments=1&boundary_flow=6";
+                    break;
                 case "kinematicwave":
                     errorMsg = "ERROR: Algorithm is not currently supported.";
                     break;
@@ -273,18 +288,29 @@ namespace WatershedDelineation
                         {
                             fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
                         }
-
-                        string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-                        if (flaskURL == null)
-                        {
-                            flaskURL = "http://localhost:7777";
-                        }
+                                                
                         Debug.WriteLine("Flask Server URL: " + flaskURL);
-                        string baseURL = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + COMID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+                        baseURL = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + COMID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
                         WatershedDelineation.NWM watermod = new WatershedDelineation.NWM();
                         string data = watermod.GetData(out errorMsg, baseURL);
                         //if (errorMsg.Contains("ERROR")) { break; }
                         Result result = JSON.Deserialize<Result>(data);
+
+                        Dictionary<string, string> dailySF = new Dictionary<string, string>();
+                        double sum = 0;
+                        int ct = 0;
+                        foreach (KeyValuePair<string, string> kvp in result.data.data)
+                        {
+                            sum += Convert.ToDouble(kvp.Value);
+                            ct += 1;
+                            if(ct == 24)
+                            {
+                                sum = sum / 24;
+                                dailySF.Add(kvp.Key, sum.ToString());
+                                ct = 0;
+                                sum = 0;
+                            }
+                        }
 
                         for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
                         {
@@ -329,16 +355,17 @@ namespace WatershedDelineation
                             }
 
                             
-                            date = datekey.ToString("yyyy-MM-dd") + "T00:00:00";
+                            //date = datekey.ToString("yyyy-MM-dd") + "T00:00:00";
+                            date = datekey.ToString("yyyy-MM-dd") + "T23:00:00";
 
                             //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
                             double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
                             double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
                             double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
 
-                            if (result != null && result.data.ContainsKey(date))
+                            if (result != null && dailySF.ContainsKey(date)) //if (result != null && result.data.data.ContainsKey(date))
                             {
-                                dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(result.data[date]) / 35.314667;//Convert cubic feet / sec to meters / sec
+                                dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dailySF[date]) / 35.314667;//Convert cubic feet / sec to meters / sec
                             }
                             else
                             {

@@ -217,7 +217,7 @@ namespace Temperature
                 max = (maxValue > max) ? maxValue : max;
                 min = (minValue < min) ? minValue : min;
                 average = (average + (maxValue + minValue) / 2) / 2;
-                if (date.Month != iDate.Month)
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {

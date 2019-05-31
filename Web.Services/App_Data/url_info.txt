@@ -38,3 +38,4 @@ TIMEZONE_GEE_EXT https://172.20.100.11/hms/rest/timezone/
 prism_precipitation_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
 prism_temperature_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
 prism_dewpoint_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
+prism_evapotranspiration_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0

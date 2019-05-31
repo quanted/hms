@@ -20,7 +20,7 @@ namespace Data
         static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
             ["precipitation"] =  new List<string>{ "nldas", "gldas", "daymet", "ncei", "prism", "wgen", "nwm" },
-            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "grangergray", "hamon", "hspf",
+            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
                 "mcjannett", "mortoncrae", "mortoncrwe", "ncdc", "penmandaily", "penmanhourly",
                 "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
             ["nutrients"] = new List<string> { "aquatox" },
