@@ -308,67 +308,15 @@ namespace Evapotranspiration
                     CustomData cd = new CustomData();
                     dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "penmandaily");
                     break;
-                case "prism":
+                case "nldas":
+                case "gldas":
+                default:
                     prismCalc = true;
+                    inpt.Source = "prism";
                     Humidity.PRISM prism = new Humidity.PRISM();
                     inpt.Geometry.GeometryMetadata.Add("evapo", "evapo");
                     ITimeSeriesOutput prismOutput = prism.GetRelativeHumidityData(out errorMsg, null, inpt);
-                    inpt.Source = "nldas";//REMOVE
-                    NLDAS2 nldas3 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                    dt = nldas3.getData4(timeZoneOffset, out errorMsg);
-                    DataRow dr2 = null;
-                    List<Double> tList2 = new List<double>();
-                    List<Double> sList2 = new List<double>();
-                    double sol2 = 0.0;
-                    double wind2 = 0.0;
-                    DataTable mnly2 = dt.Clone();
-                    int curmonth2 = inpt.DateTimeSpan.StartDate.Month;
-                    int l = 0;
-                    int k = -1;
-                    bool newmonth2 = true;
-                    for (int i = 0; i < dt.Rows.Count; i++)
-                    {
-                        if (newmonth2)
-                        {
-                            k++;
-                            dr2 = mnly2.NewRow();
-                            dr2["Date"] = dt.Rows[i]["Date"].ToString();
-                            dr2["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
-                            tList2 = new List<double>();
-                            sList2 = new List<double>();
-                            sol2 = 0.0;
-                            wind2 = 0.0;
-                            newmonth2 = false;
-                            curmonth2 = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
-                        }
-                        //tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                        //tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
-                        sol2 += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
-                        wind2 += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                        //sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                        //sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
-                        if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth2) || i == dt.Rows.Count - 1)
-                        {
-                            double tmin = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[2]);
-                            double tmax = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[3]);
-                            dr2["TMin_C"] = tmin;//tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                            dr2["TMax_C"] = tmax;//tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                            dr2["TMean_C"] = (tmin + tmax) / 2.0;//(tList.Min() + tList.Max()) / 2.0;
-                            dr2["SolarRadMean_MJm2day"] = Math.Round(sol2 / (l + 1), 2);
-                            dr2["WindSpeedMean_m/s"] = Math.Round(wind2 / (l + 1), 2);
-                            dr2["SHmin"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Min().ToString();
-                            dr2["SHmax"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[1]);//sList.Max().ToString();
-                            mnly2.Rows.Add(dr2);
-                            l = -1;
-                            newmonth2 = true;
-                        }
-                        l++;
-                    }
-                    dt = mnly2;
-                    break;
-                case "nldas":
-                case "gldas":
-                default:                    
+                    inpt.Source = "nldas";                   
                     NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
                     if (inpt.TemporalResolution == "hourly")
                     {
@@ -449,11 +397,13 @@ namespace Evapotranspiration
                             DataTable mnly = dt.Clone();
                             int curmonth = inpt.DateTimeSpan.StartDate.Month;
                             int j = 0;
+                            int k = -1;
                             bool newmonth = true;
                             for (int i = 0; i < dt.Rows.Count; i++)
                             {
                                 if (newmonth)
                                 {
+                                    k++;
                                     dr1 = mnly.NewRow();
                                     dr1["Date"] = dt.Rows[i]["Date"].ToString();
                                     dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
@@ -464,21 +414,23 @@ namespace Evapotranspiration
                                     newmonth = false;
                                     curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
                                 }
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
+                                //tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
+                                //tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
                                 sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
                                 wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
+                                //sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
+                                //sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
                                 if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
                                 {
-                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
+                                    double tmin = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[2]);
+                                    double tmax = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[3]);
+                                    dr1["TMin_C"] = tmin;//tList.Min().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMax_C"] = tmax;//tList.Max().ToString("F2", CultureInfo.InvariantCulture);
+                                    dr1["TMean_C"] = (tmin + tmax) / 2.0;//(tList.Min() + tList.Max()) / 2.0;
                                     dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
                                     dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
-                                    dr1["SHmin"] = sList.Min().ToString();
-                                    dr1["SHmax"] = sList.Max().ToString();
+                                    dr1["SHmin"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Min().ToString();
+                                    dr1["SHmax"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[1]);//sList.Max().ToString();
                                     mnly.Rows.Add(dr1);
                                     j = -1;
                                     newmonth = true;
