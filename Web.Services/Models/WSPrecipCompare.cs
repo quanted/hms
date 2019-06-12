@@ -102,6 +102,8 @@ namespace Web.Services.Models
             //NCEI station is required. If only a ComID is provided, use catchment centroid coordinates to find nearest NCEI station.
             if (input.Geometry.StationID == null)
             {
+
+
                 errorMsg = "";
                 string dbPath = "./App_Data/catchments.sqlite";
                 string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + input.Geometry.ComID.ToString();

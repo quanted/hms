@@ -175,9 +175,16 @@ namespace Utilities
                 baseURL += "com_id_list=" + comList;
             }
 
-            if(input.Geometry.GeometryMetadata["precipSource"] != null)
+            if(input.Geometry.GeometryMetadata.ContainsKey("precipSource"))
             {
-                baseURL += "&grid_source=" + input.Geometry.GeometryMetadata["precipSource"];
+                if (input.Geometry.GeometryMetadata["precipSource"] != null)
+                {
+                    baseURL += "&grid_source=" + input.Geometry.GeometryMetadata["precipSource"];
+                }
+                else
+                {
+                    baseURL += "&grid_source=nldas";
+                }
             }
             else
             {

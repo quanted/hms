@@ -64,6 +64,42 @@ namespace Web.Services.Controllers
     }
 
     // --------------- Swashbuckle Examples --------------- //
+    /// <summary>
+    /// Swashbuckle Precipitation POST request example
+    /// </summary>
+    public class PrecipitationCompareInputExample : IExamplesProvider
+    {
+        /// <summary>
+        /// Get example function.
+        /// </summary>
+        /// <returns></returns>
+        public object GetExamples()
+        {
+            PrecipitationCompareInput example = new PrecipitationCompareInput()
+            {
+                Dataset = "Precipitation",
+                SourceList = new List<String>(){ "nldas", "gldas" },
+                Weighted = true,
+                DateTimeSpan = new DateTimeSpan()
+                {
+                    StartDate = new DateTime(2015, 01, 01),
+                    EndDate = new DateTime(2015, 01, 08),
+                    DateTimeFormat = "yyyy-MM-dd HH"
+                },
+                Geometry = new TimeSeriesGeometry()
+                {
+                    ComID = 1053791
+                },
+                DataValueFormat = "E3",
+                TemporalResolution = "default",
+                Units = "metric",
+                OutputFormat = "json"
+            };
+            return example;
+        }
+    }
+
+
 
     // --------------- WorkflowPrecip Controller --------------- //
     /// <summary>
@@ -81,7 +117,7 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [Route("precip_compare")]             // Default endpoint
-        //[SwaggerRequestExample(typeof(PrecipitationExtractionInput), typeof(PrecipitationExtractionInputExample))]
+        [SwaggerRequestExample(typeof(PrecipitationCompareInput), typeof(PrecipitationCompareInputExample))]
         //[SwaggerResponseExample(200, typeof(PrecipitationExtractionOutputExample))]
         public async Task<IActionResult> POSTComparison([FromBody]PrecipitationCompareInput precipCompareInput)
         {
