@@ -11,11 +11,11 @@ using Web.Services.Models;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Radiation Input that implements TimeSeriesInput object
+    /// Pressure Input that implements TimeSeriesInput object
     /// </summary>
-    public class RadiationInput : TimeSeriesInput
+    public class PressureInput : TimeSeriesInput
     {
-        // Add extra radiation specific variables here
+        // Add extra pressure specific variables here
 
     }
 
@@ -23,9 +23,9 @@ namespace Web.Services.Controllers
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle Radiation POST request example
+    /// Swashbuckle Pressure POST request example
     /// </summary>
-    public class RadiationInputExample : IExamplesProvider
+    public class PressureInputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -33,9 +33,9 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            RadiationInput example = new RadiationInput()
+            PressureInput example = new PressureInput()
             {
-                Source = "nldas",
+                Source = "gldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -61,60 +61,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbuckle Radiation POST request example
+    /// Swashbucle Pressure Output example
     /// </summary>
-    public class RadiationInputExampleFull : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            RadiationInput example = new RadiationInput()
-            {
-                Source = "nldas",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08),
-                    DateTimeFormat = "yyyy-MM-dd HH"
-                },
-                Geometry = new TimeSeriesGeometry()
-                {
-                    Description = "EPA Athens Office",
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
-                    GeometryMetadata = new Dictionary<string, string>()
-                    {
-                        { "City", "Athens" },
-                        { "State", "Georgia"},
-                        { "Country", "United States" }
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
-                },
-                DataValueFormat = "E3",
-                TemporalResolution = "default",
-                TimeLocalized = true,
-                Units = "default",
-                OutputFormat = "json"
-            };
-            return example;
-        }
-    }
-
-    /// <summary>
-    /// Swashbucle Radiation Output example
-    /// </summary>
-    public class RadiationOutputExample : IExamplesProvider
+    public class PressureOutputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -124,15 +73,10 @@ namespace Web.Services.Controllers
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "Radiation";
-            output.DataSource = "nldas";
+            output.Dataset = "Surface Air Pressure";
+            output.DataSource = "gldas";
             output.Metadata = new Dictionary<string, string>()
             {
-                { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
-                { "nldas_param_short_name", "TMP2m" },
-                { "nldas_param_name", "2-m above ground temperature" },
-                { "nldas_unit", "kg/m^2" },
-                { "nldas_undef", "  9.9990e+20" },
                 { "nldas_begin_time", "2015/01/01/00" },
                 { "nldas_end_time", "2015/01/01/05" },
                 { "nldas_time_interval[hour]", "1" },
@@ -167,27 +111,27 @@ namespace Web.Services.Controllers
     }
 
 
-    // --------------- Radiation Controller --------------- //
+    // --------------- Pressure Controller --------------- //
 
     /// <summary>
-    /// Radiation controller for HMS.
+    /// Pressure controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api/meteorology/radiation")]
-    public class WSRadiationController : Controller
+    [Route("api/meteorology/pressure")]
+    public class WSPressureController : Controller
     {
         /// <summary>
-        /// POST Method for getting radiation data.
+        /// POST Method for getting pressure data.
         /// </summary>
-        /// <param name="tempInput">Parameters for retrieving radiation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="tempInput">Parameters for retrieving pressure data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [SwaggerResponseExample(200, typeof(RadiationOutputExample))]
-        [SwaggerRequestExample(typeof(RadiationInput), typeof(RadiationInputExample))]
-        public async Task<IActionResult> POST([FromBody]RadiationInput tempInput)
+        [SwaggerResponseExample(200, typeof(PressureOutputExample))]
+        [SwaggerRequestExample(typeof(PressureInput), typeof(PressureInputExample))]
+        public async Task<IActionResult> POST([FromBody]PressureInput tempInput)
         {
-            WSRadiation rad = new WSRadiation();
-            ITimeSeriesOutput results = await rad.GetRadiation(tempInput);
+            WSPressure press = new WSPressure();
+            ITimeSeriesOutput results = await press.GetPressure(tempInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

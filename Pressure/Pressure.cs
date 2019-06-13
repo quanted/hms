@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Radiation
+namespace Pressure
 {
-    public class Radiation
+    public class Pressure
     {
 
-        private enum validSources { nldas, gldas, daymet };
+        private enum validSources { gldas };
 
-        // -------------- Radiation Variables -------------- //
+        // -------------- Pressure Variables -------------- //
 
         // Radiation specific variables are listed here.
 
@@ -22,18 +22,18 @@ namespace Radiation
 
 
 
-        // -------------- Radiation Constructors -------------- //
+        // -------------- Pressure Constructors -------------- //
 
         /// <summary>
-        /// Default Radiation constructor
+        /// Default Pressure constructor
         /// </summary>
-        public Radiation() { }
+        public Pressure() { }
 
 
-        // -------------- Radiation Functions -------------- //
+        // -------------- Pressure Functions -------------- //
 
         /// <summary>
-        /// Get Radiation data function.
+        /// Get Pressure data function.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
@@ -59,21 +59,13 @@ namespace Radiation
 
             switch (this.Input.Source)
             {
-                case "nldas":
-                    NLDAS nldas = new NLDAS();
-                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input);
-                    break;
                 case "gldas":
                     GLDAS gldas = new GLDAS();
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
                     break;
-                case "daymet":
-                    Daymet daymet = new Daymet();
-                    this.Output = daymet.GetData(out errorMsg, this.Output, this.Input);
-                    break;
                 default:
                     if (errorMsg.Contains("ERROR")) { return null; }
-                    errorMsg = "ERROR: 'Source' for radiation was not found among available sources or is invalid. Valid sources: " + Enum.GetNames(typeof(validSources)).ToList();
+                    errorMsg = "ERROR: 'Source' for pressure was not found among available sources or is invalid. Valid sources: " + Enum.GetNames(typeof(validSources)).ToList();
                     break;
             }
             if (errorMsg.Contains("ERROR"))

@@ -13,7 +13,7 @@ namespace Data
     {
         static string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
-            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
+            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
             "temperature", "wind", "dewpoint", "humidity"
         };
 
@@ -35,7 +35,8 @@ namespace Data
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },
-            ["humidity"] = new List<string> { "prism" }
+            ["humidity"] = new List<string> { "prism" },
+            ["surfacepressure"] = new List<string> { "gldas" }
         };
 
         static string[] validRemoteData =
