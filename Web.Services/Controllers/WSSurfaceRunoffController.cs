@@ -23,7 +23,7 @@ namespace Web.Services.Controllers
         /// <summary>
         /// Determines whether to use point-based runoff or area-based runoff
         /// </summary>
-        public string RunoffType { get; set; }
+        //public string RunoffType { get; set; }
         // Add extra SurfaceRunoff specific variables here
     }
 

@@ -97,11 +97,14 @@ namespace Web.Services.Models
 
                 merged = Utilities.Merger.MergeTimeSeries(output, merged);
                 results.Add(output);
-                merged.Metadata.Add("p_area_" + i, gd.geometry.ElementAt(0).Value.points[i].percentArea.ToString());
+                //merged.Metadata.Add("p_area_" + i, gd.geometry.ElementAt(0).Value.points[i].percentArea.ToString());
             }
 
             aggregated = cd.getCatchmentAggregation(input, merged, gd, true);
-            //foreach(ITimeSeriesOutput o in results)
+            aggregated.Metadata["column_2"] = "runoff";
+            aggregated.Metadata.Remove("column_3");
+            aggregated.Metadata.Remove("column_5");
+            //foreach (ITimeSeriesOutput o in results)
             //{
             //    aggregated = Utilities.Merger.MergeTimeSeries(aggregated, o);
             //}
