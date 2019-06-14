@@ -20,9 +20,8 @@ namespace Utilities
         {
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput result = oFactory.Initialize();
-
-            result = primary;
+            ITimeSeriesOutput result = new TimeSeriesOutput();
+            result = primary.Clone();
 
             if (!secondary.Metadata.ContainsKey(secondary.DataSource + "_ERROR"))
             {
@@ -47,11 +46,13 @@ namespace Utilities
             // Merges data values for each date key in secondary into primary.
             if (secondary.Data.Keys.Count > 0)
             {
-                foreach (string date in result.Data.Keys)
+                foreach (string date in primary.Data.Keys)
                 {
                     if (secondary.Data.ContainsKey(date))
                     {
-                        result.Data[date].Add(secondary.Data[date][0]);
+                        foreach (string value in secondary.Data[date]) { 
+                            result.Data[date].Add(value);
+                        }
                     }
                 }
             }

@@ -56,8 +56,9 @@ namespace Web.Services.Models
             {
                 // Gets the SurfaceRunoff data.
                 result = runoff.GetData(out errorMsg);
-                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             }
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
             // Get generic statistics
             result = Utilities.Statistics.GetStatistics(out errorMsg, runoff.Input, result);
 
@@ -65,11 +66,15 @@ namespace Web.Services.Models
 
         }
 
+        /// <summary>
+        /// Calculates spatially weighted average for surface runoff over a specified catchment comID
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         private ITimeSeriesOutput SpatiallyWeightedAverage(ITimeSeriesInput input)
         {
             string errorMsg = "";
 
-            // 1 - Get list of nldas points, grid cells, that are contained in comid catchment
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput aggregated = oFactory.Initialize();
             ITimeSeriesOutput merged = oFactory.Initialize();
@@ -101,6 +106,8 @@ namespace Web.Services.Models
             }
 
             aggregated = cd.getCatchmentAggregation(input, merged, gd, true);
+
+            aggregated.Metadata.Add("comID", input.Geometry.ComID.ToString());
             aggregated.Metadata["column_2"] = "runoff";
             aggregated.Metadata.Remove("column_3");
             aggregated.Metadata.Remove("column_5");
@@ -108,11 +115,7 @@ namespace Web.Services.Models
             //{
             //    aggregated = Utilities.Merger.MergeTimeSeries(aggregated, o);
             //}
-
-            // 2 - download data for all nldas points
-            // 3 - aggregate values based on percent overlap with catchment
             return aggregated;
-
         }
     }
 }

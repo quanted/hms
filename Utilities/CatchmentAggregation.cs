@@ -272,27 +272,34 @@ namespace Utilities
                         ptsList.Add(tuple);
                     }
                 }
-
                 foreach (var entry in result.Data)
                 {
                     double average = 0.0;
-                    foreach (Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)
+                    int j = 0;
+                    if (entry.Value.Count == ptsList.Count)
                     {
-                        List<string> outList = new List<string>();
-                        Point pt = tup.Item2;
-                        DateTime date = new DateTime();
-                        string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
-                        DateTime.TryParse(dateString, out date);
-                        outList.Add(dateString);//Date
-                        outList.Add(tup.Item1.ToString());//ComID
-                        outList.Add((Convert.ToDouble(entry.Value[0])).ToString());//runoff
-                        //outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
-                        outList.Add(Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8).ToString());//% runoff
-                        average += Math.Round((Convert.ToDouble(entry.Value[0]) * (pt.percentArea / 100)), 8);
-                        string key = i.ToString();//Arbitrary ID to keep track of dictionary values
-                        //output.Data.Add(key, outList);
-                        i++;
+                        foreach (Tuple<string, Point> tup in ptsList)//foreach (Point pt in ptsList)
+                        {
+                            List<string> outList = new List<string>();
+                            Point pt = tup.Item2;
+                            DateTime date = new DateTime();
+                            string dateString = entry.Key.ToString().Substring(0, entry.Key.ToString().Length - 3);
+                            DateTime.TryParse(dateString, out date);
+                            outList.Add(dateString);//Date
+                            outList.Add(tup.Item1.ToString());//ComID
+                            outList.Add((Convert.ToDouble(entry.Value[j])).ToString());//runoff
+                                                                                       //outList.Add((Math.Round(pt.percentArea, 5).ToString()));//% area
+                            outList.Add(Math.Round((Convert.ToDouble(entry.Value[j]) * (pt.percentArea / 100)), 8).ToString());//% runoff
+                            double value = (Convert.ToDouble(entry.Value[j]) * (pt.percentArea / 100));
+                            average += Math.Round(value, 8);
+                            //string key = i.ToString();//Arbitrary ID to keep track of dictionary values
+                            //output.Data.Add(key, outList);
+                            j++;
+                            //Debug.Write(j + " ");
+                        }
                     }
+                    i++;
+                    //Debug.WriteLine(i);
                     output.Data.Add(entry.Key.ToString(), new List<string> { (average / ptsList.Count).ToString("E3") });
                 }
 
