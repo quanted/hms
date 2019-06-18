@@ -412,12 +412,12 @@ namespace Utilities
             return root1;
         }
 
-        public static double CalculateRH(double SpecificHumidity, double Temperature)
+        public static double CalculateRH(double SpecificHumidity, double Temperature, double Pressure)
         {
             // Calculate relative humidity here.
             double RH = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
+            double e = SpecificHumidity * Pressure / (0.378 * SpecificHumidity + 0.622);//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
+            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
             RH = 100 * (e / es);
 
             return RH;

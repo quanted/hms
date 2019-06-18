@@ -141,10 +141,6 @@ namespace Evapotranspiration
                     dt = daymetData(inpt, outpt);
                     dt = Utilities.Utility.aggregateData(inpt, dt, "hamon");
                     break;
-                case "custom":
-                    CustomData cd = new CustomData();
-                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "hamon");
-                    break;
                 case "nldas":
                 case "gldas":
                 default:

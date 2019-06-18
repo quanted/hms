@@ -277,6 +277,13 @@ namespace Evapotranspiration
             dt.Columns.Add("SHmax");
             dt.Columns.Add("WindSpeedMean_m/s");
 
+            /*List<int> count = new List<int>(){ dtSR.Rows.Count, dtSH.Rows.Count, dtWS.Rows.Count };
+            int rowcount = count.Min();
+            if( > rowcount)
+            {
+                dt.Rows.
+            }*/
+
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 dt.Rows[i]["SolarRadMean_MJm2day"] = dtSR.Rows[i]["SolarRadMean_MJm2day"];
@@ -632,17 +639,17 @@ namespace Evapotranspiration
 
             DataTable dt = new DataTable();
             DataTable dtSR = new DataTable();
-
-            if (_source == "gldas" && (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).Year > 2010))
+            
+            /*if (_source == "gldas" && (Convert.ToDateTime(_startDate).Year > 2010 || Convert.ToDateTime(_endDate).AddDays(-1.0).Year > 2010))
             {
                 errorMsg = "No GLDAS data is available for this time frame.";
                 return dtSR;
-                /*_source = "nldas";
-                DateTime startDate = Convert.ToDateTime(_startDate);
-                startDate = startDate.AddDays(-1.0);
-                _startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
-                _urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";*/
-            }
+                //_source = "nldas";
+                //DateTime startDate = Convert.ToDateTime(_startDate);
+                //startDate = startDate.AddDays(-1.0);
+                //_startDate = startDate.Year.ToString() + "-" + startDate.Month.ToString() + "-" + startDate.Day.ToString();
+                //_urlBasePF = @"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:";
+            }*/
 
             if (_source == "nldas")
             {
@@ -711,7 +718,7 @@ namespace Evapotranspiration
             DataTable dt = new DataTable();
             DataTable dtSH = new DataTable();
 
-            // Get specific humidity.  
+            //Get specific humidity.  
             _parameter = getNLDASParameterName(parameter.SpecificHumidity2mAboveGround_KgPerKg);
             dtSH = getData(out errorMsg);
 

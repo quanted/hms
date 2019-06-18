@@ -16,9 +16,15 @@
   <ItemGroup>
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\DewPoint\DewPoint.csproj" />
     <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\Pressure\Pressure.csproj" />
+    <ProjectReference Include="..\Radiation\Radiation.csproj" />
+    <ProjectReference Include="..\Solar\Solar.csproj" />
+    <ProjectReference Include="..\Temperature\Temperature.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\Wind\Wind.csproj" />
   </ItemGroup>
 
 </Project>
