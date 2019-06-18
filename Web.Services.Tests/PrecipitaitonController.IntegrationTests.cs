@@ -64,7 +64,7 @@ namespace Web.Services.Tests
         /// NCDC daily request json string for testing a valid request
         /// </summary>
         const string ncdcRequest =
-             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
             "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
