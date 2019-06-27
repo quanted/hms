@@ -27,7 +27,7 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
-            // Radiation object
+            // Pressure object
             Pressure.Pressure press = new Pressure.Pressure();
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
