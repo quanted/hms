@@ -4,15 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Utilities;
 
-namespace Radiation
+namespace Humidity
 {
     public class NLDAS
     {
-
-        private Dictionary<string, ITimeSeriesOutput> timeseriesData;
-
-
         /// <summary>
         /// Makes the GetData call to the base NLDAS class.
         /// </summary>
@@ -26,87 +23,41 @@ namespace Radiation
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (!validInputs) { return null; }
 
-            this.timeseriesData = new Dictionary<string, ITimeSeriesOutput>();
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput output1 = oFactory.Initialize();
-            ITimeSeriesOutput output2 = oFactory.Initialize();
-            this.GetLongwaveComponent(out errorMsg, input, output1);
-            this.GetShortwaveComponent(out errorMsg, input, output2);
-            output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
+            Data.Source.NLDAS nldas = new Data.Source.NLDAS();
+            string data = nldas.GetData(out errorMsg, "humidity", input);
 
-            output.Dataset = "DW Radiation";
-            output.DataSource = "nldas";
+
+            ITimeSeriesOutput nldasOutput = nldas.SetDataToOutput(out errorMsg, "Specific Humidity", data, output, input);
 
             switch (input.TemporalResolution)
             {
                 case "monthly":
-                    output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
-                    output.Data = MonthlyAverage(out errorMsg, 23, 1.0, output, input);
+                    nldasOutput.Data = DailyValues(out errorMsg, 1.0, output, input);
+                    nldasOutput.Data = MonthlyAverage(out errorMsg, 23, 1.0, output, input);
                     break;
                 case "daily":
-                    output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
-                    break;
-                case "hourly":
                 case "default":
                 default:
+                    nldasOutput.Data = DailyValues(out errorMsg, 1.0, output, input);
                     break;
             }
-            output.Metadata["column_1"] = "date";
-            output.Metadata["column_2"] = "longwave";
-            output.Metadata["column_3"] = "shortwave";
-            output.Metadata["column_2_units"] = "W/m^2";
-            output.Metadata["column_3_units"] = "W/m^2";
+            nldasOutput.Metadata["column_1"] = "date";
+            nldasOutput.Metadata["column_2"] = "specifichumidity";
+            nldasOutput.Metadata["column_2_units"] = "kg/kg";
 
-            return output;
-
+            return nldasOutput;
         }
-
-        private void GetLongwaveComponent(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput output)
-        {
-            string title = "DW Longwave";
-            input.BaseURL = new List<string>() { Data.TimeSeriesInputFactory.GetBaseURL("nldas", "longwave_radiation") };//input.BaseURL = new List<string>() { Data.TimeSeriesInputFactory.GetBaseURL(input.Source, "longwave_radiation") };
-            input.Source = title;
-            Data.Source.NLDAS nldas = new Data.Source.NLDAS();
-            string data = nldas.GetData(out errorMsg, title, input);
-            if (errorMsg.Contains("ERROR")) { return; }
-
-            ITimeSeriesOutput nldasOutput = output.Clone();
-            nldasOutput = nldas.SetDataToOutput(out errorMsg, title, data, output, input);
-            if (errorMsg.Contains("ERROR")) { return; }
-
-            this.timeseriesData.Add("longwave", nldasOutput);
-            if (errorMsg.Contains("ERROR")) { return; }
-        }
-
-        private void GetShortwaveComponent(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput output)
-        {
-            string title = "DW Shortwave";
-            ITimeSeriesInput tempInput = input.Clone(new List<string>() { "radiation" });
-            tempInput.BaseURL = new List<string>() { Data.TimeSeriesInputFactory.GetBaseURL("nldas", "shortwave_radiation") };
-            tempInput.Source = title;
-            Data.Source.NLDAS nldas = new Data.Source.NLDAS();
-            string data = nldas.GetData(out errorMsg, title, tempInput);
-            if (errorMsg.Contains("ERROR")) { return; }
-
-            ITimeSeriesOutput nldasOutput = output.Clone();
-            nldasOutput = nldas.SetDataToOutput(out errorMsg, title, data, output, tempInput);
-            if (errorMsg.Contains("ERROR")) { return; }
-
-            this.timeseriesData.Add("shortwave", nldasOutput);
-            if (errorMsg.Contains("ERROR")) { return; }
-        }
-
 
         /// <summary>
-        /// Daily average for radiation data.
+        /// Daily aggregated sums for precipitation data.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> DailyAverage(out string errorMsg, int hours, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public static Dictionary<string, List<string>> DailyValues(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-
+            int hours = 23;
             // Unit conversion coefficient
             double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
             if (input.Units.Contains("imperial")) { output.Metadata["nldas_unit"] = "in"; }
@@ -117,6 +68,8 @@ namespace Radiation
             }
             // Daily aggregation using MathNet Matrix multiplication (results in ~25% speedup)
             hours += 1;
+            double minSH = 0.0;
+            double maxSH = 0.0;
             int totalDays = (output.Data.Keys.Count / hours) + 1;
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             for (int index = 0; index < output.Data.ElementAt(0).Value.Count; index++)
@@ -138,14 +91,17 @@ namespace Radiation
 
                 var m = Matrix<double>.Build;
                 Matrix<double> matrix = m.DenseOfRowArrays(dValues);
-                Vector<double> precipRowValues = matrix.RowSums();
+                var x = matrix.ToRowArrays();
+                                
                 var tempKeys = output.Data.Keys;
                 int j = 0;
                 if (index == 0)
                 {
                     for (int i = 0; i < output.Data.Count; i += hours)
                     {
-                        tempData.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j) / matrix.Row(j).Count).ToString(input.DataValueFormat) });
+                        minSH = MathNet.Numerics.Statistics.Statistics.Minimum(x[j]);
+                        maxSH = MathNet.Numerics.Statistics.Statistics.Maximum(x[j]);
+                        tempData.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * minSH).ToString(input.DataValueFormat), (unit * maxSH).ToString(input.DataValueFormat) });
                         j++;
                     }
                 }
@@ -153,7 +109,7 @@ namespace Radiation
                 {
                     for (int i = 0; i < output.Data.Count; i += hours)
                     {
-                        tempData[tempKeys.ElementAt(i).Replace(" 01", " 00")].Add((unit * precipRowValues.ElementAt(j) / matrix.Row(j).Count).ToString(input.DataValueFormat));
+                        tempData[tempKeys.ElementAt(i).Replace(" 01", " 00")].Add((unit * minSH).ToString(input.DataValueFormat));
                         j++;
                     }
                 }
@@ -162,7 +118,7 @@ namespace Radiation
         }
 
         /// <summary>
-        /// Monthly average for radiation data.
+        /// Monthly average for humidity data.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
@@ -177,8 +133,7 @@ namespace Radiation
             DateTime newDate;
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out newDate);
-            double ssum = 0.0;
-            double lsum = 0.0;
+            List<double> humids = new List<double>();
             int days = -1;
             for (int i = 0; i < output.Data.Count; i++)
             {
@@ -187,25 +142,30 @@ namespace Radiation
                 DateTime.TryParse(dateString, out iDate);
                 if (iDate.Month != newDate.Month || i == output.Data.Count - 1)
                 {
-                    ssum = ssum / days;
-                    lsum = lsum / days;
-                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString(), lsum.ToString() });
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { humids.Min().ToString(input.DataValueFormat), humids.Max().ToString(input.DataValueFormat) });
                     newDate = iDate;
-                    ssum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    lsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    humids.Clear();
+                    humids.Add(Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]));
+                    humids.Add(Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]));
                     days = 0;
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
-                    ssum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    lsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    humids.Add(Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]));
+                    humids.Add(Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]));
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
             return output1.Data;
         }
 
+        /// <summary>
+        /// Validate input dates and coordinates for precipitation nldas data.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
         private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
@@ -227,11 +187,11 @@ namespace Radiation
 
             // Validate Spatial range
             // NLDAS spatial range 125W ~ 63E, 25S ~ 53N
-            if (input.Geometry.Point.Latitude < -25 && input.Geometry.Point.Latitude > 53)
+            if (input.Geometry.Point.Latitude < -25 || input.Geometry.Point.Latitude > 53)
             {
                 errors.Add("ERROR: Latitude is not valid. Latitude must be between -25 and 53. Latitude provided: " + input.Geometry.Point.Latitude.ToString());
             }
-            if (input.Geometry.Point.Longitude < -125 && input.Geometry.Point.Longitude > 63)
+            if (input.Geometry.Point.Longitude < -125 || input.Geometry.Point.Longitude > 63)
             {
                 errors.Add("ERROR: Longitude is not valid. Longitude must be between -125 and 63. Longitude provided: " + input.Geometry.Point.Longitude.ToString());
             }
@@ -244,6 +204,5 @@ namespace Radiation
 
             return valid;
         }
-
     }
 }

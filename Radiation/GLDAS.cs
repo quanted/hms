@@ -39,6 +39,10 @@ namespace Radiation
 
             switch (input.TemporalResolution)
             {
+                case "monthly":
+                    output.Data = NLDAS.DailyAverage(out errorMsg, 7, 1.0, output, input);
+                    output.Data = NLDAS.MonthlyAverage(out errorMsg, 7, 1.0, output, input);
+                    break;
                 case "daily":
                     output.Data = NLDAS.DailyAverage(out errorMsg, 7, 1.0, output, input);
                     break;

@@ -12,7 +12,8 @@ nldas_longwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/acc
 nldas_shortwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc&location=NLDAS:
 gldas_longwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:LWdown_f_tavg&location=GEOM:POINT
 gldas_shortwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:SWdown_f_tavg&location=GEOM:POINT
-NLDAS_Humidity_URL http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:SPFH2m&location=NLDAS:
+nldas_humidity_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:SPFH2m&location=NLDAS:
+gldas_humidity_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.0:Qair_f_inst&location=GEOM:POINT
 nldas_temperature_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:TMP2m&location=NLDAS:
 gldas_temperature_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Tair_f_inst&location=GEOM:POINT
 nldas_u_wind_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:UGRD10m&location=NLDAS:

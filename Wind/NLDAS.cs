@@ -54,6 +54,16 @@ namespace Wind
                 case "daily":
                     output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
                     break;
+                case "weekly":
+                    //output.Data = WeeklyAverage(out errorMsg, 23, 1.0, output, input);
+                    return output;
+                case "monthly":
+                    output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
+                    output.Data = MonthlyAverage(out errorMsg, 23, 1.0, output, input);
+                    return output;
+                case "yearly":
+                    //output.Data = YearlyAverage(out errorMsg, 23, 1.0, output, input);
+                    return output;
                 case "hourly":
                 default:
                     break;
@@ -203,5 +213,50 @@ namespace Wind
             return tempData;
         }
 
+        /// <summary>
+        /// Monthly average for wind data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> MonthlyAverage(out string errorMsg, int hours, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output1 = oFactory.Initialize();
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double usum = 0.0;
+            double vsum = 0.0;
+            int days = -1;
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                days += 1;
+                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (iDate.Month != newDate.Month || i == output.Data.Count - 1)
+                {
+                    usum = usum / days;
+                    vsum = vsum / days;
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { usum.ToString(), vsum.ToString() } );
+                    newDate = iDate;
+                    usum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    vsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    days = 0;
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    usum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    vsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    //days += 1;
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+            }
+            return output1.Data;
+        }
     }
 }
