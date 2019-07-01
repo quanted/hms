@@ -484,6 +484,15 @@ namespace Evapotranspiration
                     ITimeSeriesOutput nldasRadOutput = nldasRad.GetData(out errorMsg, nRadOutput, nriInput);
                     outputList.Add(nldasRadOutput);
 
+                    Pressure.GLDAS gpress2 = new Pressure.GLDAS();
+                    ITimeSeriesOutputFactory gpFactory2 = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gpressOutput2 = gpFactory2.Initialize();
+                    inpt.Source = "gldas";
+                    ITimeSeriesInputFactory gpiFactory2 = new TimeSeriesInputFactory();
+                    ITimeSeriesInput gpInput2 = gpiFactory2.SetTimeSeriesInput(inpt, new List<string>() { "surfacepressure" }, out errorMsg);
+                    ITimeSeriesOutput pressOutput2 = gpress2.GetData(out errorMsg, gpressOutput2, gpInput2);
+                    outputList.Add(pressOutput2);
+
                     foreach (ITimeSeriesOutput result in outputList)
                     {
                         nldasTempOutput = Utilities.Merger.MergeTimeSeries(nldasTempOutput, result);
@@ -493,6 +502,7 @@ namespace Evapotranspiration
                         }
                     }
 
+                    inpt.Source = "nldas";
                     int julian = 0;
                     nldasTempOutput.Data.Remove("Total Average");
                     nldasTempOutput.Data.Remove("Min Temp");
@@ -509,11 +519,12 @@ namespace Evapotranspiration
                         double shmax = Convert.ToDouble(timeseries.Value[6]);
                         double wind = Convert.ToDouble(timeseries.Value[3]);
                         double solarRad = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
+                        double pressure = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
                         int jday = ++julian;
 
-                        PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, 1013.25,
+                        PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, pressure,
                                           out petPMD, out errorMsg);
-
+                        //1013.25
                         //Setting order of all items
                         timeseries.Value[0] = jday.ToString();
                         timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
@@ -524,6 +535,7 @@ namespace Evapotranspiration
                         timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                         timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
                         timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                        timeseries.Value.RemoveAt(9);
                     }
                     nldasTempOutput.Dataset = "Evapotranspiration";
                     nldasTempOutput.DataSource = "penmandaily";
