@@ -41,6 +41,7 @@ COPY Chemicals/Chemicals.AQUATOX.UnitTests/Chemicals.AQUATOX.UnitTests.csproj Ch
 COPY Diagenesis/Diagenesis.AQUATOX/Diagenesis.AQUATOX.csproj Diagenesis/Diagenesis.AQUATOX/
 COPY Diagenesis/Diagenesis.AQUATOX.UnitTests/Diagenesis.AQUATOX.UnitTests.csproj Diagenesis/Diagenesis.AQUATOX.UnitTests/
 COPY WatershedDelineation/WatershedDelineation.csproj WatershedDelineation/
+COPY ContaminantLoader/ContaminantLoader.csproj ContaminantLoader/
 
 RUN dotnet restore -nowarn:msb3202,nu1503
 COPY . .
