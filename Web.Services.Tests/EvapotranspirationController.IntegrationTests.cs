@@ -319,6 +319,24 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// Penman Monthly gldas request json string for testing a valid request
+        /// </summary>
+        const string penmanMonthlyGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2009-01-01T00:00:00\", \"endDate\": \"2009-12-31T00:00:00\"," +
+            " \"dateTimeFormat\": \"yyyy-MM-dd HH\" }, \"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
+        /// Penman Monthly nldas request json string for testing a valid request
+        /// </summary>
+        const string penmanMonthlyNldasRequest = "{ \"source\": \"nldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2009-01-01T00:00:00\", \"endDate\": \"2009-12-31T00:00:00\"," +
+            " \"dateTimeFormat\": \"yyyy-MM-dd HH\" }, \"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// Integration test constructor creates test server and test client.
         /// </summary>
         public EvapotranspirationControllerIntegrationTests()
@@ -335,38 +353,40 @@ namespace Web.Services.Tests
         /// <returns></returns>
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest)]
-        [InlineData(gldasRequest)]
-        [InlineData(hamonNldasRequest)]
-        [InlineData(priestlytaylorNldasRequest)]
-        [InlineData(grangergrayNldasRequest)]
-        [InlineData(penpanNldasRequest)]
-        [InlineData(mcjannettNldasRequest)]
-        [InlineData(penmanopenwaterNldasRequest)]
-        [InlineData(penmandailyNldasRequest)]
-        [InlineData(penmanhourlyNldasRequest)]
-        [InlineData(mortoncraeNldasRequest)]
-        [InlineData(mortoncrweNldasRequest)]
-        [InlineData(shuttleworthwallaceNldasRequest)]
-        [InlineData(hspfNldasRequest)]
-        [InlineData(hamonGldasRequest)]
-        [InlineData(priestlytaylorGldasRequest)]
-        [InlineData(grangergrayGldasRequest)]
-        [InlineData(penpanGldasRequest)]
-        [InlineData(mcjannettGldasRequest)]
-        [InlineData(penmanopenwaterGldasRequest)]
-        [InlineData(penmandailyGldasRequest)]
-        [InlineData(penmanhourlyGldasRequest)]
-        [InlineData(mortoncraeGldasRequest)]
-        [InlineData(mortoncrweGldasRequest)]
-        [InlineData(shuttleworthwallaceGldasRequest)]
-        [InlineData(hspfGldasRequest)]
-        [InlineData(hamonDaymetRequest)]
-        [InlineData(priestlytaylorDaymetRequest)]
-        [InlineData(mortoncraeDaymetRequest)]
-        [InlineData(mortoncrweDaymetRequest)]
-        [InlineData(ncdcRequest)]
-        public async Task ValidRequests(string evapoInputString)
+        [InlineData(nldasRequest, 365)]
+        [InlineData(gldasRequest, 365)]/*
+        [InlineData(hamonNldasRequest, 365)]
+        [InlineData(priestlytaylorNldasRequest, 365)]
+        [InlineData(grangergrayNldasRequest, 365)]
+        [InlineData(penpanNldasRequest, 365)]
+        [InlineData(mcjannettNldasRequest, 365)]
+        [InlineData(penmanopenwaterNldasRequest, 365)]*/
+        [InlineData(penmandailyNldasRequest, 365)]/*
+        [InlineData(penmanhourlyNldasRequest, 365)]
+        [InlineData(mortoncraeNldasRequest, 365)]
+        [InlineData(mortoncrweNldasRequest, 365)]
+        [InlineData(shuttleworthwallaceNldasRequest, 365)]
+        [InlineData(hspfNldasRequest, 365)]
+        [InlineData(hamonGldasRequest, 365)]
+        [InlineData(priestlytaylorGldasRequest, 365)]
+        [InlineData(grangergrayGldasRequest, 365)]
+        [InlineData(penpanGldasRequest, 365)]
+        [InlineData(mcjannettGldasRequest, 365)]
+        [InlineData(penmanopenwaterGldasRequest, 365)]*/
+        [InlineData(penmandailyGldasRequest, 365)]/*
+        [InlineData(penmanhourlyGldasRequest, 365)]
+        [InlineData(mortoncraeGldasRequest, 365)]
+        [InlineData(mortoncrweGldasRequest, 365)]
+        [InlineData(shuttleworthwallaceGldasRequest, 365)]
+        [InlineData(hspfGldasRequest, 365)]
+        [InlineData(hamonDaymetRequest, 365)]
+        [InlineData(priestlytaylorDaymetRequest, 365)]
+        [InlineData(mortoncraeDaymetRequest, 365)]
+        [InlineData(mortoncrweDaymetRequest, 365)]*/ 
+        [InlineData(penmanMonthlyNldasRequest, 12)]
+        [InlineData(penmanMonthlyGldasRequest, 12)]
+        //[InlineData(ncdcRequest, 365)]
+        public async Task ValidRequests(string evapoInputString, int expected)
         {
             string endpoint = "api/hydrology/evapotranspiration";
             EvapotranspirationInput input = JsonConvert.DeserializeObject<EvapotranspirationInput>(evapoInputString);
@@ -380,7 +400,7 @@ namespace Web.Services.Tests
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
             TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
-            Assert.Equal(365, resultObj.Data.Count);
+            Assert.Equal(expected, resultObj.Data.Count);
         }
     }
 }
