@@ -79,7 +79,7 @@ namespace Evapotranspiration
 
         public void PenmanDailyMethod(double tmin, double tmax, double tmean, int jday, double shmin, double shmax,
                                       double wind, double solarRad, out double relHumidityMin, out double relHumidityMax,
-                                      out double petPMD, out string errorMsg)
+                                      double press, out double petPMD, out string errorMsg)
         {
             double EL = elevation;
             double lat = latitude;
@@ -163,8 +163,8 @@ namespace Evapotranspiration
                 if (!prismCalc)
                 {
                     // Convert specific humidity to relative humidity here.  
-                    RHmin = Utilities.Utility.CalculateRH(shmin, tmin, 1013.25);
-                    RHmax = Utilities.Utility.CalculateRH(shmax, tmax, 1013.25);
+                    RHmin = Utilities.Utility.CalculateRH(shmin, tmin, press);
+                    RHmax = Utilities.Utility.CalculateRH(shmax, tmax, press);
                 }
                 else
                 {
@@ -287,6 +287,7 @@ namespace Evapotranspiration
             //DataTable dt = nldas.getData4(timeZoneOffset, out errorMsg);
             DataTable dt = new DataTable();
             DataTable daymets = new DataTable();
+            List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
             switch (inpt.Source)
             {
                 case "daymet":
@@ -309,281 +310,255 @@ namespace Evapotranspiration
                     dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "penmandaily");
                     break;
                 case "gldas":
-                    /*
-                    inpt.Source = "prism";
-                    Humidity.PRISM prism = new Humidity.PRISM();
-                    ITimeSeriesOutput prismOutput = prism.GetRelativeHumidityData(out errorMsg, null, inpt);*/
+                    Temperature.GLDAS gldasTemp = new Temperature.GLDAS();
+                    ITimeSeriesOutputFactory gtFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gTempOutput = gtFactory.Initialize();
+                    ITimeSeriesInputFactory gtiFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput gtiInput = gtiFactory.SetTimeSeriesInput(inpt, new List<string>() { "temperature" }, out errorMsg);
+                    gtiInput.Geometry.GeometryMetadata.Add("ETGLDAS", ".");
+                    ITimeSeriesOutput gldasTempOutput = gldasTemp.GetData(out errorMsg, gTempOutput, gtiInput);
+                    
+                    if (errorMsg != "")
+                    {
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
+                    }
+                    inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+
+                    Wind.GLDAS gldasWind = new Wind.GLDAS();
+                    ITimeSeriesOutputFactory gwFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gWindOutput = gwFactory.Initialize();
+                    ITimeSeriesInputFactory gwiFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput gwiInput = gwiFactory.SetTimeSeriesInput(inpt, new List<string>() { "wind" }, out errorMsg);
+                    ITimeSeriesOutput gldasWindOutput = gldasWind.GetData(out errorMsg, gWindOutput, gwiInput);
+                    outputList.Add(gldasWindOutput);
+
+                    if (errorMsg != "")
+                    {
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
+                    }
+                    inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+
+                    Humidity.GLDAS gldasHumid = new Humidity.GLDAS();
+                    ITimeSeriesOutputFactory ghFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gHumidOutput = ghFactory.Initialize();
+                    ITimeSeriesInputFactory ghiFactory = new TimeSeriesInputFactory();
+                    inpt.Source = "gldas";
+                    ITimeSeriesInput ghiInput = ghiFactory.SetTimeSeriesInput(inpt, new List<string>() { "humidity" }, out errorMsg);
+                    ITimeSeriesOutput gldasHumidOutput = gldasHumid.GetData(out errorMsg, gHumidOutput, ghiInput);
+                    outputList.Add(gldasHumidOutput);
+
+                    if (errorMsg != "")
+                    {
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
+                    }
+                    inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+
+                    Radiation.GLDAS gldasRad = new Radiation.GLDAS();
+                    ITimeSeriesOutputFactory grFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gRadOutput = grFactory.Initialize();
+                    ITimeSeriesInputFactory griFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput griInput = griFactory.SetTimeSeriesInput(inpt, new List<string>() { "radiation" }, out errorMsg);
+                    ITimeSeriesOutput gldasRadOutput = gldasRad.GetData(out errorMsg, gRadOutput, griInput);
+                    outputList.Add(gldasRadOutput);
+
+                    if (errorMsg != "")
+                    {
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
+                    }
+                    inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
 
                     Pressure.GLDAS gpress = new Pressure.GLDAS();
+                    ITimeSeriesOutputFactory gpFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gpressOutput = gpFactory.Initialize();
                     inpt.Source = "gldas";
-                    ITimeSeriesOutputFactory oFactory2 = new TimeSeriesOutputFactory();
-                    ITimeSeriesOutput gpressOutput = oFactory2.Initialize();
-                    ITimeSeriesOutput pressOutput = gpress.GetData(out errorMsg, gpressOutput, inpt);
+                    ITimeSeriesInputFactory gpiFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput gpInput = gpiFactory.SetTimeSeriesInput(inpt, new List<string>() { "surfacepressure" }, out errorMsg);
+                    ITimeSeriesOutput pressOutput = gpress.GetData(out errorMsg, gpressOutput, gpInput);
+                    outputList.Add(pressOutput);
 
-                    NLDAS2 nldas2 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                    if (inpt.TemporalResolution == "hourly")
+                    if (errorMsg != "")
                     {
-                        NLDAS2 nldasday = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                        DataTable dtd = nldasday.getData4(timeZoneOffset, out errorMsg);
-                        dt = nldas2.getDataHourly(timeZoneOffset, false, out errorMsg);
-                        dt.Columns["THourly_C"].ColumnName = "TMean_C";
-                        dt.Columns["SolarRad_MJm2day"].ColumnName = "SolarRadMean_MJm2day";
-                        dt.Columns["WindSpeed_m/s"].ColumnName = "WindSpeedMean_m/s";
-                        dt.Columns.Remove("SH_Hourly");
-                        dt.Columns.Add("TMin_C");
-                        dt.Columns.Add("TMax_C");
-                        dt.Columns.Add("SHmin");
-                        dt.Columns.Add("SHmax");
-                        int j = -1;
-                        for (int i = 0; i < dt.Rows.Count; i++)
-                        {
-                            if ((inpt.Source == "nldas" && (i % 24 == 0)) || (inpt.Source == "gldas" && (i % 8 == 0)))
-                            {
-                                j++;
-                            }
-                            DataRow dr = dtd.Rows[j];
-                            dt.Rows[i]["TMin_C"] = dr["TMin_C"];
-                            dt.Rows[i]["TMax_C"] = dr["TMax_C"];
-                            dt.Rows[i]["SHmin"] = dr["SHmin"];
-                            dt.Rows[i]["SHmax"] = dr["SHmax"];
-                        }
-                        dtd = null;
+                        Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                        return err.ReturnError(errorMsg);
                     }
-                    else
+
+                    foreach (ITimeSeriesOutput result in outputList)
                     {
-                        dt = nldas2.getData4(timeZoneOffset, out errorMsg);
-                        DataRow dr1 = null;
-                        List<Double> tList = new List<double>();
-                        List<Double> sList = new List<double>();
-                        double sol = 0.0;
-                        double wind = 0.0;
-                        if (inpt.TemporalResolution == "weekly")
+                        gldasTempOutput = Utilities.Merger.MergeTimeSeries(gldasTempOutput, result);
+                        if (result.Metadata.Values.Contains("ERROR"))
                         {
-                            DataTable wkly = dt.Clone();
-                            int j = 0;
-                            for (int i = 0; i < dt.Rows.Count; i++)
-                            {
-                                if (j == 0)
-                                {
-                                    dr1 = wkly.NewRow();
-                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
-                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
-                                    tList = new List<double>();
-                                    sList = new List<double>();
-                                    sol = 0.0;
-                                    wind = 0.0;
-                                }
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
-                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
-                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
-                                if (j == 6 || i == dt.Rows.Count - 1)
-                                {
-                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
-                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
-                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
-                                    dr1["SHmin"] = sList.Min().ToString();
-                                    dr1["SHmax"] = sList.Max().ToString();
-                                    wkly.Rows.Add(dr1);
-                                    j = -1;
-                                }
-                                j++;
-                            }
-                            dt = wkly;
-                        }
-                        else if (inpt.TemporalResolution == "monthly")
-                        {
-                            DataTable mnly = dt.Clone();
-                            int curmonth = inpt.DateTimeSpan.StartDate.Month;
-                            int j = 0;
-                            int k = -1;
-                            bool newmonth = true;
-                            for (int i = 0; i < dt.Rows.Count; i++)
-                            {
-                                if (newmonth)
-                                {
-                                    k++;
-                                    dr1 = mnly.NewRow();
-                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
-                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
-                                    tList = new List<double>();
-                                    sList = new List<double>();
-                                    sol = 0.0;
-                                    wind = 0.0;
-                                    newmonth = false;
-                                    curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
-                                }
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
-                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
-                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
-                                if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
-                                {
-                                    //double tmin = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[3]);
-                                    //double tmax = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[4]);
-                                    //dr1["TMin_C"] = tmin;//tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    //dr1["TMax_C"] = tmax;//tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0; //Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[1]);//(tmin + tmax) / 2.0;
-                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
-                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
-                                    //dr1["SHmin"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Min().ToString();
-                                    //dr1["SHmax"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Max().ToString();
-                                    dr1["SHmin"] = sList.Min().ToString();
-                                    dr1["SHmax"] = sList.Max().ToString();
-                                    mnly.Rows.Add(dr1);
-                                    j = -1;
-                                    newmonth = true;
-                                }
-                                j++;
-                            }
-                            dt = mnly;
+                            gldasTempOutput.Metadata.Add(result.DataSource.ToString() + " ERROR", "The service is unavailable or returned no valid data.");
                         }
                     }
-                    break;
+
+                    int julianday = 0;
+                    gldasTempOutput.Data.Remove("Total Average");
+                    gldasTempOutput.Data.Remove("Min Temp");
+                    gldasTempOutput.Data.Remove("Max Temp");
+                    foreach (KeyValuePair<string, List<string>> timeseries in gldasTempOutput.Data)
+                    {
+                        timeseries.Value[0] = (Convert.ToDouble(timeseries.Value[0]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[1] = (Convert.ToDouble(timeseries.Value[1]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[2] = (Convert.ToDouble(timeseries.Value[2]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        double tmin = Convert.ToDouble(timeseries.Value[1]);
+                        double tmax = Convert.ToDouble(timeseries.Value[0]);
+                        double tmean = Convert.ToDouble(timeseries.Value[2]);
+                        double shmin = Convert.ToDouble(timeseries.Value[4]);
+                        double shmax = Convert.ToDouble(timeseries.Value[5]);
+                        double wind = Convert.ToDouble(timeseries.Value[3]);
+                        double solarRad = Convert.ToDouble(timeseries.Value[7]) * 0.0864;
+                        double pressure = Convert.ToDouble(timeseries.Value[8]) / 100; //Convert Pa to mbar
+                        int jday = ++julianday;
+
+                        PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, pressure,
+                                          out petPMD, out errorMsg);
+
+                        //Setting order of all items
+                        timeseries.Value[0] = jday.ToString();
+                        timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[4] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                    }
+                    gldasTempOutput.Dataset = "Evapotranspiration";
+                    gldasTempOutput.DataSource = "penmandaily";
+                    gldasTempOutput.Metadata = new Dictionary<string, string>()
+                    {
+                        { "elevation", elevation.ToString() },
+                        { "latitude", latitude.ToString() },
+                        { "longitude", longitude.ToString() },
+                        { "albedo", albedo.ToString() },
+                        { "request_time", DateTime.Now.ToString() },
+                        { "column_1", "Date" },
+                        { "column_2", "Julian Day" },
+                        { "column_3", "Minimum Temperature" },
+                        { "column_4", "Maximum Temperature" },
+                        { "column_5", "Mean Temperature" },
+                        { "column_6", "Mean Solar Radiation" },
+                        { "column_7", "Mean Wind Speed" },
+                        { "column_8", "Minimum Relative Humidity" },
+                        { "column_9", "Maximum Relative Humidity" },
+                        { "column_10", "Potential Evapotranspiration" }
+                    };
+                    //0 = Max Temp, 1 = Min Temp, 2 = Mean Temp, 3 = Wind, 4 = SHMin, 5 = SHMax, 6 = Longwave, 7 = Shortwave,                  
+                    return gldasTempOutput;
                 case "nldas":
                 default:
-                    /*prismCalc = false;// true;
-                    inpt.Source = "prism";
-                    Humidity.PRISM prism2 = new Humidity.PRISM();
-                    ITimeSeriesOutput prismOutput2 = prism2.GetRelativeHumidityData(out errorMsg, null, inpt);*/
+                    Temperature.NLDAS nldasTemp = new Temperature.NLDAS();
+                    ITimeSeriesOutputFactory ntFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput nTempOutput = ntFactory.Initialize();
+                    ITimeSeriesInputFactory ntiFactory = new TimeSeriesInputFactory();                    
+                    ITimeSeriesInput ntiInput = ntiFactory.SetTimeSeriesInput(inpt, new List<string>() { "temperature" }, out errorMsg);
+                    ITimeSeriesOutput nldasTempOutput = nldasTemp.GetData(out errorMsg, nTempOutput, ntiInput);
+                                                          
+                    Wind.NLDAS nldasWind = new Wind.NLDAS();
+                    ITimeSeriesOutputFactory nwFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput nWindOutput = nwFactory.Initialize();
+                    ITimeSeriesInputFactory nwiFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput nwiInput = nwiFactory.SetTimeSeriesInput(inpt, new List<string>() { "wind" }, out errorMsg);
+                    ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "SPEED/DIRECTION", nWindOutput, nwiInput);
+                    outputList.Add(nldasWindOutput);
+
+                    Humidity.NLDAS nldasHumid = new Humidity.NLDAS();
+                    ITimeSeriesOutputFactory nhFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput nHumidOutput = nhFactory.Initialize();
+                    ITimeSeriesInputFactory nhiFactory = new TimeSeriesInputFactory();
+                    inpt.Source = "nldas";
+                    ITimeSeriesInput nhiInput = nhiFactory.SetTimeSeriesInput(inpt, new List<string>() { "humidity" }, out errorMsg);
+                    ITimeSeriesOutput nldasHumidOutput = nldasHumid.GetData(out errorMsg, nHumidOutput, nhiInput);
+                    outputList.Add(nldasHumidOutput);
+
+                    Radiation.NLDAS nldasRad = new Radiation.NLDAS();
+                    ITimeSeriesOutputFactory nrFactory = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput nRadOutput = nrFactory.Initialize();
+                    ITimeSeriesInputFactory nriFactory = new TimeSeriesInputFactory();
+                    ITimeSeriesInput nriInput = nriFactory.SetTimeSeriesInput(inpt, new List<string>() { "radiation" }, out errorMsg);
+                    ITimeSeriesOutput nldasRadOutput = nldasRad.GetData(out errorMsg, nRadOutput, nriInput);
+                    outputList.Add(nldasRadOutput);
+
+                    Pressure.GLDAS gpress2 = new Pressure.GLDAS();
+                    ITimeSeriesOutputFactory gpFactory2 = new TimeSeriesOutputFactory();
+                    ITimeSeriesOutput gpressOutput2 = gpFactory2.Initialize();
+                    inpt.Source = "gldas";
+                    ITimeSeriesInputFactory gpiFactory2 = new TimeSeriesInputFactory();
+                    ITimeSeriesInput gpInput2 = gpiFactory2.SetTimeSeriesInput(inpt, new List<string>() { "surfacepressure" }, out errorMsg);
+                    ITimeSeriesOutput pressOutput2 = gpress2.GetData(out errorMsg, gpressOutput2, gpInput2);
+                    outputList.Add(pressOutput2);
+
+                    foreach (ITimeSeriesOutput result in outputList)
+                    {
+                        nldasTempOutput = Utilities.Merger.MergeTimeSeries(nldasTempOutput, result);
+                        if (result.Metadata.Values.Contains("ERROR"))
+                        {
+                            nldasTempOutput.Metadata.Add(result.DataSource.ToString() + " ERROR", "The service is unavailable or returned no valid data.");
+                        }
+                    }
 
                     inpt.Source = "nldas";
-                    NLDAS2 nldas3 = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                    if (inpt.TemporalResolution == "hourly")
+                    int julian = 0;
+                    nldasTempOutput.Data.Remove("Total Average");
+                    nldasTempOutput.Data.Remove("Min Temp");
+                    nldasTempOutput.Data.Remove("Max Temp");
+                    foreach (KeyValuePair<string, List<string>> timeseries in nldasTempOutput.Data)
                     {
-                        NLDAS2 nldasday = new NLDAS2(inpt.Source, lat, lon, startDate, endDate);
-                        DataTable dtd = nldasday.getData4(timeZoneOffset, out errorMsg);
-                        dt = nldas3.getDataHourly(timeZoneOffset, false, out errorMsg);
-                        dt.Columns["THourly_C"].ColumnName = "TMean_C";
-                        dt.Columns["SolarRad_MJm2day"].ColumnName = "SolarRadMean_MJm2day";
-                        dt.Columns["WindSpeed_m/s"].ColumnName = "WindSpeedMean_m/s";
-                        dt.Columns.Remove("SH_Hourly");
-                        dt.Columns.Add("TMin_C");
-                        dt.Columns.Add("TMax_C");
-                        dt.Columns.Add("SHmin");
-                        dt.Columns.Add("SHmax");
-                        int j = -1;
-                        for (int i = 0; i < dt.Rows.Count; i++)
-                        {
-                            if ((inpt.Source == "nldas" && (i % 24 == 0)) || (inpt.Source == "gldas" && (i % 8 == 0)))
-                            {
-                                j++;
-                            }
-                            DataRow dr = dtd.Rows[j];
-                            dt.Rows[i]["TMin_C"] = dr["TMin_C"];
-                            dt.Rows[i]["TMax_C"] = dr["TMax_C"];
-                            dt.Rows[i]["SHmin"] = dr["SHmin"];
-                            dt.Rows[i]["SHmax"] = dr["SHmax"];
-                        }
-                        dtd = null;
+                        timeseries.Value[0] = (Convert.ToDouble(timeseries.Value[0]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[1] = (Convert.ToDouble(timeseries.Value[1]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[2] = (Convert.ToDouble(timeseries.Value[2]) - 273.15).ToString("F2", CultureInfo.InstalledUICulture);
+                        double tmin = Convert.ToDouble(timeseries.Value[1]);
+                        double tmax = Convert.ToDouble(timeseries.Value[0]);
+                        double tmean = Convert.ToDouble(timeseries.Value[2]);
+                        double shmin = Convert.ToDouble(timeseries.Value[5]);
+                        double shmax = Convert.ToDouble(timeseries.Value[6]);
+                        double wind = Convert.ToDouble(timeseries.Value[3]);
+                        double solarRad = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
+                        double pressure = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
+                        int jday = ++julian;
+
+                        PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, pressure,
+                                          out petPMD, out errorMsg);
+                        //1013.25
+                        //Setting order of all items
+                        timeseries.Value[0] = jday.ToString();
+                        timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[4] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                        timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                        timeseries.Value.RemoveAt(9);
                     }
-                    else
+                    nldasTempOutput.Dataset = "Evapotranspiration";
+                    nldasTempOutput.DataSource = "penmandaily";
+                    nldasTempOutput.Metadata = new Dictionary<string, string>()
                     {
-                        dt = nldas3.getData4(timeZoneOffset, out errorMsg);
-                        DataRow dr1 = null;
-                        List<Double> tList = new List<double>();
-                        List<Double> sList = new List<double>();
-                        double sol = 0.0;
-                        double wind = 0.0;
-                        if (inpt.TemporalResolution == "weekly")
-                        {
-                            DataTable wkly = dt.Clone();
-                            int j = 0;
-                            for (int i = 0; i < dt.Rows.Count; i++)
-                            {
-                                if (j == 0)
-                                {
-                                    dr1 = wkly.NewRow();
-                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
-                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
-                                    tList = new List<double>();
-                                    sList = new List<double>();
-                                    sol = 0.0;
-                                    wind = 0.0;
-                                }
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
-                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
-                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
-                                if (j == 6 || i == dt.Rows.Count - 1)
-                                {
-                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;
-                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
-                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
-                                    dr1["SHmin"] = sList.Min().ToString();
-                                    dr1["SHmax"] = sList.Max().ToString();
-                                    wkly.Rows.Add(dr1);
-                                    j = -1;
-                                }
-                                j++;
-                            }
-                            dt = wkly;
-                        }
-                        else if (inpt.TemporalResolution == "monthly")
-                        {
-                            DataTable mnly = dt.Clone();
-                            int curmonth = inpt.DateTimeSpan.StartDate.Month;
-                            int j = 0;
-                            int k = -1;
-                            bool newmonth = true;
-                            for (int i = 0; i < dt.Rows.Count; i++)
-                            {
-                                if (newmonth)
-                                {
-                                    k++;
-                                    dr1 = mnly.NewRow();
-                                    dr1["Date"] = dt.Rows[i]["Date"].ToString();
-                                    dr1["Julian_Day"] = dt.Rows[i]["Julian_Day"].ToString();
-                                    tList = new List<double>();
-                                    sList = new List<double>();
-                                    sol = 0.0;
-                                    wind = 0.0;
-                                    newmonth = false;
-                                    curmonth = Convert.ToDateTime(dt.Rows[i]["Date"]).Month;
-                                }
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMin_C"].ToString()));
-                                tList.Add(Convert.ToDouble(dt.Rows[i]["TMax_C"].ToString()));
-                                sol += Convert.ToDouble(dt.Rows[i]["SolarRadMean_MJm2day"]);
-                                wind += Convert.ToDouble(dt.Rows[i]["WindSpeedMean_m/s"]);
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmin"].ToString()));
-                                sList.Add(Convert.ToDouble(dt.Rows[i]["SHmax"].ToString()));
-                                if (i + 1 < dt.Rows.Count && (Convert.ToDateTime(dt.Rows[i + 1]["Date"]).Month != curmonth) || i == dt.Rows.Count - 1)
-                                {
-                                    //double tmin = Convert.ToDouble(prismOutput2.Data.ElementAt(k).Value[3]);
-                                    //double tmax = Convert.ToDouble(prismOutput2.Data.ElementAt(k).Value[4]);
-                                    //dr1["TMin_C"] = tmin;//tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    //dr1["TMax_C"] = tmax;//tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMin_C"] = tList.Min().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMax_C"] = tList.Max().ToString("F2", CultureInfo.InvariantCulture);
-                                    dr1["TMean_C"] = (tList.Min() + tList.Max()) / 2.0;//Convert.ToDouble(prismOutput2.Data.ElementAt(k).Value[1]);//(tmin + tmax) / 2.0;
-                                    dr1["SolarRadMean_MJm2day"] = Math.Round(sol / (j + 1), 2);
-                                    dr1["WindSpeedMean_m/s"] = Math.Round(wind / (j + 1), 2);
-                                    //dr1["SHmin"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Min().ToString();
-                                    //dr1["SHmax"] = Convert.ToDouble(prismOutput.Data.ElementAt(k).Value[0]);//sList.Max().ToString();
-                                    dr1["SHmin"] = sList.Min().ToString();
-                                    dr1["SHmax"] = sList.Max().ToString();
-                                    mnly.Rows.Add(dr1);
-                                    j = -1;
-                                    newmonth = true;
-                                }
-                                j++;
-                            }
-                            dt = mnly;
-                        }
-                    }
-                    break;
+                        { "elevation", elevation.ToString() },
+                        { "latitude", latitude.ToString() },
+                        { "longitude", longitude.ToString() },
+                        { "albedo", albedo.ToString() },
+                        { "request_time", DateTime.Now.ToString() },
+                        { "column_1", "Date" },
+                        { "column_2", "Julian Day" },
+                        { "column_3", "Minimum Temperature" },
+                        { "column_4", "Maximum Temperature" },
+                        { "column_5", "Mean Temperature" },
+                        { "column_6", "Mean Solar Radiation" },
+                        { "column_7", "Mean Wind Speed" },
+                        { "column_8", "Minimum Relative Humidity" },
+                        { "column_9", "Maximum Relative Humidity" },
+                        { "column_10", "Potential Evapotranspiration" }
+                    };
+                    //0 = Max Temp, 1 = Min Temp, 2 = Mean Temp, 3 = U Wind?, 4 = V Wind?, 5 = SHMin, 6 = SHMax, 7 = Longwave, 8 = Shortwave,                  
+                    return nldasTempOutput;
             }
 
             if (errorMsg != "")
@@ -638,7 +613,7 @@ namespace Evapotranspiration
                 };
             }
             output.Data = new Dictionary<string, List<string>>();
-
+                       
             foreach (DataRow dr in dt.Rows)
             {
                 double tmean = Convert.ToDouble(dr["TMean_C"].ToString());
@@ -650,7 +625,7 @@ namespace Evapotranspiration
                 double solarRad = Convert.ToDouble(dr["SolarRadMean_MJm2day"].ToString());
                 int jday = Convert.ToInt32(dr["Julian_Day"].ToString());
 
-                PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax,
+                PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, 1013.25,
                                   out petPMD, out errorMsg);
 
                 dr["RHmin"] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);

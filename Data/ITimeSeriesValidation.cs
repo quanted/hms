@@ -35,7 +35,7 @@ namespace Data
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },
-            ["humidity"] = new List<string> { "prism" },
+            ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
             ["surfacepressure"] = new List<string> { "gldas" }
         };
 

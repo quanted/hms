@@ -416,11 +416,21 @@ namespace Utilities
         {
             // Calculate relative humidity here.
             double RH = 0.0;
-            double e = SpecificHumidity * Pressure / (0.378 * SpecificHumidity + 0.622);//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
+            double e = SpecificHumidity * Pressure / (0.378 * SpecificHumidity + 0.622);
+            //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
-            RH = 100 * (e / es);
+            RH = e / es;
 
-            return RH;
+            if(RH > 1.0)
+            {
+                RH = 1.0;
+            }
+            else if (RH < 0.0)
+            {
+                RH = 0.0;
+            }
+
+            return RH * 100;
         }
 
         public static int CalculateMortonMethod(string method)
