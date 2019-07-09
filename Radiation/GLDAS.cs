@@ -103,7 +103,9 @@ namespace Radiation
             // Validate Date range
             // GLDAS 2.0 date range 1948-01-01 - 2010-12-31
             DateTime date0 = new DateTime(1948, 1, 1);
-            DateTime date1 = new DateTime(2010, 12, 31);
+            DateTime tempDate = DateTime.Now;
+            DateTime date1 = new DateTime(tempDate.Year, tempDate.Month, 1).AddMonths(-2);
+            //DateTime date1 = new DateTime(2010, 12, 31);
             string dateFormat = "yyyy-MM-dd";
             if (DateTime.Compare(input.DateTimeSpan.StartDate, date0) < 0 || (DateTime.Compare(input.DateTimeSpan.StartDate, date1) > 0))
             {

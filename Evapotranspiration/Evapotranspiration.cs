@@ -132,7 +132,7 @@ namespace Evapotranspiration
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
-            {                
+            {
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -147,7 +147,7 @@ namespace Evapotranspiration
             //this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
 
             //Error checking and data validation
-            if(this.Input.Source != "gldas" && this.Algorithm == "gldas" )
+            if (this.Input.Source != "gldas" && this.Algorithm == "gldas")
             {
                 errorMsg = "ERROR: GLDAS algorithm requires GLDAS data source.";
                 return null;
@@ -167,11 +167,11 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: Algorithm is incompatible with NCDC data source.";
                 return null;
             }
-            if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
+            /*if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
             {
                 errorMsg = "ERROR: No data available for the requested Source/Algorithm/Date range.";
                 return null;
-            }
+            }*/
             if (this.Input.Source == "custom")
             {
                 if (this.Algorithm == "penmanhourly" || this.Algorithm == "hspf")
@@ -180,7 +180,7 @@ namespace Evapotranspiration
                     return null;
                 }
                 this.Input.Geometry.GeometryMetadata["userdata"] = UserData;
-            }           
+            }
 
             switch (this.Algorithm)
             {
@@ -375,7 +375,7 @@ namespace Evapotranspiration
 
             return this.Output;
         }
-        
+
         /// <summary>
         /// Check evapotranspiration data endpoints.
         /// </summary>
