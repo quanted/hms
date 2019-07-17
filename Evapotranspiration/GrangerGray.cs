@@ -273,7 +273,7 @@ namespace Evapotranspiration
             }
 
             // Convert mm/day to in/day
-            petGG = PET;//(PET / 25.4);
+            petGG = (PET / 25.4);
 
         }
 
