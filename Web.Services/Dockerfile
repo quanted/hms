@@ -1,8 +1,8 @@
-FROM microsoft/dotnet:2.2-sdk AS base
+FROM microsoft/dotnet:latest AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM microsoft/dotnet:latest AS build
 WORKDIR /src
 COPY HMS.sln ./
 COPY Web.Services/Web.Services.csproj Web.Services/
