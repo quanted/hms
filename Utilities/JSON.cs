@@ -27,6 +27,11 @@ namespace Utilities
                 Console.WriteLine("Error deserializing object: " + ex.Message);
                 return default(T);
             }
+            catch(JsonException ex)
+            {
+                Console.WriteLine("Error deserializing object: " + ex.Message);
+                return default(T);
+            }
         }
 
         /// <summary>

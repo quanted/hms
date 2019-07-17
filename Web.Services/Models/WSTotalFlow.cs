@@ -369,7 +369,7 @@ namespace Web.Services.Models
                     catchmentPoints.Add(Utilities.Merger.AddTimeSeries(output1, output2, "TotalFlow"));
                 }
 
-                output.Data = (Utilities.Merger.MergeTimeSeries(catchmentPoints).Data);
+                output.Data = (Utilities.Merger.AddTimeSeries(catchmentPoints).Data);
                 int currentCatchment = catchmentMeta.Count + 1;
                 catchmentMeta.Add("catchment_column_" + currentCatchment.ToString() + "_ID", catchments.Key);
             });

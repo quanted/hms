@@ -34,7 +34,7 @@ namespace SurfaceRunoff
                 input.Source = precipSource;
                 ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
-                if (input.Geometry.ComID == 0)
+                if (input.Geometry.ComID == -1)
                 {
                     // Validate comid
                     input.Geometry.ComID = GetComID(out errorMsg, input.Geometry.Point);
@@ -42,7 +42,7 @@ namespace SurfaceRunoff
                 else
                 {
                     // Database call for centroid data with specified comid.
-                    precipInput.Geometry.Point = GetCatchmentCentroid(out errorMsg, input.Geometry.ComID);
+                    precipInput.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                                                                                
@@ -123,6 +123,7 @@ namespace SurfaceRunoff
         }
 
         /// <summary>
+        /// CAN BE REPLACED BY static method COMID.GetCentroid()
         /// Get the catchment centroid from a specified comid.
         /// Runs SQL query to sqlite database file.
         /// </summary>
