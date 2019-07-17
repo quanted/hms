@@ -52,6 +52,10 @@ namespace ContaminantLoader
         {
             switch (this.ContaminantType)
             {
+                case ("uniform"):
+                    Uniform uniform = new Uniform();
+                    this.Result = uniform.GenerateUniformDistribution(this.InputString);
+                    break;
                 default:
                 case ("generic"):
                     Generic generic = new Generic();

@@ -25,10 +25,14 @@ namespace Precipitation
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-            bool validInputs = ValidateInputs(input, out errorMsg);
-            if (errorMsg.Contains("ERROR")) { return null; }
 
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
+            if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
+            {
+                input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
+            }
+            bool validInputs = ValidateInputs(input, out errorMsg);
+            if (errorMsg.Contains("ERROR")) { return null; }
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
             
             ITimeSeriesOutput nldasOutput = output;

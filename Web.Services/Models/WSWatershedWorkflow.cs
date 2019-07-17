@@ -286,7 +286,7 @@ namespace Web.Services.Models
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
+                    System.IO.Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     jobID = JSON.Deserialize<Dictionary<string, string>>(reader.ReadToEnd())["job_id"];
                     reader.Close();
@@ -308,7 +308,7 @@ namespace Web.Services.Models
                     WebRequest wr = WebRequest.Create(dataURL + jobID);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
+                    System.IO.Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
                     taskData = JSON.Deserialize<dynamic>(data);

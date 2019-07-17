@@ -28,9 +28,11 @@ namespace Precipitation
             // Make call to get station metadata and add to output.Metadata
             if (!input.Geometry.GeometryMetadata.ContainsKey("token"))
             {
-                errorMsg = "ERROR: No NCEI token provided. Please provide a valid NCEI token.";
-                return null;
+                input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
+            //    errorMsg = "ERROR: No NCEI token provided. Please provide a valid NCEI token.";
+            //    return null;
+            //}
             string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
             if(input.Geometry.StationID != null && !input.Geometry.GeometryMetadata.ContainsKey("stationID"))
             {
