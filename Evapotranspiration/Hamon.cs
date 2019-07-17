@@ -111,7 +111,7 @@ namespace Evapotranspiration
             }
 
             // Convert cm/day to inches/day
-            petHamon = pot_evap;// / IN_TO_CM;
+            petHamon = pot_evap / IN_TO_CM;
 
         }
 

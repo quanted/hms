@@ -495,7 +495,7 @@ namespace Evapotranspiration
             }
 
             // Convert mm/day to inches/day
-            petMC = PET;// / 25.4;
+            petMC = PET / 25.4;
 
         }
 
