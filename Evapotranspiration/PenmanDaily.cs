@@ -503,7 +503,7 @@ namespace Evapotranspiration
 
                 //1013.25
                 //Setting order of all items
-                timeseries.Value[0] = jday.ToString();
+                /*timeseries.Value[0] = jday.ToString();
                 timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
@@ -511,8 +511,17 @@ namespace Evapotranspiration
                 timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);*/
+                timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[3] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[4] = wind.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[5] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[6] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[7] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
                 timeseries.Value.RemoveAt(9);
+                timeseries.Value.RemoveAt(8);
             }
             nldasTempOutput.Dataset = "Evapotranspiration";
             nldasTempOutput.DataSource = "penmandaily";
@@ -524,15 +533,14 @@ namespace Evapotranspiration
                         { "albedo", albedo.ToString() },
                         { "request_time", DateTime.Now.ToString() },
                         { "column_1", "Date" },
-                        { "column_2", "Julian Day" },
-                        { "column_3", "Minimum Temperature" },
-                        { "column_4", "Maximum Temperature" },
-                        { "column_5", "Mean Temperature" },
-                        { "column_6", "Mean Solar Radiation" },
-                        { "column_7", "Mean Wind Speed" },
-                        { "column_8", "Minimum Relative Humidity" },
-                        { "column_9", "Maximum Relative Humidity" },
-                        { "column_10", "Potential Evapotranspiration" }
+                        { "column_2", "Minimum Temperature" },
+                        { "column_3", "Maximum Temperature" },
+                        { "column_4", "Mean Temperature" },
+                        { "column_5", "Mean Solar Radiation" },
+                        { "column_6", "Mean Wind Speed" },
+                        { "column_7", "Minimum Relative Humidity" },
+                        { "column_8", "Maximum Relative Humidity" },
+                        { "column_9", "Potential Evapotranspiration" }
                     };
             return nldasTempOutput;
         }
@@ -652,7 +660,7 @@ namespace Evapotranspiration
                                           out petPMD, out errorMsg);
 
                 //Setting order of all items
-                timeseries.Value[0] = jday.ToString();
+                /*timeseries.Value[0] = jday.ToString();
                 timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
@@ -660,7 +668,16 @@ namespace Evapotranspiration
                 timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);*/
+                timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[3] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[4] = wind.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[5] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[6] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[7] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                timeseries.Value.RemoveAt(8);
             }
             gldasTempOutput.Dataset = "Evapotranspiration";
             gldasTempOutput.DataSource = "penmandaily";
@@ -672,15 +689,14 @@ namespace Evapotranspiration
                         { "albedo", albedo.ToString() },
                         { "request_time", DateTime.Now.ToString() },
                         { "column_1", "Date" },
-                        { "column_2", "Julian Day" },
-                        { "column_3", "Minimum Temperature" },
-                        { "column_4", "Maximum Temperature" },
-                        { "column_5", "Mean Temperature" },
-                        { "column_6", "Mean Solar Radiation" },
-                        { "column_7", "Mean Wind Speed" },
-                        { "column_8", "Minimum Relative Humidity" },
-                        { "column_9", "Maximum Relative Humidity" },
-                        { "column_10", "Potential Evapotranspiration" }
+                        { "column_2", "Minimum Temperature" },
+                        { "column_3", "Maximum Temperature" },
+                        { "column_4", "Mean Temperature" },
+                        { "column_5", "Mean Solar Radiation" },
+                        { "column_6", "Mean Wind Speed" },
+                        { "column_7", "Minimum Relative Humidity" },
+                        { "column_8", "Maximum Relative Humidity" },
+                        { "column_9", "Potential Evapotranspiration" }
                     };
             return gldasTempOutput;
         }
