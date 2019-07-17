@@ -23,6 +23,9 @@ namespace Wind
         public ITimeSeriesOutput GetData(out string errorMsg, string product, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            bool validInputs = ValidateInputs(input, out errorMsg);
+            if (!validInputs) { return null; }
+
             this.timeseriesData = new Dictionary<string, ITimeSeriesOutput>();
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output1 = oFactory.Initialize();
@@ -71,6 +74,35 @@ namespace Wind
 
             return output;
 
+        }
+
+        private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
+        {
+            errorMsg = "";
+            List<string> errors = new List<string>();
+            bool valid = true;
+            // Validate Date range
+            // NLDAS 2.0 date range 1948-01-01 - 2010-12-31
+            DateTime date0 = new DateTime(1948, 1, 1);
+            DateTime tempDate = DateTime.Now;
+            DateTime date1 = new DateTime(tempDate.Year, tempDate.Month, tempDate.Day).AddDays(-6);
+            string dateFormat = "yyyy-MM-dd";
+            if (DateTime.Compare(input.DateTimeSpan.StartDate, date0) < 0 || (DateTime.Compare(input.DateTimeSpan.StartDate, date1) > 0))
+            {
+                errors.Add("ERROR: Start date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". Start date provided: " + input.DateTimeSpan.StartDate.ToString(dateFormat));
+            }
+            if (DateTime.Compare(input.DateTimeSpan.EndDate, date0) < 0 || DateTime.Compare(input.DateTimeSpan.EndDate, date1) > 0)
+            {
+                errors.Add("ERROR: End date is not valid. Date must be between " + date0.ToString(dateFormat) + " and " + date1.ToString(dateFormat) + ". End date provided: " + input.DateTimeSpan.EndDate.ToString(dateFormat));
+            }
+
+            if (errors.Count > 0)
+            {
+                valid = false;
+                errorMsg = String.Join(", ", errors.ToArray());
+            }
+
+            return valid;
         }
 
         private void GetUComponent(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput output)

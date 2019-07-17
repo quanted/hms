@@ -22,11 +22,14 @@ namespace Pressure
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
-            if (!validInputs) { return null; }
+            //if (!validInputs) { return null; }
 
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
             List<string> data = gldas.GetData(out errorMsg, "PSURF", input);
-
+            if(data == null)
+            {
+                data = new List<string>();
+            }
 
             ITimeSeriesOutput output = gldas.SetDataToOutput(out errorMsg, "Surface Air Pressure", data, output0, input);
 
@@ -59,7 +62,7 @@ namespace Pressure
             // GLDAS 2.0 date range 1948-01-01 - 2010-12-31
             DateTime date0 = new DateTime(1948, 1, 1);
             DateTime tempDate = DateTime.Now;
-            DateTime date1 = new DateTime(tempDate.Year, tempDate.Month, 1).AddMonths(-2);
+            DateTime date1 = new DateTime(tempDate.Year, tempDate.Month, tempDate.Day).AddDays(-5);
             //DateTime date1 = new DateTime(2010, 12, 31);
             string dateFormat = "yyyy-MM-dd";
             if (DateTime.Compare(input.DateTimeSpan.StartDate, date0) < 0 || (DateTime.Compare(input.DateTimeSpan.StartDate, date1) > 0))

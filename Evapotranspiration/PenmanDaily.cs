@@ -272,7 +272,7 @@ namespace Evapotranspiration
 
 
             // Convert mm/day to inches/day
-            petPMD = (PET / 25.4);
+            petPMD = PET;//(PET / 25.4);
 
         }
 
@@ -414,6 +414,9 @@ namespace Evapotranspiration
             ITimeSeriesInputFactory ntiFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput ntiInput = ntiFactory.SetTimeSeriesInput(inpt, new List<string>() { "temperature" }, out errorMsg);
             ITimeSeriesOutput nldasTempOutput = nldasTemp.GetData(out errorMsg, nTempOutput, ntiInput);
+            inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Wind.NLDAS nldasWind = new Wind.NLDAS();
             ITimeSeriesOutputFactory nwFactory = new TimeSeriesOutputFactory();
@@ -422,6 +425,9 @@ namespace Evapotranspiration
             ITimeSeriesInput nwiInput = nwiFactory.SetTimeSeriesInput(inpt, new List<string>() { "wind" }, out errorMsg);
             ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "SPEED/DIRECTION", nWindOutput, nwiInput);
             outputList.Add(nldasWindOutput);
+            inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Humidity.NLDAS nldasHumid = new Humidity.NLDAS();
             ITimeSeriesOutputFactory nhFactory = new TimeSeriesOutputFactory();
@@ -431,6 +437,9 @@ namespace Evapotranspiration
             ITimeSeriesInput nhiInput = nhiFactory.SetTimeSeriesInput(inpt, new List<string>() { "humidity" }, out errorMsg);
             ITimeSeriesOutput nldasHumidOutput = nldasHumid.GetData(out errorMsg, nHumidOutput, nhiInput);
             outputList.Add(nldasHumidOutput);
+            inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Radiation.NLDAS nldasRad = new Radiation.NLDAS();
             ITimeSeriesOutputFactory nrFactory = new TimeSeriesOutputFactory();
@@ -439,6 +448,9 @@ namespace Evapotranspiration
             ITimeSeriesInput nriInput = nriFactory.SetTimeSeriesInput(inpt, new List<string>() { "radiation" }, out errorMsg);
             ITimeSeriesOutput nldasRadOutput = nldasRad.GetData(out errorMsg, nRadOutput, nriInput);
             outputList.Add(nldasRadOutput);
+            inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Pressure.GLDAS gpress2 = new Pressure.GLDAS();
             ITimeSeriesOutputFactory gpFactory2 = new TimeSeriesOutputFactory();
@@ -448,6 +460,7 @@ namespace Evapotranspiration
             ITimeSeriesInput gpInput2 = gpiFactory2.SetTimeSeriesInput(inpt, new List<string>() { "surfacepressure" }, out errorMsg);
             ITimeSeriesOutput pressOutput2 = gpress2.GetData(out errorMsg, gpressOutput2, gpInput2);
             outputList.Add(pressOutput2);
+
 
             foreach (ITimeSeriesOutput result in outputList)
             {
@@ -475,7 +488,11 @@ namespace Evapotranspiration
                 double shmax = Convert.ToDouble(timeseries.Value[6]);
                 double wind = Convert.ToDouble(timeseries.Value[3]);
                 double solarRad = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
-                double pressure = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
+                if(timeseries.Value.Count != 10)
+                {
+                    timeseries.Value.Add("101325");
+                }
+                double pressure  = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
                 double relHMax = 0.0;
                 double relHMin = 0.0;
                 double petPMD = 0.0;
