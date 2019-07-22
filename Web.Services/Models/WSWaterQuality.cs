@@ -686,6 +686,10 @@ namespace Web.Services.Models
         private void LoadAquatoxOutput()
         {
             string filePath = "App_Data\\aquatox_nutrient_model_output.txt";
+            if (!File.Exists(filePath))
+            {
+                filePath = @"App_Data/aquatox_nutrient_model_output.txt";
+            }
             try
             {
                 string textString = System.IO.File.ReadAllText(filePath);
@@ -722,6 +726,10 @@ namespace Web.Services.Models
         private dynamic LoadAquatoxInputFile()
         {
             string filePath = "App_Data\\aquatox_nutrient_model_input.txt";
+            if (!File.Exists(filePath))
+            {
+                filePath = @"App_Data/aquatox_nutrient_model_input.txt";
+            }
             try
             {
                 string fileData = System.IO.File.ReadAllText(filePath);
