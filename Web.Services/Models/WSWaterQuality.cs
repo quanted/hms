@@ -75,7 +75,12 @@ namespace Web.Services.Models
             this.LoadNWMData();
 
             // Demo static file
-            string filePath = "App_Data/NetworkConnectivityTable.xlsx";
+            string filePath = @"App_Data\NetworkConnectivityTable.xlsx";
+            if (!File.Exists(filePath))
+            {
+                filePath = @"App_Data/NetworkConnectivityTable.xlsx";
+            }
+
 
             this.taskID = input.TaskID;
 
@@ -598,7 +603,12 @@ namespace Web.Services.Models
         private void LoadNWMData()
         {
             this.nwmData = new Dictionary<int, NationalWaterModelData>();
-            string filePath = "App_Data\\CapeFearDailyFlow.csv";
+            string filePath = @"App_Data\CapeFearDailyFlow.csv";
+            if (!File.Exists(filePath))
+            {
+                filePath = @"App_Data/CapeFearDailyFlow.csv";
+            }
+
             Dictionary<int, Dictionary<string, double>> tsData = new Dictionary<int, Dictionary<string, double>>();
             using (var reader = new StreamReader(filePath))
             {
