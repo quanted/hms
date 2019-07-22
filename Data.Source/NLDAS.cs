@@ -152,7 +152,7 @@ namespace Data.Source
             try
             {
                 // TODO: Read in max retry attempt from config file.
-                int retries = 5;
+                int retries = 20;
 
                 // Response status message
                 string status = "";
@@ -169,12 +169,14 @@ namespace Data.Source
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK")) { Thread.Sleep(5000); }
                 }
             }
             catch (Exception ex)
             {
                 errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
                 Debug.WriteLine(errorMsg);
+                Debug.WriteLine(url);
                 return null;
             }
             return data;

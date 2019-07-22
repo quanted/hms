@@ -81,7 +81,10 @@ namespace Utilities
             foreach (ITimeSeriesOutput output in outputs) {
                 foreach (KeyValuePair<string, string> meta in outputs.ElementAt(0).Metadata)
                 {
-                    result.Metadata.Add(output.Dataset + "_" + meta.Key, meta.Value);
+                    string key = output.Dataset + "_" + meta.Key;
+                    if (!result.Metadata.ContainsKey(key)) {
+                        result.Metadata.Add(key, meta.Value);
+                    }
                 }
             }
 
@@ -93,9 +96,10 @@ namespace Utilities
                 List<string> values = new List<string>();
                 foreach (ITimeSeriesOutput o in outputs)
                 {
-                    for (int i = 0; i < o.Data[timestep.Key].Count; i++)
+                    string key = (o.Data.ContainsKey(timestep.Key)) ? timestep.Key : timestep.Key.Split(" ")[0] + "T00:00:00";
+                    for (int i = 0; i < o.Data[key].Count; i++)
                     {
-                        values.Add(o.Data[timestep.Key][i]);
+                        values.Add(o.Data[key][i]);
                     }
                 }
                 result.Data.Add(timestep.Key, values );

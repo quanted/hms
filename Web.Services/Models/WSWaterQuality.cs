@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -22,7 +23,7 @@ namespace Web.Services.Models
     /// </summary>
     public class WSWaterQuality
     {
-        private bool testMode = true;
+        private bool testMode = false;
 
         // Static Inputs
         private DateTime startDate = DateTime.Today.AddDays(-40);
@@ -32,8 +33,11 @@ namespace Web.Services.Models
 
         private int headwaterFromCOMID;
         private ITimeSeriesOutput headwater;
+        private List<NetworkCatchment> catchments;
 
         private ITimeSeriesOutput nceiPrecip;
+
+        private Dictionary<int, NationalWaterModelData> nwmData;
 
         private Dictionary<string, List<string>> bcAmmonia = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> bcNitrate = new Dictionary<string, List<string>>();
@@ -67,6 +71,9 @@ namespace Web.Services.Models
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
+            // Load static national water model data (start and end date determined by nwm data timeseries)
+            this.LoadNWMData();
+
             // Demo static file
             string filePath = "App_Data/NetworkConnectivityTable.xlsx";
 
@@ -74,7 +81,7 @@ namespace Web.Services.Models
 
             // Step 1a: Load stream network connectivity table (App_Data/NetworkConnectivityTable.xlsx)
             Utilities.Logger.WriteToFile(input.TaskID, "Loading stream network connectivity table...");
-            List<NetworkCatchment> catchments = this.ReadXlsx(filePath);
+            this.catchments = this.ReadXlsx(filePath);
             Utilities.Logger.WriteToFile(input.TaskID, "Successfully loaded Stream Network");
 
             // Step 2: Download flow data for the headwater COMID (first row in table) using WaterShedDelineation.NWM
@@ -135,19 +142,24 @@ namespace Web.Services.Models
         private ITimeSeriesOutput GetNWMData(int catchment)
         {
             string errorMsg = "";
-            WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
-            string flaskURL = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : "http://localhost:7777";
-            string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + catchment.ToString() + "&startDate=" + this.startDate.ToString("yyyy-MM-dd") + "&endDate=" + this.endDate.ToString("yyyy-MM-dd");
-            Utilities.Logger.WriteToFile(this.taskID, "Getting NWM data with URL: " + nwmUrl);
-            string data = nwm.GetData(out errorMsg, nwmUrl);
-            dynamic jsonData = JSON.Deserialize<dynamic>(data);
+
+            // Commented out method uses HMS flask NWM endpoint to retrieve data, remote data server currently shutdown
+            //WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
+            //string flaskURL = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : "http://localhost:7777";
+            //string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + catchment.ToString() + "&startDate=" + this.startDate.ToString("yyyy-MM-dd") + "&endDate=" + this.endDate.ToString("yyyy-MM-dd");
+            //Utilities.Logger.WriteToFile(this.taskID, "Getting NWM data with URL: " + nwmUrl);
+            //string data = nwm.GetData(out errorMsg, nwmUrl);
+            //dynamic jsonData = JSON.Deserialize<dynamic>(data);
+
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput nwmData = oFactory.Initialize();
             nwmData.Dataset = "streamflow";
             nwmData.DataSource = "National Water Model";
             Dictionary<string, List<string>> timeseries;
 
-            timeseries = JSON.Deserialize<Dictionary<string, List<string>>>(JSON.Serialize(jsonData.data));
+            //timeseries = JSON.Deserialize<Dictionary<string, List<string>>>(JSON.Serialize(jsonData.data));
+            timeseries = this.nwmData[catchment].Timeseries;
+
 
             if (this.testMode && timeseries == null)
             {
@@ -203,8 +215,9 @@ namespace Web.Services.Models
                 result.DataSource = source;
                 result.Metadata = this.SetMetadata(result.Metadata, catchment);
                 result.Metadata.Add("column_1", "total_flow");
-                result.Metadata.Add("column_2", "surface_runoff");
-                result.Metadata.Add("column_3", "contaminant_loading");
+                result.Metadata.Add("column_2", "contaminant_loading");
+                result.Metadata.Add("column_3", "aquatox_ammonia");
+                result.Metadata.Add("column_4", "aquatox_nitrate");
             }
             else
             {
@@ -273,6 +286,8 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_4", "precip");
                 result.Metadata.Add("column_5", "total_flow");
                 result.Metadata.Add("column_6", "contaminant_loading");
+                result.Metadata.Add("column_7", "aquatox_ammonia");
+                result.Metadata.Add("column_8", "aquatox_nitrate");
             }
             // Run Aquatox model
             string aquaTaskID = this.taskID + "-" + catchment.COMID.ToString() + "-aquatox";
@@ -286,6 +301,7 @@ namespace Web.Services.Models
             Utilities.MongoDB.DumpData(aquaTaskID, aquatoxOutput);
             Utilities.Logger.WriteToFile(this.taskID, "Aquatox data dumped into mongodb with taskID: " + aquaTaskID);
             this.completedAquatox.Add(aquaTaskID);
+            result = Utilities.Merger.MergeTimeSeries(new List<ITimeSeriesOutput>() { result, this.completedAmmonia[catchment.COMID], this.completedNitrate[catchment.COMID] });
 
             string taskID = this.taskID + "-" + catchment.COMID.ToString();
             //Dumb result in database
@@ -323,7 +339,11 @@ namespace Web.Services.Models
             catchments.Add(current);
 
             // Steps 4/5
-            Parallel.ForEach(catchments, (catchment) =>
+            var pOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = 6
+            };
+            Parallel.ForEach(catchments, pOptions, (catchment) =>
             //foreach (int catchment in catchments)
             {
                 if (this.completedContributingCatchments.ContainsKey(catchment))
@@ -333,11 +353,26 @@ namespace Web.Services.Models
                 }
                 else
                 {
+                    Thread.Sleep(500);
+                    PointCoordinate point = Utilities.COMID.GetCentroid(catchment, out errorMsg);
+                    if (point == null)
+                    {
+                        point = Utilities.COMID.GetCentroid(current, out errorMsg);
+                        if (point == null)
+                        {
+                            point = Utilities.COMID.GetCentroid(this.catchments.Where(x => x.COMID == current).First().FromCOMID, out errorMsg);
+                        }
+                        else
+                        {
+                            Utilities.Logger.WriteToFile(this.taskID, "Unable to get centroid for: " + catchment);
+                        }
+                    }
                     ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
                     ITimeSeriesInput input = iFactory.Initialize();
                     input.DateTimeSpan.StartDate = this.startDate;
                     input.DateTimeSpan.EndDate = this.endDate;
                     input.Source = source;
+                    input.Geometry.Point = point;
                     input.Geometry.ComID = catchment;
                     Timezone tz = new Timezone()
                     {
@@ -346,7 +381,7 @@ namespace Web.Services.Models
                     };
                     input.Geometry.Timezone = tz;
                     input.TemporalResolution = "daily";
-                    if (source.Equals("curvenumber") || source.Equals("ncei"))
+                    if (source.Equals("ncei"))
                     {
                         input.Source = "curvenumber";
                         input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>()
@@ -367,7 +402,32 @@ namespace Web.Services.Models
                     }
                     else
                     {
-                        runoffData = runoff.GetData(out errorMsg);
+                        bool runoffB = true;
+                        int runoffI = 5;
+                        while (runoffB && runoffI != 0) {
+                            runoffData = runoff.GetData(out errorMsg);
+                            if(runoffData != null)
+                            {
+                                runoffB = false;
+                            }
+                            else if(errorMsg.Contains("ComID"))
+                            {
+                                if (runoff.Input.Geometry.ComID == current) {
+                                    runoff.Input.Geometry.ComID = this.GetPreviousCOMID(current);
+                                    input.Geometry.ComID = this.GetPreviousCOMID(current);
+                                }
+                                else
+                                {
+                                    runoff.Input.Geometry.ComID = current;
+                                    input.Geometry.ComID = current;
+                                }
+                            }
+                            else
+                            {
+                                Thread.Sleep(500);
+                            }
+                            runoffI -= 1;
+                        }
                         if (this.testMode)
                         {
                             this.TestModeFileWrite("surfacerunoff", runoffData);
@@ -393,7 +453,21 @@ namespace Web.Services.Models
                     }
                     else
                     {
-                        subsurfaceflow = subsurface.GetData(out errorMsg);
+                        bool baseflowB = true;
+                        int baseflowI = 5;
+                        while (baseflowB && baseflowI != 0)
+                        {
+                            subsurfaceflow = subsurface.GetData(out errorMsg);
+                            if (subsurfaceflow != null)
+                            {
+                                baseflowB = false;
+                            }
+                            else
+                            {
+                                Thread.Sleep(500);
+                            }
+                            baseflowI -= 1;
+                        }
                         if (this.testMode)
                         {
                             this.TestModeFileWrite("subsurfaceflow", subsurfaceflow);
@@ -412,6 +486,11 @@ namespace Web.Services.Models
             return Utilities.Merger.SumTimeSeriesByColumn(catchmentData);
         }
 
+        private int GetPreviousCOMID(int current)
+        {
+            return this.catchments.Where(x => x.COMID == current).First().FromCOMID;
+        }
+
         private ITimeSeriesOutput GetPrecipData(string source, int catchment)
         {
             string errorMsg = "";
@@ -428,7 +507,12 @@ namespace Web.Services.Models
             }
             else
             {
-                input.Geometry.ComID = catchment;
+                PointCoordinate point = Utilities.COMID.GetCentroid(catchment, out errorMsg);
+                if(point == null)
+                {
+                    point = Utilities.COMID.GetCentroid(this.catchments.Where(x => x.COMID == catchment).First().FromCOMID, out errorMsg);
+                }
+                input.Geometry.Point = point;
             }
             Timezone tz = new Timezone()
             {
@@ -509,6 +593,44 @@ namespace Web.Services.Models
                 }
             }
             return catchments;
+        }
+
+        private void LoadNWMData()
+        {
+            this.nwmData = new Dictionary<int, NationalWaterModelData>();
+            string filePath = "App_Data\\CapeFearDailyFlow.csv";
+            Dictionary<int, Dictionary<string, double>> tsData = new Dictionary<int, Dictionary<string, double>>();
+            using (var reader = new StreamReader(filePath))
+            {
+                bool first = true;
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    if (first)
+                    {
+                        first = false;
+                        continue;
+                    }
+                    var values = line.Split(",");
+                    string dateStr = values[0] + " 00";
+                    int comid = int.Parse(values[1]);
+                    string flow = values[2].ToString();
+                    if (this.nwmData.ContainsKey(comid))
+                    {
+                        this.nwmData[comid].Timeseries.Add(dateStr, new List<string>() { flow });
+                    }
+                    else
+                    {
+                        NationalWaterModelData data = new NationalWaterModelData();
+                        data.COMID = comid;
+                        data.Timeseries = new Dictionary<string, List<string>>() { { dateStr, new List<string>() { flow } } };
+                        this.nwmData.Add(comid, data);
+                    }
+ 
+                }
+            }
+            this.startDate = DateTime.ParseExact(this.nwmData.First().Value.Timeseries.Keys.First(), "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
+            this.endDate = DateTime.ParseExact(this.nwmData.First().Value.Timeseries.Keys.Last(), "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
         }
 
         private bool TestModeFileCheck(string dataset)
@@ -641,5 +763,14 @@ namespace Web.Services.Models
             this.Length = double.Parse(len);
             this.Comments = comm;
         }
+    }
+
+    public class NationalWaterModelData
+    {
+        public int COMID;
+        public Dictionary<string, List<string>> Timeseries;
+
+        public NationalWaterModelData() { }
+
     }
 }
