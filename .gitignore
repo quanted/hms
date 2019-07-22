@@ -27,7 +27,6 @@ TestResults/
 
 # Database files
 *.db
-*.csv
 *.sqlite3
 *.sqlite
 *.zip
