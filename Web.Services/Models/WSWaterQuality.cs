@@ -178,7 +178,6 @@ namespace Web.Services.Models
             return nwmData;
         }
 
-
         private bool GetDataByCOMID(NetworkCatchment catchment, string source)
         {
             List<ITimeSeriesOutput> outputData = new List<ITimeSeriesOutput>();
@@ -503,7 +502,7 @@ namespace Web.Services.Models
             ITimeSeriesInput input = iFactory.Initialize();
             if (source.Equals("ncei") && this.nceiPrecip == null)
             {
-                input.Geometry.StationID = "GHCND:US1NCCM0006";
+                input.Geometry.StationID = "GHCND:US1NCBD0002";
             }
             else if (source.Equals("ncei"))
             {
