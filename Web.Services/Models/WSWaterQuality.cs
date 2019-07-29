@@ -240,8 +240,8 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_4", "ammonia_concentration");
                 result.Metadata.Add("column_5", "nitrate_concentration");
                 result.Metadata.Add("column_1_units", (this.metric) ? "m3/day" : "f3/day");
-                result.Metadata.Add("column_2_units", "mg/L day");
-                result.Metadata.Add("column_3_units", "mg/L day");
+                result.Metadata.Add("column_2_units", "mg day");
+                result.Metadata.Add("column_3_units", "mg day");
                 result.Metadata.Add("column_4_units", "g/m3 day");
                 result.Metadata.Add("column_5_units", "g/m3 day");
             }
@@ -321,8 +321,8 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_3_units", "m3/day");
                 result.Metadata.Add("column_4_units", "mm/day");
                 result.Metadata.Add("column_5_units", "m3/day");
-                result.Metadata.Add("column_6_units", "mg/L day");
-                result.Metadata.Add("column_7_units", "mg/L day");
+                result.Metadata.Add("column_6_units", "mg day");
+                result.Metadata.Add("column_7_units", "mg day");
                 result.Metadata.Add("column_8_units", "g/m3 day");
                 result.Metadata.Add("column_9_units", "g/m3 day");
             }
