@@ -30,12 +30,15 @@ namespace Web.Services.Models
         private DateTime endDate = DateTime.Today.AddDays(-8);
 
         private string taskID;
+        private bool metric = true;
 
         private int headwaterFromCOMID;
         private ITimeSeriesOutput headwater;
         private List<NetworkCatchment> catchments;
 
         private ITimeSeriesOutput nceiPrecip;
+        private int seed = 42;
+        private Random rnd;
 
         private Dictionary<int, NationalWaterModelData> nwmData;
 
@@ -73,13 +76,9 @@ namespace Web.Services.Models
 
             // Load static national water model data (start and end date determined by nwm data timeseries)
             this.LoadNWMData();
-
+            this.rnd = new Random(this.seed);
             // Demo static file
-            string filePath = "App_Data\\NetworkConnectivityTable.xlsx";
-            if (!File.Exists(filePath))
-            {
-                filePath = "App_Data/NetworkConnectivityTable.xlsx";
-            }
+            string filePath = File.Exists("App_Data\\NetworkConnectivityTable.xlsx") ? "App_Data\\NetworkConnectivityTable.xlsx" : "App_Data/NetworkConnectivityTable.xlsx";
 
             this.taskID = input.TaskID;
 
@@ -186,9 +185,23 @@ namespace Web.Services.Models
             ITimeSeriesOutput totalFlow;
             ITimeSeriesOutput result;
             dynamic aquatoxInput = this.SetAquatoxInput(catchment);
+            int ammoniaSeed = rnd.Next();
+            Utilities.Logger.WriteToFile(this.taskID, "Generating ammonia loading for catchment: " + catchment.COMID);
+            string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'100000', 'max':'750000','seed':'" + ammoniaSeed + "'}";
+            ContaminantLoader.ContaminantLoader ammoniaLoading = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
+            ITimeSeriesOutput ammoniaLoadingData = ammoniaLoading.Result;
+            Utilities.Logger.WriteToFile(this.taskID, "Successfully generated ammonia loading data");
+
+            int nitrateSeed = rnd.Next();
+            Utilities.Logger.WriteToFile(this.taskID, "Generating nitrate loading for catchment: " + catchment.COMID);
+            string nitrateContaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'100', 'max':'1000','seed':'" + nitrateSeed + "'}";
+            ContaminantLoader.ContaminantLoader nitrateLoading = new ContaminantLoader.ContaminantLoader("uniform", "json", nitrateContaminantInput);
+            ITimeSeriesOutput nitrateLoadingData = nitrateLoading.Result;
+            Utilities.Logger.WriteToFile(this.taskID, "Successfully generated ammonia loading data");
+
             if (catchment.FromCOMID == this.headwaterFromCOMID)
             {
-                aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.bcAmmonia);
+                aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.bcAmmonia);           
                 aquatoxInput.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.bcNitrate);
             }
             else
@@ -196,7 +209,15 @@ namespace Web.Services.Models
                 aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedAmmonia[catchment.FromCOMID].Data);
                 aquatoxInput.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedNitrate[catchment.FromCOMID].Data);
             }
-
+            foreach (KeyValuePair<string, List<string>> kv in ammoniaLoadingData.Data) {
+                aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].list.Add(kv.Key.Split(" ")[0] + "T00:00:00", kv.Value[0]);
+            }
+            aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].UseConstant = false;
+            foreach (KeyValuePair<string, List<string>> kv in nitrateLoadingData.Data)
+            {
+                aquatoxInput.SV[1].LoadsRec.Alt_Loadings[2].list.Add(kv.Key.Split(" ")[0] + "T00:00:00", kv.Value[0]);
+            }
+            aquatoxInput.SV[1].LoadsRec.Alt_Loadings[2].UseConstant = false;
 
             if (source.Equals("nwm"))
             {
@@ -206,21 +227,23 @@ namespace Web.Services.Models
                 outputData.Add(totalFlow);  // Column 1: NWM flow data
                 Utilities.Logger.WriteToFile(this.taskID, "Successfully loaded NWM data.");
 
-                Utilities.Logger.WriteToFile(this.taskID, "Generating contaminant loading for catchment: " + catchment.COMID);
-                string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'0', 'max':'5'}";
-                ContaminantLoader.ContaminantLoader contaminant = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
-                ITimeSeriesOutput contaminantData = contaminant.Result;
-                Utilities.Logger.WriteToFile(this.taskID, "Successfully generated contaminant loading data");
-                outputData.Add(contaminantData);    // Column 2: Contaminant Loading
+                outputData.Add(ammoniaLoadingData);    // Column 2: Contaminant Loading
+                outputData.Add(nitrateLoadingData);
 
                 result = Utilities.Merger.MergeTimeSeries(outputData);
                 result.Dataset = "wq_workflow";
                 result.DataSource = source;
                 result.Metadata = this.SetMetadata(result.Metadata, catchment);
                 result.Metadata.Add("column_1", "total_flow");
-                result.Metadata.Add("column_2", "contaminant_loading");
-                result.Metadata.Add("column_3", "aquatox_ammonia");
-                result.Metadata.Add("column_4", "aquatox_nitrate");
+                result.Metadata.Add("column_2", "ammonia_loading");
+                result.Metadata.Add("column_3", "nitrate_loading");
+                result.Metadata.Add("column_4", "ammonia_concentration");
+                result.Metadata.Add("column_5", "nitrate_concentration");
+                result.Metadata.Add("column_1_units", (this.metric) ? "m3/day" : "f3/day");
+                result.Metadata.Add("column_2_units", "mg/L day");
+                result.Metadata.Add("column_3_units", "mg/L day");
+                result.Metadata.Add("column_4_units", "g/m3 day");
+                result.Metadata.Add("column_5_units", "g/m3 day");
             }
             else
             {
@@ -271,13 +294,14 @@ namespace Web.Services.Models
                 outputData.Add(totalFlow);          // Column 5: Total Flow
                 this.completeFlows.Add(catchment.COMID, totalFlow);
 
-                // Step 7: Generate contaminant loading (uniform distribution)
-                Utilities.Logger.WriteToFile(this.taskID, "Generating contaminant loading for catchment: " + catchment.COMID);
-                string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'0', 'max':'5'}";
-                ContaminantLoader.ContaminantLoader contaminant = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
-                ITimeSeriesOutput contaminantData = contaminant.Result;
-                Utilities.Logger.WriteToFile(this.taskID, "Successfully generated contaminant loading data");
-                outputData.Add(contaminantData);    // Column 6: Contaminant Loading
+                //// Step 7: Generate contaminant loading (uniform distribution)
+                //Utilities.Logger.WriteToFile(this.taskID, "Generating contaminant loading for catchment: " + catchment.COMID);
+                //string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'0', 'max':'5'}";
+                //ContaminantLoader.ContaminantLoader contaminant = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
+                //ITimeSeriesOutput contaminantData = contaminant.Result;
+                //Utilities.Logger.WriteToFile(this.taskID, "Successfully generated contaminant loading data");
+                outputData.Add(ammoniaLoadingData);
+                outputData.Add(nitrateLoadingData);
 
                 result = Utilities.Merger.MergeTimeSeries(outputData);
                 result.Dataset = "wq_workflow";
@@ -288,15 +312,26 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_3", "baseflow");
                 result.Metadata.Add("column_4", "precip");
                 result.Metadata.Add("column_5", "total_flow");
-                result.Metadata.Add("column_6", "contaminant_loading");
-                result.Metadata.Add("column_7", "aquatox_ammonia");
-                result.Metadata.Add("column_8", "aquatox_nitrate");
+                result.Metadata.Add("column_6", "ammonia_loading");
+                result.Metadata.Add("column_7", "nitrate_loading");
+                result.Metadata.Add("column_8", "ammonia_concentration");
+                result.Metadata.Add("column_9", "nitrate_concentration");
+                result.Metadata.Add("column_1_units", (this.metric) ? "m3/day" : "f3/day");
+                result.Metadata.Add("column_2_units", "m3/day");
+                result.Metadata.Add("column_3_units", "m3/day");
+                result.Metadata.Add("column_4_units", "mm/day");
+                result.Metadata.Add("column_5_units", "m3/day");
+                result.Metadata.Add("column_6_units", "mg/L day");
+                result.Metadata.Add("column_7_units", "mg/L day");
+                result.Metadata.Add("column_8_units", "g/m3 day");
+                result.Metadata.Add("column_9_units", "g/m3 day");
             }
             // Run Aquatox model
             string aquaTaskID = this.taskID + "-" + catchment.COMID.ToString() + "-aquatox";
             aquatoxInput.SV[3].LoadsRec.Alt_Loadings[0].ITSI.InputTimeSeries.input.Data = JObject.FromObject(totalFlow.Data);
             string aquatoxInputJson = JSON.Serialize(aquatoxInput);
             string errorMsg = "";
+            //Utilities.Logger.WriteToFile(catchment.COMID + "-aquatox", aquatoxInputJson);
             AQTNutrientsModel AQTM = new AQTNutrientsModel(ref aquatoxInputJson, out errorMsg, true);
             string aquatoxOutput = AQTM.outputString;
             this.SetAquatoxOutputToObject(catchment.COMID, aquatoxOutput);
@@ -305,6 +340,9 @@ namespace Web.Services.Models
             Utilities.Logger.WriteToFile(this.taskID, "Aquatox data dumped into mongodb with taskID: " + aquaTaskID);
             this.completedAquatox.Add(aquaTaskID);
             result = Utilities.Merger.MergeTimeSeries(new List<ITimeSeriesOutput>() { result, this.completedAmmonia[catchment.COMID], this.completedNitrate[catchment.COMID] });
+            result.Metadata.Add("ammonia_seed", ammoniaSeed.ToString());
+            result.Metadata.Add("nitrate_seed", nitrateSeed.ToString());
+
 
             string taskID = this.taskID + "-" + catchment.COMID.ToString();
             //Dumb result in database
@@ -364,6 +402,10 @@ namespace Web.Services.Models
                         if (point == null)
                         {
                             point = Utilities.COMID.GetCentroid(this.catchments.Where(x => x.COMID == current).First().FromCOMID, out errorMsg);
+                        }
+                        if (point == null)
+                        {
+                            point = Utilities.COMID.GetCentroid(this.catchments.ElementAt(0).COMID, out errorMsg);
                         }
                         else
                         {
@@ -436,6 +478,12 @@ namespace Web.Services.Models
                             this.TestModeFileWrite("surfacerunoff", runoffData);
                         }
                     }
+                    string catchmentDBFile = File.Exists("App_Data\\catchments.sqlite") ? "App_Data\\catchments.sqlite" : "App_Data/catchments.sqlite";
+                    string areaQuery = "SELECT * FROM PlusFlowlineVAA WHERE ComID = " + catchment;
+                    Dictionary<string, string> catchmentDetails = Utilities.SQLite.GetData(catchmentDBFile, areaQuery);
+                    
+                    double catchmentArea = catchmentDetails.ContainsKey("AreaSqKM") ? double.Parse(catchmentDetails["AreaSqKM"]) : 1;    // If key doesn't exist set area 1km^2
+                    runoffData = Utilities.Merger.ModifyTimeSeries(runoffData, catchmentArea);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km
                     data.Add(runoffData);
                     Utilities.Logger.WriteToFile(this.taskID, "Successfully downloaded runoff data for COMID: " + catchment);
 
@@ -476,6 +524,8 @@ namespace Web.Services.Models
                             this.TestModeFileWrite("subsurfaceflow", subsurfaceflow);
                         }
                     }
+                    subsurfaceflow = Utilities.Merger.ModifyTimeSeries(subsurfaceflow, catchmentArea);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km
+
                     data.Add(subsurfaceflow);
                     Utilities.Logger.WriteToFile(this.taskID, "Successfully downloaded baseflow data for COMID: " + catchment);
 
@@ -486,7 +536,8 @@ namespace Web.Services.Models
             }
             );
             Utilities.Logger.WriteToFile(this.taskID, "Summing up contributing flow for: " + current);
-            return Utilities.Merger.SumTimeSeriesByColumn(catchmentData);
+
+            return Utilities.Merger.SumTimeSeriesByColumn(catchmentData, 1.0);
         }
 
         private int GetPreviousCOMID(int current)
@@ -542,6 +593,10 @@ namespace Web.Services.Models
                 {
                     this.TestModeFileWrite("precipitation", data);
                 }
+            }
+            if (source.Equals("ncei"))
+            {
+                this.nceiPrecip = data;
             }
             return data;
         }
@@ -601,11 +656,9 @@ namespace Web.Services.Models
         private void LoadNWMData()
         {
             this.nwmData = new Dictionary<int, NationalWaterModelData>();
-            string filePath = "App_Data\\CapeFearDailyFlow.csv";
-            if (!File.Exists(filePath))
-            {
-                filePath = @"App_Data/CapeFearDailyFlow.csv";
-            }
+            string filePath = File.Exists("App_Data\\CapeFearDailyFlow.csv") ? "App_Data\\CapeFearDailyFlow.csv" : "App_Data/CapeFearDailyFlow.csv";
+
+            double conversionFactor = (this.metric) ? 0.3048 : 1.0;
 
             Dictionary<int, Dictionary<string, double>> tsData = new Dictionary<int, Dictionary<string, double>>();
             using (var reader = new StreamReader(filePath))
@@ -622,7 +675,7 @@ namespace Web.Services.Models
                     var values = line.Split(",");
                     string dateStr = values[0] + " 00";
                     int comid = int.Parse(values[1]);
-                    string flow = values[2].ToString();
+                    string flow = (double.Parse(values[2]) * conversionFactor).ToString("E3");
                     if (this.nwmData.ContainsKey(comid))
                     {
                         this.nwmData[comid].Timeseries.Add(dateStr, new List<string>() { flow });
@@ -684,11 +737,8 @@ namespace Web.Services.Models
 
         private void LoadAquatoxOutput()
         {
-            string filePath = "App_Data\\aquatox_nutrient_model_output.txt";
-            if (!File.Exists(filePath))
-            {
-                filePath = @"App_Data/aquatox_nutrient_model_output.txt";
-            }
+            string filePath = File.Exists("App_Data\\aquatox_nutrient_model_output.txt") ? "App_Data\\aquatox_nutrient_model_output.txt" : "App_Data/aquatox_nutrient_model_output.txt";
+
             try
             {
                 string textString = System.IO.File.ReadAllText(filePath);
@@ -724,11 +774,8 @@ namespace Web.Services.Models
 
         private dynamic LoadAquatoxInputFile()
         {
-            string filePath = "App_Data\\aquatox_nutrient_model_input.txt";
-            if (!File.Exists(filePath))
-            {
-                filePath = @"App_Data/aquatox_nutrient_model_input.txt";
-            }
+            string filePath = File.Exists("App_Data\\aquatox_nutrient_model_input.txt") ? "App_Data\\aquatox_nutrient_model_input.txt" : "App_Data/aquatox_nutrient_model_input.txt";
+
             try
             {
                 string fileData = System.IO.File.ReadAllText(filePath);
