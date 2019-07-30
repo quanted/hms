@@ -342,7 +342,8 @@ namespace Web.Services.Models
             result = Utilities.Merger.MergeTimeSeries(new List<ITimeSeriesOutput>() { result, this.completedAmmonia[catchment.COMID], this.completedNitrate[catchment.COMID] });
             result.Metadata.Add("ammonia_seed", ammoniaSeed.ToString());
             result.Metadata.Add("nitrate_seed", nitrateSeed.ToString());
-
+            result.Dataset = "water_quality_workflow";
+            result.DataSource = source;
 
             string taskID = this.taskID + "-" + catchment.COMID.ToString();
             //Dumb result in database
