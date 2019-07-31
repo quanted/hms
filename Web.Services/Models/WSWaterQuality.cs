@@ -306,13 +306,7 @@ namespace Web.Services.Models
                 Utilities.Logger.WriteToFile(this.taskID, "Getting contributing runoff/baseflow data for catchment: " + catchment.COMID);
                 ITimeSeriesOutput contributing = this.GetContributingFlow(catchment.COMID, catchment.ContributingCOMIDs, source, precip);
                 Utilities.Logger.WriteToFile(this.taskID, "Successfully retrieved runoff/baseflow data");
-
-                string catchmentDBFile = File.Exists("App_Data\\catchments.sqlite") ? "App_Data\\catchments.sqlite" : "App_Data/catchments.sqlite";
-                string areaQuery = "SELECT * FROM PlusFlowlineVAA WHERE ComID = " + catchment.COMID;
-                Dictionary<string, string> catchmentDetails = Utilities.SQLite.GetData(catchmentDBFile, areaQuery);
-                double catchmentArea = catchmentDetails.ContainsKey("AreaSqKM") ? double.Parse(catchmentDetails["AreaSqKM"]) : 1;    // If key doesn't exist set area 1km^2,
-                precip = Utilities.Merger.ModifyTimeSeries(precip, catchmentArea * 1000);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km * 1000m/1km
-
+               
                 outputData.Add(contributing);       // Column 2/3: Surface Runoff and Subsurface flow (from all contributing catchments)
                 outputData.Add(precip);             // Column 4: Precipitation of current catchment.
 
@@ -342,7 +336,7 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_1_units", (this.metric) ? "m3/day" : "f3/day");
                 result.Metadata.Add("column_2_units", "m3/day");
                 result.Metadata.Add("column_3_units", "m3/day");
-                result.Metadata.Add("column_4_units", "m3/day");
+                result.Metadata.Add("column_4_units", "mm/day");
                 result.Metadata.Add("column_5_units", "m3/day");
                 result.Metadata.Add("column_6_units", "mg day");
                 result.Metadata.Add("column_7_units", "mg day");
