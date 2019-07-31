@@ -195,9 +195,14 @@ namespace Utilities
 
             foreach (string date in timeseries.Data.Keys)
             {
-                double value = 0.0;
-                Double.TryParse(timeseries.Data[date][0], out value);
-                result.Data[date] = new List<string> { (modifier * value).ToString("E3") };
+                List<string> values = new List<string>();
+                foreach (string v in timeseries.Data[date])
+                {
+                    double value = 0.0;
+                    Double.TryParse(v, out value);
+                    values.Add((value * modifier).ToString("E3"));
+                }
+                result.Data[date] = values;
             }
             return result;
         }
@@ -226,7 +231,7 @@ namespace Utilities
                         value[i] += modifier * double.Parse(o.Data[timestep.Key][i]);
                     }
                 }
-                result.Data.Add(timestep.Key, value.Select(v => v.ToString("E3")).ToList());
+                result.Data.Add(timestep.Key, value.Select(v => v.ToString("E5")).ToList());
             }
             return result;
         }
@@ -256,7 +261,7 @@ namespace Utilities
                         value += double.Parse(o.Data[timestep.Key][i]);
                     }
                 }
-                result.Data.Add(timestep.Key, new List<string>() { value.ToString("E3") });
+                result.Data.Add(timestep.Key, new List<string>() { value.ToString("E5") });
             }
             return result;
         }

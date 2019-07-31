@@ -36,6 +36,11 @@ namespace Web.Services.Models
         private ITimeSeriesOutput headwater;
         private List<NetworkCatchment> catchments;
 
+        private int minNitrate = 1000;
+        private int maxNitrate = 10000;
+        private int minAmmonia = 100000;
+        private int maxAmmonia = 750000;
+
         private ITimeSeriesOutput nceiPrecip;
         private int seed = 42;
         private Random rnd;
@@ -70,6 +75,11 @@ namespace Web.Services.Models
                 "timestamp: " + now.ToString(),
                 "--------------------------------"
             });
+            this.minNitrate = input.MinNitrate != 0 ? input.MinNitrate : this.minNitrate;
+            this.minAmmonia = input.MinAmmonia != 0 ? input.MinAmmonia : this.minAmmonia;
+            this.maxNitrate = input.MaxNitrate != 0 ? input.MaxNitrate : this.maxNitrate;
+            this.maxAmmonia = input.MaxAmmonia != 0 ? input.MaxAmmonia : this.maxAmmonia;
+
 
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -135,6 +145,10 @@ namespace Web.Services.Models
             result.Metadata.Add("endDate", this.endDate.ToString("yyyy-MM-dd"));
             result.Metadata.Add("streamStart", catchments.ElementAt(0).COMID.ToString());
             result.Metadata.Add("streamEnd", catchments.ElementAt(catchments.Count - 1).COMID.ToString());
+            result.Metadata.Add("minAmmonia", this.minAmmonia.ToString());
+            result.Metadata.Add("maxAmmonia", this.maxAmmonia.ToString());
+            result.Metadata.Add("minNitrate", this.minNitrate.ToString());
+            result.Metadata.Add("maxNitrate", this.maxNitrate.ToString());
 
             Utilities.Logger.WriteToFile(input.TaskID, "Task: " + input.TaskID + " Completed");
             stpWatch.Stop();
@@ -184,17 +198,24 @@ namespace Web.Services.Models
             ITimeSeriesOutput nwmFlow;
             ITimeSeriesOutput totalFlow;
             ITimeSeriesOutput result;
+
+            // rectangle estimate 
+            double estimateVolume = (catchment.Length * 1000) * (400 * 0.3048) * (40 * 0.3048);         // Length converted from km to m, width ~= 400ft converted to m, depth ~= 40ft converted to m
+
+            // ellipse estimate
+            double estimateVolume2 = estimateVolume - (estimateVolume - (catchment.Length * 1000) * Math.PI * ((200 * 0.3048) * (20 * 0.3048))) / 2;
+
             dynamic aquatoxInput = this.SetAquatoxInput(catchment);
             int ammoniaSeed = rnd.Next();
             Utilities.Logger.WriteToFile(this.taskID, "Generating ammonia loading for catchment: " + catchment.COMID);
-            string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'100000', 'max':'750000','seed':'" + ammoniaSeed + "'}";
+            string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'" + this.minAmmonia + "', 'max':'" + this.maxAmmonia + "','seed':'" + ammoniaSeed + "'}";
             ContaminantLoader.ContaminantLoader ammoniaLoading = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
             ITimeSeriesOutput ammoniaLoadingData = ammoniaLoading.Result;
             Utilities.Logger.WriteToFile(this.taskID, "Successfully generated ammonia loading data");
 
             int nitrateSeed = rnd.Next();
             Utilities.Logger.WriteToFile(this.taskID, "Generating nitrate loading for catchment: " + catchment.COMID);
-            string nitrateContaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'100', 'max':'1000','seed':'" + nitrateSeed + "'}";
+            string nitrateContaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'" + this.minNitrate + "', 'max':'" + this.maxNitrate + "','seed':'" + nitrateSeed + "'}";
             ContaminantLoader.ContaminantLoader nitrateLoading = new ContaminantLoader.ContaminantLoader("uniform", "json", nitrateContaminantInput);
             ITimeSeriesOutput nitrateLoadingData = nitrateLoading.Result;
             Utilities.Logger.WriteToFile(this.taskID, "Successfully generated ammonia loading data");
@@ -209,7 +230,8 @@ namespace Web.Services.Models
                 aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedAmmonia[catchment.FromCOMID].Data);
                 aquatoxInput.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedNitrate[catchment.FromCOMID].Data);
             }
-            foreach (KeyValuePair<string, List<string>> kv in ammoniaLoadingData.Data) {
+            foreach (KeyValuePair<string, List<string>> kv in ammoniaLoadingData.Data)
+            {
                 aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].list.Add(kv.Key.Split(" ")[0] + "T00:00:00", kv.Value[0]);
             }
             aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].UseConstant = false;
@@ -284,6 +306,13 @@ namespace Web.Services.Models
                 Utilities.Logger.WriteToFile(this.taskID, "Getting contributing runoff/baseflow data for catchment: " + catchment.COMID);
                 ITimeSeriesOutput contributing = this.GetContributingFlow(catchment.COMID, catchment.ContributingCOMIDs, source, precip);
                 Utilities.Logger.WriteToFile(this.taskID, "Successfully retrieved runoff/baseflow data");
+
+                string catchmentDBFile = File.Exists("App_Data\\catchments.sqlite") ? "App_Data\\catchments.sqlite" : "App_Data/catchments.sqlite";
+                string areaQuery = "SELECT * FROM PlusFlowlineVAA WHERE ComID = " + catchment.COMID;
+                Dictionary<string, string> catchmentDetails = Utilities.SQLite.GetData(catchmentDBFile, areaQuery);
+                double catchmentArea = catchmentDetails.ContainsKey("AreaSqKM") ? double.Parse(catchmentDetails["AreaSqKM"]) : 1;    // If key doesn't exist set area 1km^2,
+                precip = Utilities.Merger.ModifyTimeSeries(precip, catchmentArea * 1000);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km * 1000m/1km
+
                 outputData.Add(contributing);       // Column 2/3: Surface Runoff and Subsurface flow (from all contributing catchments)
                 outputData.Add(precip);             // Column 4: Precipitation of current catchment.
 
@@ -294,12 +323,6 @@ namespace Web.Services.Models
                 outputData.Add(totalFlow);          // Column 5: Total Flow
                 this.completeFlows.Add(catchment.COMID, totalFlow);
 
-                //// Step 7: Generate contaminant loading (uniform distribution)
-                //Utilities.Logger.WriteToFile(this.taskID, "Generating contaminant loading for catchment: " + catchment.COMID);
-                //string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'0', 'max':'5'}";
-                //ContaminantLoader.ContaminantLoader contaminant = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
-                //ITimeSeriesOutput contaminantData = contaminant.Result;
-                //Utilities.Logger.WriteToFile(this.taskID, "Successfully generated contaminant loading data");
                 outputData.Add(ammoniaLoadingData);
                 outputData.Add(nitrateLoadingData);
 
@@ -308,9 +331,9 @@ namespace Web.Services.Models
                 result.DataSource = source;
                 result.Metadata = this.SetMetadata(result.Metadata, catchment);
                 result.Metadata.Add("column_1", "boundary_condition_flow");
-                result.Metadata.Add("column_2", "surface_runoff");
-                result.Metadata.Add("column_3", "baseflow");
-                result.Metadata.Add("column_4", "precip");
+                result.Metadata.Add("column_2", "total_surface_runoff");
+                result.Metadata.Add("column_3", "total_baseflow");
+                result.Metadata.Add("column_4", "total_precip");
                 result.Metadata.Add("column_5", "total_flow");
                 result.Metadata.Add("column_6", "ammonia_loading");
                 result.Metadata.Add("column_7", "nitrate_loading");
@@ -319,7 +342,7 @@ namespace Web.Services.Models
                 result.Metadata.Add("column_1_units", (this.metric) ? "m3/day" : "f3/day");
                 result.Metadata.Add("column_2_units", "m3/day");
                 result.Metadata.Add("column_3_units", "m3/day");
-                result.Metadata.Add("column_4_units", "mm/day");
+                result.Metadata.Add("column_4_units", "m3/day");
                 result.Metadata.Add("column_5_units", "m3/day");
                 result.Metadata.Add("column_6_units", "mg day");
                 result.Metadata.Add("column_7_units", "mg day");
@@ -329,9 +352,9 @@ namespace Web.Services.Models
             // Run Aquatox model
             string aquaTaskID = this.taskID + "-" + catchment.COMID.ToString() + "-aquatox";
             aquatoxInput.SV[3].LoadsRec.Alt_Loadings[0].ITSI.InputTimeSeries.input.Data = JObject.FromObject(totalFlow.Data);
+            aquatoxInput.SV[3].InitialCond = Convert.ToInt32(estimateVolume);
             string aquatoxInputJson = JSON.Serialize(aquatoxInput);
             string errorMsg = "";
-            //Utilities.Logger.WriteToFile(catchment.COMID + "-aquatox", aquatoxInputJson);
             AQTNutrientsModel AQTM = new AQTNutrientsModel(ref aquatoxInputJson, out errorMsg, true);
             string aquatoxOutput = AQTM.outputString;
             this.SetAquatoxOutputToObject(catchment.COMID, aquatoxOutput);
@@ -342,6 +365,7 @@ namespace Web.Services.Models
             result = Utilities.Merger.MergeTimeSeries(new List<ITimeSeriesOutput>() { result, this.completedAmmonia[catchment.COMID], this.completedNitrate[catchment.COMID] });
             result.Metadata.Add("ammonia_seed", ammoniaSeed.ToString());
             result.Metadata.Add("nitrate_seed", nitrateSeed.ToString());
+            result.Metadata.Add("estimated_volume", estimateVolume.ToString());
             result.Dataset = "water_quality_workflow";
             result.DataSource = source;
 
@@ -479,13 +503,6 @@ namespace Web.Services.Models
                             this.TestModeFileWrite("surfacerunoff", runoffData);
                         }
                     }
-                    string catchmentDBFile = File.Exists("App_Data\\catchments.sqlite") ? "App_Data\\catchments.sqlite" : "App_Data/catchments.sqlite";
-                    string areaQuery = "SELECT * FROM PlusFlowlineVAA WHERE ComID = " + catchment;
-                    Dictionary<string, string> catchmentDetails = Utilities.SQLite.GetData(catchmentDBFile, areaQuery);
-                    
-                    double catchmentArea = catchmentDetails.ContainsKey("AreaSqKM") ? double.Parse(catchmentDetails["AreaSqKM"]) : 1;    // If key doesn't exist set area 1km^2
-                    runoffData = Utilities.Merger.ModifyTimeSeries(runoffData, catchmentArea);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km
-                    data.Add(runoffData);
                     Utilities.Logger.WriteToFile(this.taskID, "Successfully downloaded runoff data for COMID: " + catchment);
 
                     SubSurfaceFlow.SubSurfaceFlow subsurface = new SubSurfaceFlow.SubSurfaceFlow();
@@ -495,7 +512,7 @@ namespace Web.Services.Models
                     if (source.Equals("curvenumber") || source.Equals("ncei"))
                     {
                         input.Source = "curvenumber";
-                        subsurface.Input.InputTimeSeries.Add("surfacerunoff", data.ElementAt(0) as TimeSeriesOutput);
+                        subsurface.Input.InputTimeSeries.Add("surfacerunoff", runoffData as TimeSeriesOutput);
                     }
                     Utilities.Logger.WriteToFile(this.taskID, "Downloading baseflow data for COMID: " + catchment);
                     ITimeSeriesOutput subsurfaceflow = null;
@@ -525,8 +542,15 @@ namespace Web.Services.Models
                             this.TestModeFileWrite("subsurfaceflow", subsurfaceflow);
                         }
                     }
-                    subsurfaceflow = Utilities.Merger.ModifyTimeSeries(subsurfaceflow, catchmentArea);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km
+                    string catchmentDBFile = File.Exists("App_Data\\catchments.sqlite") ? "App_Data\\catchments.sqlite" : "App_Data/catchments.sqlite";
+                    string areaQuery = "SELECT * FROM PlusFlowlineVAA WHERE ComID = " + catchment;
+                    Dictionary<string, string> catchmentDetails = Utilities.SQLite.GetData(catchmentDBFile, areaQuery);
 
+                    double catchmentArea = catchmentDetails.ContainsKey("AreaSqKM") ? double.Parse(catchmentDetails["AreaSqKM"]) : 1;    // If key doesn't exist set area 1km^2
+                    runoffData = Utilities.Merger.ModifyTimeSeries(runoffData, catchmentArea * 1000);  // Unit conversion from mm/day to m^3/day, 1000m/1km
+                    subsurfaceflow = Utilities.Merger.ModifyTimeSeries(subsurfaceflow, catchmentArea * 1000);  // Unit conversion from mm/day to m^3/day, 1m/1000mm * 1000m/1km
+
+                    data.Add(runoffData);
                     data.Add(subsurfaceflow);
                     Utilities.Logger.WriteToFile(this.taskID, "Successfully downloaded baseflow data for COMID: " + catchment);
 
@@ -659,8 +683,8 @@ namespace Web.Services.Models
             this.nwmData = new Dictionary<int, NationalWaterModelData>();
             string filePath = File.Exists("App_Data\\CapeFearDailyFlow.csv") ? "App_Data\\CapeFearDailyFlow.csv" : "App_Data/CapeFearDailyFlow.csv";
 
-            double conversionFactor = (this.metric) ? 0.3048 : 1.0;
-
+            double conversionFactor = (this.metric) ? 0.0283168 : 1.0;          // Cubic feet to cubic meters
+            conversionFactor = conversionFactor * (3600 * 24);                  // per second to per day
             Dictionary<int, Dictionary<string, double>> tsData = new Dictionary<int, Dictionary<string, double>>();
             using (var reader = new StreamReader(filePath))
             {
