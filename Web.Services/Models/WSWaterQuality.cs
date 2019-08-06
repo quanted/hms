@@ -79,10 +79,10 @@ namespace Web.Services.Models
                 "timestamp: " + now.ToString(),
                 "--------------------------------"
             });
-            this.minNitrate = input.MinNitrate != 0 ? input.MinNitrate : this.minNitrate;
-            this.minAmmonia = input.MinAmmonia != 0 ? input.MinAmmonia : this.minAmmonia;
-            this.maxNitrate = input.MaxNitrate != 0 ? input.MaxNitrate : this.maxNitrate;
-            this.maxAmmonia = input.MaxAmmonia != 0 ? input.MaxAmmonia : this.maxAmmonia;
+            this.minNitrate = input.MinNitrate < 0 ? input.MinNitrate : this.minNitrate;
+            this.minAmmonia = input.MinAmmonia < 0 ? input.MinAmmonia : this.minAmmonia;
+            this.maxNitrate = input.MaxNitrate < 0 ? input.MaxNitrate : this.maxNitrate;
+            this.maxAmmonia = input.MaxAmmonia < 0 ? input.MaxAmmonia : this.maxAmmonia;
 
 
             // Constructs default error output object containing error message.
