@@ -169,7 +169,7 @@
               "$type": "SortedList`2"
             },
             "Hourly": false,
-            "ConstLoad": 0.002596186,
+            "ConstLoad": 0,
             "UseConstant": true,
             "NoUserLoad": false,
             "MultLdg": 1
@@ -254,7 +254,7 @@
               "$type": "SortedList`2"
             },
             "Hourly": false,
-            "ConstLoad": 0.002596186,
+            "ConstLoad": 0,
             "UseConstant": true,
             "NoUserLoad": false,
             "MultLdg": 1
@@ -643,7 +643,7 @@
     "AverageOutput": true,
     "StepSizeInDays": true,
     "ModelTSDays": true,
-    "FixStepSize": 0.1,
+    "FixStepSize": 0.001,
     "UseFixStepSize": true,
   },
   "UseConstEvap": true,

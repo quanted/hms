@@ -195,9 +195,14 @@ namespace Utilities
 
             foreach (string date in timeseries.Data.Keys)
             {
-                double value = 0.0;
-                Double.TryParse(timeseries.Data[date][0], out value);
-                result.Data[date] = new List<string> { (modifier * value).ToString("E3") };
+                List<string> values = new List<string>();
+                foreach (string v in timeseries.Data[date])
+                {
+                    double value = 0.0;
+                    Double.TryParse(v, out value);
+                    values.Add((value * modifier).ToString("E3"));
+                }
+                result.Data[date] = values;
             }
             return result;
         }
@@ -205,10 +210,12 @@ namespace Utilities
         /// <summary>
         /// Sums the timestep value by column/row index by each TimeSeries in output. Assumes all timeseries data are the same size.
         /// Resulting timeseries will contain the same number of rows and columns as the input timeseries.
+        /// Multiply the result by the modifer for unit conversion.
         /// </summary>
         /// <param name="output"></param>
+        /// <param name="modifier"></param>
         /// <returns></returns>
-        public static ITimeSeriesOutput SumTimeSeriesByColumn(List<ITimeSeriesOutput> output)
+        public static ITimeSeriesOutput SumTimeSeriesByColumn(List<ITimeSeriesOutput> output, double modifier)
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput result = oFactory.Initialize();
@@ -221,10 +228,10 @@ namespace Utilities
                 {
                    for(int i = 0; i < timestep.Value.Count; i++)
                     {
-                        value[i] += double.Parse(o.Data[timestep.Key][i]);
+                        value[i] += modifier * double.Parse(o.Data[timestep.Key][i]);
                     }
                 }
-                result.Data.Add(timestep.Key, value.Select(v => v.ToString("E3")).ToList());
+                result.Data.Add(timestep.Key, value.Select(v => v.ToString("E5")).ToList());
             }
             return result;
         }
@@ -254,9 +261,37 @@ namespace Utilities
                         value += double.Parse(o.Data[timestep.Key][i]);
                     }
                 }
-                result.Data.Add(timestep.Key, new List<string>() { value.ToString("E3") });
+                result.Data.Add(timestep.Key, new List<string>() { value.ToString("E5") });
             }
             return result;
+        }
+
+        /// <summary>
+        /// Sums the values for each timestep from all timeseries in the output.
+        /// Resulting timeseries will contain just one value for each timestep.
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <param name="datasource"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> SumDictionaryByRow(Dictionary<string, List<string>> output0, Dictionary<string, List<string>> output1)
+        {
+            Dictionary<string, List<string>> newOutput = new Dictionary<string, List<string>>();
+            foreach (KeyValuePair<string, List<string>> timestep in output0)
+            {
+                double result = 0.0;
+                foreach (string value in timestep.Value)
+                {
+                    result += double.Parse(value);
+                }
+                string key = (output1.ContainsKey(timestep.Key)) ? timestep.Key : timestep.Key.Split("T")[0] + " 00";
+                foreach (string value in output1[key])
+                {
+                    result += double.Parse(value);
+                }
+                newOutput.Add(timestep.Key, new List<string>() { result.ToString("E3") });
+            }
+            return newOutput;
         }
     }
 }

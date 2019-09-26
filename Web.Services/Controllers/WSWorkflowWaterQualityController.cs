@@ -35,6 +35,11 @@ namespace Web.Services.Controllers
         [Required]
         public string DataSource { get; set; }
 
+        public int MinNitrate { get; set; }
+        public int MaxNitrate { get; set; }
+        public int MinAmmonia { get; set; }
+        public int MaxAmmonia { get; set; }
+
     }
 
 
@@ -53,7 +58,11 @@ namespace Web.Services.Controllers
             WaterQualityInput example = new WaterQualityInput()
             {
                 //ConnectivityTable = new List<List<string>>(){}
-                DataSource = "nldas"
+                DataSource = "nldas",
+                MinNitrate = 1000,
+                MaxNitrate = 10000,
+                MinAmmonia = 100000,
+                MaxAmmonia = 750000
             };
             return example;
         }

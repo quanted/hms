@@ -35,6 +35,7 @@ namespace ContaminantLoader
             DateTime startDate;
             DateTime endDate;
             string temporalResolution;
+            int seed = 42;
 
             try
             {
@@ -59,8 +60,14 @@ namespace ContaminantLoader
                 Utilities.ErrorOutput error = new Utilities.ErrorOutput();
                 return error.ReturnError("JSON date error - " + ex.ToString());
             }
-
-            int seed = 42;
+            try
+            {
+                seed = int.Parse(jsonInput.seed.ToString());
+            }
+            catch(Exception e)
+            {
+                seed = 42;
+            }
 
             output.Data = this.GetRandomDistribution(startDate, endDate, temporalResolution, seed, min, max);
             output.Metadata.Add("minValue", min.ToString());

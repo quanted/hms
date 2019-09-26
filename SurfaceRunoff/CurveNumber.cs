@@ -151,7 +151,6 @@ namespace SurfaceRunoff
 
         /// <summary>
         /// Get the comid from a specified lat/long.
-        /// Runs SQL query to sqlite database file.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="comid"></param>

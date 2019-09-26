@@ -129,7 +129,7 @@ namespace Evapotranspiration
             double ea = 0.0;
             double deficit = 0.0;
             double P = 0.0; //pressure
-            double gama = 0.0; //psychometric const
+            double gama = 0.0; //psychometric constant
             double radian = 0.0;
             double dr = 0.0;
             double sigma2 = 0.0;
@@ -255,7 +255,6 @@ namespace Evapotranspiration
                 ENERG_ET = 0.408 * Rnet;
 
                 // COMBINATION OF AREODYNAMIC AND ENERGY COMPONENTS
-
                 denom = slope / (slope + gama * (1 + 0.34 * u));
                 nenom = gama / (slope + gama * (1 + 0.34 * u));
 
@@ -274,6 +273,162 @@ namespace Evapotranspiration
             // Convert mm/day to inches/day
             petPMD = (PET / 25.4);
 
+        }
+
+        public void PenmanMonteithMethod(double tmin, double tmax, double tmean, int jday, double shmin, double shmax,
+                                      double wind, double solarRadLongWave, double solarRadShortWave, out double relHumidityMin, out double relHumidityMax,
+                                      double press, out double petPMD, out string errorMsg)
+        {
+            /*
+             * Penman Monteith ET equation from SWAT 2005 Paper 
+             * ////Insert Citation////
+             */
+
+            //Parameters from NLDAS/GLDAS:
+            /*
+             * tmin, tmax, tmean, shmin, shmax, wind,  solarRad, relHumidityMin, relHumidityMax, press, petPMD
+             */
+
+            double EL = elevation;
+            double lat = latitude;
+            double ALBEDO = albedo;
+            errorMsg = "";
+            relHumidityMin = 0.0;
+            relHumidityMax = 0.0;
+
+            // extracted from input data
+            double TMIN = 0.0;   // celsisus
+            double TMAX = 0.0;   // celsisus
+            double RHmin = 0.0;
+            double RHmax = 0.0;
+
+            // EVAPOTRANSPIRATION
+            double PET = 0.0;
+                        
+            try
+            {
+                TMIN = tmin;
+                TMAX = tmax;
+
+                if (!prismCalc)
+                {
+                    // Convert specific humidity to relative humidity here.  
+                    RHmin = Utilities.Utility.CalculateRH(shmin, tmin, press);
+                    RHmax = Utilities.Utility.CalculateRH(shmax, tmax, press);
+                }
+                else
+                {
+                    RHmin = shmin;
+                    RHmax = shmax;
+                }
+
+                // Check relative humidities
+                if (RHmax < RHmin)
+                {
+                    double swap = RHmin;
+                    RHmin = RHmax;
+                    RHmax = swap;
+                }
+
+                // Set relHumidityMin to RHmin and relHumidityMax to RHmax.
+                relHumidityMin = RHmin;
+                relHumidityMax = RHmax;
+
+                
+                double lambdaE = 0.0; //Latent heat flux density in MJ/m^2d
+                double lambda = 0.0; //Latent heat of vaporization MJ/kg
+                double slope = 0.0; //Slope of vapor pressure-tempurature curve de/dT (kPa / degrees C)
+                double Hnet = 0.0; //Net radiation in MJ/m^2d
+                double G = 0.0; //Heat flux density to the ground MJ/m^2d
+                double Pair = 1.225; //Air density in kg/m^3 Constant?
+                double Cp = 1.01325 * Math.Pow(10, -3); //Specific heat at constant pressure MJ/(kg * deg C)
+                double Ez0 = 0.0; //Saturation vapor pressure of air kPa
+                double Ez = 0.0; //Water vapor pressure of air kPa
+                double gamma = 0.0; //Psychrometric constant kPa/ deg C
+                double Rc = 0.0; //Canopy resistance s/m
+                double Ra = 0.0; //Aerodynamic resistance s/m
+                double K1 = 86400; //Dimension coefficient
+
+                //Calculating Aerodynamic resistance
+                double Zw = 170; //Wind speed measurement height cm
+                double Zp = 170; //Height of the humidity(psychrometer) and temperature measurements cm
+                double d = 0.0; //Zero plane displacement of wind profile cm
+                double Zom = 0.0; //Roughness length for momentum transfer cm
+                double Zov = 0.0; //Roughness length for vapor transfer cm
+                double k = 0.41; //Von Karman constant, calculated to be near 0.4 with a range of 0.36 to 0.43. SWAT uses 0.41
+                double U2 = wind; //Wind speed at height Zw m/s
+                double Hc = 1000; //Mean height of canopy cm
+
+
+
+                //Slope calculation - slope of saturation vapour pressure curve
+                slope = (4098 * 0.6108 * Math.Exp((17.27 * tmean) / (237.3 + tmean))) / Math.Pow((tmean + 237.3), 2.0); //http://modeling.bsyse.wsu.edu/CS_Suite_4/CropSyst/manual/simulation/et/common.htm#slope_vpf
+
+
+                //Radiation and Soil Head Flux calculation
+                Hnet = solarRadShortWave + solarRadLongWave;   //http://modeling.bsyse.wsu.edu/CS_Suite_4/CropSyst/manual/simulation/et/common.htm#soilheatflux
+                G = Hnet * 0.1;
+
+                //Psychrometric constant calculation
+                Pair = Cp;
+                lambda = 2.501 - tmean * 0.002361;          //http://modeling.bsyse.wsu.edu/CS_Suite_4/CropSyst/manual/simulation/et/common.htm#psychometric_const
+                gamma = (Pair * press) / (0.622 * lambda);
+
+
+                Ez0 = Math.Exp(((16.78 * tmean) - 116.9) / (tmean + 237.3));//SWAT 1:2.3.2
+                double averageRH = (relHumidityMin + relHumidityMax) / 2;
+                Ez = averageRH * Ez0;
+
+                // Wind speed correction based on height
+                double u = 0.0;
+                double ht = 10.0;  // The wind data in the NLDAS database is given at a height of 10 meters.
+                if (ht != 2.0)
+                {
+                    u = U2 * (4.87 / (Math.Log(67.8 * ht - 5.42)));
+                }
+                else
+                {
+                    u = U2;
+                }
+
+
+                //Finding roughness length using equations 2:2.2.4 and 2:2.2.5
+                if (Hc <= 200)
+                {
+                    Zom = Hc / (3 * Math.E);
+                }
+                else
+                {
+                    Zom = 0.058 * Math.Pow(Hc, 1.19);
+                }
+
+                Zov = 0.1 * Zom; //2:2.2.6
+                d = (2 / 3) * Hc; //2:2.2.7
+                Ra = (Math.Log((Zw - d) / Zom) * Math.Log((Zp - d) / Zov)) / (k * k * U2);//2:2.2.3
+
+
+                //Calculating Canopy Resistance
+                double Rl = 0.0; //Minimum effective stomatal leaf resistance s/m
+                double LAI = 0.0; //Leaf area index of canopy
+
+                Rc = 0.0;//Equation 2:2.2.8 states equates Rc = Rl / (0.5 * LAI), but will SWC uses 0 value.
+
+                //Full ET equation
+                //double numerator = slope * (Hnet - G) + gamma * ((Ez0 - Ez));
+                //double denominator = slope + gamma
+                double Ksegment = 0.622 * lambda * Pair / press;//1710 - (6.85 * tmean);//2:2.2.19
+                double numerator = slope * (Hnet - G) + gamma * Ksegment * ((Ez0 - Ez)/Ra);
+                double denominator = slope + gamma * (1 + (Rc / Ra));
+                
+                PET = numerator / denominator;
+            }
+            catch (Exception ex)
+            {
+                errorMsg = ex.Message;
+            }
+            
+            // Convert mm/day to inches/day
+            petPMD = (PET / 25.4);
         }
 
         public ITimeSeriesOutput Compute(ITimeSeriesInput inpt, ITimeSeriesOutput outpt, double lat, double lon, string startDate, string endDate, int timeZoneOffset, out string errorMsg)
@@ -370,7 +525,7 @@ namespace Evapotranspiration
                 };
             }
             output.Data = new Dictionary<string, List<string>>();
-                       
+
             foreach (DataRow dr in dt.Rows)
             {
                 double tmean = Convert.ToDouble(dr["TMean_C"].ToString());
@@ -487,31 +642,22 @@ namespace Evapotranspiration
                 double shmin = Convert.ToDouble(timeseries.Value[5]);
                 double shmax = Convert.ToDouble(timeseries.Value[6]);
                 double wind = Convert.ToDouble(timeseries.Value[3]);
-                double solarRad = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
-                if(timeseries.Value.Count != 10)
+                double solarRadLongWave = Convert.ToDouble(timeseries.Value[7]) * 0.0864;
+                double solarRadShortWave = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
+                double solarRad = (solarRadLongWave + solarRadShortWave) / 2;
+                if (timeseries.Value.Count != 10)
                 {
                     timeseries.Value.Add("101325");
                 }
-                double pressure  = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
+                double pressure = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
                 double relHMax = 0.0;
                 double relHMin = 0.0;
                 double petPMD = 0.0;
                 int jday = ++julian;
 
-                PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, pressure,
-                                          out petPMD, out errorMsg);
+                PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, 1013.25, out petPMD, out errorMsg);
+                //PenmanMonteithMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRadLongWave, solarRadShortWave, out relHMin, out relHMax, pressure, out petPMD, out errorMsg);
 
-                //1013.25
-                //Setting order of all items
-                /*timeseries.Value[0] = jday.ToString();
-                timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[4] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);*/
                 timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
@@ -659,16 +805,6 @@ namespace Evapotranspiration
                 PenmanDailyMethod(tmin, tmax, tmean, jday, shmin, shmax, wind, solarRad, out relHMin, out relHMax, pressure,
                                           out petPMD, out errorMsg);
 
-                //Setting order of all items
-                /*timeseries.Value[0] = jday.ToString();
-                timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[4] = solarRad.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[5] = wind.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[6] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[7] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[8] = petPMD.ToString("F4", CultureInfo.InvariantCulture);*/
                 timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);

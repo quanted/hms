@@ -527,7 +527,6 @@ namespace Evapotranspiration
         public ITimeSeriesOutput getNldasData(out string errorMsg, ITimeSeriesInput inpt)
         {
             List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
-            CultureInfo CInfoUS = new CultureInfo("en-US");
 
             Temperature.NLDAS nldasTemp = new Temperature.NLDAS();
             ITimeSeriesOutputFactory ntFactory = new TimeSeriesOutputFactory();
@@ -603,7 +602,7 @@ namespace Evapotranspiration
                 double wTemp = 0.0;
                 int jday = ++julian;
 
-                DateTime time1 = DateTime.ParseExact(timeseries.Key, "yyyy-MM-dd HH", CInfoUS);
+                DateTime time1 = DateTime.ParseExact(timeseries.Key, "yyyy-MM-dd HH", new CultureInfo("en-US"));
 
                 McJannettMethod(tmin, tmax, tmean, jday, time1, shmin, shmax, wind, solarRad, out relHMin, out relHMax, out wTemp,
                                 out petMcJ, out errorMsg);
@@ -648,7 +647,6 @@ namespace Evapotranspiration
         public ITimeSeriesOutput getGldasData(out string errorMsg, ITimeSeriesInput inpt)
         {
             List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
-            CultureInfo CInfoUS = new CultureInfo("en-US");
 
             Temperature.GLDAS gldasTemp = new Temperature.GLDAS();
             ITimeSeriesOutputFactory gtFactory = new TimeSeriesOutputFactory();
@@ -758,7 +756,7 @@ namespace Evapotranspiration
                 double wTemp = 0.0;
                 int jday = ++julianday;
 
-                DateTime time1 = DateTime.ParseExact(timeseries.Key, "yyyy-MM-dd HH", CInfoUS);
+                DateTime time1 = DateTime.ParseExact(timeseries.Key, "yyyy-MM-dd HH", new CultureInfo("en-US"));
 
                 McJannettMethod(tmin, tmax, tmean, jday, time1, shmin, shmax, wind, solarRad, out relHMin, out relHMax, out wTemp,
                                 out petMcJ, out errorMsg);
