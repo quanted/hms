@@ -11,32 +11,37 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        
         static string[] validDatasets = {
-            "precipitation", "evapotranspiration", "nutrients", "organicmatter",
-            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
-            "temperature"
+            "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
+            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
+            "temperature", "wind", "dewpoint", "humidity"
         };
 
         static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
-            ["precipitation"] =  new List<string>{ "nldas", "gldas", "daymet", "ncdc", "prism", "wgen" },
-            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "grangergray", "hamon", "hspf",
+            ["precipitation"] =  new List<string>{ "nldas", "gldas", "daymet", "ncei", "prism", "wgen", "nwm" },
+            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
                 "mcjannett", "mortoncrae", "mortoncrwe", "ncdc", "penmandaily", "penmanhourly",
                 "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
             ["nutrients"] = new List<string> { "aquatox" },
             ["organicmatter"] = new List<string> { "aquatox"},
+            ["radiation"]  = new List<string> { "nldas", "gldas", "daymet"},
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
-            ["subsurfaceflow"] = new List<string> { "nldas", "gldas" },
+            ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
-            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" }
+            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
+            ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
+            ["dewpoint"] = new List<string> { "prism" },
+            ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
+            ["surfacepressure"] = new List<string> { "gldas" }
         };
 
         static string[] validRemoteData =
         {
-            "nldas", "gldas", "ncdc", "daymet", "prism"
+            "nldas", "gldas", "ncei", "daymet", "prism"
         };
 
         /// <summary>
@@ -68,6 +73,8 @@ namespace Data
             if (errors.Count == 0 && ValidateGeometry(out errorTemp, input.Geometry))
             {
                 validInput.Geometry = input.Geometry;
+                validInput.Geometry.Timezone = ValidateTimezone(out errorTemp, input.Geometry.Timezone);
+                validInput.Geometry.GeometryMetadata = (input.Geometry.GeometryMetadata == null) ? new Dictionary<string, string>() : input.Geometry.GeometryMetadata;
             }
             errors = errors.Concat(errorTemp).ToList();
             errorTemp = new List<string>();
@@ -95,6 +102,39 @@ namespace Data
 
             errorMsg = string.Join(", ", errors.ToArray());
             return validInput;
+        }
+        
+        /// <summary>
+        /// Validates the timezone attribute for ITimeSeriesInput
+        /// </summary>
+        /// <param name="errors"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
+        {
+            errors = new List<string>();
+            Timezone validTZ = new Timezone(); 
+            if (input == null)
+            {
+                validTZ = new Timezone()
+                {
+                    Name = "",
+                    Offset = 0.0,
+                    DLS = false
+                };
+            }
+            else
+            {
+                validTZ = new Timezone() { };
+                validTZ.Name = (String.IsNullOrWhiteSpace(input.Name)) ? "TZNotSet" : input.Name;
+                validTZ.Offset = (Double.IsNaN(input.Offset)) ? 0.0 : input.Offset;
+                if (validTZ.Offset > 12 || validTZ.Offset < -12)
+                {
+                    errors.Add("ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + validTZ.Offset.ToString());
+                }
+                validTZ.DLS = (input.DLS == true) ? true : false;
+            }
+            return validTZ;
         }
 
         /// <summary>
@@ -178,15 +218,21 @@ namespace Data
                     validGeom = ValidatePoint(out errorTemp, geometry.Point);
                     errors = errors.Concat(errorTemp).ToList();
                 }
-                if (!validGeom && !string.IsNullOrWhiteSpace(geometry.HucID.ToString()))
+                if (!validGeom && !string.IsNullOrWhiteSpace(geometry.HucID))
                 {
-                    validGeom = ValidateHucID(out errorTemp, geometry.HucID);
-                    errors = errors.Concat(errorTemp).ToList();
+                    if (string.Equals("-1", geometry.HucID))
+                    {
+                        validGeom = ValidateHucID(out errorTemp, geometry.HucID);
+                        errors = errors.Concat(errorTemp).ToList();
+                    }
                 }
                 if (!validGeom && !string.IsNullOrWhiteSpace(geometry.ComID.ToString()))
                 {
-                    validGeom = ValidateComID(out errorTemp, geometry.ComID);
-                    errors = errors.Concat(errorTemp).ToList();
+                    if (geometry.ComID > -1)
+                    {
+                        validGeom = ValidateComID(out errorTemp, geometry.ComID);
+                        errors = errors.Concat(errorTemp).ToList();
+                    }
                 }
                 if (!validGeom && !string.IsNullOrWhiteSpace(geometry.StationID))
                 {
@@ -253,18 +299,18 @@ namespace Data
         /// <param name="errors"></param>
         /// <param name="hucID"></param>
         /// <returns></returns>
-        private static bool ValidateHucID(out List<string> errors, int hucID)
+        private static bool ValidateHucID(out List<string> errors, string hucID)
         {
             errors = new List<string>();
-            if (string.IsNullOrWhiteSpace(hucID.ToString()))
+            if (string.IsNullOrWhiteSpace(hucID))
             {
                 errors.Add("ERROR: A valid HUC ID was not found.");
                 return false;
             }
-            int hucType = hucID.ToString().Length;
+            int hucType = hucID.Length;
             if (hucType != 8 || hucType != 12)
             {
-                errors.Add("ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: " + hucID.ToString());
+                errors.Add("ERROR: HucID provided is not valid. Only HucID's for HUC8 or HUC12 are accepted. HucID: " + hucID);
                 return false;
             }
             return true;
@@ -370,7 +416,7 @@ namespace Data
         {
             errors = new List<string>();
             List<string> baseUrls = new List<string>();
-            if (validRemoteData.Contains(source))
+            if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
                 try

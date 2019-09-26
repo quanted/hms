@@ -56,7 +56,7 @@ namespace SoilMoisture
             errorMsg = "";
             ITimeSeriesOutput output = new TimeSeriesOutput();
             output.Data = new Dictionary<string, List<string>>();
-            for( int i = 0; i < layersData[0].Data.Count; i++)
+            for (int i = 0; i < layersData[0].Data.Count; i++)
             {
                 List<string> data = new List<string>();
                 for (int j = 0; j < layersData.Count; j++)
@@ -70,8 +70,12 @@ namespace SoilMoisture
             output.Metadata = layersData[0].Metadata;
             for (int i = 0; i < layersData.Count; i++)
             {
-                string layerName = layersData[i].Metadata[source + "_param_short_name"].Substring(layersData[i].Metadata[source + "_param_short_name"].IndexOf('M') + 1);
-                output.Metadata.Add("column_" + (i + 3), layerName);
+                string sourceV = source;
+                if (source.ToLower().Equals("gldas")) {
+                    sourceV = (layersData[i].Metadata.ContainsKey(source + "_2.1_param_short_name")) ? source + "_2.1" : source + "_2.0";
+                }
+                string layerName = layersData[i].Metadata[sourceV + "_param_short_name"].Substring(layersData[i].Metadata[sourceV + "_param_short_name"].IndexOf('M') + 1);
+                output.Metadata.Add("column_" + (i + 2), layerName);
             }
 
             return output;
@@ -99,21 +103,21 @@ namespace SoilMoisture
             {
                 output.Metadata.Add("column_1", "Date");
             };
-            
+
 
             switch (input.TemporalResolution)
             {
                 case "daily":
                     output.Data = DailyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Daily Average");
+                    //output.Metadata.Add("column_2", "Daily Average");
                     return output;
                 case "weekly":
                     output.Data = WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Weekly Average");
-                     return output;
+                    //output.Metadata.Add("column_2", "Weekly Average");
+                    return output;
                 case "monthly":
                     output.Data = MonthlyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Monthly Average");
+                    //output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     return output;

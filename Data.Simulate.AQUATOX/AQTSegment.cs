@@ -50,6 +50,36 @@ namespace AQUATOX.AQTSegment
 
         }
 
+        public string ExportJSON(ref string json)
+        {
+
+            try
+            {
+                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
+                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
+                {
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                    TypeNameHandling = TypeNameHandling.Objects,
+                    SerializationBinder = AQTBinder
+                };
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
+                return json;
+            }
+            catch (Newtonsoft.Json.JsonWriterException e)
+            {
+                return e.Message;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+
+            finally
+            {
+            }
+
+        }
+
 
         public string Instantiate(string json)
         {
@@ -149,6 +179,11 @@ namespace AQUATOX.AQTSegment
             Dataset = "";
             DataSource = "";
             Metadata = new Dictionary<string, string>();
+        }
+
+        public ITimeSeriesOutput Clone()
+        {
+            return this;
         }
     }
 

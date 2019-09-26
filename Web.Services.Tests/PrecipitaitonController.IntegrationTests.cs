@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Text;
 using Data;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Web.Services.Tests
 {
@@ -63,7 +64,7 @@ namespace Web.Services.Tests
         /// NCDC daily request json string for testing a valid request
         /// </summary>
         const string ncdcRequest =
-             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
             "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
@@ -98,14 +99,15 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
-        [InlineData(gldasRequest, 365)]
+        [InlineData(gldasRequest, 366)]
         [InlineData(daymetRequest, 365)]
-        [InlineData(prismRequest, 364)]         //Will always fail as prism web service is not active. TODO: Fix end date, cutting off last day.
+        [InlineData(prismRequest, 365)]         //Passing?
         [InlineData(ncdcRequest, 365)]
         [InlineData(wgenRequest, 365)]
         public async Task ValidRequests(string precipInputString, int expected)
         {
-            string endpoint = "api/hydrology/precipitation";
+            Thread.Sleep(5000);
+            string endpoint = "api/meteorology/precipitation";
             PrecipitationInput input = JsonConvert.DeserializeObject<PrecipitationInput>(precipInputString);
             input.TemporalResolution = "daily";
             Debug.WriteLine("Integration Test: Precipitation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

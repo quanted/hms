@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -37,72 +37,20 @@ namespace Web.Services.Controllers
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08)
-                },
-                Geometry = new TimeSeriesGeometry()
-                {
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = true
-                    }
-                }
-            };
-            return example;
-        }
-    }
-
-    /// <summary>
-    /// Swashbuckle Precipitation POST request example
-    /// </summary>
-    public class PrecipitationInputExampleFull : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            PrecipitationInput example = new PrecipitationInput()
-            {
-                Source = "nldas",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
                     EndDate = new DateTime(2015, 01, 08),
                     DateTimeFormat = "yyyy-MM-dd HH"
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {
                         Latitude = 33.925673,
                         Longitude = -83.355723
-                    },
-                    GeometryMetadata = new Dictionary<string, string>()
-                    {
-                        { "City", "Athens" },
-                        { "State", "Georgia"},
-                        { "Country", "United States" }
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
                     }
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
-                TimeLocalized = true,
-                Units = "default",
+                Units = "metric",
                 OutputFormat = "json"
             };
             return example;
@@ -170,7 +118,8 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Precipitation controller for HMS.
     /// </summary>
-    [Route("api/hydrology/precipitation")]
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
+    [Route("api/meteorology/precipitation")]
     public class WSPrecipitationController : Controller
     {
         /// <summary>
@@ -179,15 +128,16 @@ namespace Web.Services.Controllers
         /// <param name="precipInput">Parameters for retrieving precipitation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]                 // Default endpoint
-        [Route("v1.0")]             // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         [SwaggerResponseExample(200, typeof(PrecipitationOutputExample))]
-        [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExampleFull))]
+        [SwaggerRequestExample(typeof(PrecipitationInput), typeof(PrecipitationInputExample))]
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
             WSPrecipitation precip = new WSPrecipitation();
+            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
             ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
+            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+            stpWatch.Stop();
+            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString() + " ms", results.Metadata);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

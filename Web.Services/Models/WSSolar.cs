@@ -5,6 +5,7 @@ using Data;
 using System.Globalization;
 using System.Threading.Tasks;
 
+
 namespace Web.Services.Models
 {
     /// <summary>
@@ -248,6 +249,7 @@ namespace Web.Services.Models
             }
 
             soCal.GetCalculatorData();
+
             return soCal.Output;
         }
     }

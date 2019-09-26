@@ -29,7 +29,7 @@ namespace Evapotranspiration
             string data = "";
             string errorMsg = "";
             string[] station = inpt.Geometry.GeometryMetadata["stationID"].ToString().Split(':');
-            string url = "https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=" + station[1] + "&startDate=" + inpt.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + inpt.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&format=json&units=metric";
+            string url = "https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=" + station[1] + "&startDate=" + inpt.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + inpt.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&format=json&units=metric";
             WebClient myWC = new WebClient();
             try
             {
@@ -38,7 +38,6 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -48,6 +47,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (Exception ex)

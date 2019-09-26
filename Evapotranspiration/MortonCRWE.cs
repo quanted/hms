@@ -240,8 +240,16 @@ namespace Evapotranspiration
                 TMAX = tmax;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHmin(shmin, tmin);
-                RHmax = Utilities.Utility.CalculateRHmax(shmax, tmax);
+                RHmin = Utilities.Utility.CalculateRH(shmin, tmin, 1013.25);
+                RHmax = Utilities.Utility.CalculateRH(shmax, tmax, 1013.25);
+
+                // Check relative humidities
+                if (RHmax < RHmin)
+                {
+                    double swap = RHmin;
+                    RHmin = RHmax;
+                    RHmax = swap;
+                }
 
                 // Set relHumidityMin to RHmin and relHumidityMax to RHmax.
                 relHumidityMin = RHmin;
@@ -794,7 +802,6 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(300);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -806,7 +813,7 @@ namespace Evapotranspiration
                     retries -= 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(500);
+                        Thread.Sleep(100);
                     }
                 }
             }

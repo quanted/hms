@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Data.SQLite;
+using System.Text;
+using Microsoft.Data.Sqlite;
 
 namespace Utilities
 {
@@ -22,25 +23,38 @@ namespace Utilities
             }
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
             Dictionary<string, string> data = new Dictionary<string, string>();
-            using (System.Data.SQLite.SQLiteConnection con = new System.Data.SQLite.SQLiteConnection(dbPath))
+            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
+            connectionStringBuilder.DataSource = dbPath;
+
+            using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
             {
-                using (System.Data.SQLite.SQLiteCommand com = new System.Data.SQLite.SQLiteCommand(con))
+                con.Open();
+                SQLiteCommand com = con.CreateCommand();
+                com.CommandText = query;
+                using (SQLiteDataReader reader = com.ExecuteReader())
                 {
-                    con.Open();                             
-                    com.CommandText = query;                
-                    com.ExecuteNonQuery();                
-                    using (System.Data.SQLite.SQLiteDataReader reader = com.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
+                        for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            data.Add(reader["key"].ToString(), reader["value"].ToString());
+                            if (reader.IsDBNull(i))
+                            {
+                                return data;
+                            }
+                            var k = reader.GetName(i);
+                            var v = reader.GetValue(i).ToString();
+
+                            if (!data.ContainsKey(k))
+                            {
+                                data.Add(k, v);
+                            }
                         }
                     }
-                    con.Close();
                 }
+                con.Close();
             }
             return data;
-        }
-        
+        }        
     }
 }
+

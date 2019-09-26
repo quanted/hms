@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Text;
 using Data;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Web.Services.Tests
 {
@@ -58,6 +59,7 @@ namespace Web.Services.Tests
         [InlineData(gldasRequest)]
         public async Task ValidRequests(string soilmoistureInputString)
         {
+            Thread.Sleep(5000);
             string endpoint = "api/hydrology/soilmoisture";
             SoilMoistureInput input = JsonConvert.DeserializeObject<SoilMoistureInput>(soilmoistureInputString);
             Debug.WriteLine("Integration Test: Soil Moisture controller; Endpoint:" + endpoint + "; Data source: " + input.Source);

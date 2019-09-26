@@ -7,15 +7,15 @@ using System.Text;
 using System.Threading;
 using System.Runtime.Serialization;
 using Utilities;
-
+using Newtonsoft.Json;
 
 namespace Data.Source
 {
 
-    // ---------------- NCDC return object ---------------- //
+    // ---------------- NCEI return object ---------------- //
 
     /// <summary>
-    /// Metadata of json string retrieved from ncdc.
+    /// Metadata of json string retrieved from ncei.
     /// </summary>
     public class MetaData
     {
@@ -23,7 +23,7 @@ namespace Data.Source
     }
 
     /// <summary>
-    /// Result structure of the json string retrieved from ncdc.
+    /// Result structure of the json string retrieved from ncei.
     /// </summary>
     public class Result
     {
@@ -45,10 +45,10 @@ namespace Data.Source
     }
 
     /// <summary>
-    /// Complete json object returned from NCDC.
+    /// Complete CSV object returned from NCEI.
     /// </summary>
     [DataContract]
-    public class NCDCJson
+    public class NCDCCSV
     {
         [DataMember]
         public MetaData metadata { get; set; }
@@ -71,15 +71,15 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public Dictionary<string, double> GetData(out string errorMsg, string dataset, ITimeSeriesInput input)
+        public Dictionary<string, double> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
         {
             errorMsg = "";
 
             // Add one day to the end of the requested time span, to include the end date. NCDC cuts off at the requested end date.
-            input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(1);
+            //input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(1);
 
             // Begins sequence to download ncdc data.
-            Dictionary<string, double> data = BeginDataDownload(out errorMsg, dataset, input);
+            Dictionary<string, double> data = BeginDataDownload(out errorMsg, dataTypeID, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -92,82 +92,42 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private Dictionary<string, double> BeginDataDownload(out string errorMsg, string dataset, ITimeSeriesInput input)
+        private Dictionary<string, double> BeginDataDownload(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
         {
             errorMsg = "";
 
             Dictionary<string, double> data = new Dictionary<string, double>();
             DateTime tempStartDate = input.DateTimeSpan.StartDate;
             DateTime tempEndDate = input.DateTimeSpan.EndDate;
-
-            string station = input.Geometry.GeometryMetadata["stationID"];
+            string stationID = "";
+            if (input.Geometry.StationID != null)
+            {
+                stationID = input.Geometry.StationID;
+            }
+            else
+            {
+                stationID = input.Geometry.GeometryMetadata["stationID"];
+            }
             string token = input.Geometry.GeometryMetadata["token"];
 
             //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
-            string url = "";
+            string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
+            if (errorMsg.Contains("ERROR")) { return null; }
 
-            //Check if date difference is greater than one year, if true splits dates apart into multiple requests that are equal to 1y-1day.
-            int requiredCalls = Convert.ToInt16(Math.Ceiling((input.DateTimeSpan.EndDate - input.DateTimeSpan.StartDate).TotalDays / 365));
-            for (int i = 0; i < requiredCalls; i++)
+            string csv = DownloadData(out errorMsg, token, url);
+            if (errorMsg.Contains("ERROR")) { return null; }
+            if (!csv.Equals("{}"))
             {
-                if (i == 0 && requiredCalls == 1)       //url constructed for a single call being made
-                {
-                    tempStartDate = input.DateTimeSpan.StartDate;
-                    tempEndDate = input.DateTimeSpan.EndDate;
-                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else if (i == 0 && requiredCalls != 1)  //url constructed for first call of multiple
-                {
-                    tempStartDate = input.DateTimeSpan.StartDate;
-                    tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
-                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else if (i != 0 && i == requiredCalls - 1) //url constructed for last call of multiple
-                {
-                    tempStartDate = tempEndDate;
-                    tempEndDate = input.DateTimeSpan.EndDate;
-                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else                                   //url constructed for calls that are not the start or end
-                {
-                    tempStartDate = tempEndDate;
-                    tempEndDate = tempStartDate.AddYears(1).AddDays(-1);
-                    url = ConstructURL(out errorMsg, station, input.BaseURL.First(), tempStartDate, tempEndDate);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                string json = DownloadData(out errorMsg, token, url);
+                NCDCCSV results = ReadData(out errorMsg, csv);
+           
+                Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
+                AppendData(ref data, sumValues, input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
                 if (errorMsg.Contains("ERROR")) { return null; }
-                if (!json.Equals("{}"))
-                {
-
-                    NCDCJson results = JSON.Deserialize<NCDCJson>(json);
-
-                    double total = results.metadata.resultset.count;        //checking if available results exceed 1000 entry limit.
-                    if (total > 1000)
-                    {
-                        for (int j = 1; j < Math.Ceiling(total / 1000); j++)
-                        {
-                            url = url + "&offset=" + (j) * 1000;
-                            json = DownloadData(out errorMsg, input.Geometry.GeometryMetadata["token"], url);
-                            if (errorMsg.Contains("ERROR")) { return null; }
-
-                            NCDCJson tempResults = JSON.Deserialize<NCDCJson>(json);
-
-                            results.results.AddRange(tempResults.results);                              //Adds the additional calls to the results.results variable
-                        }
-                    }
-                    Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
-                    AppendData(ref data, sumValues, input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else
-                {
-                    AppendData(ref data, new Dictionary<string, double>(), input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
+            }
+            else
+            {
+                AppendData(ref data, new Dictionary<string, double>(), input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
+                if (errorMsg.Contains("ERROR")) { return null; }
             }
             return data;
         }
@@ -180,17 +140,20 @@ namespace Data.Source
         /// <param name="station">stationID</param>
         /// <param name="dateTime">IDateTimeSpan</param>
         /// <returns></returns>
-        private string ConstructURL(out string errorMsg, string station, string baseURL, DateTime startDate, DateTime endDate)
+        private string ConstructURL(out string errorMsg, string dataTypeID, string station, string baseURL, DateTime startDate, DateTime endDate)
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
             sb.Append(baseURL);
+
             if (station.Contains("GHCND"))
             {
-                sb.Append("datasetid=GHCND&datatypeid=PRCP" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
+                station = station.Remove(0, 6);
+                sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=csv" + "&includeAttributes=true" + "&units=metric");
             }
             else
             {
+                errorMsg = "ERROR: NCEI web service does not currently support the dataset for this station.";
                 sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
             return sb.ToString();
@@ -205,7 +168,7 @@ namespace Data.Source
         /// <returns></returns>
         private string DownloadData(out string errorMsg, string token, string url)
         {
-            errorMsg = "";
+                errorMsg = "";
             try
             {              
                 int retries = 5;                                        // Max number of request retries
@@ -230,7 +193,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station data. " + ex.Message;
+                errorMsg = "ERROR: Unable to download NCEI station data. " + ex.Message;
                 return null;
             }
         }
@@ -248,14 +211,22 @@ namespace Data.Source
             // TODO: include a count of thrown out data entries in meta data.
             // TODO: add attribute column to data output for data entries handling
 
+            //Explanation of quality flags: https://www1.ncdc.noaa.gov/pub/data/cdo/documentation/GHCND_documentation.pdf
+            char[] qualityFlags = new char[] { 'D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'R', 'S', 'T', 'W', 'X', 'Z' };
+            string[] tables = attribute.Split(',');
+
             errorMsg = "";
             if (attribute.Contains("[") || attribute.Contains("]"))             // Begin and end of deleted period, during the given hour
             {
-                return 0.0;
+                return -9999;
             }
             else if (attribute.Contains("{") || attribute.Contains("}"))        // Begin and end of missing period, during the given hour
             {
-                return 0.0;
+                return -9999;
+            }
+            else if (tables[0].Contains("M") || tables[1].IndexOfAny(qualityFlags) != -1)        // One period of missing data or failed QA check
+            {
+                return -9999;
             }
             else
             {
@@ -273,7 +244,7 @@ namespace Data.Source
         /// <param name="tempStartDate"></param>
         /// <param name="tempEndDate"></param>
         /// <returns></returns>
-        private Dictionary<string, double> AggregateData(out string errorMsg, ITimeSeriesInput inputData, NCDCJson results, DateTime tempStartDate, DateTime tempEndDate)
+        private Dictionary<string, double> AggregateData(out string errorMsg, ITimeSeriesInput inputData, NCDCCSV results, DateTime tempStartDate, DateTime tempEndDate)
         {
             Dictionary<string, double> sumValues = new Dictionary<string, double>();
             switch (inputData.TemporalResolution)
@@ -282,6 +253,7 @@ namespace Data.Source
                     sumValues = SumHourlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "extreme_5":
                 case "daily":
                 case "default":
                 default:
@@ -290,21 +262,67 @@ namespace Data.Source
                     break;
                 case "weekly":
                     sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
+                    Dictionary<string, double> tempValues = new Dictionary<string, double>();
+                    AppendData(ref tempValues, sumValues, inputData.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, "daily");////
                     if (errorMsg.Contains("ERROR")) { return null; }
                     // Weekly aggregation of ncdc data requires daily summed values.
-                    sumValues = SumWeeklyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    sumValues = SumWeeklyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, tempValues);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "monthly":
                     sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
                     if (errorMsg.Contains("ERROR")) { return null; }
-                    // Weekly aggregation of ncdc data requires daily summed values.
-                    sumValues = SumWeeklyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    // Monthly aggregation of ncdc data requires daily summed values.
+                    sumValues = SumMonthlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "annual":
+                    sumValues = SumDailyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, results);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    // Yearly aggregation of ncdc data requires daily summed values.
+                    sumValues = SumYearlyValues(out errorMsg, inputData.DateTimeSpan.DateTimeFormat, sumValues);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
             }
             return sumValues;
         }
+
+        /// <summary>
+        /// Sums the values for each recorded value to return a dictionary of yearly summed values.
+        /// Requires summing of daily values first.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Dictionary<string, double> SumYearlyValues(out string errorMsg, string dateFormat, Dictionary<string, double> dailyData)
+        {
+            errorMsg = "";
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = dailyData.Keys.ElementAt(0).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double sum = 0.0;
+            for (int i = 0; i < dailyData.Count; i++)
+            {
+                string dateString = dailyData.Keys.ElementAt(i).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (iDate.Year != newDate.Year || i == dailyData.Count - 1)
+                {
+                    dict.Add(newDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    sum += dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+            }
+            return dict;
+        }
+
 
         /// <summary>
         /// Sums the values for each recorded value to return a dictionary of monthly summed values.
@@ -319,21 +337,23 @@ namespace Data.Source
             Dictionary<string, double> dict = new Dictionary<string, double>();
             DateTime iDate;
             DateTime newDate;
-            DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
+            string dateString0 = dailyData.Keys.ElementAt(0).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
             double sum = 0.0;
-            for (int i = 0; i < dailyData.Count - 1; i++)
+            for (int i = 0; i < dailyData.Count; i++)
             {
-                DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
-                if (iDate.Month == newDate.Month)
-                {
-                    sum += dailyData[dailyData.Keys.ElementAt(i)];
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else
+                string dateString = dailyData.Keys.ElementAt(i).ToString().Substring(0, dailyData.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (iDate.Month != newDate.Month || i == dailyData.Count-1)
                 {
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    sum += dailyData[dailyData.Keys.ElementAt(i)];
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
@@ -353,13 +373,42 @@ namespace Data.Source
             Dictionary<string, double> dict = new Dictionary<string, double>();
             DateTime iDate;
             DateTime newDate;
-            DateTime.TryParse(dailyData.Keys.ElementAt(0), out newDate);
+            DateTime.TryParseExact(dailyData.Keys.ElementAt(0), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
             double sum = 0.0;
             int week = 0;
-            for (int i = 0; i < dailyData.Count - 1; i++)
+            for (int i = 0; i < dailyData.Count; i++)
             {
-                DateTime.TryParse(dailyData.Keys.ElementAt(i), out iDate);
-                if (week == 7)
+                DateTime.TryParseExact(dailyData.Keys.ElementAt(i), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out iDate);
+                int dayDif = (int)(iDate - newDate).TotalDays;
+                if(dayDif >= 7)
+                {
+                    dict.Add(newDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    week++;
+                    double addition = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (sum < 0)
+                    {
+                        sum = 0;
+                    }
+                    if (addition < 0)
+                    {
+                        sum = addition;
+                    }
+                    else
+                    {
+                        sum += addition;
+                    }
+
+                    sum += addition;//dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                /*
+                if (week < 7)
                 {
                     week++;
                     sum += dailyData[dailyData.Keys.ElementAt(i)];
@@ -367,12 +416,19 @@ namespace Data.Source
                 }
                 else
                 {
-                    week = 0;
+                    week = 1;
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = dailyData[dailyData.Keys.ElementAt(i)];
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
+                if (i == dailyData.Count - 1)
+                {
+                    dict.Add(newDate.ToString(dateFormat), sum);
+                    newDate = iDate;
+                    sum = dailyData[dailyData.Keys.ElementAt(i)];
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }*/
             }
             return dict;
         }
@@ -383,7 +439,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, double> SumDailyValues(out string errorMsg, string dateFormat, NCDCJson data)
+        private Dictionary<string, double> SumDailyValues(out string errorMsg, string dateFormat, NCDCCSV data)
         {
             errorMsg = "";
             Dictionary<string, double> dict = new Dictionary<string, double>();
@@ -391,19 +447,37 @@ namespace Data.Source
             DateTime newDate;
             DateTime.TryParse(data.results[0].date, out newDate);
             double sum = 0.0;
-            for (int i = 0; i < data.results.Count - 1; i++)
+            for (int i = 0; i <= data.results.Count - 1; i++)
             {
                 DateTime.TryParse(data.results[i].date, out iDate);
                 if (iDate.Date == newDate.Date)
                 {
-                    sum += NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    if (sum < 0)
+                    {
+                        sum = 0;
+                    }
+                    double addition = NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    if(addition < 0)
+                    {
+                        sum = addition;
+                    }
+                    else
+                    {
+                        sum += addition;
+                    }
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
+                    newDate = newDate.AddHours(-newDate.Hour);
                     dict.Add(newDate.ToString(dateFormat), sum);
                     newDate = iDate;
                     sum = NCDCAttributeCheck(out errorMsg, data.results[i].value, data.results[i].attributes);
+                    if (i == data.results.Count - 1)
+                    {
+                        iDate = iDate.AddHours(-iDate.Hour);
+                        dict.Add(iDate.ToString(dateFormat), sum);
+                    }
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }
@@ -416,7 +490,7 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, double> SumHourlyValues(out string errorMsg, string dateFormat, NCDCJson data)
+        private Dictionary<string, double> SumHourlyValues(out string errorMsg, string dateFormat, NCDCCSV data)
         {
             errorMsg = "";
             Dictionary<string, double> dict = new Dictionary<string, double>();
@@ -464,24 +538,29 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
+                case "extreme_5":
                 case "daily":
                 case "default":
                 default:
                     int days = Convert.ToInt16((endDate - startDate).TotalDays);
-                    for (int i = 0; i < days; i++)
+                    for (int i = 0; i <= days; i++)
                     {
                         DateTime date = startDate.AddDays(i);
-                        if (secondDict.ContainsKey(date.ToString(dateFormat)))
+                        if (firstDict.ContainsKey(date.ToString(dateFormat)))
+                        {
+                            continue;
+                        }
+                        else if (secondDict.ContainsKey(date.ToString(dateFormat)))
                         {
                             firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
@@ -496,24 +575,43 @@ namespace Data.Source
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
                 case "monthly":
-                    int years = Convert.ToInt16(endDate.Year - endDate.Year);
+                    int years = Convert.ToInt16(endDate.Year - startDate.Year);
                     int months = Convert.ToInt16(endDate.Month - startDate.Month);
                     int totalMonths = years * 12 + months;
-                    for (int i = 0; i < totalMonths; i++)
+                    //if (totalMonths >= 12) { totalMonths -= 1; } //Remove extra month caused by adding extra day
+                    if (totalMonths == 0) { break; }
+                    for (int i = 0; i <= totalMonths; i++)
                     {
-                        DateTime date = startDate.AddDays(i * 7);
+                        DateTime date = startDate.AddMonths(i);//.AddDays(i * 7);
                         if (secondDict.ContainsKey(date.ToString(dateFormat)))
                         {
                             firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);
                         }
                         else
                         {
-                            firstDict.Add(date.ToString(dateFormat), 0.0);
+                            firstDict.Add(date.ToString(dateFormat), -9999);
+                        }
+                    }
+                    break;
+                case "annual":
+                    int yrs = Convert.ToInt16(endDate.Year - startDate.Year);
+                    //if (yrs >= 1) { yrs -= 1; } //Remove extra year caused by adding extra day
+                    if (Convert.ToInt16((endDate - startDate).TotalDays) < 364) { break; } //Check for full years
+                    for (int i = 0; i <= yrs; i++)
+                    {
+                        DateTime date = startDate.AddYears(i);
+                        if (secondDict.ContainsKey(date.ToString(dateFormat)))
+                        {
+                            firstDict.Add(date.ToString(dateFormat), secondDict[date.ToString(dateFormat)]);
+                        }
+                        else
+                        {
+                            firstDict.Add(date.ToString(dateFormat), -9999);
                         }
                     }
                     break;
@@ -521,11 +619,11 @@ namespace Data.Source
         }
 
         /// <summary>
-        /// Gets NCDC station details.
+        /// Gets NCEI station details.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="stationID"></param>
-        /// <param name="token">Token required for accessing ncdc services.</param>
+        /// <param name="token">Token required for accessing NCEI services.</param>
         /// <returns></returns>
         public Dictionary<string, string> GetStationDetails(out string errorMsg, string url, string stationID, string token)
         {
@@ -534,7 +632,7 @@ namespace Data.Source
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {
-                errorMsg = "ERROR: No token provided for retrieving ncdc station details.";
+                errorMsg = "ERROR: No token provided for retrieving NCEI station details.";
                 return new Dictionary<string, string>();
             }
             try
@@ -559,7 +657,7 @@ namespace Data.Source
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download ncdc station details. " + ex.Message;
+                errorMsg = "ERROR: Unable to download NCEI station details. " + ex.Message;
                 return new Dictionary<string, string>();
             }
             return stationDetails;
@@ -598,5 +696,29 @@ namespace Data.Source
             }
         }
 
+        public NCDCCSV ReadData(out string errorMsg, string data)
+        {
+            NCDCCSV output = new NCDCCSV();
+            output.results = new List<Result>();
+            errorMsg = "";
+            string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 1; i < tsLines.Length; i++)
+            {
+                string[] lineData = tsLines[i].Split(new string[] { "\",\"", "\"" }, StringSplitOptions.RemoveEmptyEntries);
+                if(lineData.Length != 4)
+                {
+                    //Some data skipped over, so mark as missing with null attributes
+                    lineData = new string[]{ lineData[0], lineData[1], "-9999", ",,,"};
+                }
+                Result result = new Result();
+                result.station = lineData[0];
+                result.date = lineData[1];
+                result.value = Convert.ToDouble(lineData[2]);
+                result.attributes = lineData[3];
+                output.results.Add(result);
+
+            }
+            return output;
+        }
     }
 }

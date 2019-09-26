@@ -5,6 +5,7 @@ using System.Net;
 using System.Web;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace Data.Source
 {
@@ -27,6 +28,13 @@ namespace Data.Source
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
+            if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
+            {
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy", null);
+                TimeSpan ts = new TimeSpan(23, 00, 0);
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
+            }
+            
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -53,7 +61,8 @@ namespace Data.Source
             errorMsg = "";
             IDateTimeSpan dateTime = cInput.DateTimeSpan;
 
-            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true) {
+            if (cInput.Geometry.Timezone.Offset < 0.0 && cInput.TimeLocalized == true)
+            {
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 1 + Convert.ToInt16(System.Math.Abs(cInput.Geometry.Timezone.Offset)), 00, 00);
             }
             else if (cInput.Geometry.Timezone.Offset > 0.0 && cInput.TimeLocalized == true)
@@ -92,7 +101,7 @@ namespace Data.Source
         /// <returns></returns>
         public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
         {
-        
+
             string[] date = dateHour.Split(' ');
             string hourStr = date[1].Substring(0, 2);
             string dateHourStr = date[0] + " " + hourStr;
@@ -125,7 +134,7 @@ namespace Data.Source
             string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
             string[] endDT = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
             sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
-            
+
             return sb.ToString();
         }
 
@@ -143,7 +152,7 @@ namespace Data.Source
             try
             {
                 // TODO: Read in max retry attempt from config file.
-                int retries = 5;
+                int retries = 20;
 
                 // Response status message
                 string status = "";
@@ -160,11 +169,14 @@ namespace Data.Source
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK")) { Thread.Sleep(5000); }
                 }
             }
             catch (Exception ex)
             {
                 errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                Debug.WriteLine(errorMsg);
+                Debug.WriteLine(url);
                 return null;
             }
             return data;

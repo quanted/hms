@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
@@ -67,9 +68,10 @@ namespace Web.Services.Tests
         [Theory]
         [InlineData(nldasRequest)]
         [InlineData(gldasRequest)]
-        [InlineData(curvenumberRequest)]
+        //[InlineData(curvenumberRequest)]
         public async Task ValidRequests(string inputString)
         {
+            Thread.Sleep(5000);
             string endpoint = "api/hydrology/surfacerunoff";
             SurfaceRunoffInput input = JsonConvert.DeserializeObject<SurfaceRunoffInput>(inputString);
             Debug.WriteLine("Integration Test: Surface Runoff controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

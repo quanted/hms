@@ -80,6 +80,8 @@ namespace Temperature
         public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataSet, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+            output.Dataset = dataSet;
+            output.DataSource = input.Source;
             string[] splitData = data.Split(new string[] { "year,yday,tmax (deg c),tmin (deg c)" }, StringSplitOptions.RemoveEmptyEntries);
             output.Metadata = SetMetaData(out errorMsg, splitData[0]);
             if (errorMsg.Contains("ERROR")) { return null; }

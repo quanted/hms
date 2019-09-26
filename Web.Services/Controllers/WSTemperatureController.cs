@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,20 +11,20 @@ using Web.Services.Models;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Temperature Input that implements TimeSeriesInput object
+    /// Dew Point Input that implements TimeSeriesInput object
     /// </summary>
-    public class TemperatureInput : TimeSeriesInput
+    public class DewPointInput : TimeSeriesInput
     {
-        // Add extra evapotranspiration specific variables here
+        // Add extra Dew Point specific variables here
     }
 
 
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle Temperature POST request example
+    /// Swashbuckle Dew Point POST request example
     /// </summary>
-    public class TemperatureInputExample : IExamplesProvider
+    public class DewPointInputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -32,9 +32,9 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            TemperatureInput example = new TemperatureInput()
+            DewPointInput example = new DewPointInput()
             {
-                Source = "nldas",
+                Source = "prism",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -60,9 +60,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbuckle Temperature POST request example
+    /// Swashbuckle Dew Point POST request example
     /// </summary>
-    public class TemperatureInputExampleFull : IExamplesProvider
+    public class DewPointInputExampleFull : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -70,9 +70,9 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         public object GetExamples()
         {
-            TemperatureInput example = new TemperatureInput()
+            DewPointInput example = new DewPointInput()
             {
-                Source = "nldas",
+                Source = "prism",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -111,9 +111,9 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
-    /// Swashbucle Temperature Output example
+    /// Swashbucle DewPoint Output example
     /// </summary>
-    public class TemperatureOutputExample : IExamplesProvider
+    public class DewPointOutputExample : IExamplesProvider
     {
         /// <summary>
         /// Get example function.
@@ -123,7 +123,7 @@ namespace Web.Services.Controllers
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "Temperature";
+            output.Dataset = "Dew Point";
             output.DataSource = "nldas";
             output.Metadata = new Dictionary<string, string>()
             {
@@ -166,29 +166,27 @@ namespace Web.Services.Controllers
     }
 
 
-    // --------------- Temperature Controller --------------- //
+    // --------------- DewPoint Controller --------------- //
 
     /// <summary>
-    /// Temperature controller for HMS.
+    /// DewPoint controller for HMS.
     /// </summary>
-    [Route("api/hydrology/temperature")]
-    public class WSTemperatureController : Controller
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
+    [Route("api/meteorology/dewpoint")]
+    public class WSDewPointController : Controller
     {
         /// <summary>
-        /// POST Method for getting evapotranspiration data.
+        /// POST Method for getting dew point data.
         /// </summary>
-        /// <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="tempInput">Parameters for retrieving dew point data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]                 // Default endpoint
-        [Route("v1.0")]             // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExample))]
-        [SwaggerResponseExample(200, typeof(TemperatureOutputExample))]
-        [SwaggerRequestExample(typeof(TemperatureInput), typeof(TemperatureInputExampleFull))]
-        public async Task<IActionResult> POST([FromBody]TemperatureInput tempInput)
+        [SwaggerResponseExample(200, typeof(DewPointOutputExample))]
+        [SwaggerRequestExample(typeof(DewPointInput), typeof(DewPointInputExampleFull))]
+        public async Task<IActionResult> POST([FromBody]DewPointInput tempInput)
         {
-            WSTemperature temp = new WSTemperature();
-            ITimeSeriesOutput results = await temp.GetTemperature(tempInput);
+            WSDewPoint dPoint = new WSDewPoint();
+            ITimeSeriesOutput results = await dPoint.GetDewPoint(tempInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

@@ -43,17 +43,21 @@ namespace SurfaceRunoff
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
+            if (this.Input.Geometry.Timezone.Offset == 0 && this.Input.Geometry.Point != null)
             {
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
+            else
+            {
+                this.Input.TimeLocalized = false;
+            }
 
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS SurfaceRunoff Data call
@@ -73,12 +77,12 @@ namespace SurfaceRunoff
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
-                    errorMsg = "ERROR: 'Source' for surfacerunoff was not found among available sources or is invalid.";
+                    errorMsg = "ERROR: Source for surfacerunoff was not found among available sources or is invalid.";
                     break;
             };
 
             // Adds Geometry metadata to the output metadata. NOT WORKING
-            this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
+            // this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
             this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);

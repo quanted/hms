@@ -1,10 +1,8 @@
-#FROM microsoft/aspnetcore:2.0 AS base
-FROM microsoft/dotnet:2.1-sdk AS base
+FROM microsoft/dotnet:latest AS base
 WORKDIR /app
 EXPOSE 80
 
-#FROM microsoft/aspnetcore-build:2.0 AS build
-FROM microsoft/dotnet:2.1-sdk AS build
+FROM microsoft/dotnet:latest AS build
 WORKDIR /src
 COPY HMS.sln ./
 COPY Web.Services/Web.Services.csproj Web.Services/
@@ -22,6 +20,11 @@ COPY SoilMoisture/SoilMoisture.csproj SoilMoisture/
 COPY Temperature/Temperature.csproj Temperature/
 COPY SubSurfaceFlow/SubSurfaceFlow.csproj SubSurfaceFlow/
 COPY Solar/Solar.csproj Solar/
+COPY Pressure/Pressure.csproj Pressure/
+COPY Radiation/Radiation.csproj Radiation/
+COPY Wind/Wind.csproj Wind/
+COPY DewPoint/DewPoint.csproj DewPoint/
+COPY Humidity/Humidity.csproj Humidity/
 COPY Evapotranspiration/Evapotranspiration.csproj Evapotranspiration/
 COPY SurfaceRunoff/SurfaceRunoff.csproj SurfaceRunoff/
 COPY GIS.Operations/GIS.Operations.csproj GIS.Operations/
@@ -33,6 +36,13 @@ COPY Nutrients/Nutrients.AQUATOX/Nutrients.AQUATOX.csproj Nutrients/Nutrients.AQ
 COPY Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj Nutrients/Nutrients.AQUATOX.UnitTests/
 COPY OrganicMatter/OrganicMatter.AQUATOX/OrganicMatter.AQUATOX.csproj OrganicMatter/OrganicMatter.AQUATOX/
 COPY OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj OrganicMatter/OrganicMatter.AQUATOX.UnitTests/
+COPY Chemicals/Chemicals.AQUATOX/Chemicals.AQUATOX.csproj Chemicals/Chemicals.AQUATOX/
+COPY Chemicals/Chemicals.AQUATOX.UnitTests/Chemicals.AQUATOX.UnitTests.csproj Chemicals/Chemicals.AQUATOX.UnitTests/
+COPY Diagenesis/Diagenesis.AQUATOX/Diagenesis.AQUATOX.csproj Diagenesis/Diagenesis.AQUATOX/
+COPY Diagenesis/Diagenesis.AQUATOX.UnitTests/Diagenesis.AQUATOX.UnitTests.csproj Diagenesis/Diagenesis.AQUATOX.UnitTests/
+COPY WatershedDelineation/WatershedDelineation.csproj WatershedDelineation/
+COPY ContaminantLoader/ContaminantLoader.csproj ContaminantLoader/
+
 RUN dotnet restore -nowarn:msb3202,nu1503
 COPY . .
 WORKDIR /src/Web.Services
@@ -44,8 +54,9 @@ RUN dotnet publish -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-COPY test_reports/ /src/
+#COPY test_reports/ /src/
 COPY . /src
-RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp2.0
+RUN ls /app/App_Data
+RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp2.2
 #ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]
 ENTRYPOINT ["dotnet", "Web.Services.dll"]

@@ -1,17 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\</OutputPath>
-    <DocumentationFile>bin\netcoreapp2.0\XmlComments.xml</DocumentationFile>
+    <DocumentationFile>bin\netcoreapp2.2\XmlComments.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>bin\netcoreapp2.2\XmlComments.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
   </PropertyGroup>
 
@@ -55,27 +66,50 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Examples" Version="2.9.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="2.4.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.9.1" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.2.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.DataAnnotations" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="3.1.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.7.11" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="4.5.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="4.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ContaminantLoader\ContaminantLoader.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\DewPoint\DewPoint.csproj" />
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj" />
+    <ProjectReference Include="..\Humidity\Humidity.csproj" />
+    <ProjectReference Include="..\Nutrients\Nutrients.AQUATOX\Nutrients.AQUATOX.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\Pressure\Pressure.csproj" />
+    <ProjectReference Include="..\Radiation\Radiation.csproj" />
     <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj" />
     <ProjectReference Include="..\Solar\Solar.csproj" />
     <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />
     <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />
     <ProjectReference Include="..\Temperature\Temperature.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\WatershedDelineation\WatershedDelineation.csproj" />
+    <ProjectReference Include="..\Wind\Wind.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="App_Data\catchments.sqlite">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="App_Data\hms_database.sqlite3">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

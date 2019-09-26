@@ -1,6 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Examples;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -187,7 +187,8 @@ namespace Web.Services.Controllers
     /// <summary>
     /// SoilMoisture controller for HMS.
     /// </summary>
-    [Route("api/hydrology/soilmoisture")]
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
+    [Route("api/hydrology/soilmoisture")]    
     public class WSSoilMoistureController : Controller
     {
         /// <summary>
@@ -196,9 +197,6 @@ namespace Web.Services.Controllers
         /// <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [Route("")]             // Default endpoint
-        [Route("v1.0")]         // Version 1.0 endpoint
-        //[SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExample))]
         [SwaggerResponseExample(200, typeof(SoilMoistureOutputExample))]
         [SwaggerRequestExample(typeof(SoilMoistureInput), typeof(SoilMoistureInputExampleFull))]
         public async Task<IActionResult> POST([FromBody]SoilMoistureInput evapoInput)

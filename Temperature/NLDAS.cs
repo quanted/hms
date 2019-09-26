@@ -177,7 +177,7 @@ namespace Temperature
                     {
                         case "all":
                         default:
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat),
@@ -187,7 +187,7 @@ namespace Temperature
                             );
                             break;
                         case "avg":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (average).ToString(input.DataValueFormat)
@@ -195,7 +195,7 @@ namespace Temperature
                             );
                             break;
                         case "high":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat)
@@ -203,7 +203,7 @@ namespace Temperature
                             );
                             break;
                         case "low":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (low).ToString(input.DataValueFormat)

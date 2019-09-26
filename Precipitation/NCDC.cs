@@ -26,33 +26,39 @@ namespace Precipitation
             ITimeSeriesOutput ncdcOutput = output;
 
             // Make call to get station metadata and add to output.Metadata
-            //string token = (input.Geometry.GeometryMetadata.ContainsKey("token")) ? input.Geometry.GeometryMetadata["token"] : (string)HttpContext.Current.Application["ncdc_token"];
             if (!input.Geometry.GeometryMetadata.ContainsKey("token"))
             {
-                errorMsg = "ERROR: No ncdc token provided. Please provide a valid ncdc token.";
-                return null;
+                input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
+            //    errorMsg = "ERROR: No NCEI token provided. Please provide a valid NCEI token.";
+            //    return null;
+            //}
             string station_url = "https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/";
+            if(input.Geometry.StationID != null && !input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            {
+                input.Geometry.GeometryMetadata.Add("stationID", input.Geometry.StationID);
+            }
             if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
             {
-                errorMsg = "ERROR: No ncdc stationID provided. Please provide a valid ncdc stationID.";
+                errorMsg = "ERROR: No NCEI stationID provided. Please provide a valid NCEI stationID.";
                 return null;
             }
-            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncdc", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
-            ncdcOutput.Metadata.Add("ncdc_temporalResolution", input.TemporalResolution);
-            ncdcOutput.Metadata.Add("ncdc_units", "mm");
+            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", ncdc.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
+            ncdcOutput.Metadata.Add("ncei", input.TemporalResolution);
+            ncdcOutput.Metadata.Add("ncei_units", "mm");
 
             // Data aggregation takes place within ncdc.GetData
-            Dictionary<string, double> data = ncdc.GetData(out errorMsg, "NCDC", input);
+            Dictionary<string, double> data = ncdc.GetData(out errorMsg, "PRCP", input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Set resulting data to output.Data
             ncdcOutput.Data = ConvertDict(out errorMsg, input.DataValueFormat, data);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            ncdcOutput.DataSource = "ncdc";
+            ncdcOutput.DataSource = "ncei";
             ncdcOutput.Dataset = "Precipitation";
-
+            ncdcOutput.Metadata.Add("column_1", "Date");
+            ncdcOutput.Metadata.Add("column_2", "NCEI Total");
             return ncdcOutput;
         }
 
@@ -63,7 +69,7 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, double> data)
+        public Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, double> data)
         {
             errorMsg = "";
 
@@ -82,7 +88,7 @@ namespace Precipitation
         /// <param name="source"></param>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        private Dictionary<string, string> SetMetadata(out string errorMsg, string source, Dictionary<string, string> metadata)
+        public Dictionary<string, string> SetMetadata(out string errorMsg, string source, Dictionary<string, string> metadata)
         {
             errorMsg = "";
             Dictionary<string, string> newMeta = new Dictionary<string, string>();

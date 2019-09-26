@@ -201,9 +201,9 @@ namespace Evapotranspiration
                 TMAX = thr;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHhourly(shhr, thr);
+                RHmin = Utilities.Utility.CalculateRH(shhr, thr, 1013.25);
                 RHmax = RHmin;
-
+                                
                 // Set relHumidityHr to RHmin or RHmax.
                 relHumidityHr = RHmin;
 
@@ -662,8 +662,8 @@ namespace Evapotranspiration
                 { "column_7", "Potential Evaporation" },
                 { "column_8", "Hourly Relative Humidity" },
                 { "column_9", "Potential Evapotranspiration" },
-                { "column_9.1", "Dew Point Temperature" },
-                { "column_9.2", "Cloud Coverage" }
+                { "column_10", "Dew Point Temperature" },
+                { "column_11", "Cloud Coverage" }
             };
             if (!hour)
             {
@@ -746,7 +746,6 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -756,6 +755,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (Exception ex)

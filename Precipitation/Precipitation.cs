@@ -43,7 +43,7 @@ namespace Precipitation
             errorMsg = "";
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset ==  0 && !this.Input.Source.Contains("ncdc"))
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
             {
                 Utilities.Time tz = new Utilities.Time();
                 this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
@@ -67,11 +67,12 @@ namespace Precipitation
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
-                case "ncdc":
+                case "ncei":
                     // NCDC Precipitation Data call
                     NCDC ncdc = new NCDC();
                     this.Output = ncdc.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
+                    this.Input.Source = "ncei";
                     break;
                 case "daymet":
                     // daymet Precipitation Data call
@@ -89,6 +90,12 @@ namespace Precipitation
                     // PRISM Precipitation Data call
                     PRISM prism = new PRISM();
                     this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "nwm":
+                    // wgen Precipitation Data call
+                    NWM nwm = new NWM();
+                    this.Output = nwm.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
@@ -122,7 +129,7 @@ namespace Precipitation
                     return GLDAS.CheckStatus(this.Input);
                 case "daymet":
                     return Daymet.CheckStatus(this.Input);
-                case "ncdc":
+                case "ncei":
                     return NCDC.CheckStatus(this.Input);
                 // TODO: Add check status function for PRISM
                 default:

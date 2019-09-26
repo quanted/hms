@@ -196,9 +196,17 @@ namespace Evapotranspiration
                 TMAX = thr;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHhourly(shhr, thr);
+                RHmin = Utilities.Utility.CalculateRH(shhr, thr, 1013.25);
                 RHmax = RHmin;
-
+                
+                // Check relative humidities
+                if (RHmax < RHmin)
+                {
+                    double swap = RHmin;
+                    RHmin = RHmax;
+                    RHmax = swap;
+                }
+                               
                 // Set relHumidityHr to RHmin or RHmax (it makes no difference in this case).
                 relHumidityHr = RHmin;
 
@@ -682,12 +690,11 @@ namespace Evapotranspiration
             WebClient myWC = new WebClient();
             try
             {
-                int retries = 5;                                        // Max number of request retries
+                int retries = 10;                                        // Max number of request retries
                 string status = "";                                     // response status code
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -697,6 +704,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (Exception ex)

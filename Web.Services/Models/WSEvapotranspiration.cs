@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Web.Services.Controllers;
+using Utilities;
 
 namespace Web.Services.Models
 {
@@ -17,7 +18,7 @@ namespace Web.Services.Models
         private enum EvapoSources { nldas, gldas, daymet, wgen, prism, ncdc, custom }
 
         /// <summary>
-        /// Gets evapotranspiration data using the given TimeSeriesInput parameters.
+        /// Gets Data Source evapotranspiration data (NLDAS, GLDAS) using the given TimeSeriesInput parameters.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -64,6 +65,10 @@ namespace Web.Services.Models
             // Gets the Evapotranspiration data.
             ITimeSeriesOutput result = evapo.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            // Get generic statistics
+            // TODO: Handle negative values
+            // result = Utilities.Statistics.GetStatistics(out errorMsg, evapo.Input, result);
 
             return result;
         }

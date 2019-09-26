@@ -9,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
-using Swashbuckle.AspNetCore.Examples;
-using Swashbuckle.AspNetCore.SwaggerGen;
+//using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Web.Services
 {
@@ -45,6 +45,7 @@ namespace Web.Services
             var xmlPath = Path.Combine(basePath, "XmlComments.xml");
             var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
 
+            services.AddSwaggerExamples();
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -56,8 +57,8 @@ namespace Web.Services
                 
                 c.IncludeXmlComments(xmlPath);
                 c.IncludeXmlComments(xmlDataPath);
-                c.OperationFilter<ExamplesOperationFilter>();
-                c.OperationFilter<DescriptionOperationFilter>();
+
+                c.ExampleFilters();
             });
 
         }
@@ -68,6 +69,7 @@ namespace Web.Services
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
+        /// <param name="loggerFactory"></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 

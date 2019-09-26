@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
@@ -56,6 +57,7 @@ namespace Web.Services.Tests
         [InlineData(gldasRequest)]
         public async Task ValidRequests(string inputString)
         {
+            Thread.Sleep(5000);
             string endpoint = "api/hydrology/subsurfaceflow";
             SubSurfaceFlowInput input = JsonConvert.DeserializeObject<SubSurfaceFlowInput>(inputString);
             Debug.WriteLine("Integration Test: SubsurfaceFlow controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

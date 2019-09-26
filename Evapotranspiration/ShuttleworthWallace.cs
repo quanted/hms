@@ -274,8 +274,16 @@ namespace Evapotranspiration
                 TMAX = tmax;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHmin(shmin, tmin);
-                RHmax = Utilities.Utility.CalculateRHmax(shmax, tmax);
+                RHmin = Utilities.Utility.CalculateRH(shmin, tmin, 1013.25);
+                RHmax = Utilities.Utility.CalculateRH(shmax, tmax, 1013.25);
+
+                // Check relative humidities
+                if (RHmax < RHmin)
+                {
+                    double swap = RHmin;
+                    RHmin = RHmax;
+                    RHmax = swap;
+                }
 
                 // Set relHumidityMin to RHmin and relHumidityMax to RHmax.
                 relHumidityMin = RHmin;
@@ -690,13 +698,13 @@ namespace Evapotranspiration
                 { "column_1", "Date" },
                 { "column_2", "Julian Day" },
                 { "column_3", "Minimum Temperature" },
-                { "column_3.1", "Maximum Temperature" },
-                { "column_3.2", "Mean Temperature" },
-                { "column_4", "Mean Solar Radiation" },
-                { "column_5", "Mean Wind Speed" },
-                { "column_6", "Minimum Relative Humidity" },
-                { "column_7", "Maximum Relative Humidity" },
-                { "column_8", "Potential Evapotranspiration" }
+                { "column_4", "Maximum Temperature" },
+                { "column_5", "Mean Temperature" },
+                { "column_6", "Mean Solar Radiation" },
+                { "column_7", "Mean Wind Speed" },
+                { "column_8", "Minimum Relative Humidity" },
+                { "column_9", "Maximum Relative Humidity" },
+                { "column_10", "Potential Evapotranspiration" }
             };
             if (inpt.TemporalResolution == "hourly")
             {
@@ -711,10 +719,10 @@ namespace Evapotranspiration
                     { "column_4", "Mean Solar Radiation" },
                     { "column_5", "Minimum Daily Temperature" },
                     { "column_6", "Maximum Daily Temperature" },
-                    { "column_6.1", "Mean Wind Speed" },
-                    { "column_7", "Minimum Relative Humidity" },
-                    { "column_8", "Maximum Relative Humidity" },
-                    { "column_9", "Potential Evapotranspiration" }
+                    { "column_7", "Mean Wind Speed" },
+                    { "column_8", "Minimum Relative Humidity" },
+                    { "column_9", "Maximum Relative Humidity" },
+                    { "column_10", "Potential Evapotranspiration" }
                 };
             }
             output.Data = new Dictionary<string, List<string>>();
@@ -786,7 +794,6 @@ namespace Evapotranspiration
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -796,6 +803,10 @@ namespace Evapotranspiration
                     reader.Close();
                     response.Close();
                     retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (Exception ex)
