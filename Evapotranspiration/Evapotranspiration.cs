@@ -167,19 +167,10 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: Algorithm is incompatible with NCDC data source.";
                 return null;
             }
-            /*if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
+            if(this.Algorithm == "hargreaves" && this.Input.TemporalResolution == "hourly")
             {
-                errorMsg = "ERROR: No data available for the requested Source/Algorithm/Date range.";
+                errorMsg = "ERROR: Algorithm does not support hourly aggregation.";
                 return null;
-            }*/
-            if (this.Input.Source == "custom")
-            {
-                if (this.Algorithm == "penmanhourly" || this.Algorithm == "hspf")
-                {
-                    errorMsg = "ERROR: Hourly algorithms do not yet support custom data.";
-                    return null;
-                }
-                this.Input.Geometry.GeometryMetadata["userdata"] = UserData;
             }
 
             switch (this.Algorithm)
