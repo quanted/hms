@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.Extensions.PlatformAbstractions;
+//using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 //using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.Extensions.Logging;
