@@ -164,9 +164,7 @@ namespace Globals
     //2        NonPointSource
     //    } // end Alt_LoadingsType
 
-
-
-
+                
     public enum T_SVType
     {
         StV,
@@ -191,11 +189,11 @@ namespace Globals
         OrgTox18,
         OrgTox19,
         OrgTox20,
-        //OtherOutput,
+        OtherOutput,
         NTrack,
-        PTrack
-        //NIntrnl,
-        //PIntrnl
+        PTrack,
+        NIntrnl,
+        PIntrnl
     } // end T_SVType
 
 
@@ -252,8 +250,17 @@ namespace Globals
         Org_Matt
     } // end DetrDataType
 
+    public enum TMacroType
+    {
+        Benthic,
+        Rootedfloat,
+        Freefloat
+    } // end TMacroType
+
+
     public class Consts
     {
+        public const int NToxs = 20;
         public const double Tiny = 5.0e-19;   // mach. accuracy = 1.0e-19
         public const double Small = 1.0e-6;
         public const double VSmall = 1.0e-10;
@@ -265,11 +272,40 @@ namespace Globals
         public const double Detr_OM_2_OC = 1.90;
         public const double KAnaerobic = 0.3;  //  (1/d)  decomp reduction - check Sanders, Gunnison
 
+        public const AllVariables FirstPlant = AllVariables.BlGreens1;
         public const AllVariables FirstDetr = AllVariables.SedmRefrDetr;
         public const AllVariables LastDetr = AllVariables.SuspLabDetr;
+        public const AllVariables LastPlant = AllVariables.Macrophytes6;
+        public const AllVariables FirstAlgae = AllVariables.Diatoms1;
+        public const AllVariables LastAlgae = AllVariables.OtherAlg2;
+        public const AllVariables FirstDiatom = AllVariables.Diatoms1;
+        public const AllVariables LastDiatom = AllVariables.Diatoms6;
+        public const AllVariables FirstGreens = AllVariables.Greens1;
+        public const AllVariables LastGreens = AllVariables.Greens6;
+        public const AllVariables FirstBlGreen = AllVariables.BlGreens1;
+        public const AllVariables LastBlGreen = AllVariables.BlGreens6;
+        public const AllVariables FirstMacro = AllVariables.Macrophytes1;
+        public const AllVariables LastMacro = AllVariables.Macrophytes6;
+        public const AllVariables FirstAnimal = AllVariables.SuspFeeder1;
+        public const AllVariables LastAnimal = AllVariables.Fish15;
+        public const AllVariables FirstInvert = AllVariables.SuspFeeder1;
+        public const AllVariables LastInvert = AllVariables.PredInvt4;
+        public const AllVariables FirstDetrInv = AllVariables.DepFeeder1;
+        public const AllVariables LastDetrInv = AllVariables.DepFeeder3;
+        public const AllVariables FirstFish = AllVariables.SmForageFish1;
+        public const AllVariables LastFish = AllVariables.Fish15;
+        public const AllVariables FirstBiota = AllVariables.Diatoms1;
+        public const AllVariables LastBiota = AllVariables.Fish15;
+
 
         public const T_SVType FirstOrgTxTyp = T_SVType.OrgTox1;
         public const T_SVType LastOrgTxTyp = T_SVType.OrgTox20;
+    }
+
+    public struct TSVConc
+    {
+        public double SVConc;
+        public DateTime Time;
     }
 
     public struct TParameter

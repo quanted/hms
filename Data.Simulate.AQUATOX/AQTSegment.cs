@@ -8,6 +8,7 @@ using AQUATOX.Volume;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using AQUATOX.Chemicals;
+using AQUATOX.Plants;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -399,6 +400,114 @@ namespace AQUATOX.AQTSegment
             else Decomp = 0.0;
             return Decomp;
         }  // Decomposition
+
+
+        // TSTATEVARIABLE IDENTIFICATION METHODS 9/13/98 jsc
+        public bool IsPlant()
+        {
+            bool result;
+            result = (NState >= Consts.FirstPlant && NState <= Consts.LastPlant) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsMacrophyte()
+        {
+            bool result;
+            result = (NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsAlgae()
+        {
+            bool result;
+            result = (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsAnimal()
+        {
+            bool result;
+            result = (NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsFish()
+        {
+            bool result;
+            result = (NState >= Consts.FirstFish && NState <= Consts.LastFish) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsSmallFish()
+        {
+            bool result;
+            result = ((NState == AllVariables.SmForageFish1) || (NState == AllVariables.SmForageFish2) || (NState == AllVariables.SmBottomFish1) || (NState == AllVariables.SmBottomFish2) 
+                   || (NState == AllVariables.SmGameFish1)) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsSmallPI()
+        {
+            bool result;
+            result = (NState >= AllVariables.SmallPI1 && NState <= AllVariables.SmallPI2) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsInvertebrate()
+        {
+            bool result;
+            result = (NState >= Consts.FirstInvert && NState <= Consts.LastInvert) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public bool IsPlantOrAnimal()
+        {
+            bool result;
+            result = (NState >= Consts.FirstBiota && NState <= Consts.LastBiota) && (SVType == T_SVType.StV);
+            return result;
+        }
+
+        public virtual double WetToDry()
+        {
+            double result;
+            ReminRecord RR = Location.Remin;
+            switch (NState)
+            {
+                case AllVariables.SedmRefrDetr:
+                    result = RR.Wet2DrySRefr;
+                    break;
+                case AllVariables.SedmLabDetr:
+                    result = RR.Wet2DrySLab;
+                    break;
+                case AllVariables.SuspRefrDetr:
+                    result = RR.Wet2DryPRefr;
+                    break;
+                case AllVariables.SuspLabDetr:
+                    result = RR.Wet2DryPLab;
+                    break;
+                case AllVariables.DissRefrDetr:
+                case AllVariables.DissLabDetr:
+                    result = 1.0;
+                    break;
+                case AllVariables.ReDOMPore:
+                case AllVariables.LaDOMPore:
+                case AllVariables.PoreWater:
+                    result = 1.0;
+                    break;
+                case AllVariables.BuriedRefrDetr:
+                case AllVariables.BuriedLabileDetr:
+                    result = 1.0;
+                    break;
+                default:
+                    throw new Exception("TStateVariable Wet To Dry called for irrelevant variable.");
+            }
+            // case
+
+            return result;
+        }
+
+
+
     }  // end TStateVariable
 
 
@@ -446,6 +555,8 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public int YearNum_PrevStep = 0;      // The year number during the previous step of the model run; used to determine when a year has passed
 
         [JsonIgnore] public TStateVariable[,,] MemLocRec = null;   // Array of pointers to SV loc in memory
+        [JsonIgnore] public List<TSVConc> PLightVals;
+
 
         public AQUATOXSegment()
         {
@@ -788,27 +899,64 @@ namespace AQUATOX.AQTSegment
         }
 
 
+        public void DoThisEveryStep_CheckSloughEvent(TPlant P)  //turn off sloughing following a 1/day slough event
+        {
+            if (P.IsPlant())
+              if (P.SloughEvent)
+                if ((P.State <= P.SloughLevel))
+                   P.SloughEvent = false;
+                    // HMS removed code to update progress dialog 
+        }
+
+        public void DoThisEveryStep_UpdateLightVals()
+        {
+            // Time history of daily average light values
+            TSVConc pconc;
+            TSVConc newconc;
+            int i;
+            TLight PL;
+            bool deleted;
+            PL = GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
+            newconc.SVConc = PL.DailyLight;
+            newconc.Time = TPresent;
+            PLightVals.Insert(0, newconc);
+            i = PLightVals.Count - 1;
+            do
+            {
+                // clean up any data points greater than 96 hours old
+                deleted = false;
+                pconc = PLightVals[i];
+                if ((TPresent - pconc.Time).TotalDays > 4)                  // 4 days or 96 hours
+                {
+                    PLightVals.RemoveAt(i); 
+                    deleted = true;
+                }
+                i -= 1;
+            } while (!(!deleted || (i < 0)));
+        }
+
         public void DoThisEveryStep(double hdid)
         {
             // Procedure runs after the derivatives have completed each time step
             int CurrentYearNum;
             // -----------------------------------------------------------------
-            //int i;
+            int i;
 
-            //// Dothiseverystep
-            //for (i = 0; i < SV.Count; i++)
-            //{
-            //    DoThisEveryStep_CheckSloughEvent(At(i));
-            //}
-            //DoThisEveryStep_UpdateLightVals();
-            //// update light history values for calculating effects
-            //DoThisEveryStep_UpdateO2Concs();
-            //// update oxygen concentration history for calculating effects
-            //DoThisEveryStep_UpdateSedConcs();
-            //// update sediment conc. history for calculating effects
+            // Dothiseverystep
+            for (i = 0; i < SV.Count; i++)
+            {
+                DoThisEveryStep_CheckSloughEvent(SV[i] as TPlant);
+            }
+
+            DoThisEveryStep_UpdateLightVals();   // update light history values for calculating effects
+
+            //DoThisEveryStep_UpdateO2Concs();   // update oxygen concentration history for calculating effects
+
+            //DoThisEveryStep_UpdateSedConcs(); // update sediment conc. history for calculating effects
+
             //DoThisEveryStep_MultiFishPromote();
-            //DoThisEveryStep_FishRecruit();
-            //// add effects of recruitment to all fish vars.  Must be called after multifish promote.
+            //DoThisEveryStep_FishRecruit();     // add effects of recruitment to all fish vars.  Must be called after multifish promote.
+
             //DoThisEveryStep_Anadromous_Migr();
             //if (GetStatePointer(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) != null)
             //{
@@ -822,14 +970,18 @@ namespace AQUATOX.AQTSegment
             //{
             //    DoThisEveryStep_SetFracKilled_and_Spawned(At(i));
             //}
+
             //DoThisEveryStep_SumAggr();
-            //// update meandischarge calculation each year
+
+            
 
             int dayspassed = (TPresent - ModelStartTime).Days;
             CurrentYearNum = (int)((dayspassed + 2.0) / 365.0) + 1;
             if (CurrentYearNum > YearNum_PrevStep)   // (!EstuarySegment && (CurrentYearNum > YearNum_PrevStep))
-            { TVolume PV = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-                PV.SetMeanDischarge(TPresent); }
+            {
+                TVolume PV = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                PV.SetMeanDischarge(TPresent); // update meandischarge calculation each year
+            }     
 
             // days
             //if (TPresent - LastPctEmbedCalc > 60)
@@ -1468,6 +1620,26 @@ namespace AQUATOX.AQTSegment
 
             return Location.Locale.ICZMean;  // DynZMean is null
         }
+
+        // variable zmean of seg. or entire system if stratified
+        public double StaticZMean()
+        {
+         
+            TVolume PVol;
+            if (Location.Locale.UseBathymetry)
+            {
+                // zmean does not vary in this case
+                return Location.Locale.ICZMean;
+            }
+            else
+            {
+                PVol = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                return PVol.InitialCond / Location.Locale.SurfArea;    // Initial zmean based on const surf area over vertical profile
+                // m         // m3                         // m2
+            }
+        }
+
+
 
         public void SetupLinks()
         {
@@ -2420,7 +2592,6 @@ namespace AQUATOX.AQTSegment
 
         public double Extinct(bool Incl_Periphyton, bool Incl_BenthicMacro, bool Incl_FloatingMacro, bool IsSurfaceFloater, int OrgFlag)
         {
-            // Modified to allow for weighted average in the event of linked-mode well-mixed stratification, 2-27-08
             // orgflag = 0 -- Normal execution,  orgflag = 1, organics only, orgflag = 2, inorganics only, orgflag = 3 phytoplankton only
             double PhytoExtinction;
             double TempExt;
@@ -2433,7 +2604,7 @@ namespace AQUATOX.AQTSegment
             //double ThisSegThick;
             //double OtherSegThick;
   
-            PhytoExtinction = 0.0;
+            PhytoExtinction = 0.0;   // FIXME ADD PLANT
             // initialize
             //if ((OrgFlag == 0) || (OrgFlag == 3))
             //{
@@ -2547,10 +2718,55 @@ namespace AQUATOX.AQTSegment
         }
 
         // phcorr
+
+        // -------------------------------------------------------------------------------------------------------
+        // (************************************)
+        // (* Straskraba, '76; Hutchinson, '57 *)
+        // (* BUT simplify to linear relation  *)
+        // (************************************)
+
+        // tcorr
         // -------------------------------------------------------------------------------------------------------
 
-
-
+        public double ZEuphotic()
+        {
+            double result;
+            double RExt;
+            double ZEup;
+            RExt = Extinct(false, false, true, false, 0);
+            if (RExt <= 0.0)
+            {   // 4.605 is ln 1% of surface light
+                // m                            // 1/m
+                ZEup = 4.605 / Location.Locale.ECoeffWater;
+            }
+            else
+            {
+                ZEup = 4.605 / RExt;
+            }
+            if (Location.Locale.UseBathymetry)
+            {
+                //@ Unsupported property or method(D): 'ZMax'
+                if ((ZEup > Location.Locale.ZMax))
+                {
+                    //@ Unsupported property or method(D): 'ZMax'
+                    ZEup = Location.Locale.ZMax;
+                }
+            }
+            // else if (ZEup > DynamicZMean) then ZEup := DynamicZMean;
+            result = ZEup;
+            return result;
+        }
+        
+        public double SalEffect(double Min, double Max, double Coeff1, double Coeff2)
+        {
+            double Salt;
+            Salt = GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+            if (Salt == -1) return 1;
+            if ((Salt >= Min) && (Salt <= Max)) return 1;
+            else if (Salt < Min) return Coeff1 * Math.Exp(Salt - Min);
+            else return Coeff2 * Math.Exp(Max - Salt);
+        }
+        
     }  // end TAQUATOXSegment
 
 

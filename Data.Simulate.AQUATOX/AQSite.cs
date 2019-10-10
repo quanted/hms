@@ -99,11 +99,11 @@ namespace AQUATOX.AQSite
         public string ConstRef8;
         public double Min_Vol_Frac;
         public string XMin_Vol_Frac;
-        //public double WaterShedArea;
-        //public string XWaterShedArea;
-        //public bool EnterTotalLength;
-        //public double TotalLength;
-        //public string XTotalLength;
+        public double WaterShedArea;
+        public string XWaterShedArea;
+        public bool EnterTotalLength;
+        public double TotalLength;
+        public string XTotalLength;
         public double ECoeffSED;
         public string XECoeffSED;
         public double ECoeffDOM;
