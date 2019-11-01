@@ -1,11 +1,16 @@
 ﻿using Data;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Utilities;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Diagnostics;
 
 namespace Web.Services.Models
 {
@@ -20,18 +25,18 @@ namespace Web.Services.Models
         /// Specifies the type of geometry provided
         /// Valid values: "huc", "commid", "catchmentid", "catchment", "flowline", "points"
         /// </summary>
-        public string GeometryType;
+        public string GeometryType { get; set; }
 
         /// <summary>
         /// Contains the geometry data, type specified by geometry Type. 
         /// Valid formats are: an ID for type huc, commid, and catchmentid; geojson for types catchment and flowline; and points for type points
         /// </summary>
-        public string GeometryInput;
+        public string GeometryInput { get; set; }
 
         /// <summary>
         /// Contains the type as key and input as value, used when multiple inputs are needed for a request
         /// </summary>
-        public Dictionary<string, string> GeometryInputs;
+        public Dictionary<string, string> GeometryInputs { get; set; }
     }
 
     /// <summary>
@@ -39,9 +44,10 @@ namespace Web.Services.Models
     /// </summary>
     public class GeometryResponse
     {
-        public string id;
-        public string status;
-        public GeometryData data;
+        public string job_id { get; set; }
+        public string status { get; set; }
+        public string data { get; set; }
+        public GeometryData geometryData { get; set; }
     }
 
 
@@ -53,12 +59,12 @@ namespace Web.Services.Models
         /// <summary>
         /// Geometry component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, Catchment> geometry;
+        public Dictionary<string, Catchment> geometry { get; set; }
 
         /// <summary>
         /// Metadata component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, string> metadata;
+        public Dictionary<string, object> metadata { get; set; }
     }
 
     /// <summary>
@@ -69,7 +75,7 @@ namespace Web.Services.Models
         /// <summary>
         /// List of points in the Catchment
         /// </summary>
-        public List<Point> points;
+        public List<Point> points { get; set; }
     }
 
     /// <summary>
@@ -80,23 +86,24 @@ namespace Web.Services.Models
         /// <summary>
         /// Latitude of centroid
         /// </summary>
-        public double latitude;
+
+        public double latitude { get; set; }
         /// <summary>
         /// Longitude of centroid
         /// </summary>
-        public double longitude;
+        public double longitude { get; set; }
         /// <summary>
         /// Total cell area
         /// </summary>
-        public double cellArea;
+        public double cellArea { get; set; }
         /// <summary>
         /// Cell area that intersects the catchment
         /// </summary>
-        public double containedArea;
+        public double containedArea { get; set; }
         /// <summary>
         /// Percent coverage of the intersection
         /// </summary>
-        public double percentArea;
+        public double percentArea { get; set; }
     }
 
     /// <summary>
@@ -107,11 +114,11 @@ namespace Web.Services.Models
         /// <summary>
         /// Point latitude
         /// </summary>
-        public double Latitude;
+        public double Latitude { get; set; }
         /// <summary>
         /// Point longitude
         /// </summary>
-        public double Longitude;
+        public double Longitude { get; set; }
 
     }
 
@@ -123,11 +130,11 @@ namespace Web.Services.Models
     {
 
         // local testing
-        // private string baseUrl = "http://localhost:8000";
+        private string baseUrl = "http://localhost:8000";
         // qedinternal url
         // private string baseUrl = "https://qedinternal.epa.gov";
         // deployment url
-        private string baseUrl = "http://172.20.100.15";
+        // private string baseUrl = "http://172.20.100.15";
 
 
 
@@ -160,23 +167,30 @@ namespace Web.Services.Models
             string error = "";
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             GeometryResponse geo = new GeometryResponse();
-
+            this.baseUrl = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : this.baseUrl;
             string requestUrl = this.baseUrl + "/hms/rest/api/v2/hms/gis/percentage/";
+
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
 
             if (input.GeometryInputs != null)
             {
                 if (input.GeometryInputs.ContainsKey("huc8") && input.GeometryInputs.ContainsKey("commid"))
                 {
                     Dictionary<string, string> taskID;
-                    string queryUrl = requestUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"];
+                    string queryUrl = requestUrl + "?huc_8_num=" + input.GeometryInputs["huc8"] + "&com_id_num=" + input.GeometryInputs["commid"] + "&grid_source=" + input.Source;
                     using (var httpClientHandler = new HttpClientHandler())
                     {
                         httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
                         using (var client = new HttpClient(httpClientHandler))
                         {
-                            taskID = JsonConvert.DeserializeObject<Dictionary<string, string>>(client.GetStringAsync(queryUrl).Result);
+                            var result = client.GetStringAsync(queryUrl);
+                            taskID = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Result, options);
                         }
-                        geo = this.RequestData(taskID["job_id"], out error);
+                        geo = await this.RequestData(taskID["job_id"]);
                     }
 
                 }
@@ -195,23 +209,29 @@ namespace Web.Services.Models
                         string hucID = input.GeometryInput;
                         using (var client = new HttpClient())
                         {
-                            string queryUrl = baseUrl + "?huc_8_id=" + hucID;
+                            string queryUrl = requestUrl + "?huc_8_num=" + hucID + "&grid_source=" + input.Source;
                             client.Timeout = TimeSpan.FromMinutes(10);
-                            geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
+                            Task<string> request = client.GetStringAsync(queryUrl);
+                            var result = request.Result;
+                            GeometryResponse resp = JsonSerializer.Deserialize<GeometryResponse>(result, options);
+                            Thread.Sleep(500);
+                            geo = await this.RequestData(resp.job_id);
                         }
-                        //goto default;
                         break;
-                    case "commid":
+                    case "comid":
                         // use case 3
-                        //string commid = input.GeometryInput;
-                        //using (var client = new HttpClient())
-                        //{
-                        //    string queryUrl = baseUrl + "?com_id=" + commid;
-                        //    client.Timeout = TimeSpan.FromMinutes(10);
-                        //    geo = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(queryUrl).Result);
-                        //}
-                        goto default;
-                        //break;
+                        string comID = input.GeometryInput;
+                        using (var client = new HttpClient())
+                        {
+                            string queryUrl = requestUrl + "?com_id_list=" + comID + "&grid_source=" + input.Source;
+                            client.Timeout = TimeSpan.FromMinutes(10);
+                            Task<string> request = client.GetStringAsync(queryUrl);
+                            var result = request.Result;
+                            GeometryResponse resp = JsonSerializer.Deserialize<GeometryResponse>(result, options);
+                            Thread.Sleep(500);
+                            geo = await this.RequestData(resp.job_id);
+                        }
+                        break;
                     case "catchmentid":
                         // use case 3
                         // string catchmentID = input.GeometryInput;
@@ -238,9 +258,17 @@ namespace Web.Services.Models
                         goto default;
                         //break;
                     case "test":
-                        string testGeometry = "{\"geometry\":{\"9311911\": { \"points\": [ { \"cellArea\": 0.015624999999992895,  \"containedArea\": 4.178630503273804e-05,  \"longitude\": -71.43749999999996,  \"latitude\": 44.18749999999999,  \"percentArea\": 0.26743235220964506 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.005083393397351494,  \"longitude\": -71.31249999999997,  \"latitude\": 44.18750000000001,  \"percentArea\": 32.53371774305696 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.0002419268603100419,  \"longitude\": -71.31249999999997,  \"latitude\": 44.31249999999997,  \"percentArea\": 1.5483319059846201 } ] } },  \"metadata\": { \"execution time\": 86.99717831611633,  \"nldas source\": \"https://ldas.gsfc.nasa.gov/nldas/gis/NLDAS_Grid_Reference.zip\",  \"number of points\": 3,  \"request date\": \"Thu, 22 Mar 2018 11:46:44 GMT\",  \"shapefile source\": \"ftp://newftp.epa.gov/exposure/BasinsData/NHDPlus21/NHDPlus01060002.zip\" } }";
-                        //string testGeometry = "{\"Geometry\": {\"02080107\": [{\"Latitude\": 37.437499999999972,\"Longitude\": -76.687499999999972,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.00559514073505796,\"PercentArea\": 35.8089007043628},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.5625,\"CellArea\": 0.0156250000000053,\"ContainedArea\": 0.0100796700330301,\"PercentArea\": 64.5098882113707},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.437499999999972,\"CellArea\": 0.0156250000000142,\"ContainedArea\": 0.00780989236262298,\"PercentArea\": 49.9833111207416},{\"Latitude\": 37.437499999999972,\"Longitude\": -76.312499999999957,\"CellArea\": 0.0156250000000036,\"ContainedArea\": 0.0012605882348706,\"PercentArea\": 8.06776470316997}]},\"Metadata\": {}}";
-                        geo = JsonConvert.DeserializeObject<GeometryResponse>(testGeometry);
+                        try
+                        {
+                            string testGeometry = "{\"geometry\":{\"9311911\": { \"points\": [ { \"cellArea\": 0.015624999999992895,  \"containedArea\": 4.178630503273804e-05,  \"longitude\": -71.43749999999996,  \"latitude\": 44.18749999999999,  \"percentArea\": 0.26743235220964506 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.005083393397351494,  \"longitude\": -71.31249999999997,  \"latitude\": 44.18750000000001,  \"percentArea\": 32.53371774305696 },  { \"cellArea\": 0.015624999999996447,  \"containedArea\": 0.0002419268603100419,  \"longitude\": -71.31249999999997,  \"latitude\": 44.31249999999997,  \"percentArea\": 1.5483319059846201 } ] } },  \"metadata\": { \"execution time\": 86.99717831611633,  \"nldas source\": \"https://ldas.gsfc.nasa.gov/nldas/gis/NLDAS_Grid_Reference.zip\",  \"number of points\": 3,  \"request date\": \"Thu, 22 Mar 2018 11:46:44 GMT\",  \"shapefile source\": \"ftp://newftp.epa.gov/exposure/BasinsData/NHDPlus21/NHDPlus01060002.zip\" } }";
+                            string testResponse = System.IO.File.ReadAllText(@"App_Data\test_nldas_grid.json");
+                            geo = JsonSerializer.Deserialize<GeometryResponse>(testResponse, options);
+                            geo.geometryData = JsonSerializer.Deserialize<GeometryData>(geo.data, options);
+                        }
+                        catch(JsonException ex)
+                        {
+                            string jsonError = ex.Message;
+                        }
                         break;
                     default:
                         return err.ReturnError("Input error - GeometryType provided is invalid. Provided value = " + input.GeometryType);
@@ -255,7 +283,7 @@ namespace Web.Services.Models
             // Collect all unique points in Catchment
             List<GeometryPoint> points = new List<GeometryPoint>();
             List<string> pointsSTR = new List<string>();
-            foreach (KeyValuePair<string, Catchment> k in geo.data.geometry)
+            foreach (KeyValuePair<string, Catchment> k in geo.geometryData.geometry)
             {
                 foreach (Point cp in k.Value.points)
                 {
@@ -285,6 +313,10 @@ namespace Web.Services.Models
                     Latitude = point.Latitude,
                     Longitude = point.Longitude
                 };
+                if (surfaceFlow.Keys.Contains(key) || subsurfaceFlow.Keys.Contains(key))
+                {
+                    continue;
+                }
 
                 // Initialize surfaceFlow catchment point object
                 errorMsg = "";
@@ -311,8 +343,8 @@ namespace Web.Services.Models
             // Parallelized surfaceRunoff
             object outputListLock = new object();
             List<string> surfaceError = new List<string>();
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
-            Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
+            var pOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+            Parallel.ForEach(surfaceFlow, pOptions, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
             {
                 string errorM = "";
                 surF.Value.GetData(out errorM);
@@ -324,7 +356,7 @@ namespace Web.Services.Models
 
             // Parallelized subsurfaceFlow
             List<string> subsurfaceError = new List<string>();
-            Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
+            Parallel.ForEach(subsurfaceFlow, pOptions, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
             {
                 string errorM = "";
                 subF.Value.GetData(out errorM);
@@ -342,7 +374,7 @@ namespace Web.Services.Models
             ITimeSeriesOutput iOutput = outputFactory.Initialize();
             var options2 = new ParallelOptions { MaxDegreeOfParallelism = 1 };
             Dictionary<string, string> catchmentMeta = new Dictionary<string, string>();
-            Parallel.ForEach(geo.data.geometry, options2, (KeyValuePair<string, Catchment> catchments) => {
+            Parallel.ForEach(geo.geometryData.geometry, options2, (KeyValuePair<string, Catchment> catchments) => {
                 string catchmentID = catchments.Key;
                 List<ITimeSeriesOutput> catchmentPoints = new List<ITimeSeriesOutput>();
                 foreach (Point cp in catchments.Value.points)
@@ -353,6 +385,12 @@ namespace Web.Services.Models
                         Longitude = cp.longitude
                     };
                     string key = point.Latitude.ToString() + "," + point.Longitude.ToString();
+                    if (subsurfaceFlow[key].Output == null || surfaceFlow[key].Output == null)
+                    {
+                        Debug.WriteLine("Key:" + key + " was not found");
+                        continue;
+                    }
+
                     ITimeSeriesOutput output1 = Utilities.Merger.ModifyTimeSeries(surfaceFlow[key].Output, cp.percentArea / 100);
                     ITimeSeriesOutput output2 = Utilities.Merger.ModifyTimeSeries(subsurfaceFlow[key].Output, cp.percentArea / 100);
 
@@ -388,11 +426,11 @@ namespace Web.Services.Models
             output.Metadata[input.Source + "_points"] = string.Join(", ", pointsSTR);
 
             // Adding geometry metadata to output metadata
-            foreach (KeyValuePair<string, string> kv in geo.data.metadata)
+            foreach (KeyValuePair<string, object> kv in geo.geometryData.metadata)
             {
                 if (!output.Metadata.ContainsKey(kv.Key))
                 {
-                    output.Metadata.Add(kv.Key, kv.Value);
+                    output.Metadata.Add(kv.Key, kv.Value.ToString());
                 }
             }
 
@@ -423,9 +461,14 @@ namespace Web.Services.Models
         /// <param name="taskID"></param>
         /// <param name="error"></param>
         /// <returns></returns>
-        public GeometryResponse RequestData(string taskID, out string error)
+        public async Task<GeometryResponse> RequestData(string taskID)
         {
-            error = "";
+            string error = "";
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
 
             GeometryResponse result = new GeometryResponse();
 
@@ -446,7 +489,16 @@ namespace Web.Services.Models
                     httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
                     using (var client = new HttpClient(httpClientHandler))
                     {
-                        result = JsonConvert.DeserializeObject<GeometryResponse>(client.GetStringAsync(dataUrl).Result);
+                        var r = client.GetStringAsync(dataUrl);
+                        await r;
+                        try
+                        {
+                            result = JsonSerializer.Deserialize<GeometryResponse>(r.Result, options);
+                        }
+                        catch(JsonException ex)
+                        {
+                            string test = ex.Message;
+                        }
                     }
                 }
                 status = result.status;
@@ -459,6 +511,17 @@ namespace Web.Services.Models
             if (status.Equals("FAILURE"))
             {
                 error = "Task to retrieve all gridpoints encountered an error.";
+            }
+            else
+            {
+                try
+                {
+                    result.geometryData = JsonSerializer.Deserialize<GeometryData>(result.data, options);
+                }
+                catch (JsonException ex)
+                {
+                    string test = ex.Message;
+                }
             }
 
             return result;

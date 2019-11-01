@@ -10,31 +10,31 @@ using Web.Services.Models;
 
 namespace Web.Services.Controllers
 {
-    /// <summary>
-    /// Dew Point Input that implements TimeSeriesInput object
-    /// </summary>
-    public class DewPointInput : TimeSeriesInput
-    {
-        // Add extra Dew Point specific variables here
-    }
 
+    /// <summary>
+    /// Temperature Input that implements TimeSeriesInput object
+    /// </summary>
+    public class TemperatureInput : TimeSeriesInput
+    {
+        // Add extra evapotranspiration specific variables here
+    }
 
     // --------------- Swashbuckle Examples --------------- //
 
     /// <summary>
-    /// Swashbuckle Dew Point POST request example
+    /// Swashbuckle Temperature POST request example
     /// </summary>
-    public class DewPointInputExample : IExamplesProvider
+    public class TemperatureInputExample : IExamplesProvider<TemperatureInput>
     {
         /// <summary>
         /// Get example function.
         /// </summary>
         /// <returns></returns>
-        public object GetExamples()
+        public TemperatureInput GetExamples()
         {
-            DewPointInput example = new DewPointInput()
+            TemperatureInput example = new TemperatureInput()
             {
-                Source = "prism",
+                Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -59,134 +59,27 @@ namespace Web.Services.Controllers
         }
     }
 
-    /// <summary>
-    /// Swashbuckle Dew Point POST request example
-    /// </summary>
-    public class DewPointInputExampleFull : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            DewPointInput example = new DewPointInput()
-            {
-                Source = "prism",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08),
-                    DateTimeFormat = "yyyy-MM-dd HH"
-                },
-                Geometry = new TimeSeriesGeometry()
-                {
-                    Description = "EPA Athens Office",
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
-                    GeometryMetadata = new Dictionary<string, string>()
-                    {
-                        { "City", "Athens" },
-                        { "State", "Georgia"},
-                        { "Country", "United States" }
-                    },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
-                },
-                DataValueFormat = "E3",
-                TemporalResolution = "default",
-                TimeLocalized = true,
-                Units = "default",
-                OutputFormat = "json"
-            };
-            return example;
-        }
-    }
+    // --------------- Temperature Controller --------------- //
 
     /// <summary>
-    /// Swashbucle DewPoint Output example
-    /// </summary>
-    public class DewPointOutputExample : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput output = oFactory.Initialize();
-            output.Dataset = "Dew Point";
-            output.DataSource = "nldas";
-            output.Metadata = new Dictionary<string, string>()
-            {
-                { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
-                { "nldas_param_short_name", "TMP2m" },
-                { "nldas_param_name", "2-m above ground temperature" },
-                { "nldas_unit", "kg/m^2" },
-                { "nldas_undef", "  9.9990e+20" },
-                { "nldas_begin_time", "2015/01/01/00" },
-                { "nldas_end_time", "2015/01/01/05" },
-                { "nldas_time_interval[hour]", "1" },
-                { "nldas_tot_record", "5" },
-                { "nldas_grid_y", "71" },
-                { "nldas_grid_x", "333" },
-                { "nldas_elevation[m]", "219.065796" },
-                { "nldas_dlat", "0.125000" },
-                { "nldas_dlon", "0.125000" },
-                { "nldas_ydim(original data set)", "224" },
-                { "nldas_xdim(original data set)", "464" },
-                { "nldas_start_lat(original data set)", "  25.0625" },
-                { "nldas_start_lon(original data set)", "-124.9375" },
-                { "nldas_Last_update", "Fri Jun  2 15:41:10 2017" },
-                { "nldas_begin_time_index", "315563" },
-                { "nldas_end_time_index", "315731" },
-                { "nldas_lat", "  33.9375" },
-                { "nldas_lon", " -83.3125" },
-                { "nldas_Request_time", "Fri Jun  2 20:00:24 2017" }
-            };
-            output.Data = new Dictionary<string, List<string>>()
-            {
-                { "2015-01-01 00Z", new List<string>() { "2.764E+002" } },
-                { "2015-01-01 01Z", new List<string>() { "2.754E+002" } },
-                { "2015-01-01 02Z", new List<string>() { "2.747E+002" } },
-                { "2015-01-01 03Z", new List<string>() { "2.741E+002" } },
-                { "2015-01-01 04Z", new List<string>() { "2.735E+002" } },
-                { "2015-01-01 05Z", new List<string>() { "2.731E+002" } },
-            };
-            return output;
-        }
-    }
-
-
-    // --------------- DewPoint Controller --------------- //
-
-    /// <summary>
-    /// DewPoint controller for HMS.
+    /// Temperature controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api/meteorology/dewpoint")]
-    public class WSDewPointController : Controller
+    [Route("api/hydrology/temperature")]
+    [Produces("application/json")]
+    public class WSTemperatureController : Controller
     {
         /// <summary>
-        /// POST Method for getting dew point data.
+        /// POST method for submitting a request for evapotranspiration data.
         /// </summary>
-        /// <param name="tempInput">Parameters for retrieving dew point data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [SwaggerResponseExample(200, typeof(DewPointOutputExample))]
-        [SwaggerRequestExample(typeof(DewPointInput), typeof(DewPointInputExampleFull))]
-        public async Task<IActionResult> POST([FromBody]DewPointInput tempInput)
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> POST([FromBody]TemperatureInput tempInput)
         {
-            WSDewPoint dPoint = new WSDewPoint();
-            ITimeSeriesOutput results = await dPoint.GetDewPoint(tempInput);
+            WSTemperature temp = new WSTemperature();
+            ITimeSeriesOutput results = await temp.GetTemperature(tempInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

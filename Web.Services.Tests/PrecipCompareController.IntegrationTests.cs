@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using Web.Services.Controllers;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using System.Net.Http;
@@ -9,6 +8,7 @@ using System.Text;
 using Data;
 using System.Diagnostics;
 using System.Threading;
+using System.Text.Json;
 
 namespace Web.Services.Tests
 {
@@ -213,23 +213,28 @@ namespace Web.Services.Tests
         [InlineData(dailyTwoYearMissing, 730)]
         [InlineData(monthlyTwoYearMissing, 24)]
         [InlineData(annualTwoYearMissing, 2)]
-        [InlineData(extremeTwoYearMissing, 419)]*/
-        [InlineData(dailySevenYear, 7)]
+        [InlineData(extremeTwoYearMissing, 419)]
+        [InlineData(dailySevenYear, 7)]*/
         //[InlineData(dailyOneYearWeighted, 366)]
         public async Task ValidRequests(string precipInputString, int expected)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             Thread.Sleep(5000);
             string endpoint = "api/workflow/precip_compare";
-            PrecipitationCompareInput input = JsonConvert.DeserializeObject<PrecipitationCompareInput>(precipInputString);
+            PrecipitationCompareInput input = JsonSerializer.Deserialize<PrecipitationCompareInput>(precipInputString, options);
             Debug.WriteLine("Integration Test: Precipitation Compare controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint,
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(expected, resultObj.Data.Count);
         }
     }

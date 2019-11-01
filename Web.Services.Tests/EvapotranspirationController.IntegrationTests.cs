@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using Web.Services.Controllers;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using System.Net.Http;
@@ -8,7 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using System.Text;
 using Data;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using System.Threading;
 
 namespace Web.Services.Tests
 {
@@ -388,10 +388,16 @@ namespace Web.Services.Tests
         [InlineData(ncdcRequest, 365)]
         public async Task ValidRequests(string evapoInputString, int expected)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Thread.Sleep(5000);
             string endpoint = "api/hydrology/evapotranspiration";
-            EvapotranspirationInput input = JsonConvert.DeserializeObject<EvapotranspirationInput>(evapoInputString);
+            EvapotranspirationInput input = JsonSerializer.Deserialize<EvapotranspirationInput>(evapoInputString, options);
             Debug.WriteLine("Integration Test: Evapotranspiration controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
-            string json = JsonConvert.SerializeObject(input);
+            string json = JsonSerializer.Serialize(input, options);
             var response = await _client.PostAsync(
                 endpoint,
                 new StringContent(json, Encoding.UTF8, "application/json"));
@@ -399,7 +405,7 @@ namespace Web.Services.Tests
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(expected, resultObj.Data.Count);
         }
     }

@@ -17,24 +17,22 @@ namespace Web.Services.Controllers
         /// <summary>
         /// Input Dictionary, containing unknown values.
         /// </summary>
-        public Dictionary<string, object> input;
+        public Dictionary<string, object> input { get; set; }
     }
 
     /// <summary>
     /// Input example taken from the default input values call.
     /// </summary>
-    public class SolarInputExample : IExamplesProvider
+    public class SolarInputExample : IExamplesProvider<SolarInput>
     {
         /// <summary>
         /// Gets example object.
         /// </summary>
         /// <returns></returns>
-        public object GetExamples()
+        public SolarInput GetExamples()
         {
-            return new Dictionary<string, object>()
-            {
-                {
-                    "input", new Dictionary<string, object>()
+            SolarInput sInput = new SolarInput();
+            sInput.input = new Dictionary<string, object>()
                     {
                         { "contaminant name", "Methoxyclor" },
                         { "contaminant type", "Chemical" },
@@ -113,38 +111,18 @@ namespace Web.Services.Controllers
                                 { "water attenuation coefficients (m**-1)", "0.029000" },
                                 { "chemical absorption coefficients (L/(mole cm))", "0.020000" }
                             } }
-                        }
-                    }
-                    }
                 }
+            }
             };
-        }
-    }
-
-    /// <summary>
-    /// Output example for solar data request.
-    /// </summary>
-    public class SolarOutputExample : IExamplesProvider
-    {
-        /// <summary>
-        /// IExamplesProvider interface override
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            return new Dictionary<string, object>()
-            {
-                {"test item 1", "test value 1" }
-            };
+            return sInput;
         }
     }
 
     /// <summary>
     /// HMS API controller for GC Solar data.
     /// </summary>
-    [Produces("application/json")]
     [Route("api/water-quality/solar")]                      // Default endpoint
-    [Route("api/water-quality/solar/v1.0")]                 // Version 1.0 endpoint
+    [Produces("application/json")]
     public class WSSolarController : Controller
     {
         /// <summary>
@@ -154,6 +132,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("run/")]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> GETDefaultOutput()
         {
             WSSolar solar = new WSSolar();
@@ -168,6 +147,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/")]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> GETDefaultInput()
         {
             WSSolar solar = new WSSolar();
@@ -183,12 +163,11 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("run/")]
-        //[SwaggerResponseExample(200, typeof(SolarOutputExample))]
-        [SwaggerRequestExample(typeof(SolarInput), typeof(SolarInputExample))]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POSTCustomInput([FromBody]SolarInput input)
         {
             WSSolar solar = new WSSolar();
-            if (input is null)
+            if (input.input is null)
             {
                 Dictionary<string, object> errorMsg = new Dictionary<string, object>()
                 {
@@ -209,6 +188,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("inputs/metadata")]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> GetInputMetadata()
         {
             WSSolar solar = new WSSolar();
@@ -221,13 +201,13 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Input example for NOAA Solar Calculator POST
     /// </summary>
-    public class SolarCalcInputExample : IExamplesProvider
+    public class SolarCalcInputExample :IExamplesProvider<SolarCalculatorInput>
     {
         /// <summary>
         /// Get example function
         /// </summary>  
         /// <returns></returns>
-        public object GetExamples()
+        public SolarCalculatorInput GetExamples()
         {
             SolarCalculatorInput example = new SolarCalculatorInput()
             {
@@ -259,10 +239,9 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Meterology Solar HMS endpoint class
     /// </summary>
-    [Produces("application/json")]
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/solar")]
-    //[Route("api/meteorology/solar/v1.0")]
+    [Produces("application/json")]
     public class WSMeteorologySolarController : Controller
     {
         /// <summary>
@@ -272,7 +251,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [SwaggerRequestExample(typeof(SolarCalculatorInput), typeof(SolarCalcInputExample))]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POSTSolarCalculator([FromBody]SolarCalculatorInput i)
         {
             WSSolar solar = new WSSolar();

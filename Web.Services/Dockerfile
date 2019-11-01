@@ -2,7 +2,7 @@ FROM microsoft/dotnet:latest AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM microsoft/dotnet:latest AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /src
 COPY HMS.sln ./
 COPY Web.Services/Web.Services.csproj Web.Services/

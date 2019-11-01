@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -101,7 +102,8 @@ namespace Web.Services.Models
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
 
             Web.Services.Controllers.WatershedWorkflowOutput totalOutput = new Web.Services.Controllers.WatershedWorkflowOutput();
-            totalOutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
+            /*totalOutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();*/
+            Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
             int x = 1;
             Dictionary<string, string> meta = new Dictionary<string, string>();
             foreach (string com in lst)
@@ -121,13 +123,15 @@ namespace Web.Services.Models
                 timeSeriesDict.Add("SurfaceRunoff", surfOutput);
                 timeSeriesDict.Add("SubsurfaceRunoff", subOutput);
                 timeSeriesDict.Add("StreamHydrology", hydrologyOutput);
-                totalOutput.data.Add(Int32.Parse(com), timeSeriesDict);
+                data.Add(Int32.Parse(com), timeSeriesDict);
                 meta = precipOutput.Metadata;
                 x++;
             }
 
             //Turn delineation table to ITimeseries
-            totalOutput.table = new Dictionary<string, Dictionary<string, string>>();
+            /*totalOutput.table = new Dictionary<string, Dictionary<string, string>>();*/
+            Dictionary<string, Dictionary<string, string>> table = new Dictionary<string, Dictionary<string, string>>();
+
             int i = 0;
             foreach (DataRow dr in dt.Rows)
             {
@@ -139,19 +143,19 @@ namespace Web.Services.Models
                 {
                     lv.Add(dt.Columns[j++].ToString(), g.ToString());
                 }
-                if (totalOutput.table.ContainsKey(com))
+                if (table.ContainsKey(com))
                 {
                     continue;
                 }
                 else
                 {
-                    totalOutput.table.Add(com, lv);
+                    table.Add(com, lv);
                 }
             }
 
             //Adding delineation data to output
             totalOutput.Metadata = meta;
-            totalOutput.metadata = new Dictionary<string, string>()
+            totalOutput.Metadata = new Dictionary<string, string>()
             {
                 { "request_url", "api/workflow/watershed" },
                 { "start_date", input.DateTimeSpan.StartDate.ToString() },
@@ -166,7 +170,26 @@ namespace Web.Services.Models
             totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + input.StreamHydrology.ToString();
             watch.Stop();
             string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
-            totalOutput.metadata.Add("Time_elapsed", elapsed);
+            totalOutput.Metadata.Add("Time_elapsed", elapsed);
+
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            totalOutput.Data = new Dictionary<string, List<string>>();
+            foreach(KeyValuePair<int, Dictionary<string, ITimeSeriesOutput>> kv in data)
+            {
+                string dataString = JsonSerializer.Serialize(kv.Value, options);
+                totalOutput.Data[kv.Key.ToString()] = new List<string> { dataString };
+            }
+            totalOutput.table = new Dictionary<string, string>();
+            foreach (KeyValuePair<string, Dictionary<string, string>> kv in table)
+            {
+                string tableString = JsonSerializer.Serialize(table, options);
+                totalOutput.table[kv.Key] = tableString;
+            }
+
             return totalOutput;
         }
 
@@ -242,7 +265,12 @@ namespace Web.Services.Models
 
             //Using FLASK NCDC webservice            
             string data = DownloadData(out errorMsg, nceiBaseURL);
-            Result result = JSON.Deserialize<Result>(data);
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Result result = JsonSerializer.Deserialize<Result>(data, options);
             //Set NCEI station to closest station regardless of type
             input.Geometry.StationID = result.data[0].id.ToString();
             foreach (ResultData details in result.data)//Opt for closest GHCND station, if any

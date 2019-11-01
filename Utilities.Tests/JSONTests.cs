@@ -11,6 +11,7 @@ namespace Utilities.Tests
         [TestMethod]
         public void DeserializedValidTest()
         {
+
             string validJsonString = "{ 'name':'John', 'age':31, 'city':'New York' }";
             Dictionary<string, object> validDict = JSON.Deserialize<Dictionary<string, object>>(validJsonString);
             Dictionary<string, object> expectedDict = new Dictionary<string, object>()
@@ -47,8 +48,8 @@ namespace Utilities.Tests
         [TestMethod]
         public void SerializeValidListTest()
         {
-            List<object> validList = new List<object>(new object[] { "a string", 'c', 100, 1.00 });
-            string expectedString = @"[""a string"",""c"",100,1.0]";
+            List<object> validList = new List<object>(new object[] { "a string", 'c', 100, 1.1 });
+            string expectedString = @"[""a string"",""c"",100,1.1]";
             string jsonString = JSON.Serialize(validList);
             Assert.AreEqual(expectedString, jsonString);
         }
@@ -76,7 +77,7 @@ namespace Utilities.Tests
                     { "age", 31 },
                     { "city", "New York" }
                 };
-            string expectedString = "{\r\n  \"name\": \"John\",\r\n  \"age\": 31,\r\n  \"city\": \"New York\"\r\n}";
+            string expectedString = @"{""name"":""John"",""age"":31,""city"":""New York""}";
             string jsonString = JSON.Serialize(validDict,1);
             Assert.AreEqual(expectedString, jsonString);
         }

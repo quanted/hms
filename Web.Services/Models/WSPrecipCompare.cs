@@ -10,6 +10,7 @@ using System.Web;
 using Utilities;
 using Web.Services.Controllers;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace Web.Services.Models
 {
@@ -21,6 +22,16 @@ namespace Web.Services.Models
         public string id { get; set; }
         public string status { get; set; }
         public List<ResultData> data { get; set; }
+    }
+
+    /// <summary>
+    /// Result structure of the json string retrieved from ncei.
+    /// </summary>
+    public class ResultString
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+        public string data { get; set; }
     }
 
     /// <summary>
@@ -132,8 +143,17 @@ namespace Web.Services.Models
 
                 //Using FLASK NCDC webservice            
                 string data = DownloadData(out errorMsg, nceiBaseURL);
-                Result result = JSON.Deserialize<Result>(data);
-                //Set NCEI station to closest station regardless of type
+                JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                ResultString strResult = JsonSerializer.Deserialize<ResultString>(data, jsonOptions);
+                Result result = new Result();
+                result.id = strResult.id;
+                result.status = strResult.status;
+                result.data = JsonSerializer.Deserialize<List<ResultData>>(strResult.data);
+                ////Set NCEI station to closest station regardless of type
                 input.Geometry.StationID = result.data[0].id.ToString();
                 foreach (ResultData details in result.data)//Opt for closest GHCND station, if any
                 {
@@ -297,6 +317,11 @@ namespace Web.Services.Models
             {
                 flaskURL = "http://localhost:7777";
             }
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             Debug.WriteLine("Flask Server URL: " + flaskURL);
 
             string dataURL = flaskURL + "/hms/data?job_id=";
@@ -315,7 +340,7 @@ namespace Web.Services.Models
                     status = response.StatusCode.ToString();
                     System.IO.Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
-                    jobID = JSON.Deserialize<Dictionary<string, string>>(reader.ReadToEnd())["job_id"];
+                    jobID = JsonSerializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd(), options)["job_id"];
                     reader.Close();
                     response.Close();
                     retries -= 1;
@@ -338,7 +363,7 @@ namespace Web.Services.Models
                     System.IO.Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
+                    taskData = JsonSerializer.Deserialize<dynamic>(data, options);
                     if (taskData["status"] == "SUCCESS")
                     {
                         success = true;

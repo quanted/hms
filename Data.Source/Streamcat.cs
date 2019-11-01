@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Text.Json;
 
 namespace Data.Source
 {
@@ -29,7 +29,7 @@ namespace Data.Source
         {
             errorMsg = "";
             string rawData = GetStreamcatData(out errorMsg, comid);
-            dynamic streamcatData = JsonConvert.DeserializeObject<dynamic>(rawData);
+            dynamic streamcatData = JsonSerializer.Deserialize<dynamic>(rawData);
             Catchment catchment = SetCatchmentData(out errorMsg, streamcatData.output);
             return catchment;
         }

@@ -136,76 +136,76 @@ namespace AQUATOX.AQSite
 
 
     public struct ReminRecord
-{
-    public string RemRecName;
-    public double DecayMax_Lab;
-    public string XDecayMax_Lab;
-    public double Q10_NotUsed;
-    public string XQ10;
-    public double TOpt;
-    public string XTOpt;
-    public double TMax;
-    public string XTMax;
-    public double TRef_NotUsed;
-    public string XTRef;
-    public double pHMin;
-    public string XpHMin;
-    public double pHMax;
-    public string XpHMax;
-    public double P2OrgLab;
-    public double N2OrgLab;
-    public string XP2OrgLab;
-    public string XN2OrgLab;
-    public double O2Biomass;
-    public string XO2Biomass;
-    public double O2N;
-    public string XO2N;
-    public double KSed;
-    public string XKsed;
-    public double PSedRelease_NotUsed;
-    public string XPSedrelease;
-    public double NSedRelease_NotUsed;
-    public string XNSedRelease;
-    public double DecayMax_Refr;    // g/g d
-    public string XDecayMax_Refr;
-    // ESTUARY ADDITIONS BELOW
-    public double KSedTemp;
-    public string XKSedTemp;
-    public double KSedSalinity;
-    public string XKSedSalinity;
-    // ESTUARY ADDITIONS Above
-    public double P2Org_Refr;
-    public string XP2Org_Refr;
-    public double N2Org_Refr;
-    public string XN2Org_Refr;
-    public double Wet2DryPRefr;
-    public string XWet2DryPRefr;
-    public double Wet2DryPLab;
-    public string Xet2DryPLab;
-    public double Wet2DrySRefr;
-    public string XWet2DrySRefr;
-    public double Wet2DrySLab;
-    public string XWet2DrySLab;
-    public double N2OrgDissLab;
-    public string XN2OrgDissLab;
-    public double P2OrgDissLab;
-    public string XP2OrgDissLab;
-    public double N2OrgDissRefr;
-    public string XN2OrgDissRefr;
-    public double P2OrgDissRefr;
-    public string XP2OrgDissRefr;
-    public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
-    public string XKD_P_Calcite;
-//    public double NotUsed;         // Was BOD5_CBODu
-//    public string XNotUsed;      // XBOD5_CBODu
-    public double KNitri;
-    public string XKNitri;
-    public double KDenitri_Bot;
-    public string XKDenitri_Bot;
-    public double KDenitri_Wat;
-    public string XKDenitri_Wat;
+    {
+        public string RemRecName;
+        public double DecayMax_Lab;
+        public string XDecayMax_Lab;
+        public double Q10_NotUsed;
+        public string XQ10;
+        public double TOpt;
+        public string XTOpt;
+        public double TMax;
+        public string XTMax;
+        public double TRef_NotUsed;
+        public string XTRef;
+        public double pHMin;
+        public string XpHMin;
+        public double pHMax;
+        public string XpHMax;
+        public double P2OrgLab;
+        public double N2OrgLab;
+        public string XP2OrgLab;
+        public string XN2OrgLab;
+        public double O2Biomass;
+        public string XO2Biomass;
+        public double O2N;
+        public string XO2N;
+        public double KSed;
+        public string XKsed;
+        public double PSedRelease_NotUsed;
+        public string XPSedrelease;
+        public double NSedRelease_NotUsed;
+        public string XNSedRelease;
+        public double DecayMax_Refr;    // g/g d
+        public string XDecayMax_Refr;
+        // ESTUARY ADDITIONS BELOW
+        public double KSedTemp;
+        public string XKSedTemp;
+        public double KSedSalinity;
+        public string XKSedSalinity;
+        // ESTUARY ADDITIONS Above
+        public double P2Org_Refr;
+        public string XP2Org_Refr;
+        public double N2Org_Refr;
+        public string XN2Org_Refr;
+        public double Wet2DryPRefr;
+        public string XWet2DryPRefr;
+        public double Wet2DryPLab;
+        public string Xet2DryPLab;
+        public double Wet2DrySRefr;
+        public string XWet2DrySRefr;
+        public double Wet2DrySLab;
+        public string XWet2DrySLab;
+        public double N2OrgDissLab;
+        public string XN2OrgDissLab;
+        public double P2OrgDissLab;
+        public string XP2OrgDissLab;
+        public double N2OrgDissRefr;
+        public string XN2OrgDissRefr;
+        public double P2OrgDissRefr;
+        public string XP2OrgDissRefr;
+        public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
+        public string XKD_P_Calcite;
+        //    public double NotUsed;         // Was BOD5_CBODu
+        //    public string XNotUsed;      // XBOD5_CBODu
+        public double KNitri;
+        public string XKNitri;
+        public double KDenitri_Bot;
+        public string XKDenitri_Bot;
+        public double KDenitri_Wat;
+        public string XKDenitri_Wat;
 
-} // end ReminRecord
+    } // end ReminRecord
 
 
     public struct MorphRecord          // Hold Results of Variable Morphometry
@@ -229,7 +229,7 @@ namespace AQUATOX.AQSite
         TribInput,
         Marine
     } // end SiteTypes
-    
+
 
     public class TAQTSite
     {
@@ -302,9 +302,9 @@ namespace AQUATOX.AQSite
                 LocalZMean = Volume / Locale.SurfArea;
                 // m
                 FracLit = ZEuphotic / LocalZMean;
-            // frac
-            // m
-            // m
+                // frac
+                // m
+                // m
             }
             if (FracLit > 1)
             {
@@ -349,7 +349,7 @@ namespace AQUATOX.AQSite
                 return 0.040; // natural stream
             }
 
-        }    
+        }
 
 
         public void ChangeData(double ZM)
@@ -366,9 +366,9 @@ namespace AQUATOX.AQSite
             {
                 P_Shape = 1.0;
             }
-            else if ((P_Shape <  -1.0))
+            else if ((P_Shape < -1.0))
             {
-                P_Shape =  -1.0;
+                P_Shape = -1.0;
             }
 
         }
@@ -420,4 +420,3 @@ namespace AQUATOX.AQSite
 
 
 }
-

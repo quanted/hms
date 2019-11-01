@@ -1,7 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
+using System.Text.Json;
 
 namespace Web.Services.Tests
 {
@@ -71,18 +71,23 @@ namespace Web.Services.Tests
         [InlineData(daymetRequest, 365)]
         public async Task ValidRequests(string inputString, int expected)
         {
-            Thread.Sleep(5000);
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Thread.Sleep(1000);
             string endpoint = "api/meteorology/radiation";
-            RadiationInput input = JsonConvert.DeserializeObject<RadiationInput>(inputString);
+            RadiationInput input = JsonSerializer.Deserialize<RadiationInput>(inputString, options);
             Debug.WriteLine("Integration Test: Radiation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint,
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             // New nldas/gldas temperature data contains statistics at the end (+3 required)
             //int expected = (input.Source.Equals("nldas") || input.Source.Equals("gldas")) ? 368 : 365;
             Assert.Equal(expected, resultObj.Data.Count);

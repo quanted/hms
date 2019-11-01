@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.Serialization;
 using Utilities;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Data.Source
 {
@@ -628,7 +628,14 @@ namespace Data.Source
         public Dictionary<string, string> GetStationDetails(out string errorMsg, string url, string stationID, string token)
         {
             errorMsg = "";
+
             Dictionary<string, string> stationDetails = new Dictionary<string, string>();
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {
@@ -639,6 +646,7 @@ namespace Data.Source
             {
                 int retries = 5;                                        // Max number of request retries
                 string status = "";                                     // response status code
+                Dictionary<string, object> details = new Dictionary<string, object>();
 
                 while (retries > 0 && !status.Contains("OK"))
                 {
@@ -650,9 +658,13 @@ namespace Data.Source
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     string dataBuffer = reader.ReadToEnd();
-                    stationDetails = JSON.Deserialize<Dictionary<string, string>>(dataBuffer);
+                    details = JsonSerializer.Deserialize<Dictionary<string, object>>(dataBuffer, options);
                     response.Close();
                     retries -= 1;
+                }
+                foreach(KeyValuePair<string, object> kv in details)
+                {
+                    stationDetails[kv.Key] = kv.Value.ToString();
                 }
             }
             catch (Exception ex)
