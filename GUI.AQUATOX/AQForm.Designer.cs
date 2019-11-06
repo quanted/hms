@@ -1,4 +1,8 @@
-﻿namespace GUI.AQUATOX
+﻿using System.Windows.Forms.DataVisualization.Charting;
+using System.Windows.Forms;
+
+
+namespace GUI.AQUATOX
 {
     partial class AQTTestForm
     {
@@ -65,19 +69,18 @@
             // 
             // textBox1
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Location = new System.Drawing.Point(20, 62);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(782, 316);
+            this.textBox1.Size = new System.Drawing.Size(849, 175);
             this.textBox1.TabIndex = 2;
             // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(815, 411);
+            this.ClientSize = new System.Drawing.Size(893, 532);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.integrate);
             this.Controls.Add(this.loadJSON);
@@ -93,6 +96,11 @@
         private System.Windows.Forms.Button saveJSON;
         private System.Windows.Forms.Button integrate;
         private System.Windows.Forms.TextBox textBox1;
+
+
+
     }
+
+
 }
 

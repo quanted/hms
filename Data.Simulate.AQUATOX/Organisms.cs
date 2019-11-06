@@ -16,18 +16,23 @@ namespace AQUATOX.Organisms
         public double[] OrgToxBCF = new double[Consts.NToxs];
         public double[] PrevFracKill = new double[Consts.NToxs];
         public double[] Resistant = new double[Consts.NToxs];
-        public double[,] DeltaCumFracKill, DeltaResistant = new double[Consts.NToxs, 7];  // Toxicity Tracking Variables
+        public double[,] DeltaCumFracKill = new double[Consts.NToxs, 7];  // Toxicity Tracking Variables
+        public double[,] DeltaResistant = new double[Consts.NToxs, 7];  // Toxicity Tracking Variables
 
-        public double[] AmmoniaResistant, AmmoniaPrevFracKill = new double[2];
+        public double[] AmmoniaResistant = new double[2];
+        public double[] AmmoniaPrevFracKill = new double[2];
 
-        public double[,] AmmoniaDeltaCumFracKill, AmmoniaDeltaResistant = new double[2, 7];  // Ammonia EFfects Tracking Variables
+        public double[,] AmmoniaDeltaCumFracKill = new double[2, 7];  // Ammonia EFfects Tracking Variables
+        public double[,] AmmoniaDeltaResistant = new double[2, 7];  // Ammonia EFfects Tracking Variables
 
         public double SedPrevFracKill = 0;
         public double SedResistant = 0;
-        public double[] SedDeltaCumFracKill;
-        public double[] SedDeltaResistant;    // Susp. Sediment EFfects Tracking Variables
+        public double[] SedDeltaCumFracKill = new double[7];
+        public double[] SedDeltaResistant = new double[7];    // Susp. Sediment EFfects Tracking Variables
 
-        public double[] RedGrowth, RedRepro, FracPhoto = new double[Consts.NToxs];
+        public double[] RedGrowth = new double[Consts.NToxs];
+        public double[] RedRepro = new double[Consts.NToxs];
+        public double[] FracPhoto = new double[Consts.NToxs];
 
         public TOrganism(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
@@ -35,7 +40,9 @@ namespace AQUATOX.Organisms
             int StepLoop;
             int Ionized;
 
-            for (ToxLoop = 0; ToxLoop <= (int)Consts.LastOrgTxTyp; ToxLoop++)
+
+
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
                 LCInfinite[ToxLoop] = 0;
                 for (StepLoop = 1; StepLoop <= 6; StepLoop++)
@@ -68,12 +75,12 @@ namespace AQUATOX.Organisms
             SedResistant = 0;
             SedPrevFracKill = 0;
 
-            LoadsRec.Loadings.ConstLoad = 1e-5;
-            // seed loading
-            if (Ns == AllVariables.Salinity)
-            {
-                LoadsRec.Loadings.ConstLoad = 0;
-            }
+            //LoadsRec.Loadings.ConstLoad = 1e-5;   // for initializing new variable within GUI, not yet implemented in HMS
+            //// seed loading
+            //if (Ns == AllVariables.Salinity)
+            //{
+            //    LoadsRec.Loadings.ConstLoad = 0;
+            //}
         }
 
         public double PhytoResFactor()
@@ -126,11 +133,10 @@ namespace AQUATOX.Organisms
             SegVolume = AQTSeg.SegVol();
             Loading = 0;
             // Inflow Loadings
-            base.CalculateLoad(TimeIndex);
-            // TStateVariable
-            Infl = Location.Morph.InflowH2O;  // [VSeg] * (OOSInflowFrac);
+            base.CalculateLoad(TimeIndex);   // TStateVariable
 
-            // JSC Restore OOSInflowFrac 6/9/2017.  Otherwise inflow organism loadings are non-zero even if there is zero inflow loading to the system.
+            Infl = Location.Morph.InflowH2O;  // [VSeg] * (OOSInflowFrac);              // JSC Restore OOSInflowFrac 6/9/2017.  Otherwise inflow organism loadings are non-zero even if there is zero inflow loading to the system.
+
             //    if (AQTSeg.EstuarySegment)
             //    {
             //        Infl = Location.Morph.InflowH2O[VerticalSegments.Epilimnion] / 2;
@@ -138,18 +144,16 @@ namespace AQUATOX.Organisms
 
             if (Infl > 0.0)
             {
-                // JSC Fix Logic 2/16/2011
-                // conc/d // Conc// cu m d  // cu m
+              // conc/d // Conc// cu m d  // cu m
                 Loading = Loading * Infl / SegVolume;
             }
             else Loading = 0;
 
             if (AQTSeg.Convert_g_m2_to_mg_L(NState, SVType, Layer))
             {
-                Loading = Loading * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;
+                Loading = Loading * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;  // Convert loading from g/m2 to g/m3 --  Seed loadings only
             }
-
-            // Convert loading from g/m2 to g/m3 --  Seed loadings only
+                        
             if (IsPlant())
             {
                 if (((this) as TPlant).IsPhytoplankton())
@@ -212,7 +216,7 @@ namespace AQUATOX.Organisms
         public virtual double Respiration()
         {
             return 0;
-            // see TAnimal.Respiration
+            // see TAnimal.Respiration  TPlant.Respiration
         }
 
         //public void CalcRiskConc_SetOysterCategory(AllVariables ns)
@@ -593,7 +597,7 @@ namespace AQUATOX.Organisms
         //    }
         //    SedResistant = 0;
         //    SedPrevFracKill = 0;
-        //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+        //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop < Consts.LastOrgTxTyp; ToxLoop++)
         //    {
         //        LCInfinite[ToxLoop] = 0;
         //        for (StepLoop = 1; StepLoop <= 6; StepLoop++)
@@ -1438,40 +1442,30 @@ namespace AQUATOX.Organisms
         //        result = 0.35;
         //    }
         //    else if ((NState >= AllVariables.LgGameFish1 && NState <= AllVariables.LgGameFish4))
-        //    {
-        //        result = 0.92;
-        //    }
-        //    else
-        //    {
-        //        result = 0.62;
-        //    }
+        //         result = 0.92;
+        //    else result = 0.62;
         //    return result;
         //}
 
         public double SalMort(double Min, double Max, double Coeff1, double Coeff2)
         {
-            double result;
             double Salt;
-            result = 0;
-            Salt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
-            if (Salt == -1)
-            {
-                return result;
-            }
-            if ((Salt >= Min) && (Salt <= Max))
-            {
-                result = 0;
-            }
+            TSalinity PSalt = (TSalinity)AQTSeg.GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+
+            if (PSalt == null) Salt = -1.0;
+                          else Salt = PSalt.State;
+
+            if (Salt == -1) return 0;
+            if ((Salt >= Min) && (Salt <= Max)) return 0;
+
             else if (Salt < Min)
             {
-                result = Coeff1 * Math.Exp(Min - Salt);
+                return Coeff1 * Math.Exp(Min - Salt);
             }
             else
-            {
-                // Salt>Max
-                result = Coeff2 * Math.Exp(Salt - Max);
+            {   // Salt>Max
+                return Coeff2 * Math.Exp(Salt - Max);
             }
-            return result;
         }
 
         public virtual double Mortality()

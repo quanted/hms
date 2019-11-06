@@ -3,6 +3,8 @@ using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.Loadings;
 using AQUATOX.Nutrients;
+using AQUATOX.Organisms;
+using AQUATOX.Plants;
 using Newtonsoft.Json;
 using Globals;
 
@@ -31,8 +33,9 @@ public class TDetritus : TRemineralize
             double ConvertFrac, RefrFrac, PartFrac, RefrPercent, PartPercent;
             // User Input Percentage of Refractory or Particulate
 
-            DetritalInputRecordType PInputRec;
-            PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
+            TDissRefrDetr TDRD = (TDissRefrDetr) AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            DetritalInputRecordType PInputRec = TDRD.InputRecord;
+
             if ((NState==AllVariables.SedmRefrDetr)|| (NState == AllVariables.SedmLabDetr))
                throw new Exception("Programming Error:  Mult Frac is not relevant to Sed. Detritus");
             
@@ -213,178 +216,80 @@ public class TDetritus : TRemineralize
         // ---------------------------
         // sum sources of detritus
         // ---------------------------
-        //public double PlantSink_To_Detr(AllVariables Ns)  // fixme plant linkage
-        //{
-        //    double result;
-        //    result = 0;
-        //    switch (Ns)
-        //    {
-        //        // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
-        //        case Consts.FirstAlgae:
-        //            if (NState == AllVariables.SedmLabDetr)
-        //            {
-        //                result = 0.92;
-        //            }
-        //            if (NState == AllVariables.SedmRefrDetr)
-        //            {
-        //                result = 0.08;
-        //            }
-        //            break;
-        //        // Modify the A .. B: Consts.FirstMacro .. Consts.LastMacro
-        //        case Consts.FirstMacro:
-        //            throw new Exception("Programming Error: PlantSink_To_Detr Passed a macrophyte.");
-        //            break;
-        //        // Modify the A .. B: Consts.FirstAnimal .. Consts.LastAnimal
-        //        case Consts.FirstAnimal:
-        //            throw new Exception("Programming Error: PlantSink_To_Detr Passed an animal.");
-        //            break;
-        //    }
-        //    // Case
+        public double PlantSink_To_Detr(AllVariables Ns)  
+        {
+            if ((Ns >= Consts.FirstAlgae) && (Ns <= Consts.LastAlgae))
+            {
+                if (NState == AllVariables.SedmLabDetr) return 0.92;
+                if (NState == AllVariables.SedmRefrDetr) return 0.08;
+            }
 
-        //    return result;
-        //}
+            return 0;
+        }
 
-        //public double Mort_To_Detr(AllVariables Ns)
-        //{
-        //    double result;  //fixme animal, plant linkages
-        //    TPlant PPl;
-        //    result = 0;
-        //    switch (Ns)
-        //    {
-        //        // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
-        //        case Consts.FirstAlgae:
-        //            if (NState == AllVariables.DissLabDetr)
-        //            {
-        //                result = 0.27;
-        //            }
-        //            if (NState == AllVariables.DissRefrDetr)
-        //            {
-        //                result = 0.03;
-        //            }
-        //            if (NState == AllVariables.SuspLabDetr)
-        //            {
-        //                result = 0.65;
-        //            }
-        //            if (NState == AllVariables.SuspRefrDetr)
-        //            {
-        //                result = 0.05;
-        //            }
-        //            break;
-        //        // Modify the A .. B: Consts.FirstMacro .. Consts.LastMacro
-        //        case Consts.FirstMacro:
-        //            PPl = AQTSeg.GetStatePointer(Ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (PPl.PAlgalRec.PlantType == "Bryophytes")
-        //            {
-        //                // JSC 8-12-2002
-        //                if (NState == AllVariables.DissLabDetr)
-        //                {
-        //                    result = 0.00;
-        //                }
-        //                if (NState == AllVariables.DissRefrDetr)
-        //                {
-        //                    result = 0.25;
-        //                }
-        //                if (NState == AllVariables.SuspLabDetr)
-        //                {
-        //                    result = 0.00;
-        //                }
-        //                if (NState == AllVariables.SuspRefrDetr)
-        //                {
-        //                    result = 0.75;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (NState == AllVariables.DissLabDetr)
-        //                {
-        //                    result = 0.24;
-        //                }
-        //                if (NState == AllVariables.DissRefrDetr)
-        //                {
-        //                    result = 0.01;
-        //                }
-        //                // 0.06
-        //                if (NState == AllVariables.SuspLabDetr)
-        //                {
-        //                    result = 0.38;
-        //                }
-        //                if (NState == AllVariables.SuspRefrDetr)
-        //                {
-        //                    result = 0.37;
-        //                }
-        //            }
-        //            break;
-        //        // Modify the A .. B: Consts.FirstAnimal .. Consts.LastAnimal
-        //        case Consts.FirstAnimal:
-        //            if (NState == AllVariables.DissLabDetr)
-        //            {
-        //                result = 0.27;
-        //            }
-        //            if (NState == AllVariables.DissRefrDetr)
-        //            {
-        //                result = 0.03;
-        //            }
-        //            if (NState == AllVariables.SuspLabDetr)
-        //            {
-        //                result = 0.56;
-        //            }
-        //            if (NState == AllVariables.SuspRefrDetr)
-        //            {
-        //                result = 0.14;
-        //            }
-        //            break;
-        //    }
-        //    // case
+        public double Mort_To_Detr(AllVariables Ns)
+        {
+            TPlant PPl;
+            if ((Ns >= Consts.FirstAlgae) && (Ns <= Consts.LastAlgae))
+            {
+                if (NState == AllVariables.DissLabDetr) return 0.27;
+                if (NState == AllVariables.DissRefrDetr) return 0.03;
+                if (NState == AllVariables.SuspLabDetr) return 0.65;
+                if (NState == AllVariables.SuspRefrDetr) return 0.05;
+            };
 
-        //    return result;
-        //}
+            if ((Ns >= Consts.FirstMacro) && (Ns <= Consts.LastMacro))
+            {
+                PPl = AQTSeg.GetStatePointer(Ns, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                if (PPl.PAlgalRec.PlantType == "Bryophytes")
+                {
+                    if (NState == AllVariables.DissLabDetr) return 0.00;
+                    if (NState == AllVariables.DissRefrDetr) return 0.25;
+                    if (NState == AllVariables.SuspLabDetr) return 0.00;
+                    if (NState == AllVariables.SuspRefrDetr) return 0.75;
+                }
+                else //not bryophytes
+                {
+                    if (NState == AllVariables.DissLabDetr) return 0.24;
+                    if (NState == AllVariables.DissRefrDetr) return 0.01;
+                    if (NState == AllVariables.SuspLabDetr) return 0.38;
+                    if (NState == AllVariables.SuspRefrDetr) return 0.37;
+                }
+            }
+
+            if ((Ns >= Consts.FirstAnimal) && (Ns <= Consts.LastAnimal))
+            {
+                if (NState == AllVariables.DissLabDetr) return 0.27;
+                if (NState == AllVariables.DissRefrDetr) return 0.03;
+                if (NState == AllVariables.SuspLabDetr) return 0.56;
+                if (NState == AllVariables.SuspRefrDetr) return 0.14;
+            };
+            
+            return 0;
+        }
 
         //// Mort To Detr
         // -------------------------------------------------------------------------------------------------------
-        //public double Excr_To_Diss_Detr(AllVariables Ns)    // fixme plant, animal linkage
-        //{
-        //    double result;
-        //    result = 0;
-        //    switch (Ns)
-        //    {
-        //        // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
-        //        case Consts.FirstAlgae:
-        //            if (NState == AllVariables.DissLabDetr)
-        //            {
-        //                result = 0.9;
-        //            }
-        //            if (NState == AllVariables.DissRefrDetr)
-        //            {
-        //                result = 0.1;
-        //            }
-        //            break;
-        //        // Modify the A .. B: Consts.FirstMacro .. Consts.LastMacro
-        //        case Consts.FirstMacro:
-        //            if (NState == AllVariables.DissLabDetr)
-        //            {
-        //                result = 0.8;
-        //            }
-        //            if (NState == AllVariables.DissRefrDetr)
-        //            {
-        //                result = 0.2;
-        //            }
-        //            break;
-        //        default:
-        //            // animal
-        //            if (NState == AllVariables.DissLabDetr)
-        //            {
-        //                result = 1.0;
-        //            }
-        //            if (NState == AllVariables.DissRefrDetr)
-        //            {
-        //                result = 0.0;
-        //            }
-        //            break;
-        //    }
-        //    // case
+        public double Excr_To_Diss_Detr(AllVariables Ns)   
+        {
+            if ((Ns >= Consts.FirstAlgae) && (Ns <= Consts.LastAlgae))
+            {
+                if (NState == AllVariables.DissLabDetr) return 0.9;
+                if (NState == AllVariables.DissRefrDetr) return 0.1;
+            }
 
-        //    return result;
-        //}
+            if ((Ns >= Consts.FirstMacro) && (Ns <= Consts.LastMacro))
+            {
+                if (NState == AllVariables.DissLabDetr) return 0.8;
+                if (NState == AllVariables.DissRefrDetr) return 0.2;
+            }
+
+            // otherwise it's an animal
+            {
+                if (NState == AllVariables.DissLabDetr) return 1.0;
+                return 0.0;  // it must be that (NState == AllVariables.DissRefrDetr) 
+            }
+        }
 
         // -------------------------------------------------------------------------------------------------------
         //public double SumGameteLoss()  // fixme animal linkage
@@ -407,53 +312,50 @@ public class TDetritus : TRemineralize
         //    return result;
         //}
 
-        //public void DetritalFormation_SumDF(TOrganism P, ref double Mort, ref double Excr)  // FIXME Plant/Animal Linkage
+        public void DetritalFormation_SumDF(TOrganism P, ref double Mort, ref double Excr)  // FIXME Animal Linkage
+{
+    if (P.IsPlantOrAnimal())
+    {
+        Mort = Mort + P.Mortality() * Mort_To_Detr(P.NState);
+
+        //if (P.IsAnimal())  // FIXME ANIMAL LINKAGE
         //{
-        //    if (P.IsPlantOrAnimal())
-        //    {
-        //        Mort = Mort + P.Mortality() * Mort_To_Detr(P.NState);
-        //        if (P.IsAnimal())
-        //        {
-        //            // AnimExcretion 5/13/2013
-        //            Excr = Excr + ((P) as TAnimal).Respiration() * Excr_To_Diss_Detr(P.NState);
-        //        }
-        //        else
-        //        {
-        //            Excr = Excr + ((P) as TPlant).PhotoResp() * Excr_To_Diss_Detr(P.NState);
-        //        }
-        //        if ((P.IsMacrophyte()))
-        //        {
-        //            Mort = Mort + ((P) as TMacrophyte).Breakage() * Mort_To_Detr(P.NState);
-        //        }
-        //        if (P.IsPlant() && (!P.IsMacrophyte()))
-        //        {
-        //            TPlant w1 = ((P) as TPlant);
-        //            Mort = Mort + ((P) as TPlant).ToxicDislodge() * Mort_To_Detr(P.NState);
-        //            ((P) as TPlant).CalcSlough();
-        //            // update sloughevent
-        //            if (w1.SloughEvent)
-        //            {
-        //                j = -999;
-        //                // signal to not write mass balance tracking
-        //                ((P) as TPlant).Derivative(j);
-        //                // update sloughing
-        //                if (w1.PSameSpecies == AllVariables.NullStateVar)
-        //                {
-        //                    FracMult = 1.0;
-        //                }
-        //                else
-        //                {
-        //                    FracMult = 2 / 3;
-        //                }
-        //                // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
-        //                Mort = Mort + w1.Sloughing * FracMult * Mort_To_Detr(P.NState);
-        //            }
-        //        }
-        //    }
+        //    // AnimExcretion 5/13/2013
+        //    Excr = Excr + ((P) as TAnimal).Respiration() * Excr_To_Diss_Detr(P.NState);
+        //}
+        //else
+        //{
+            Excr = Excr + ((P) as TPlant).PhotoResp() * Excr_To_Diss_Detr(P.NState);
         //}
 
-        // -------------------------------------------------------------------------------------------------------
-        public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed, ref double Gam)
+        if ((P.IsMacrophyte()))
+        {
+            Mort = Mort + ((P) as TMacrophyte).Breakage() * Mort_To_Detr(P.NState);
+        }
+
+        if (P.IsPlant() && (!P.IsMacrophyte()))
+        {
+            TPlant w1 = ((P) as TPlant);
+            Mort = Mort + ((P) as TPlant).ToxicDislodge() * Mort_To_Detr(P.NState);
+            ((P) as TPlant).CalcSlough();
+            // update sloughevent
+            if (w1.SloughEvent)
+            {
+                double FracMult;
+                double j = -999; // signal to not write mass balance tracking
+                ((P) as TPlant).Derivative(ref j);  // update sloughing
+   
+                if (w1.PSameSpecies == AllVariables.NullStateVar) FracMult = 1.0;
+                   else FracMult = 2.0 / 3.0; // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
+
+                Mort = Mort + w1.Sloughing * FracMult * Mort_To_Detr(P.NState);
+            }
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------
+public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed, ref double Gam)
         {
             double result;
             Mort = 0;
@@ -476,61 +378,50 @@ public class TDetritus : TRemineralize
             return result;
         }
 
-        // ------------------------------------------------------
-        //public void SedDetritalFormation_SumDef(TAnimal PP, ref double Def)  //FIXME animal linkage
-        //{
-        //    double Def2Detr;
-        //    // all defecation goes to sediment
-        //    if (PP.IsAnimal())
-        //    {
-        //        if (NState == AllVariables.SedmLabDetr)
-        //        {
-        //            Def2Detr = Consts.Def2SedLabDetr;
-        //        }
-        //        else
-        //        {
-        //            Def2Detr = 1 - Consts.Def2SedLabDetr;
-        //        }
-        //        Def = Def + Def2Detr * PP.Defecation();
-        //    }
-        //}
+// ------------------------------------------------------
+//public void SedDetritalFormation_SumDef(TAnimal PP, ref double Def)  //FIXME animal linkage
+//{
+//    double Def2Detr;
+//    // all defecation goes to sediment
+//    if (PP.IsAnimal())
+//    {
+//        if (NState == AllVariables.SedmLabDetr)
+//        {
+//            Def2Detr = Consts.Def2SedLabDetr;
+//        }
+//        else
+//        {
+//            Def2Detr = 1 - Consts.Def2SedLabDetr;
+//        }
+//        Def = Def + Def2Detr * PP.Defecation();
+//    }
+//}
 
-        // ------------------------------------------------------ 
-        //public void SedDetritalFormation_SumSed(TStateVariable P)  // fixme Plant Linkage
-        //{
-        //    TPlant PP;
-        //    if (P.IsAlgae())
-        //    {
-        //        PP = ((P) as TPlant);
-        //        if (!PP.IsLinkedPhyto())
-        //        {
-        //            Sed = Sed + PP.Sedimentation() * PlantSink_To_Detr(P.NState);
-        //        }
-        //    }
-        //}
 
-        // -------------------------------------------------------------------------------------------------------
-        public double SedDetritalFormation()
+// -------------------------------------------------------------------------------------------------------
+public double SedDetritalFormation()
         {
-            double result;
             double Def;
             double Sed;
-            //int I;
-            // ------------------------------------------------------
+
+                // ------------------------------------------------------
+                void SedDetritalFormation_SumSed(TStateVariable P)  
+                {
+                  if (P.IsAlgae())
+                    {
+                        TPlant PP = ((P) as TPlant);
+                        if (!PP.IsLinkedPhyto()) Sed = Sed + PP.Sedimentation() * PlantSink_To_Detr(P.NState);
+                    }
+                }
+                // ------------------------------------------------------
             Def = 0;
             Sed = 0;
-            //TStates w1 = AQTSeg;
-            //for (I = 0; I < w1.Count; I++)
-            //{
-            //    SedDetritalFormation_SumSed(w1.At(I));  fixme animal, plant linkage
-            //}
-            //TStates w2 = AQTSeg;
-            //for (I = 0; I < w2.Count; I++)
-            //{
-            //    SedDetritalFormation_SumDef(w2.At(I));  fixme animal linkage
-            //}
-            result = Def + Sed;
-            return result;
+
+            foreach (TStateVariable TSV in AQTSeg.SV)  SedDetritalFormation_SumSed(TSV); 
+
+            // foreach (TStateVariable TSV in AQTSeg.SV) SedDetritalFormation_SumDef(TSV);   // fixme animal linkage
+
+            return Def + Sed;
         }
 
         public double DailyBurial()
@@ -917,8 +808,8 @@ public class TDetritus : TRemineralize
                 if (AQTSeg.MeanDischarge < Consts.Small)  Sedimented = RR.KSed / Thick * State * DensFactor;
                 else                                      Sedimented = RR.KSed / Thick * State * Decel * DensFactor;
 
-                //if ((AQTSeg.GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) >= 5.5) && (Thick <= 1.0))  // fixme wind linkage
-                //    Sedimented = -Sedimented;        // should be a power fn. of depth
+                if ((AQTSeg.GetStateVal(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) >= 5.5) && (Thick <= 1.0))  
+                    Sedimented = -Sedimented;        // should be a power fn. of depth
 
                 if ((AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) < AQTSeg.Ice_Cover_Temp()))
                 {   Sedimented = 2 * Sedimented;   }

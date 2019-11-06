@@ -9,10 +9,10 @@ namespace AQUATOX.Volume
 
     public enum VolumeMethType
     {
-        Manning,
-        KeepConst,
-        Dynam, 
-        KnownVal
+        Manning,    // 0
+        KeepConst,  // 1
+        Dynam,      // 2
+        KnownVal    // 3
     } // end VolumeMethType
 
    

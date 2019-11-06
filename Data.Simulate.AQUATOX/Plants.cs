@@ -138,7 +138,7 @@ namespace AQUATOX.Plants
         public double EC50_Photo_Slope = 0;  // 4/5/2017  specific to plant/chemical/effect combination 
     }
 
-    public class MortRatesRecord
+    public class MortRatesRecord   // HMS not yet utilized as partial rates not yet implemented
     {
         // not saved to disk
         public double[] OrgPois = new double[Consts.NToxs];
@@ -157,13 +157,13 @@ namespace AQUATOX.Plants
         // Set in Sedimentation
         public double[] EC50_Photo;
         [JsonIgnore] public TPlantToxRecord[] Plant_Tox;     // pointer to relevant plant toxicity data (nosave)
-        [JsonIgnore] public MortRatesRecord MortRates;       // Holds data about how plant category is dying, (nosave)
+//        [JsonIgnore] public MortRatesRecord MortRates;       // Holds data about how plant category is dying, (nosave)
         [JsonIgnore] public TMacroType MacroType;        // If plant is macrophyte, what type is it (nosave)
         [JsonIgnore] public bool SloughEvent = false;         // have conditions for a sloughing event been met?  Nosave
         [JsonIgnore] public double SloughLevel = 0;         // how far will biomass drop in a sloughin event?   NoSave
         public double Sloughing = 0;
         [JsonIgnore] public double NutrLim_Step = 0;         // nutrlimit calculated at the beginning of each step  NoSave
-        [JsonIgnore] public double HabitatLimit = 0;         // Habitat Limitation nosave
+        [JsonIgnore] public double HabitatLimit = 1.0;       // Habitat Limitation nosave  
         public double ZOpt = 0;         // optimum depth for a given plant (a constant approximated at the beginning of the simulation)
         public double Lt_Limit = 0;
         public double Nutr_Limit = 0;
@@ -181,17 +181,27 @@ namespace AQUATOX.Plants
 
         public TPlant(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            int ToxLoop;
-            PSameSpecies = AllVariables.NullStateVar;
+            // int ToxLoop;
+            //PSameSpecies = AllVariables.NullStateVar;
 
             //          PRequiresData = true;
-            MortRates.OtherMort = 0;
-            MortRates.SaltMort = 0;
-            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-            {
-                MortRates.OrgPois[ToxLoop] = 0;
-            }
+            //MortRates.OtherMort = 0;
+            //MortRates.SaltMort = 0;
+            //for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            //{
+            //    MortRates.OrgPois[ToxLoop] = 0;
+            //}
         }
+
+        public override void SetToInitCond()
+        {
+            base.SetToInitCond();
+            SinkToHypo = 0;
+            SloughEvent = false;
+            NutrLim_Step = 1;
+            HabitatLimit = PHabitat_Limit();   //previously set in CalcRiskConc
+        }
+
 
         public double PHabitat_Limit()
         {
@@ -364,7 +374,6 @@ namespace AQUATOX.Plants
         // (*********************************)
         public virtual double PhotoResp()
         {
-            double result;
             double Excrete;
             double LightStress;
             // const      actually = KResp
@@ -379,8 +388,8 @@ namespace AQUATOX.Plants
             // + KStress
             Excrete = Photosynthesis() * (PAlgalRec.KResp * LightStress);
             // g/cu m-d  g/cu m-d         unitless unitless     unitless
-            result = Excrete;
-            return result;
+            
+            return Excrete;
         }
 
         // algalexcr
@@ -405,6 +414,7 @@ namespace AQUATOX.Plants
             double ExcessT;
             double Dead;
             double Stress;
+            TStateVariable TSV;
             double Pois;
             int ToxLoop;
             double WaterTemp;
@@ -423,26 +433,26 @@ namespace AQUATOX.Plants
             // per day by nutrient and light limitation
             Dead = (PAlgalRec.KMort + ExcessT + Stress) * State;
             // g/cu m-d               (        g/g-d           )   g/cu m
-            MortRates.OtherMort = Dead;
-            MortRates.SaltMort = State * SalMort(PAlgalRec.Salmin_Mort, PAlgalRec.SalMax_Mort, PAlgalRec.Salcoeff1_Mort, PAlgalRec.Salcoeff2_Mort);
-            Dead = Dead + MortRates.SaltMort;
+            //MortRates.OtherMort = Dead;
+            //MortRates.SaltMort = State * SalMort(PAlgalRec.Salmin_Mort, PAlgalRec.SalMax_Mort, PAlgalRec.Salcoeff1_Mort, PAlgalRec.Salcoeff2_Mort);
+            //Dead = Dead + MortRates.SaltMort;
             // g/cu m-d                g/cu m-d
             Setup_Record SR = AQTSeg.PSetup;
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
-                if ((SR.UseExternalConcs && (AQTSeg.GetState(AllVariables.H2OTox, T_SVType.OrgTox1+ToxLoop, T_SVLayer.WaterCol) > 0)) || ((!SR.UseExternalConcs) && (AQTSeg.GetState(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
-                {
-                    Pois = 0; //  Poisoned(ToxLoop);  FIXME
-                    MortRates.OrgPois[ToxLoop] = Pois;
-                    Dead = Dead + Pois;
-                }
-                else
-                {
-                    RedGrowth[ToxLoop] = 0;
-                    // 5/3/2017 defaults for no effects if tox is zero
-                    RedRepro[ToxLoop] = 0;
-                    FracPhoto[ToxLoop] = 1;
-                }
+                RedGrowth[ToxLoop] = 0;     // 5/3/2017 defaults for no effects if tox is zero
+                RedRepro[ToxLoop] = 0;
+                FracPhoto[ToxLoop] = 1;
+
+                if (SR.UseExternalConcs) TSV = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
+                                    else TSV = AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol); 
+                if (TSV != null)
+                 if (TSV.State > 0)
+                    {
+                        Pois = 0; //  Poisoned(ToxLoop);  FIXME
+                        //MortRates.OrgPois[ToxLoop] = Pois;
+                        Dead = Dead + Pois;
+                    };
             }
             if (Dead > State)
             {
@@ -611,7 +621,7 @@ namespace AQUATOX.Plants
             const double MaxToxSlough = 0.1;
             // 10% per day
             Dislodge = 0;
-            if ((!IsPhytoplankton()))
+            if ((!IsPhytoplankton())&&(Plant_Tox!= null))
             {
                 for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
                 {
@@ -658,14 +668,12 @@ namespace AQUATOX.Plants
             double Suboptimal;
             double Adaptation;
             Wash = 0;   // mg/L d
+
             Nutr = NutrLim_Step;
             LtL = LtLimit(AQTSeg.PSetup.ModelTSDays);
-            Suboptimal = Nutr * LtL * AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax) * 20;
-            // 5 to 20 RAP 1-24-05
-            if (Suboptimal > 1)
-            {
-                Suboptimal = 1;
-            }
+            Suboptimal = Nutr * LtL * AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax) * 20;        // 5 to 20 RAP 1-24-05
+            if (Suboptimal > 1)  Suboptimal = 1;
+
             // uses nutrlimit calculated at the beginning of this time-step
             if ((!IsPhytoplankton()))
             {
@@ -685,15 +693,15 @@ namespace AQUATOX.Plants
                     AvgVel = 0.003;  // based on KCap of 200 g/m2
                 }
                 
-                Adaptation = Math.Pow(AvgVel, 2) / 0.006634;
+                Adaptation = Math.Pow(AvgVel, 2.0) / 0.006634;
                 // RAP 1/20/2005
                 if (!SloughEvent) // check to see if sloughevent should be initiated
                 {
-                    if (NState >= Consts.FirstDiatom && NState <= Consts.LastDiatom)
+                    if ((NState >= Consts.FirstDiatom) && (NState <= Consts.LastDiatom))
                     {
                         // Periphyton -- Diatoms
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow(Biovol_Dia * UnitArea, 2 / 3) * 1E-6;
-                        // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2             m2/mm2
+                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow(Biovol_Dia * UnitArea, (2.0/3.0)) * 1E-6;
+                        // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2                 m2/mm2
                         // 3/19/2013 fcrit of zero means no scour
 
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
@@ -709,7 +717,7 @@ namespace AQUATOX.Plants
                     {
                         // filamentous (includes greens and blgreens and should not be confused
                         // with filamentous phytoplankton)
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow((Biovol_Fil * UnitArea), 2 / 3) * 1E-6;
+                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
                         // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2             m2/mm2
 
                         // 3/19/2013 fcrit of zero means no scour
@@ -726,22 +734,9 @@ namespace AQUATOX.Plants
                         }
                     }
                 }
-                // If Not Sloughevent
-                // If SloughEvent then
-                // Begin
-                // If (State>SloughLevel) and (State>MINBIOMASS)
-                // then Wash := State-(SloughLevel/2)
-                // else Begin
-                // SloughEvent := False;
-                // With AQTSeg do
-                // If nstate in [FirstGreens..LastGreens] then ProgData.SloughGr   := False else
-                // If nstate in [FirstDiatom..LastDiatom] then ProgData.SloughDia  := False
-                // else ProgData.SloughBlGr := False;
-                // 
-                // End;
-                // End; {if sloughevent
-            }
-            // if not phytoplankton
+
+            }  // if not phytoplankton
+
             result = Wash;
             // g/m3 d
 
@@ -784,8 +779,9 @@ namespace AQUATOX.Plants
         public double KCAP_in_g_m3()
         {
             // note, deeper sites have lower g/m3 KCAP
-            return  PAlgalRec.CarryCapac / AQTSeg.StaticZMean();
-            // g/m3            // g/m2               // m
+            return PAlgalRec.CarryCapac * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;   //  11/3/2014 replaced static zmean with more consistent conversion
+        //   {g/m3}              {g/m2}                      {m2}               {m3}
+
 
             // Stratified and linked-mode code removed
         }
@@ -1442,7 +1438,7 @@ namespace AQUATOX.Plants
                             // signal to not write mass balance tracking
                             PP.Derivative(ref j);
                             // update sloughing
-                            PSlough = PSlough + PP.Sloughing * (1 / 3);
+                            PSlough = PSlough + PP.Sloughing * (1.0 / 3.0);
                             // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/Slough.
                         }
                     }
@@ -1639,21 +1635,23 @@ namespace AQUATOX.Plants
             double PeriScr= 0;
             double Sed2Me= 0;
             double Fl= 0;
-            bool Trackit;
+            //bool Trackit;
             bool SurfaceFloater;
             // --------------------------------------------------
-            int ToxLoop;
+            // int ToxLoop;
 
-            MortRates.OtherMort = 0;
+            //MortRates.OtherMort = 0;
             Sloughing = 0;
-            MortRates.SaltMort = 0;
+            //MortRates.SaltMort = 0;
 
-            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-            {
-                MortRates.OrgPois[ToxLoop] = 0;
-            }
-            Trackit = (DB != -999);
+            //for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            //{
+            //    MortRates.OrgPois[ToxLoop] = 0;
+            //}
+
+            //Trackit = (DB != -999);
             // signal to not write mass balance tracking
+
             SurfaceFloater = PAlgalRec.SurfaceFloating;
             double L = Loading;
             // WI = Washin();
@@ -1671,17 +1669,18 @@ namespace AQUATOX.Plants
                 // SFE = SinkFromEp();  HMS Removed, no vert stratification
                 Sed2Me = SedToMe();
             }
-            if (SurfaceFloater)
-            {
-                // Fl = Floating();  HMS Removed, no vert stratification
-            }
+            //if (SurfaceFloater)
+            //{
+            //    // Fl = Floating();  HMS Removed, no vert stratification
+            //}
+
             if (IsPhytoplankton())
             {
                 PeriScr = PeriphytonSlough();
             }
             if (!IsPhytoplankton())
             {
-                Slg = CalcSlough();
+                 Slg = CalcSlough();
             }
             if (SloughEvent)
             {
@@ -1746,16 +1745,16 @@ namespace AQUATOX.Plants
             PlantRecord PR = PAlgalRec;
             Dead = (1 - Math.Exp(-PR.EMort * (1 - AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax)))) * State + (PR.KMort * State);
             // emort is approximate maximum fraction killed per day by suboptimal temp.
-            MortRates.OtherMort = Dead;
-            MortRates.SaltMort = State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);
-            Dead = Dead + MortRates.SaltMort;
+            //MortRates.OtherMort = Dead;
+            //MortRates.SaltMort = State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);
+            Dead = Dead + State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);   // MortRates.SaltMort;
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
-                if ((AQTSeg.PSetup.UseExternalConcs && (AQTSeg.GetState(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
-                     || ((!AQTSeg.PSetup.UseExternalConcs) && (AQTSeg.GetState(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
+                if ((AQTSeg.PSetup.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
+                     || ((!AQTSeg.PSetup.UseExternalConcs) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
                     Pois = 0; //  Poisoned(ToxLoop); FIXME ADD Poisoned WHEN ADDING ECOTOXICOLOGY
-                    MortRates.OrgPois[ToxLoop] = Pois;
+                    //MortRates.OrgPois[ToxLoop] = Pois;
                     Dead = Dead + Pois;
                 }
                 else
@@ -1772,9 +1771,9 @@ namespace AQUATOX.Plants
             }
             result = Dead;
             return result;
-        }
+        }        // TMacrophyte.Mortality
 
-        // TMacrophyte.Mortality
+
         public override double Photosynthesis()
         {
             double result;
@@ -1789,8 +1788,7 @@ namespace AQUATOX.Plants
             double KCapEffect;
             KCap = KCAP_in_g_m3();
             // g/m3
-            KCapEffect = 1.0;
-            // 10/12/2014 KCap affects photosynthesis for macrophytes, not washout
+            KCapEffect = 1.0;  // 10/12/2014 KCap affects photosynthesis for macrophytes, not washout  added to Rel 3.2 4/26/2019
             if ((KCap > Consts.Tiny) && (State >= 0.9 * KCap))
             {
                 KCapEffect = 1 - (State - 0.9 * KCap) / (0.1 * KCap);
@@ -1801,14 +1799,13 @@ namespace AQUATOX.Plants
             }
             if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
             {
-                // JSC 8-12-2002
-                NL = NutrLimit();
+                NL = NutrLimit();   // JSC 8-12-2002
             }
             else
             {
-                NL = 1.0;
+                NL = 1.0; // floating macrophytes are not subject to light limitation
             }
-            // floating macrophytes are not subject to light limitation
+            
             if ((MacroType == TMacroType.Benthic))
             {
                 LL = LtLimit(AQTSeg.PSetup.ModelTSDays);
@@ -1820,13 +1817,11 @@ namespace AQUATOX.Plants
             PlantRecord PR = PAlgalRec;
             TCorrValue = AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax);
             AggFP = AggregateFracPhoto();
-            Temp_Limit = TCorrValue;
-            // save for rate output  JSC 9-5-02
-            Chem_Limit = AggFP;
-            // save for rate output  JSC 9-5-02
-            // g/sq m-d   1/d   unitless unitless unitless
+            Temp_Limit = TCorrValue;        // save for rate output  JSC 9-5-02
+            Chem_Limit = AggFP;             // save for rate output  JSC 9-5-02
+
             Photosyn = PR.PMax * NL * LL * TCorrValue * AggFP * State;
-            // unitless  g/sq m
+          // (g/sq m-d)  (1/d)  (these four terms unitless  )   g/sq m
             SaltEffect = AQTSeg.SalEffect(PR.Salmin_Phot, PR.SalMax_Phot, PR.Salcoeff1_Phot, PR.Salcoeff2_Phot);
             // frac littoral limitation applies to benthic and rooted floating macrophytes only
             FracLit = Location.FracLittoral(AQTSeg.ZEuphotic(), AQTSeg.Volume_Last_Step);
@@ -2256,7 +2251,7 @@ namespace AQUATOX.Plants
                             // signal to not write mass balance tracking
                             PPl.Derivative(ref j);
                             // update sloughing
-                            NPSlough = NPSlough + PPl.Sloughing * PPl.Nutr_2_Org(SVType) * 1e3 * (1 / 3);
+                            NPSlough = NPSlough + PPl.Sloughing * PPl.Nutr_2_Org(SVType) * 1e3 * (1.0 / 3.0);
                             // ug/L    // mg/L        // g/g                   // ug/mg        // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/Slough.
                         }
                     }

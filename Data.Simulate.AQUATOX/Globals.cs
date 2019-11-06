@@ -272,10 +272,10 @@ namespace Globals
         public const double Detr_OM_2_OC = 1.90;
         public const double KAnaerobic = 0.3;  //  (1/d)  decomp reduction - check Sanders, Gunnison
 
-        public const AllVariables FirstPlant = AllVariables.BlGreens1;
+        public const AllVariables FirstPlant = AllVariables.Diatoms1;
+        public const AllVariables LastPlant = AllVariables.Macrophytes6;
         public const AllVariables FirstDetr = AllVariables.SedmRefrDetr;
         public const AllVariables LastDetr = AllVariables.SuspLabDetr;
-        public const AllVariables LastPlant = AllVariables.Macrophytes6;
         public const AllVariables FirstAlgae = AllVariables.Diatoms1;
         public const AllVariables LastAlgae = AllVariables.OtherAlg2;
         public const AllVariables FirstDiatom = AllVariables.Diatoms1;
