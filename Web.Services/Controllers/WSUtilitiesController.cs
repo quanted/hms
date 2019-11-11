@@ -11,8 +11,9 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Utility REST endpoints for HMS components.
     /// </summary>
-    [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api")]             // Default endpoints
+    /*[ApiVersion("0.1")]             // Version 0.1 endpoint
+    [Route("api")]                  // Default endpoints
+    [Produces("application/json")]*/
     public class WSUtilitiesController : Controller
     {
 
@@ -20,10 +21,9 @@ namespace Web.Services.Controllers
         /// Checks endpoints for all datasets.
         /// </summary>
         /// <returns></returns>
-        [Route("utilities/status")]
-        //[Route("utilities/status/v1.0")]
+/*        [Route("utilities/status")]
         [HttpGet]
-        //public Dictionary<string, Dictionary<string, Dictionary<string, string>>> AllDatasetEndpointsCheck()
+        [ProducesResponseType(200)]*/
         public async Task<IActionResult> AllDatasetEndpointsCheck()
         {
             Task<Dictionary<string, Dictionary<string, string>>> evapo = Models.WSUtilities.CheckEvapoEndpoints();
@@ -62,10 +62,9 @@ namespace Web.Services.Controllers
         /// </summary>
         /// <param name="dataset"></param>
         /// <returns></returns>
-        [Route("utilities/status/{dataset}")]
-        //[Route("utilities/status/{dataset}/v1.0")]
+/*        [Route("utilities/status/{dataset}")]
         [HttpGet]
-        //public List<Dictionary<string, Dictionary<string, string>>> DatasetEndpointsCheck(string dataset)
+        [ProducesResponseType(200)]*/
         public async Task<IActionResult> DatasetEndpointsCheck(string dataset)
         {
             List<string> validEndpoints = new List<string>() { "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature" };

@@ -138,7 +138,7 @@ namespace Evapotranspiration
 
             DataTable tab = new DataTable();
             tab.Columns.Add("Date");
-            tab.Columns.Add("Julian_Day");
+            //tab.Columns.Add("Julian_Day");
             tab.Columns.Add("TMin_C");
             tab.Columns.Add("TMax_C");
             tab.Columns.Add("TMean_C");
@@ -163,7 +163,7 @@ namespace Evapotranspiration
                 {
                     DataRow tabrow = tab.NewRow();
                     tabrow["Date"] = (new DateTime(Convert.ToInt32(Convert.ToDouble(linedata[0])), 1, 1).AddDays(Convert.ToInt32(Convert.ToDouble(linedata[1])) - 1)).ToString("yyyy-MM-dd");
-                    tabrow["Julian_Day"] = Convert.ToInt32(Convert.ToDouble(linedata[1]));
+                    //tabrow["Julian_Day"] = Convert.ToInt32(Convert.ToDouble(linedata[1]));
                     tabrow["TMin_C"] = linedata[4];
                     tabrow["TMax_C"] = linedata[3];
                     tabrow["TMean_C"] = (Convert.ToDouble(linedata[4]) + Convert.ToDouble(linedata[3])) / 2.0;
@@ -185,31 +185,16 @@ namespace Evapotranspiration
                 { "longitude", longitude.ToString() },
                 { "request_time", DateTime.Now.ToString() },
                 { "column_1", "Date" },
-                { "column_2", "Julian Day" },
-                { "column_3", "Minimum Temperature" },
-                { "column_4", "Maximum Temperature" },
-                { "column_5", "Mean Temperature" },
-                { "column_6", "Sunshine Hours" },
-                { "column_7", "Potential Evapotranspiration" }
+                { "column_2", "Minimum Temperature" },
+                { "column_3", "Maximum Temperature" },
+                { "column_4", "Mean Temperature" },
+                { "column_5", "Sunshine Hours" },
+                { "column_6", "Potential Evapotranspiration" }
             };
-
-            if (inpt.TemporalResolution == "hourly")
-            {
-                output.Metadata = new Dictionary<string, string>()
-                {
-                    { "latitude", latitude.ToString() },
-                    { "longitude", longitude.ToString() },
-                    { "request_time", DateTime.Now.ToString() },
-                    { "column_1", "DateHour" },
-                    { "column_2", "Julian Day" },
-                    { "column_3", "Hourly Temperature" },
-                    { "column_4", "Sunshine Hours" },
-                    { "column_5", "Potential Evapotranspiration" }
-                };
-            }
 
             output.Data = new Dictionary<string, List<string>>();
 
+            int jday = 0;
             foreach (DataRow dr in tab.Rows)
             {
                 double petHargreaves = 0.0;
@@ -217,8 +202,8 @@ namespace Evapotranspiration
                 double tmin = Convert.ToDouble(dr["TMin_C"].ToString());
                 double tmax = Convert.ToDouble(dr["TMax_C"].ToString());
                 double rad = Convert.ToDouble(dr["Radiation"].ToString());
-                int jday = Convert.ToInt32(dr["Julian_Day"]);
-                HargreavesMethod(tmax, tmin, tmean, rad, jday, out petHargreaves, out errorMsg);
+                //int jday = Convert.ToInt32(dr["Julian_Day"]);
+                HargreavesMethod(tmax, tmin, tmean, rad, ++jday, out petHargreaves, out errorMsg);
                 dr["HargreavesPET_in"] = petHargreaves.ToString("F4", CultureInfo.InvariantCulture);
                 List<string> lv = new List<string>();
                 foreach (Object g in dr.ItemArray.Skip(1))
@@ -277,28 +262,27 @@ namespace Evapotranspiration
                 HargreavesMethod(tmax, tmin, tmean, rad, jday, out petHargreaves, out errorMsg);
 
                 //Setting order of all items
-                timeseries.Value[0] = jday.ToString();
-                timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[4] = rad.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
+                //timeseries.Value[0] = jday.ToString();
+                timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[3] = rad.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[4] = petHargreaves.ToString("F4", CultureInfo.InvariantCulture);//timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
             }
             nldasTempOutput.Dataset = "Evapotranspiration";
             nldasTempOutput.DataSource = "hargreaves";
             nldasTempOutput.Metadata = new Dictionary<string, string>()
-                    {
-                        { "latitude", latitude.ToString() },
-                        { "longitude", longitude.ToString() },
-                        { "request_time", DateTime.Now.ToString() },
-                        { "column_1", "Date" },
-                        { "column_2", "Julian Day" },
-                        { "column_3", "Minimum Temperature" },
-                        { "column_4", "Maximum Temperature" },
-                        { "column_5", "Mean Temperature" },
-                        { "column_6", "Radiation" },
-                        { "column_7", "Potential Evapotranspiration" }
-                    };       
+            {
+                { "latitude", latitude.ToString() },
+                { "longitude", longitude.ToString() },
+                { "request_time", DateTime.Now.ToString() },
+                { "column_1", "Date" },
+                { "column_2", "Minimum Temperature" },
+                { "column_3", "Maximum Temperature" },
+                { "column_4", "Mean Temperature" },
+                { "column_5", "Radiation" },
+                { "column_6", "Potential Evapotranspiration" }
+            };
             return nldasTempOutput;
         }
 
@@ -351,12 +335,12 @@ namespace Evapotranspiration
                 HargreavesMethod(tmax, tmin, tmean, rad, jday, out petHargreaves, out errorMsg);
 
                 //Setting order of all items
-                timeseries.Value[0] = jday.ToString();
-                timeseries.Value[1] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[2] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[3] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[4] = rad.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
+                //timeseries.Value[0] = jday.ToString();
+                timeseries.Value[0] = tmin.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[3] = rad.ToString("F2", CultureInfo.InstalledUICulture);
+                timeseries.Value[4] = petHargreaves.ToString("F4", CultureInfo.InvariantCulture);//timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
             }
             gldasTempOutput.Dataset = "Evapotranspiration";
             gldasTempOutput.DataSource = "hargreaves";
@@ -366,12 +350,11 @@ namespace Evapotranspiration
                         { "longitude", longitude.ToString() },
                         { "request_time", DateTime.Now.ToString() },
                         { "column_1", "Date" },
-                        { "column_2", "Julian Day" },
-                        { "column_3", "Minimum Temperature" },
-                        { "column_4", "Maximum Temperature" },
-                        { "column_5", "Mean Temperature" },
-                        { "column_6", "Radiation" },
-                        { "column_7", "Potential Evapotranspiration" }
+                        { "column_2", "Minimum Temperature" },
+                        { "column_3", "Maximum Temperature" },
+                        { "column_4", "Mean Temperature" },
+                        { "column_5", "Radiation" },
+                        { "column_6", "Potential Evapotranspiration" }
                     };
             return gldasTempOutput;
         }        

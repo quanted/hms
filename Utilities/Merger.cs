@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -115,21 +116,27 @@ namespace Utilities
         /// <returns></returns>
         public static ITimeSeriesOutput AddTimeSeries(List<ITimeSeriesOutput> data)
         {
-
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput result = oFactory.Initialize();
+            if(data.Count == 0)
+            {
+                return result;
+            }
             result.Metadata = new Dictionary<string, string>();
-            result.Data = new Dictionary<string, List<string>>();
-
+            result.Data = new Dictionary<string, List<string>>();           
             foreach (string date in data[0].Data.Keys) {
                 double total = 0.0;
                 foreach (ITimeSeriesOutput d in data)
                 {
+                    if (!d.Data.Keys.Contains(date))
+                    {
+                        continue;
+                    }
                     double point = 0.0;
                     Double.TryParse(d.Data[date][0], out point);
                     total += point;
                 }
-                result.Data[date] = new List<string>() { total.ToString("E3") };              
+                result.Data[date] = new List<string>() { total.ToString("E3") };
             }
             return result;
         }
@@ -188,6 +195,12 @@ namespace Utilities
         {
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput result = oFactory.Initialize();
+
+            if(timeseries == null)
+            {
+                Debug.WriteLine("Utilities.Merger.ModifyTimeSeries INPUT ERROR: Timeseries input is null");
+                return result;
+            }
 
             //result = timeseries;
             result.Metadata = timeseries.Metadata;

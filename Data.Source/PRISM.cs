@@ -168,9 +168,9 @@ namespace Data.Source
             PRISMData.PRISM content;
             try
             {
-                content = Newtonsoft.Json.JsonConvert.DeserializeObject<PRISMData.PRISM>(data);
+                content = System.Text.Json.JsonSerializer.Deserialize<PRISMData.PRISM>(data);
             }
-            catch(Newtonsoft.Json.JsonException ex)
+            catch(System.Text.Json.JsonException ex)
             {
                 errorMsg = "PRISM JSON Deserialization Error: " + ex.Message;
                 return null;

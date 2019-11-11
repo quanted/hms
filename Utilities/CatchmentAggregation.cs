@@ -1,5 +1,4 @@
 ﻿using Data;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +10,20 @@ using System.Data.SQLite;
 using System.Data;
 using System.Diagnostics;
 using Microsoft.Data.Sqlite;
+using System.Text.Json;
 
 namespace Utilities
 {
+
+    /// <summary>
+    /// Result structure of the json string retrieved from ncei.
+    /// </summary>
+    public class ResultString
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+        public string data { get; set; }
+    }
     /// <summary>
     /// Response from HMS-GIS
     /// </summary>
@@ -22,12 +32,12 @@ namespace Utilities
         /// <summary>
         /// Geometry component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, Catchment> geometry;
+        public Dictionary<string, Catchment> geometry { get; set; }
 
         /// <summary>
         /// Metadata component of HMS-GIS response
         /// </summary>
-        public Dictionary<string, string> metadata;
+        public Dictionary<string, object> metadata { get; set; }
     }
 
     /// <summary>
@@ -38,7 +48,7 @@ namespace Utilities
         /// <summary>
         /// List of points in the Catchment
         /// </summary>
-        public List<Point> points;
+        public List<Point> points { get; set; }
     }
 
     /// <summary>
@@ -49,23 +59,23 @@ namespace Utilities
         /// <summary>
         /// Latitude of centroid
         /// </summary>
-        public double latitude;
+        public double latitude { get; set; }
         /// <summary>
         /// Longitude of centroid
         /// </summary>
-        public double longitude;
+        public double longitude { get; set; }
         /// <summary>
         /// Total cell area
         /// </summary>
-        public double cellArea;
+        public double cellArea { get; set; }
         /// <summary>
         /// Cell area that intersects the catchment
         /// </summary>
-        public double containedArea;
+        public double containedArea { get; set; }
         /// <summary>
         /// Percent coverage of the intersection
         /// </summary>
-        public double percentArea;
+        public double percentArea { get; set; }
     }
 
     public class CatchmentAggregation
@@ -195,7 +205,12 @@ namespace Utilities
             WebClient myWC = new WebClient();
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             string data = "";
-            dynamic taskData = "";
+            ResultString taskData = new ResultString();
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             try
             {
                 int retries = 5;                                        // Max number of request retries
@@ -208,7 +223,8 @@ namespace Utilities
                     status = response.StatusCode.ToString();
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
-                    jobID = JSON.Deserialize<Dictionary<string,string>>(reader.ReadToEnd())["job_id"];
+
+                    jobID = JsonSerializer.Deserialize<Dictionary<string,string>>(reader.ReadToEnd(), options)["job_id"];
                     reader.Close();
                     response.Close();
                     retries -= 1;
@@ -220,7 +236,6 @@ namespace Utilities
 
                 retries = 50;
                 status = "";
-                taskData = "";
                 bool success = false;
                 while (retries > 0 && !success && !jobID.Equals(""))
                 {
@@ -231,12 +246,12 @@ namespace Utilities
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
-                    if(taskData["status"] == "SUCCESS")
+                    taskData = JsonSerializer.Deserialize<ResultString>(data);
+                    if(taskData.status == "SUCCESS")
                     {
                         success = true;
                     }
-                    else if(taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
+                    else if(taskData.status == "FAILURE" || taskData.status == "PENDING")
                     {
                         break;
                     }
@@ -249,7 +264,7 @@ namespace Utilities
             {
                 errorMsg =  "ERROR: Unable to obtain data for the specified query." + ex.Message;
             }
-            GeometryData geodata = JsonConvert.DeserializeObject<GeometryData>(JsonConvert.SerializeObject(taskData["data"]));
+            GeometryData geodata = JsonSerializer.Deserialize<GeometryData>(taskData.data, options);
             
             return geodata;
         }

@@ -1,5 +1,10 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Utilities
 {
@@ -18,16 +23,17 @@ namespace Utilities
         /// <returns>Object T</returns>
         public static T Deserialize<T>(string value)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            value = value.Replace("'", "\"");
             try
             {
-                return JsonConvert.DeserializeObject<T>(value);
+                return System.Text.Json.JsonSerializer.Deserialize<T>(value, options);
             }
-            catch(JsonReaderException ex)
-            {
-                Console.WriteLine("Error deserializing object: " + ex.Message);
-                return default(T);
-            }
-            catch(JsonException ex)
+            catch(Exception ex)
             {
                 Console.WriteLine("Error deserializing object: " + ex.Message);
                 return default(T);
@@ -41,9 +47,15 @@ namespace Utilities
         /// <returns>string</returns>
         public static string Serialize(Object obj)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+
             try
             {
-                return JsonConvert.SerializeObject(obj, Formatting.None);
+                return System.Text.Json.JsonSerializer.Serialize(obj, options);
             }
             catch(Exception ex)
             {
@@ -60,15 +72,21 @@ namespace Utilities
         /// <returns>json formatted string</returns>
         public static string Serialize(Object obj, int format)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+
             try
             {
                 switch (format)
                 {
                     case 0:
                     default:
-                        return JsonConvert.SerializeObject(obj, Formatting.None);
+                        return System.Text.Json.JsonSerializer.Serialize(obj, options);
                     case 1:
-                        return JsonConvert.SerializeObject(obj, Formatting.Indented);                        
+                        return System.Text.Json.JsonSerializer.Serialize(obj, options);                        
                 }
             }
             catch(Exception ex)
@@ -76,6 +94,26 @@ namespace Utilities
                 Console.Write("Error serializing object: " + ex.Message);
                 return null;
             }
+        }
+    }
+    public class DoubleConverter : JsonConverter<double>
+    {
+        public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            string value = reader.GetString();
+            try
+            {
+                return Double.Parse(value);
+            }
+            catch (FormatException)
+            {
+                throw new JsonException();
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
         }
     }
 }

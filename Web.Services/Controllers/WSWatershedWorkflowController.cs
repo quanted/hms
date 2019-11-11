@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Utilities;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers
@@ -45,10 +47,13 @@ namespace Web.Services.Controllers
     /// </summary>
     public class WatershedWorkflowOutput : TimeSeriesOutput
     {
-        public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }
-        public Dictionary<string, string> metadata { get; set; }
-        public Dictionary<string, Dictionary<string, string>> table { get; set; }
-        //public Dictionary<string, Dictionary<string, string>> table { get; set; }
+        /*public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }*/
+        /*public Dictionary<string, string> data { get; set; }*/
+
+        /*public Dictionary<string, string> metadata { get; set; }*/
+        /*public Dictionary<string, Dictionary<string, string>> table { get; set; }*/
+        public Dictionary<string, string> table { get; set; }
+
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -56,13 +61,13 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Swashbuckle WorkFlowCompare POST request example
     /// </summary>
-    public class WatershedWorkflowInputExample : IExamplesProvider
+    public class WatershedWorkflowInputExample : IExamplesProvider<WatershedWorkflowInput>
     {
         /// <summary>
         /// Get example function.
         /// </summary>
         /// <returns></returns>
-        public object GetExamples()
+        public WatershedWorkflowInput GetExamples()
         {
             WatershedWorkflowInput example = new WatershedWorkflowInput()
             {
@@ -100,59 +105,6 @@ namespace Web.Services.Controllers
         }
     }
 
-    /// <summary>
-    /// Swashbucle WorkFlowCompare Output example
-    /// </summary>
-    public class WatershedWorkflowOutputExample : IExamplesProvider
-    {
-        /// <summary>
-        /// Get example function.
-        /// </summary>
-        /// <returns></returns>
-        public object GetExamples()
-        {
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput output = oFactory.Initialize();
-            WatershedWorkflowOutput wsoutput = new WatershedWorkflowOutput();
-            wsoutput.Dataset = "Precipitation";
-            wsoutput.DataSource = "ncdc, nldas, gldas, daymet";
-            wsoutput.metadata = new Dictionary<string, string>()
-            {
-                { "nldas_prod_name", "NLDAS_FORA0125_H.002" },
-                { "nldas_param_short_name", "SSRUNsfc" },
-                { "nldas_param_name", "Surface runoff (non-infiltrating)" },
-                { "nldas_unit", "kg/m^2" },
-                { "nldas_undef", "  9.9990e+20" },
-                { "nldas_begin_time", "2015/01/01/00" },
-                { "nldas_end_time", "2015/01/01/05" },
-                { "nldas_time_interval[hour]", "1" },
-                { "nldas_tot_record", "5" },
-                { "nldas_grid_y", "71" },
-                { "nldas_grid_x", "333" },
-                { "nldas_elevation[m]", "219.065796" },
-                { "nldas_dlat", "0.125000" },
-                { "nldas_dlon", "0.125000" },
-                { "nldas_ydim(original data set)", "224" },
-                { "nldas_xdim(original data set)", "464" },
-                { "nldas_start_lat(original data set)", "  25.0625" },
-                { "nldas_start_lon(original data set)", "-124.9375" },
-                { "nldas_Last_update", "Fri Jun  2 15:41:10 2017" },
-                { "nldas_begin_time_index", "315563" },
-                { "nldas_end_time_index", "315731" },
-                { "nldas_lat", "  33.9375" },
-                { "nldas_lon", " -83.3125" },
-                { "nldas_Request_time", "Fri Jun  2 20:00:24 2017" }
-            };
-            wsoutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>()
-            {
-                { 9311817, new Dictionary<string, ITimeSeriesOutput>(){ { "Precip", output }, { "Subsurf", output }, { "Surface", output }, { "Stream Flow", output } } },
-                { 9311819, new Dictionary<string, ITimeSeriesOutput>(){ { "Precip", output }, { "Subsurf", output }, { "Surface", output }, { "Stream Flow", output } } }
-            };
-            return wsoutput;
-        }
-    }
-
-
     // --------------- WorkFlowCompare Controller --------------- //
 
     /// <summary>
@@ -160,17 +112,17 @@ namespace Web.Services.Controllers
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/watershed")]
+    [Produces("application/json")]
     public class WSWatershedWorkflowController : Controller
     {
         /// <summary>
-        /// POST Method for getting WorkFlowCompare data.
+        /// POST method for submitting a request for getting workflow compare data.
         /// Source parameter must contain a value, but value is not used.
         /// </summary>
         /// <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [SwaggerRequestExample(typeof(WatershedWorkflowInput), typeof(WatershedWorkflowInputExample))]
-        [SwaggerResponseExample(200, typeof(WatershedWorkflowOutputExample))]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]WatershedWorkflowInput workflowInput)
         {
             WSWatershedWorkFlow workFlow = new WSWatershedWorkFlow();

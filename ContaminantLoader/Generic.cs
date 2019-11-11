@@ -1,9 +1,9 @@
 ﻿using Data;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Utilities;
+using System.Text.Json;
 
 namespace ContaminantLoader
 {
@@ -85,7 +85,7 @@ namespace ContaminantLoader
 
             try
             {
-                dynamic jsonInput = JObject.Parse(input);
+                dynamic jsonInput = System.Text.Json.JsonDocument.Parse(input);
                 var data = jsonInput.Data;
                 if (data != null)
                 {
@@ -104,7 +104,7 @@ namespace ContaminantLoader
                     output.Metadata.Add("ERROR", "Contaminant Loader needs Data block containing timeseries data.");
                 }
             }
-            catch (Newtonsoft.Json.JsonException ex)
+            catch (System.Text.Json.JsonException ex)
             {
                 output.Metadata.Add("ERROR", ex.ToString());
                 output.Metadata.Add("Valid-Format-Error", "JSON input contaminant format must be structured as: 'Data':[[date1, value1],...]");

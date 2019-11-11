@@ -4,9 +4,9 @@ using System.Text;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 using Data;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 
 namespace ContaminantLoader
 {
@@ -39,14 +39,14 @@ namespace ContaminantLoader
 
             try
             {
-                jsonInput = JObject.Parse(inputString);
+                jsonInput = System.Text.Json.JsonDocument.Parse(inputString);
                 min = jsonInput.min;
                 max = jsonInput.max;
                 startDateString = jsonInput.startDate;
                 endDateString = jsonInput.endDate;
                 temporalResolution = jsonInput.temporalResolution;
             }
-            catch(Newtonsoft.Json.JsonException ex){
+            catch(System.Text.Json.JsonException ex){
                 Utilities.ErrorOutput error = new Utilities.ErrorOutput();
                 return error.ReturnError("JSON input error - " + ex.ToString());
             }

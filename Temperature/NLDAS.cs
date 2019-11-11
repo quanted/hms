@@ -112,6 +112,9 @@ namespace Temperature
                     output.Data = MonthlyValues(out errorMsg, output, input, "low");
                     output.Metadata.Add("column_2", "Min Temperature");
                     return output;
+                case "hourly":
+                    output.Metadata.Add("column_2", "Hourly Average Temperature");
+                    return output;
                 default:
                     return output;
             }

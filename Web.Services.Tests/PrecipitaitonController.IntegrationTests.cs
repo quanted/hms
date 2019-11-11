@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using Web.Services.Controllers;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using System.Net.Http;
@@ -9,6 +8,7 @@ using System.Text;
 using Data;
 using System.Diagnostics;
 using System.Threading;
+using System.Text.Json;
 
 namespace Web.Services.Tests
 {
@@ -106,19 +106,24 @@ namespace Web.Services.Tests
         [InlineData(wgenRequest, 365)]
         public async Task ValidRequests(string precipInputString, int expected)
         {
-            Thread.Sleep(5000);
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Thread.Sleep(1000);
             string endpoint = "api/meteorology/precipitation";
-            PrecipitationInput input = JsonConvert.DeserializeObject<PrecipitationInput>(precipInputString);
+            PrecipitationInput input = JsonSerializer.Deserialize<PrecipitationInput>(precipInputString, options);
             input.TemporalResolution = "daily";
             Debug.WriteLine("Integration Test: Precipitation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint, 
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(expected, resultObj.Data.Count);
         }
 

@@ -35,8 +35,8 @@ namespace Precipitation
                 prismOutput = prism.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             }
 
-            string inputObject = Newtonsoft.Json.JsonConvert.SerializeObject(input);
-            string outputObject = Newtonsoft.Json.JsonConvert.SerializeObject(prismOutput);
+            string inputObject = System.Text.Json.JsonSerializer.Serialize(input);
+            string outputObject = System.Text.Json.JsonSerializer.Serialize(prismOutput);
 
             prismOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }

@@ -1,8 +1,8 @@
-FROM microsoft/dotnet:latest AS base
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM microsoft/dotnet:latest AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /src
 COPY HMS.sln ./
 COPY Web.Services/Web.Services.csproj Web.Services/
@@ -57,6 +57,6 @@ COPY --from=publish /app .
 #COPY test_reports/ /src/
 COPY . /src
 RUN ls /app/App_Data
-RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp2.2
+RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp3.0
 #ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]
-ENTRYPOINT ["dotnet", "Web.Services.dll"]
+ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "https://0.0.0.0:80"]

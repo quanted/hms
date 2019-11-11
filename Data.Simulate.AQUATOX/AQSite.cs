@@ -128,7 +128,7 @@ namespace AQUATOX.AQSite
 
 
     public struct ReminRecord
-{
+    {
     public string RemRecName;
     public double DecayMax_Lab;
     public string XDecayMax_Lab;
@@ -178,6 +178,8 @@ namespace AQUATOX.AQSite
     public string XP2OrgDissRefr;
     public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
     public string XKD_P_Calcite;
+        //    public double NotUsed;         // Was BOD5_CBODu
+        //    public string XNotUsed;      // XBOD5_CBODu
     public double KNitri;
     public string XKNitri;
     public double KDenitri_Bot;
@@ -185,7 +187,7 @@ namespace AQUATOX.AQSite
     public double KDenitri_Wat;
     public string XKDenitri_Wat;
 
-} // end ReminRecord
+    } // end ReminRecord
 
 
     public struct MorphRecord          // Hold Results of Variable Morphometry
@@ -209,7 +211,7 @@ namespace AQUATOX.AQSite
         TribInput,
         Marine
     } // end SiteTypes
-    
+
 
     public class TAQTSite
     {
@@ -329,7 +331,7 @@ namespace AQUATOX.AQSite
                 return 0.040; // natural stream
             }
 
-        }    
+        }
 
 
         public void ChangeData(double ZM)
@@ -400,4 +402,3 @@ namespace AQUATOX.AQSite
 
 
 }
-

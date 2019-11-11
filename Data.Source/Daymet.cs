@@ -81,6 +81,11 @@ namespace Data.Source
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
+            if(input.BaseURL == null)
+            {
+                errorMsg = "ERROR: Unable to build url for dataset = " + dataSet + " and source = " + input.Source;
+                return null;
+            }
             sb.Append(input.BaseURL[0]);
             sb.Append("lat=" + input.Geometry.Point.Latitude + "&lon=" + input.Geometry.Point.Longitude);                   // Adds coordinates to url variable string
             sb.Append("&measuredParams=" + GetMeasuredParam(out errorMsg, dataSet));                                        // Adds dataset variable to string

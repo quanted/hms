@@ -32,7 +32,6 @@ namespace Web.Services.Controllers
         /// If value is 'nldas': surface runoff and subsurface flow will be from nldas (no precip will be downloaded); 
         /// If value is 'ncei', precip data will be downloaded from the closest station to the catchment and curvenumber will be used for surface runoff/subsurface flow.
         /// </summary>
-        [Required]
         public string DataSource { get; set; }
 
         public int MinNitrate { get; set; }
@@ -42,18 +41,17 @@ namespace Web.Services.Controllers
 
     }
 
-
     // --------------- Swashbuckle Examples --------------- //
     /// <summary>
     /// Swashbuckle Water Quality POST request example
     /// </summary>
-    public class WaterQualityInputExample : IExamplesProvider
+    public class WaterQualityInputExample : IExamplesProvider<WaterQualityInput>
     {
         /// <summary>
         /// Get example function.
         /// </summary>
         /// <returns></returns>
-        public object GetExamples()
+        public WaterQualityInput GetExamples()
         {
             WaterQualityInput example = new WaterQualityInput()
             {
@@ -68,24 +66,23 @@ namespace Web.Services.Controllers
         }
     }
 
-
-
     // --------------- Water Quality Controller --------------- //
     /// <summary>
     /// Workflow Water Quality controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/waterquality")]
+    [Produces("application/json")]
     public class WSWorkflowWaterQualityController : Controller
     {
         /// <summary>
-        /// POST Method for getting Water Quality data.
+        /// POST method to submit a request for water quality data.
         /// dataSource can be 'nldas' or 'ncei', which will pull data from GHCND:US1NCCM0006
         /// </summary>
         /// <param name="waterqualityInput"></param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
-        [SwaggerRequestExample(typeof(WaterQualityInput), typeof(WaterQualityInputExample))]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POSTComparison([FromBody]WaterQualityInput waterqualityInput)
         {
             if(waterqualityInput.TaskID == null)

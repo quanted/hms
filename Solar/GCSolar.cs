@@ -152,7 +152,7 @@ namespace Solar
                         double minWave = 0;
                         try
                         {
-                            minWave = Convert.ToDouble(p.Value);
+                            minWave = Convert.ToDouble(p.Value.ToString());
                         }
                         catch (FormatException ex)
                         {
@@ -177,7 +177,7 @@ namespace Solar
                         double maxWave = 0;
                         try
                         {
-                            maxWave = Convert.ToDouble(p.Value);
+                            maxWave = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -201,7 +201,7 @@ namespace Solar
                         double lon = 0;
                         try
                         {
-                            lon = Convert.ToDouble(p.Value);
+                            lon = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -255,7 +255,7 @@ namespace Solar
                         double lat;
                         try
                         {
-                            lat = Convert.ToDouble(p.Value);
+                            lat = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -271,7 +271,7 @@ namespace Solar
                             errors.Add("Latitude(s) Error: Latitude value must be greater than or equal to 0 and less than 70.");
                         }
                         if (!ephemerideValues)
-                            common.typlat = Convert.ToDouble(p.Value);
+                            common.typlat = Convert.ToDouble(p.Value.ToString());
                         break;
                     case "solar declination":
                         double[] sd_values;
@@ -337,7 +337,7 @@ namespace Solar
                         double ozone;
                         try
                         {
-                            ozone = Convert.ToDouble(p.Value);
+                            ozone = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -354,7 +354,7 @@ namespace Solar
                         double idepth;
                         try
                         {
-                            idepth = Convert.ToDouble(p.Value);
+                            idepth = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -367,7 +367,7 @@ namespace Solar
                         double fdepth;
                         try
                         {
-                            fdepth = Convert.ToDouble(p.Value);
+                            fdepth = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -393,7 +393,7 @@ namespace Solar
                         double dPoint;
                         try
                         {
-                            dPoint = Convert.ToDouble(p.Value);
+                            dPoint = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -407,7 +407,7 @@ namespace Solar
                         double Q;
                         try
                         {
-                            Q = Convert.ToDouble(p.Value);
+                            Q = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -420,7 +420,7 @@ namespace Solar
                         double refI;
                         try
                         {
-                            refI = Convert.ToDouble(p.Value);
+                            refI = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -433,7 +433,7 @@ namespace Solar
                         double ele;
                         try
                         {
-                            ele = Convert.ToDouble(p.Value);
+                            ele = Convert.ToDouble(p.Value.ToString());
                         }
                         catch(FormatException ex)
                         {
@@ -460,8 +460,8 @@ namespace Solar
                             string contaminantKey = (common.contaminantType + " " + common.contaminantUnits).ToLower();
                             try
                             {
-                                wac = Convert.ToDouble(values["water attenuation coefficients (m**-1)"]) / 100.0;
-                                cac = Convert.ToDouble(values[contaminantKey]);
+                                wac = Convert.ToDouble(values["water attenuation coefficients (m**-1)"].ToString()) / 100.0;
+                                cac = Convert.ToDouble(values[contaminantKey].ToString());
                             }
                             catch(Exception ex)
                             {

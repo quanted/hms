@@ -1,9 +1,9 @@
-﻿using AQUATOXNutrientModel;
+﻿using AQUATOX.AQTSegment;
+using AQUATOXNutrientModel;
 using Data;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MathNet.Numerics.LinearAlgebra;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 //using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -228,7 +229,7 @@ namespace Web.Services.Models
             // rectangle estimate 
             double estimateVolume = (catchment.Length * 1000) * (400 * 0.3048) * (40 * 0.3048);         // Length converted from km to m, width ~= 400ft converted to m, depth ~= 40ft converted to m
 
-            dynamic aquatoxInput = this.SetAquatoxInput(catchment);
+            AQTNutrientsModel aquatoxSim = this.SetAquatoxInput(catchment);
 
             Utilities.Logger.WriteToFile(this.taskID, "Generating ammonia loading for catchment: " + catchment.COMID);
             ITimeSeriesOutput ammoniaLoadingData = this.FlowRatioForLoading(catchment, this.maxAmmonia, this.minAmmonia);
@@ -240,13 +241,13 @@ namespace Web.Services.Models
 
             if (catchment.FromCOMID == this.headwaterFromCOMID)
             {
-                aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.bcAmmonia);           
-                aquatoxInput.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.bcNitrate);
+                aquatoxSim.AQSim.AQTSeg.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries["input"].Data = this.bcAmmonia;
+                aquatoxSim.AQSim.AQTSeg.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries["input"].Data = this.bcNitrate;
             }
             else
             {
-                aquatoxInput.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedAmmonia[catchment.FromCOMID].Data);
-                aquatoxInput.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries.input.Data = JObject.FromObject(this.completedNitrate[catchment.FromCOMID].Data);
+                aquatoxSim.AQSim.AQTSeg.SV[0].LoadsRec.Loadings.ITSI.InputTimeSeries["input"].Data = this.completedAmmonia[catchment.FromCOMID].Data;
+                aquatoxSim.AQSim.AQTSeg.SV[1].LoadsRec.Loadings.ITSI.InputTimeSeries["input"].Data = this.completedNitrate[catchment.FromCOMID].Data;
             }
             if (source.Equals("nwm"))
             {
@@ -353,25 +354,35 @@ namespace Web.Services.Models
 
             foreach (KeyValuePair<string, List<string>> kv in ammoniaLoadingData.Data)
             {
-                aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].list.Add(kv.Key.Split(" ")[0] + "T00:00:00", kv.Value[0]);
+                string dtValues = kv.Key.Split(" ")[0];
+                DateTime dt = Convert.ToDateTime(dtValues);
+                aquatoxSim.AQSim.AQTSeg.SV[0].LoadsRec.Alt_Loadings[2].list.Add(dt, Convert.ToDouble(kv.Value[0]));
             }
-            aquatoxInput.SV[0].LoadsRec.Alt_Loadings[2].UseConstant = false;
+            aquatoxSim.AQSim.AQTSeg.SV[0].LoadsRec.Alt_Loadings[2].UseConstant = false;
             foreach (KeyValuePair<string, List<string>> kv in nitrateLoadingData.Data)
             {
-                aquatoxInput.SV[1].LoadsRec.Alt_Loadings[2].list.Add(kv.Key.Split(" ")[0] + "T00:00:00", kv.Value[0]);
+                string dtValues = kv.Key.Split(" ")[0];
+                DateTime dt = Convert.ToDateTime(dtValues);
+                aquatoxSim.AQSim.AQTSeg.SV[1].LoadsRec.Alt_Loadings[2].list.Add(dt, Convert.ToDouble(kv.Value[0]));
             }
-            aquatoxInput.SV[1].LoadsRec.Alt_Loadings[2].UseConstant = false;
+            aquatoxSim.AQSim.AQTSeg.SV[1].LoadsRec.Alt_Loadings[2].UseConstant = false;
+
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
 
             // Run Aquatox model
             string aquaTaskID = this.taskID + "-" + catchment.COMID.ToString() + "-aquatox";
-            aquatoxInput.SV[3].LoadsRec.Alt_Loadings[0].ITSI.InputTimeSeries.input.Data = JObject.FromObject(totalFlow.Data);
-            aquatoxInput.SV[3].InitialCond = Convert.ToInt32(estimateVolume);
-            string aquatoxInputJson = JSON.Serialize(aquatoxInput);
-            AQTNutrientsModel AQTM = new AQTNutrientsModel(ref aquatoxInputJson, out errorMsg, true);
-            string aquatoxOutput = AQTM.outputString;
-            this.SetAquatoxOutputToObject(catchment.COMID, aquatoxOutput);
+            aquatoxSim.AQSim.AQTSeg.SV[3].LoadsRec.Alt_Loadings[0].ITSI.InputTimeSeries["input"].Data = totalFlow.Data;
+            aquatoxSim.AQSim.AQTSeg.SV[3].InitialCond = Convert.ToInt32(estimateVolume);
+            aquatoxSim.AQSim.Integrate();
+            this.SetAquatoxOutputToObject(catchment.COMID, aquatoxSim);
             Utilities.Logger.WriteToFile(this.taskID, "Dumping aquatox data for catchment: " + catchment.COMID);
-            Utilities.MongoDB.DumpData(aquaTaskID, aquatoxOutput);
+            string aqtOutput = "";
+            aqtOutput = aquatoxSim.AQSim.ExportJSON(ref aqtOutput);
+            Utilities.MongoDB.DumpData(aquaTaskID, aqtOutput);
             //Utilities.Logger.WriteToFile(catchment.COMID + "-aquatox", aquatoxOutput);
             Utilities.Logger.WriteToFile(this.taskID, "Aquatox data dumped into mongodb with taskID: " + aquaTaskID);
             this.completedAquatox.Add(aquaTaskID);
@@ -425,7 +436,6 @@ namespace Web.Services.Models
 
             return current;
         }
-
         private ITimeSeriesOutput GetContributingFlow(int current, List<int> catchments, string source, ITimeSeriesOutput precipData)
         {
             string errorMsg = "";
@@ -768,7 +778,7 @@ namespace Web.Services.Models
                 using (System.IO.StreamWriter file =
                     new System.IO.StreamWriter(filePath))
                 {
-                    file.Write(JSON.Serialize(output));
+                    file.Write(JsonSerializer.Serialize(output));
                 }
             }
             catch (System.IO.IOException ex) {
@@ -779,18 +789,24 @@ namespace Web.Services.Models
 
         private ITimeSeriesOutput TestModeFileRead(string dataset)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             string filePath = "App_Data\\" + dataset + "_testdata.json";
-            ITimeSeriesOutput output = JSON.Deserialize<TimeSeriesOutput>(File.ReadAllText(filePath));
+            ITimeSeriesOutput output = JsonSerializer.Deserialize<TimeSeriesOutput>(File.ReadAllText(filePath), options);
             return output;
         }
 
-        private dynamic SetAquatoxInput(NetworkCatchment catchment)
+        private AQTNutrientsModel SetAquatoxInput(NetworkCatchment catchment)
         {
-            dynamic input = this.LoadAquatoxInputFile();
-            input.Location.Locale.SiteName = catchment.COMID.ToString();
-            input.Location.Locale.SiteLength = catchment.Length;
-            input.PSetup.FirstDay = this.startDate.ToString("yyyy-MM-dd") + "T00:00:00";
-            input.PSetup.LastDay = this.endDate.ToString("yyyy-MM-dd") + "T00:00:00";
+            AQTNutrientsModel input = this.LoadAquatoxInputFile();
+            
+            input.AQSim.AQTSeg.Location.Locale.SiteName = catchment.COMID.ToString();
+            input.AQSim.AQTSeg.Location.Locale.SiteLength = catchment.Length;
+            input.AQSim.AQTSeg.PSetup.FirstDay = this.startDate;
+            input.AQSim.AQTSeg.PSetup.LastDay = this.endDate;
 
             return input;
         }
@@ -801,11 +817,12 @@ namespace Web.Services.Models
 
             try
             {
+                string errorMsg = "";
                 string textString = System.IO.File.ReadAllText(filePath);
-                dynamic output = JSON.Deserialize<dynamic>(textString);
+                AQTNutrientsModel output = new AQTNutrientsModel(ref textString,out errorMsg, false);
                 //Import ammonia sample output as the input for the boundary condition
                 DateTime iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.SV[0].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[0].output.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -816,7 +833,7 @@ namespace Web.Services.Models
                 }
                 //Import nitrate sample output as the input for the boundary condition
                 iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.SV[1].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[1].output.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -832,30 +849,36 @@ namespace Web.Services.Models
             }
         }
 
-        private dynamic LoadAquatoxInputFile()
+        private AQTNutrientsModel LoadAquatoxInputFile()
         {
             string filePath = File.Exists("App_Data\\aquatox_nutrient_model_input.txt") ? "App_Data\\aquatox_nutrient_model_input.txt" : "App_Data/aquatox_nutrient_model_input.txt";
-
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             try
             {
                 string fileData = System.IO.File.ReadAllText(filePath);
-                return JSON.Deserialize<dynamic>(fileData);
+                string errorMsg = "";
+                AQTNutrientsModel model = new AQTNutrientsModel(ref fileData, out errorMsg, false);
+                return model;
             }
             catch (Exception ex)
             {
-                return "Error loading input configuration for aqautox nutrient model";
+                Debug.WriteLine("Error loading input configuration for aqautox nutrient model. Error: " + ex.Message);
+                return null;
             }
         }
 
-        private void SetAquatoxOutputToObject(int comid, string outputString)
+        private void SetAquatoxOutputToObject(int comid, AQTNutrientsModel model)
         {
-            dynamic output = JSON.Deserialize<dynamic>(outputString);
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput ammonia = oFactory.Initialize();
             ITimeSeriesOutput nitrate = oFactory.Initialize();
-            ammonia.Data = output.SV[0].output["Data"].ToObject<Dictionary<string, List<string>>>();
+            ammonia.Data = model.AQSim.AQTSeg.SV[0].output.Data;
             this.completedAmmonia.Add(comid, ammonia);
-            nitrate.Data = output.SV[1].output["Data"].ToObject<Dictionary<string, List<string>>>();
+            nitrate.Data = model.AQSim.AQTSeg.SV[1].output.Data;
             this.completedNitrate.Add(comid, nitrate);
         }
     }

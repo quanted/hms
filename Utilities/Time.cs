@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Web;
+using System.Text.Json;
 
 namespace Utilities
 {
@@ -24,13 +25,18 @@ namespace Utilities
             string url = "https://134.67.114.1/hms/rest/timezone/";
             string queryString = "latitude=" + point.Latitude.ToString() + "&longitude=" + point.Longitude.ToString();
             string completeUrl = url + queryString;
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             try
             {
                 WebClient wc = new WebClient();
                 byte[] buffer = wc.DownloadData(completeUrl);
                 string resultString = Encoding.UTF8.GetString(buffer);
-                Dictionary<string, string> tz = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
-                return new Timezone() { Name = tz["tzName"], Offset = Convert.ToDouble(tz["tzOffset"]), DLS = false };
+                Dictionary<string, object> tz = JsonSerializer.Deserialize<Dictionary<string, object>>(resultString, options);
+                return new Timezone() { Name = tz["tzName"].ToString(), Offset = Convert.ToDouble(tz["tzOffset"].ToString()), DLS = false };
             }
             catch
             {
@@ -44,8 +50,8 @@ namespace Utilities
                     WebClient wc = new WebClient();
                     byte[] buffer = wc.DownloadData(completeUrl);
                     string resultString = Encoding.UTF8.GetString(buffer);
-                    Dictionary<string, string> tz = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(resultString);
-                    return new Timezone() { Name = tz["timeZoneId"], Offset = Convert.ToDouble(tz["rawOffset"]) / 3600, DLS = false };
+                    Dictionary<string, object> tz = JsonSerializer.Deserialize<Dictionary<string, object>>(resultString);
+                    return new Timezone() { Name = tz["timeZoneId"].ToString(), Offset = Convert.ToDouble(tz["rawOffset"].ToString()) / 3600, DLS = false };
                 }
                 catch (Exception ex)
                 {

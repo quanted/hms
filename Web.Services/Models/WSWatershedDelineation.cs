@@ -29,14 +29,17 @@ namespace Web.Services.Models
             if (input.Geometry.GeometryMetadata.ContainsKey("huc_8_num"))
             {
                 gtype = "huc_8_num";
+                input.Geometry.HucID = input.Geometry.GeometryMetadata["huc_8_num"];
             }
             else if (input.Geometry.GeometryMetadata.ContainsKey("huc_12_num"))
             {
                 gtype = "huc_12_num";
+                input.Geometry.HucID = input.Geometry.GeometryMetadata["huc_12_num"];
             }
             else if (input.Geometry.GeometryMetadata.ContainsKey("com_id_num"))
             {
                 gtype = "com_id_num";
+                input.Geometry.ComID = int.Parse(input.Geometry.GeometryMetadata["huc_8_num"]);
             }
             else if (input.Geometry.GeometryMetadata.ContainsKey("com_id_list"))
             {
