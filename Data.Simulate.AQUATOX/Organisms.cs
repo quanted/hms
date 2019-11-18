@@ -103,11 +103,9 @@ namespace AQUATOX.Organisms
                 }
                 else
                 {
-                    //@ Unsupported property or method(D): 'WatershedArea'
                     Area_Mi2 = LL.WaterShedArea * 0.386;
                     // mi2         // km2
-                    TotLen = 1.4 * Math.Pow(Area_Mi2, 0.6);
-                    // Leopold et al. 1964, p. 145
+                    TotLen = 1.4 * Math.Pow(Area_Mi2, 0.6);                     // Leopold et al. 1964, p. 145
                     // mi   // mi2
                     TotLen = TotLen * 1.609;
                     // km     // mi

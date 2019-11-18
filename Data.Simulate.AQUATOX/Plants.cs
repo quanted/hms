@@ -152,6 +152,7 @@ namespace AQUATOX.Plants
 
     public class TPlant : TOrganism
     {
+        public Loadings.TLoadings Predation_Link = null;
         public PlantRecord PAlgalRec;
         public double SinkToHypo = 0;
         // Set in Sedimentation
@@ -299,9 +300,7 @@ namespace AQUATOX.Plants
 
         public override double WetToDry()
         {
-            double result;
-            result = PAlgalRec.Wet2Dry;
-            return result;
+            return PAlgalRec.Wet2Dry;
         }
 
         public double AggregateFracPhoto()
@@ -651,7 +650,6 @@ namespace AQUATOX.Plants
 
         public double CalcSlough()
         {
-            double result;
             const double UnitArea = 1.0;    // mm2
             const double DragCoeff = 2.53E-4;  // unitless, suitable for calibration because little exposure; 0.01 in Asaeda & Son, 2000
             const int Rho = 1000;       // kg/m3
@@ -737,26 +735,22 @@ namespace AQUATOX.Plants
 
             }  // if not phytoplankton
 
-            result = Wash;
+            return Wash;
             // g/m3 d
-
-            return result;
         }
 
         // Function Sloughing
         public override double Washout()
         {
-            double result;
             double Wash;
             double SegVolume;
             double Disch;
             SegVolume = AQTSeg.SegVol();
             Wash = 0;
-            result = 0;
             Disch = Location.Discharge;
             if (Disch == 0)
             {
-                return result;
+                return Wash;
             }
             if ((IsPhytoplankton()))
             {
@@ -768,11 +762,11 @@ namespace AQUATOX.Plants
                        // days      // cu m   // cu m/ d    // unitless
             }
             // end Phytoplankton Code
-            result = Wash;
-            // g/m3 d
 
 //             WashoutStep[AQTSeg.DerivStep] = Wash * AQTSeg.SegVol();
-            return result;
+            return Wash;
+            // g/m3 d
+
         }
 
         // Function Washout
@@ -932,7 +926,6 @@ namespace AQUATOX.Plants
         public double DepthBottom()
         {  // HMS Vertical stratification code stripped, not relevant to HMS Work Flows
 
-            double result;
             double DB;
 
             if (AQTSeg.Location.Locale.UseBathymetry) DB = AQTSeg.Location.Locale.ZMax;
@@ -971,14 +964,12 @@ namespace AQUATOX.Plants
                     DB = AQTSeg.ZEuphotic();
                 }
             }
-            result = DB;
-            return result;
+            return DB;
         }
 
         // -------------------------------------------------
         public double LtLimit_PeriphytExt()
         {
-            double result;
             double PeriExtinction;
             AllVariables Phyto;
             TPlant PPhyt;
@@ -995,10 +986,8 @@ namespace AQUATOX.Plants
                     }
                 }
             }
-            result = Math.Exp(-PeriExtinction);
-            // 1/m
-
-            return result;
+            return Math.Exp(-PeriExtinction);
+                               // 1/m
         }
 
         // (*****************************************)
@@ -1008,7 +997,6 @@ namespace AQUATOX.Plants
         // (*****************************************)
         public double LtLimit(bool DailyStep)
         {
-            double result;
             double LL;
             // RAP changed DB to DBot & added P & E. 8/23/95
             double DBot;
@@ -1022,11 +1010,9 @@ namespace AQUATOX.Plants
             bool Inhibition;
 //            bool WellMixedLinked;
             double Const_a;
-            result = 1;
-            if ((PAlgalRec.PlantType == "Macrophytes") && (MacroType == TMacroType.Freefloat))
-            {
-                return result;
-            }
+            LL = 1;
+            if ((PAlgalRec.PlantType == "Macrophytes") && (MacroType == TMacroType.Freefloat))  return LL;  
+
             DBot = DepthBottom();
             DT = 0;  // HMS no vertical stratification
             if ((DBot - DT) < Consts.Tiny)
@@ -1090,8 +1076,7 @@ namespace AQUATOX.Plants
                     }
                 }
             }
-            result = LL;
-            return result;
+            return LL;
         }
 
         // (********************************)
@@ -1100,7 +1085,6 @@ namespace AQUATOX.Plants
         // (********************************)
         public double PO4Limit()
         {
-            double result;
             double PLimit;
             double P2O;
             if (AQTSeg.PSetup.Internal_Nutrients)
@@ -1111,10 +1095,7 @@ namespace AQUATOX.Plants
                     // Internal nutrientsP Limit
                     PLimit = (1 - (PAlgalRec.Min_P_Ratio / P2O));
                 }
-                else
-                {
-                    PLimit = 0.0;
-                }
+                else PLimit = 0.0;
             }
             else
             {
@@ -1128,28 +1109,25 @@ namespace AQUATOX.Plants
                     PLimit = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) / (AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4);
                 }
                 // unitless  P/PO4           gPO4/cu m    P/PO4            gPO4/cu m            gP/cu m
-            }
-            // external nutrients
+            }  // external nutrients
+
+
             if (PLimit < Consts.Small)
             {
-                PLimit = 0.0;
+                PLimit = 0.0;      // RAP, 9/11/95 Tiny -> Small
             }
-            // RAP, 9/11/95 Tiny -> Small
-            result = PLimit;
-            return result;
+
+            return PLimit;
         }
 
         // phoslimit
         public bool Is_Pcp_CaCO3()
         {
-            bool result;
             // Is this plant precipitating CaCO3?
             // JSC, From 8.25 to 7.5 on 7/2/2009
-            result = (AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) >= 7.5) && 
+            return (AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) >= 7.5) && 
                 !((PAlgalRec.PlantType == "Bryophytes") || (NState == AllVariables.OtherAlg1) || (NState == AllVariables.OtherAlg2));
             // subset of plants, all plants except Bryophytes and "Other Algae" compartments
-
-            return result;
         }
 
         // (********************************)
@@ -1158,7 +1136,6 @@ namespace AQUATOX.Plants
         // (********************************)
         public double CO2Limit()
         {
-            double result;
             double CLimit;
             double CDioxide;
             const double C2CO2 = 0.27;
@@ -1180,28 +1157,20 @@ namespace AQUATOX.Plants
                 CLimit = C2CO2 * CDioxide / (C2CO2 * CDioxide + PAlgalRec.KCarbon);
             }
             // unitless C/CO2   gCO2/cu m C/CO2        gCO2/cu m      gC/cu m
-            result = CLimit;
-            return result;
+            return CLimit;
         }
 
         // phoslimit
         public double Nutr_2_Org(T_SVType NTyp)
         {
-            double result;
             if (NTyp == T_SVType.NIntrnl)
-            {
-                result = N_2_Org();
-            }
+                return N_2_Org();
             else
-            {
-                result = P_2_Org();
-            }
-            return result;
+                return P_2_Org();
         }
 
         public double N_2_Org()
         {
-            double result;
             // g N / g OM
             if (AQTSeg.PSetup.Internal_Nutrients && (State > Consts.Tiny))
             {
@@ -1211,88 +1180,71 @@ namespace AQUATOX.Plants
                     // ug N /L
                     // mg OM/L
                     // mg/ug
-                    result = AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
+                    return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
                 }
                 else
                 {
-                    result = PAlgalRec.N2OrgInit;
+                    return PAlgalRec.N2OrgInit;
                 }
                 // rooted macrophyte
             }
             else
             {
-                result = PAlgalRec.N2OrgInit;
+                return PAlgalRec.N2OrgInit;
             }
-            return result;
         }
 
         public double P_2_Org()
         {
-            double result;
             if (AQTSeg.PSetup.Internal_Nutrients && (State > Consts.Tiny))
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) != null)
                 {
-                    // ug N /L
-                    // mg/L
-                    // mg/ug
-                    result = AQTSeg.GetState(NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
+                    return AQTSeg.GetState(NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
+                    // ug N /L                                                          // mg/L  // mg/ug
+
                 }
                 else
                 {
-                    result = PAlgalRec.P2OrgInit;
+                    return PAlgalRec.P2OrgInit;
                 }
                 // rooted macrophyte
             }
             else
             {
-                result = PAlgalRec.P2OrgInit;
+                return PAlgalRec.P2OrgInit;
             }
-            return result;
         }
 
         public bool IsFixingN()
         {
-            bool result;
             double Nitrogen;
             double InorgP;
             double NtoP;
-            result = false;
-            if (!(NState >= Consts.FirstBlGreen && NState <= Consts.LastBlGreen))
-            {
-                return result;
-            }
-            // cyanobacteria only
-            // internal nutrients option 3/18/2014
-            if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
-            {
-                result = (N_2_Org() < 0.5 * PAlgalRec.NHalfSatInternal);
-                return result;
-            }
-            // added option 3/19/2010
-            if (!AQTSeg.PSetup.NFix_UseRatio)
+
+            if (!(NState >= Consts.FirstBlGreen && NState <= Consts.LastBlGreen)) return false;    // IsFixingN true for cyanobacteria only
+            
+            if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)      // internal nutrients option 3/18/2014
+                return (N_2_Org() < 0.5 * PAlgalRec.NHalfSatInternal);
+            
+            if (!AQTSeg.PSetup.NFix_UseRatio)  // added option 3/19/2010
             {
                 Nitrogen = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
-                result = (Nitrogen < 0.5 * PAlgalRec.KN);
-                // Official "Release 3" code
+                return (Nitrogen < 0.5 * PAlgalRec.KN);   // Official "Release 3" code
             }
-            else
+            else                 
             {
-                // NFix_UseRatio
                 // 12-16-2009 N Fixing Option
                 InorgP = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
                 // Avoid Divide by Zero
                 if (InorgP > Consts.Tiny)
                 {
                     NtoP = (AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol)) / InorgP;
-                    if ((NtoP < AQTSeg.PSetup.NtoPRatio))
-                    {
-                        result = true;
-                    }
-                    // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
+                    if ((NtoP < AQTSeg.PSetup.NtoPRatio))  return true; // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
                 }
+                
             }
-            return result;
+            return false;
         }
 
         // (********************************)
@@ -1300,7 +1252,6 @@ namespace AQUATOX.Plants
         // (********************************)
         public double NLimit()
         {
-            double result;
             double Nitrogen;
             double NL;
             double N2O;
@@ -1349,14 +1300,12 @@ namespace AQUATOX.Plants
             {
                 NL = 0.0;
             }
-            result = NL;
-            return result;
+            return NL;
         }
 
         // nitrolimit
         public double NutrLimit()
         {
-            double result;
             double NLM;
             PO4_Limit = PO4Limit();
             // save for rate output  JSC 1-30-03
@@ -1368,8 +1317,7 @@ namespace AQUATOX.Plants
             NLM = Math.Min(NLM, CO2_Limit);
             Nutr_Limit = NLM;
             // save for rate output  JSC 9-5-02
-            result = NLM;
-            return result;
+            return NLM;
         }
 
         public double PProdLimit()
@@ -1417,7 +1365,6 @@ namespace AQUATOX.Plants
 
         public double PeriphytonSlough()
         {
-            double result;
             AllVariables PlantLoop;
             TPlant PP;
             double PSlough;
@@ -1444,8 +1391,7 @@ namespace AQUATOX.Plants
                     }
                 }
             }
-            result = PSlough;
-            return result;
+            return PSlough;
         }
 
         // --------------------------------------------------
@@ -1660,6 +1606,8 @@ namespace AQUATOX.Plants
             R = Respiration();
             Ex = PhotoResp();
             Pr = Predation();
+            if (Predation_Link != null) Pr = Predation_Link.ReturnLoad(AQTSeg.TPresent);
+
             WO = Washout();
             S = Sedimentation();
             // SinkToHypo is Calculated Here
@@ -1675,18 +1623,14 @@ namespace AQUATOX.Plants
             //}
 
             if (IsPhytoplankton())
-            {
-                PeriScr = PeriphytonSlough();
-            }
+            {   PeriScr = PeriphytonSlough();   }
+
             if (!IsPhytoplankton())
-            {
-                 Slg = CalcSlough();
-            }
+            {   Slg = CalcSlough();             }
+
             if (SloughEvent)
-            {
-                Slg = 0; // set precisely below  11/11/03
-            }
-            
+            {  Slg = 0; }  // set precisely below  11/11/03
+
             // HMS Removed linked mode and stratification code and estuary-mode code
 
             DB = L + Pho - R - Ex - M - Pr - WO + WI - S + Sed2Me - STH + SFE + TD + En + DiffUp + DiffDown - ToxD - Slg + PeriScr + Fl;
@@ -1720,25 +1664,21 @@ namespace AQUATOX.Plants
             // * breakage term for macrophytes 10-5-2001 *
             // (*******************************************)
 
-            double result;
             const int Gradual = 20;
             // JSC via RAP 11-05-2002
             double Vel;
             Vel = AQTSeg.Velocity(PAlgalRec.PrefRiffle, PAlgalRec.PrefPool, false);
             
             if (Vel >= PAlgalRec.Macro_VelMax) // 11/9/2001 constrain breakage so does not exceed "state" (concentration)
-                result = State;
+                return State;
             else
-                result = State * (Math.Exp((Vel - PAlgalRec.Macro_VelMax) / Gradual));
+                return State * (Math.Exp((Vel - PAlgalRec.Macro_VelMax) / Gradual));
               // mg/L d  // mg/L        // cm/s              // cm/s         // cm/s
 
-            return result;
         }
 
         public override double Mortality()
         {
-            double result;
-            // , HgPois
             double Dead;
             double Pois;
             int ToxLoop;
@@ -1769,14 +1709,12 @@ namespace AQUATOX.Plants
             {
                 Dead = State;
             }
-            result = Dead;
-            return result;
+            return Dead;
         }        // TMacrophyte.Mortality
 
 
         public override double Photosynthesis()
         {
-            double result;
             double LL;
             double NL;
             double Photosyn;
@@ -1827,20 +1765,16 @@ namespace AQUATOX.Plants
             FracLit = Location.FracLittoral(AQTSeg.ZEuphotic(), AQTSeg.Volume_Last_Step);
             if ((MacroType != TMacroType.Freefloat))
             {
-                result = SaltEffect * FracLit * Photosyn * HabitatLimit * KCapEffect;
+                return SaltEffect * FracLit * Photosyn * HabitatLimit * KCapEffect;
             }
             else
             {
-                result = SaltEffect * Photosyn * HabitatLimit * KCapEffect;
+                return SaltEffect * Photosyn * HabitatLimit * KCapEffect;
             }
-            // with
-
-            return result;
-        }       // TPlant.derivative
+        }    
 
         public override double Washout()  // HMS  multi-segment water flow logic disabled
         {
-            double result;
             double SegVolume;
             double Disch;
             double KCap;
@@ -1856,11 +1790,10 @@ namespace AQUATOX.Plants
             KCap = KCAP_in_g_m3();
             // g/m3
             KCapLimit = 1 - ((KCap - State) / KCap);
-            result = KCapLimit * Disch / SegVolume * State;
+            return KCapLimit * Disch / SegVolume * State;
         // g/cu m-d  (fraction) (cu m/d)   (cu m)   (g/cu m)
 
-//          WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
-            return result;
+//         WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
         }
 
 
@@ -1968,6 +1901,8 @@ namespace AQUATOX.Plants
                 R = Respiration();
                 Ex = PhotoResp();
                 Pr = Predation();
+                if (Predation_Link != null) Pr = Predation_Link.ReturnLoad(AQTSeg.TPresent);
+
                 Br = Breakage();
                 if (MacroType == TMacroType.Freefloat)
                 {
@@ -2230,7 +2165,6 @@ namespace AQUATOX.Plants
         // ----------------------------------------------------------------
         public double Derivative_NToPhytoFromSlough()
         {
-            double result;
             AllVariables PlantLoop;
             TPlant PPl;
             double NPSlough;
@@ -2257,8 +2191,7 @@ namespace AQUATOX.Plants
                     }
                 }
             }
-            result = NPSlough;
-            return result;
+            return NPSlough;
         }
 
 
@@ -2392,11 +2325,13 @@ namespace AQUATOX.Plants
                 Lo = CP.Loading * N2O;
           // (ug N/L d) (mg OM/L d) (ug N/mg OM)
                 WashO = CP.Washout() * N2O;
-//                WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-//                WashI = NutInCarrierWashin();
+//              WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
+//              WashI = NutInCarrierWashin();
                 Uptk = Uptake();
                 Mort = CP.Mortality() * N2O;
                 Predt = CP.Predation() * N2O;
+                if (CP.Predation_Link != null) Predt = CP.Predation_Link.ReturnLoad(AQTSeg.TPresent) * N2O;
+
                 Exc = CP.PhotoResp() * N2O;
                 Rsp = CP.Respiration() * N2O;
                 MacBrk = ((CP) as TMacrophyte).Breakage() * N2O;
@@ -2435,6 +2370,8 @@ namespace AQUATOX.Plants
                 //    }
 
                 Predt = CP.Predation() * N2O;
+                if (CP.Predation_Link != null) Predt = CP.Predation_Link.ReturnLoad(AQTSeg.TPresent) * N2O;
+
                 Mort = CP.Mortality() * N2O;
                 Exc = CP.PhotoResp() * N2O;
                 Rsp = CP.Respiration() * N2O;

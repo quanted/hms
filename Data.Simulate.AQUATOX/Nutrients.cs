@@ -382,7 +382,6 @@ namespace AQUATOX.Nutrients
         // ---------------------------process equations--------------------------
         public double SumDetrDecomp(T_SVType OType, bool SedOnly)
         {
-            double result;
             // If OType=NTrack returns sum of detrital decomp into ammonia
             // If OType=NTrack returns sum detrital decomp into dissolved phosphorus
             // otherwise returns sum of detrital decomposition in terms of organic matter
@@ -440,8 +439,7 @@ namespace AQUATOX.Nutrients
                 }
                 SumDecomp = SumDecomp + Decomp;
             }
-            result = SumDecomp;
-            return result;
+            return SumDecomp;
         }
 
         //public void CalcAnimPredn_NutrPred(TAnimal P)
@@ -496,14 +494,13 @@ namespace AQUATOX.Nutrients
         //    {
         //        CalcAnimPredn_NutrPred(AQTSeg.At(i));
         //    }
-        //    result = NetPredation;
+        //    return NetPredation;
         //    return result;
         //}
 
         // Remineralization
         public double NutrRelPeriScr()
         {
-            double result;
             // When Periphyton is scoured into phytoplankton nutrient balance must
             // be maintained if they have different stochiometry
             AllVariables PeriLoop;
@@ -556,8 +553,7 @@ namespace AQUATOX.Nutrients
                     }
                 }
             }
-            result = NRPS;
-            return result;
+            return NRPS;
         }
 
         // -------------------------------------------------------------------------------------------------------
@@ -588,14 +584,13 @@ namespace AQUATOX.Nutrients
         //            NGL = NGL + PAn.GameteLoss() * DiffNFrac;
         //        }
         //    }
-        //    result = NGL;
+        //    return NGL;
         //    return result;
         //}
 
         // -------------------------------------------------------------------------------------------------------
         public double NutrRelMortality()  
         {
-            double result;
             // When Anim & Plant die, excess nutrients are converted into NH4;
             // Detritus tends to have a lower fraction of nutrients then the dying organisms.
             // Macrophyte breakage and Tox Dislodge are included in mortality here
@@ -675,8 +670,7 @@ namespace AQUATOX.Nutrients
                     NMort = NMort + Mort * DiffNFrac;
                 }
             }
-            result = NMort;
-            return result;
+            return NMort;
         }
 
      //    -------------------------------------------------------------------------------------------------------
@@ -803,8 +797,7 @@ namespace AQUATOX.Nutrients
                     }
                 }
             }
-            result = NSink;
-            return result;
+            return NSink;
         }
 //         -------------------------------------------------------------------------------------------------------
         public double NutrRelColonization()  
@@ -896,7 +889,7 @@ namespace AQUATOX.Nutrients
         //            NDef = NDef + PAn.Defecation() * DiffNFrac;
         //        }
         //    }
-        //    result = NDef;
+        //    return NDef;
         //    return result;
         //}
 
@@ -949,7 +942,7 @@ namespace AQUATOX.Nutrients
         //            // 5/13/2013
         //        }
         //    }
-        //    result = Excret;
+        //    return Excret;
         //    return result;
         //}
 
@@ -975,7 +968,6 @@ namespace AQUATOX.Nutrients
         // -------------------------------------------------------------------------------------------------------
         public double CalcPhotoResp()  
         {
-            double result;
             // When photorespiration takes place in plants, excess nutrients are converted
             // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
             // the plants which are going through photorespiration
@@ -1019,8 +1011,7 @@ namespace AQUATOX.Nutrients
                     PhotoRsp = PhotoRsp + PPl.PhotoResp() * DiffNFrac;
                 }
             }
-            result = PhotoRsp;
-            return result;
+            return PhotoRsp;
         }
 
         // -------------------------------------------------------------------------------------------------------
@@ -1393,7 +1384,6 @@ namespace AQUATOX.Nutrients
             // ---------------------------------
             public double Nitrification()
             {
-                double result;
                 double T;
                 double p;
                 double Nitrify;
@@ -1426,8 +1416,7 @@ namespace AQUATOX.Nutrients
                 {
                     Nitrify = 0.0;
                 }
-                result = Nitrify;
-                return result;
+                return Nitrify;
             }
 
             // real
@@ -1665,7 +1654,6 @@ namespace AQUATOX.Nutrients
             // -------------------------------------------------------------------------------------------------------
             public double Denitrification()
             {
-                double result;
                 // , Sed_Surf_Corr
                 double T, O2;
                 double p;
@@ -1704,8 +1692,7 @@ namespace AQUATOX.Nutrients
                 {
                     Denitrify = 0.0;
                 }
-                result = Denitrify;
-                return result;
+                return Denitrify;
             }
 
             // --------------------------------------------------
@@ -1900,18 +1887,15 @@ namespace AQUATOX.Nutrients
         // --------------------------------
         public double AtmosExch_CO2Sat()
         {
-            double result;
             double TKelvin;
-            double CO2Henry;
-            // Henry's Law constant for CO2
-            const double pCO2 = 0.00035;
-            // atmos. partial pressure for CO2
+            double CO2Henry;               // Henry's Law constant for CO2
+            const double pCO2 = 0.00035;   // atmos. partial pressure for CO2
             // make variable?  This number is rising
             const double MCO2 = 44000.0;
             if (ImportCo2Equil)
             {
                 // Import CO2Equil from CO2SYS or equivalent
-                result = CO2Equil.ReturnTSLoad(AQTSeg.TPresent);
+                return CO2Equil.ReturnTSLoad(AQTSeg.TPresent);
             }
             else
             {
@@ -1919,10 +1903,9 @@ namespace AQUATOX.Nutrients
                 TKelvin = 273.15 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
                 CO2Henry = MCO2 * Math.Pow(10.0, (2385.73 / TKelvin - 14.0184 + 0.0152642 * TKelvin));
                 // g/cu m atm  mg CO2/mole
-                result = CO2Henry * pCO2;
+                return CO2Henry * pCO2;
                 // g/cu m   g/cu m-atm atm
             }
-            return result;
         }
 
         // real
@@ -1933,24 +1916,20 @@ namespace AQUATOX.Nutrients
         // ----------------------------------------------------------
         public double AtmosExch()
         {
-            double result;
             // temp adjustment, Churchill et al., 1962
             const double MolWtCO2 = 44.0;
             const double MolWtO2 = 32.0;
             double KLiqCO2;
             TO2Obj P;
             // atmosexch
-            result = 0;
-            //            if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)    {  return result;     }
+            //            if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)   return 0;    
 
             P = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj);
 
             KLiqCO2 = P.KReaer() * Math.Pow((MolWtO2 / MolWtCO2), 0.25);              // Schwarzenbach et al., 1993:
             // 1/d        1/d
-            result = KLiqCO2 * (AtmosExch_CO2Sat() - State);
+            return KLiqCO2 * (AtmosExch_CO2Sat() - State);
             // g/cu m-d    1/d        g/cu m  g/cu m
-
-            return result;
         }     // atmosexch
 
         // Winberg
@@ -2189,7 +2168,6 @@ namespace AQUATOX.Nutrients
         // ----------------------------------
         public double Reaeration_O2Sat()
         {
-            double result;
             double TKelvin;
             double Salt;
             double lnCsf;
@@ -2211,13 +2189,11 @@ namespace AQUATOX.Nutrients
             AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100;
             // Fractional effect due to altitude from Zison et al. 1978
             // m
-            result = Math.Exp(lnCss) * AltEffect;
+            return Math.Exp(lnCss) * AltEffect;
             // 8/19/2008, Changed to APHA code as in Thomann & Mueller
             // (*       O2Sat := 1.4277 * exp(-173.492 + 24963.39/TKelvin + 143.3483
             // * ln(TKelvin/100.0) - 0.218492 * TKelvin
             // + Salt * (-0.033096 + 0.00014259 * TKelvin - 1.7e-7 * SQR(TKelvin)));  {JSC 8/18/2008, Change from SQRT to SQR}  *)
-
-            return result;
         }
 
         // KReaer

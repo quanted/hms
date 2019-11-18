@@ -829,7 +829,6 @@ namespace AQUATOX.Chemicals
             //                // cu m
             //                if (Loop == Alt_LoadingsType.DirectPrecip)
             //                {
-            //                    //@ Unsupported property or method(D): 'SurfArea'
             //                    AddLoad = AddLoad * Location.Locale.SurfArea;
             //                }
             //                // mg/L d
