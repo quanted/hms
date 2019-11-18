@@ -110,7 +110,7 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public LinkedList<StreamSegment> GetStreams(string startDate, string endDate)
+        public LinkedList<StreamSegment> GetStreams(ITimeSeriesInput input)
         {
             string errorMsg = "";
             // Constructs default error output object containing error message.
@@ -128,16 +128,15 @@ namespace WatershedDelineation
             ITimeSeriesOutput test = cl.Result;*/
             //Time = Distance / Velocity
 
-
-
             //Create a LinkedList of Streams
             LinkedList<StreamSegment> travelPath = new LinkedList<StreamSegment>();
             //Call EPA Waters web service to get path of travel
             //For example: Using the user specified (from map) start and stop COMIDs
             //The call returns JSON with COMIDs in the path
-            string data = GetWatersData(out errorMsg);
+            string data = GetWatersData(out errorMsg, input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["stopCOMID"]);
 
             RootObject networkObject = Utilities.JSON.Deserialize<RootObject>(data);
+
 
             //Iterate through the COMIDs and stream lengths in the returned JSON and add them to the LinkedList
             foreach (NtNavResultsStandard stream in networkObject.output.ntNavResultsStandard)
@@ -148,14 +147,14 @@ namespace WatershedDelineation
                 //Use NWM forecast data for the stream to fill flow values
                 WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
                 string flaskURL = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : "http://localhost:7777";
-                string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + seg.comID + "&startDate=" + startDate + "&endDate=" + endDate;
+                string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
                 string nwmdata = nwm.GetData(out errorMsg, nwmUrl);
                 NWMObject flowData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
                 NWMData parsedFlowData = Utilities.JSON.Deserialize<NWMData>(flowData.data);
                 seg.flows_m3PerSec = parsedFlowData.data;
 
                 //Use NWM forecast data for the stream to fill velocity values
-                nwmUrl = flaskURL + "/hms/nwm/data/?dataset=velocity&comid=" + seg.comID + "&startDate=" + startDate + "&endDate=" + endDate;
+                nwmUrl = flaskURL + "/hms/nwm/data/?dataset=velocity&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
                 nwmdata = nwm.GetData(out errorMsg, nwmUrl);
                 NWMObject velocityData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
                 NWMData parsedVelocityData = Utilities.JSON.Deserialize<NWMData>(velocityData.data);
@@ -163,19 +162,13 @@ namespace WatershedDelineation
                 //Initialize stream. Contaminated with false values
                 seg.contaminated = new Dictionary<string, bool>();
                 seg.timestepData = new Dictionary<string, List<string>>();
-                /*foreach (string date in seg.velocities_mPerSec.Keys)
-                {
-                    List<string> combined = new List<string>{ seg.comID, seg.length_km.ToString(), seg.flows_m3PerSec[date].ToString(), seg.velocities_mPerSec[date].ToString(), "false"};
-                    seg.contaminated.Add(date, false);
-                    seg.timestepData.Add(date, combined);
-                }*/
                 travelPath.AddLast(seg);
             }
 
             //Calculate which streams got contaminated at each time step
             for (int timeStep = 0; timeStep <= 18; timeStep++)//Change timestep to be datetime for indexing  2019-11-02T04:00:00
             {
-                string timeindex = startDate + "T" + timeStep.ToString("00") + ":00:00";
+                string timeindex = input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "T" + timeStep.ToString("00") + ":00:00";
                 double totalTravelTime = 0;
                 for (LinkedListNode<StreamSegment> stream = travelPath.First; stream != null; stream = stream.Next)
                 {                    
@@ -196,10 +189,10 @@ namespace WatershedDelineation
             return travelPath;
         }
 
-        public string GetWatersData(out string errorMsg)
+        public string GetWatersData(out string errorMsg, string start, string stop)
         {
             errorMsg = "";
-            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=22338753&pStopCOMID=22340577";
+            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + start + "&pStopCOMID=" + stop;
             string data = "";
             try
             {
