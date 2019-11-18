@@ -43,6 +43,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
+                    HucID = "030502040102",
+                    StationID = null,
                     Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {

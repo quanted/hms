@@ -9,6 +9,19 @@ using Utilities;
 
 namespace WatershedDelineation
 {
+    public class NWMData
+    {
+        public Dictionary<string, double> data { get; set; }
+        public Dictionary<string, string> metadata { get; set; }
+    }
+
+    public class NWMObject
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+        public string data { get; set; }
+    }
+
     public class NWM
     {
         public string GetData(out string errorMsg, string url)
