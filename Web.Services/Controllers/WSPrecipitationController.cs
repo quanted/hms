@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Web.Services.Models;
 
@@ -76,7 +75,7 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]  
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
-            Debug.WriteLine("INPUT" + precipInput.ToString());
+            Console.WriteLine("INPUT" + precipInput.ToString());
             WSPrecipitation precip = new WSPrecipitation();
             var stpWatch = System.Diagnostics.Stopwatch.StartNew();
             ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
