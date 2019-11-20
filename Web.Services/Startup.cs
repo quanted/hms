@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
 using Web.Services.Controllers;
+using Utilities;
 
 namespace Web.Services
 {
@@ -39,6 +40,7 @@ namespace Web.Services
                 options.JsonSerializerOptions.WriteIndented = true;
                 options.JsonSerializerOptions.AllowTrailingCommas = true;
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Converters.Add(new Utilities.DoubleConverter());
             });
 
             services.AddLogging();
