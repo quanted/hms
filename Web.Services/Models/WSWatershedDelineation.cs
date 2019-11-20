@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using WatershedDelineation;
 using Web.Services.Controllers;
 
 namespace Web.Services.Models
@@ -21,8 +22,12 @@ namespace Web.Services.Models
             string errorMsg = "";
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+            
 
-            //Stream Network Delineation
+            WatershedDelineation.Streams streamNetwork = new WatershedDelineation.Streams(input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["stopCOMID"], null);
+            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd"), input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd"));
+
+            /*Stream Network Delineation
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
             string gtype = "";
@@ -46,22 +51,22 @@ namespace Web.Services.Models
                 gtype = "com_id_list";
             }
             DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.HucID.ToString(), gtype, out errorMsg, out lst);             //list of coms?
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }*/
 
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput delinOutput = oFactory.Initialize();
 
-            //Turn delineation table to ITimeseries
-            int i = 0;
-            foreach (DataRow dr in dt.Rows)
+            //Format data into ITimeSeriesOutput format.
+            foreach(string date in travelPath.First.Value.timestepData.Keys)
             {
                 List<string> lv = new List<string>();
-                foreach (Object g in dr.ItemArray)
+                foreach(StreamSegment node in travelPath)
                 {
-                    lv.Add(g.ToString());
+                    lv.AddRange(node.timestepData[date]);
                 }
-                delinOutput.Data.Add(i++.ToString(), lv);
+                delinOutput.Data.Add(date,lv);//delinOutput.Data.Add(date, travelPath.First.Value.timestepData[date]);
             }
+
             return delinOutput;
         }
     }

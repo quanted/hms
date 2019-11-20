@@ -43,6 +43,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
+                    HucID = "030502040102",
+                    StationID = null,
                     Description = "EPA Athens Office",
                     Point = new PointCoordinate()
                     {
@@ -93,9 +95,14 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]WatershedDelineationInput watershedInput)
         {
+            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+
             WSWatershedDelineation watershed = new WSWatershedDelineation();
             ITimeSeriesOutput results = await watershed.GetDelineationData(watershedInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+
+            stpWatch.Stop();
+            long time = stpWatch.ElapsedMilliseconds / 1000;
             return new ObjectResult(results);
         }
     }
