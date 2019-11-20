@@ -25,9 +25,9 @@ namespace Web.Services.Models
             
 
             WatershedDelineation.Streams streamNetwork = new WatershedDelineation.Streams(input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["stopCOMID"], null);
-            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd"), input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd"));
+            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input);
 
-            /*Stream Network Delineation
+            /* Stream Network Delineation
             List<string> lst = new List<string>();
             WatershedDelineation.StreamNetwork sn = new WatershedDelineation.StreamNetwork();
             string gtype = "";
