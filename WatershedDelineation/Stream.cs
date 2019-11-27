@@ -79,8 +79,8 @@ namespace WatershedDelineation
     {
         public string comID { get; set; }
         public double length_km { get; set; }
-        public Dictionary<string, double> velocities_mPerSec { get; set; }  //(key, value) 	Key= timestep, value=velocity
-        public Dictionary<string, double> flows_m3PerSec { get; set; }      //(key, value) 	Key= timestep, value=flow
+        public Dictionary<string, List<String>> velocities_mPerSec { get; set; }  //(key, value) 	Key= timestep, value=velocity
+        public Dictionary<string, List<String>> flows_m3PerSec { get; set; }      //(key, value) 	Key= timestep, value=flow
         public Dictionary<string, bool> contaminated { get; set; }	//(key, value) 	Key= timestep, value=contaminated?	
         public Dictionary<string, List<string>> timestepData { get; set; }
 
@@ -137,6 +137,38 @@ namespace WatershedDelineation
 
             RootObject networkObject = Utilities.JSON.Deserialize<RootObject>(data);
 
+            /*List<StreamSegment> unsorted = new List<StreamSegment>();
+            object outputListLock = new object();
+            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            Parallel.ForEach(networkObject.output.ntNavResultsStandard, options, (NtNavResultsStandard stream) =>
+            {
+                StreamSegment seg = new StreamSegment(); //Instantiate Stream object from Stream Class
+                seg.comID = stream.comid.ToString();
+                seg.length_km = stream.lengthkm;
+                //Use NWM forecast data for the stream to fill flow values
+                WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
+                string flaskURL = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : "http://localhost:7777";
+                string nwmUrl = flaskURL + "/hms/nwm/forecast/short_term/" + seg.comID;
+                //string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+                string nwmdata = nwm.GetData(out errorMsg, nwmUrl);
+                NWMObject nwmObjectData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
+                NWMData parsedNwmData = Utilities.JSON.Deserialize<NWMData>(nwmObjectData.data);
+
+                seg.flows_m3PerSec = parsedNwmData.data;
+                seg.velocities_mPerSec = parsedNwmData.data;
+                //Initialize stream. Contaminated with false values
+                seg.contaminated = new Dictionary<string, bool>();
+                seg.timestepData = new Dictionary<string, List<string>>();
+                lock (outputListLock)
+                {
+                    unsorted.Add(seg);
+                }
+            });
+
+            foreach (StreamSegment segment in unsorted.OrderBy(s => s.comID).ToList())
+            {
+                travelPath.AddLast(segment);
+            }*/
 
             //Iterate through the COMIDs and stream lengths in the returned JSON and add them to the LinkedList
             foreach (NtNavResultsStandard stream in networkObject.output.ntNavResultsStandard)
@@ -147,32 +179,29 @@ namespace WatershedDelineation
                 //Use NWM forecast data for the stream to fill flow values
                 WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
                 string flaskURL = (Environment.GetEnvironmentVariable("FLASK_SERVER") != null) ? Environment.GetEnvironmentVariable("FLASK_SERVER") : "http://localhost:7777";
-                string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+                string nwmUrl = flaskURL + "/hms/nwm/forecast/short_term/" + seg.comID;
+                //string nwmUrl = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
                 string nwmdata = nwm.GetData(out errorMsg, nwmUrl);
-                NWMObject flowData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
-                NWMData parsedFlowData = Utilities.JSON.Deserialize<NWMData>(flowData.data);
-                seg.flows_m3PerSec = parsedFlowData.data;
+                NWMObject nwmObjectData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
+                NWMData parsedNwmData = Utilities.JSON.Deserialize<NWMData>(nwmObjectData.data);
 
-                //Use NWM forecast data for the stream to fill velocity values
-                nwmUrl = flaskURL + "/hms/nwm/data/?dataset=velocity&comid=" + seg.comID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
-                nwmdata = nwm.GetData(out errorMsg, nwmUrl);
-                NWMObject velocityData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
-                NWMData parsedVelocityData = Utilities.JSON.Deserialize<NWMData>(velocityData.data);
-                seg.velocities_mPerSec = parsedVelocityData.data;
+                seg.flows_m3PerSec = parsedNwmData.data;
+                seg.velocities_mPerSec = parsedNwmData.data;
                 //Initialize stream. Contaminated with false values
                 seg.contaminated = new Dictionary<string, bool>();
                 seg.timestepData = new Dictionary<string, List<string>>();
                 travelPath.AddLast(seg);
+                Thread.Sleep(1000);
             }
 
             //Calculate which streams got contaminated at each time step
-            for (int timeStep = 0; timeStep <= 18; timeStep++)//Change timestep to be datetime for indexing  2019-11-02T04:00:00
+            for (int timeStep = 0; timeStep < 18; timeStep++)//Change timestep to be datetime for indexing  2019-11-02T04:00:00
             {
-                string timeindex = input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "T" + timeStep.ToString("00") + ":00:00";
+                string timeindex = travelPath.First.Value.velocities_mPerSec.Keys.ElementAt(timeStep);//DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd ") + "00";//input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "T" + timeStep.ToString("00") + ":00:00";
                 double totalTravelTime = 0;
                 for (LinkedListNode<StreamSegment> stream = travelPath.First; stream != null; stream = stream.Next)
                 {                    
-                    totalTravelTime += stream.Value.velocities_mPerSec[timeindex.ToString()] / stream.Value.length_km;
+                    totalTravelTime += double.Parse(stream.Value.velocities_mPerSec[timeindex.ToString()][1]) / stream.Value.length_km;
                     if (totalTravelTime >= timeStep)
                     {
                         stream.Value.contaminated[timeindex.ToString()] = false;
@@ -182,7 +211,7 @@ namespace WatershedDelineation
                         stream.Value.contaminated[timeindex.ToString()] = true;
                     }
                     //stream.Value.contaminated[timeindex.ToString()] = true;
-                    List<string> combined = new List<string> { stream.Value.comID, stream.Value.length_km.ToString(), stream.Value.flows_m3PerSec[timeindex].ToString(), stream.Value.velocities_mPerSec[timeindex].ToString(), stream.Value.contaminated[timeindex].ToString() };
+                    List<string> combined = new List<string> { stream.Value.comID, stream.Value.length_km.ToString(), stream.Value.flows_m3PerSec[timeindex][0].ToString(), stream.Value.velocities_mPerSec[timeindex][1].ToString(), stream.Value.contaminated[timeindex].ToString() };
                     stream.Value.timestepData.Add(timeindex, combined);
                 }
             }

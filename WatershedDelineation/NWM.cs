@@ -11,7 +11,7 @@ namespace WatershedDelineation
 {
     public class NWMData
     {
-        public Dictionary<string, double> data { get; set; }
+        public Dictionary<string, List<String>> data { get; set; }
         public Dictionary<string, string> metadata { get; set; }
     }
 
@@ -59,7 +59,7 @@ namespace WatershedDelineation
                         Thread.Sleep(100);
                     }
                 }
-
+                Thread.Sleep(1000);
                 retries = 50;
                 status = "";
                 taskData = "";
@@ -73,12 +73,12 @@ namespace WatershedDelineation
                     Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
-                    if (taskData["status"] == "SUCCESS")
+                    taskData = JSON.Deserialize<NWMObject>(data);
+                    if (taskData.status == "SUCCESS")
                     {
                         success = true;
                     }
-                    else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
+                    else if (taskData.status == "FAILURE")
                     {
                         break;
                     }
