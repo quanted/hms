@@ -40,7 +40,7 @@ namespace Web.Services
                 options.JsonSerializerOptions.WriteIndented = true;
                 options.JsonSerializerOptions.AllowTrailingCommas = true;
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                options.JsonSerializerOptions.Converters.Add(new Utilities.DoubleConverter());
+                //options.JsonSerializerOptions.Converters.Add(new Utilities.DoubleConverter());
             });
 
             services.AddLogging();
