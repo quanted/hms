@@ -92,6 +92,12 @@ namespace Precipitation
                     this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "trmm":
+                    // TRMM Precipitation Data call
+                    TRMM trmm = new TRMM();
+                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input);
+                    if(errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 case "nwm":
                     // wgen Precipitation Data call
                     NWM nwm = new NWM();
