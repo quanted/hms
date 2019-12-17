@@ -8,8 +8,8 @@ using AQUATOX.Volume;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using AQUATOX.Chemicals;
-using AQUATOX.Organisms;
 using AQUATOX.Plants;
+using AQUATOX.Animals;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -664,6 +664,7 @@ namespace AQUATOX.AQTSegment
 
         [JsonIgnore] public TStateVariable[,,] MemLocRec = null;   // Array of pointers to SV loc in memory
         [JsonIgnore] public List<TSVConc> PLightVals = new List<TSVConc>();
+        [JsonIgnore] public List<TSVConc> PO2Concs = new List<TSVConc>();
 
 
         public AQUATOXSegment()
@@ -986,7 +987,7 @@ namespace AQUATOX.AQTSegment
                 TSV.State = TSV.yhold;
             }
 
-            Perform_Dilute_or_Concentrate(x);
+            Perform_Dilute_or_Concentrate();
         }
 
 
@@ -1020,6 +1021,33 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+        public void DoThisEveryStep_UpdateO2Concs()
+        {
+            TSVConc pconc;
+            TSVConc newconc;
+            int i;
+            bool deleted;
+
+            newconc.SVConc = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            newconc.Time = TPresent;
+            PO2Concs.Insert(0, newconc);
+            i = PO2Concs.Count - 1;
+            do
+            {
+                // clean up any data points greater than 96 hours old
+                deleted = false;
+                pconc = PO2Concs[i];
+                // days or 96 hours
+                if ((TPresent - pconc.Time).TotalDays > 4)
+                {
+                    PO2Concs.RemoveAt(i);
+                    deleted = true;
+                }
+                i -= 1;
+            } while (!(!deleted || (i < 0)));
+        }
+
+
         public void DoThisEveryStep_UpdateLightVals()
         {
             // Time history of daily average light values
@@ -1030,7 +1058,8 @@ namespace AQUATOX.AQTSegment
             bool deleted;
             PL = GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
             if (PL != null)
-            { 
+            {
+                newconc = new TSVConc();
                 newconc.SVConc = PL.DailyLight;
                 newconc.Time = TPresent;
                 PLightVals.Insert(0, newconc);
@@ -1063,7 +1092,7 @@ namespace AQUATOX.AQTSegment
 
             DoThisEveryStep_UpdateLightVals();   // update light history values for calculating effects
 
-            //DoThisEveryStep_UpdateO2Concs();   // update oxygen concentration history for calculating effects
+            DoThisEveryStep_UpdateO2Concs();   // update oxygen concentration history for calculating effects
 
             //DoThisEveryStep_UpdateSedConcs(); // update sediment conc. history for calculating effects
 
@@ -1258,7 +1287,7 @@ namespace AQUATOX.AQTSegment
         // Added delta thermocline 7/16/07
         // *************************************
 
-        public void Perform_Dilute_or_Concentrate(DateTime TimeIndex)
+        public void Perform_Dilute_or_Concentrate()
         {
             double Vol_Prev_Step;
             double NewVolume;
@@ -1798,6 +1827,185 @@ namespace AQUATOX.AQTSegment
         }
 
 
+        //// -------------------------------------------------------------------------------------------------------
+        //public double InorgSedConc(bool WeightedAvg)
+        //{
+        //    double result;
+        //    // Conc Inorganic sediments in mg/L
+        //    // Modified to allow for weighted average in the event of linked-mode well-mixed stratification, 2-27-08
+        //    double InorgSed;
+        //    double SedState;
+        //    AllVariables DetrLoop;
+        //    AllVariables AlgLoop;
+        //    AllVariables SedLoop;
+        //    TSandSiltClay PTSS;
+        //    TPlant PPhyto;
+        //    TStates OtherSeg;
+        //    double ThisSegThick;
+        //    double OtherSegThick;
+        //    if (WeightedAvg)
+        //    {
+        //        _wvar1 = Location.Locale;
+        //        ThisSegThick = DynamicZMean();
+        //        // 10-14-2010 removed ZMAX from this calculation
+        //        if (VSeg == Global.VerticalSegments.Epilimnion)
+        //        {
+        //            OtherSeg = HypoSegment;
+        //        }
+        //        else
+        //        {
+        //            OtherSeg = EpiSegment;
+        //        }
+        //        OtherSegThick = OtherSeg.DynamicZMean();
+        //    }
+        //    InorgSed = 0;
+        //    if (GetStatePointer(Global.AllVariables.Sand, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null)
+        //    {
+        //        for (SedLoop = Global.AllVariables.Sand; SedLoop <= Global.AllVariables.Clay; SedLoop++)
+        //        {
+        //            // If there is sand..clay in a simulation there is no TSS, nor cohesives
+        //            SedState = InorgSedConc_GetExtState(SedLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //            if (SedState > -1)
+        //            {
+        //                InorgSed = InorgSed + SedState;
+        //            }
+        //        }
+        //    }
+        //    if (GetStatePointer(Global.AllVariables.Cohesives, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null)
+        //    {
+        //        for (SedLoop = Global.AllVariables.Cohesives; SedLoop <= Global.AllVariables.NonCohesives; SedLoop++)
+        //        {
+        //            // If there are cohesives/noncohesives, in a simulation there is not TSS nor sand..clay
+        //            SedState = InorgSedConc_GetExtState(SedLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //            if (SedState > -1)
+        //            {
+        //                InorgSed = InorgSed + SedState;
+        //            }
+        //        }
+        //    }
+
+        //    PTSS = GetStatePointer(Global.AllVariables.TSS, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //    if (PTSS != null)
+        //    {
+        //        // If there is TSS in a simulation there are no cohesives nor sand..clay
+        //        InorgSed = InorgSedConc_GetExtState(Global.AllVariables.TSS, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //        if (PTSS.TSS_Solids)
+        //        {
+        //            // TSS includes algae so, to avoid double-counting, this algorithm subtracts the phytoplankton biomass
+        //            // from the TSS ("inorganic sediment") before computing the extinction coeff.
+        //            for (AlgLoop = Global.Units.Global.FirstAlgae; AlgLoop <= Global.Units.Global.LastAlgae; AlgLoop++)
+        //            {
+        //                PPhyto = GetStatePointer(AlgLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                if (PPhyto != null)
+        //                {
+        //                    if (PPhyto.IsPhytoplankton())
+        //                    {
+        //                        // 1/7/2005
+        //                        InorgSed = InorgSed - InorgSedConc_GetExtState(AlgLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        if (PTSS.TSS_Solids)
+        //        {
+        //            for (DetrLoop = Global.AllVariables.SuspRefrDetr; DetrLoop <= Global.AllVariables.SuspLabDetr; DetrLoop++)
+        //            {
+        //                if (InorgSedConc_GetExtState(DetrLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) > 0)
+        //                {
+        //                    InorgSed = InorgSed - InorgSedConc_GetExtState(DetrLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                }
+        //            }
+        //        }
+        //        if (InorgSed < 0)
+        //        {
+        //            InorgSed = 0;
+        //        }
+        //        // 10-18-07 bullet proofing
+        //    }
+        //    result = InorgSed;
+        //    return result;
+        //}
+
+        //// inorganic seds in mg/L
+        //// -------------------------------------------------------------------------------------------------------
+        //public double InorgSed60Day(bool MustHave60)
+        //{
+        //    double result;
+        //    // 60 day running average of inorganic seds, mg/L
+        //    // 3/5/2008, if MustHave60=TRUE then returns zero if the data-record (simulation time) is less than 60 days
+        //    bool OverTime;
+        //    TSVConc PSS;
+        //    int i;
+        //    double RunningSum;
+        //    double LastInorg;
+        //    double LastTime;
+        //    if (Convert.ToInt64(TimeLastInorgSedAvg[MustHave60]) == Convert.ToInt64(TPresent))
+        //    {
+        //        // optimization, only calculate once per day
+        //        result = LastInorgSedAvg[MustHave60];
+        //        return result;
+        //    }
+        //    LastInorg = InorgSedConc(false);
+        //    if (MustHave60)
+        //    {
+        //        result = 0;
+        //    }
+        //    else
+        //    {
+        //        result = LastInorg;
+        //    }
+        //    // Used if Count of historical data =0
+        //    LastTime = TPresent;
+        //    OverTime = false;
+        //    i = 0;
+        //    RunningSum = 0;
+        //    if (PSedConcs.Count > 0)
+        //    {
+        //        do
+        //        {
+        //            PSS = PSedConcs.At(i);
+        //            if ((TPresent - PSS.Time - 0.001) > 60)
+        //            {
+        //                OverTime = true;
+        //            }
+        //            // days               (min)
+        //            // d
+        //            RunningSum = RunningSum + ((PSS.SVConc + LastInorg) / 2) * (LastTime - PSS.Time);
+        //            // mg/L d
+        //            // mg/L
+        //            // mg/L
+        //            // d
+        //            // d
+        //            // trapezoidal integration
+        //            LastTime = PSS.Time;
+        //            LastInorg = PSS.SVConc;
+        //            i++;
+        //        } while (!((i == PSedConcs.Count) || OverTime));
+        //        if (TPresent - LastTime > Global.Units.Global.Tiny)
+        //        {
+        //            // must have time-record to process
+        //            if ((TPresent - LastTime < 60) && MustHave60)
+        //            {
+        //                // not 60 days of data
+        //                result = 0;
+        //            }
+        //            else
+        //            {
+        //                result = RunningSum / (TPresent - LastTime);
+        //            }
+        //        }
+        //        // mg/L d
+        //        // d
+        //    }
+        //    // Count>0
+        //    TimeLastInorgSedAvg[MustHave60] = TPresent;
+        //    LastInorgSedAvg[MustHave60] = result;
+        //    return result;
+        //}
+
+
+
+
         // ***  Process Equations  ***
         // *******************************************************
         // Stroganov Function
@@ -2224,19 +2432,12 @@ namespace AQUATOX.AQTSegment
                 else
                 {
                     // If (Typ <> StV) then
-                    switch (NS)
+                    NFrac = NS switch
                     {
-                        case AllVariables.POC_G3:
-                            NFrac = Diagenesis_Params.LigninDetr.Val;
-                            break;
-                        case AllVariables.POC_G2:
-                            NFrac = (1 - Diagenesis_Params.LigninDetr.Val);
-                            break;
-                        default:
-                            // POCG1:
-                            NFrac = 1;
-                            break;
-                    }
+                        AllVariables.POC_G3 => Diagenesis_Params.LigninDetr.Val,
+                        AllVariables.POC_G2 => (1 - Diagenesis_Params.LigninDetr.Val),
+                        _ => 1,   // POC_G1
+                    }; 
                 }
                 // Case
                 if ((Typ == T_SVType.StV))
@@ -2744,18 +2945,13 @@ namespace AQUATOX.AQTSegment
             if (ppH <= pHMin) result = KpH * Math.Exp(ppH - pHMin);
             if (ppH > pHMax) result = KpH * Math.Exp(pHMax - ppH);
             return result;
-        }
-
-        // phcorr
+        }   // phcorr
 
         // -------------------------------------------------------------------------------------------------------
         // (************************************)
         // (* Straskraba, '76; Hutchinson, '57 *)
         // (* BUT simplify to linear relation  *)
         // (************************************)
-
-        // tcorr
-        // -------------------------------------------------------------------------------------------------------
 
         public double ZEuphotic()
         {
@@ -3161,7 +3357,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(TimeSeriesInput), typeof(TimeSeriesOutput), typeof(TNH4_Sediment), typeof(TNO3_Sediment), typeof(TPO4_Sediment),
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
-                                          typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte) }; 
+                                          typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord) }; 
     }
 }
 

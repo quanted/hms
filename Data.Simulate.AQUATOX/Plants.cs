@@ -214,18 +214,12 @@ namespace AQUATOX.Plants
             PctRun = 100 - AQTSeg.Location.Locale.PctRiffle - AQTSeg.Location.Locale.PctPool;
             PrefRun = 100 - PAlgalRec.PrefRiffle - PAlgalRec.PrefPool;
             HabitatAvail = 0;
-            if (PAlgalRec.PrefRiffle > 0)
-            {
-                HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100;
-            }
-            if (PAlgalRec.PrefPool > 0)
-            {
-                HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100;
-            }
-            if (PrefRun > 0)
-            {
-                HabitatAvail = HabitatAvail + PctRun / 100;
-            }
+            if (PAlgalRec.PrefRiffle > 0)   HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100;  
+
+            if (PAlgalRec.PrefPool > 0)     HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100;
+
+            if (PrefRun > 0)                HabitatAvail = HabitatAvail + PctRun / 100;
+
             return HabitatAvail;
         }
 

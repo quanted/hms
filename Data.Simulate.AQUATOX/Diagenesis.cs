@@ -543,27 +543,17 @@ namespace AQUATOX.Diagenesis
 
         public double Mineralization()
         {
-            double result;
             // gC/m3 day
             double Temp;
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            switch (NState)
+            var result = NState switch
             {
-                case AllVariables.POC_G1:
-                    result = DR.kpoc1.Val * Math.Pow(DR.ThtaPOC1.Val, Temp - 20) * State;
-                    break;
-                case AllVariables.POC_G2:
-                    result = DR.kpoc2.Val * Math.Pow(DR.ThtaPOC2.Val, Temp - 20) * State;
-                    break;
-                default:
-                    result = DR.kpoc3.Val * Math.Pow(DR.ThtaPOC3.Val, Temp - 20) * State;
-                    break;
-                    // g C/m3 d
-                    // 1/d
-                    // unitless
-                    // g C/m3
-            }
+                AllVariables.POC_G1 => DR.kpoc1.Val * Math.Pow(DR.ThtaPOC1.Val, Temp - 20) * State,
+                AllVariables.POC_G2 => DR.kpoc2.Val * Math.Pow(DR.ThtaPOC2.Val, Temp - 20) * State,
+                _ => DR.kpoc3.Val * Math.Pow(DR.ThtaPOC3.Val, Temp - 20) * State,
+                // g C/m3 d =   // 1/d            // unitless          // g C/m3
+            };
             return result;
         }
 
@@ -656,23 +646,17 @@ namespace AQUATOX.Diagenesis
 
         public double Mineralization()
         {
-            double result;
             double Temp;
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            switch (NState)
+            var result = NState switch
             {
-                case AllVariables.PON_G1:
-                    result = DR.kpon1.Val * Math.Pow(DR.ThtaPON1.Val, Temp - 20) * State;
-                    break;
-                case AllVariables.PON_G2:
-                    result = DR.kpon2.Val * Math.Pow(DR.ThtaPON2.Val, Temp - 20) * State;
-                    break;
-                default:
-                    result = DR.kpon3.Val * Math.Pow(DR.ThtaPON3.Val, Temp - 20) * State;
-                    break;
-                    // g N/m3 d     // 1/d                 // unitless           // g N/m3
-            }
+                AllVariables.PON_G1 => DR.kpon1.Val * Math.Pow(DR.ThtaPON1.Val, Temp - 20) * State,
+                AllVariables.PON_G2 => DR.kpon2.Val * Math.Pow(DR.ThtaPON2.Val, Temp - 20) * State,
+                _ => DR.kpon3.Val * Math.Pow(DR.ThtaPON3.Val, Temp - 20) * State,
+            };
+            // g N/m3 d  =   // 1/d             // unitless           // g N/m3
+
             return result;
         }
 
@@ -771,23 +755,16 @@ namespace AQUATOX.Diagenesis
 
         public double Mineralization()
         {
-            double result;
             double Temp;
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            switch (NState)
+            var result = NState switch
             {
-                case AllVariables.POP_G1:
-                    result = DR.kpop1.Val * Math.Pow(DR.ThtaPOP1.Val, Temp - 20) * State;
-                    break;
-                case AllVariables.POP_G2:
-                    result = DR.kpop2.Val * Math.Pow(DR.ThtaPOP2.Val, Temp - 20) * State;
-                    break;
-                default:
-                    result = DR.kpop3.Val * Math.Pow(DR.ThtaPOP3.Val, Temp - 20) * State;
-                    break;
-                    // g P/m3 d   // 1/d           // unitless                   // g C/m3
-            }
+                AllVariables.POP_G1 => DR.kpop1.Val * Math.Pow(DR.ThtaPOP1.Val, Temp - 20) * State,
+                AllVariables.POP_G2 => DR.kpop2.Val * Math.Pow(DR.ThtaPOP2.Val, Temp - 20) * State,
+                _ => DR.kpop3.Val * Math.Pow(DR.ThtaPOP3.Val, Temp - 20) * State,
+                // g P/m3 d   // 1/d           // unitless                 // g C/m3
+            };
             return result;
         }
 

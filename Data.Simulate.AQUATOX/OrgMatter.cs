@@ -752,7 +752,6 @@ public double SedDetritalFormation()
             double Sedimented;
             double Thick;
             double Decel;
-            double SedState;
             double DensFactor;
             //double FracDep;
             //double DepVel;
@@ -817,18 +816,12 @@ public double SedDetritalFormation()
                 if (Sedimented < 0)
                 {
                     // resuspension, but don't resuspend more Sed Detritus than exists
-                    switch (NState)
+                    var SedState = NState switch
                     {
-                        case AllVariables.SuspLabDetr:
-                            SedState = AQTSeg.GetState(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-                            break;
-                        default:
-                            // SuspRefrDetr
-                            SedState = AQTSeg.GetState(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-                            break;
-                    }
-                    if (-Sedimented > SedState)
-                    {  Sedimented = -SedState;  }
+                        AllVariables.SuspLabDetr => AQTSeg.GetState(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol),
+                                               _ => AQTSeg.GetState(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol),
+                    };
+                    if (-Sedimented > SedState) Sedimented = -SedState;  
                 }
             }
 

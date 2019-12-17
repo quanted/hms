@@ -18,8 +18,7 @@ namespace AQUATOX.Nutrients
         {
             // if using TN or TP for init cond
             TNH4Obj PNH4;
-            double Nut2Org;
-            double CNutrient;
+            double CNutrient, Nut2Org;
             AllVariables NSLoop;
 
             if (!((NState == AllVariables.Nitrate) || (NState == AllVariables.Phosphate))) return;  // procedure for TP and TN only
@@ -35,43 +34,25 @@ namespace AQUATOX.Nutrients
                         {
                             if (NState == AllVariables.Nitrate)
                             {
-                                switch (NSLoop)
-                                {
-                                    case AllVariables.SuspRefrDetr:
-                                        Nut2Org = Location.Remin.N2Org_Refr;
-                                        break;
-                                    case AllVariables.SuspLabDetr:
-                                        Nut2Org = Location.Remin.N2OrgLab;
-                                        break;
-                                    case AllVariables.DissRefrDetr:
-                                        Nut2Org = Location.Remin.N2OrgDissRefr;
-                                        break;
-                                    default:
-                                        // DissLabDetr:
-                                        Nut2Org = Location.Remin.N2OrgDissLab;
-                                        break;
-                                }
-                                // Case
-                            }
+                            Nut2Org = NSLoop switch
+                            {
+                                AllVariables.SuspRefrDetr => Location.Remin.N2Org_Refr,
+                                AllVariables.SuspLabDetr => Location.Remin.N2OrgLab,
+                                AllVariables.DissRefrDetr => Location.Remin.N2OrgDissRefr,
+                                _ => Location.Remin.N2OrgDissLab,
+                            };
+                            // Case
+                        }
                             else
                             {
-                                switch (NSLoop)
-                                {
-                                    case AllVariables.SuspRefrDetr:
-                                        Nut2Org = Location.Remin.P2Org_Refr;
-                                        break;
-                                    case AllVariables.SuspLabDetr:
-                                        Nut2Org = Location.Remin.P2OrgLab;
-                                        break;
-                                    case AllVariables.DissRefrDetr:
-                                        Nut2Org = Location.Remin.P2OrgDissRefr;
-                                        break;
-                                    default:
-                                        // DissLabDetr:
-                                        Nut2Org = Location.Remin.P2OrgDissLab;
-                                        break;
-                                }
-                            }
+                            Nut2Org = NSLoop switch
+                            {
+                                AllVariables.SuspRefrDetr => Location.Remin.P2Org_Refr,
+                                AllVariables.SuspLabDetr => Location.Remin.P2OrgLab,
+                                AllVariables.DissRefrDetr => Location.Remin.P2OrgDissRefr,
+                                _ => Location.Remin.P2OrgDissLab,
+                            };
+                        }
                             // Case
                             CNutrient = CNutrient - AQTSeg.GetState(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) * Nut2Org;
                             // mg/L     // mg/L             // mg/L      // N2Org

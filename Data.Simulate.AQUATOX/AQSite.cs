@@ -114,16 +114,16 @@ namespace AQUATOX.AQSite
         public double EnteredKReaer;
         public string XEnteredKReaer;
         public bool UsePhytoRetention;
-        //public double BasePercentEmbed;
-        //public string XBasePercentEmbed;
+        public double BasePercentEmbed;
+        public string XBasePercentEmbed;
         public double Altitude;
         public string XAltitude;
-        //public double FractalD;
-        //public string XFractalD;
-        //public double FD_Refuge_Coeff;
-        //public string XFD_Refuge_Coeff;
-        //public double HalfSatOysterRefuge;
-        //public string XHalfSatOysterRefuge;
+        public double FractalD;
+        public string XFractalD;
+        public double FD_Refuge_Coeff;
+        public string XFD_Refuge_Coeff;
+        public double HalfSatOysterRefuge;
+        public string XHalfSatOysterRefuge;
     } // end SiteRecord
 
 
