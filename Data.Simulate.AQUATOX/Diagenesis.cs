@@ -1,6 +1,7 @@
 ﻿using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
+using AQUATOX.Organisms;
 using AQUATOX.OrgMatter;
 using AQUATOX.Nutrients;
 using Newtonsoft.Json;
@@ -570,17 +571,13 @@ namespace AQUATOX.Diagenesis
         // mg/L
         public double Predn()
         {
-            return 0;  // fixme animal linkage
+            if (NState == AllVariables.POC_G1)
+                return Predation() / Consts.Detr_OM_2_OC;
+            if (NState == AllVariables.POC_G2)
+                return Predation() / Consts.Detr_OM_2_OC;
+            // g OC/m3 w  // g OM /m3    // g OM / g OC
 
-            //double result;
-            //result = 0;
-            //if (NState == AllVariables.POC_G1)
-            //    result = ((TOrganism)(this)).Predation() / Units.Detr_OM_2_OC;
-            //if (NState == AllVariables.POC_G2)
-            //    result = ((TOrganism)(this)).Predation() / Units.Detr_OM_2_OC;
-            //// g OC/m3 w            //// g OM /m3            //// g OM / g OC
-
-            //return result;
+            return 0;
         }
 
         //public void Derivative_WriteRates()
@@ -713,18 +710,16 @@ namespace AQUATOX.Diagenesis
             // m/d         // m   // mg/L
 
             Pred = 0;
-            //if (NState == AllVariables.PON_G1)   // fixme animal predation linkage
-            //{
-            //    Pred = ((TOrganism)(this)).Predation() * Location.Remin.N2OrgLab;
-            //}
-            //if (NState == AllVariables.PON_G2)
-            //{
-            //    Pred = ((TOrganism)(this)).Predation() * Location.Remin.N2Org_Refr;
-            //// g N/m3 w            // g OM /m3             // g N / g OM
-            //}
-            //MorphRecord MR = AQTSeg.Location.Morph;
-            //Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
-            // g/m3 s  g/m3 w      // m3 w            // m3 s
+            if (NState == AllVariables.PON_G1)   
+                Pred = Predation() * Location.Remin.N2OrgLab;
+
+            if (NState == AllVariables.PON_G2)
+                Pred = Predation() * Location.Remin.N2Org_Refr;
+             // g N/m3 w     // g OM /m3             // g N / g OM
+
+            MorphRecord MR = AQTSeg.Location.Morph;
+            Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
+      // g/m3*sed  g/m3 w    // m3 water         // m3 sed
 
             if (Predation_Link != null) Pred = Predation_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
             //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
@@ -828,19 +823,17 @@ namespace AQUATOX.Diagenesis
             Pred = 0;
             if (Predation_Link != null) Pred = Predation_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
             //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
-           
-            //if (NState == AllVariables.POP_G1)   // FIXME ANIMAL Predation LINKAGE
-            //{   Pred = ((TOrganism)(this)).Predation() * Location.Remin.P2OrgLab;
-            //}
-            //if (NState == AllVariables.POP_G2)
-            //{   Pred = ((TOrganism)(this)).Predation() * Location.Remin.P2Org_Refr;
-            //}
-            //// g P/m3 w             // g P /m3             // g P / g OM
 
-            //    TStates DR = AQTSeg;
-            //    MorphRecord DR = DR.Location.Morph;
-            //    Pred = Pred * DR.SegVolum[DR.VSeg] / DR.DiagenesisVol(2);
-            //// g/m3 s // g/m3 w       // m3 w                     // m3 s
+            if (NState == AllVariables.POP_G1)   
+                Pred = Predation() * Location.Remin.P2OrgLab;
+
+            if (NState == AllVariables.POP_G2)
+                Pred = Predation() * Location.Remin.P2Org_Refr;
+            //g P/m3 w  // g P /m3             // g P / g OM
+
+            MorphRecord MR = AQTSeg.Location.Morph;
+            Pred = Pred * MR.SegVolum / AQTSeg.DiagenesisVol(2);
+        // g/m3 s // g/m3 w  // m3 w                // m3 s
 
             DB = Deposition - Minerl - Burial - Pred;
             // g/m3 d

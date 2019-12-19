@@ -248,7 +248,7 @@ namespace AQUATOX.AQTSegment
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
 
-            //if (SVType == T_SVType.StV)  FIXME
+            //if (SVType == T_SVType.StV)  FIXME TOXIC EFFECTS
             //        // Using ToxicityRecord Initialize Organisms with
             //        // the appropriate RISKCONC, LCINFINITE, and K2
             //        if (P.IsPlantOrAnimal())
@@ -578,7 +578,7 @@ namespace AQUATOX.AQTSegment
         public double NutrToOrg(AllVariables S)
         {
             TPlant PP;
-      //    TAnimal PA;
+            TAnimal PA;
             ReminRecord LR = Location.Remin;
             bool Nitr = ((S == AllVariables.Nitrate) || (S == AllVariables.Ammonia));
             if (Nitr)
@@ -588,12 +588,12 @@ namespace AQUATOX.AQTSegment
                 if (NState == AllVariables.DissRefrDetr) return LR.N2OrgDissRefr;
                 if (NState == AllVariables.DissLabDetr) return LR.N2OrgDissLab;
 
-                //if ((NState=>Consts.FirstAnimal) && (NState<=Consts.LastAnimal))  // FIXME ANIMAL LINKAGE
-                //{
-                //    PA = this as TAnimal;
-                //    NutrToOrg:= PA.PAnimalData.N2Org;
-                //}
-                
+                if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
+                {
+                    PA = this as TAnimal;
+                    return PA.PAnimalData.N2Org;
+                }
+
                 PP = this as TPlant;  // must be a plant
                 return PP.N_2_Org();
             }
@@ -604,17 +604,47 @@ namespace AQUATOX.AQTSegment
                 if (NState == AllVariables.DissRefrDetr) return LR.P2OrgDissRefr;
                 if (NState == AllVariables.DissLabDetr) return LR.P2OrgDissLab;
 
-                //if ((NState=>Consts.FirstAnimal) && (NState<=Consts.LastAnimal))  // FIXME ANIMAL LINKAGE
-                //{
-                //    PA = this as TAnimal;
-                //    NutrToOrg:= PA.PAnimalData.P2Org;
-                //}
+                if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
+                {
+                    PA = this as TAnimal;
+                    return PA.PAnimalData.P2Org;
+                }
 
                 PP = this as TPlant;  // must be a plant
                 return PP.P_2_Org();
 
             };
         }
+
+        public double Predation()
+        {   // Calculates Predation of the given organism or organic matter using TAnimal.IngestSpecies 
+            double Prd = 0;
+            AllVariables ns = NState;
+            //-------------------------------------------------------------------------
+            void CalcPredation(TStateVariable P)
+            {
+                TAnimal PA;
+                double EgestRet=0;
+                double GER=0;
+                if (P.IsAnimal())
+                {
+                    PA = ((P) as TAnimal);
+                    Prd = Prd + PA.IngestSpecies(ns, null, ref EgestRet, ref GER);
+                }
+            }
+            //-------------------------------------------------------------------------
+
+            if ((NState == AllVariables.PON_G1)|| (NState == AllVariables.POP_G1) || (NState == AllVariables.POC_G1))
+                    ns = AllVariables.SedmLabDetr;
+
+            if ((NState == AllVariables.PON_G2) || (NState == AllVariables.POP_G2) || (NState == AllVariables.POC_G2))
+                ns = AllVariables.SedmRefrDetr;
+
+            foreach (TStateVariable TSV in AQTSeg.SV) CalcPredation(TSV);
+
+            return Prd;
+        }
+
 
 
     }  // end TStateVariable
@@ -737,10 +767,12 @@ namespace AQUATOX.AQTSegment
             TPresent = X;
 
             DerivStep = Step;
+
             // Zero_Utility_Variables();  animal trophic level only
 
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
             if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
+            CalculateSumPrey();
 
             foreach (TStateVariable TSV in SV)
             {
@@ -1172,9 +1204,9 @@ namespace AQUATOX.AQTSegment
 
             DateTime x;
             double hnext = 0;
-            //                DateTime xsav;
+            //  DateTime xsav;
             bool simulation_done;
-            //                bool FinishPoint;
+            //  bool FinishPoint;
             double MaxStep;
             double h_taken = 0;
             double h;
@@ -1197,8 +1229,10 @@ namespace AQUATOX.AQTSegment
             SimulationDate = DateTime.Now;
 
             ModelStartTime = TStart;
-            //            TPreviousStep = TStart;
+            // TPreviousStep = TStart;
             TPresent = TStart;
+
+            ChangeData();
 
             Derivs(x, 1);   
             WriteResults(TStart); // Write Initial Conditions as the first data Point
@@ -1317,7 +1351,7 @@ namespace AQUATOX.AQTSegment
 
             Vol_Prev_Step = Volume_Last_Step;
 
-            // FIXME Stratification code here if and when relevant
+            //Stratification code removed here 
 
             NewVolume = GetState(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
             Volume_Last_Step = NewVolume;
@@ -1327,7 +1361,7 @@ namespace AQUATOX.AQTSegment
             //NewSegVol = 0;
             //          NewVolFrac = 1;
 
-            // FIXME Stratification code here if and when relevant
+            // Stratification code removed here 
 
             //          Last_Non_Zero_Vol = NewVolume;
             FracChange = (NewVolume / Vol_Prev_Step);
@@ -1480,11 +1514,7 @@ namespace AQUATOX.AQTSegment
                     if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
                     {
                         res = res * SegVol() / SurfaceArea();
-                    //  g/m2  g/m3     m3         m2
-
-                        //If(NS in [FirstFish..LastFish]) and(Typ = StV) then   // fixme Animal code units
-                        //      res = res * Volume_Last_Step / Locale.SurfArea;
-                        ////    g/m2  g/m3   { m3, entire sys}    { m2, entire sys}
+                        //  g/m2  g/m3     m3         m2
                     }
                     TSV.Results.Add(res);
                 }
@@ -1499,7 +1529,7 @@ namespace AQUATOX.AQTSegment
             if ((L == T_SVLayer.WaterCol)) //  && (P != null))
             {
                 // Fish must be converted from mg/L to g/sq.m
-                // if (((S >= Consts.FirstFish && S <= Consts.LastFish) && (T == T_SVType.StV))) Convert = true;  FIXME Animal units
+                if (((S >= Consts.FirstFish && S <= Consts.LastFish) && (T == T_SVType.StV))) Convert = true;  
 
                 // Sedimented Detritus must be converted from mg/L to g/sq.m
                 if (((S == AllVariables.SedmRefrDetr) || (S == AllVariables.SedmLabDetr)) && (T == T_SVType.StV)) Convert = true;
@@ -1508,12 +1538,11 @@ namespace AQUATOX.AQTSegment
                 if ((T == T_SVType.StV) && (P.IsPlant())) 
                 {  if ((((P) as TPlant).PAlgalRec.PlantType != "Phytoplankton")) Convert = true; }
 
-                //// ZooBenthos and nekton must be converted from mg/L to g/sq.m  FIXME Animal units
-                //if ((T == T_SVType.StV) && (P.IsAnimal()))
-                //{ if (!((P) as TAnimal).IsPlanktonInvert())
-                //}                    
+                // ZooBenthos and nekton must be converted from mg/L to g/sq.m  
+                if ((T == T_SVType.StV) && (P.IsAnimal()))
+                   { if (!((P) as TAnimal).IsPlanktonInvert()) Convert = true; }
 
-                // if ((S >= AllVariables.Veliger1 && S <= AllVariables.Veliger2)) Convert = false; FIXME Animal units
+                if ((S >= AllVariables.Veliger1 && S <= AllVariables.Veliger2)) Convert = false; 
             }
 
             //if ((T == T_SVType.OtherOutput) && (((TAddtlOutput)(S)) == TAddtlOutput.MultiFishConc)) convert = true;
@@ -1813,8 +1842,6 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV)
                 MemLocRec[(int)TSV.NState, (int)TSV.SVType, (int)TSV.Layer] = TSV;
-
-
         }
 
 
@@ -1823,7 +1850,6 @@ namespace AQUATOX.AQTSegment
             return Volume_Last_Step;
             //if  (LinkedMode) or (!Stratified) return Volume_Last_Step; // or linked mode
             // else return Location.Morph.SegVolum[VSeg];
-
         }
 
 
@@ -2180,7 +2206,6 @@ namespace AQUATOX.AQTSegment
         // -----------------------------------------------------------------------------------------
         public double Diagenesis(T_SVLayer Layer)
         {
-            
             double s;
             double Jc;
             double Jn;
@@ -2259,10 +2284,8 @@ namespace AQUATOX.AQTSegment
             // m/d =  go2/m2 d /  gO2/m3
 
             // mass transfer coeff
-            if (result > MAX_S)
-                result = MAX_S;
-            if (result < Consts.Tiny)
-                result = Consts.Tiny;
+            if (result > MAX_S) result = MAX_S;
+            if (result < Consts.Tiny) result = Consts.Tiny;
             // avoid divide by zero error
 
             return result;
@@ -2270,69 +2293,54 @@ namespace AQUATOX.AQTSegment
 
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        //public void CalcDeposition_SumDef(TAnimal PA)  // fixme animal linkage
-        //{
-        //    double NFrac;
-        //    double Def2Detr;
-        //    // all defecation goes to sediment
-        //    if (NS == AllVariables.Avail_Silica)
-        //    {
-        //        return;
-        //    }
-        //    if (PA.IsAnimal())
-        //    {
-        //        switch (NS)
-        //        {
-        //            case AllVariables.PON_G1:
-        //            case AllVariables.POP_G1:
-        //            case AllVariables.POC_G1:
-        //                // G1 equivalent to labile
-        //                Def2Detr = Consts.Def2SedLabDetr * (1 - Def_to_G3);
-        //                break;
-        //            case AllVariables.PON_G2:
-        //            case AllVariables.POP_G2:
-        //            case AllVariables.POC_G2:
-        //                // G2 equivalent to refractory
-        //                Def2Detr = (1 - Consts.Def2SedLabDetr) * (1 - Def_to_G3);
-        //                break;
-        //            default:
-        //                Def2Detr = Def_to_G3;
-        //                break;
-        //                // G3 class is inert
-        //        }
-        //        switch (NS)
-        //        {
-        //            // case
-        //            // Modify the A .. B: AllVariables.PON_G1 .. AllVariables.PON_G3
-        //            case AllVariables.PON_G1:
-        //                NFrac = Location.Remin.N2OrgLab;
-        //                break;
-        //            // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
-        //            // Modify the A .. B: AllVariables.POP_G1 .. AllVariables.POP_G3
-        //            case AllVariables.POP_G1:
-        //                NFrac = Location.Remin.P2OrgLab;
-        //                break;
-        //            default:
-        //                // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
-        //                // POC_G1..POC_G3:
-        //                NFrac = 1 / Consts.Detr_OM_2_OC;
-        //                break;
-        //                // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
-        //        }
-        //        // Case
-        //        if ((Typ == T_SVType.StV))
-        //        {
-        //            // g/m3
-        //            // g/m3
-        //            Def = Def + Def2Detr * PA.Defecation() * NFrac;
-        //        }
-        //        else
-        //        {
-        //            Def = Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;
-        //        }
-                     // ug/m3    // unitless    // ug/L           // L/m3
-        //    }
-        //}
+        public void CalcDeposition_SumDef(TStateVariable P, AllVariables NS, T_SVType Typ, ref double Def)
+        {
+            double Def2Detr;
+            const double Def_to_G3 = 0.00;          // 0% of defecation to G3
+
+            // all defecation goes to sediment
+            if (NS == AllVariables.Avail_Silica)
+            {
+                return;
+            }
+            if (P.IsAnimal())
+            {
+                switch (NS)
+                {
+                    case AllVariables.PON_G1:
+                    case AllVariables.POP_G1:
+                    case AllVariables.POC_G1:
+                        // G1 equivalent to labile
+                        Def2Detr = Consts.Def2SedLabDetr * (1 - Def_to_G3);
+                        break;
+                    case AllVariables.PON_G2:
+                    case AllVariables.POP_G2:
+                    case AllVariables.POC_G2:
+                        // G2 equivalent to refractory
+                        Def2Detr = (1 - Consts.Def2SedLabDetr) * (1 - Def_to_G3);
+                        break;
+                    default:
+                        Def2Detr = Def_to_G3;
+                        break;
+                        // G3 class is inert
+                }
+                var NFrac = NS switch
+                {
+                    AllVariables.PON_G1 => Location.Remin.N2OrgLab,    // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
+                    AllVariables.POP_G1 => Location.Remin.P2OrgLab,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
+                    _ => 1 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
+                };
+                // Case
+                TAnimal PA = P as TAnimal;
+                if ((Typ == T_SVType.StV))
+                    Def = Def + Def2Detr * PA.Defecation() * NFrac;
+                // g/m3                 // g/m3
+
+//                else
+               // Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;  FIXME TOXICANT LINKAGE
+              // ug/m3 // unitless    // ug/L           // L/m3
+            }
+        }
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - -
         public void CalcDeposition_SumSed(TStateVariable P, AllVariables NS, T_SVType Typ, ref double Sed)
@@ -2457,7 +2465,6 @@ namespace AQUATOX.AQTSegment
             
             // Calc deposition input into diagenesis model
             // Calculate Deposition for each sed carbon & nutrient class in  (gC/m2 d) (gN/m2 d) (gP/m2 d) (gSi/m2 d
-            // const double Def_to_G3 = 0.00;          // 0% of defecation to G3
             double Def;
             double Sed;
             // - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2466,7 +2473,7 @@ namespace AQUATOX.AQTSegment
             foreach (TStateVariable TSV in SV)
             {
                 CalcDeposition_SumSed(TSV, NS, Typ, ref Sed);
-                //  CalcDeposition_SumDef(TSV,NS,Typ,ref SedAt(i));  fixme animal linkage
+                CalcDeposition_SumDef(TSV, NS, Typ, ref Sed);  
             }
             MorphRecord MR = Location.Morph;
             return   (Sed + Def) * MR.SegVolum / DiagenesisVol(2) * Diagenesis_Params.H2.Val;
@@ -3015,6 +3022,43 @@ namespace AQUATOX.AQTSegment
             return C2Calcite * (Photo / OM_2_OC);
         // (mg calcite/L d)=(g Calcite / gC)*((mg OM/L d)/(g OM/ gOC))
         }
+
+        public void ChangeData()     // Make sure all data is updated prior to study run
+        {
+            T_SVType Loop2;
+
+            foreach (TStateVariable TSV in SV)
+            {
+                if (TSV.IsAnimal()) ((TSV) as TAnimal).ChangeData();
+                if (TSV.IsPlant()) ((TSV) as TPlant).ChangeData();
+            }
+
+            Location.ChangeData(Location.Locale.ICZMean);
+
+            //for (Loop2 = Global.Units.Global.FirstOrgTxTyp; Loop2 <= Global.Units.Global.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
+            //{
+            //    if (Chemptrs[Loop2] != null)
+            //    {
+            //        Chemptrs[Loop2].ChangeData();
+            //    }
+            //}
+        }
+
+
+        // ---------------------------------------------------------------
+        public void CalculateSumPrey()
+        {
+            AllVariables nsloop;
+            TAnimal PA;
+            // Calculates the total prey available to an animal in the given timestep.  This is used
+            // for normalization of the ingestion function within TANIMAL.INGESTS
+            for (nsloop = Consts.FirstAnimal; nsloop <= Consts.LastAnimal; nsloop++)
+             {
+               PA = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+               if (PA != null) PA.CalculateSumPrey();
+             }
+        }
+
 
     }  // end TAQUATOXSegment
 

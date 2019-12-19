@@ -252,7 +252,7 @@ namespace AQUATOX.Plants
                 }
                 else
                 {
-                    //                    MessageBox.Show("Warning:  Macrophyte " + PName + " has an unrecognized type!", Application.ProductName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);  fixme raise error?
+                    //   MessageBox.Show("Warning:  Macrophyte " + PName + " has an unrecognized type!", Application.ProductName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);  fixme raise error?
                 }
             }
         }
@@ -442,7 +442,7 @@ namespace AQUATOX.Plants
                 if (TSV != null)
                  if (TSV.State > 0)
                     {
-                        Pois = 0; //  Poisoned(ToxLoop);  FIXME
+                        Pois = 0; //  Poisoned(ToxLoop);  FIXME TOXIC EFFECTS
                         //MortRates.OrgPois[ToxLoop] = Pois;
                         Dead = Dead + Pois;
                     };
@@ -1687,7 +1687,7 @@ namespace AQUATOX.Plants
                 if ((AQTSeg.PSetup.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
                      || ((!AQTSeg.PSetup.UseExternalConcs) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
-                    Pois = 0; //  Poisoned(ToxLoop); FIXME ADD Poisoned WHEN ADDING ECOTOXICOLOGY
+                    Pois = 0; //  Poisoned(ToxLoop); FIXME TOXIC EFFECTS -- ADD Poisoned WHEN ADDING ECOTOXICOLOGY 
                     //MortRates.OrgPois[ToxLoop] = Pois;
                     Dead = Dead + Pois;
                 }

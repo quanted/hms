@@ -1351,56 +1351,6 @@ namespace AQUATOX.Organisms
         //    return result;
         //}
 
-        //public void Predation_CalcPredation(TStateVariable P)
-        //{
-        //    TAnimal PA;
-        //    double EgestRet;
-        //    double GER;
-        //    if (P.IsAnimal())
-        //    {
-        //        PA = ((P) as TAnimal);
-        //        Prd = Prd + PA.IngestSpecies(ns, null, ref EgestRet, ref GER);
-        //    }
-        //}
-
-        //// ------------------------------------------------------------------------
-        public double Predation()
-        {
-            return 0;  // FIXME when animals added
-        }
-        //    double result;
-        //    // Calculates Predation of the given organism
-        //    // This algorithm now utilizes TAnimal.IngestSpecies (10/31/98)
-        //    double Prd;
-        //    AllVariables ns;
-        //    int i;
-        //    Prd = 0;
-        //    result = 0;
-        //    if (IsAnimal())
-        //    {
-        //        if ((((this) as TAnimal).IsLeavingSeg))
-        //        {
-        //            return result;
-        //        }
-        //    }
-        //    ns = NState;
-        //    if ((new ArrayList(new object[] { AllVariables.PON_G1, AllVariables.POP_G1, AllVariables.POC_G1 }).Contains(ns)))
-        //    {
-        //        ns = AllVariables.SedmLabDetr;
-        //    }
-        //    if ((new ArrayList(new object[] { AllVariables.PON_G2, AllVariables.POP_G2, AllVariables.POC_G2 }).Contains(ns)))
-        //    {
-        //        ns = AllVariables.SedmRefrDetr;
-        //    }
-        //    TStates 1 = AQTSeg;
-        //    for (i = 0; i < 1.Count; i++)
-        //    {
-        //        Predation_CalcPredation(1.At(i));
-        //    }
-        //    result = Prd;
-        //    return result;
-        //}
-
         //// ------------------------------------------------------------------------
         //public virtual double Mortality()
         //{

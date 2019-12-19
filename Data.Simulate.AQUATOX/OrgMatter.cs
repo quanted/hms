@@ -5,6 +5,7 @@ using AQUATOX.Loadings;
 using AQUATOX.Nutrients;
 using AQUATOX.Organisms;
 using AQUATOX.Plants;
+using AQUATOX.Animals;
 using Newtonsoft.Json;
 using Globals;
 
@@ -292,46 +293,42 @@ public class TDetritus : TRemineralize
         }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double SumGameteLoss()  // fixme animal linkage
-        //{
-        //    double result;
-        //    double GamLoss;
-        //    AllVariables Loop;
-        //    TAnimal PA;
-        //    GamLoss = 0;
-        //    for (Loop = Consts.FirstAnimal; Loop <= Consts.LastAnimal; Loop++)
-        //    {
-        //        PA = AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (PA != null)
-        //        {
-        //            GamLoss = GamLoss + PA.GameteLoss();
-        //        }
-        //    }
-        //    // loop
-        //    result = GamLoss;
-        //    return result;
-        //}
+        public double SumGameteLoss()  
+        {
+            double GamLoss;
+            AllVariables Loop;
+            TAnimal PA;
+            GamLoss = 0;
+            for (Loop = Consts.FirstAnimal; Loop <= Consts.LastAnimal; Loop++)
+            {
+                PA = AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (PA != null)
+                {
+                    GamLoss = GamLoss + PA.GameteLoss();
+                }
+            }
+            // loop
+            return GamLoss;
+        }
 
-        public void DetritalFormation_SumDF(TOrganism P, ref double Mort, ref double Excr)  // FIXME Animal Linkage
+        public void DetritalFormation_SumDF(TStateVariable P, ref double Mort, ref double Excr)  
 {
     if (P.IsPlantOrAnimal())
     {
-        Mort = Mort + P.Mortality() * Mort_To_Detr(P.NState);
+        Mort = Mort + ((P) as TOrganism).Mortality() * Mort_To_Detr(P.NState);
 
-        //if (P.IsAnimal())  // FIXME ANIMAL LINKAGE
-        //{
-        //    // AnimExcretion 5/13/2013
-        //    Excr = Excr + ((P) as TAnimal).Respiration() * Excr_To_Diss_Detr(P.NState);
-        //}
-        //else
-        //{
+        if (P.IsAnimal())  
+          {
+            // AnimExcretion 5/13/2013
+            Excr = Excr + ((P) as TAnimal).Respiration() * Excr_To_Diss_Detr(P.NState);
+          }
+        else
             Excr = Excr + ((P) as TPlant).PhotoResp() * Excr_To_Diss_Detr(P.NState);
-        //}
 
         if ((P.IsMacrophyte()))
-        {
+          {
             Mort = Mort + ((P) as TMacrophyte).Breakage() * Mort_To_Detr(P.NState);
-        }
+          }
 
         if (P.IsPlant() && (!P.IsMacrophyte()))
         {
@@ -363,43 +360,21 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             Sed = 0;
             Gam = 0;
 
-            //if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr))
-            //    {  Sed = SedDetritalFormation();  }
-            //else
-            //{
-                // fixme animal, plant linkages
-                //for (i = 0; i < AQTSeg.SV.Count; i++)
-                //{  DetritalFormation_SumDF(AQTSeg.SV[i]);   }
-            //}
-            // if ((NState == AllVariables.SuspLabDetr))  // fixme animal linkage
-            //  {  Gam = SumGameteLoss();  }
+            if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr))  Sed = SedDetritalFormation(); 
+            else foreach (TStateVariable TSV in AQTSeg.SV) DetritalFormation_SumDF(TSV, ref Mort, ref Excr); 
+            
+
+            if ((NState == AllVariables.SuspLabDetr))  Gam = SumGameteLoss(); 
 
             result = Mort + Excr + Sed + Gam;
             return result;
         }
 
-// ------------------------------------------------------
-//public void SedDetritalFormation_SumDef(TAnimal PP, ref double Def)  //FIXME animal linkage
-//{
-//    double Def2Detr;
-//    // all defecation goes to sediment
-//    if (PP.IsAnimal())
-//    {
-//        if (NState == AllVariables.SedmLabDetr)
-//        {
-//            Def2Detr = Consts.Def2SedLabDetr;
-//        }
-//        else
-//        {
-//            Def2Detr = 1 - Consts.Def2SedLabDetr;
-//        }
-//        Def = Def + Def2Detr * PP.Defecation();
-//    }
-//}
 
 
-// -------------------------------------------------------------------------------------------------------
-public double SedDetritalFormation()
+
+        // -------------------------------------------------------------------------------------------------------
+        public double SedDetritalFormation()
         {
             double Def;
             double Sed;
@@ -414,12 +389,25 @@ public double SedDetritalFormation()
                     }
                 }
                 // ------------------------------------------------------
+                void SedDetritalFormation_SumDef(TStateVariable P)
+                {
+                    double Def2Detr; // all defecation goes to sediment
+                    if (P.IsAnimal())
+                    {
+                        if (NState == AllVariables.SedmLabDetr) Def2Detr = Consts.Def2SedLabDetr;
+                        else Def2Detr = 1 - Consts.Def2SedLabDetr;
+
+                        Def = Def + Def2Detr * ((TAnimal)P).Defecation();
+                    }
+                }
+                // ------------------------------------------------------
+
             Def = 0;
             Sed = 0;
 
             foreach (TStateVariable TSV in AQTSeg.SV)  SedDetritalFormation_SumSed(TSV); 
 
-            // foreach (TStateVariable TSV in AQTSeg.SV) SedDetritalFormation_SumDef(TSV);   // fixme animal linkage
+            foreach (TStateVariable TSV in AQTSeg.SV) SedDetritalFormation_SumDef(TSV);   
 
             return Def + Sed;
         }
@@ -1076,7 +1064,7 @@ public double SedDetritalFormation()
             //if (AQTSeg.LinkedMode)
             //{  WaI = Washin();  }
 
-            //Pr = Predation();  // fixme animal linkage
+            Pr = Predation();  
             if (Predation_Link != null) Pr = Predation_Link.ReturnLoad(AQTSeg.TPresent);
 
             Se = Sedimentation();
@@ -1284,7 +1272,7 @@ public double SedDetritalFormation()
             {
                 Co = -Co;
             }
-            // Pr = Predation();  fixme animal linkage
+             Pr = Predation();  
             if (Predation_Link != null) Pr = Predation_Link.ReturnLoad(AQTSeg.TPresent);
 
             //if (PBD != null)

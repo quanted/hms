@@ -5,6 +5,7 @@ using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using AQUATOX.Organisms;
+using AQUATOX.Animals;
 using Newtonsoft.Json;
 using Globals;
 
@@ -30,7 +31,7 @@ namespace AQUATOX.Nutrients
 
                     for (NSLoop = AllVariables.DissRefrDetr; NSLoop <= AllVariables.SuspLabDetr; NSLoop++)
                     {
-                        if (AQTSeg.GetState(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                        if (AQTSeg.GetStateVal(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
                         {
                             if (NState == AllVariables.Nitrate)
                             {
@@ -261,7 +262,7 @@ namespace AQUATOX.Nutrients
             PNO3 = (TNO3Obj)AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
             Loading = 0;
             SegVolume = AQTSeg.SegVol();
-            Inflow = Location.Morph.InflowH2O; // * (Location.Morph.OOSInflowFrac);  Fixme Linked Mode
+            Inflow = Location.Morph.InflowH2O; // * (Location.Morph.OOSInflowFrac);  Removed Linked Mode Logic
 
             if (LoadsRec.Loadings.NoUserLoad)
             {
@@ -423,61 +424,47 @@ namespace AQUATOX.Nutrients
             return SumDecomp;
         }
 
-        //public void CalcAnimPredn_NutrPred(TAnimal P)
-        //{
-        // FIXME LINKAGE TO ANIMALS
 
-        //double Cons;
-        //double PreyNutr2Org;
-        //double PredNutr2Org;
-        //double DiffNutrFrac;
-        //if (P.IsAnimal())
-        //{
-        //    if (NState == AllVariables.Phosphate)
-        //    {
-        //        PredNutr2Org = P.PAnimalData.P2Org;
-        //    }
-        //    else
-        //    {
-        //        PredNutr2Org = P.PAnimalData.N2Org;
-        //    }
-        //    PreyNutr2Org = 0;
-        //    Cons = P.EatEgest(Loadings.EatOrEgest.Eat);
-        //    if (Cons > 0)
-        //    {
-        //        if (NState == AllVariables.Phosphate)
-        //        {
-        //            PreyNutr2Org = P.PhosCons / Cons;
-        //        }
-        //        else
-        //        {
-        //            PreyNutr2Org = P.NitrCons / Cons;
-        //        }
-        //    }
-        //    DiffNutrFrac = PredNutr2Org - PreyNutr2Org;
-        //    NetPredation = NetPredation - Cons * DiffNutrFrac;
-        //}
-        //}
 
         // -------------------------
         // sum instantaneous
         // contributions from
         // each process to Detr
         // -------------------------
-        //public double CalcAnimPredn()  //FIXME Animal Linkage
-        //{
-        //    double result;
-        //    double NetPredation;
-        //    int i;
-        //    // excr
-        //    NetPredation = 0.0;
-        //    for (i = 0; i < AQTSeg.Count; i++)
-        //    {
-        //        CalcAnimPredn_NutrPred(AQTSeg.At(i));
-        //    }
-        //    return NetPredation;
-        //    return result;
-        //}
+        public double CalcAnimPredn()  
+        {
+            double NetPredation;
+            // -----------------------------------------------------------
+            void CalcAnimPredn_NutrPred(TStateVariable P)
+            {
+                double Cons;
+                double PreyNutr2Org;
+                double PredNutr2Org;
+                double DiffNutrFrac;
+                if (P.IsAnimal())
+                {
+                    TAnimal PA = (TAnimal)P;
+                    if (NState == AllVariables.Phosphate) 
+                         PredNutr2Org = PA.PAnimalData.P2Org;
+                    else PredNutr2Org = PA.PAnimalData.N2Org;
+ 
+                    PreyNutr2Org = 0;
+                    Cons = PA.EatEgest(false);
+                    if (Cons > 0)
+                    {
+                        if (NState == AllVariables.Phosphate)
+                             PreyNutr2Org = PA.PhosCons / Cons;
+                        else PreyNutr2Org = PA.NitrCons / Cons;
+                    }
+                    DiffNutrFrac = PredNutr2Org - PreyNutr2Org;
+                    NetPredation = NetPredation - Cons * DiffNutrFrac;
+                }
+            }
+            // -----------------------------------------------------------
+            NetPredation = 0.0;
+            foreach (TStateVariable TSV in AQTSeg.SV) CalcAnimPredn_NutrPred(TSV);
+            return NetPredation;
+        }
 
         // Remineralization
         public double NutrRelPeriScr()
@@ -508,25 +495,17 @@ namespace AQUATOX.Nutrients
                             if (PPeri.SloughEvent)
                             {
                                 if ((NState == AllVariables.Ammonia))
-                                {
                                     Nut2OrgPeri = PPeri.N_2_Org();
-                                }
                                 else
-                                {
                                     Nut2OrgPeri = PPeri.P_2_Org();
-                                }
+                                
                                 if ((NState == AllVariables.Ammonia))
-                                {
                                     Nut2OrgPhyt = PPhyt.N_2_Org();
-                                }
                                 else
-                                {
                                     Nut2OrgPhyt = PPhyt.P_2_Org();
-                                }
-                                j = -999;
-                                // signal to not write mass balance tracking
-                                PPeri.Derivative(ref j);
-                                // update sloughing
+
+                                j = -999;  // signal to not write mass balance tracking
+                                PPeri.Derivative(ref j);  // update sloughing
                                 NRPS = NRPS + PPeri.Sloughing * (1 / 3) * (Nut2OrgPeri - Nut2OrgPhyt);
                                 // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
                             }
@@ -538,36 +517,31 @@ namespace AQUATOX.Nutrients
         }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double NutrRelGamLoss()  // FIXME Animal Linkage
-        //{
-        //    double result;
-        //    // When Gameteloss takes place in animals, (-->SuspLabDetr)
-        //    // excess nutrients are converted into NH4.
-        //    AllVariables ns;
-        //    TAnimal PAn;
-        //    double DiffNFrac;
-        //    double NGL;
-        //    NGL = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            ReminRecord _1 = Location.Remin;
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - _1.N2OrgLab;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - _1.P2OrgLab;
-        //            }
-        //            NGL = NGL + PAn.GameteLoss() * DiffNFrac;
-        //        }
-        //    }
-        //    return NGL;
-        //    return result;
-        //}
+        public double NutrRelGamLoss()  
+        {
+            // When Gameteloss takes place in animals, (-->SuspLabDetr)
+            // excess nutrients are converted into NH4.
+            AllVariables ns;
+            TAnimal PAn;
+            double DiffNFrac;
+            double NGL;
+            NGL = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    ReminRecord RR = Location.Remin;
+
+                    if (NState == AllVariables.Ammonia)
+                          DiffNFrac = PAn.PAnimalData.N2Org - RR.N2OrgLab;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org - RR.P2OrgLab;
+
+                    NGL = NGL + PAn.GameteLoss() * DiffNFrac;
+                }
+            }
+            return NGL;
+        }
 
         // -------------------------------------------------------------------------------------------------------
         public double NutrRelMortality()  
@@ -821,131 +795,103 @@ namespace AQUATOX.Nutrients
             return SumColonize;
         }
 
-        //public double NutrRelDefecation()  // FIXME ANIMAL LINKAGE
-        //{
-        //    double result;
-        //    // When Defecation takes place in animals, excess nutrients are converted
-        //    // into NH4.  Sedimented Detritus tends to have a lower fraction of nutrients then
-        //    // the animals which are defecating organic matter.
-        //    AllVariables ns;
-        //    TAnimal PAn;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double NDef;
-        //    double Nut2Org_Refr;
-        //    double Nut2Org_Lab;
-        //    // NutrRelDefecation := 0;
-        //    // If AQTSeg.Diagenesis_Included then exit;  6/6/08, procedure now relevant to diagenesis model
-        //    ReminRecord _1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_Refr = _1.N2Org_Refr;
-        //        Nut2Org_Lab = _1.N2OrgLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_Refr = _1.P2Org_Refr;
-        //        Nut2Org_Lab = _1.P2OrgLab;
-        //    }
-        //    NDef = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = (1 - Def2SedLabDetr) * Nut2Org_Refr + Def2SedLabDetr * Nut2Org_Lab;
-        //            if (AQTSeg.Diagenesis_Included())
-        //            {
-        //                DetrNFrac = Nut2Org_Lab;
-        //            }
-        //            // 6/6/2008, diagenesis defecation has same nutrients as labile detritus
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
-        //            }
-        //            NDef = NDef + PAn.Defecation() * DiffNFrac;
-        //        }
-        //    }
-        //    return NDef;
-        //    return result;
-        //}
+        public double NutrRelDefecation()  
+        {
+            double result;
+            // When Defecation takes place in animals, excess nutrients are converted
+            // into NH4.  Sedimented Detritus tends to have a lower fraction of nutrients then
+            // the animals which are defecating organic matter.
+            AllVariables ns;
+            TAnimal PAn;
+            double DetrNFrac;
+            double DiffNFrac;
+            double NDef;
+            double Nut2Org_Refr;
+            double Nut2Org_Lab;
+            // NutrRelDefecation := 0;
+            // If AQTSeg.Diagenesis_Included then exit;  6/6/08, procedure now relevant to diagenesis model
+            ReminRecord _1 = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_Refr = _1.N2Org_Refr;
+                Nut2Org_Lab = _1.N2OrgLab;
+            }
+            else
+            {
+                Nut2Org_Refr = _1.P2Org_Refr;
+                Nut2Org_Lab = _1.P2OrgLab;
+            }
+            NDef = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    DetrNFrac = (1 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
+                    if (AQTSeg.Diagenesis_Included())
+                    {
+                        DetrNFrac = Nut2Org_Lab;
+                    }
+                    // 6/6/2008, diagenesis defecation has same nutrients as labile detritus
+                    if (NState == AllVariables.Ammonia)
+                          DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
 
-        // -------------------------------------------------------------------------------------------------------
-        //public double CalcAnimResp_Excr()  // FIXME ANIMAL Linkage
-        //{
-        //    double result;
-        //    // When Excretion (5/13/2013 and respiration) takes place in animals, _excess_ nutrients are converted
-        //    // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
-        //    // the animals which are excreting organic matter.
-        //    AllVariables ns;
-        //    TDetritus PDRD;
-        //    TDetritus PDLD;
-        //    TAnimal PAn;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double Excret;
-        //    double Nut2Org_DissRefr;
-        //    double Nut2Org_DissLab;
-        //    PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    ReminRecord _1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_DissRefr = _1.N2OrgDissRefr;
-        //        Nut2Org_DissLab = _1.N2OrgDissLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_DissRefr = _1.P2OrgDissRefr;
-        //        Nut2Org_DissLab = _1.P2OrgDissLab;
-        //    }
-        //    Excret = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
-        //            }
-        //            // was AnimExcretion
-        //            Excret = Excret + PAn.Respiration() * DiffNFrac;
-        //            // 5/13/2013
-        //        }
-        //    }
-        //    return Excret;
-        //    return result;
-        //}
+                    NDef = NDef + PAn.Defecation() * DiffNFrac;
+                }
+            }
+            return NDef;
+        }
 
-        // 5/13/2013
-        // Function TRemineralize.CalcAnimResp: Double;
-        // Var ns: AllVariables;
-        // PAn: TAnimal;
-        // Resp: Double;
-        // Nutr2Org: Double;
-        // Begin
-        // Resp := 0;
-        // For ns := FirstAnimal to LastAnimal do
-        // If AQTSeg.GetState(ns,StV,WaterCol)>0 then
-        // Begin
-        // PAn := AQTSeg.GetStatePointer(ns,StV,WaterCol);
-        // If NState=Ammonia
-        // then Nutr2Org := PAn.PAnimalData^.N2Org
-        // else Nutr2Org := PAn.PAnimalData^.P2Org ;
-        // Resp := Resp +  PAn.Respiration * Nutr2Org;
-        // End;
-        // CalcAnimResp := Resp;
-        // End;
+       //  -------------------------------------------------------------------------------------------------------
+        public double CalcAnimResp_Excr()  
+        {
+            // When Excretion (5/13/2013 and respiration) takes place in animals, _excess_ nutrients are converted
+            // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
+            // the animals which are excreting organic matter.
+            AllVariables ns;
+            TAnimal PAn;
+            double DetrNFrac;
+            double DiffNFrac;
+            double Excret;
+            double Nut2Org_DissRefr;
+            double Nut2Org_DissLab;
+            TDetritus PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            TDetritus PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            ReminRecord _1 = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_DissRefr = _1.N2OrgDissRefr;
+                Nut2Org_DissLab = _1.N2OrgDissLab;
+            }
+            else
+            {
+                Nut2Org_DissRefr = _1.P2OrgDissRefr;
+                Nut2Org_DissLab = _1.P2OrgDissLab;
+            }
+            Excret = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
+                    if (NState == AllVariables.Ammonia)
+                    {
+                        DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
+                    }
+                    else
+                    {
+                        DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
+                    }
+                    // was AnimExcretion
+                    Excret = Excret + PAn.Respiration() * DiffNFrac;
+                    // 5/13/2013
+                }
+            }
+            return Excret;
+        }
+
         // -------------------------------------------------------------------------------------------------------
         public double CalcPhotoResp()  
         {
@@ -1146,13 +1092,13 @@ namespace AQUATOX.Nutrients
                 
             Remin = Remin + CalcPhotoResp();    
             Remin = Remin + CalcDarkResp();      
-            //Remin = Remin + CalcAnimResp_Excr();    // FIXME ANIMAL LINKAGE
-            //Remin = Remin + CalcAnimPredn();        // FIXME ANIMAL LINKAGE
-            //Remin = Remin + NutrRelDefecation();    // FIXME ANIMAL LINKAGE
+            Remin = Remin + CalcAnimResp_Excr();    
+            Remin = Remin + CalcAnimPredn();        
+            Remin = Remin + NutrRelDefecation();    
             Remin = Remin + NutrRelColonization();  
             Remin = Remin + NutrRelPlantSink();  
             Remin = Remin + NutrRelMortality();
-            //Remin = Remin + NutrRelGamLoss();       // FIXME ANIMAL LINKAGE
+            Remin = Remin + NutrRelGamLoss();       
             Remin = Remin + NutrRelPeriScr();    
             return Remin;
             }
@@ -1409,17 +1355,17 @@ namespace AQUATOX.Nutrients
              Remin = 0;
 
                 PhotoResp = CalcPhotoResp();  // When photorespiration takes place in plants, excess nutrients are converted into NH4  
-                DarkResp = CalcDarkResp();  // When dark respiration occurs, excess nutrients are converted into NH4. 
+                DarkResp = CalcDarkResp();     // When dark respiration occurs, excess nutrients are converted into NH4. 
 
-                //AnimExcr = CalcAnimResp_Excr(); // FIXME Animal Linkage // direct respiration losses plus excess nutrient losses from excretion to detritus
-                //AnimPredn = CalcAnimPredn();   // FIXME Animal Linkage  // When predation occurs, differences in nutrients are refelcted in W.C.
+                AnimExcr = CalcAnimResp_Excr(); // direct respiration losses plus excess nutrient losses from excretion to detritus
+                AnimPredn = CalcAnimPredn();     // When predation occurs, differences in nutrients are refelcted in W.C.
 
                 SvNutrRelColonization = NutrRelColonization();  
                 SvNutrRelMortality = NutrRelMortality(); 
-                //SvNutrRelGamLoss = NutrRelGamLoss();  // FIXME Animal Linkage
+                SvNutrRelGamLoss = NutrRelGamLoss();  
                 SvNutrRelPeriScr = NutrRelPeriScr();   
                 SvNutrRelPlantSink = NutrRelPlantSink();
-            //SvNutrRelDefecation = NutrRelDefecation();  // FIXME Animal Linkage
+                SvNutrRelDefecation = NutrRelDefecation();  
 
             SvSumDetrDecomp = SumDetrDecomp(T_SVType.NTrack, false);
 

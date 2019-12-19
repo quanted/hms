@@ -165,7 +165,7 @@ namespace AQUATOX.Animals
         public string XInteraction;
     } 
 
-    public class TPreference : InteractionFields 
+    public class TPreference 
     {
         public TPreference(double pr, double ec, AllVariables av)
         {
@@ -177,8 +177,6 @@ namespace AQUATOX.Animals
         public double Preference;
         public double EgestCoeff;
         public AllVariables nState; 
-
-
     }
 
     public class TAnimalToxRecord 
@@ -238,7 +236,7 @@ namespace AQUATOX.Animals
         [JsonIgnore] public bool IsLeavingSeg = false;   // Is 100% of the animal currently migrating out of the segment due to anoxia or salinity(nosave)
 //      public MigrationInputRec[] MigrInput;
         public double KD = 0;               // KD calculated for PFA cheimcals
-        public double HabitatLimit = 0;     // Habitat Limitation nosave
+        public double HabitatLimit = 1.0;     // Habitat Limitation nosave
         [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)
         public AllVariables PSameSpecies;   // other state variable that represents the same species, relevant to only Sm and Lg Game Fish
         public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
@@ -246,8 +244,8 @@ namespace AQUATOX.Animals
         public double NitrCons = 0;
         public double PhosCons = 0;
         // holds data about the consumption of nutrients (nosave)
-        public double[] LastO2Calc = new double[2];      //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
-        public DateTime[] LastO2CalcTime = new DateTime[2];  //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
+        public double[] LastO2Calc = new double[3];      //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
+        public DateTime[] LastO2CalcTime = new DateTime[3];  //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
         // optimization
         public double LastSedCalc = 0;
         public DateTime LastSedCalcTime = DateTime.MinValue;        // optimization
@@ -294,6 +292,17 @@ namespace AQUATOX.Animals
         //    }
         //}
 
+        // ------------------------------------------------------------------------
+        public override void SetToInitCond()
+        {
+            base.SetToInitCond();
+            HabitatLimit = AHabitat_Limit();   //previously set in CalcRiskConc
+        }
+        // ------------------------------------------------------------------------
+        public int iTrophInt(AllVariables ns)
+        {
+            return ((int)ns - (int)AllVariables.Cohesives);
+        }
         // ------------------------------------------------------------------------
         public bool IsBenthos()
         {
@@ -402,22 +411,22 @@ namespace AQUATOX.Animals
             T_SVType ToxLoop;
             InteractionFields Blank;
             AllVariables nsloop;
-//            int MigrLoop;
+            //          int MigrLoop;
 
-            //            MyPrey = new TCollection(6, 4);
+            if (MyPrey != null) MyPrey.Clear(); else MyPrey = new List<TPreference>();
 
             Blank = new InteractionFields();
             Blank.Pref = 0;
             Blank.ECoeff = 0;
             Blank.XInteraction = "";
 
-             PTrophInt = new InteractionFields[(int) Consts.LastBiota];
+             PTrophInt = new InteractionFields[iTrophInt(Consts.LastBiota)+1];
                           for (nsloop = AllVariables.Cohesives; nsloop <= Consts.LastBiota; nsloop++)
                 {
-                    PTrophInt[(int) nsloop] = Blank;
+                    PTrophInt[iTrophInt(nsloop)] = Blank;
                 }
-                PSameSpecies = new AllVariables();
-                PSameSpecies = AllVariables.NullStateVar;
+
+            PSameSpecies = AllVariables.NullStateVar;
 
             // TOrganism
             Spawned = false;
@@ -434,7 +443,7 @@ namespace AQUATOX.Animals
             SumPrey = 0;
             MortRates.OtherMort = 0;
 
-            MortRates.OrgPois =  new double[(int)Consts.LastOrgTxTyp]; 
+            MortRates.OrgPois =  new double[(int)Consts.LastOrgTxTyp+1]; 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
                 MortRates.OrgPois[(int) ToxLoop] = 0;
@@ -495,8 +504,8 @@ namespace AQUATOX.Animals
                 }
                 else
                 {
-                    Pref = PTrophInt[(int) CMP].Pref;
-                    Egest = PTrophInt[(int) CMP].ECoeff;
+                    Pref = PTrophInt[iTrophInt(CMP)].Pref;
+                    Egest = PTrophInt[iTrophInt(CMP)].ECoeff;
                 }
                 // or (Egest>0)
                 if ((Pref > 0))
@@ -507,7 +516,7 @@ namespace AQUATOX.Animals
             }
         }        // Set SumPrey property at start of time-step
         
-        
+       
 
 
     // ---------------------------process equations--------------------------
@@ -518,29 +527,27 @@ namespace AQUATOX.Animals
     public void CalculateSumPrey()
     {
         double SumPrefPrey;
-        double SumTerm;
         double PreyState;
 
             void CalculateSumPrey_SumP(TPreference P)
             {
+                double SumTerm;
+
                 if (P.Preference > 0)
                 {
                     // diagenesis model included
                     if (((P.nState == AllVariables.SedmRefrDetr) || (P.nState == AllVariables.SedmLabDetr)) && AQTSeg.Diagenesis_Included())
-                    {
                         PreyState = AQTSeg.Diagenesis_Detr(P.nState);
-                    }
                     else
-                    {
-                        PreyState = AQTSeg.GetState(P.nState, T_SVType.StV, T_SVLayer.WaterCol);
-                    }
+                        PreyState = AQTSeg.GetStateVal(P.nState, T_SVType.StV, T_SVLayer.WaterCol);
                     // mg/L wc
-                    SumTerm = P.Preference * (PreyState - BMin_in_mg_L()) * RefugeFrom(P.nState);
-                    if (SumTerm < 0)
+
+                    if (PreyState > 0.0)
                     {
-                        SumTerm = 0;
+                        SumTerm = P.Preference * (PreyState - BMin_in_mg_L()) * RefugeFrom(P.nState);
+                        if (SumTerm < 0) SumTerm = 0;
+                        SumPrefPrey = SumPrefPrey + SumTerm;
                     }
-                    SumPrefPrey = SumPrefPrey + SumTerm;
                 }
             }
 
@@ -2287,8 +2294,8 @@ namespace AQUATOX.Animals
             // removed linked mode, stratification, and estuary code as not relevant to HMS
             
             DB = Lo + Co - De - Re - Ex - Mo - Pr - Fi - Ga - DrO + DrI + Pgn - PLs - Emrg + En - Entr + TD + Migr + DiffUp + DiffDown;
-            // mg/L
-            // all mg/L
+            // mg/L      // all mg/L
+
             // Multi-Fish Promotion occurs on the first spawning of the year.
             // Size-class Recruitment occurs each time spawning occurs.
             // These effects are calculated after the timestep is complete;
