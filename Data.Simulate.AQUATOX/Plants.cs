@@ -11,7 +11,7 @@ namespace AQUATOX.Plants
 
 {
 
-    public struct PlantRecord
+    public class PlantRecord
     {
         public string PlantName;
         public string PlantType;
@@ -163,7 +163,7 @@ namespace AQUATOX.Plants
         [JsonIgnore] public bool SloughEvent = false;         // have conditions for a sloughing event been met?  Nosave
         [JsonIgnore] public double SloughLevel = 0;         // how far will biomass drop in a sloughin event?   NoSave
         public double Sloughing = 0;
-        [JsonIgnore] public double NutrLim_Step = 0;         // nutrlimit calculated at the beginning of each step  NoSave
+        [JsonIgnore] public double NutrLim_Step = 1.0;         // nutrlimit calculated at the beginning of each step  NoSave
         [JsonIgnore] public double HabitatLimit = 1.0;       // Habitat Limitation nosave  
         public double ZOpt = 0;         // optimum depth for a given plant (a constant approximated at the beginning of the simulation)
         public double Lt_Limit = 0;
@@ -1249,15 +1249,9 @@ namespace AQUATOX.Plants
             double Nitrogen;
             double NL;
             double N2O;
-            // const
-            // N2NH4 = 0.78;
-            // 1/24/03, deleted
-            // N2NO3 = 0.23;
-            // 1/24/03, deleted
-            // N2NH4 *
-            // N2NO3 *
+
             Nitrogen = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-            // gN/cu m    N/NH4            gNH4/cu m  N/NO3           gNO3/cu m
+            // gN/cu m    N/NH4            gNH4/cu m                                                                 N/NO3           gNO3/cu m
             if (IsFixingN())
             {
                 // N-fixation

@@ -12,7 +12,7 @@ namespace AQUATOX.Animals
 
 {
 
-    public struct AnimalRecord 
+    public class AnimalRecord 
     {
         public string AnimalName;
         public string Animal_Type;
@@ -203,7 +203,7 @@ namespace AQUATOX.Animals
         public double EC50_Repro_Slope = 0;   // 4/5/2017  specific to animal/chemical/effect combination
     }
 
-    public struct MortRatesRecord
+    public class MortRatesRecord
     {
         // not saved to disk
         public double[] OrgPois;
@@ -240,7 +240,7 @@ namespace AQUATOX.Animals
         [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)
         public AllVariables PSameSpecies;   // other state variable that represents the same species, relevant to only Sm and Lg Game Fish
         public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
-        [JsonIgnore] public MortRatesRecord MortRates;    // Holds data about how animal is dying, (nosave)
+        [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how animal is dying, (nosave)
         public double NitrCons = 0;
         public double PhosCons = 0;
         // holds data about the consumption of nutrients (nosave)
@@ -552,12 +552,8 @@ namespace AQUATOX.Animals
             }
 
 
-        int i;
         SumPrefPrey = 0;
-        if ((MyPrey.Count > 0))
-        {
-            for (i = 0; i < MyPrey.Count; i++) CalculateSumPrey_SumP(MyPrey[i]);
-        }
+        foreach (TPreference TP in MyPrey) CalculateSumPrey_SumP(TP);
         SumPrey = SumPrefPrey;
     }
 
@@ -688,7 +684,7 @@ namespace AQUATOX.Animals
 
 
             // --------------------------------------------------
-            void IngestSpecies_GetPref(TPreference P, ref double EgestReturn)
+            void GetPref(TPreference P, ref double EgestReturn)
             {
                 if ((P.nState == Prey))
                 {
@@ -697,12 +693,12 @@ namespace AQUATOX.Animals
                 }
             }
             // --------------------------------------------------
-            void IngestSpecies_Calc_GutEffRed(ref double GutEffRed)
+            void Calc_GutEffRed(ref double GutEffRed)
             {
                 GutEffRed = 1 - AggRG;
             }
             // --------------------------------------------------
-            double IngestSpecies_FoodDilution()
+            double FoodDilution()
             {
                 
                 double SurfArea;
@@ -743,7 +739,6 @@ namespace AQUATOX.Animals
             }
             // --------------------------------------------------
 
-            int i;
         double InorgSed;
         double RedGrow;
         // ingestspecies
@@ -763,17 +758,13 @@ namespace AQUATOX.Animals
             Pref = PPref.Preference;
             EgestReturn = PPref.EgestCoeff;
         }
-        else if ((MyPrey.Count > 0))
-        {
-            for (i = 0; i < MyPrey.Count; i++)
-                IngestSpecies_GetPref(MyPrey[i],ref EgestReturn);
-        }
+        else foreach (TPreference TP in MyPrey) GetPref(TP, ref EgestReturn);
 
         if ((Pref > 0))
             Food = (PreyState - BMin_in_mg_L()) * RefugeFrom(Prey);
 
         if ((Food > Consts.Tiny))
-            Food = Food * IngestSpecies_FoodDilution();
+            Food = Food * FoodDilution();
 
         AggRG = AggregateRedGrowth();  
         RedGrow = (0.2 * AggRG) + O2EffectFrac(1);  // 1=O2Growth_Red
@@ -799,7 +790,7 @@ namespace AQUATOX.Animals
             if (SSedEffect < 0) SSedEffect = 0;
         }
 
-        IngestSpecies_Calc_GutEffRed(ref GutEffRed);
+        Calc_GutEffRed(ref GutEffRed);
         return IngestS * SaltEffect * SSedEffect;
 
     }
@@ -883,18 +874,14 @@ namespace AQUATOX.Animals
                 }
             }
             // -------------------------------------------------------------------------------
-            int i;
         // EatEgest
         if (!CalcEgest) TrophicLevel = 2;   // 4/14/2014 avoid zero trophic levels even if no food available, minimum of 2.0 at 1/27/2015
 
         EECount = 0;
         NitrCons = 0;
         PhosCons = 0;
-        if ((MyPrey.Count > 0))
-        {
-            for (i = 0; i < MyPrey.Count; i++)
-                EatEgest_EatE(MyPrey[i]);
-        }
+        foreach (TPreference TP in MyPrey) EatEgest_EatE(TP);
+
         return EECount;
     }
 

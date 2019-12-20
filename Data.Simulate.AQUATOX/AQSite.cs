@@ -14,7 +14,7 @@ namespace AQUATOX.AQSite
     } // end StreamTypes
 
 
-    public struct SiteRecord
+    public class SiteRecord
     {
         public string SiteName;
         public double ECoeffWater;
@@ -127,7 +127,7 @@ namespace AQUATOX.AQSite
     } // end SiteRecord
 
 
-    public struct ReminRecord
+    public class ReminRecord
     {
     public string RemRecName;
     public double DecayMax_Lab;
@@ -190,7 +190,7 @@ namespace AQUATOX.AQSite
     } // end ReminRecord
 
 
-    public struct MorphRecord          // Hold Results of Variable Morphometry
+    public class MorphRecord          // Hold Results of Variable Morphometry
 
     {
         public double SegVolum;     // segment volume last good solution step
@@ -222,7 +222,7 @@ namespace AQUATOX.AQSite
         [JsonIgnore] public double MeanThick;
         [JsonIgnore] public double P_Shape = 0;
         [JsonIgnore] public double TotDischarge = 0;    // was originally Q in older code
-        [JsonIgnore] public MorphRecord Morph;  // variable morphometry results, NoSave
+        [JsonIgnore] public MorphRecord Morph = new MorphRecord();  // variable morphometry results, NoSave
         [JsonIgnore] public double ICSurfArea = 0;
 
         // DeltaMorph procedures have been moved to TVOLUME.DELTAVOLUME found in STATE.INC

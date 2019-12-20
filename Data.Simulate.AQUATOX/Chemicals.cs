@@ -9,7 +9,7 @@ using Globals;
 namespace AQUATOX.Chemicals
 {
 
-    public struct ChemicalRecord
+    public class ChemicalRecord
     {
         public string ChemName;
         public string CASRegNo;

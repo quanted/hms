@@ -451,7 +451,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
 
     } // end TDetritus
 
-    public struct DetritalInputRecordType
+    public class DetritalInputRecordType
     {
         public DetrDataType DataType;   // CBOD,Org_Carb,Org_Matt
         public double InitCond;         // Initial Condition of TOC/CBOD/organic matter
@@ -636,7 +636,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
     public class TDissRefrDetr : TDissDetr
     {
 
-        public DetritalInputRecordType InputRecord;
+        public DetritalInputRecordType InputRecord = new DetritalInputRecordType();
 
         // -------------------------------------------------------------------------------------------------------
         //Constructor  Init( Ns,  SVT,  aName,  P,  IC,  IsTempl)

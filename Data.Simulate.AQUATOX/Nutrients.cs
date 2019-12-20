@@ -386,7 +386,7 @@ namespace AQUATOX.Nutrients
 
             for (Loop = Consts.FirstDetr; Loop <= EndLoop; Loop++)
             {
-                ReminRecord _1 = Location.Remin;
+                ReminRecord RR = Location.Remin;
                 RP = (TRemineralize)AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol);
                 if ((RP == null))
                 {
@@ -394,29 +394,29 @@ namespace AQUATOX.Nutrients
                 }
                 else
                 {
-                    Decomp = RP.Decomposition(_1.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                    Decomp = RP.Decomposition(RR.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
                 }
 
                 if (OType == T_SVType.NTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * _1.N2OrgDissLab;
+                        Decomp = Decomp * RR.N2OrgDissLab;
                     }
                     else
                     {
-                        Decomp = Decomp * _1.N2OrgLab;
+                        Decomp = Decomp * RR.N2OrgLab;
                     }
                 }
                 if (OType == T_SVType.PTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * _1.P2OrgDissLab;
+                        Decomp = Decomp * RR.P2OrgDissLab;
                     }
                     else
                     {
-                        Decomp = Decomp * _1.P2OrgLab;
+                        Decomp = Decomp * RR.P2OrgLab;
                     }
                 }
                 SumDecomp = SumDecomp + Decomp;
@@ -466,7 +466,6 @@ namespace AQUATOX.Nutrients
             return NetPredation;
         }
 
-        // Remineralization
         public double NutrRelPeriScr()
         {
             // When Periphyton is scoured into phytoplankton nutrient balance must
@@ -570,20 +569,20 @@ namespace AQUATOX.Nutrients
             PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
             PPRD = AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
             PPLD = AQTSeg.GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
-            ReminRecord _1 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = _1.N2Org_Refr;
-                Nut2Org_Lab = _1.N2OrgLab;
-                Nut2Org_DissRefr = _1.N2OrgDissRefr;
-                Nut2Org_DissLab = _1.N2OrgDissLab;
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
             }
             else
             {
-                Nut2Org_Refr = _1.P2Org_Refr;
-                Nut2Org_Lab = _1.P2OrgLab;
-                Nut2Org_DissRefr = _1.P2OrgDissRefr;
-                Nut2Org_DissLab = _1.P2OrgDissLab;
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
             }
             NMort = 0;
             for (ns = Consts.FirstBiota; ns <= Consts.LastBiota; ns++)
@@ -660,16 +659,16 @@ namespace AQUATOX.Nutrients
 
 
             // diagenesis model in place
-            ReminRecord _1 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = _1.N2Org_Refr;
-                Nut2Org_Lab = _1.N2OrgLab;
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
             }
             else
             {
-                Nut2Org_Refr = _1.P2Org_Refr;
-                Nut2Org_Lab = _1.P2OrgLab;
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
             }
             NSink = 0;
             for (ns = Consts.FirstAlgae; ns <= Consts.LastAlgae; ns++)
@@ -810,16 +809,16 @@ namespace AQUATOX.Nutrients
             double Nut2Org_Lab;
             // NutrRelDefecation := 0;
             // If AQTSeg.Diagenesis_Included then exit;  6/6/08, procedure now relevant to diagenesis model
-            ReminRecord _1 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = _1.N2Org_Refr;
-                Nut2Org_Lab = _1.N2OrgLab;
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
             }
             else
             {
-                Nut2Org_Refr = _1.P2Org_Refr;
-                Nut2Org_Lab = _1.P2OrgLab;
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
             }
             NDef = 0;
             for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
@@ -858,16 +857,16 @@ namespace AQUATOX.Nutrients
             double Nut2Org_DissLab;
             TDetritus PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
             TDetritus PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
-            ReminRecord _1 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_DissRefr = _1.N2OrgDissRefr;
-                Nut2Org_DissLab = _1.N2OrgDissLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
             }
             else
             {
-                Nut2Org_DissRefr = _1.P2OrgDissRefr;
-                Nut2Org_DissLab = _1.P2OrgDissLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
             }
             Excret = 0;
             for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
@@ -909,16 +908,16 @@ namespace AQUATOX.Nutrients
             double Nut2Org_DissLab;
             PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
             PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
-            ReminRecord _1 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_DissRefr = _1.N2OrgDissRefr;
-                Nut2Org_DissLab = _1.N2OrgDissLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
             }
             else
             {
-                Nut2Org_DissRefr = _1.P2OrgDissRefr;
-                Nut2Org_DissLab = _1.P2OrgDissLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
             }
             PhotoRsp = 0;
             for (ns = Consts.FirstPlant; ns <= Consts.LastPlant; ns++)
@@ -2037,9 +2036,9 @@ namespace AQUATOX.Nutrients
                 // m/s         // cm/s                                                                        // m/cm
                 if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
 
-                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
+                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);  // m/s at 10 m
                 if (TWind == null) Wnd = 0.1;
-                else Wnd = TWind.State;  // m/s at 10 m
+                else Wnd = TWind.State;  
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
                 KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;

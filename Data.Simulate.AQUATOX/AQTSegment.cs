@@ -125,14 +125,14 @@ namespace AQUATOX.AQTSegment
 
                 AQTSeg.ClearResults();
                 AQTSeg.SVsToInitConds();
-                AQTSeg.Integrate(AQTSeg.PSetup.FirstDay, AQTSeg.PSetup.LastDay, 0.1, 1e-5, 1);
+                Setup_Record PS = AQTSeg.PSetup;
+                AQTSeg.Integrate(PS.FirstDay, PS.LastDay, PS.RelativeError, PS.MinStepSize, PS.StoreStepSize );
                 return "";
             }
      //       catch (Exception e)
      //       {
      //           return e.Message;
      //       }
-
      //       finally
       //      {
       //      }
@@ -277,13 +277,13 @@ namespace AQUATOX.AQTSegment
             //}
 
             // Initialize BCF calculation
-            //if (P.Layer < Global.T_SVLayer.SedLayer1)
+            //if (P.Layer < T_SVLayer.SedLayer1)
             //{
-            //    for (TLP = Global.Units.Global.FirstOrgTxTyp; TLP <= Global.Units.Global.LastOrgTxTyp; TLP++)
+            //    for (TLP = Units.FirstOrgTxTyp; TLP <= Units.LastOrgTxTyp; TLP++)
             //    {
-            //        if ((GetStatePointer(Global.Units.Global.AssocToxSV(TLP), Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null))
+            //        if ((GetStatePointer(Units.AssocToxSV(TLP), T_SVType.StV, T_SVLayer.WaterCol) != null))
             //        {
-            //            if (new ArrayList(new object[] { Global.Units.Global.FirstDetr, Global.Units.Global.FirstBiota }).Contains(P.NState))
+            //            if (new ArrayList(new object[] { Units.FirstDetr, Units.FirstBiota }).Contains(P.NState))
             //            {
             //                ((P) as TOrganism).BCF(0, TLP);
             //            }
@@ -294,11 +294,11 @@ namespace AQUATOX.AQTSegment
 
 
             //// initialize internal nutrients in ug/L
-            //if (new ArrayList(new T_SVType[] { Global.T_SVType.NIntrnl, Global.T_SVType.PIntrnl }).Contains(P.SVType))
+            //if (new ArrayList(new T_SVType[] { T_SVType.NIntrnl, T_SVType.PIntrnl }).Contains(P.SVType))
             //{
-            //    TP = GetStatePointer(P.NState, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+            //    TP = GetStatePointer(P.NState, T_SVType.StV, T_SVLayer.WaterCol);
             //    // associated plant
-            //    if (P.SVType == Global.T_SVType.NIntrnl)
+            //    if (P.SVType == T_SVType.NIntrnl)
             //    {
             //        P.InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
             //    }
@@ -310,19 +310,19 @@ namespace AQUATOX.AQTSegment
             //}
 
             //// Initialize Toxics
-            //if ((P.SVType >= Global.Units.Global.FirstOrgTxTyp && P.SVType <= Global.Units.Global.LastOrgTxTyp) || (P.NState >= Global.Units.Global.FirstOrgTox && P.NState <= Global.Units.Global.LastOrgTox))
+            //if ((P.SVType >= Units.FirstOrgTxTyp && P.SVType <= Units.LastOrgTxTyp) || (P.NState >= Units.FirstOrgTox && P.NState <= Units.LastOrgTox))
             //{
             //    ((P) as TToxics).ppb = 0;
-            //    if ((P.NState >= Global.Units.Global.FirstAnimal && P.NState <= Global.Units.Global.LastAnimal) && (P.SVType >= Global.Units.Global.FirstOrgTxTyp && P.SVType <= Global.Units.Global.LastOrgTxTyp))
+            //    if ((P.NState >= Units.FirstAnimal && P.NState <= Units.LastAnimal) && (P.SVType >= Units.FirstOrgTxTyp && P.SVType <= Units.LastOrgTxTyp))
             //    {
             //        ((P) as TToxics).InitialLipid();
             //    }
             //    ((P) as TToxics).IsAGGR = false;
-            //    if ((P.SVType == Global.Units.Global.FirstToxTyp) && T1IsAGGR)
+            //    if ((P.SVType == Units.FirstToxTyp) && T1IsAGGR)
             //    {
             //        ((P) as TToxics).IsAGGR = true;
             //    }
-            //    if ((P.NState == Global.Units.Global.FirstOrgTox) && T1IsAGGR)
+            //    if ((P.NState == Units.FirstOrgTox) && T1IsAGGR)
             //    {
             //        ((P) as TToxics).IsAGGR = true;
             //    }
@@ -773,6 +773,7 @@ namespace AQUATOX.AQTSegment
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
             if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
             CalculateSumPrey();
+            NormDiff(Step);
 
             foreach (TStateVariable TSV in SV)
             {
@@ -786,8 +787,12 @@ namespace AQUATOX.AQTSegment
             if (p.State < Consts.Tiny)
             {
                 p.State = 0.0;
+                //if (P.NState in [FirstOrgTox..LastOrgTox]) or  FIXME CHEMICAL IN ORGANISMS
+                //  (P.SVType in [FirstOrgTxTyp..LastOrgTxTyp])
+                //  then TToxics(P).PPB:=0;
+
             }
-        }
+}
 
         public void TryRKStep_CheckZeroStateAllSVs()
         {
@@ -800,17 +805,13 @@ namespace AQUATOX.AQTSegment
         public void TryRKStep_RestoreStates_From_Holder()
         {
             foreach (TStateVariable TSV in SV)
-            {
                 TSV.State = TSV.yhold;
-            }
         }
 
         public void TryRKStep_SaveStates_to_Holder()
         {
             foreach (TStateVariable TSV in SV)
-            {
                 TSV.yhold = TSV.State;
-            }
         }
 
         // Modify db to Account for a changing volume
@@ -830,10 +831,14 @@ namespace AQUATOX.AQTSegment
         // -------------------------------------------------------------------------
         public void TryRKStep(DateTime x, double h)
         {
-            double[] A = { 0, 0, 0.2, 0.3, 0.6, 1, 0.875 };
+            double[] A = { 0, 0, 0.2, 0.3, 0.6, 1.0, 0.875 };
             double[] B5 = { 0, 0.09788359788, 0, 0.40257648953, 0.21043771044, 0, 0.28910220215 };
             double[] B4 = { 0, 0.10217737269, 0, 0.38390790344, 0.24459273727, 0.01932198661, 0.25 };  // Butcher Tableau
-            double[,] Tableau = { { 0.2, 0, 0, 0, 0 }, { 0.075, 0.225, 0, 0, 0 }, { 0.3, -0.9, 1.2, 0, 0 }, { -0.2037037037037, 2.5, -2.5925925925926, 1.2962962963, 0 }, { 0.029495804398148, 0.341796875000000, 0.041594328703704, 0.400345413773148, 0.061767578125000 } };
+            double[,] Tableau = { { 0.2, 0, 0, 0, 0 }, 
+                                  { 0.075, 0.225, 0, 0, 0 }, 
+                                  { 0.3, -0.9, 1.2, 0, 0 }, 
+                                  { -0.2037037037037, 2.5, -2.5925925925926, 1.2962962963, 0 }, 
+                                  { 0.029495804398148, 0.341796875000000, 0.041594328703704, 0.400345413773148, 0.061767578125000 } };
             int Steps;
             int SubStep;
             double YFourth;
@@ -852,13 +857,11 @@ namespace AQUATOX.AQTSegment
                     foreach (TStateVariable TSV in SV)
                     {
                         for (SubStep = 1; SubStep <= Steps; SubStep++)
-                        {
                             TSV.State = TSV.State + h * Tableau[Steps - 1, SubStep - 1] * TSV.StepRes[SubStep];
-                        }
                     }
                 }
-            }
-            // 6 steps of integration
+            }  // 6 steps of integration
+
             foreach (TStateVariable TSV in SV)
             {
                 TSV.yhold = TSV.State;
@@ -955,15 +958,10 @@ namespace AQUATOX.AQTSegment
                         // of the software for any or for a particular purpose. Dr Michael Thomas Flanagan shall
                         // not be liable for any damages suffered as a result of using, modifying or distributing
                         // this software or its derivatives.
+
                         Delta = SAFETY * Math.Pow(MaxError / RelError, -0.25);
-                        if ((Delta < 0.1))
-                        {
-                            h = h * 0.1;
-                        }
-                        else
-                        {
-                            h = h * Delta;
-                        }
+                        if ((Delta < 0.1)) h = h * 0.1;
+                        else h = h * Delta;
                     }
                 }
                 // no warning at this time
@@ -984,41 +982,24 @@ namespace AQUATOX.AQTSegment
             else if ((MaxError < RelError))
             {
                 // Adaptive Stepsize Adjustment Source ("Delta" code) Dr. Michael Thomas Flanagan www.ee.ucl.ac.uk/~mflanaga, see terms above
-                if (MaxError == 0)
-                {
-                    Delta = 4.0;
-                }
-                else
-                {
-                    Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
-                }
-                if ((Delta > 4.0))
-                {
-                    Delta = 4.0;
-                }
-                if ((Delta < 1.0))
-                {
-                    Delta = 1.0;
-                }
+                if (MaxError == 0)  Delta = 4.0;
+                else Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
+
+                if ((Delta > 4.0)) Delta = 4.0;
+                if ((Delta < 1.0)) Delta = 1.0;
+
                 hnext = h * Delta;
             }
             h_taken = h;
-            if (hnext > MaxStep)
-            {
-                hnext = MaxStep;
-            }
-            if (h > MaxStep)
-            {
-                h = MaxStep;
-            }
+
+            if (hnext > MaxStep) hnext = MaxStep;
+            if (h > MaxStep) h = MaxStep;
+
             x = x.AddDays(h);
 
-            foreach (TStateVariable TSV in SV)
-            {
-                // reasonable error, so copy results of differentiation saved in YHolders
+            foreach (TStateVariable TSV in SV)               // reasonable error, so copy results of differentiation saved in YHolders
                 TSV.State = TSV.yhold;
-            }
-
+            
             Perform_Dilute_or_Concentrate();
         }
 
@@ -1028,6 +1009,10 @@ namespace AQUATOX.AQTSegment
             if (p.State < 0)
             {
                 p.State = 0.0;
+                //if (P.NState in [FirstOrgTox..LastOrgTox]) or  FIXME CHEMICAL IN ORGANISMS
+                //  (P.SVType in [FirstOrgTxTyp..LastOrgTxTyp])
+                //  then TToxics(P).PPB:=0;
+
             }
         }
 
@@ -1056,7 +1041,7 @@ namespace AQUATOX.AQTSegment
         public void DoThisEveryStep_UpdateO2Concs()
         {
             TSVConc pconc;
-            TSVConc newconc;
+            TSVConc newconc = new TSVConc();
             int i;
             bool deleted;
 
@@ -1233,6 +1218,7 @@ namespace AQUATOX.AQTSegment
             TPresent = TStart;
 
             ChangeData();
+            NormDiff(h);
 
             Derivs(x, 1);   
             WriteResults(TStart); // Write Initial Conditions as the first data Point
@@ -1874,7 +1860,7 @@ namespace AQUATOX.AQTSegment
         //        _wvar1 = Location.Locale;
         //        ThisSegThick = DynamicZMean();
         //        // 10-14-2010 removed ZMAX from this calculation
-        //        if (VSeg == Global.VerticalSegments.Epilimnion)
+        //        if (VSeg == VerticalSegments.Epilimnion)
         //        {
         //            OtherSeg = HypoSegment;
         //        }
@@ -1885,24 +1871,24 @@ namespace AQUATOX.AQTSegment
         //        OtherSegThick = OtherSeg.DynamicZMean();
         //    }
         //    InorgSed = 0;
-        //    if (GetStatePointer(Global.AllVariables.Sand, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null)
+        //    if (GetStatePointer(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) != null)
         //    {
-        //        for (SedLoop = Global.AllVariables.Sand; SedLoop <= Global.AllVariables.Clay; SedLoop++)
+        //        for (SedLoop = AllVariables.Sand; SedLoop <= AllVariables.Clay; SedLoop++)
         //        {
         //            // If there is sand..clay in a simulation there is no TSS, nor cohesives
-        //            SedState = InorgSedConc_GetExtState(SedLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //            SedState = InorgSedConc_GetExtState(SedLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //            if (SedState > -1)
         //            {
         //                InorgSed = InorgSed + SedState;
         //            }
         //        }
         //    }
-        //    if (GetStatePointer(Global.AllVariables.Cohesives, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) != null)
+        //    if (GetStatePointer(AllVariables.Cohesives, T_SVType.StV, T_SVLayer.WaterCol) != null)
         //    {
-        //        for (SedLoop = Global.AllVariables.Cohesives; SedLoop <= Global.AllVariables.NonCohesives; SedLoop++)
+        //        for (SedLoop = AllVariables.Cohesives; SedLoop <= AllVariables.NonCohesives; SedLoop++)
         //        {
         //            // If there are cohesives/noncohesives, in a simulation there is not TSS nor sand..clay
-        //            SedState = InorgSedConc_GetExtState(SedLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //            SedState = InorgSedConc_GetExtState(SedLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //            if (SedState > -1)
         //            {
         //                InorgSed = InorgSed + SedState;
@@ -1910,35 +1896,35 @@ namespace AQUATOX.AQTSegment
         //        }
         //    }
 
-        //    PTSS = GetStatePointer(Global.AllVariables.TSS, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //    PTSS = GetStatePointer(AllVariables.TSS, T_SVType.StV, T_SVLayer.WaterCol);
         //    if (PTSS != null)
         //    {
         //        // If there is TSS in a simulation there are no cohesives nor sand..clay
-        //        InorgSed = InorgSedConc_GetExtState(Global.AllVariables.TSS, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //        InorgSed = InorgSedConc_GetExtState(AllVariables.TSS, T_SVType.StV, T_SVLayer.WaterCol);
         //        if (PTSS.TSS_Solids)
         //        {
         //            // TSS includes algae so, to avoid double-counting, this algorithm subtracts the phytoplankton biomass
         //            // from the TSS ("inorganic sediment") before computing the extinction coeff.
-        //            for (AlgLoop = Global.Units.Global.FirstAlgae; AlgLoop <= Global.Units.Global.LastAlgae; AlgLoop++)
+        //            for (AlgLoop = Units.FirstAlgae; AlgLoop <= Units.LastAlgae; AlgLoop++)
         //            {
-        //                PPhyto = GetStatePointer(AlgLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                PPhyto = GetStatePointer(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //                if (PPhyto != null)
         //                {
         //                    if (PPhyto.IsPhytoplankton())
         //                    {
         //                        // 1/7/2005
-        //                        InorgSed = InorgSed - InorgSedConc_GetExtState(AlgLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                        InorgSed = InorgSed - InorgSedConc_GetExtState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //                    }
         //                }
         //            }
         //        }
         //        if (PTSS.TSS_Solids)
         //        {
-        //            for (DetrLoop = Global.AllVariables.SuspRefrDetr; DetrLoop <= Global.AllVariables.SuspLabDetr; DetrLoop++)
+        //            for (DetrLoop = AllVariables.SuspRefrDetr; DetrLoop <= AllVariables.SuspLabDetr; DetrLoop++)
         //            {
-        //                if (InorgSedConc_GetExtState(DetrLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol) > 0)
+        //                if (InorgSedConc_GetExtState(DetrLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
         //                {
-        //                    InorgSed = InorgSed - InorgSedConc_GetExtState(DetrLoop, Global.T_SVType.StV, Global.T_SVLayer.WaterCol);
+        //                    InorgSed = InorgSed - InorgSedConc_GetExtState(DetrLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //                }
         //            }
         //        }
@@ -2007,7 +1993,7 @@ namespace AQUATOX.AQTSegment
         //            LastInorg = PSS.SVConc;
         //            i++;
         //        } while (!((i == PSedConcs.Count) || OverTime));
-        //        if (TPresent - LastTime > Global.Units.Global.Tiny)
+        //        if (TPresent - LastTime > Units.Tiny)
         //        {
         //            // must have time-record to process
         //            if ((TPresent - LastTime < 60) && MustHave60)
@@ -3035,7 +3021,7 @@ namespace AQUATOX.AQTSegment
 
             Location.ChangeData(Location.Locale.ICZMean);
 
-            //for (Loop2 = Global.Units.Global.FirstOrgTxTyp; Loop2 <= Global.Units.Global.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
+            //for (Loop2 = Units.FirstOrgTxTyp; Loop2 <= Units.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
             //{
             //    if (Chemptrs[Loop2] != null)
             //    {
@@ -3059,6 +3045,124 @@ namespace AQUATOX.AQTSegment
              }
         }
 
+        // ----------------------------------------
+        // NORMDIFF
+        // 
+        // compute normalized rate differences
+        // for uptake rates given conc. gradient
+        // for Org Tox
+        // 
+        // also, normalize preference for the
+        // amount of food available in a given
+        // time step
+        // ----------------------------------------
+        public void NormDiff(double Step)
+        {
+            AllVariables ns;
+            TAnimal CP;
+            double PreyState;
+            double SumPref;
+
+            //double Egest;
+            //double Pref;
+            //T_SVType ToxLoop;
+            //T_SVLayer LayLoop;
+            //bool SedModelRunning;
+
+            //if (Step > -1)
+            //{
+            //    // don't calculate Diff when exporting trophic interactions
+            //    for (ToxLoop = Units.FirstOrgTxTyp; ToxLoop <= Units.LastOrgTxTyp; ToxLoop++)
+            //    {
+            //        // Begin
+            //        Diff[ToxLoop] = 1;
+            //    }
+            //}
+
+
+            // normalize preference for the amount of food avail. in a given time step
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                CP = ((GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
+                if (CP != null)
+                {
+                    CP.ChangeData();
+                    // reload original preferences from entry screen / JSON
+                    // Sum up preference values for all food sources that are present above
+                    // the minimum biomass level for feeding during a particular time step.
+
+                    SumPref = 0;
+                    foreach (TPreference PP in CP.MyPrey)
+                    {
+                        if ( !((PP.nState == AllVariables.SedmRefrDetr)||(PP.nState == AllVariables.SedmLabDetr))
+                              && (GetStatePointer(PP.nState, T_SVType.StV, T_SVLayer.WaterCol) == null) )  
+                            PP.Preference = 0;
+
+                        if (!((PP.nState == AllVariables.SedmRefrDetr) || (PP.nState == AllVariables.SedmLabDetr)) // diagenesis model included
+                              && (GetStatePointer(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.WaterCol) != null))
+                        {
+                            {  if (Step != -1)  PreyState = Diagenesis_Detr(PP.nState); else PreyState = 0; }
+                        }
+                        else PreyState = GetStateVal(PP.nState, T_SVType.StV, T_SVLayer.WaterCol);
+                                       // mg/L wc
+
+
+                        if ((PreyState <= CP.BMin_in_mg_L()) && (Step != -1))
+                            PP.Preference = 0;
+
+                        SumPref = SumPref + PP.Preference;
+                    }
+
+                    // normalize preferences
+                    foreach (TPreference PP in CP.MyPrey)
+                       if ((PP.Preference > 0) && (SumPref > 0))
+                            PP.Preference = PP.Preference / SumPref;
+
+                }  // if TAnimal not nil
+            } // loop through animals
+
+            //// **GULL MODEL** Normalize preferences for bird model
+            //BirdPrey.FreeAll();
+            //for (ns = AllVariables.Cohesives; ns <= Units.LastBiota; ns++)
+            //{
+            //    // RELOAD ORIGINAL PREFERENCES
+            //    if (GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) != null)
+            //    {
+            //        if (new ArrayList(new object[] { AllVariables.DissRefrDetr, AllVariables.DissLabDetr, AllVariables.BuriedRefrDetr }).Contains(ns))
+            //        {
+            //            Pref = 0;
+            //        }
+            //        else
+            //        {
+            //            Pref = GullPref[ns].Pref;
+            //        }
+            //        if ((Pref > 0))
+            //        {
+            //            Egest = 0;
+            //            PP = new TPreference(Pref, Egest, ns);
+            //            BirdPrey.Insert(PP);
+            //        }
+            //    }
+            //}
+            //// **GULL MODEL** Sum up preference values for all food sources that are present above
+            //// the minimum biomass level for feeding during a particular time step.
+            //SumPref = 0;
+            //for (i = 0; i < BirdPrey.Count; i++)
+            //{
+            //    PP = ((BirdPrey.At(i)) as TPreference);
+            //    SumPref = SumPref + PP.Preference;
+            //}
+            //// **GULL MODEL** normalize preferences
+            //for (i = 0; i < BirdPrey.Count; i++)
+            //{
+            //    PP = ((BirdPrey.At(i)) as TPreference);
+            //    if ((PP.Preference > 0) && (SumPref > 0))
+            //    {
+            //        PP.Preference = PP.Preference / SumPref;
+            //    }
+            //}
+
+        } // end NORMDIFF
 
     }  // end TAQUATOXSegment
 
@@ -3332,7 +3436,7 @@ namespace AQUATOX.AQTSegment
             }
             Wind = MeanVal;
 
-            DateVal = 2 * Math.PI * TimeIndex.DayOfYear / 365;
+            DateVal = 2 * Math.PI * TimeIndex.DayOfYear / 365.0;
             for (N = 1; N <= 24; N++)
             {
                 if (N % 2 == 1)

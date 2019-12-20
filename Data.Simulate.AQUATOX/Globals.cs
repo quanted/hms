@@ -212,7 +212,7 @@ namespace Globals
         //SedLayer10
     } // end T_SVLayer
 
-    public struct Setup_Record
+    public class Setup_Record
     {
         public DateTime FirstDay;
         public DateTime LastDay;
@@ -302,13 +302,13 @@ namespace Globals
         public const T_SVType LastOrgTxTyp = T_SVType.OrgTox20;
     }
 
-    public struct TSVConc
+    public class TSVConc
     {
         public double SVConc;
         public DateTime Time;
     }
 
-    public struct TParameter
+    public class TParameter
     {
         public double Val;
         public object Symbol;
