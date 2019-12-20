@@ -65,7 +65,7 @@ namespace Precipitation
             errorMsg = "";
             output.Metadata.Add("gldas_temporalresolution", input.TemporalResolution);
             output.Metadata.Add("column_1", "Date");
-            output.Data = ConvertToHourly(out errorMsg, output, input);
+            //output.Data = ConvertToHourly(out errorMsg, output, input);
             if (input.Units.Contains("imperial")) { output.Metadata["gldas_unit"] = "in"; }
 
             // NLDAS static methods used for aggregation as GLDAS is identical in function. Modifier refers to the 3hr different to nldas's hourly resolution.
