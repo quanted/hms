@@ -2,6 +2,7 @@ using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.Plants;
+using AQUATOX.Animals;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
@@ -120,17 +121,16 @@ namespace AQUATOX.Organisms
         }
 
 
-        public override void CalculateLoad(DateTime TimeIndex)
+        public override void CalculateLoad(DateTime TimeIndex)  // Inflow Loadings
         {
             // for animals & plants
-            double SegVolume;
+            double SegVolume = AQTSeg.SegVol(); ;
             double AddLoad;
             double Infl;
             double Wash;
             int Loop; // alt loadings
-            SegVolume = AQTSeg.SegVol();
-            Loading = 0;
-            // Inflow Loadings
+            Loading = 0;  
+
             base.CalculateLoad(TimeIndex);   // TStateVariable
 
             Infl = Location.Morph.InflowH2O;  // [VSeg] * (OOSInflowFrac);              // JSC Restore OOSInflowFrac 6/9/2017.  Otherwise inflow organism loadings are non-zero even if there is zero inflow loading to the system.
@@ -141,10 +141,8 @@ namespace AQUATOX.Organisms
             //    }    // upstream loadings only, estuary vsn. 10-17-02
 
             if (Infl > 0.0)
-            {
-              // conc/d // Conc// cu m d  // cu m
                 Loading = Loading * Infl / SegVolume;
-            }
+             // conc/d // Conc// cu m d  // cu m
             else Loading = 0;
 
             if (AQTSeg.Convert_g_m2_to_mg_L(NState, SVType, Layer))
@@ -162,16 +160,15 @@ namespace AQUATOX.Organisms
                 }
             }
 
-            //if (IsAnimal())
-            //{
-            //    if (((((this) as TAnimal).IsPlanktonInvert()) || (NState >= AllVariables.Veliger1 && NState <= AllVariables.Veliger2)))
-            //    {
-            //        TStates 3 = AQTSeg;
-            //        Wash = ((TAnimal)this).Drift();
-            //        Loading = Loading + (Wash - (Wash / 3.PhytoResFactor()));
-            //        // mg/L           // mg/L    // mg/L  // mg/L          // unitless
-            //    }
-            //}
+            if (IsAnimal())
+            {
+                if ( (((TAnimal)this).IsPlanktonInvert()) || (NState >= AllVariables.Veliger1 && NState <= AllVariables.Veliger2))
+                {
+                    Wash = ((TAnimal)this).Drift();
+                    Loading = Loading + (Wash - (Wash / PhytoResFactor()));
+                    // mg/L   // mg/L  // mg/L  // mg/L      // unitless
+                }
+            }
 
             // 10/15/2010 update 10/24/2012 handle fish/animal stocking or time-series fishing or withdrawal
             if ((NState >= Consts.FirstAnimal && NState <= Consts.LastFish) && (!(LoadsRec.Alt_Loadings[0] == null)))
@@ -198,7 +195,7 @@ namespace AQUATOX.Organisms
                     else
                     {
                         AddLoad = AddLoad * 0.01 * State * LoadsRec.Alt_Loadings[Loop].MultLdg;          // 4/14/2014 change units, especially relevant for fish/clam/oyster removal
-                                                                                                         // mg/L d  // pct/d frac/pct // mg/L     // unitless
+                      // mg/L d  // pct/d frac/pct // mg/L     // unitless
                     };
 
                     Loading = Loading + AddLoad;

@@ -80,7 +80,7 @@ namespace GUI.AQUATOX
             {
                 int cnt = 0;
                 Series ser = chart1.Series.Add(TSV.PName);
-                outtxt = outtxt + TSV.PName + ", ";
+                outtxt = outtxt + TSV.PName.Replace(",", "") + ", ";  // suppress commas in name for CSV output
 
                 ser.ChartType = SeriesChartType.Line;
                 ser.BorderWidth = 2;

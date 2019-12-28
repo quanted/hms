@@ -219,14 +219,13 @@ namespace AQUATOX.Animals
     {
         public AnimalRecord PAnimalData;
         public InteractionFields[] PTrophInt;        // Eating Preferences and Egestion Coefficients
-        public List<TPreference> MyPrey = null;      // Things I Eat
-        public double CalcLipid = 0;        // calculated lipid content, relevant to fish only
+        [JsonIgnore] public List<TPreference> MyPrey = null;      // Things I Eat
         public bool Spawned = false;        // Has this species spawned already on this date, within the correct temp range
         public int SpawnTimes = 0;          // how many times has this species spawned since midwinter?
 //      public AnadromousInputRec AnadRel;  // If size class anadromous, this is relevant
         [JsonIgnore] public double PromoteLoss = 0;      // promotion of biomass from this size class to the next (nosave)
         [JsonIgnore] public double PromoteGain = 0;      // promotion of biomass from lower size class to this (nosave)
-        public double Recruit = 0;
+        [JsonIgnore] public double Recruit = 0;
         [JsonIgnore] public double Gametes = 0;          // SmGameFish recruited from LgGameFish, or size class (nosave)
         [JsonIgnore] public int OysterCategory = 0;      // 1=Veliger 2=Spat 3=Seed 4=Sack, 0= not an oyster, nosave
         [JsonIgnore] public object POlder = null;
@@ -235,32 +234,31 @@ namespace AQUATOX.Animals
         [JsonIgnore] public double RecrSave = 0;         // Saved for use in DoThisEveryStep (nosave)
         [JsonIgnore] public bool IsLeavingSeg = false;   // Is 100% of the animal currently migrating out of the segment due to anoxia or salinity(nosave)
 //      public MigrationInputRec[] MigrInput;
-        public double KD = 0;               // KD calculated for PFA cheimcals
-        public double HabitatLimit = 1.0;     // Habitat Limitation nosave
+//      public double KD = 0;               // KD calculated for PFA cheimcals
+        [JsonIgnore] public double HabitatLimit = 1.0;     // Habitat Limitation nosave
         [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)
         public AllVariables PSameSpecies;   // other state variable that represents the same species, relevant to only Sm and Lg Game Fish
-        public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
+        [JsonIgnore] public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
         [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how animal is dying, (nosave)
-        public double NitrCons = 0;
-        public double PhosCons = 0;
-        // holds data about the consumption of nutrients (nosave)
-        public double[] LastO2Calc = new double[3];      //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
-        public DateTime[] LastO2CalcTime = new DateTime[3];  //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
-        // optimization
-        public double LastSedCalc = 0;
-        public DateTime LastSedCalcTime = DateTime.MinValue;        // optimization
+        [JsonIgnore] public double NitrCons = 0;
+        [JsonIgnore] public double PhosCons = 0; // holds data about the consumption of nutrients (nosave)
+
+        [JsonIgnore] public double[] LastO2Calc = new double[3];      //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)
+        [JsonIgnore] public DateTime[] LastO2CalcTime = new DateTime[3];  //(0=O2Mortality,1=O2Growth_Red,2=O2Repro_Red)         // optimization
+
+        [JsonIgnore] public double LastSedCalc = 0;
+        [JsonIgnore] public DateTime LastSedCalcTime = DateTime.MinValue;        // optimization
 
 //      public AnadromousDataRec AnadromousData = null;        // NoSave
-        public double[] DerivedK1;
-        public double[] DerivedK2;        // 9/27/2010 model calculations for alternative BAF (nosave)
+        [JsonIgnore] public double[] DerivedK1;
+        [JsonIgnore] public double[] DerivedK2;        // 9/27/2010 model calculations for alternative BAF (nosave)
 
-        public double PreyTrophicLevel = 0;
-        public double TrophicLevel = 0;
-        // Object IDs for storing in collections
+        [JsonIgnore] public double PreyTrophicLevel = 0;
+        [JsonIgnore] public double TrophicLevel = 0;
 
         // ChangeData MUST be called when the underlying data record is changed
         // ------------------------------------------------------------------------
-        //public void Assign_Anim_Tox()
+        //public void Assign_Anim_Tox()  // fixme chemical effects on animals
         //{
         //    int FoundToxIndx;
         //    int i;
@@ -364,7 +362,7 @@ namespace AQUATOX.Animals
             MacroState = 0;
             for (LoopVal = Consts.FirstMacro; LoopVal <= Consts.LastMacro; LoopVal++)
             {
-                if ((AQTSeg.GetState(LoopVal, T_SVType.StV, T_SVLayer.WaterCol) > -1))
+                if ((AQTSeg.GetStateVal(LoopVal, T_SVType.StV, T_SVLayer.WaterCol) > -1))
                 {
                     MacroState = MacroState + AQTSeg.GetState(LoopVal, T_SVType.StV, T_SVLayer.WaterCol);
                 }
@@ -712,7 +710,7 @@ namespace AQUATOX.Animals
                 if ((PAnimalData.Guild_Taxa == "Susp Feeder") || (PAnimalData.Guild_Taxa == "Clam"))
                 {
                     Sed = 0; //  AQTSeg.InorgSedConc(false);  FIXME ADD INORGANIC SEDIMENT (TSS)
-                    SandC = AQTSeg.GetState(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.NonCohesives2, T_SVType.StV, T_SVLayer.WaterCol);
+                    SandC = AQTSeg.GetStateVal(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetStateVal(AllVariables.NonCohesives2, T_SVType.StV, T_SVLayer.WaterCol);
                     if (SandC > 0)  Sed = Sed - SandC; // mg/L
                                                        // Dilution Effects are only based on Silt and Clay
 
@@ -912,7 +910,6 @@ namespace AQUATOX.Animals
     // (*************************************)
     public override double Respiration()
     {
-        
         double SpecDynAction;
         double SaltEffect;
         double Respire;
@@ -2300,8 +2297,6 @@ namespace AQUATOX.Animals
 
 
 } // end TAnimal
-
-
 
 
 } // namespace

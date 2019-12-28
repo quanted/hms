@@ -10,6 +10,7 @@ using AQUATOX.Diagenesis;
 using AQUATOX.Chemicals;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
+using AQUATOX.Organisms;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -279,11 +280,11 @@ namespace AQUATOX.AQTSegment
             // Initialize BCF calculation
             //if (P.Layer < T_SVLayer.SedLayer1)
             //{
-            //    for (TLP = Units.FirstOrgTxTyp; TLP <= Units.LastOrgTxTyp; TLP++)
+            //    for (TLP = Consts.FirstOrgTxTyp; TLP <= Consts.LastOrgTxTyp; TLP++)
             //    {
-            //        if ((GetStatePointer(Units.AssocToxSV(TLP), T_SVType.StV, T_SVLayer.WaterCol) != null))
+            //        if ((GetStatePointer(Consts.AssocToxSV(TLP), T_SVType.StV, T_SVLayer.WaterCol) != null))
             //        {
-            //            if (new ArrayList(new object[] { Units.FirstDetr, Units.FirstBiota }).Contains(P.NState))
+            //            if (new ArrayList(new object[] { Consts.FirstDetr, Consts.FirstBiota }).Contains(P.NState))
             //            {
             //                ((P) as TOrganism).BCF(0, TLP);
             //            }
@@ -310,19 +311,19 @@ namespace AQUATOX.AQTSegment
             //}
 
             //// Initialize Toxics
-            //if ((P.SVType >= Units.FirstOrgTxTyp && P.SVType <= Units.LastOrgTxTyp) || (P.NState >= Units.FirstOrgTox && P.NState <= Units.LastOrgTox))
+            //if ((P.SVType >= Consts.FirstOrgTxTyp && P.SVType <= Consts.LastOrgTxTyp) || (P.NState >= Consts.FirstOrgTox && P.NState <= Consts.LastOrgTox))
             //{
             //    ((P) as TToxics).ppb = 0;
-            //    if ((P.NState >= Units.FirstAnimal && P.NState <= Units.LastAnimal) && (P.SVType >= Units.FirstOrgTxTyp && P.SVType <= Units.LastOrgTxTyp))
+            //    if ((P.NState >= Consts.FirstAnimal && P.NState <= Consts.LastAnimal) && (P.SVType >= Consts.FirstOrgTxTyp && P.SVType <= Consts.LastOrgTxTyp))
             //    {
             //        ((P) as TToxics).InitialLipid();
             //    }
             //    ((P) as TToxics).IsAGGR = false;
-            //    if ((P.SVType == Units.FirstToxTyp) && T1IsAGGR)
+            //    if ((P.SVType == Consts.FirstToxTyp) && T1IsAGGR)
             //    {
             //        ((P) as TToxics).IsAGGR = true;
             //    }
-            //    if ((P.NState == Units.FirstOrgTox) && T1IsAGGR)
+            //    if ((P.NState == Consts.FirstOrgTox) && T1IsAGGR)
             //    {
             //        ((P) as TToxics).IsAGGR = true;
             //    }
@@ -583,7 +584,7 @@ namespace AQUATOX.AQTSegment
             bool Nitr = ((S == AllVariables.Nitrate) || (S == AllVariables.Ammonia));
             if (Nitr)
             {
-                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmRefrDetr)) return LR.N2Org_Refr;
+                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.N2Org_Refr;
                 if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.N2OrgLab;
                 if (NState == AllVariables.DissRefrDetr) return LR.N2OrgDissRefr;
                 if (NState == AllVariables.DissLabDetr) return LR.N2OrgDissLab;
@@ -599,7 +600,7 @@ namespace AQUATOX.AQTSegment
             }
             else
             {
-                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmRefrDetr)) return LR.P2Org_Refr;
+                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.P2Org_Refr;
                 if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.P2OrgLab;
                 if (NState == AllVariables.DissRefrDetr) return LR.P2OrgDissRefr;
                 if (NState == AllVariables.DissLabDetr) return LR.P2OrgDissLab;
@@ -1024,6 +1025,120 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+        // -----------------------------------------------------------------
+        public void DoThisEveryStep_SetFracKilled_and_Spawned(TStateVariable P, double hdid) 
+        {
+            TAnimal PAnim;
+            int MidWinterJulianDate;
+            int sl;
+            T_SVType ToxLoop;
+            int ionized;
+            double WeightedCumFracKill;
+            double WeightedTempResistant;
+
+            if (P.IsPlant())  ((P) as TPlant).NutrLim_Step = ((P) as TPlant).NutrLimit();
+
+            if (Location.Locale.Latitude < 0.0) MidWinterJulianDate = 182;
+                                           else MidWinterJulianDate = 1;
+
+            if (P.IsPlantOrAnimal())
+            {   TOrganism TOR = (TOrganism)P;
+                if ((P.State < Consts.VSmall) && (P.InitialCond > Consts.VSmall) && (P.Loading < Consts.VSmall))
+                {
+                    P.State = P.State + 1e-7;                     // 1/15/2015
+                    // prevent extinction outside of derivs to prevent stiff eqn 4/15/2015
+                }
+
+                WeightedCumFracKill = (Consts.C1 * TOR.SedDeltaCumFracKill[1] + Consts.C3 * TOR.SedDeltaCumFracKill[3] + Consts.C4 * TOR.SedDeltaCumFracKill[4] + Consts.C6 * TOR.SedDeltaCumFracKill[6]) * hdid;
+                WeightedTempResistant = (Consts.C1 * TOR.SedDeltaResistant[1] + Consts.C3 * TOR.SedDeltaResistant[3] + Consts.C4 * TOR.SedDeltaResistant[4] + Consts.C6 * TOR.SedDeltaResistant[6]) * hdid;
+                if (WeightedCumFracKill > 0)
+                    TOR.SedPrevFracKill = TOR.SedPrevFracKill + WeightedCumFracKill;
+
+                if (WeightedTempResistant > 0)
+                    TOR.SedResistant = TOR.SedResistant + WeightedTempResistant;
+
+                if (TOR.SedResistant > 1)
+                    TOR.SedResistant = 1;
+
+                for (sl = 1; sl <= 6; sl++)
+                {
+                    TOR.SedDeltaCumFracKill[sl] = 0;  // initialize for next step's calculations
+                    TOR.SedDeltaResistant[sl] = 0;
+                }
+                for (ionized = 0; ionized <= 1; ionized++)
+                {
+                    WeightedCumFracKill = (Consts.C1 * TOR.AmmoniaDeltaCumFracKill[ionized, 1] + Consts.C3 * TOR.AmmoniaDeltaCumFracKill[ionized, 3] + Consts.C4 * TOR.AmmoniaDeltaCumFracKill[ionized, 4] + Consts.C6 * TOR.AmmoniaDeltaCumFracKill[ionized, 6]) * hdid;
+                    WeightedTempResistant = (Consts.C1 * TOR.AmmoniaDeltaResistant[ionized, 1] + Consts.C3 * TOR.AmmoniaDeltaResistant[ionized, 3] + Consts.C4 * TOR.AmmoniaDeltaResistant[ionized, 4] + Consts.C6 * TOR.AmmoniaDeltaResistant[ionized, 6]) * hdid;
+                    if (WeightedCumFracKill > 0)
+                        TOR.AmmoniaPrevFracKill[ionized] = TOR.AmmoniaPrevFracKill[ionized] + WeightedCumFracKill;
+                    if (WeightedTempResistant > 0)
+                        TOR.AmmoniaResistant[ionized] = TOR.AmmoniaResistant[ionized] + WeightedTempResistant;
+                    if (TOR.AmmoniaResistant[ionized] > 1)
+                        TOR.AmmoniaResistant[ionized] = 1;
+                    for (sl = 1; sl <= 6; sl++)
+                    {
+                        TOR.AmmoniaDeltaCumFracKill[ionized, sl] = 0;
+                        TOR.AmmoniaDeltaResistant[ionized, sl] = 0;
+                    }
+                }
+
+                //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)    FIXME CHEMICAL EFFECTS
+                //{
+                //    WeightedCumFracKill = (Consts.C1 * TOR.DeltaCumFracKill[ToxLoop, 1] + Consts.C3 * TOR.DeltaCumFracKill[ToxLoop, 3] + Consts.C4 * TOR.DeltaCumFracKill[ToxLoop, 4] + Consts.C6 * TOR.DeltaCumFracKill[ToxLoop, 6]) * hdid;
+                //    WeightedTempResistant = (Consts.C1 * TOR.DeltaResistant[ToxLoop, 1] + Consts.C3 * TOR.DeltaResistant[ToxLoop, 3] + Consts.C4 * TOR.DeltaResistant[ToxLoop, 4] + Consts.C6 * TOR.DeltaResistant[ToxLoop, 6]) * hdid;
+                //    if (WeightedCumFracKill > 0)
+                //        TOR.PrevFracKill[ToxLoop] = TOR.PrevFracKill[ToxLoop] + WeightedCumFracKill;
+                //    if (WeightedTempResistant > 0)
+                //        TOR.Resistant[ToxLoop] = TOR.Resistant[ToxLoop] + WeightedTempResistant;
+                //    if (TOR.Resistant[ToxLoop] > 1)
+                //        TOR.Resistant[ToxLoop] = 1;
+                //    for (sl = 1; sl <= 6; sl++)
+                //    {
+                //        TOR.DeltaCumFracKill[ToxLoop, sl] = 0;
+                //        TOR.DeltaResistant[ToxLoop, sl] = 0;
+                //    }
+                //}
+
+                if (TPresent.DayOfYear == MidWinterJulianDate)
+                {
+                    // 9-17-07 JSC, see specs in section 8.1
+                    // it is assumed that resistance persists in the population until the end of the growing season
+                    TOR.SedPrevFracKill = 0;
+                    TOR.SedResistant = 0;
+                    for (ionized = 0; ionized <= 1; ionized++)
+                    {
+                        TOR.AmmoniaPrevFracKill[ionized] = 0;
+                        TOR.AmmoniaResistant[ionized] = 0;
+                    }
+
+                    //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  FIXME CHEMICAL EFFECTS
+                    //{
+                    //    TOR.PrevFracKill[ToxLoop] = 0;
+                    //    TOR.Resistant[ToxLoop] = 0;
+                    //    FirstExposure[ToxLoop] = 0;
+                    //}
+                }
+            }
+            if (P.IsAnimal())
+            {
+                PAnim = ((P) as TAnimal);
+                if (((PAnim.SpawnNow(TPresent.AddDays(-hdid))) && (!PAnim.Spawned)))
+                {
+                    PAnim.SpawnTimes++;
+                    // Spawned must be set to true so that fish do not
+                    // spawn multiple times in the same day / temp. range
+                    PAnim.Spawned = true;
+                }
+                else if ((!PAnim.SpawnNow(TPresent.AddDays(-hdid))))  PAnim.Spawned = false;
+
+                // Reset Number of Spawning Times in Midwinter
+                if (TPresent.DayOfYear == MidWinterJulianDate)  PAnim.SpawnTimes = 0;
+
+            }
+            // if IsAnimal
+
+        }
+
 
         public void DoThisEveryStep_CheckSloughEvent(TStateVariable P)  //turn off sloughing following a 1/day slough event
         {
@@ -1054,8 +1169,8 @@ namespace AQUATOX.AQTSegment
                 // clean up any data points greater than 96 hours old
                 deleted = false;
                 pconc = PO2Concs[i];
-                // days or 96 hours
-                if ((TPresent - pconc.Time).TotalDays > 4)
+                
+                if ((TPresent - pconc.Time).TotalDays > 4) // 4 days or 96 hours
                 {
                     PO2Concs.RemoveAt(i);
                     deleted = true;
@@ -1096,6 +1211,86 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+        // -----------------------------------------------------------------
+        public void DoThisEveryStep_MultiFishPromote(double hdid)
+        {
+            AllVariables Young;
+            AllVariables MFLoop;
+            TStateVariable PYF;
+            TStateVariable POF;
+            // PYoungFish, POldFish
+            TAnimal PAnml;
+            T_SVType ToxLoop;
+            bool OldestFish;
+            // Is program evaluating oldest age-class in simulation
+            PAnml = GetStatePointer(AllVariables.Fish3, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+            if ((PAnml == null))  return;
+
+            OldestFish = true;
+            if (PAnml.SpawnNow(TPresent.AddDays(-hdid)) && (!PAnml.Spawned) && (PAnml.SpawnTimes == 0))
+            {
+                // age class change on first spawning of the year
+                for (MFLoop = AllVariables.Fish15; MFLoop >= AllVariables.Fish1; MFLoop--)
+                {
+                    if (GetStatePointer(MFLoop, T_SVType.StV, T_SVLayer.WaterCol) != null)
+                    {
+                        Young = MFLoop - 1;
+                        // promote fish itself
+                        POF = GetStatePointer(MFLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                        PYF = GetStatePointer(Young, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (OldestFish) POF.State = POF.State + PYF.State;
+                        else if (MFLoop == AllVariables.Fish1)  // YOY
+                             POF.State = 0;
+                        else POF.State = PYF.State;
+
+                        // promote org toxicants and mercury
+                        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
+                        {
+                            POF = GetStatePointer(MFLoop, ToxLoop, T_SVLayer.WaterCol);
+                            if (POF != null)
+                            {
+                                PYF = GetStatePointer(Young, ToxLoop, T_SVLayer.WaterCol);
+                                if (OldestFish) POF.State = POF.State + PYF.State;
+                                else
+                                {
+                                    if (MFLoop == AllVariables.Fish1) POF.State = 0;
+                                    else POF.State = PYF.State;
+                                }
+                            }
+                        }
+                        if (OldestFish) OldestFish = false;
+                   }
+                }
+            }
+        }
+
+        public void DoThisEveryStep_FishRecruit()
+        {
+            AllVariables FLoop;
+            TAnimal PFish;
+            TToxics PToxFish;
+            T_SVType ToxLoop;
+            for (FLoop = Consts.FirstInvert; FLoop <= Consts.LastFish; FLoop++)
+            {
+                // 4/16/2014 add incorporation of invert recrsave
+                PFish = GetStatePointer(FLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (PFish != null)
+                {
+                    PFish.State = PFish.State + PFish.RecrSave;
+                    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+                    {
+                        PToxFish = GetStatePointer(FLoop, ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                        if (PToxFish != null)
+                        {
+                           // PToxFish.State = PToxFish.State + PToxFish.RecrSave;  FIXME TOXICS IN FISH RECRUITMENT TRACKING
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         public void DoThisEveryStep(double hdid)
         {
             // Procedure runs after the derivatives have completed each time step
@@ -1103,9 +1298,7 @@ namespace AQUATOX.AQTSegment
             // -----------------------------------------------------------------
 
             foreach (TStateVariable TSV in SV)
-            {
                 DoThisEveryStep_CheckSloughEvent(TSV);
-            }
 
             DoThisEveryStep_UpdateLightVals();   // update light history values for calculating effects
 
@@ -1113,26 +1306,21 @@ namespace AQUATOX.AQTSegment
 
             //DoThisEveryStep_UpdateSedConcs(); // update sediment conc. history for calculating effects
 
-            //DoThisEveryStep_MultiFishPromote();
-            //DoThisEveryStep_FishRecruit();     // add effects of recruitment to all fish vars.  Must be called after multifish promote.
+            DoThisEveryStep_MultiFishPromote(hdid);
+            DoThisEveryStep_FishRecruit();     // add effects of recruitment to all fish vars.  Must be called after multifish promote.
 
             //DoThisEveryStep_Anadromous_Migr();
             //if (GetStatePointer(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) != null)
-            //{
             //    Update_Sed_Bed(TPresent - TPreviousStep);
-            //}
             //// JSC 2-21-2003, Update sediment bed after each derivative step if sediment model is running
+
             //// After every step, PrevFracKill must be set to Current FracKill for
             //// correct computation of POISONED
             //// Also, for each animal species spawning data must be updated
-            //for (i = 0; i < Count; i++)
-            //{
-            //    DoThisEveryStep_SetFracKilled_and_Spawned(At(i));    // FIXME Enable along with anti extinction code
-            //}
+            foreach (TStateVariable TSV in SV)
+                DoThisEveryStep_SetFracKilled_and_Spawned(TSV, hdid);
 
             //DoThisEveryStep_SumAggr();
-
-            
 
             int dayspassed = (TPresent - ModelStartTime).Days;
             CurrentYearNum = (int)((dayspassed + 2.0) / 365.0) + 1;
@@ -1147,33 +1335,8 @@ namespace AQUATOX.AQTSegment
             //{  //    // 3-11-08
             //    DoThisEveryStep_CalculatePercentEmbedded();  }
 
-            //if (SedModelIncluded() && !SedNonReactive)
-            //{
-            //    UpdateSedData();
-            //    if (SedData[1].DynBedDepth > MaxUpperThick)
-            //    {
-            //        DoThisEveryStep_CompressSed();
-            //    }
-            //    if (SedData[1].DynBedDepth < BioTurbThick)
-            //    {
-            //        DoThisEveryStep_ExposeSed();
-            //    }
-            //}
-
             YearNum_PrevStep = CurrentYearNum;
 
-            //if (VSeg == VerticalSegments.Epilimnion)
-            //{
-            //    // Only change yearnum once
-            //    YearNum_PrevStep = CurrentYearNum;
-            //    if ((LinkedMode && Stratified))
-            //    {
-            //        HypoSegment.YearNum_PrevStep = CurrentYearNum;
-            //    }
-            //}
-
-            //DoThisEveryStep_MigrateAnimals();
-            //if (!LinkedMode)
             //{   ProgData.AnoxicVis = Anoxic;} 
         }
 
@@ -1857,7 +2020,7 @@ namespace AQUATOX.AQTSegment
         //    double OtherSegThick;
         //    if (WeightedAvg)
         //    {
-        //        _wvar1 = Location.Locale;
+        //        TOR = Location.Locale;
         //        ThisSegThick = DynamicZMean();
         //        // 10-14-2010 removed ZMAX from this calculation
         //        if (VSeg == VerticalSegments.Epilimnion)
@@ -1905,7 +2068,7 @@ namespace AQUATOX.AQTSegment
         //        {
         //            // TSS includes algae so, to avoid double-counting, this algorithm subtracts the phytoplankton biomass
         //            // from the TSS ("inorganic sediment") before computing the extinction coeff.
-        //            for (AlgLoop = Units.FirstAlgae; AlgLoop <= Units.LastAlgae; AlgLoop++)
+        //            for (AlgLoop = Consts.FirstAlgae; AlgLoop <= Consts.LastAlgae; AlgLoop++)
         //            {
         //                PPhyto = GetStatePointer(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
         //                if (PPhyto != null)
@@ -1993,7 +2156,7 @@ namespace AQUATOX.AQTSegment
         //            LastInorg = PSS.SVConc;
         //            i++;
         //        } while (!((i == PSedConcs.Count) || OverTime));
-        //        if (TPresent - LastTime > Units.Tiny)
+        //        if (TPresent - LastTime > Consts.Tiny)
         //        {
         //            // must have time-record to process
         //            if ((TPresent - LastTime < 60) && MustHave60)
@@ -2464,7 +2627,7 @@ namespace AQUATOX.AQTSegment
             MorphRecord MR = Location.Morph;
             return   (Sed + Def) * MR.SegVolum / DiagenesisVol(2) * Diagenesis_Params.H2.Val;
             //        (g / m2 d) (g / m3 w )        (m3 w)        (m3 sed)         (m sed)
-            //        (ug / m2 d)(ug / m3 w)        (m3 w)        (m3 sed)         (m sed)  (toxicant deposition units)
+            //        (ug / m2 d)(ug / m3 w)        (m3 w)        (m3 sed)         (m sed)  (toxicant deposition Consts)
         }
 
 
@@ -3021,7 +3184,7 @@ namespace AQUATOX.AQTSegment
 
             Location.ChangeData(Location.Locale.ICZMean);
 
-            //for (Loop2 = Units.FirstOrgTxTyp; Loop2 <= Units.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
+            //for (Loop2 = Consts.FirstOrgTxTyp; Loop2 <= Consts.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
             //{
             //    if (Chemptrs[Loop2] != null)
             //    {
@@ -3072,7 +3235,7 @@ namespace AQUATOX.AQTSegment
             //if (Step > -1)
             //{
             //    // don't calculate Diff when exporting trophic interactions
-            //    for (ToxLoop = Units.FirstOrgTxTyp; ToxLoop <= Units.LastOrgTxTyp; ToxLoop++)
+            //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             //    {
             //        // Begin
             //        Diff[ToxLoop] = 1;
@@ -3123,7 +3286,7 @@ namespace AQUATOX.AQTSegment
 
             //// **GULL MODEL** Normalize preferences for bird model
             //BirdPrey.FreeAll();
-            //for (ns = AllVariables.Cohesives; ns <= Units.LastBiota; ns++)
+            //for (ns = AllVariables.Cohesives; ns <= Consts.LastBiota; ns++)
             //{
             //    // RELOAD ORIGINAL PREFERENCES
             //    if (GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) != null)

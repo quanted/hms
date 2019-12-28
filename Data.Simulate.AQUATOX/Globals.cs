@@ -268,6 +268,11 @@ namespace Globals
         public const string DateFormatString = "yyyy-MM-dd'T'HH:mm:ss";
         public const string ValFormatString = "E";  // e.g. 1.043700E+021
 
+        public const double C1 = 0.09788359788;
+        public const double C3 = 0.40257648953;
+        public const double C4 = 0.21043771044;
+        public const double C6 = 0.28910220215;
+
         public const double Def2SedLabDetr = 0.5;  // Defecation that is labile 
         public const double Detr_OM_2_OC = 1.90;
         public const double KAnaerobic = 0.3;  //  (1/d)  decomp reduction - check Sanders, Gunnison
