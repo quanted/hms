@@ -193,14 +193,17 @@ namespace AQUATOX.Plants
             //    MortRates.OrgPois[ToxLoop] = 0;
             //}
         }
-
+         
         public override void SetToInitCond()
         {
             base.SetToInitCond();
             SinkToHypo = 0;
             SloughEvent = false;
             NutrLim_Step = 1;
+
             HabitatLimit = PHabitat_Limit();   //previously set in CalcRiskConc
+            // CalcRiskConc(true);  fixme CHEM EFFECTS
+
         }
 
 
@@ -252,7 +255,7 @@ namespace AQUATOX.Plants
                 }
                 else
                 {
-                    //   MessageBox.Show("Warning:  Macrophyte " + PName + " has an unrecognized type!", Application.ProductName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);  fixme raise error?
+                    //   MessageBox.Show("Warning:  Macrophyte " + PName + " has an unrecognized type!", Application.ProductName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);  raise error?
                 }
             }
         }
@@ -785,12 +788,9 @@ namespace AQUATOX.Plants
             EX = AQTSeg.Extinct(IsPeriphyton(), true, true, false, 0);
             // don't include cyanobacteria self shading effects because result is used for LtAtTop and LtAtDepth
             return PAR * Math.Exp(-EX * ZOpt);
-            // TPlant.ZOpt Set at Initial Condition in TStates.SetStatesToInitConds
+            // TPlant.ZOpt Set within Initial Condition in TStates.SVsToInitConds()
         }
 
-
-        // 1/m
-        // m
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
         public double LightSat()             // Aug 16, 2007, Light Saturation including Adaptive Light
 
@@ -814,7 +814,7 @@ namespace AQUATOX.Plants
                 for (i = 0; i < AQTSeg.PLightVals.Count; i++)
                 {
                     LightVal = AQTSeg.PLightVals[i];
-                    index = (int)Math.Floor((AQTSeg.TPresent.Date-LightVal.Time.Date).TotalDays - 0.001);  // -.001 fixes issue in which values time-stamped exactly at midnight refer to average light the previous day
+                    index = (int)(AQTSeg.TPresent.Date - (LightVal.Time.AddDays(-0.001).Date)).TotalDays;
                     if (index >= 0 && index <= 2)
                     {
                         if (n[index] == 0)
@@ -874,7 +874,7 @@ namespace AQUATOX.Plants
                 else LightCorr = 1.25;
                 
             LT = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * DTop));
-            // unitless      ly/d                  ly/d             1/m  m
+            // unitless      ly/d                  ly/d                     1/m  m
 
             if (LT < -30) LT = 0;  // Prevent a Crash, JSC
                 else LT = Math.Exp(LT);

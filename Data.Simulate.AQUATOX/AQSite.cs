@@ -104,8 +104,8 @@ namespace AQUATOX.AQSite
         public bool EnterTotalLength;
         public double TotalLength;
         public string XTotalLength;
-        public double ECoeffSED;
-        public string XECoeffSED;
+        public double ECoeffSed;
+        public string XECoeffSed;
         public double ECoeffDOM;
         public string XECoeffDOM;
         public double ECoeffPOM;

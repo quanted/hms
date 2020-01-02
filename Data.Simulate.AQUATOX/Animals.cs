@@ -138,7 +138,7 @@ namespace AQUATOX.Animals
         public string XSlopeSSFeed;
         public double InterceptSSFeed;
         public string XInterceptSSFeed;
-        public string SenstoSediment;
+        public string SenstoSediment = "";
         public string XSensToSediment;
         public double Trigger;
         public string XTrigger;
@@ -295,6 +295,18 @@ namespace AQUATOX.Animals
         {
             base.SetToInitCond();
             HabitatLimit = AHabitat_Limit();   //previously set in CalcRiskConc
+
+            Spawned = false;
+            SpawnTimes = 0;
+            PromoteLoss = 0;
+            PromoteGain = 0;
+            EmergeInsect = 0;
+            Recruit = 0;
+            if ((PAnimalData.Animal_Type == "Fish") || (IsPlanktonInvert()))
+                PAnimalData.AveDrift = 0;
+
+            // Assign_Anim_Tox();    fixme CHEM EFFECTS
+            // CalcRiskConc(true);  fixme CHEM EFFECTS
         }
         // ------------------------------------------------------------------------
         public int iTrophInt(AllVariables ns)
@@ -709,7 +721,7 @@ namespace AQUATOX.Animals
                 Sed = 0;
                 if ((PAnimalData.Guild_Taxa == "Susp Feeder") || (PAnimalData.Guild_Taxa == "Clam"))
                 {
-                    Sed = 0; //  AQTSeg.InorgSedConc(false);  FIXME ADD INORGANIC SEDIMENT (TSS)
+                    Sed = AQTSeg.InorgSedConc();  
                     SandC = AQTSeg.GetStateVal(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetStateVal(AllVariables.NonCohesives2, T_SVType.StV, T_SVLayer.WaterCol);
                     if (SandC > 0)  Sed = Sed - SandC; // mg/L
                                                        // Dilution Effects are only based on Silt and Clay
@@ -725,8 +737,8 @@ namespace AQUATOX.Animals
 
                     SurfArea = Location.Locale.SurfArea;
                     // m2                    // m2
-                    Sed = 0; // AQTSeg.InorgSedDep(false) * 1000 * PConstant;  FIXME ADD INORGANIC SEDIMENT (TSS)
-                    // g/m2               // kg/m2  // g/kg    // Proportionality Constant
+                    Sed = AQTSeg.InorgSedDep() * 1000 * PConstant;  
+                    // g/m2     // kg/m2      // g/kg  // Proportionality Constant
                     FdSub = Food * AQTSeg.Volume_Last_Step / SurfArea;
                     // g/m2  // g/m3          // m3           // m2
                 }
@@ -779,9 +791,9 @@ namespace AQUATOX.Animals
         SSedEffect = 1;
         if (PAnimalData.SuspSedFeeding)
         {
-            InorgSed = 0;   // AQTSeg.InorgSedConc(false);  FIXME ADD INORGANIC SEDIMENT (TSS)
+            InorgSed = AQTSeg.InorgSedConc(); 
             if (InorgSed > Consts.Tiny)
-                 SSedEffect = PAnimalData.SlopeSSFeed * Math.Log(InorgSed + PAnimalData.InterceptSSFeed);
+                 SSedEffect = PAnimalData.SlopeSSFeed * Math.Log(InorgSed) + PAnimalData.InterceptSSFeed;
             else SSedEffect = 1.0;
 
             if (SSedEffect > 1) SSedEffect = 1;
@@ -1209,107 +1221,104 @@ namespace AQUATOX.Animals
 
         if (!IsFish()) return 0;
 
-        //// optimization
-        //if (AQTSeg.TPresent == LastSedCalcTime)
-        //{
-        //    result = LastSedCalc;
-        //    return result;
-        //}
-        //if (IsFish() && (PAnimalData.SenstoSediment != "Zero Sensitivity"))
-        //{
-        //    CStop = CALCSTOPTOL;
-        //    SlopeSS = 1.62;
-        //    InterceptSS = -14.2;
-        //    SlopeTime = 3.5;
-        //    // 'Tolerant'
-        //    if (PAnimalData.SenstoSediment == "Sensitive")
-        //    {
-        //        // 'Sensitive'
-        //        SlopeSS = 0.34;
-        //        InterceptSS = -1.85;
-        //        SlopeTime = 0.1;
-        //        CStop = CALCSTOP;
-        //    }
-        //    if (PAnimalData.SenstoSediment == "Highly Sensitive")
-        //    {
-        //        // 'Highly Sensitive'
-        //        SlopeSS = 0.328;
-        //        InterceptSS = -1.375;
-        //        SlopeTime = 0.1;
-        //        CStop = CALCSTOP;
-        //    }
-        //    for (CalcIteration = 0; CalcIteration <= CStop; CalcIteration++)
-        //    {
-        //        CalcTime = CALCTIMES[CalcIteration];
-        //            MinSS = 0; // FIXME INORG Sediments AQTSeg.InorgSedConc(false);
-        //        i = 0;
-        //        OverTime = false;
-        //        Foundone = false;
-        //        TCollection 1 = AQTSeg.PSedConcs;
-        //        if (1.Count > 0)
-        //        {
-        //            do
-        //            {
-        //                PSS = 1.At(i);
-        //                TimePassed = AQTSeg.TPresent - PSS.Time;
-        //                // days      (min)
-        //                // d
-        //                if ((TimePassed - 0.001) > CalcTime)
-        //                    OverTime = true;
-        //                else
-        //                {
-        //                    // only evaluate longer times if enough data exist to support them
-        //                    if ((CalcIteration == 0))
-        //                        Foundone = true;
-        //                    else if ((TimePassed > CALCTIMES[CalcIteration - 1]))
-        //                        Foundone = true;
-        //                    if (PSS.SVConc < MinSS)
-        //                        MinSS = PSS.SVConc;
-        //                    // find minimum during time period
-        //                }
-        //                i++;
-        //            } while (!((i == 1.Count) || OverTime));
-        //        }
-        //        if (Foundone && (MinSS > Consts.Tiny))
-        //        {
-        //            // must have enough of a time-record of TSS to make a comparison
-        //            ThisCumFrac = SlopeSS * Math.Log(MinSS) + InterceptSS + SlopeTime * Math.Log(CALCTIMES[CalcIteration]);
-        //            if (ThisCumFrac > MaxCumFrac)
-        //            {
-        //                MaxCumFrac = ThisCumFrac;
-        //            }
-        //        }
-        //        // foundone
-        //    }
-        //    // calciteration
-        //    if (MaxCumFrac < Consts.Tiny)
-        //    {
-        //        return result;
-        //    }
-        //    SedNonResistant = State * (1 - SedResistant);
-        //    // mg/L            mg/L             frac
-        //    if (SedPrevFracKill >= MaxCumFrac)
-        //    {
-        //        FracKill = 0;
-        //    }
-        //    else
-        //    {
-        //        FracKill = (MaxCumFrac - SedPrevFracKill) / (1 - SedPrevFracKill);
-        //    }
-        //    TStates 2 = AQTSeg;
+            // optimization
+            if (AQTSeg.TPresent == LastSedCalcTime)
+            {
+                result = LastSedCalc;
+                return result;
+            }
+            if (IsFish() && (PAnimalData.SenstoSediment != "Zero Sensitivity") && (PAnimalData.SenstoSediment != ""))
+            {
+                CStop = CALCSTOPTOL;
+                SlopeSS = 1.62;
+                InterceptSS = -14.2;
+                SlopeTime = 3.5;
+                // 'Tolerant'
+                if (PAnimalData.SenstoSediment == "Sensitive")
+                {
+                    // 'Sensitive'
+                    SlopeSS = 0.34;
+                    InterceptSS = -1.85;
+                    SlopeTime = 0.1;
+                    CStop = CALCSTOP;
+                }
+                if (PAnimalData.SenstoSediment == "Highly Sensitive")
+                {
+                    // 'Highly Sensitive'
+                    SlopeSS = 0.328;
+                    InterceptSS = -1.375;
+                    SlopeTime = 0.1;
+                    CStop = CALCSTOP;
+                }
+                for (CalcIteration = 0; CalcIteration <= CStop; CalcIteration++)
+                {
+                    CalcTime = CALCTIMES[CalcIteration];
+                    MinSS = AQTSeg.InorgSedConc();
+                    i = 0;
+                    OverTime = false;
+                    Foundone = false;
+                    if (AQTSeg.PSedConcs.Count > 0)
+                    {
+                        do
+                        {
+                            PSS = AQTSeg.PSedConcs[i];
+                            TimePassed = (AQTSeg.TPresent - PSS.Time).TotalDays;
+                            // days      (min)                           // d
+                            if ((TimePassed - 0.001) > CalcTime)
+                                OverTime = true;
+                            else
+                            {
+                                // only evaluate longer times if enough data exist to support them
+                                if ((CalcIteration == 0))
+                                    Foundone = true;
+                                else if ((TimePassed > CALCTIMES[CalcIteration - 1]))
+                                    Foundone = true;
+                                if (PSS.SVConc < MinSS)
+                                    MinSS = PSS.SVConc;
+                                // find minimum during time period
+                            }
+                            i++;
+                        } while (!((i == AQTSeg.PSedConcs.Count) || OverTime));
+                    }
+                    if (Foundone && (MinSS > Consts.Tiny))
+                    {
+                        // must have enough of a time-record of TSS to make a comparison
+                        ThisCumFrac = SlopeSS * Math.Log(MinSS) + InterceptSS + SlopeTime * Math.Log(CALCTIMES[CalcIteration]);
+                        if (ThisCumFrac > MaxCumFrac)
+                        {
+                            MaxCumFrac = ThisCumFrac;
+                        }
+                    }
+                    // foundone
+                }
+                // calciteration
+                if (MaxCumFrac < Consts.Tiny)
+                {
+                    return result;
+                }
+                SedNonResistant = State * (1 - SedResistant);
+                // mg/L            mg/L             frac
+                if (SedPrevFracKill >= MaxCumFrac)
+                {
+                    FracKill = 0;
+                }
+                else
+                {
+                    FracKill = (MaxCumFrac - SedPrevFracKill) / (1 - SedPrevFracKill);
+                }
 
-        //    result = SedResistant * State * FracKill + SedNonResistant * MaxCumFrac;
-        //    // mg/L-d           frac       mg/L     g/g-d        mg/L             g/g-d
-        //    NewResist = (State - result) / State;
-        //    // frac     // mg/L  // mg/L   // mg/L
-        //    SedDeltaResistant[2.DerivStep] = NewResist - SedResistant;
-        //    SedDeltaCumFracKill[2.DerivStep] = MaxCumFrac - SedPrevFracKill;
-        //}
-        //// IsFish
-        //// Optimization
-        //LastSedCalcTime = AQTSeg.TPresent;
-        //LastSedCalc = result;
-        return result;
+                result = SedResistant * State * FracKill + SedNonResistant * MaxCumFrac;
+                // mg/L-d           frac       mg/L     g/g-d        mg/L             g/g-d
+                NewResist = (State - result) / State;
+                // frac     // mg/L  // mg/L   // mg/L
+                SedDeltaResistant[AQTSeg.DerivStep] = NewResist - SedResistant;
+                SedDeltaCumFracKill[AQTSeg.DerivStep] = MaxCumFrac - SedPrevFracKill;
+            }
+            // IsFish
+            // Optimization
+            LastSedCalcTime = AQTSeg.TPresent;
+            LastSedCalc = result;
+            return result;
     }
 
     // (*************************************)
@@ -1333,11 +1342,11 @@ namespace AQUATOX.Animals
             {
                 Dead = (PAnimalData.KMort + Math.Exp(AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) - PAnimalData.TMax) / 2.0) * State;
             }
-            //if (PAnimalData.SenstoPctEmbed && (AQTSeg.PercentEmbedded > PAnimalData.PctEmbedThreshold))  FIXME INORGANIC SEDIMENT EFFECTS
-            //{
-            //    Dead = State;
-            //}
-            // If site's percent embeddedness exceeds the threshold then assume 100% mortality
+                if (PAnimalData.SenstoPctEmbed && (AQTSeg.PercentEmbedded > PAnimalData.PctEmbedThreshold))   
+            {
+                    Dead = State;  // If site's percent embeddedness exceeds the threshold then assume 100% mortality
+            }
+                
             MortRates.OtherMort = Dead;
             MortRates.O2Mort = O2EffectFrac(0) * State;   //(0=O2Mortality)
             // mg/L-d     g/g-d                     mg/L
@@ -1372,7 +1381,7 @@ namespace AQUATOX.Animals
             //        FracPhoto[ToxLoop] = 1;
             //    }
             //}
-            MortRates.SedMort = Sediment_Mort() * State;
+            MortRates.SedMort = Sediment_Mort();           // JSC 1/2/2020, removed * State, units arlready mg/L-d
             Dead = Dead + MortRates.SedMort;
             if (IsBenthos())
             {
@@ -1639,17 +1648,13 @@ namespace AQUATOX.Animals
                 }
                 // only evaluate if zoobenthos is capable of drifting
                 AccelDrift = 1.0;
-                if (IsBenthos())
-                {
-                    InorgSdDep = 0; // fixme add INORG SED DEP AQTSeg.InorgSedDep(true);
-                    if ((InorgSdDep > PAnimalData.Trigger))
+                if (IsBenthos())  // NOT FOR NEKTON INVERTS
                     {
+                    InorgSdDep = AQTSeg.InorgSedDep();
+                    if ((InorgSdDep > PAnimalData.Trigger))
                         AccelDrift = Math.Exp(InorgSdDep - PAnimalData.Trigger);
+                                                // kg/m2           // kg/m2
                     }
-                    // NOT FOR NEKTON INVERTS
-                    // kg/m2
-                    // kg/m2
-                }
                 Dislodge = PAnimalData.AveDrift * AccelDrift;
 
                 //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // FIXME TOXIC EFFECTS, DRIFT
