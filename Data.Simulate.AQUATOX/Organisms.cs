@@ -214,48 +214,37 @@ namespace AQUATOX.Organisms
             // see TAnimal.Respiration  TPlant.Respiration
         }
 
-        //public void CalcRiskConc_SetOysterCategory(AllVariables ns)
-        //{
-        //    TAnimal POy;
-        //    POy = GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //    if (POy != null)
-        //    {
-        //        POy.OysterCategory = 0;
-        //        if (POy.NState >= AllVariables.Veliger1 && POy.NState <= AllVariables.Veliger2)
-        //        {
-        //            POy.OysterCategory = 1;
-        //        }
-        //        else if (POy.NState >= AllVariables.Spat1 && POy.NState <= AllVariables.Spat2)
-        //        {
-        //            POy.OysterCategory = 2;
-        //        }
-        //        else if (POy.NState >= AllVariables.Clams1 && POy.NState <= AllVariables.Clams4)
-        //        {
-        //            if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("sack") > 0)
-        //            {
-        //                POy.OysterCategory = 4;
-        //            }
-        //            else if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("seed") > 0)
-        //            {
-        //                POy.OysterCategory = 3;
-        //            }
-        //            else if (POy.PSameSpecies == AllVariables.NullStateVar)
-        //            {
-        //                POy.OysterCategory = 0;
-        //            }
-        //            else if ((int)(POy.PSameSpecies) > (int)(POy.NState))
-        //            {
-        //                // linked to larger clam
-        //                POy.OysterCategory = 3;
-        //            }
-        //            else
-        //            {
-        //                POy.OysterCategory = 4;
-        //            }
-        //            // linked to smaller clam
-        //        }
-        //    }
-        //}
+        public void CalcRiskConc_SetOysterCategory(AllVariables ns)
+        {
+            TAnimal POy;
+            POy = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+            if (POy != null)
+            {
+                POy.OysterCategory = 0;
+                if (POy.NState >= AllVariables.Veliger1 && POy.NState <= AllVariables.Veliger2)
+                    POy.OysterCategory = 1;
+
+                else if (POy.NState >= AllVariables.Spat1 && POy.NState <= AllVariables.Spat2)
+                    POy.OysterCategory = 2;
+
+                else if (POy.NState >= AllVariables.Clams1 && POy.NState <= AllVariables.Clams4)
+                {
+                    if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("sack") > 0)
+                        POy.OysterCategory = 4;
+
+                    else if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("seed") > 0)
+                        POy.OysterCategory = 3;
+
+                    else if (POy.PSameSpecies == AllVariables.NullStateVar)
+                        POy.OysterCategory = 0;
+
+                    else if ((int)(POy.PSameSpecies) > (int)(POy.NState))     // linked to larger clam
+                        POy.OysterCategory = 3;
+
+                    else POy.OysterCategory = 4;                              // linked to smaller clam
+                }
+            }
+        }
 
         //public void CalcRiskConc_SetPreyTrophicLevel(AllVariables NS)
         //{
@@ -320,237 +309,190 @@ namespace AQUATOX.Organisms
         //            }
         //        }
         //    }
-        //}
+        //}  // SetPreyTrophicLevel
 
-        //// SetPreyTrophicLevel
-        //public void CalcRiskConc_SetOysterData()
-        //{
-        //    // Set OysterCategory and POlder and PYounger pointers
-        //    AllVariables nsLoop;
-        //    TAnimal POld;
-        //    TAnimal PYng;
-        //    string ErrString;
-        //    ErrString = "";
-        //    TAnimal 1 = ((this) as TAnimal);
-        //    1.POlder = null;
-        //    1.PYounger = null;
-        //    for (nsLoop = AllVariables.Veliger1; nsLoop <= AllVariables.Clams4; nsLoop++)
-        //    {
-        //        CalcRiskConc_SetOysterCategory(nsLoop);
-        //    }
-        //    if (1.OysterCategory == 1)
-        //    {
-        //        if (1.NState == AllVariables.Veliger1)
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if (1.NState == AllVariables.Veliger2)
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if ((1.POlder == null) && (1.NState == AllVariables.Veliger1))
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if ((1.POlder == null) && (1.NState == AllVariables.Veliger2))
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
-        //        {
-        //            PYng = 1.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (PYng != null)
-        //            {
-        //                if ((PYng.OysterCategory == 4))
-        //                {
-        //                    1.PYounger = PYng;
-        //                    if (1.NState == AllVariables.Veliger1)
-        //                    {
-        //                        break;
-        //                    }
-        //                }
-        //            }
-        //            // assign veliger 1 to sack with lower number
-        //        }
-        //        // If POlder=nil then ErrString := 'Warning. Veliger found but no Spat to promote to.';
-        //        // If PYounger = nil then ErrString := 'Warning. Veliger found but no Sack to recruit from.';
-        //        if ((ErrString != ""))
-        //        {
-        //            TStates 2 = 1.AQTSeg;
-        //            2.PMessageStr = ErrString;
-        //            2.PMessageErr = true;
-        //            2.TSMessage;
-        //        }
-        //    }
-        //    if (1.OysterCategory == 2)
-        //    {
-        //        if (1.NState == AllVariables.Spat1)
-        //        {
-        //            1.PYounger = 1.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if (1.NState == AllVariables.Spat2)
-        //        {
-        //            1.PYounger = 1.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if ((1.PYounger == null) && (1.NState == AllVariables.Spat1))
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if ((1.PYounger == null) && (1.NState == AllVariables.Spat2))
-        //        {
-        //            1.POlder = 1.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
-        //        {
-        //            POld = 1.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (POld != null)
-        //            {
-        //                if ((POld.OysterCategory == 3))
-        //                {
-        //                    1.POlder = POld;
-        //                    if (1.NState == AllVariables.Spat1)
-        //                    {
-        //                        break;
-        //                    }
-        //                }
-        //            }
-        //            // assign spat 1 to seed with lower number
-        //        }
-        //        if (1.POlder == null)
-        //        {
-        //            ErrString = "Warning. Spat found but no Seed to promote to.";
-        //        }
-        //        if (1.PYounger == null)
-        //        {
-        //            ErrString = "Warning. Spat found but no Veliger to promote from.";
-        //        }
-        //        if (ErrString != "")
-        //        {
-        //            TStates 3 = 1.AQTSeg;
-        //            3.PMessageStr = ErrString;
-        //            3.PMessageErr = true;
-        //            3.TSMessage;
-        //        }
-        //    }
-        //    if (1.OysterCategory == 3)
-        //    {
-        //        PYng = 1.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (PYng != null)
-        //        {
-        //            if (PYng.POlder == this)
-        //            {
-        //                1.PYounger = PYng;
-        //            }
-        //        }
-        //        PYng = 1.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (PYng != null)
-        //        {
-        //            if (PYng.POlder == this)
-        //            {
-        //                1.PYounger = PYng;
-        //            }
-        //        }
-        //        if (1.PSameSpecies != AllVariables.NullStateVar)
-        //        {
-        //            1.POlder = 1.GetStatePointer(1.PSameSpecies, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if (1.POlder == null)
-        //        {
-        //            for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
-        //            {
-        //                POld = 1.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //                if (POld != null)
-        //                {
-        //                    if ((POld.OysterCategory == 4))
-        //                    {
-        //                        1.POlder = POld;
-        //                        if (1.NState == AllVariables.Clams1)
-        //                        {
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //                // assign Clams1 to sack with lower number
-        //            }
-        //        }
-        //        if (1.POlder == null)
-        //        {
-        //            ErrString = "Warning. Seed found but no Sack to promote to.";
-        //        }
-        //        if (1.PYounger == null)
-        //        {
-        //            ErrString = "Warning. Seed found but no Spat to promote from.";
-        //        }
-        //        if (ErrString != "")
-        //        {
-        //            TStates 4 = 1.AQTSeg;
-        //            4.PMessageStr = ErrString;
-        //            4.PMessageErr = true;
-        //            4.TSMessage;
-        //        }
-        //    }
-        //    if (1.OysterCategory == 4)
-        //    {
-        //        POld = 1.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (POld != null)
-        //        {
-        //            if (POld.PYounger == this)
-        //            {
-        //                1.POlder = POld;
-        //            }
-        //        }
-        //        POld = 1.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (POld != null)
-        //        {
-        //            if (POld.PYounger == this)
-        //            {
-        //                1.POlder = POld;
-        //            }
-        //        }
-        //        if (1.PSameSpecies != AllVariables.NullStateVar)
-        //        {
-        //            1.PYounger = 1.GetStatePointer(1.PSameSpecies, T_SVType.StV, T_SVLayer.WaterCol);
-        //        }
-        //        if (1.PYounger == null)
-        //        {
-        //            for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
-        //            {
-        //                PYng = 1.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //                if (PYng != null)
-        //                {
-        //                    if ((POld.OysterCategory == 4))
-        //                    {
-        //                        1.PYounger = PYng;
-        //                        if (1.NState == AllVariables.Clams1)
-        //                        {
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //                // assign Clams1 to sack with lower number
-        //            }
-        //        }
-        //        if (1.POlder == null)
-        //        {
-        //            ErrString = "Warning. Seed found but no Sack to promote to.";
-        //        }
-        //        if (1.PYounger == null)
-        //        {
-        //            ErrString = "Warning. Seed found but no Spat to promote from.";
-        //        }
-        //        if (ErrString != "")
-        //        {
-        //            TStates 5 = 1.AQTSeg;
-        //            5.PMessageStr = ErrString;
-        //            5.PMessageErr = true;
-        //            5.TSMessage;
-        //        }
-        //    }
-        //}
+
+        public void CalcRiskConc_SetOysterData()
+        {
+            // Set OysterCategory and POlder and PYounger pointers
+            AllVariables nsLoop;
+            TAnimal POld;
+            TAnimal PYng;
+            string ErrString;
+            ErrString = "";
+
+            TAnimal TA = ((this) as TAnimal);
+            TA.POlder = null;
+            TA.PYounger = null;
+
+            for (nsLoop = AllVariables.Veliger1; nsLoop <= AllVariables.Clams4; nsLoop++)
+                CalcRiskConc_SetOysterCategory(nsLoop);
+
+            if (TA.OysterCategory == 1)
+            {
+                if (NState == AllVariables.Veliger1)
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+
+                if (NState == AllVariables.Veliger2)
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if ((TA.POlder == null) && (NState == AllVariables.Veliger1))
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if ((TA.POlder == null) && (NState == AllVariables.Veliger2))
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol);
+
+                for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
+                {
+                    PYng = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    if (PYng != null)
+                    {
+                        if ((PYng.OysterCategory == 4))
+                        {
+                            TA.PYounger = PYng;
+                            if (NState == AllVariables.Veliger1)    // assign veliger 1 to sack with lower number
+                                break;
+                        }
+                    }
+                }
+
+                if (ErrString != "") throw new Exception(ErrString);
+
+            }
+
+            if (TA.OysterCategory == 2)
+            {
+                if (NState == AllVariables.Spat1)
+                    TA.PYounger = AQTSeg.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if (NState == AllVariables.Spat2)
+                    TA.PYounger = AQTSeg.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if ((TA.PYounger == null) && (NState == AllVariables.Spat1))
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if ((TA.PYounger == null) && (NState == AllVariables.Spat2))
+                    TA.POlder = AQTSeg.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol);
+
+                for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
+                {
+                    POld = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    if (POld != null)
+                    {
+                        if ((POld.OysterCategory == 3))
+                        {
+                            TA.POlder = POld;
+                            if (NState == AllVariables.Spat1)
+                                break;
+                        }
+                    }
+                    // assign spat 1 to seed with lower number
+                }
+                if (TA.POlder == null)
+                    ErrString = "Warning. Spat found but no Seed to promote to.";
+                if (TA.PYounger == null)
+                    ErrString = "Warning. Spat found but no Veliger to promote from.";
+
+                if (ErrString != "") throw new Exception(ErrString);
+
+            }
+            if (TA.OysterCategory == 3)
+            {
+                PYng = AQTSeg.GetStatePointer(AllVariables.Spat1, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (PYng != null)
+                {
+                    if (PYng.POlder == this)
+                        TA.PYounger = PYng;
+                }
+
+                PYng = AQTSeg.GetStatePointer(AllVariables.Spat2, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (PYng != null)
+                {
+                    if (PYng.POlder == this)
+                        TA.PYounger = PYng;
+                }
+
+                if (TA.PSameSpecies != AllVariables.NullStateVar)
+                    TA.POlder = AQTSeg.GetStatePointer(TA.PSameSpecies, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if (TA.POlder == null)
+                {
+                    for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
+                    {
+                        POld = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                        if (POld != null)
+                        {
+                            if ((POld.OysterCategory == 4))
+                            {
+                                TA.POlder = POld;
+                                if (NState == AllVariables.Clams1)
+                                    break;
+
+                            }
+                        }
+                        // assign Clams1 to sack with lower number
+                    }
+                }
+                if (TA.POlder == null)
+                    ErrString = "Warning. Seed found but no Sack to promote to.";
+
+                if (TA.PYounger == null)
+                    ErrString = "Warning. Seed found but no Spat to promote from.";
+
+                if (ErrString != "") throw new Exception(ErrString);
+
+            }
+            if (TA.OysterCategory == 4)
+            {
+                POld = AQTSeg.GetStatePointer(AllVariables.Veliger1, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (POld != null)
+                {
+                    if (POld.PYounger == this)
+                        TA.POlder = POld;
+
+            }
+                POld = AQTSeg.GetStatePointer(AllVariables.Veliger2, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (POld != null)
+                {
+                    if (POld.PYounger == this)
+                        TA.POlder = POld;
+
+                }
+                if (TA.PSameSpecies != AllVariables.NullStateVar)
+                    TA.PYounger = AQTSeg.GetStatePointer(TA.PSameSpecies, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if (TA.PYounger == null)
+                {
+                    for (nsLoop = AllVariables.Clams1; nsLoop <= AllVariables.Clams4; nsLoop++)
+                    {
+                        PYng = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                        if (PYng != null)
+                        {
+                            if ((POld.OysterCategory == 4))
+                            {
+                                TA.PYounger = PYng;
+                                if (NState == AllVariables.Clams1)
+                                    break;
+
+                            }
+                        }
+                        // assign Clams1 to sack with lower number
+                    }
+                }
+                if (TA.POlder == null)
+                    ErrString = "Warning. Seed found but no Sack to promote to.";
+
+                if (TA.PYounger == null)
+                    ErrString = "Warning. Seed found but no Spat to promote from.";
+
+                if (ErrString != "") throw new Exception(ErrString);
+
+            }
+        }
 
         // ---------------------------------------------------------------------
-        //public void CalcRiskConc(bool warn)
-        //{
+        public void CalcRiskConc(bool warn)
+        {
         //    // This procedure should be executed at the beginning of model
         //    // run and also when stratification occurs
         //    string[] DataName;
@@ -569,12 +511,11 @@ namespace AQUATOX.Organisms
         //    double Local_K2;
         //    double MeanAge;
         //    TToxics AnimTox;
-        //    // CalcRiskConc
+        //    
         //    PTR = this;
-        //    if (NState >= AllVariables.Veliger1 && NState <= AllVariables.Clams4)
-        //    {
-        //        CalcRiskConc_SetOysterData();
-        //    }
+            if (NState >= AllVariables.Veliger1 && NState <= AllVariables.Clams4)
+                CalcRiskConc_SetOysterData();
+
         //    for (Ionized = false; Ionized <= true; Ionized++)
         //    {
         //        for (StepLoop = 1; StepLoop <= 6; StepLoop++)
@@ -766,9 +707,8 @@ namespace AQUATOX.Organisms
         //    }
         //    // ToxLoop
 
-        //}
+        } //     CalcRiskConc
 
-        //// CalcRiskConc
         //// ------------------------------------------------------------------------
         //public virtual double BCF(double TElapsed, object ToxTyp)
         //{
@@ -1230,6 +1170,8 @@ namespace AQUATOX.Organisms
 
         //// CalcRiskConc was reworked to be run at the beginning of model
         //// run rather than each time step. (JSC Apr 5, 1996)
+
+
         //// BCF Calculation
         //// ------------------------------------------------------------------------
         //public virtual double Poisoned(object ToxTyp)

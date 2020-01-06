@@ -36,6 +36,8 @@ namespace GUI.AQUATOX
             this.saveJSON = new System.Windows.Forms.Button();
             this.integrate = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.SuspendLayout();
             // 
             // loadJSON
             // 
@@ -78,15 +80,31 @@ namespace GUI.AQUATOX
             this.textBox1.Size = new System.Drawing.Size(849, 175);
             this.textBox1.TabIndex = 2;
             // 
+            // progressBar1
+            // 
+            this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(441, 21);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(428, 21);
+            this.progressBar1.Step = 1;
+            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar1.TabIndex = 3;
+            this.progressBar1.Visible = false;
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(893, 532);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.integrate);
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
             this.Name = "AQTTestForm";
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -96,9 +114,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button saveJSON;
         private System.Windows.Forms.Button integrate;
         private System.Windows.Forms.TextBox textBox1;
-
-
-
+        private ProgressBar progressBar1;
     }
 
 

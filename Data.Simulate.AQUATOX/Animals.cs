@@ -1530,12 +1530,11 @@ namespace AQUATOX.Animals
                 {
                     FracAdults = 1;
                 }
-                if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15)
-                {
-                    // multi age fish
-                    AgeIndex = (int)(NState) - (int)(AllVariables.Fish1) + 1;
-                        // upper bound of fish age
-                        SpawnAge = 3; // fixme Multi Age Fish Spawn Age reference AQTSeg.PMultiRec.PSpawnAge;
+                if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15) // multi age fish
+                    {
+                    AgeIndex = (int)(NState) - (int)(AllVariables.Fish1) + 1;   // upper bound of fish age, years
+
+                    SpawnAge = AQTSeg.MF_Spawn_Age; 
                     // age at which fish start spawning
                     if ((AgeIndex <= SpawnAge))
                     {

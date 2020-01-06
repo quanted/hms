@@ -6,20 +6,30 @@ using System.Drawing;
 using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
 using Data;
+using System.ComponentModel;
+
 
 namespace GUI.AQUATOX
 {
     public partial class AQTTestForm : Form
     {
         private Chart chart1 = new Chart();
+        private BackgroundWorker Worker = new BackgroundWorker();
+        private string errmessage;
+
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         Series series1 = new Series();
+        
         public AQTSim aQTS = null;
 
         public AQTTestForm()
         {
-           InitializeComponent();
+            InitializeComponent();
+            Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
+            Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
+            Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
+            Worker.WorkerReportsProgress = true;
 
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             SuspendLayout();
@@ -170,11 +180,46 @@ namespace GUI.AQUATOX
             if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
             else
             {
-                string errmessage = aQTS.Integrate();
-                if (errmessage == "") DisplaySVs();
-                else textBox1.Text = errmessage;
+                progressBar1.Visible = true;
+                Worker.RunWorkerAsync();
             }
         }
+
+
+
+        private void Worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            aQTS.AQTSeg.ProgWorker = worker;
+            errmessage = aQTS.Integrate();
+
+       }
+
+       private void Worker_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // progressBar1.Visible = false;
+
+            progressBar1.Update();
+            if (e.Error != null) textBox1.Text = "Error Raised: " + e.Error.Message;
+            else if (errmessage == "")
+            {
+                textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
+                Application.DoEvents();
+                DisplaySVs();
+                progressBar1.Visible = false;
+            }
+            else textBox1.Text = errmessage;
+        }
+
+
+        // This event handler updates the progress bar
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.ProgressPercentage < 100) progressBar1.Value = (e.ProgressPercentage+1);  // workaround of animation bug
+            progressBar1.Value = (e.ProgressPercentage);
+        }
+
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -182,7 +227,6 @@ namespace GUI.AQUATOX
             if (resultExplode.Series != null)
 
             {
-
                 if (resultExplode.Object is LegendItem)
                 {
                     LegendItem legendItem = (LegendItem)resultExplode.Object;
@@ -230,6 +274,7 @@ namespace GUI.AQUATOX
             }
 
         }
+
 
     }
 }

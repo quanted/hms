@@ -22,26 +22,26 @@
     "NoUserLoad": true,
     "UseConstant": false,
     "ConstLoad":  8.00000000000000E-0002,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -58,7 +58,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TNO3Obj",
@@ -75,26 +75,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  4.90000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -115,7 +115,7 @@
   "TN_IC": false,
   "TN_Inflow": false,
   "TN_PS": false,
-  "TN_NPS": falsePSameSpecies
+  "TN_NPS": false
   },
   {
   "$type": "TPO4Obj",
@@ -132,26 +132,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  2.10000000000000E-0001,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -174,7 +174,7 @@
   "TP_IC": false,
   "TP_Inflow": false,
   "TP_PS": false,
-  "TP_NPS": falsePSameSpecies
+  "TP_NPS": false
   },
   {
   "$type": "TCO2Obj",
@@ -193,8 +193,8 @@
     "NoUserLoad": true,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
-    }PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
+    }
    },
   "PRequiresData": false,
   "PHasData": false,
@@ -209,7 +209,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TO2Obj",
@@ -229,26 +229,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  6.50000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -265,7 +265,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TSedRefrDetr",
@@ -282,8 +282,8 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
-    }PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
+    }
    },
   "PRequiresData": false,
   "PHasData": false,
@@ -298,7 +298,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TSedLabileDetr",
@@ -315,8 +315,8 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
-    }PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
+    }
    },
   "PRequiresData": false,
   "PHasData": false,
@@ -331,7 +331,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TDissRefrDetr",
@@ -348,26 +348,26 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
     "Alt_Loadings": [
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  0.00000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  0.00000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  0.00000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       }
      ]
     },
@@ -378,26 +378,26 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  1.00000000000000E+0001,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
     "Alt_Loadings": [
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0001,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0001,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0001,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       }
      ]
     },
@@ -408,29 +408,29 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  1.00000000000000E+0002,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
     "Alt_Loadings": [
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0002,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0002,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.00000000000000E+0002,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       }
      ]
-    }PSameSpecies
+    }
    },
   "InitialCond":  9.00000000000000E-0001,
   "State":  7.86104940060582E-0002,
@@ -445,26 +445,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -481,7 +481,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TDissLabDetr",
@@ -498,26 +498,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -534,7 +534,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TSuspRefrDetr",
@@ -551,26 +551,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -587,7 +587,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TSuspLabDetr",
@@ -604,26 +604,26 @@
     "NoUserLoad": false,
     "UseConstant": true,
     "ConstLoad":  0.00000000000000E+0000,
-    "MultLdg":  1.00000000000000E+0000PSameSpecies
+    "MultLdg":  1.00000000000000E+0000
     },
    "Alt_Loadings": [
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
      {
      "$type": "TLoadings",
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      }
     ]
    },
@@ -640,7 +640,7 @@
   "PShowRates^": true,
   "LoadNotes1": "",
   "LoadNotes2": "",
-  "PTrackResults^": truePSameSpecies
+  "PTrackResults^": true
   },
   {
   "$type": "TMacrophyte",
@@ -657,8 +657,8 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
-     }PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
+     }
     },
    "PRequiresData": true,
    "PHasData": true,
@@ -770,9 +770,9 @@
     "Min_P_Ratio":  1.00000000000000E-0003,
     "XMin_P_Ratio": "WASP7, Ambrose et al. 2006",
     "Plant_to_Chla":  2.80000000000000E+0001,
-    "XPlant_to_Chla": "Ambrose et al., 1991 -- EPA Rel. 3.1 Default"PSameSpecies
+    "XPlant_to_Chla": "Ambrose et al., 1991 -- EPA Rel. 3.1 Default"
     },
-   "PSameSpecies^": 149PSameSpecies
+   "^": 149
    },
    {
    "$type": "TVolume",
@@ -789,26 +789,26 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
      },
     "Alt_Loadings": [
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  1.44000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  0.00000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       },
       {
       "$type": "TLoadings",
       "UseConstant": true,
       "ConstLoad":  0.00000000000000E+0000,
-      "MultLdg":  1.00000000000000E+0000PSameSpecies
+      "MultLdg":  1.00000000000000E+0000
       }
      ]
     },
@@ -830,7 +830,7 @@
    "StratInflow": 2,
    "StratOutflow": 2,
    "StratAutomatically": true,
-   "Hourly": falsePSameSpecies
+   "Hourly": false
    },
    {
    "$type": "TTemperature",
@@ -847,8 +847,8 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  2.10000000000000E+0001,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
-     }PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
+     }
     },
    "PRequiresData": false,
    "PHasData": false,
@@ -863,7 +863,7 @@
    "PShowRates^": true,
    "LoadNotes1": "",
    "LoadNotes2": "",
-   "PTrackResults^": truePSameSpecies
+   "PTrackResults^": true
    },
    {
    "$type": "TWindLoading",
@@ -880,8 +880,8 @@
      "NoUserLoad": false,
      "UseConstant": true,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
-     }PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
+     }
     },
    "PRequiresData": false,
    "PHasData": false,
@@ -897,7 +897,7 @@
    "TWindLoading.MeanValue":  0.00000000000000E+0000,
    "LoadNotes1": "",
    "LoadNotes2": "",
-   "PTrackResults^": truePSameSpecies
+   "PTrackResults^": true
    },
    {
    "$type": "TLight",
@@ -914,8 +914,8 @@
      "NoUserLoad": true,
      "UseConstant": false,
      "ConstLoad":  2.35000000000000E+0002,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
-     }PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
+     }
     },
    "PRequiresData": false,
    "PHasData": false,
@@ -932,7 +932,7 @@
    "LoadNotes2": "",
    "PTrackResults^": true,
    "CalculatePhotoperiod": true,
-   "UserPhotoPeriod":  0.00000000000000E+0000PSameSpecies
+   "UserPhotoPeriod":  0.00000000000000E+0000
    },
    {
    "$type": "TpHObj",
@@ -949,8 +949,8 @@
      "NoUserLoad": true,
      "UseConstant": false,
      "ConstLoad":  0.00000000000000E+0000,
-     "MultLdg":  1.00000000000000E+0000PSameSpecies
-     }PSameSpecies
+     "MultLdg":  1.00000000000000E+0000
+     }
     },
    "PRequiresData": false,
    "PHasData": false,
@@ -966,7 +966,7 @@
    "LoadNotes1": "",
    "LoadNotes2": "",
    "PTrackResults^": true,
-   "alkalinity":  1.00000000000000E+0003PSameSpecies
+   "alkalinity":  1.00000000000000E+0003
    }
   ],
  "MeanDischarge":  1.44000000000000E+0000,
@@ -978,8 +978,8 @@
    "NoUserLoad": false,
    "UseConstant": true,
    "ConstLoad":  2.10000000000000E+0001,
-   "MultLdg":  1.00000000000000E+0000PSameSpecies
-   }PSameSpecies
+   "MultLdg":  1.00000000000000E+0000
+   }
   },
  "Shade": {
   "$type": "LoadingsRecord",
@@ -988,8 +988,8 @@
    "NoUserLoad": false,
    "UseConstant": true,
    "ConstLoad":  0.00000000000000E+0000,
-   "MultLdg":  1.00000000000000E+0000PSameSpecies
-   }PSameSpecies
+   "MultLdg":  1.00000000000000E+0000
+   }
   },
  "Z_Thermocline": {
   "$type": "LoadingsRecord",
@@ -998,8 +998,8 @@
    "NoUserLoad": true,
    "UseConstant": true,
    "ConstLoad":  0.00000000000000E+0000,
-   "MultLdg":  1.00000000000000E+0000PSameSpecies
-   }PSameSpecies
+   "MultLdg":  1.00000000000000E+0000
+   }
   },
  "CalcVelocity": true,
  "DynVelocity": {
@@ -1032,7 +1032,7 @@
   "Detritus.OmitPS": false,
   "Detritus.OmitDP": false,
   "Detritus.OmitNPS": false,
-  "Detritus.SetMult": falsePSameSpecies
+  "Detritus.SetMult": false
   },
  "PSavePPB^": true,
  "PSaveBAFs^": true,
@@ -1075,7 +1075,7 @@
   "Internal_Nutrients": false,
   "T1IsAggregate": false,
   "AmmoniaIsDriving": false,
-  "TSedDetrIsDriving": falsePSameSpecies
+  "TSedDetrIsDriving": false
   },
  "Location": {
   "$type": "TAQTSite",
@@ -1199,7 +1199,7 @@
    "FD_Refuge_Coeff": -1.50000000000000E-0001,
    "XFD_Refuge_Coeff": "default",
    "HalfSatOysterRefuge":  8.00000000000000E+0001,
-   "XHalfSatOysterRefuge": "default"PSameSpecies
+   "XHalfSatOysterRefuge": "default"
    },
   "Discharge[Epilimnion]":  1.44000000000051E+0000,
   "Discharge[Hypolimnion]":  0.00000000000000E+0000,
@@ -1267,12 +1267,12 @@
    "KDenitri_Bot":  2.00000000000000E-0001,
    "XKDenitri_Bot": "Default",
    "KDenitri_Wat":  9.00000000000000E-0002,
-   "XKDenitri_Wat": "Default"PSameSpecies
+   "XKDenitri_Wat": "Default"
    },
   "SiteType": 4,
   "MeanThick[Epilimnion]":  5.30000000000000E-0001,
   "MeanThick[Hypolimnion]":  0.00000000000000E+0000,
   "P_Shape":  1.00000000000000E+0000,
-  "TotDischarge":  1.44000000000051E+0000PSameSpecies
-  }PSameSpecies
+  "TotDischarge":  1.44000000000051E+0000
+  }
  }

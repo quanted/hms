@@ -15,6 +15,7 @@ using AQUATOX.Organisms;
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
+using System.ComponentModel;
 
 namespace AQUATOX.AQTSegment
 
@@ -247,17 +248,14 @@ namespace AQUATOX.AQTSegment
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
 
+            if (SVType == T_SVType.StV)   
+            if (IsPlantOrAnimal())
+               {
+                 ((this) as TOrganism).CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
+                                                              // the appropriate RISKCONC, LCINFINITE, and K2
+                                                              // Set Oyster Category
 
-
-
-
-            //if (SVType == T_SVType.StV)  FIXME TOXIC EFFECTS
-            //        // Using ToxicityRecord Initialize Organisms with
-            //        // the appropriate RISKCONC, LCINFINITE, and K2
-            //        if (P.IsPlantOrAnimal())
-            //        {
-            //            ((P) as TOrganism).CalcRiskConc(true);
-            //        }
+                }
 
             // Initialize BCF calculation   // FIXME TOX EFFECTS
             //if (P.Layer < T_SVLayer.SedLayer1)
@@ -274,7 +272,7 @@ namespace AQUATOX.AQTSegment
             //    }
             //}
 
-            
+
             //// initialize internal nutrients in ug/L  // FIXME INTERNAL NUTRIENTS
             //if (new ArrayList(new T_SVType[] { T_SVType.NIntrnl, T_SVType.PIntrnl }).Contains(P.SVType))
             //{
@@ -660,8 +658,12 @@ namespace AQUATOX.AQTSegment
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
 
+        public double MF_Spawn_Age = 3.0;  // multi-fish age where fish spawn relevant for age classes only, default is 3.0
+
         public Loadings.TLoadings BenthicBiomass_Link = null; // optional linkage for diagenesis simulations when benthos not directly simulated, g/m2
         public Loadings.TLoadings AnimalDef_Link = null; // optional linkage to sediment from animal defecation for diagenesis simulations when animals not directly simulated, g/m2
+
+        [JsonIgnore] public BackgroundWorker ProgWorker = null;  // report progress
 
         [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
@@ -1147,7 +1149,9 @@ namespace AQUATOX.AQTSegment
             int i;
             bool deleted;
 
-            newconc.SVConc = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            newconc.SVConc = GetStateVal(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if (newconc.SVConc < 0) return;
+
             newconc.Time = TPresent;
             PO2Concs.Insert(0, newconc);
             i = PO2Concs.Count - 1;
@@ -1379,6 +1383,7 @@ namespace AQUATOX.AQTSegment
             DateTime x;
             double hnext = 0;
             //  DateTime xsav;
+            int lastprog = -1;
             bool simulation_done;
             //  bool FinishPoint;
             double MaxStep;
@@ -1461,6 +1466,10 @@ namespace AQUATOX.AQTSegment
                 {
                     h = hnext;
                 }
+
+                int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
+                if (progint==lastprog) ProgWorker.ReportProgress(progint);
+                lastprog = progint;
 
                 Integrate_CheckZeroStateAllSVs();
 
@@ -1938,32 +1947,35 @@ namespace AQUATOX.AQTSegment
             PLightVals.Clear();
 
             TLight PL = GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
-            PL.CalculateLoad(PSetup.FirstDay);  // Set DailyLight for First Day
-            double MaxDailyLight = PL.DailyLight;
-            for (DateTime LightTest = PSetup.FirstDay.Date.AddDays(1); LightTest <= PSetup.FirstDay.Date.AddDays(365); LightTest = LightTest.AddDays(1))
-            {   // Get Maximum daily light for one year from simulation start point
-                PL.CalculateLoad(LightTest); // Set DailyLight for "LightTest" Day
-                if (MaxDailyLight < PL.DailyLight) MaxDailyLight = PL.DailyLight;
-            }
-            PL.CalculateLoad(PSetup.FirstDay);  // Reset DailyLight for First Day
-
-            for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
+            if (PL != null)
             {
-                TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
-                if (PP != null)
+                PL.CalculateLoad(PSetup.FirstDay);  // Set DailyLight for First Day
+                double MaxDailyLight = PL.DailyLight;
+                for (DateTime LightTest = PSetup.FirstDay.Date.AddDays(1); LightTest <= PSetup.FirstDay.Date.AddDays(365); LightTest = LightTest.AddDays(1))
+                {   // Get Maximum daily light for one year from simulation start point
+                    PL.CalculateLoad(LightTest); // Set DailyLight for "LightTest" Day
+                    if (MaxDailyLight < PL.DailyLight) MaxDailyLight = PL.DailyLight;
+                }
+                PL.CalculateLoad(PSetup.FirstDay);  // Reset DailyLight for First Day
+
+                for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
                 {
-                    if (PP.PAlgalRec.EnteredLightSat >= MaxDailyLight) 
+                    TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    if (PP != null)
                     {
-                        PP.ZOpt = 0.1;  //  towards top of water column due to low light conditions
+                        if (PP.PAlgalRec.EnteredLightSat >= MaxDailyLight) 
+                        {
+                            PP.ZOpt = 0.1;  //  towards top of water column due to low light conditions
+                        }
+                        else
+                        {
+                            PP.ZOpt = Math.Log(PP.PAlgalRec.EnteredLightSat / MaxDailyLight) / -Extinct(PP.IsPeriphyton(), true, true, false, 0);
+                        }                                  //   (Ly/d)            (Ly/d)         (1/m)
                     }
-                    else
-                    {
-                        PP.ZOpt = Math.Log(PP.PAlgalRec.EnteredLightSat / MaxDailyLight) / -Extinct(PP.IsPeriphyton(), true, true, false, 0);
-                    }                                  //   (Ly/d)            (Ly/d)         (1/m)
                 }
             }
-            
-            PercentEmbedded = Location.Locale.BasePercentEmbed;
+
+                PercentEmbedded = Location.Locale.BasePercentEmbed;
             LastPctEmbedCalc = PSetup.FirstDay;
 
             SOD = -99;
@@ -3695,7 +3707,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
-                                          typeof(TSandSiltClay)}; 
+                                          typeof(TSandSiltClay), typeof(InteractionFields)}; 
     }
 }
 
