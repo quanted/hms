@@ -875,26 +875,13 @@ namespace AQUATOX.AQTSegment
         // www.ee.ucl.ac.uk/~mflanaga
         // 
         // -------------------------------------------------------------------------
-        public void AdaptiveStep(ref DateTime x, double hstart, double RelError, ref double h_taken, ref double hnext)
+        public void AdaptiveStep(ref DateTime x, double hstart, double RelError, ref double h_taken, ref double hnext, double MaxStep)
         {
             const double SAFETY = 0.9;
             double h;
             double Delta;
             TStateVariable ErrVar;
             double MaxError;
-            double MaxStep;
-            //            string ErrText;
-
-            MaxStep = 1.0;
-
-            //            if (SV.PModelTimeStep == TimeStepType.TSDaily)
-            //            {
-            //                MaxStep = 1.0;
-            //            }
-            //            else
-            //            {
-            //                MaxStep = 1.0 / 24.0; // Hourly
-            //            }
 
             if (PSetup.UseFixStepSize)
             {
@@ -1402,7 +1389,10 @@ namespace AQUATOX.AQTSegment
             // ensure dxsave <> 0, which causes crash
             // (**  Initialize variables........*)
             x = TStart;
-            MaxStep = 1.0;
+
+
+            if (PSetup.ModelTSDays) MaxStep = 1.0;
+                               else MaxStep = 1.0 / 24.0;  // Hourly
             h = MaxStep;
 
             SimulationDate = DateTime.Now;
@@ -1447,7 +1437,7 @@ namespace AQUATOX.AQTSegment
                 // force steps to stop on even one-day increments.
                 // This is required for cascade segments to preserve mass balance (given output avg.)
 
-                AdaptiveStep(ref x, h, RelError, ref h_taken, ref hnext);
+                AdaptiveStep(ref x, h, RelError, ref h_taken, ref hnext, MaxStep);
                 //                rk_has_executed = true;
 
                 TPresent = x;
