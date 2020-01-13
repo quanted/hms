@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
@@ -100,20 +101,69 @@ namespace Utilities
     {
         public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            string value = reader.GetString();
-            try
+            if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
             {
-                return Double.Parse(value);
+                string value = reader.GetString();
+                try
+                {
+                    return Double.Parse(value);
+                }
+                catch (FormatException)
+                {
+                    throw new JsonException();
+                }
             }
-            catch (FormatException)
+            else
             {
-                throw new JsonException();
+                return reader.GetDouble();
             }
         }
 
         public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
+        }
+    }
+
+    public class BooleanConverter : JsonConverter<Boolean>
+    {
+        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == System.Text.Json.JsonTokenType.String)
+            {
+                string value = reader.GetString();
+                try
+                {
+                    return Boolean.Parse(value);
+                }
+                catch (FormatException)
+                {
+                    throw new JsonException();
+                }
+            }
+            else
+            {
+                return reader.GetBoolean();
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
+        {
+            writer.WriteBooleanValue(value);
+        }
+    }
+
+    public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            Debug.Assert(typeToConvert == typeof(DateTime));
+            return DateTime.Parse(reader.GetString());
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
         }
     }
 }

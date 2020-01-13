@@ -75,6 +75,7 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]  
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
+            Console.WriteLine("INPUT" + precipInput.ToString());
             WSPrecipitation precip = new WSPrecipitation();
             var stpWatch = System.Diagnostics.Stopwatch.StartNew();
             ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);

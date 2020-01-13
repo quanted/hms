@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
 using Web.Services.Controllers;
+using Utilities;
 
 namespace Web.Services
 {
@@ -39,6 +40,11 @@ namespace Web.Services
                 options.JsonSerializerOptions.WriteIndented = true;
                 options.JsonSerializerOptions.AllowTrailingCommas = true;
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.Converters.Add(new Utilities.DoubleConverter());
+                options.JsonSerializerOptions.Converters.Add(new Utilities.BooleanConverter());
+                options.JsonSerializerOptions.Converters.Add(new Utilities.DateTimeConverterUsingDateTimeParse());
+                options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
             services.AddLogging();
@@ -111,7 +117,6 @@ namespace Web.Services
 
             // Enable static files middleware.
             app.UseStaticFiles();
-            // app.UseMvc();
             // app.UseMvcWithDefaultRoute();
 ;
             app.UseSwagger();

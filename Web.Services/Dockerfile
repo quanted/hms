@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS base
 WORKDIR /app
 EXPOSE 80
 
+
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /src
 COPY HMS.sln ./
@@ -53,10 +54,11 @@ RUN dotnet publish -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
+COPY . /app
 COPY --from=publish /app .
-#COPY test_reports/ /src/
-COPY . /src
+# COPY test_reports/ /src/
+# COPY . /src
 RUN ls /app/App_Data
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp3.0
-#ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]
-ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "https://0.0.0.0:80"]
+# ENTRYPOINT ["/bin/bash", "/src/runtests_start.sh"]
+ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "http://0.0.0.0:80"]
