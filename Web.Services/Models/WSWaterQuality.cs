@@ -307,7 +307,7 @@ namespace Web.Services.Models
                 }
                 outputData.Add(bcFlow);             // Column 1: Boundary Condition Flow
                 Utilities.Logger.WriteToFile(this.taskID, "Getting precipitation data for catchment: " + catchment.COMID);
-                ITimeSeriesOutput precip = this.GetPrecipData(source, catchment.COMID);
+                ITimeSeriesOutput precip = this.GetPrecipData(source, catchment.COMID);   // = null JSC
                 Utilities.Logger.WriteToFile(this.taskID, "Successfully retrieved precipitation data");
 
                 //outputData.Add(nwmFlow);            // Column 2: NWM Flow (will be the same for the first catchment)
@@ -377,7 +377,12 @@ namespace Web.Services.Models
             string aquaTaskID = this.taskID + "-" + catchment.COMID.ToString() + "-aquatox";
             aquatoxSim.AQSim.AQTSeg.SV[3].LoadsRec.Alt_Loadings[0].ITSI.InputTimeSeries["input"].Data = totalFlow.Data;
             aquatoxSim.AQSim.AQTSeg.SV[3].InitialCond = Convert.ToInt32(estimateVolume);
+
+            aquatoxSim.CheckDataRequirements(); 
+
+
             aquatoxSim.AQSim.Integrate();
+
             this.SetAquatoxOutputToObject(catchment.COMID, aquatoxSim);
             Utilities.Logger.WriteToFile(this.taskID, "Dumping aquatox data for catchment: " + catchment.COMID);
             string aqtOutput = "";

@@ -118,7 +118,7 @@ namespace AQUATOX.AQTSegment
         {
             if (AQTSeg == null) return "AQTSeg not Instantiated";
 
-          //  try
+            try
             {
                 AQTSeg.SetMemLocRec();
                 string errmsg = AQTSeg.Verify_Runnable();
@@ -130,13 +130,13 @@ namespace AQUATOX.AQTSegment
                 AQTSeg.Integrate(PS.FirstDay, PS.LastDay, PS.RelativeError, PS.MinStepSize, PS.StoreStepSize );
                 return "";
             }
-     //       catch (Exception e)
-     //       {
-     //           return e.Message;
-     //       }
-     //       finally
-      //      {
-      //      }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+            finally
+            {
+            }
         }
 
         public string Integrate(DateTime StartDate, DateTime EndDate)
@@ -625,6 +625,10 @@ namespace AQUATOX.AQTSegment
             return Prd;
         }
 
+       public double GetPPB(AllVariables S, T_SVType T, T_SVLayer L)
+        {
+            return AQTSeg.GetPPB(S, T, L);
+        }
 
 
     }  // end TStateVariable
@@ -1406,6 +1410,7 @@ namespace AQUATOX.AQTSegment
 
             Derivs(x, 1);   
             WriteResults(TStart); // Write Initial Conditions as the first data Point
+            CalcPPB();
 
             // (**  Start stepping the RungeKutta.....**)
             while (!simulation_done)
@@ -1419,6 +1424,7 @@ namespace AQUATOX.AQTSegment
                 }
                 //                  FinishPoint = (Convert.ToInt32(x * (1 / dxsav)) > Convert.ToInt32(xsav * (1 / dxsav)));
 
+                CalcPPB();
                 WriteResults(x); // Write output to Results Collection
 
                 //                    if (FinishPoint) // if it is time to write rates
@@ -1442,6 +1448,7 @@ namespace AQUATOX.AQTSegment
 
                 TPresent = x;
                 DoThisEveryStep(h_taken);
+                CalcPPB();
 
                 if ((x - TEnd).TotalDays >= 0.0)
                 {
@@ -1457,9 +1464,12 @@ namespace AQUATOX.AQTSegment
                     h = hnext;
                 }
 
-                int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
-                if (progint==lastprog) ProgWorker.ReportProgress(progint);
-                lastprog = progint;
+                if (ProgWorker != null)
+                {
+                    int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
+                    if (progint==lastprog) ProgWorker.ReportProgress(progint);
+                    lastprog = progint;
+                }
 
                 Integrate_CheckZeroStateAllSVs();
 
@@ -1480,6 +1490,8 @@ namespace AQUATOX.AQTSegment
             }
 
             DoThisEveryStep(h_taken);
+            CalcPPB();
+
             WriteResults(x); // Write final step to Results Collection
             return PostProcessResults();
 
@@ -3328,10 +3340,73 @@ namespace AQUATOX.AQTSegment
 
         } // end NORMDIFF
 
-    }  // end TAQUATOXSegment
+        public virtual double GetPPB(AllVariables S, T_SVType T, T_SVLayer L)
+        {
+            // calculation of toxicant ppb levels during kinetic derivatives
+            // Returns dry weight ppb
+            TToxics PT;
+            double CarrierState;
+            double ToxState;
+            double PPBResult;
+
+            // ns must be a toxicant state variable or the program will halt
+            if (T >= Consts.FirstOrgTxTyp && T <= Consts.LastOrgTxTyp) throw new Exception("Programming Error, GetPPB has been passed a non-toxicant.");
+
+            if ( Diagenesis_Included() && ((S== AllVariables.SedmRefrDetr)||(S==AllVariables.SedmLabDetr)) )
+            {
+                if ((S == AllVariables.SedmRefrDetr))
+                    return GetPPB(AllVariables.POC_G2, T, T_SVLayer.SedLayer2) / Consts.Detr_OM_2_OC;
+                else
+                    return GetPPB(AllVariables.POC_G1, T, T_SVLayer.SedLayer2) / Consts.Detr_OM_2_OC;
+                // ug/kg OM                // ug /kg OC                                   // OM/OC
+            }
+
+            PT = GetStatePointer(S, T, L) as TToxics;
+            if (PT == null) return 0;
+            if (PT.IsAGGR)  return PT.ppb;
+
+            CarrierState = GetState(S, T_SVType.StV, L);
+            ToxState = GetState(S, T, L);
+
+            if (S == AllVariables.H2OTox) return PT.State;      // Toxicant Dissolved in Water already in ug/L
+
+            if ((CarrierState < Consts.Tiny) || (ToxState < Consts.Tiny)) return 0;
+
+            PPBResult = ToxState / CarrierState * 1e6;             // Toxicant in Carrier in water
+            // ug/kg       ug/L         mg/L        mg/kg
+
+            if (S >= AllVariables.POC_G1 && S <= AllVariables.POC_G3)
+            {
+                if ((CarrierState < Consts.Tiny))  PPBResult = 0;
+                else
+                {
+                    PPBResult = (ToxState / (CarrierState * Diagenesis_Params.H2.Val)) * 1e3;
+                    // ug/kg    // ug/m2      // g/m3                         // m     // g/kg
+                }
+            }
+                        
+            return PPBResult;
+        }
+
+        // ------------------------------------------------------------------------
+        public void CalcPPB()
+        {
+
+            foreach (TToxics P in SV.OfType<TToxics>())
+            {
+                if (P.IsAGGR) return;
+                if ((P.NState >= Consts.FirstDetr) && (P.NState <= Consts.LastDetr))
+                    ((P) as TToxics).ppb = GetPPB(P.NState, P.SVType, P.Layer);   // dry-weight concentration for detritus
+                else ((P) as TToxics).ppb = GetPPB(P.NState, P.SVType, P.Layer) / ((P) as TToxics).WetToDry();    // wet-weight concentration
+            }
+        }
+        // ------------------------------------------------------------------------
 
 
-    public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
+        }  // end TAQUATOXSegment
+
+
+        public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
     {
         //public double SalinityUpper = 0;
         //public double SalinityLower = 0;

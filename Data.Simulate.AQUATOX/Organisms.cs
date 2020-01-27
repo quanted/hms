@@ -3,6 +3,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
+using AQUATOX.Chemicals;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
@@ -1299,40 +1300,20 @@ namespace AQUATOX.Organisms
         //    return result;
         //}
 
-        //// Chronic Effects
-        //public double GutEffOrgTox(object ToxTyp)
-        //{
-        //    double result;
-        //    double GutEff;
-        //    ChemicalRecord 1 = Chemptrs[ToxTyp].ChemRec;
-        //    if (1.IsPFA)
-        //    {
-        //        if (1.PFAType == "carboxylate")
-        //        {
-        //            // sulfonate
-        //            GutEff = Math.Pow(10.0, -0.909539 + 0.085141 * 1.PFAChainLength);
-        //        }
-        //        else
-        //        {
-        //            GutEff = -0.68 + 0.21 * 1.PFAChainLength;
-        //        }
-        //        if ((GutEff > 1.0))
-        //        {
-        //            GutEff = 1.00;
-        //        }
-        //        result = GutEff;
-        //        // Non PFA code below
-        //    }
-        //    else if ((NState >= Consts.FirstInvert && NState <= Consts.LastInvert))
-        //    {
-        //        // Landrum et al. 1990
-        //        result = 0.35;
-        //    }
-        //    else if ((NState >= AllVariables.LgGameFish1 && NState <= AllVariables.LgGameFish4))
-        //         result = 0.92;
-        //    else result = 0.62;
-        //    return result;
-        //}
+        // Chronic Effects
+        public double GutEffOrgTox(T_SVType ToxTyp)
+        {
+            ChemicalRecord CR = Chemptrs[ToxTyp].ChemRec;
+
+            if ((NState >= Consts.FirstInvert && NState <= Consts.LastInvert))
+            {
+   
+                return 0.35;               // Landrum et al. 1990
+            }
+            else if ((NState >= AllVariables.LgGameFish1 && NState <= AllVariables.LgGameFish4))
+                  return 0.92;
+             else return 0.62;
+        }
 
         public double SalMort(double Min, double Max, double Coeff1, double Coeff2)
         {

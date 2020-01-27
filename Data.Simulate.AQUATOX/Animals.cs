@@ -568,44 +568,38 @@ namespace AQUATOX.Animals
     }
 
 
+    public double DefecationTox(T_SVType ToxType)
+        {
+            // Returns rate of transfer of organic toxicant due to defecation by predator
+            // This algorithm now utilizes TAnimal.IngestSpecies (11/20/98)
+            double DefToxCount;
+            double EgestRet;
+            double GutEffRed;
 
-        //public double DefecationTox(int ToxType)
-        //{
-        //    
-        //    // Returns rate of transfer of organic toxicant due to defecation by predator
-        //    // This algorithm now utilizes TAnimal.IngestSpecies (11/20/98)
-        //    double DefToxCount;
-        //    double EgestRet;
-        //    double GutEffRed;
+            void DefTox(TPreference P)
+            {
+                double Ingestion;
+                double KEgest;
+                double PPBPrey;
+                Ingestion = IngestSpecies(P.nState, P, ref EgestRet, ref GutEffRed);
+                KEgest = (1 - GutEffOrgTox(ToxType) * GutEffRed) * Ingestion;
+                PPBPrey = AQTSeg.GetPPB(P.nState, ToxType, T_SVLayer.WaterCol);
+                DefToxCount = DefToxCount + KEgest * PPBPrey * 1e-6;
+                // mg/L-d   ug/kg   kg/mg
 
-        //        void DefecationTox_DefTox(TPreference P)
-        //        {
-        //            double Ingestion;
-        //            double KEgest;
-        //            double PPBPrey;
-        //            Ingestion = IngestSpecies(P.nState, P, ref EgestRet, ref GutEffRed);
-        //            KEgest = (1 - GutEffOrgTox(ToxType) * GutEffRed) * Ingestion;
-        //            TStates 1 = AQTSeg;
-        //            PPBPrey = 1.GetPPB(P.nState, ToxType, T_SVLayer.WaterCol);
-        //            DefToxCount = DefToxCount + KEgest * PPBPrey * 1e-6;
-        //            // mg/L-d   ug/kg   kg/mg
+            }
+             
+            int i;
+            DefToxCount = 0;
+            if ((MyPrey.Count > 0))
+            {
+                for (i = 0; i < MyPrey.Count; i++)
+                    DefTox(MyPrey[i]);
+            }
+            return DefToxCount;
+        }
 
-        //        }
-
-        //    int i;
-        //    DefToxCount = 0;
-        //    if ((MyPrey.Count > 0))
-        //    {
-        //        for (i = 0; i < MyPrey.Count; i++)
-        //        {
-        //            DefecationTox_DefTox(MyPrey.At(i));
-        //        }
-        //    }
-        //    result = DefToxCount;
-        //    return result;
-        //}
-
-    public double AHabitat_Limit()
+        public double AHabitat_Limit()
     {
         double HabitatAvail;
         double PctRun;

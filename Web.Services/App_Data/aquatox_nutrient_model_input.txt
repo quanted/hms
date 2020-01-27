@@ -643,7 +643,7 @@
     "AverageOutput": true,
     "StepSizeInDays": true,
     "ModelTSDays": true,
-    "FixStepSize": 0.001,
+    "FixStepSize": 0.01,
     "UseFixStepSize": true,
   },
   "UseConstEvap": true,

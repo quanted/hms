@@ -62,6 +62,10 @@ namespace Web.Services.Controllers
                 MinAmmonia = 100000,
                 MaxAmmonia = 750000
             };
+
+            WSWorkflowWaterQualityController WQC = new WSWorkflowWaterQualityController();
+
+
             return example;
         }
     }

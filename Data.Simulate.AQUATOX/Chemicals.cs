@@ -360,11 +360,6 @@ namespace AQUATOX.Chemicals
             //    ToxLossRecord _wvar4 = _wvar3.ToxLossArray[OrgType()];
             //    // save for tox loss output & categorization
             //    VolatInKg = -Volat * _wvar3.SegVol() * 1000.0 * 1e-9;
-            //    // kg
-            //    // ug/L
-            //    // m3
-            //    // L/m3
-            //    // kg/ug
             //    TotalToxLoss[_wvar3.DerivStep] = TotalToxLoss[_wvar3.DerivStep] + VolatInKg;
             //    Volatiliz[_wvar3.DerivStep] = Volatiliz[_wvar3.DerivStep] + VolatInKg;
             //    DissVolat[_wvar3.DerivStep] = DissVolat[_wvar3.DerivStep] + VolatInKg;
@@ -444,180 +439,180 @@ namespace AQUATOX.Chemicals
             return Microbial;
         }
 
-        // (************************************)
-        // (*        biotransformation         *)
-        // (************************************)
-        //public double Biotransformation()
-        //{
-        //    double result;
-        //    TStateVariable Carry;
-        //    double BioTInKg;
-        //    result = 0;
-        //    Carry = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
-        //    if (Carry.IsAnimal())
-        //    {
-        //        result = State * ((Carry) as TAnimal).Anim_Tox[OrgType()].Bio_rate_const;
-        //    }
-        //    if (Carry.IsPlant())
-        //    {
-        //        result = State * ((Carry) as TPlant).Plant_Tox[OrgType()].Bio_rate_const;
-        //    }
-        //    TStates _wvar1 = AllStates;
-        //    ToxLossRecord _wvar2 = _wvar1.ToxLossArray[OrgType()];
-        //    // save for tox loss output & categorization
-        //    BioTInKg = result * _wvar1.SegVol() * 1000.0 * 1e-9;
-        //    // kg
-        //    // ug/L
-        //    // m3
-        //    // L/m3
-        //    // kg/ug
-        //    TotalToxLoss[_wvar1.DerivStep] = TotalToxLoss[_wvar1.DerivStep] + BioTInKg;
-        //    BioTransf[_wvar1.DerivStep] = BioTransf[_wvar1.DerivStep] + BioTInKg;
-        //    return result;
-        //}
+        (************************************)
+         (* biotransformation         *)
+         (************************************)
+        public double Biotransformation()
+        {
+            double result;
+            TStateVariable Carry;
+            double BioTInKg;
+            result = 0;
+            Carry = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
+            if (Carry.IsAnimal())
+            {
+                result = State * ((Carry) as TAnimal).Anim_Tox[OrgType()].Bio_rate_const;
+            }
+            if (Carry.IsPlant())
+            {
+                result = State * ((Carry) as TPlant).Plant_Tox[OrgType()].Bio_rate_const;
+            }
+            TStates _wvar1 = AllStates;
+            ToxLossRecord _wvar2 = _wvar1.ToxLossArray[OrgType()];
+            // save for tox loss output & categorization
+            BioTInKg = result * _wvar1.SegVol() * 1000.0 * 1e-9;
+            // kg
+            // ug/L
+            // m3
+            // L/m3
+            // kg/ug
+            TotalToxLoss[_wvar1.DerivStep] = TotalToxLoss[_wvar1.DerivStep] + BioTInKg;
+            BioTransf[_wvar1.DerivStep] = BioTransf[_wvar1.DerivStep] + BioTInKg;
+            return result;
+        }
 
-        // (**************************************************************)
-        // (*        Microbial_BioTrans_To_This_SV       JSC, 5/27/99    *)
-        // (*                                                            *)
-        // (*  Calculates the Microbial BioTransformation from other     *)
-        // (*  org. chemicals into this H2OTox or Detrital Compartment   *)
-        // (*                                                            *)
-        // (**************************************************************)
-        //public double Microbial_BioTrans_To_This_SV(bool Aerobic)
-        //{
-        //    double result;
-        //    double MBTSum;
-        //    T_SVType ToxLoop;
-        //    double FracToMe;
-        //    TBioTransObject BTRec;
-        //    double MicrobM;
-        //    double FracAerobic;
-        //    TToxics ToxPtr;
-        //    if (!(new ArrayList(new object[] { AllVariables.PoreWater, AllVariables.ReDOMPore, AllVariables.LaDOMPore, Consts.FirstOrgTox, Consts.FirstDetr, AllVariables.Cohesives, AllVariables.POC_G1 }).Contains(NState)))
-        //    {
-        //        throw new Exception("Programming Error, BioTrans_To_This_SV must be passed an org tox, sed, or detrital category");
-        //    }
-        //    MBTSum = 0;
-        //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-        //    {
-        //        // loop through all org toxicants
-        //        // Tox In Water
-        //        if (NState >= Consts.FirstTox && NState <= Consts.LastTox)
-        //        {
-        //            ToxPtr = AQTSeg.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, Layer);
-        //        }
-        //        else
-        //        {
-        //            ToxPtr = AQTSeg.GetStatePointer(NState, ToxLoop, Layer);
-        //        }
-        //        if (ToxPtr != null)
-        //        {
-        //            if ((ToxPtr.State > 0))
-        //            {
-        //                // if this toxicant exists then
-        //                TChemical ChemRec = AQTSeg.Chemptrs[ToxLoop];
-        //                if (Aerobic)
-        //                {
-        //                    BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
-        //                }
-        //                else
-        //                {
-        //                    BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
-        //                }
-        //                FracToMe = BTRec.Percent[OrgType()] / 100.0;
-        //                // fraction of biotrans to this org tox compartment
-        //                if (FracToMe > 0)
-        //                {
-        //                    MicrobM = ToxPtr.MicrobialMetabolism(ref FracAerobic);
-        //                    // also returns frac aerobic
-        //                    if (Aerobic)
-        //                    {
-        //                        MicrobM = MicrobM * FracAerobic;
-        //                    }
-        //                    else
-        //                    {
-        //                        MicrobM = MicrobM * (1 - FracAerobic);
-        //                    }
-        //                    MBTSum = MBTSum + (MicrobM * FracToMe);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    result = MBTSum;
-        //    return result;
-        //}
+        (**************************************************************)
+         (* Microbial_BioTrans_To_This_SV       JSC, 5/27/99    *)
+         (**)
+         (* Calculates the Microbial BioTransformation from other     *)
+         (* org. chemicals into this H2OTox or Detrital Compartment   *)
+         (**)
+         (**************************************************************)
+        public double Microbial_BioTrans_To_This_SV(bool Aerobic)
+        {
+            double result;
+            double MBTSum;
+            T_SVType ToxLoop;
+            double FracToMe;
+            TBioTransObject BTRec;
+            double MicrobM;
+            double FracAerobic;
+            TToxics ToxPtr;
+            if (!(new ArrayList(new object[] { AllVariables.PoreWater, AllVariables.ReDOMPore, AllVariables.LaDOMPore, Consts.FirstOrgTox, Consts.FirstDetr, AllVariables.Cohesives, AllVariables.POC_G1 }).Contains(NState)))
+            {
+                throw new Exception("Programming Error, BioTrans_To_This_SV must be passed an org tox, sed, or detrital category");
+            }
+            MBTSum = 0;
+            for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+            {
+                // loop through all org toxicants
+                // Tox In Water
+                if (NState >= Consts.FirstTox && NState <= Consts.LastTox)
+                {
+                    ToxPtr = AQTSeg.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, Layer);
+                }
+                else
+                {
+                    ToxPtr = AQTSeg.GetStatePointer(NState, ToxLoop, Layer);
+                }
+                if (ToxPtr != null)
+                {
+                    if ((ToxPtr.State > 0))
+                    {
+                        // if this toxicant exists then
+                        TChemical ChemRec = AQTSeg.Chemptrs[ToxLoop];
+                        if (Aerobic)
+                        {
+                            BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
+                        }
+                        else
+                        {
+                            BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
+                        }
+                        FracToMe = BTRec.Percent[OrgType()] / 100.0;
+                        // fraction of biotrans to this org tox compartment
+                        if (FracToMe > 0)
+                        {
+                            MicrobM = ToxPtr.MicrobialMetabolism(ref FracAerobic);
+                            // also returns frac aerobic
+                            if (Aerobic)
+                            {
+                                MicrobM = MicrobM * FracAerobic;
+                            }
+                            else
+                            {
+                                MicrobM = MicrobM * (1 - FracAerobic);
+                            }
+                            MBTSum = MBTSum + (MicrobM * FracToMe);
+                        }
+                    }
+                }
+            }
+            result = MBTSum;
+            return result;
+        }
 
-        // (**************************************************************)
-        // (*                  Biotrans_To_This_Org      JSC, 5/27/99    *)
-        // (*                                                            *)
-        // (*  Calculates all of the BioTransformation from other        *)
-        // (*  organic chemicals into this organism toxicant compartment *)
-        // (*                                                            *)
-        // (**************************************************************)
-        //public double Biotrans_To_This_Org()
-        //{
-        //    double result;
-        //    T_SVType ToxLoop;
-        //    double BTSum;
-        //    TBioTransObject BTRec;
-        //    TAnimal AnimPtr;
-        //    double FracToMe;
-        //    TToxics AnimToxPtr;
-        //    if (!(NState >= Consts.FirstBiota && NState <= Consts.LastBiota))
-        //    {
-        //        throw new Exception("Programming Error, BioTrans_To_This_Org must be passed an organism");
-        //    }
-        //    BTSum = 0;
-        //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-        //    {
-        //        // loop through all org toxicants
-        //        // if this toxicant is relevant then
-        //        if ((ToxLoop != SVType) && (AQTSeg.GetState(NState, ToxLoop, T_SVLayer.WaterCol) > Consts.Tiny))
-        //        {
-        //            TChemical ChemRec = AQTSeg.Chemptrs[ToxLoop];
-        //            BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTUserSpecified, NState);
-        //            // see if species specific Biotrans data exists
-        //            if (BTRec == null)
-        //            {
-        //                switch (NState)
-        //                {
-        //                    // otherwise, use general parameterization
-        //                    // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
-        //                    case Consts.FirstAlgae:
-        //                        BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAlgae, AllVariables.NullStateVar);
-        //                        break;
-        //                    // Modify the A .. B: Consts.FirstFish .. Consts.LastFish
-        //                    case Consts.FirstFish:
-        //                        BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTFish, AllVariables.NullStateVar);
-        //                        break;
-        //                    default:
-        //                        AnimPtr = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
-        //                        if ((AnimPtr.PAnimalData.Animal_Type == "Benthic Insect"))
-        //                        {
-        //                            BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTBenthInsect, AllVariables.NullStateVar);
-        //                        }
-        //                        else
-        //                        {
-        //                            BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTOtherInvert, AllVariables.NullStateVar);
-        //                        }
-        //                        break;
-        //                        // else
-        //                }
-        //            }
-        //            // Case
-        //            FracToMe = BTRec.Percent[OrgType()] / 100.0;
-        //            // fraction of biotrans to this org tox compartment
-        //            if (FracToMe > 0)
-        //            {
-        //                AnimToxPtr = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol);
-        //                BTSum = BTSum + (FracToMe * AnimToxPtr.Biotransformation());
-        //            }
-        //        }
-        //    }
-        //    // loop through toxicants
-        //    result = BTSum;
-        //    return result;
-        //}
+        (**************************************************************)
+         (* Biotrans_To_This_Org      JSC, 5/27/99    *)
+         (**)
+         (* Calculates all of the BioTransformation from other*)
+         (* organic chemicals into this organism toxicant compartment*)
+         (**)
+         (**************************************************************)
+        public double Biotrans_To_This_Org()
+        {
+            double result;
+            T_SVType ToxLoop;
+            double BTSum;
+            TBioTransObject BTRec;
+            TAnimal AnimPtr;
+            double FracToMe;
+            TToxics AnimToxPtr;
+            if (!(NState >= Consts.FirstBiota && NState <= Consts.LastBiota))
+            {
+                throw new Exception("Programming Error, BioTrans_To_This_Org must be passed an organism");
+            }
+            BTSum = 0;
+            for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+            {
+                // loop through all org toxicants
+                // if this toxicant is relevant then
+                if ((ToxLoop != SVType) && (AQTSeg.GetState(NState, ToxLoop, T_SVLayer.WaterCol) > Consts.Tiny))
+                {
+                    TChemical ChemRec = AQTSeg.Chemptrs[ToxLoop];
+                    BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTUserSpecified, NState);
+                    // see if species specific Biotrans data exists
+                    if (BTRec == null)
+                    {
+                        switch (NState)
+                        {
+                            // otherwise, use general parameterization
+                            // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
+                            case Consts.FirstAlgae:
+                                BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTAlgae, AllVariables.NullStateVar);
+                                break;
+                            // Modify the A .. B: Consts.FirstFish .. Consts.LastFish
+                            case Consts.FirstFish:
+                                BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTFish, AllVariables.NullStateVar);
+                                break;
+                            default:
+                                AnimPtr = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
+                                if ((AnimPtr.PAnimalData.Animal_Type == "Benthic Insect"))
+                                {
+                                    BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTBenthInsect, AllVariables.NullStateVar);
+                                }
+                                else
+                                {
+                                    BTRec = ChemRec.Get_BioTrans_Record(BioTransType.BTOtherInvert, AllVariables.NullStateVar);
+                                }
+                                break;
+                                // else
+                        }
+                    }
+                    // Case
+                    FracToMe = BTRec.Percent[OrgType()] / 100.0;
+                    // fraction of biotrans to this org tox compartment
+                    if (FracToMe > 0)
+                    {
+                        AnimToxPtr = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol);
+                        BTSum = BTSum + (FracToMe * AnimToxPtr.Biotransformation());
+                    }
+                }
+            }
+            // loop through toxicants
+            result = BTSum;
+            return result;
+        }
 
         // (************************************)
         // (*              ionization          *)
@@ -716,148 +711,148 @@ namespace AQUATOX.Chemicals
 
             Inflow = Location.Morph.InflowH2O;  //  * _wvar1.OOSInflowFrac;
 
-            //if (new ArrayList(new object[] { AllVariables.DissRefrDetr, AllVariables.Cohesives }).Contains(NState))
-            //{
-            //    // Code to support organisms or sediments with PS, NPS, Inflow Loadings
-            //    CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
-            //    Loading = 0;
-            //    if (NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr)
-            //    {
-            //        // Split into four compartments
-            //        PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
-            //        LoadRes = Loadings.Units.Loadings.ReturnLoad(TimeIndex, PInputRec.Load) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, null);
-            //        ToxLoad = Loadings.Units.Loadings.ReturnLoad(TimeIndex, PInputRec.ToxLoad[SVType]);
-            //    }
-            //    else
-            //    {
-            //        LoadRes = Loadings.Units.Loadings.ReturnLoad(TimeIndex, CPtr.LoadsRec);
-            //        ToxLoad = Loadings.Units.Loadings.ReturnLoad(TimeIndex, LoadsRec);
-            //    }
-            //    LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
-            //    // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
-            //    // Atmospheric and point-source loadings should be to epilimnion in single-segment mode;  9/9/98
-            //    if (AQTSeg.LinkedMode || (AQTSeg.VSeg == VerticalSegments.Epilimnion))
-            //    {
-            //        for (Loop = Alt_LoadingsType.PointSource; Loop <= Alt_LoadingsType.NonPointSource; Loop++)
-            //        {
-            //            if (Loop != Alt_LoadingsType.DirectPrecip)
-            //            {
-            //                // Irrelevant for Susp,Dissolved Detritus and Sediment
-            //                if (NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr)
-            //                {
-            //                    // Split into two or four compartments
-            //                    AddLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, PInputRec.Load, Loop) * ((CPtr) as TDetritus).MultFrac(TimeIndex, true, Loop);
-            //                    // g/d
-            //                    // unitless
-            //                    ToxLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, PInputRec.ToxLoad[SVType], Loop);
-            //                    // ug/kg
-            //                }
-            //                else
-            //                {
-            //                    AddLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, CPtr.LoadsRec, Loop);
-            //                    ToxLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, LoadsRec, Loop);
-            //                }
-            //                AddLoad = AddLoad / SegVolume * ToxLoad / 1e6;
-            //                // ug/L
-            //                // g/d
-            //                // cu m
-            //                // ug/kg
-            //                // mg/kg
-            //                LoadRes = LoadRes + AddLoad;
-            //                // mg/L d
-            //                // mg/L d
-            //            }
-            //        }
-            //    }
-            //    Loading = LoadRes;
-            //    return;
-            //    // Loading calculation is complete for Loadings of Tox in Susp&Diss Detritus
-            //}
+            if (new ArrayList(new object[] { AllVariables.DissRefrDetr, AllVariables.Cohesives }).Contains(NState))
+            {
+                // Code to support organisms or sediments with PS, NPS, Inflow Loadings
+                CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
+                Loading = 0;
+                if (NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr)
+                {
+                    // Split into four compartments
+                    PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
+                    LoadRes = Loadings.Units.Loadings.ReturnLoad(TimeIndex, PInputRec.Load) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, null);
+                    ToxLoad = Loadings.Units.Loadings.ReturnLoad(TimeIndex, PInputRec.ToxLoad[SVType]);
+                }
+                else
+                {
+                    LoadRes = Loadings.Units.Loadings.ReturnLoad(TimeIndex, CPtr.LoadsRec);
+                    ToxLoad = Loadings.Units.Loadings.ReturnLoad(TimeIndex, LoadsRec);
+                }
+                LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
+                // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
+                // Atmospheric and point-source loadings should be to epilimnion in single-segment mode;  9/9/98
+                if (AQTSeg.LinkedMode || (AQTSeg.VSeg == VerticalSegments.Epilimnion))
+                {
+                    for (Loop = Alt_LoadingsType.PointSource; Loop <= Alt_LoadingsType.NonPointSource; Loop++)
+                    {
+                        if (Loop != Alt_LoadingsType.DirectPrecip)
+                        {
+                            // Irrelevant for Susp,Dissolved Detritus and Sediment
+                            if (NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr)
+                            {
+                                // Split into two or four compartments
+                                AddLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, PInputRec.Load, Loop) * ((CPtr) as TDetritus).MultFrac(TimeIndex, true, Loop);
+                                // g/d
+                                // unitless
+                                ToxLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, PInputRec.ToxLoad[SVType], Loop);
+                                // ug/kg
+                            }
+                            else
+                            {
+                                AddLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, CPtr.LoadsRec, Loop);
+                                ToxLoad = Loadings.Units.Loadings.ReturnAltLoad(TimeIndex, LoadsRec, Loop);
+                            }
+                            AddLoad = AddLoad / SegVolume * ToxLoad / 1e6;
+                            // ug/L
+                            // g/d
+                            // cu m
+                            // ug/kg
+                            // mg/kg
+                            LoadRes = LoadRes + AddLoad;
+                            // mg/L d
+                            // mg/L d
+                        }
+                    }
+                }
+                Loading = LoadRes;
+                return;
+                // Loading calculation is complete for Loadings of Tox in Susp&Diss Detritus
+            }
 
-            //if ((new ArrayList(new object[] { Consts.FirstDetr, Consts.FirstBiota }).Contains(NState)))
-            //{
-            //    // Toxicants within Organisms Loadings
-            //    // Calc CarrierLdg, the inflow loading of the carrier
-            //    CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
-            //    CarrierLdg = Loadings.Units.Loadings.ReturnLoad(TimeIndex, CPtr.LoadsRec) * Inflow / SegVolume;
-            //    // ug/kg
-            //    base.CalculateLoad(TimeIndex);
-            //    // TStateVariable
-            //    // Put the organism's inflow tox load in ug/kg into the Loading variable
-            //    // sediment input in dry weight units
-            //    if (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SuspLabDetr)
-            //    {
-            //        Wet2Dry = 1.0;
-            //    }
-            //    else
-            //    {
-            //        Wet2Dry = WetToDry();
-            //    }
-            //    if ((new ArrayList(new object[] { AllVariables.SedmRefrDetr, AllVariables.SedmLabDetr }).Contains(NState)) && AQTSeg.PSetup.TSedDetrIsDriving)
-            //    {
-            //        // 6/7/2013  Directly assign toxicants to sediment on OC Norm basis
-            //        State = Loading * CPtr.State / 1e6;
-            //        // ug/L     ug/kg      mg/L      mg/kg
-            //        return;
-            //    }
-            //    // CarrierLdg is inflow loading only and has already been normalized for segment volume
-            //    Loading = Loading * CarrierLdg / 1e6 * Wet2Dry;
-            //    // ug/L d     ug/kg      mg/L      mg/kg  {loadings need conversion to dry weight
-            //    LoadingsRecord _wvar2 = CPtr.LoadsRec;
-            //    // 10/24/2012 handle loss of toxicant due to time-series fishing or withdrawal
-            //    if ((NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal))
-            //    {
-            //        if (!(Alt_Loadings[Alt_LoadingsType.PointSource] == null))
-            //        {
-            //            for (Loop = Alt_LoadingsType.PointSource; Loop <= Alt_LoadingsType.DirectPrecip; Loop++)
-            //            {
-            //                // NPS Irrelevant for Fish
-            //                AddLoad = 0;
-            //                if (Alt_UseConstant[Loop])
-            //                {
-            //                    // g/d or g/sq m. d
-            //                    AddLoad = Alt_ConstLoad[Loop];
-            //                }
-            //                else if (Alt_Loadings[Loop] != null)
-            //                {
-            //                    AddLoad = Alt_Loadings[Loop].GetLoad(TimeIndex, true);
-            //                }
-            //                AddLoad = AddLoad * Alt_MultLdg[Loop] / SegVolume;
-            //                // mg/L d
-            //                // g/d
-            //                // unitless
-            //                // cu m
-            //                if (Loop == Alt_LoadingsType.DirectPrecip)
-            //                {
-            //                    AddLoad = AddLoad * Location.Locale.SurfArea;
-            //                }
-            //                // mg/L d
-            //                // mg/sq m. L d
-            //                // sq m.
-            //                // fish stocking is assumed clean, but need to track tox loss due to fishing/removal
-            //                if (AddLoad < 0)
-            //                {
-            //                    Loading = Loading + AddLoad * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
-            //                }
-            //                // ug/L d
-            //                // ug/L d
-            //                // mg/L d
-            //                // ug/kg
-            //                // kg/mg
-            //            }
-            //        }
-            //    }
-            //    // loop
-            //    return;
-            //    // loading calculation is complete for toxicants within organisms
-            //}
+            if ((new ArrayList(new object[] { Consts.FirstDetr, Consts.FirstBiota }).Contains(NState)))
+            {
+                // Toxicants within Organisms Loadings
+                // Calc CarrierLdg, the inflow loading of the carrier
+                CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
+                CarrierLdg = Loadings.Units.Loadings.ReturnLoad(TimeIndex, CPtr.LoadsRec) * Inflow / SegVolume;
+                // ug/kg
+                base.CalculateLoad(TimeIndex);
+                // TStateVariable
+                // Put the organism's inflow tox load in ug/kg into the Loading variable
+                // sediment input in dry weight units
+                if (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SuspLabDetr)
+                {
+                    Wet2Dry = 1.0;
+                }
+                else
+                {
+                    Wet2Dry = WetToDry();
+                }
+                if ((new ArrayList(new object[] { AllVariables.SedmRefrDetr, AllVariables.SedmLabDetr }).Contains(NState)) && AQTSeg.PSetup.TSedDetrIsDriving)
+                {
+                    // 6/7/2013  Directly assign toxicants to sediment on OC Norm basis
+                    State = Loading * CPtr.State / 1e6;
+                    // ug/L     ug/kg      mg/L      mg/kg
+                    return;
+                }
+                // CarrierLdg is inflow loading only and has already been normalized for segment volume
+                Loading = Loading * CarrierLdg / 1e6 * Wet2Dry;
+                // ug/L d     ug/kg      mg/L      mg/kg  {loadings need conversion to dry weight
+                LoadingsRecord _wvar2 = CPtr.LoadsRec;
+                // 10/24/2012 handle loss of toxicant due to time-series fishing or withdrawal
+                if ((NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal))
+                {
+                    if (!(Alt_Loadings[Alt_LoadingsType.PointSource] == null))
+                    {
+                        for (Loop = Alt_LoadingsType.PointSource; Loop <= Alt_LoadingsType.DirectPrecip; Loop++)
+                        {
+                            // NPS Irrelevant for Fish
+                            AddLoad = 0;
+                            if (Alt_UseConstant[Loop])
+                            {
+                                // g/d or g/sq m. d
+                                AddLoad = Alt_ConstLoad[Loop];
+                            }
+                            else if (Alt_Loadings[Loop] != null)
+                            {
+                                AddLoad = Alt_Loadings[Loop].GetLoad(TimeIndex, true);
+                            }
+                            AddLoad = AddLoad * Alt_MultLdg[Loop] / SegVolume;
+                            // mg/L d
+                            // g/d
+                            // unitless
+                            // cu m
+                            if (Loop == Alt_LoadingsType.DirectPrecip)
+                            {
+                                AddLoad = AddLoad * Location.Locale.SurfArea;
+                            }
+                            // mg/L d
+                            // mg/sq m. L d
+                            // sq m.
+                            // fish stocking is assumed clean, but need to track tox loss due to fishing/removal
+                            if (AddLoad < 0)
+                            {
+                                Loading = Loading + AddLoad * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
+                            }
+                            // ug/L d
+                            // ug/L d
+                            // mg/L d
+                            // ug/kg
+                            // kg/mg
+                        }
+                    }
+                }
+                // loop
+                return;
+                // loading calculation is complete for toxicants within organisms
+            }
 
 
             //if (AQTSeg.EstuarySegment && (AQTSeg.VSeg == VerticalSegments.Hypolimnion))
             //{
             //    return;
             //}  // estuary vsn. 10-17-2002
-            
+
             // Inflow Loadings of Toxicant in Water
             base.CalculateLoad(TimeIndex);              // TStateVariable
 
@@ -894,25 +889,24 @@ namespace AQUATOX.Chemicals
 
         }
 
-        //public override double WetToDry()
-        //{
-        //    double result;
-        //    TStateVariable PS;
-        //    PS = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, Layer);
-        //    // dissolved in water
-        //    // or in sediment
-        //    if (new ArrayList(new object[] { Consts.FirstOrgTox, AllVariables.Sand, AllVariables.POC_G1 }).Contains(NState))
-        //    {
-        //        result = 1.0;
-        //    }
-        //    else
-        //    {
-        //        result = PS.WetToDry();
-        //    }
-        //    return result;
-        //}
+        public override double WetToDry()
+        {
+            double result;
+            TStateVariable PS;
+            PS = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, Layer);
+            // dissolved in water
+            // or in sediment
+            if (new ArrayList(new object[] { Consts.FirstOrgTox, AllVariables.Sand, AllVariables.POC_G1 }).Contains(NState))
+            {
+                result = 1.0;
+            }
+            else
+            {
+                result = PS.WetToDry();
+            }
+            return result;
+        }
 
-        // Function ToxEntrain          : double;
         // (************************************)
         // (*      NonDissoc (Ionization)      *)
         // (************************************)
@@ -962,192 +956,6 @@ namespace AQUATOX.Chemicals
             return result;
         }
 
-        //public override double WashIn()
-        //{
-        //    double result;
-        //    if (SVType != T_SVType.StV)
-        //    {
-        //        throw new Exception("Programming Error, TToxics.WashIn must be passed Tox Dissolved in Water");
-        //    }
-        //    result = base.WashIn();
-        //    // TStateVariable
-
-        //    return result;
-        //}
-
-        //// (************************************)
-        //// (*            Wash In               *)
-        //// (************************************)
-        //public double ToxInCarrierWashin()
-        //{
-        //    double result;
-        //    TStateVariable PUpstreamCarrier;
-        //    int i;
-        //    TVolume PUpVol;
-        //    TSegmentLink PLnk;
-        //    double Junk;
-        //    double UpStVolume;
-        //    double SegVolume;
-        //    double WaterFlow;
-        //    double UpStWashout;
-        //    double TotUpStWash;
-        //    double PctWashThisLink;
-        //    result = 0;
-        //    if (SVType == T_SVType.StV)
-        //    {
-        //        throw new Exception("Programming Error, ToxInCarrierWashin must be called by Tox dissolved in Carrier");
-        //    }
-        //    if (!AQTSeg.LinkedMode)
-        //    {
-        //        return result;
-        //    }
-        //    SegVolume = AQTSeg.SegVol();
-        //    TCollection _wvar1 = AQTSeg.In_FB_Links;
-        //    // With all incoming feedback links
-        //    for (i = 0; i < _wvar1.Count; i++)
-        //    {
-        //        // Step through all incoming feedback links
-        //        PLnk = _wvar1.At(i);
-        //        WaterFlow = PLnk.GetWaterFlow(AQTSeg.TPresent);
-        //        if (WaterFlow > Consts.Tiny)
-        //        {
-        //            PUpVol = PLnk.FromPStates.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
-        //            // TVolume for the upstream segment
-        //            if (PLnk.FromPStates.VolumeUpdated != AQTSeg.TPresent)
-        //            {
-        //                // make upper segment's discharge data up-to-date for Washout Call
-        //                PUpVol.CalculateLoad(AQTSeg.TPresent);
-        //                PUpVol.Derivative(ref Junk);
-        //            }
-        //            TotUpStWash = PUpVol.DischargeLoad;
-        //            PctWashThisLink = WaterFlow / TotUpStWash;
-        //            PUpstreamCarrier = PLnk.FromPStates.AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
-        //            UpStVolume = PUpVol.AQTSeg.SegVol();
-        //            if (PUpstreamCarrier.IsAnimal())
-        //            {
-        //                UpStWashout = ((PUpstreamCarrier) as TAnimal).Drift() * UpStVolume;
-        //            }
-        //            else
-        //            {
-        //                UpStWashout = PUpstreamCarrier.Washout() * UpStVolume;
-        //            }
-        //            // Washout is virtual method
-        //            result = result + (UpStWashout / SegVolume * PLnk.FromPStates.GetPPB(NState, SVType, Layer) * 1e-6 * PctWashThisLink);
-        //        }
-        //        // If WaterFlow > tiny
-        //    }
-        //    // with feedback links
-
-        //    return result;
-        //}
-
-        //// ToxInCarrierWashin
-        //// (************************************)
-        //// (*         Toxic Diffusion          *)
-        //// (************************************)
-        //public double ToxDiff()
-        //{
-        //    double result;
-        //    // Toxic within organisms or detritus diffusion between epilimnion and hypolimnion in non-linked mode
-        //    TStates OtherSeg;
-        //    double CarrierDiff;
-        //    result = 0;
-        //    if (!AQTSeg.Stratified)
-        //    {
-        //        return result;
-        //    }
-        //    if (AQTSeg.VSeg == VerticalSegments.Epilimnion)
-        //    {
-        //        OtherSeg = AQTSeg.HypoSegment;
-        //    }
-        //    else
-        //    {
-        //        OtherSeg = AQTSeg.EpiSegment;
-        //    }
-        //    CarrierDiff = ((AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol)) as TStateVariable).TurbDiff();
-        //    if (CarrierDiff > 0)
-        //    {
-        //        result = CarrierDiff * OtherSeg.GetPPB(NState, SVType, Layer) * 1e-6;
-        //    }
-        //    else
-        //    {
-        //        result = CarrierDiff * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
-        //    }
-        //    return result;
-        //}
-
-        //public double ToxSegDiff(bool UpLinks)
-        //{
-        //    double result;
-        //    // Diffusion of Toxicant within SVs to or from up or downstream link, only relevant for linked mode
-        //    int i;
-        //    TSegmentLink PLnk;
-        //    double ToxDiffCalc;
-        //    double CarryDiff;
-        //    double SegVolume;
-        //    TStates OtherSeg;
-        //    double ThisSegCarryConc;
-        //    double OtherSegCConc;
-        //    // g/m3
-        //    double DispCoeff;
-        //    double Area;
-        //    double Length;
-        //    TCollection Links;
-        //    result = 0;
-        //    ToxDiffCalc = 0;
-        //    if (!AQTSeg.LinkedMode)
-        //    {
-        //        throw new Exception("Programming Error, ToxSegDiff only relevant to LinkedMode");
-        //    }
-        //    SegVolume = AQTSeg.SegVol();
-        //    if (UpLinks)
-        //    {
-        //        Links = AQTSeg.In_FB_Links;
-        //    }
-        //    else
-        //    {
-        //        Links = AQTSeg.Out_FB_Links;
-        //    }
-        //    // documentation here
-        //    if (Links.Count == 0)
-        //    {
-        //        return result;
-        //    }
-        //    for (i = 0; i < Links.Count; i++)
-        //    {
-        //        PLnk = Links.At(i);
-        //        ThisSegCarryConc = AQTSeg.GetState(NState, T_SVType.StV, T_SVLayer.WaterCol);
-        //        if (UpLinks)
-        //        {
-        //            OtherSeg = PLnk.FromPStates;
-        //        }
-        //        else
-        //        {
-        //            OtherSeg = PLnk.ToPStates;
-        //        }
-        //        OtherSegCConc = OtherSeg.AQTSeg.GetState(NState, T_SVType.StV, T_SVLayer.WaterCol);
-        //        Length = PLnk.CharLength;
-        //        DispCoeff = PLnk.GetDiffusion(AQTSeg.TPresent);
-        //        Area = PLnk.GetXSection(AQTSeg.TPresent);
-        //        CarryDiff = 0;
-        //        if (Length > 0)
-        //        {
-        //            CarryDiff = (((DispCoeff * Area) / Length) * (OtherSegCConc - ThisSegCarryConc)) / SegVolume;
-        //        }
-        //        // (((mg/L d = m2/d * m2 / m) * (g/m3 - g/m3))/ m3
-        //        if (CarryDiff > 0)
-        //        {
-        //            ToxDiffCalc = ToxDiffCalc + CarryDiff * OtherSeg.GetPPB(NState, SVType, Layer) * 1e-6;
-        //        }
-        //        else
-        //        {
-        //            ToxDiffCalc = ToxDiffCalc + CarryDiff * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
-        //        }
-        //        // ug/l d = ug/l d + mg/L d + ug/kg + kg/mg
-        //    }
-        //    result = ToxDiffCalc;
-        //    return result;
-        //}
 
         public double CalculateKOM()
         {
@@ -1220,113 +1028,115 @@ namespace AQUATOX.Chemicals
         }
 
         // ------------------------------------------------------------------------------------------------------------------
-//        public double Sorption()
-//        {
-//            double result;
-//            // Calculate Organic Chemical Sorption to Sediments/ Detritus
-//            // Returns units of ug/L, Liters of water column or pore water depending on location of sed-detrital toxicant passed
-//            double CarrierState, K1, UptakeLimit, ToxState, Kp, Diff1;
-//            bool ToxIsPoreW;
+        public double Sorption()
+        {
+            double result;
+            // Calculate Organic Chemical Sorption to Sediments/ Detritus
+            // Returns units of ug/L, Liters of water column or pore water depending on location of sed-detrital toxicant passed
+            double CarrierState, K1, UptakeLimit, ToxState, Kp, Diff1;
+            bool ToxIsPoreW;
 
-////          T_SVLayer PoreLayer;
-////          TPorewater ThisPore;
+            //          T_SVLayer PoreLayer;
+            //          TPorewater ThisPore;
 
-//            result = 0;
+            result = 0;
 
-//            //PoreLayer = Layer;
-//            //if (PoreLayer == T_SVLayer.WaterCol)
-//            //{   PoreLayer = T_SVLayer.SedLayer1; }
+            //PoreLayer = Layer;
+            //if (PoreLayer == T_SVLayer.WaterCol)
+            //{   PoreLayer = T_SVLayer.SedLayer1; }
 
-//            // utility var for sediments
-//            if ((NState< AllVariables.ReDOMPore)|| (NState > Consts.LastDetr))
-//              throw new Exception("Programming Error: Sorption was passed a non sediment/detritus");   
+            // utility var for sediments
+            if ((NState < AllVariables.ReDOMPore) || (NState > Consts.LastDetr))
+                throw new Exception("Programming Error: Sorption was passed a non sediment/detritus");
 
-//            // K1
-//            switch (NState)
-//            {   case AllVariables.Cohesives:  // inorganic sorption
-//                    K1 = ChemRec.CohesivesK1;  break;
-//                case AllVariables.NonCohesives:
-//                    K1 = ChemRec.NonCohK1;     break;
-//                case AllVariables.NonCohesives2:
-//                    K1 = ChemRec.NonCoh2K1;    break;
-//                default:  // organics
-//                    K1 = ChemRec.K1Detritus;  // calibrated to 1.39  
-//                    break;
-//            }
+            // K1
+            switch (NState)
+            {
+                case AllVariables.Cohesives:  // inorganic sorption
+                    K1 = ChemRec.CohesivesK1; break;
+                case AllVariables.NonCohesives:
+                    K1 = ChemRec.NonCohK1; break;
+                case AllVariables.NonCohesives2:
+                    K1 = ChemRec.NonCoh2K1; break;
+                default:  // organics
+                    K1 = ChemRec.K1Detritus;  // calibrated to 1.39  
+                    break;
+            }
 
-//            if (K1 == 0)  return 0;  
+            if (K1 == 0) return 0;
 
-//            // ToxState
-//            ToxState = 0;
-//            if ((Layer == T_SVLayer.WaterCol) || (NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
-//                ToxState = AQTSeg.GetState(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol);
-//              // ug/L wc
+            // ToxState
+            ToxState = 0;
+            if ((Layer == T_SVLayer.WaterCol) || (NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
+                ToxState = AQTSeg.GetState(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol);
+            // ug/L wc
 
-//            // Sed Detritus is labeled as being in the "WaterCol" though it really resides in SedLayer1
-//            // This is to provide compatibility when the model runs without the Sediment Sub Model
-//            ToxIsPoreW = false;
+            // Sed Detritus is labeled as being in the "WaterCol" though it really resides in SedLayer1
+            // This is to provide compatibility when the model runs without the Sediment Sub Model
+            ToxIsPoreW = false;
 
-//            //if (AQTSeg.SedModelIncluded())
-//            //{
-//            //    ToxIsPoreW = (Layer > T_SVLayer.WaterCol) || (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr);
-//            //    if (ToxIsPoreW)
-//            //    { ToxState = AQTSeg.GetState(AllVariables.PoreWater, SVType, PoreLayer);  }
-//            //    // ug/L pw
-//            //}
+            //if (AQTSeg.SedModelIncluded())
+            //{
+            //    ToxIsPoreW = (Layer > T_SVLayer.WaterCol) || (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr);
+            //    if (ToxIsPoreW)
+            //    { ToxState = AQTSeg.GetState(AllVariables.PoreWater, SVType, PoreLayer);  }
+            //    // ug/L pw
+            //}
 
-//            if (ToxState <= Consts.Tiny)  return 0;   
+            if (ToxState <= Consts.Tiny) return 0;
 
-//            // Michaelis
-//            switch (NState)
-//            {   case AllVariables.Cohesives:
-//                    Kp = ChemRec.CohesivesKp;  break;
-//                case AllVariables.NonCohesives:
-//                    Kp = ChemRec.NonCohKp;     break;
-//                case AllVariables.NonCohesives2:
-//                    Kp = ChemRec.NonCoh2Kp;    break;
-//                default:  // organics
-//                   Kp = CalculateKOM();       break;
-//            }  // Case
+            // Michaelis
+            switch (NState)
+            {
+                case AllVariables.Cohesives:
+                    Kp = ChemRec.CohesivesKp; break;
+                case AllVariables.NonCohesives:
+                    Kp = ChemRec.NonCohKp; break;
+                case AllVariables.NonCohesives2:
+                    Kp = ChemRec.NonCoh2Kp; break;
+                default:  // organics
+                    Kp = CalculateKOM(); break;
+            }  // Case
 
-//            if (Kp == 0) return 0;  
+            if (Kp == 0) return 0;
 
-//            UptakeLimit = (Kp * ToxState - AQTSeg.GetPPB(NState, SVType, Layer)) / (Kp * ToxState);
-//            if (UptakeLimit < 0)  UptakeLimit = 0;
+            UptakeLimit = (Kp * ToxState - AQTSeg.GetPPB(NState, SVType, Layer)) / (Kp * ToxState);
+            if (UptakeLimit < 0) UptakeLimit = 0;
 
-//            // NonDissoc is a separate function (TToxics.NonDissoc) found above
+            // NonDissoc is a separate function (TToxics.NonDissoc) found above
 
-//            CarrierState = AQTSeg.GetState(NState, T_SVType.StV, Layer);
-//            // mg/L or g/m2 (buried)
+            CarrierState = AQTSeg.GetState(NState, T_SVType.StV, Layer);
+            // mg/L or g/m2 (buried)
 
-//            //if (ToxIsPoreW && (NState > AllVariables.LaDOMPore))
-//            //{
-//            //    // Carrerstate must be converted to mg/L(porewater)
-//            //    ThisPore = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, PoreLayer);
-//            //    if (ThisPore.VolumeInM3() < Consts.Tiny) return 0;
+            //if (ToxIsPoreW && (NState > AllVariables.LaDOMPore))
+            //{
+            //    // Carrerstate must be converted to mg/L(porewater)
+            //    ThisPore = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, PoreLayer);
+            //    if (ThisPore.VolumeInM3() < Consts.Tiny) return 0;
 
-//            //    if ((NState >= AllVariables.Cohesives && NState <= AllVariables.NonCohesives2) || (Layer > T_SVLayer.SedLayer1))
-//            //    {   // mg/L pw       // g/m2          // m2                 // m3 pw
-//            //        CarrierState = CarrierState * SedLayerArea() / ThisPore.VolumeInM3();
-//            //    }
-//            //    else
-//            //    {   CarrierState = CarrierState * SegVol() / ThisPore.VolumeInM3();
-//            //        // mg/L pw     // mg/L wc     // m3 wc       // m3 pw
-//            //    }
-//            //}
+            //    if ((NState >= AllVariables.Cohesives && NState <= AllVariables.NonCohesives2) || (Layer > T_SVLayer.SedLayer1))
+            //    {   // mg/L pw       // g/m2          // m2                 // m3 pw
+            //        CarrierState = CarrierState * SedLayerArea() / ThisPore.VolumeInM3();
+            //    }
+            //    else
+            //    {   CarrierState = CarrierState * SegVol() / ThisPore.VolumeInM3();
+            //        // mg/L pw     // mg/L wc     // m3 wc       // m3 pw
+            //    }
+            //}
 
-//            if (!(NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
-//            {
-//                result = K1 * ToxState * UptakeLimit * CarrierState * 1e-6;
-//                // ug/L-d = L/kgdry-d * ug/L * unitless  * mg/L * kg/mg
-//            }
-//            else
-//            {   // Diagenesis Units
-//                result = K1 * ToxState * UptakeLimit *  CarrierState * 1e-3 * Consts.Detr_OM_2_OC;
-//                // ug/m2-d = L/kgdry OM-d * ug tox/L *   unitless * g POC/m2 * kg/g * OM/POC
-//            }
+            if (!(NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
+            {
+                result = K1 * ToxState * UptakeLimit * CarrierState * 1e-6;
+                // ug/L-d = L/kgdry-d * ug/L * unitless  * mg/L * kg/mg
+            }
+            else
+            {   // Diagenesis Units
+                result = K1 * ToxState * UptakeLimit * CarrierState * 1e-3 * Consts.Detr_OM_2_OC;
+                // ug/m2-d = L/kgdry OM-d * ug tox/L *   unitless * g POC/m2 * kg/g * OM/POC
+            }
 
-//            return result;
-//        }
+            return result;
+        }
 
         // ------------------------------------------------------------------------------------------------------------------
         public double Desorption()
@@ -1342,18 +1152,7 @@ namespace AQUATOX.Chemicals
             Desorp = 0;
             if (State <= 0) {  return Desorp;  }
 
-            //switch (NState)
-            //{
-            //    case AllVariables.Cohesives:
-            //        K2 = ChemRec.CohesivesK2;
-            //        break;
-            //    case AllVariables.NonCohesives:
-            //        K2 = ChemRec.NonCohK2;
-            //        break;
-            //    case AllVariables.NonCohesives2:
-            //        K2 = ChemRec.NonCoh2K2;
-            //        break;
-                //default:  // organics
+            //default:  // organics
                     KOM = CalculateKOM();
                     if (KOM == 0)
                     {  K2 = 0; }
@@ -1367,7 +1166,6 @@ namespace AQUATOX.Chemicals
 
             Desorp =  K2 * State;
         // {ug/L-d}  {1/d} {ug/L}  {water col units}
-        // {ug/m2-d} {1/d} {ug/m2} {buried units}
             if (Desorp < 0) Desorp = 0;
 
             return Desorp;
