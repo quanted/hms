@@ -120,11 +120,11 @@ namespace Utilities
             }
             if (geo == "huc_12_num")
             {
-                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + geoNumber + "'");
+                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12=" + geoNumber);
             }
             else if (geo == "huc_8_num")
             {
-                lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)='" + geoNumber + "'");
+                lst = SQLiteRequest("Select COMID From PlusFlowlineVAA Where SUBSTR(ReachCode, 1, 8)=" + geoNumber);
             }
             return lst;
         }
