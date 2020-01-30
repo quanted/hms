@@ -9,6 +9,7 @@ using AQUATOX.Nutrients;
 using AQUATOX.Chemicals;
 using Newtonsoft.Json;
 using Globals;
+using System.Linq;
 
 namespace AQUATOX.Bioaccumulation
 {
@@ -224,22 +225,11 @@ namespace AQUATOX.Bioaccumulation
             double MortTox;
             // SumMortTox
             MortTox = 0;
-            foreach (TOrganism TO in (AQTSeg.SV).OfType<TOrganism>())
-                Derivative_MortalityToDetrTox_SumMortTox(ref MortTox, ns, TO);
+            
+            foreach (TOrganism TO in AQTSeg.SV.OfType<TOrganism>())
+                    Derivative_MortalityToDetrTox_SumMortTox(ref MortTox, ns, TO);
 
             return MortTox;
-        }
-
-        public void Derivative_GamLossToDetrTox_SumGamTox(TStateVariable IP)
-        {
-            TAnimal PA;
-            if (IP.IsAnimal())
-            {
-                PA = ((IP) as TAnimal);
-                GamTox = GamTox + PA.GameteLoss() * AQTSeg.GetPPB(IP.NState, SVType, Layer) * 1e-6;
-            }
-            // if
-
         }
 
         // ----------------------------------------------------------
@@ -248,97 +238,35 @@ namespace AQUATOX.Bioaccumulation
             
             // Calculates the toxicants in gamete loss to detritus interactions
             double GamTox;
-            int i;
             // SumGamTox
             GamTox = 0;
-            for (i = 0; i < AQTSeg.Count; i++)
-            {
-                Derivative_GamLossToDetrTox_SumGamTox(AQTSeg.At(i));
-            }
+            foreach (TAnimal TA in AQTSeg.SV.OfType<TAnimal>())
+                GamTox = GamTox + TA.GameteLoss() * AQTSeg.GetPPB(TA.NState, SVType, Layer) * 1e-6;
+
             return GamTox;
         }
 
-        public void Derivative_SumPlantSedTox_SumSedTox(TStateVariable IP)
-        {
-            TPlant PPl;
-            double Sed2Detr;
-            TDetritus DP;
-            if (IP.IsAlgae())
-            {
-                PPl = ((IP) as TPlant);
-                DP = ((CP) as TDetritus);
-                Sed2Detr = DP.PlantSink_To_Detr(PPl.NState);
-                SedTox = SedTox + (PPl.Sedimentation() * Sed2Detr * GetPPB(PPl.NState, SVType, T_SVLayer.WaterCol) * 1e-6);
-            }
-        }
-
         // ----------------------------------------------------------
-        public double Derivative_SumPlantSedTox()
+        public double Derivative_SumPlantSedTox(ref TDetritus DP)
         {
             
-            double SedTox;
-            int i;
-            SedTox = 0;
-            TStates _wvar1 = AQTSeg;
-            for (i = 0; i < _wvar1.Count; i++)
+            double SedTox = 0;
+
+            foreach (TPlant TP in AQTSeg.SV.OfType<TPlant>())
+              if (TP.IsAlgae())  // exclude macrophytes
             {
-                Derivative_SumPlantSedTox_SumSedTox(_wvar1.At(i));
+                double Sed2Detr = DP.PlantSink_To_Detr(TP.NState);
+                SedTox = SedTox + (TP.Sedimentation() * Sed2Detr * GetPPB(TP.NState, SVType, T_SVLayer.WaterCol) * 1e-6);
             }
-            result = SedTox;
-            return result;
+            return SedTox;
         }
 
         // ----------------------------------------------------------
-        public void Derivative_CalcPW(AllVariables PWState)
-        {
-            double PWExppw;
-            // Given a passed Pore Water State Variable, Calculates values for PWExp,ToPW for this Toxicant
-            PWExp = 0;
-            ToPW = 0;
-            ToTPoreWater = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
-            if ((ToTPoreWater != null))
-            {
-                if ((ToTPoreWater.VolumeInM3() > Consts.Tiny))
-                {
-                    PWDOMToxLevel = GetState(PWState, SVType, T_SVLayer.SedLayer1);
-                    // ug/L (pw)
-                    TStates _wvar1 = AQTSeg;
-                    PWExppw = PWDOMToxLevel * ToTPoreWater.To_Above() / _wvar1.PWVol_Last_Step[T_SVLayer.SedLayer1];
-                    // ug/L pw d
-                    // ug/L pw
-                    // m3/m2 d
-                    // m3/m2
-                    TStates _wvar2 = AQTSeg;
-                    PWExp = PWExppw * ToTPoreWater.VolumeInM3() / _wvar2.SegVol();
-                    // ug/L wc d
-                    // ug/L pw d
-                    // m3 pw
-                    // m3 wc
-                    TStates _wvar3 = AQTSeg;
-                    ToPW = State * ToTPoreWater.From_Above() * _wvar3.SedLayerArea() / _wvar3.SegVol();
-                    // ug/L wc d
-                    // ug/L wc
-                    // m3/m2 d
-                    // m2
-                    // m3 wc
-                }
-            }
-        }
+        // removed pore water code here
 
         // ----------------------------------------------------------
-        public double Derivative_M2_L()
-        {
+        
             
-            //@ Unsupported property or method(D): 'SurfArea'
-            result = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000);
-            // m2/L
-            // m2
-            // m3
-            // L/m3
-
-            return result;
-        }
-
         // ----------------------------------------------------------
         public double Derivative_DeposTox()
         {
@@ -435,102 +363,12 @@ namespace AQUATOX.Bioaccumulation
             return result;
         }
 
-        // ----------------------------------------------------------
-        public void Derivative_WriteRates()
-        {
-            Setup_Record _wvar1 = AQTSeg.SetupRec;
-            if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
-            {
-                ClearRate();
-                SaveRate("State", State);
-                SaveRate("Load", Lo);
-                SaveRate("Hydrolysis", Hydr);
-                SaveRate("MicrobMet", MM);
-                SaveRate("AerMM In", Mic_in_Aer);
-                SaveRate("AnaerMM In", Mic_in_Anaer);
-                if (!AQTSeg.SedModelIncluded())
-                {
-                    if (!(new ArrayList(new object[] { AllVariables.DissRefrDetr, AllVariables.DissLabDetr }).Contains(NState)))
-                    {
-                        SaveRate("ScourTox", ScrT);
-                    }
-                    if (new ArrayList(new object[] { AllVariables.SedmRefrDetr, AllVariables.SedmLabDetr }).Contains(NState))
-                    {
-                        SaveRate("BurialTox", BrT);
-                        SaveRate("ExposureTox", ExpT);
-                    }
-                }
-                if (!(NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr))
-                {
-                    SaveRate("Photol", Photo);
-                    SaveRate("Washout", WashO);
-                    SaveRate("Washin", WashI);
-                    SaveRate("MortToDetr", MTD);
-                    if (!AQTSeg.LinkedMode)
-                    {
-                        SaveRate("TurbDiff", TD);
-                    }
-                    else
-                    {
-                        // If Not AQTSeg.CascadeRunning then
-                        SaveRate("DiffUp", DiffUp);
-                        SaveRate("DiffDown", DiffDown);
-                    }
-                    if (AQTSeg.EstuarySegment)
-                    {
-                        SaveRate("Entrainment", Entr);
-                    }
-                    SaveRate("NetBoundary", Lo + WashI - WashO + Entr + DiffUp + DiffDown + TD);
-                }
-                if (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr)
-                {
-                    SaveRate("SumDef", SumDef);
-                    SaveRate("SumPlantSed", SumSed);
-                }
-                if (NState >= AllVariables.SuspRefrDetr && NState <= AllVariables.SuspLabDetr)
-                {
-                    SaveRate("SinkToHyp", STH);
-                    SaveRate("SinkFromEpi", SFE);
-                }
-                SaveRate("Sorption", So);
-                SaveRate("Desorption", Des);
-                if (!(NState == AllVariables.DissLabDetr))
-                {
-                    SaveRate("ColRefr", Co);
-                }
-                if (!(NState >= AllVariables.DissRefrDetr && NState <= AllVariables.DissLabDetr))
-                {
-                    SaveRate("Ingest", Ing);
-                    SaveRate("Sediment", Sedm + DepT);
-                    SaveRate("ReSusp", Resusp);
-                }
-                if ((SedDetrVar != AllVariables.SedmRefrDetr))
-                {
-                    SaveRate("Decomp", Decmp);
-                }
-                // not for refractory compartments
-                if ((NState == AllVariables.SuspLabDetr))
-                {
-                    SaveRate("GameteToDetr", GTD);
-                    // SaveRate('PlantToxDisl',PlToxD);
-                    // SaveRate('PlantEntrain',PlSlg);
-                }
-                if ((NState >= AllVariables.DissRefrDetr && NState <= AllVariables.DissLabDetr))
-                {
-                    SaveRate("SumExcrete", SETTD);
-                    SaveRate("ToPore", ToPW);
-                    SaveRate("PWExpulsion", PWExp);
-                    if (AQTSeg.SedModelIncluded())
-                    {
-                        SaveRate("DiffusSed", DiffSed);
-                    }
-                }
-            }
-        }
-
         // -------------------------------------------------------------------------
         public override void Derivative(double DB)
         {
+            double M2_L() { return Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000); }
+
+
             // DERIVATIVE FOR TOXICANT IN DETRITUS
             TRemineralize CP;
             TSuspendedDetr EpiCP;
