@@ -81,8 +81,7 @@ namespace Web.Services.Models
             {                
                 input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
                 input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);
-
-                
+               
             }
 
             //Getting Stream Flow data
@@ -110,13 +109,13 @@ namespace Web.Services.Models
             {
                 //Setting all to ITimeSeriesOutput
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
-                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x, input.Source), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x, input.Source), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
                 input.Source = input.StreamHydrology;
-                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x, input.Source), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
                 timeSeriesDict.Add("Precipitation", precipOutput);
@@ -193,8 +192,9 @@ namespace Web.Services.Models
             return totalOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x, string column2)
         {
+            column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
             foreach (DataRow dr in dt.Rows)
@@ -208,7 +208,7 @@ namespace Web.Services.Models
             {
                 { "request_time", DateTime.Now.ToString() },
                 { "column_1", "Date" },
-                { "column_2", "Stream Flow" },
+                { "column_2", column2 },
                 { "units", "cubic meters" }
             };
             itimeoutput.Dataset = "Stream Flow";
@@ -273,12 +273,24 @@ namespace Web.Services.Models
             Result result = JsonSerializer.Deserialize<Result>(data, options);
             //Set NCEI station to closest station regardless of type
             input.Geometry.StationID = result.data[0].id.ToString();
+            double coverage = 0.0;
+            double distance = 100000.0;
             foreach (ResultData details in result.data)//Opt for closest GHCND station, if any
             {
                 if (details.id.Contains("GHCND"))
                 {
-                    input.Geometry.StationID = details.id.ToString();
-                    break;
+                    if (details.data.datacoverage > coverage)
+                    {
+                        input.Geometry.StationID = details.id.ToString();
+                        coverage = details.data.datacoverage;
+                        distance = details.distance;
+                    }
+                    else if (details.data.datacoverage == coverage && details.distance < distance)
+                    {
+                        input.Geometry.StationID = details.id.ToString();
+                        coverage = details.data.datacoverage;
+                        distance = details.distance;
+                    }
                 }
             }
             return input.Geometry.StationID;
@@ -339,12 +351,12 @@ namespace Web.Services.Models
                     System.IO.Stream dataStream = response.GetResponseStream();
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
+                    taskData = JSON.Deserialize<Dictionary<string, string>>(data);
                     if (taskData["status"] == "SUCCESS")
                     {
                         success = true;
                     }
-                    else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
+                    else if (taskData["status"] == "FAILURE")
                     {
                         break;
                     }
