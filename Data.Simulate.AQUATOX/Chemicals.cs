@@ -924,10 +924,10 @@ namespace AQUATOX.Chemicals
 
             Charged = 0;
             // DissRefrDetr, PartRefrDetr,  suspLabDetr
-            //if (NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal)   fixme nondissoc code for animals
-            //{
-            //    Charged = -0.5;  // lower pH at gill surface--McKim & Erickson, 1991
-            //}
+            if (NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal)   
+            {
+                Charged = -0.5;  // lower pH at gill surface--McKim & Erickson, 1991
+            }
 
             pH_Val = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
             if (ChemRec.pka == 0)

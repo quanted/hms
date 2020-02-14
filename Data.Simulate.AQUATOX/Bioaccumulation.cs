@@ -6,6 +6,7 @@ using AQUATOX.Organisms;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
 using AQUATOX.Nutrients;
+using AQUATOX.Diagenesis;
 using AQUATOX.Chemicals;
 using Newtonsoft.Json;
 using Globals;
@@ -168,10 +169,9 @@ namespace AQUATOX.Bioaccumulation
         }
 
         // ----------------------------------------------------------
-        //public double Derivative_Resuspension(int ns)
+        //public double Derivative_Resuspension(AllVariables ns)
         //{
-        //    TSuspendedDetr PSD;
-        //    PSD = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
+        //    TSuspendedDetr PSD = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TSuspendedDetr;
         //    return PSD.Resuspension();
         //}
 
@@ -247,9 +247,8 @@ namespace AQUATOX.Bioaccumulation
         }
 
         // ----------------------------------------------------------
-        public double Derivative_SumPlantSedTox(ref TDetritus DP)
+        public double Derivative_SumPlantSedTox(TDetritus DP)
         {
-            
             double SedTox = 0;
 
             foreach (TPlant TP in AQTSeg.SV.OfType<TPlant>())
@@ -263,695 +262,218 @@ namespace AQUATOX.Bioaccumulation
 
         // ----------------------------------------------------------
         // removed pore water code here
-
         // ----------------------------------------------------------
-        
-            
+        // removed buried detritus code here
         // ----------------------------------------------------------
-        public double Derivative_DeposTox()
+
+        public override void Derivative(ref double DB)
         {
-            
-            // Deposition of Toxicant
-            if (NState >= AllVariables.SuspRefrDetr && NState <= AllVariables.SuspLabDetr)
-            {
-                // DeposTox removes toxicant from part detr
-                // ug/L d
-                // g/m2 d
-                // ug/kg
-                // m2/L
-                // kg/g
-                result = PBD1.TotalDep * GetPPB(NState, SVType, T_SVLayer.WaterCol) * Derivative_M2_L() * 1e-3;
-            }
-            else
-            {
-                // DeposTox adds toxicant to seddetr
-                // ug/L d
-                // g/m2 d
-                // unitless
-                result = PBD1.TotalDep * PBD1.Frac_Dep_ToSed * GetPPB(SuspDetrVar, SVType, T_SVLayer.WaterCol) * Derivative_M2_L() * 1e-3;
-            }
-            // ug/kg
-            // m2/L
-            // kg/g
-
-            return result;
-        }
-
-        // ----------------------------------------------------------
-        public double Derivative_ScourTox()
-        {
-            
-            // relevant to sed and susp toxs
-            double SC;
-            if (new ArrayList(new object[] { AllVariables.SuspLabDetr, AllVariables.SuspRefrDetr }).Contains(NState))
-            {
-                // Add Scoured Tox from Sed Layer to susp layer
-                SC = GetState(SedDetrVar, T_SVType.StV, T_SVLayer.WaterCol) * PBD1.Frac_Sed_Scour * GetPPB(SedDetrVar, SVType, T_SVLayer.WaterCol) * 1e-6;
-                // Add Scoured Tox from Buried Layer to susp layer
-                // ug/L d
-                // g/m2
-                // 1/d
-                // ug/kg
-                // m2/L
-                // kg/g
-                result = SC + PBD1.State * PBD1.Frac_Buried_Scour * GetPPB(PBD1.NState, SVType, T_SVLayer.WaterCol) * Derivative_M2_L() * 1e-3;
-            }
-            else
-            {
-                // Scour removes Toxicant from Sed Detr
-                result = GetState(SedDetrVar, T_SVType.StV, T_SVLayer.WaterCol) * PBD1.Frac_Sed_Scour * GetPPB(NState, SVType, T_SVLayer.WaterCol) * 1e-6;
-            }
-            // ug/L d
-            // mg/L
-            // 1/d
-            // ug/kg
-            // kg/mg
-
-            return result;
-        }
-
-        // ----------------------------------------------------------
-        public double Derivative_BurialTox()
-        {
-            
-            double Bur;
-            object P;
-            // Burial removes toxicant from SedDetr
-            P = AQTSeg.GetStatePointer(SedDetrVar, T_SVType.StV, T_SVLayer.WaterCol);
-            Bur = PBD1.SedDetr_To_Buried + ((P) as TDetritus).DailyBurial();
-            result = Bur * GetPPB(NState, SVType, T_SVLayer.WaterCol) * 1e-6;
-            // ug/L
-            // mg/L
-            // ug/kg
-            // kg/mg
-
-            return result;
-        }
-
-        // ----------------------------------------------------------
-        public double Derivative_ExposeTox()
-        {
-            
-            // Exposure adds toxicant to SedDetr
-            result = PBD1.BuriedDetr_To_Sed * GetPPB(PBD1.NState, SVType, T_SVLayer.WaterCol) * Derivative_M2_L() * 1e-3;
-            // ug/L
-            // g/m2 d
-            // ug/kg
-            // m2/L
-            // kg/g
-
-            return result;
-        }
-
-        // -------------------------------------------------------------------------
-        public override void Derivative(double DB)
-        {
-            double M2_L() { return Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000); }
-
+//            double M2_L() { return Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000); }
 
             // DERIVATIVE FOR TOXICANT IN DETRITUS
             TRemineralize CP;
             TSuspendedDetr EpiCP;
-            double Lo;
-            double So;
-            double Des;
-            double Co;
-            double pp;
-            double Ing;
-            double SumSed;
-            double Photo;
-            double WashO;
-            double WashI;
-            double MTD;
-            double STH;
-            double Decmp;
-            double Sedm;
-            double SumDef;
-            double Hydr;
-            double MM;
-            double SETTD;
-            double ToPW;
-            double PWExp;
-            double Entr;
-            double FracAerobic;
-            double Mic_in_Aer;
-            double Mic_in_Anaer;
-            double Resusp;
-            double DiffSed;
-            double GTD;
-            double TD;
-            double DiffUp;
-            double DiffDown;
-            double PWDOMToxLevel;
-            double SFE;
-            double DepT;
-            double ScrT;
-            double BrT;
-            double ExpT;
-            double SedDesorpInKg;
-            double SedScourInKg;
+            double Lo=0;
+            double So = 0;
+            double Des = 0;
+            double Co = 0;
+            double pp = 0;
+            double Ing = 0;
+            double SumSed = 0;
+            double Photo = 0;
+            double WashO = 0;
+            double WashI = 0;
+            double MTD = 0;
+            double STH = 0;
+            double Decmp = 0;
+            double Sedm = 0;
+            double SumDef = 0;
+            double Hydr = 0;
+            double MM = 0;
+            double SETTD = 0;
+            double ToPW = 0;
+            double PWExp = 0;
+            double Entr = 0;
+            double FracAerobic =0;
+            double Mic_in_Aer = 0;
+            double Mic_in_Anaer = 0;
+            double Resusp = 0;
+            double DiffSed = 0;
+            double GTD = 0;
+            double TD = 0;
+            double DiffUp = 0;
+            double DiffDown = 0;
+            double SFE = 0;
+            double DepT = 0;
+            double ScrT = 0;
+            double BrT = 0;
+            double ExpT = 0;
             AllVariables SedDetrVar;
             AllVariables SuspDetrVar;
-            AllVariables TopDOM;
-            TPorewater ToTPoreWater;
-            TDOMPoreWaterTox ToTDOMPoreTox;
-            double OOSDriftInKg;
-            double LoadInKg;
-            TBuriedDetr1 PBD1;
+
             // ----------------------------------------------------------------
-            Lo = 0;
-            So = 0;
-            Des = 0;
-            Co = 0;
-            SumDef = 0;
-            Ing = 0;
-            SumSed = 0;
-            WashI = 0;
-            Decmp = 0;
-            Sedm = 0;
-            Resusp = 0;
-            Hydr = 0;
-            MM = 0;
-            GTD = 0;
-            SETTD = 0;
-            STH = 0;
-            SFE = 0;
-            Photo = 0;
-            WashO = 0;
-            TD = 0;
-            MTD = 0;
-            PWExp = 0;
-            ToPW = 0;
-            Entr = 0;
-            Mic_in_Aer = 0;
-            Mic_in_Anaer = 0;
-            DiffUp = 0;
-            DiffDown = 0;
-            DiffSed = 0;
-            DepT = 0;
-            ScrT = 0;
-            BrT = 0;
-            ExpT = 0;
-            if (IsAGGR)
+
+            if (IsAGGR)  // chemical variable used to track the aggregation of other chemicals e.g. Total PCB
             {
                 DB = 0.0;
-                Derivative_WriteRates();
+//              Derivative_WriteRates();
                 return;
             }
-            CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
+            CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TRemineralize;
             pp = GetPPB(NState, SVType, Layer);
-            if ((new ArrayList(new object[] { AllVariables.SedmLabDetr, AllVariables.SedmRefrDetr }).Contains(NState)) && AQTSeg.SetupRec.TSedDetrIsDriving)
+
+            if (((NState==AllVariables.SedmLabDetr)||(NState==AllVariables.SedmRefrDetr)) && (AQTSeg.PSetup.TSedDetrIsDriving))
             {
-                Derivative_WriteRates();
-                return;
-                // 6/7/2013, toxicant set to loading in CalculateLoad above.
+//              Derivative_WriteRates();
+                return;  // 6/7/2013, toxicant set to loading in CalculateLoad .
+
             }
-            if ((new ArrayList(new object[] { AllVariables.SedmLabDetr, AllVariables.SuspLabDetr, AllVariables.DissLabDetr }).Contains(NState)))
+            if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr) || (NState == AllVariables.DissLabDetr)) // labile
             {
                 SedDetrVar = AllVariables.SedmLabDetr;
-                PBD1 = AQTSeg.GetStatePointer(AllVariables.BuriedLabileDetr, T_SVType.StV, T_SVLayer.WaterCol);
                 SuspDetrVar = AllVariables.SuspLabDetr;
             }
             else
             {
-                // nstate in [SedmRefrDetr,SuspRefrDetr,DissRefrDetr])
+                // nstate in [SedmRefrDetr,SuspRefrDetr,DissRefrDetr])  //refractory
                 SedDetrVar = AllVariables.SedmRefrDetr;
-                PBD1 = AQTSeg.GetStatePointer(AllVariables.BuriedRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
                 SuspDetrVar = AllVariables.SuspRefrDetr;
             }
-            if (!(AQTSeg.SedModelIncluded()) && (PBD1 != null))
-            {
-                // scour from deeply buried layer in "classic" model
-                PBD1.CalcTotalDep();
-                PBD1.CalcTotalScour();
-            }
-            if (Consts.Eutrophication || Chemptrs[OrgType()].ChemRec.BCFUptake)
+  
+            if (ChemRec.BCFUptake)
             {
                 DB = 0.0;
             }
             else
             {
                 Lo = Loading;
-                TStates _wvar2 = AQTSeg;
-                if (_wvar2.EstuarySegment && !(new ArrayList(new object[] { AllVariables.SedmLabDetr, AllVariables.SedmRefrDetr }).Contains(NState)))
-                {
-                    Entr = EstuaryEntrainment();
-                    if (Entr < 0)
-                    {
-                        Entr = Entr * pp * 1e-6;
-                    }
-                    if (Entr > 0)
-                    {
-                        Entr = Entr * _wvar2.HypoSegment.GetPPB(NState, SVType, Layer) * 1e-6;
-                    }
-                }
-                TStates _wvar3 = AQTSeg;
-                ToxLoadRecord _wvar4 = _wvar3.ToxLoadArray[SVType];
-                // save for tox loss output & categorization
-                if (Entr > 0)
-                {
-                    LoadInKg = (Lo + Entr) * _wvar3.SegVol() * 1000.0 * 1e-9;
-                }
-                else
-                {
-                    LoadInKg = Lo * _wvar3.SegVol() * 1000.0 * 1e-9;
-                }
-                // kg
-                // ug/L
-                // m3
-                // L/m3
-                // kg/ug
-                _wvar4.TotOOSLoad[_wvar3.DerivStep] = _wvar4.TotOOSLoad[_wvar3.DerivStep] + LoadInKg;
-                _wvar4.ToxLoadDetr[_wvar3.DerivStep] = _wvar4.ToxLoadDetr[_wvar3.DerivStep] + LoadInKg;
+
                 Hydr = Hydrolysis();
                 MM = MicrobialMetabolism(ref FracAerobic);
                 Mic_in_Aer = Microbial_BioTrans_To_This_SV(true);
                 Mic_in_Anaer = Microbial_BioTrans_To_This_SV(false);
-                TStates _wvar5 = AQTSeg;
+
                 if ((NState == AllVariables.SedmLabDetr))
                 {
-                    if ((!_wvar5.SedModelIncluded()) && (PBD1 != null))
-                    {
-                        // non multi-sed but buried sediment
-                        DepT = Derivative_DeposTox();
-                        ScrT = Derivative_ScourTox();
-                        BrT = Derivative_BurialTox();
-                        ExpT = Derivative_ExposeTox();
-                    }
+                    // buried detritus code removed here
                     SumDef = Derivative_SumDefecationTox() * Consts.Def2SedLabDetr;
                     Ing = Derivative_IngestOfCarrier() * pp * 1e-6;
                     So = Sorption();
-                    ToTPoreWater = _wvar5.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
-                    if ((So > 0) && _wvar5.SedModelIncluded())
-                    {
-                        So = So * ToTPoreWater.VolumeInM3() / _wvar5.SegVol();
-                    }
-                    // ug/L wc
-                    // ug/L pw
-                    // m3 pw
-                    // m3 wc
                     Des = Desorption();
-                    TStates _wvar6 = AQTSeg;
-                    ToxLossRecord _wvar7 = _wvar6.ToxLossArray[OrgType()];
-                    MorphRecord _wvar8 = _wvar6.Location.Morph;
-                    // save for 1/2 life calculation
-                    SedDesorpInKg = Des * _wvar6.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar7.SedDeSorp[_wvar6.DerivStep] = _wvar7.SedDeSorp[_wvar6.DerivStep] + SedDesorpInKg;
-                    Co = (Derivative_ColonizeSedRefrDetr() * _wvar5.GetPPB(AllVariables.SedmRefrDetr, SVType, Layer) * 1e-6);
-                    SumSed = Derivative_SumPlantSedTox();
+                    Co = (Derivative_ColonizeSedRefrDetr() * AQTSeg.GetPPB(AllVariables.SedmRefrDetr, SVType, Layer) * 1e-6);
+                    SumSed = Derivative_SumPlantSedTox(CP as TDetritus);
                     Decmp = Derivative_Decomp(AllVariables.SedmLabDetr) * pp * 1e-6;
                     Sedm = Derivative_Sediment(AllVariables.SuspLabDetr);
                     if (Sedm > 0)
-                    {
-                        // sedimentation
-                        Sedm = Sedm * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
+                    {   // both sedimentation and resuspension covered by Sedm term depending on sign of variable
+                        Sedm = Sedm * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;  //resuspension
                     }
-                    else
-                    {
-                        Sedm = Sedm * pp * 1e-6;
-                    }
-                    // resuspension
-                    Resusp = Derivative_Resuspension(AllVariables.SuspLabDetr) * pp * 1e-6;
-                    TStates _wvar9 = AQTSeg;
-                    ToxLossRecord _wvar10 = _wvar9.ToxLossArray[OrgType()];
-                    MorphRecord _wvar11 = _wvar9.Location.Morph;
-                    // save scour for 1/2 life calculation, can be in Resusp, Sedm, or ScrT depending on bed model used
-                    SedScourInKg = Resusp + ScrT * _wvar9.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    if (Sedm < 0)
-                    {
-                        SedScourInKg = Resusp + ScrT - Sedm * _wvar9.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar10.SedScour[_wvar9.DerivStep] = _wvar10.SedScour[_wvar9.DerivStep] + SedScourInKg;
-                    if ((_wvar5.SedModelIncluded()) && (ToTPoreWater.VolumeInM3() < Consts.Tiny))
-                    {
-                        // no pore water exists for decomposition, sorption, desorption
-                        Decmp = 0;
-                        So = 0;
-                        Des = 0;
-                    }
+                    else Sedm = Sedm * pp * 1e-6;  // sedimentation
+                    
+                    //Resusp = Derivative_Resuspension(AllVariables.SuspLabDetr) * pp * 1e-6; // resuspension in multi-sed-layer model disabled
+
                     DB = Lo + So - Des + Co + SumDef - (Decmp + Ing) + Sedm - Resusp + Mic_in_Aer + Mic_in_Anaer - Hydr - MM + SumSed + DepT - ScrT - BrT + ExpT;
                     // SedLabileDetrTox
                 }
-                else if ((new ArrayList(new object[] { AllVariables.SedmRefrDetr }).Contains(NState)))
+                else if ((NState == AllVariables.SedmRefrDetr)) 
                 {
-                    if ((!_wvar5.SedModelIncluded()) && (PBD1 != null))
-                    {
-                        DepT = Derivative_DeposTox();
-                        ScrT = Derivative_ScourTox();
-                        BrT = Derivative_BurialTox();
-                        ExpT = Derivative_ExposeTox();
-                    }
+                    // buried detritus code removed here
                     So = Sorption();
-                    ToTPoreWater = _wvar5.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
-                    if ((So > 0) && _wvar5.SedModelIncluded())
-                    {
-                        So = So * ToTPoreWater.VolumeInM3() / _wvar5.SegVol();
-                    }
-                    // ug/L wc
-                    // ug/L pw
-                    // m3 pw
-                    // m3 wc
                     Des = Desorption();
-                    TStates _wvar12 = AQTSeg;
-                    ToxLossRecord _wvar13 = _wvar12.ToxLossArray[OrgType()];
-                    MorphRecord _wvar14 = _wvar12.Location.Morph;
-                    // save for 1/2 life calculation
-                    SedDesorpInKg = Des * _wvar12.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar13.SedDeSorp[_wvar12.DerivStep] = _wvar13.SedDeSorp[_wvar12.DerivStep] + SedDesorpInKg;
-                    if ((NState == AllVariables.SedmRefrDetr))
-                    {
-                        Co = Derivative_ColonizeSedRefrDetr() * pp * 1e-6;
-                    }
-                    SumSed = Derivative_SumPlantSedTox();
+                    Co = Derivative_ColonizeSedRefrDetr() * pp * 1e-6;
+                    SumSed = Derivative_SumPlantSedTox(CP as TDetritus);
                     SumDef = Derivative_SumDefecationTox();
-                    if ((NState == AllVariables.SedmRefrDetr))
-                    {
-                        SumDef = SumDef * (1 - Consts.Def2SedLabDetr);
-                    }
+                    SumDef = SumDef * (1 - Consts.Def2SedLabDetr);
+
                     Ing = Derivative_IngestOfCarrier() * pp * 1e-6;
                     Sedm = Derivative_Sediment(SuspDetrVar);
                     if (Sedm > 0)
-                    {
-                        // sedimentation
-                        Sedm = Sedm * _wvar5.GetPPB(SuspDetrVar, SVType, Layer) * 1e-6;
+                    {   // both sedimentation and resuspension covered by Sedm term depending on sign of variable
+                        Sedm = Sedm * AQTSeg.GetPPB(SuspDetrVar, SVType, Layer) * 1e-6;  //resuspension
                     }
-                    else
-                    {
-                        Sedm = Sedm * pp * 1e-6;
-                    }
+                    else Sedm = Sedm * pp * 1e-6;  //sedimentation
+
                     // resuspension
-                    Resusp = Derivative_Resuspension(SuspDetrVar) * pp * 1e-6;
-                    if ((_wvar5.SedModelIncluded()) && (ToTPoreWater.VolumeInM3() < Consts.Tiny))
-                    {
-                        // no pore water exists for decomposition, sorption, desorption
-                        So = 0;
-                        Des = 0;
-                    }
-                    TStates _wvar15 = AQTSeg;
-                    ToxLossRecord _wvar16 = _wvar15.ToxLossArray[OrgType()];
-                    MorphRecord _wvar17 = _wvar15.Location.Morph;
-                    // save scour for 1/2 life calculation, can be in Resusp, Sedm, or ScrT depending on bed model used
-                    SedScourInKg = Resusp + ScrT * _wvar15.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    if (Sedm < 0)
-                    {
-                        SedScourInKg = Resusp + ScrT - Sedm * _wvar15.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar16.SedScour[_wvar15.DerivStep] = _wvar16.SedScour[_wvar15.DerivStep] + SedScourInKg;
-                    // kinetic derivative for SedmRefrDetrTox
+                    // Resusp = Derivative_Resuspension(SuspDetrVar) * pp * 1e-6;   // resuspension in multi-sed-layer model disabled
+
+                    // kinetic derivative for Chemical in SedmRefrDetr
                     DB = Lo + So - Des + SumDef + SumSed - (Co + Ing) + Sedm - Resusp - Hydr - MM + Mic_in_Aer + Mic_in_Anaer + DepT - ScrT - BrT + ExpT;
                     // SedmRefrDetr / SedmDetr
                 }
-                else if ((NState == AllVariables.SuspLabDetr))
+                else if (NState == AllVariables.SuspLabDetr)
                 {
-                    if ((!_wvar5.SedModelIncluded()) && (PBD1 != null))
-                    {
-                        DepT = Derivative_DeposTox();
-                        ScrT = Derivative_ScourTox();
-                    }
+                    // buried detritus code removed here
+
                     Photo = Photolysis();
-                    WashO = CP.Washout() * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
-                    WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-                    TStates _wvar18 = AQTSeg;
-                    ToxLossRecord _wvar19 = _wvar18.ToxLossArray[SVType];
-                    MorphRecord _wvar20 = _wvar18.Location.Morph;
-                    // save for tox loss output & categorization
-                    if (Entr < 0)
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = (-Entr + WashO) * _wvar18.SegVol() * 1000.0 * 1e-9;
-                    }
-                    else
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = WashO * _wvar18.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // frac
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar19.TotalToxLoss[_wvar18.DerivStep] = _wvar19.TotalToxLoss[_wvar18.DerivStep] + OOSDriftInKg;
-                    _wvar19.TotalWashout[_wvar18.DerivStep] = _wvar19.TotalWashout[_wvar18.DerivStep] + OOSDriftInKg;
-                    _wvar19.WashoutDetr[_wvar18.DerivStep] = _wvar19.WashoutDetr[_wvar18.DerivStep] + OOSDriftInKg;
-                    WashI = ToxInCarrierWashin();
-                    if (!_wvar5.LinkedMode)
-                    {
-                        TD = ToxDiff();
-                    }
-                    else if (!_wvar5.CascadeRunning)
-                    {
-                        DiffUp = ToxSegDiff(true);
-                        DiffDown = ToxSegDiff(false);
-                    }
-                    TStates _wvar21 = AQTSeg;
-                    ToxLoadRecord _wvar22 = _wvar21.ToxLoadArray[SVType];
-                    // save for tox loss output & categorization
-                    LoadInKg = (WashI + DiffUp + DiffDown) * _wvar21.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar22.TotOOSLoad[_wvar21.DerivStep] = _wvar22.TotOOSLoad[_wvar21.DerivStep] + LoadInKg;
-                    _wvar22.ToxLoadDetr[_wvar21.DerivStep] = _wvar22.ToxLoadDetr[_wvar21.DerivStep] + LoadInKg;
-                    STH = ((CP) as TSuspendedDetr).DetrSinkToHypo * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
-                    TStates _wvar23 = AQTSeg;
-                    if (_wvar23.VSeg == Consts.VerticalSegments.Hypolimnion)
-                    {
-                        EpiCP = _wvar23.EpiSegment.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
-                        // Refinement 10-20-2002 JSC
-                        SFE = EpiCP.DetrSinkToHypo * _wvar23.EpiSegment.GetPPB(AllVariables.SuspLabDetr, SVType, T_SVLayer.WaterCol) * 1e-6;
-                    }
+                    WashO = CP.Washout() * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
+
+                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. Sink to Hypolimnion Removed
+
                     So = Sorption();
                     Des = Desorption();
+
                     Sedm = Derivative_Sediment(AllVariables.SuspLabDetr);
-                    Decmp = Derivative_Decomp(AllVariables.SuspLabDetr) * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
-                    if (_wvar5.Diagenesis_Included() && (Sedm < 0))
-                    {
-                        Sedm = 0;
-                    }
-                    // no resuspension in diagenesis model
-                    if (Sedm >= 0)
-                    {
-                        // sedimentation
-                        Sedm = Sedm * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
-                    }
-                    else
-                    {
-                        Sedm = Sedm * _wvar5.GetPPB(AllVariables.SedmLabDetr, SVType, Layer) * 1e-6;
-                    }
-                    // resuspension
-                    if (_wvar5.Diagenesis_Included())
-                    {
-                        Resusp = 0;
-                    }
-                    else
-                    {
-                        Resusp = Derivative_Resuspension(AllVariables.SuspLabDetr) * _wvar5.GetPPB(AllVariables.SedmLabDetr, SVType, Layer) * 1e-6;
-                    }
+                    Decmp = Derivative_Decomp(AllVariables.SuspLabDetr) * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
+
+                    if (AQTSeg.Diagenesis_Included() && (Sedm < 0)) Sedm = 0;  // no resuspension in diagenesis model
+                    if (Sedm >= 0)  // sedimentation
+                        Sedm = Sedm * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
+                    else // resuspension
+                        Sedm = Sedm * AQTSeg.GetPPB(AllVariables.SedmLabDetr, SVType, Layer) * 1e-6;
+
+                    // resuspension in multi-sed-layer model disabled;  code removed
                     MTD = Derivative_MortalityToDetrTox(AllVariables.SuspLabDetr);
                     GTD = Derivative_GamLossToDetrTox();
-                    // (*            CalculateSloughing_and_ToxDislodge; {PlSlg, ToxD are set} *)
-                    Ing = Derivative_IngestOfCarrier() * _wvar5.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
-                    Co = Derivative_ColonizeSuspRefrDetr() * _wvar5.GetPPB(AllVariables.SuspRefrDetr, SVType, Layer) * 1e-6 + Derivative_ColonizeDissRefrDetr() * _wvar5.GetPPB(AllVariables.DissRefrDetr, SVType, Layer) * 1e-6;
-                    // kinetic derivative for SuspLabDetrTox
-                    // + PlSlg + PlToxD
+
+                    Ing = Derivative_IngestOfCarrier() * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
+                    Co = Derivative_ColonizeSuspRefrDetr() * AQTSeg.GetPPB(AllVariables.SuspRefrDetr, SVType, Layer) * 1e-6 + Derivative_ColonizeDissRefrDetr() * AQTSeg.GetPPB(AllVariables.DissRefrDetr, SVType, Layer) * 1e-6;
+
                     DB = Lo + So - Des + MTD + GTD + WashI + Resusp - (Sedm + WashO + Decmp + Ing) + Entr + Co - Hydr - Photo - MM + TD + DepT + ScrT + DiffUp + DiffDown - STH + SFE + Mic_in_Aer + Mic_in_Anaer;
                     // SuspLabDetr Toxicant Deriv
                 }
-                else if ((new ArrayList(new object[] { AllVariables.SuspRefrDetr }).Contains(NState)))
+                else if (NState == AllVariables.SuspRefrDetr) 
                 {
-                    if ((!_wvar5.SedModelIncluded()) && (PBD1 != null))
-                    {
-                        DepT = Derivative_DeposTox();
-                        ScrT = Derivative_ScourTox();
-                    }
+                    // Buried detritus code removed
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
-                    WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-                    TStates _wvar24 = AQTSeg;
-                    ToxLossRecord _wvar25 = _wvar24.ToxLossArray[SVType];
-                    MorphRecord _wvar26 = _wvar24.Location.Morph;
-                    // save for tox loss output & categorization
-                    if (Entr < 0)
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = (-Entr + WashO) * _wvar24.SegVol() * 1000.0 * 1e-9;
-                    }
-                    else
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = WashO * _wvar24.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // frac
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar25.TotalToxLoss[_wvar24.DerivStep] = _wvar25.TotalToxLoss[_wvar24.DerivStep] + OOSDriftInKg;
-                    _wvar25.TotalWashout[_wvar24.DerivStep] = _wvar25.TotalWashout[_wvar24.DerivStep] + OOSDriftInKg;
-                    _wvar25.WashoutDetr[_wvar24.DerivStep] = _wvar25.WashoutDetr[_wvar24.DerivStep] + OOSDriftInKg;
-                    WashI = ToxInCarrierWashin();
-                    if (!_wvar5.LinkedMode)
-                    {
-                        TD = ToxDiff();
-                    }
-                    else if (!_wvar5.CascadeRunning)
-                    {
-                        DiffUp = ToxSegDiff(true);
-                        DiffDown = ToxSegDiff(false);
-                    }
-                    TStates _wvar27 = AQTSeg;
-                    ToxLoadRecord _wvar28 = _wvar27.ToxLoadArray[SVType];
-                    // save for tox loss output & categorization
-                    LoadInKg = (WashI + DiffUp + DiffDown) * _wvar27.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar28.TotOOSLoad[_wvar27.DerivStep] = _wvar28.TotOOSLoad[_wvar27.DerivStep] + LoadInKg;
-                    _wvar28.ToxLoadDetr[_wvar27.DerivStep] = _wvar28.ToxLoadDetr[_wvar27.DerivStep] + LoadInKg;
-                    STH = ((CP) as TSuspendedDetr).DetrSinkToHypo * _wvar5.GetPPB(NState, SVType, Layer) * 1e-6;
-                    if (_wvar5.VSeg == Consts.VerticalSegments.Hypolimnion)
-                    {
-                        EpiCP = _wvar5.EpiSegment.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
-                        // Refinement 10-20-2002 JSC
-                        SFE = EpiCP.DetrSinkToHypo * _wvar5.EpiSegment.GetPPB(AllVariables.SuspRefrDetr, SVType, T_SVLayer.WaterCol) * 1e-6;
-                    }
+
+                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. Sink to Hypolimnion Removed
+
                     So = Sorption();
                     Des = Desorption();
                     Sedm = Derivative_Sediment(NState);
-                    if (_wvar5.Diagenesis_Included() && (Sedm < 0))
-                    {
-                        Sedm = 0;
-                    }
-                    // no resuspension in diagenesis model
-                    if (Sedm >= 0)
-                    {
-                        // sedimentation
-                        Sedm = Sedm * _wvar5.GetPPB(NState, SVType, Layer) * 1e-6;
-                    }
-                    else
-                    {
-                        Sedm = Sedm * _wvar5.GetPPB(SedDetrVar, SVType, Layer) * 1e-6;
-                    }
-                    // resuspension
-                    if (_wvar5.Diagenesis_Included())
-                    {
-                        Resusp = 0;
-                    }
-                    else
-                    {
-                        Resusp = Derivative_Resuspension(NState) * _wvar5.GetPPB(SedDetrVar, SVType, Layer) * 1e-6;
-                    }
-                    if ((NState == AllVariables.SuspRefrDetr))
-                    {
-                        Co = Derivative_ColonizeSuspRefrDetr() * pp * 1e-6;
-                    }
+                    
+                    if (AQTSeg.Diagenesis_Included() && (Sedm < 0)) Sedm = 0; // no resuspension in diagenesis model
+                    if (Sedm >= 0) // sedimentation
+                        Sedm = Sedm * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
+                    else // resuspension
+                        Sedm = Sedm * AQTSeg.GetPPB(SedDetrVar, SVType, Layer) * 1e-6;
+
+                    // resuspension in multi-sed-layer model disabled;  code removed
+
+                    Co = Derivative_ColonizeSuspRefrDetr() * pp * 1e-6;
                     MTD = Derivative_MortalityToDetrTox(NState);
                     Ing = Derivative_IngestOfCarrier() * pp * 1e-6;
-                    // kinetic Deriv for SuspRefrDetrTox
-                    // + PlSlg + PlToxD
+
                     DB = Lo + So - Des + MTD + WashI + Resusp - (Sedm + WashO + Co + Ing) + Entr - Hydr + GTD - Photo - MM + TD + DiffUp + DiffDown + DepT + ScrT - STH + SFE + Mic_in_Aer + Mic_in_Anaer;
-                    // SuspRefrDetr / SuspRefr Toxicant Deriv
+                    // SuspRefrDetr Toxicant Deriv
                 }
                 else if ((NState == AllVariables.DissLabDetr))
                 {
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
-                    WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-                    TStates _wvar29 = AQTSeg;
-                    ToxLossRecord _wvar30 = _wvar29.ToxLossArray[SVType];
-                    MorphRecord _wvar31 = _wvar29.Location.Morph;
-                    // save for tox loss output & categorization
-                    if (Entr < 0)
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = (-Entr + WashO) * _wvar29.SegVol() * 1000.0 * 1e-9;
-                    }
-                    else
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = WashO * _wvar29.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // frac
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar30.TotalToxLoss[_wvar29.DerivStep] = _wvar30.TotalToxLoss[_wvar29.DerivStep] + OOSDriftInKg;
-                    _wvar30.TotalWashout[_wvar29.DerivStep] = _wvar30.TotalWashout[_wvar29.DerivStep] + OOSDriftInKg;
-                    _wvar30.WashoutDetr[_wvar29.DerivStep] = _wvar30.WashoutDetr[_wvar29.DerivStep] + OOSDriftInKg;
-                    _wvar30.DissWash[_wvar29.DerivStep] = _wvar30.DissWash[_wvar29.DerivStep] + OOSDriftInKg;
-                    WashI = ToxInCarrierWashin();
-                    if (!_wvar5.LinkedMode)
-                    {
-                        TD = ToxDiff();
-                    }
-                    else if (!_wvar5.CascadeRunning)
-                    {
-                        DiffUp = ToxSegDiff(true);
-                        DiffDown = ToxSegDiff(false);
-                    }
-                    TStates _wvar32 = AQTSeg;
-                    ToxLoadRecord _wvar33 = _wvar32.ToxLoadArray[SVType];
-                    // save for tox loss output & categorization
-                    LoadInKg = (WashI + DiffUp + DiffDown) * _wvar32.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar33.TotOOSLoad[_wvar32.DerivStep] = _wvar33.TotOOSLoad[_wvar32.DerivStep] + LoadInKg;
-                    _wvar33.ToxLoadDetr[_wvar32.DerivStep] = _wvar33.ToxLoadDetr[_wvar32.DerivStep] + LoadInKg;
-                    ToTDOMPoreTox = _wvar5.GetStatePointer(AllVariables.LaDOMPore, SVType, T_SVLayer.SedLayer1);
-                    if (ToTDOMPoreTox != null)
-                    {
-                        DiffSed = -ToTDOMPoreTox.UpperToxDiff(true);
-                    }
+
+                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. 
+                    // pore water diffusion removed, no multi-layer sediment model in HMS at this time
+
                     So = Sorption();
                     Des = Desorption();
                     MTD = Derivative_MortalityToDetrTox(AllVariables.DissLabDetr);
                     SETTD = Derivative_SumExcToxToDiss(AllVariables.DissLabDetr);
-                    Decmp = Derivative_Decomp(AllVariables.DissLabDetr) * _wvar5.GetPPB(AllVariables.DissLabDetr, SVType, Layer) * 1e-6;
-                    // Co    := ColonizeDissRefrDetr * GetPPB(DissRefrDetrTox) * 1e-6;
-                    // Colonization of DissRefrDetr-->suspLabDetr June 24, 1998
-                    Derivative_CalcPW(AllVariables.LaDOMPore);
-                    // Calculates values for PWExp,ToPW
+                    Decmp = Derivative_Decomp(AllVariables.DissLabDetr) * AQTSeg.GetPPB(AllVariables.DissLabDetr, SVType, Layer) * 1e-6;
+
+                    // Co    := ColonizeDissRefrDetr * GetPPB(DissRefrDetrTox) * 1e-6; // Colonization of DissRefrDetr-->suspLabDetr June 24, 1998
+
                     DB = Lo + So - Des + MTD + SETTD + WashI - (WashO + Decmp) + Entr - Hydr - Photo - MM + TD + DiffUp + DiffDown + DiffSed + Mic_in_Aer + Mic_in_Anaer + PWExp - ToPW;
                     // DissLabDetr Tox Deriv
                 }
@@ -959,106 +481,28 @@ namespace AQUATOX.Bioaccumulation
                 {
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
-                    WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-                    TStates _wvar34 = AQTSeg;
-                    ToxLossRecord _wvar35 = _wvar34.ToxLossArray[SVType];
-                    MorphRecord _wvar36 = _wvar34.Location.Morph;
-                    // save for tox loss output & categorization
-                    if (Entr < 0)
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = (-Entr + WashO) * _wvar34.SegVol() * 1000.0 * 1e-9;
-                    }
-                    else
-                    {
-                        // * OOSDischFrac
-                        OOSDriftInKg = WashO * _wvar34.SegVol() * 1000.0 * 1e-9;
-                    }
-                    // kg
-                    // ug/L
-                    // frac
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar35.TotalToxLoss[_wvar34.DerivStep] = _wvar35.TotalToxLoss[_wvar34.DerivStep] + OOSDriftInKg;
-                    _wvar35.TotalWashout[_wvar34.DerivStep] = _wvar35.TotalWashout[_wvar34.DerivStep] + OOSDriftInKg;
-                    _wvar35.WashoutDetr[_wvar34.DerivStep] = _wvar35.WashoutDetr[_wvar34.DerivStep] + OOSDriftInKg;
-                    _wvar35.DissWash[_wvar34.DerivStep] = _wvar35.DissWash[_wvar34.DerivStep] + OOSDriftInKg;
-                    WashI = ToxInCarrierWashin();
-                    if (!_wvar5.LinkedMode)
-                    {
-                        TD = ToxDiff();
-                    }
-                    else if (!_wvar5.CascadeRunning)
-                    {
-                        DiffUp = ToxSegDiff(true);
-                        DiffDown = ToxSegDiff(false);
-                    }
-                    TStates _wvar37 = AQTSeg;
-                    ToxLoadRecord _wvar38 = _wvar37.ToxLoadArray[SVType];
-                    // save for tox loss output & categorization
-                    LoadInKg = (WashI + DiffUp + DiffDown) * _wvar37.SegVol() * 1000.0 * 1e-9;
-                    // kg
-                    // ug/L
-                    // m3
-                    // L/m3
-                    // kg/ug
-                    _wvar38.TotOOSLoad[_wvar37.DerivStep] = _wvar38.TotOOSLoad[_wvar37.DerivStep] + LoadInKg;
-                    _wvar38.ToxLoadDetr[_wvar37.DerivStep] = _wvar38.ToxLoadDetr[_wvar37.DerivStep] + LoadInKg;
-                    TopDOM = AllVariables.ReDOMPore;
-                    ToTDOMPoreTox = _wvar5.GetStatePointer(TopDOM, SVType, T_SVLayer.SedLayer1);
-                    if (ToTDOMPoreTox != null)
-                    {
-                        DiffSed = -ToTDOMPoreTox.UpperToxDiff(true);
-                    }
+
+                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. 
+                    // pore water diffusion removed, no multi-layer sediment model in HMS at this time
+
                     So = Sorption();
                     Des = Desorption();
                     MTD = Derivative_MortalityToDetrTox(NState);
                     SETTD = Derivative_SumExcToxToDiss(NState);
-                    if (NState == AllVariables.DissRefrDetr)
-                    {
-                        Co = Derivative_ColonizeDissRefrDetr() * _wvar5.GetPPB(NState, SVType, Layer) * 1e-6;
-                    }
-                    Derivative_CalcPW(TopDOM);
-                    // Calculates values for PWExp,ToPW
+                    Co = Derivative_ColonizeDissRefrDetr() * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
+
                     DB = Lo + So - Des + MTD + SETTD + WashI - (WashO + Co) + Entr - Hydr - Photo - MM + TD + DiffUp + DiffDown + DiffSed + Mic_in_Aer + Mic_in_Anaer + PWExp - ToPW;
                 }
                 // DissRefrDetrTox
             }
-            // If Not Eutrophication
-            Derivative_WriteRates();
         }
 
     } // end TParticleTox
 
     public class TPOCTox : TParticleTox
     {
-        public TToxics(int Ns, int Carry, T_SVType SVT, T_SVLayer L, string aName, TStates P, double IC, bool IsTempl) : base(Ns, Carry, SVT, L, aName, P, IC, IsTempl)
-        {
-        }
-        public TToxics(bool IsTemp, ref Stream st, double ReadVersionNum) : base(IsTemp, st, ReadVersionNum)
-        {
-        }
-
-        // ----------------------------------------------------------------
-        public void Derivative_WriteRates()
-        {
-            Setup_Record _wvar1 = AQTSeg.SetupRec;
-            if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
-            {
-                ClearRate();
-                SaveRate("State", State);
-                SaveRate("Sorption", So);
-                SaveRate("Desorption", Des);
-                SaveRate("Deposit Tox", DepTox);
-                SaveRate("Mineraliz", Minrl);
-                SaveRate("BurialTox", Bur);
-                SaveRate("Predation", Pred);
-                SaveRate("Hydrolysis", Hydr);
-                SaveRate("MicrobMet", MM);
-                SaveRate("AnaerMM In", Mic_In_Anaer);
-            }
-        }
+        public TPOCTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
+        { }
 
         // -------------------------------------------------------------------------
         public override void Derivative(ref double db)
@@ -1075,11 +519,12 @@ namespace AQUATOX.Bioaccumulation
             TPOC_Sediment CP;
             double PP;
             // ----------------------------------------------------------------
-            double FA;
+            double FA=0;
             double H2;
             double BuryInKg;
             double SedDesorpInKg;
-            CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer);
+
+            CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPOC_Sediment;
             So = 0;
             Des = 0;
             DepTox = 0;
@@ -1092,62 +537,27 @@ namespace AQUATOX.Bioaccumulation
             if (IsAGGR)
             {
                 db = 0.0;
-                Derivative_WriteRates();
+//              Derivative_WriteRates();
                 return;
             }
-            if (Consts.Eutrophication || Chemptrs[SVType].ChemRec.BCFUptake || (CP.State == 0))
-            {
-                db = 0.0;
-            }
+            if (ChemRec.BCFUptake || (CP.State == 0)) db = 0.0;
             else
             {
-                So = Sorption();
+                So = Sorption();      // ug/m2 d
+                Des = Desorption();   // ug/m2 d
+                  DepTox = AQTSeg.CalcDeposition(NState, SVType);
                 // ug/m2 d
-                Des = Desorption();
-                // ug/m2 d
-                TStates _wvar2 = AQTSeg;
-                ToxLossRecord _wvar3 = _wvar2.ToxLossArray[OrgType()];
-                MorphRecord _wvar4 = _wvar2.Location.Morph;
-                // save for 1/2 life calculation
-                //@ Unsupported property or method(D): 'SurfArea'
-                SedDesorpInKg = Des * _wvar2.Location.Locale.SurfArea * 1e-9;
-                // kg
-                // ug/m2
-                // m2
-                // kg/ug
-                _wvar3.SedDeSorp[_wvar2.DerivStep] = _wvar3.SedDeSorp[_wvar2.DerivStep] + SedDesorpInKg;
-                DepTox = AQTSeg.CalcDeposition(NState, SVType);
-                // ug/m2 d
+
                 PP = GetPPB(NState, SVType, Layer);
                 H2 = AQTSeg.Diagenesis_Params.H2.Val;
                 Minrl = CP.Mineralization() * PP * H2 * 1e-3;
                 Bur = CP.Burial() * PP * H2 * 1e-3;
-                // ug/m2 d
-                // g /m3 d
-                // ug/kg
-                // m
-                // kg/g
-                TStates _wvar5 = AQTSeg;
-                MorphRecord _wvar6 = _wvar5.Location.Morph;
-                Pred = CP.Predn() * PP * _wvar6.SegVolum[_wvar5.VSeg] / _wvar5.SedLayerArea() * 1e-3;
-                // ug/m2 d
-                // g OC/m3 w
-                // ug tox/kg OC
-                // m3
-                // m2
-                // kg/g
-                TStates _wvar7 = AQTSeg;
-                ToxLossRecord _wvar8 = _wvar7.ToxLossArray[OrgType()];
-                MorphRecord _wvar9 = _wvar7.Location.Morph;
-                // save for Tox MB Tracking
-                //@ Unsupported property or method(D): 'SurfArea'
-                BuryInKg = Bur * _wvar7.Location.Locale.SurfArea * 1e-9;
-                // kg
-                // ug/m2
-                // m2
-                // kg/ug
-                _wvar8.TotalToxLoss[_wvar7.DerivStep] = _wvar8.TotalToxLoss[_wvar7.DerivStep] + BuryInKg;
-                _wvar8.OOSBury[_wvar7.DerivStep] = _wvar8.OOSBury[_wvar7.DerivStep] + BuryInKg;
+             // ug/m2 d  (g /m3 d)(ug/kg) (m) (kg/g)
+
+                MorphRecord MR = Location.Morph;
+                Pred = CP.Predn() * PP *   MR.SegVolum / Location.Locale.SurfArea * 1e-3;
+          // (ug/m2 d) (g OC/m3 w)(ug tox/kg OC) (m3)                     (m2)      (kg/g)
+
                 MM = MicrobialMetabolism(ref FA);
                 // anaerobic only
                 // ug/m2 d
@@ -1158,9 +568,7 @@ namespace AQUATOX.Bioaccumulation
                 // ug/m2 d
                 // input is ug/kg
             }
-            Derivative_WriteRates();
         }
-
     } // end TPOCTox
 
     public class TAlgae_ZooTox : TToxics
@@ -1168,38 +576,19 @@ namespace AQUATOX.Bioaccumulation
         public TToxics(int Ns, int Carry, T_SVType SVT, T_SVLayer L, string aName, TStates P, double IC, bool IsTempl) : base(Ns, Carry, SVT, L, aName, P, IC, IsTempl)
         {
         }
-        public TToxics(bool IsTemp, ref Stream st, double ReadVersionNum) : base(IsTemp, st, ReadVersionNum)
-        {
-        }
 
-        public double PlantUptake_MacroUptake()
+        public double MacroUptake()
         {
             
             double K1;
             double DissocFactor;
             if (NonDissoc() < 0.2)
-            {
                 DissocFactor = 0.2;
-            }
             else
-            {
                 DissocFactor = NonDissoc();
-            }
-            TChemical _wvar1 = Chemptrs[SVType];
-            ChemicalRecord _wvar2 = _wvar1.ChemRec;
-            if (_wvar2.IsPFA)
-            {
-                PFAK2 = AlgalPtr.Plant_Tox[SVType].K2;
-                // L/kg-d
-                // L/kg
-                // 1/d
-                K1 = _wvar2.PFAMacroBCF * PFAK2;
-            }
-            else
-            {
-                TChemical _wvar3 = Chemptrs[SVType];
-                K1 = 1 / (0.0020 + (500 / (_wvar3.Kow * DissocFactor)));
-            }
+
+            K1 = 1 / (0.0020 + (500 / (Kow * DissocFactor)));
+
             // K1 function is mirrored in CHEMTOX.PAS, any change here needs to be made there
             K2 = AlgalPtr.Plant_Tox[SVType].K2;
             if (K2 > 96)
@@ -1207,8 +596,9 @@ namespace AQUATOX.Bioaccumulation
                 K1 = K1 * (96 / K2);
             }
             // scaling factor 10-02-03
+
             TStates _wvar4 = AQTSeg;
-            result = K1 * _wvar4.Diff[SVType] * ToxState * AlgalPtr.State * 1e-6;
+            return  K1 * _wvar4.Diff[SVType] * ToxState * AlgalPtr.State * 1e-6;
             // ug/L-d
             // L/kg-d
             // unitless
@@ -1216,7 +606,6 @@ namespace AQUATOX.Bioaccumulation
             // mg/L
             // kg/mg
 
-            return result;
         }
 
         // animals only
