@@ -45,15 +45,17 @@ namespace Web.Services.Controllers
     /// <summary>
     /// WorkFlow Output object
     /// </summary>
-    public class WatershedWorkflowOutput : TimeSeriesOutput
+    public class WatershedWorkflowOutput : ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>
     {
-        /*public Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data { get; set; }*/
-        /*public Dictionary<string, string> data { get; set; }*/
-
-        /*public Dictionary<string, string> metadata { get; set; }*/
-        /*public Dictionary<string, Dictionary<string, string>> table { get; set; }*/
-        public Dictionary<string, string> table { get; set; }
-
+        public string Dataset { get; set; }
+        public string DataSource { get; set; }
+        public Dictionary<string, string> Metadata { get; set; }
+        public Dictionary<string, Dictionary<string, ITimeSeriesOutput>> Data { get; set; }
+        public Dictionary<string, Dictionary<string, string>> Table { get; set; }
+        public ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>> Clone()
+        {
+            return this;
+        }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -126,7 +128,7 @@ namespace Web.Services.Controllers
         public async Task<IActionResult> POST([FromBody]WatershedWorkflowInput workflowInput)
         {
             WSWatershedWorkFlow workFlow = new WSWatershedWorkFlow();
-            ITimeSeriesOutput results = await workFlow.GetWorkFlowData(workflowInput);
+            WatershedWorkflowOutput results = await workFlow.GetWorkFlowData(workflowInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
             return new ObjectResult(results);
         }

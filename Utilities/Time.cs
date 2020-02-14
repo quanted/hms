@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Text.Json;
+using System.Globalization;
 
 namespace Utilities
 {
@@ -17,7 +18,7 @@ namespace Utilities
         /// <param name="errorMsg"></param>
         /// <param name="point">IPointCoordinate containing a latitude and longitude value.</param>
         /// <returns></returns>
-        public ITimezone GetTimezone(out string errorMsg, IPointCoordinate point)
+        public static ITimezone GetTimezone(out string errorMsg, IPointCoordinate point)
         {
             errorMsg = "";
             JsonSerializerOptions options = new JsonSerializerOptions()
@@ -73,5 +74,27 @@ namespace Utilities
             }
 
         }
+
+        /// <summary>
+        /// Shift the timeseries by the specified shift, in hours.
+        /// </summary>
+        /// <param name="shift"></param>
+        /// <param name="data"></param>
+        /// <param name="dateOutputFormat"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> TimeSeriesShift(double shift, Dictionary<string, List<string>> data, string dateOutputFormat)
+        {
+            CultureInfo enUS = new CultureInfo("en-US");
+            Dictionary<string, List<string>> newTimeseries = new Dictionary<string, List<string>>();
+            foreach(KeyValuePair<string, List<string>> d in data)
+            {
+                DateTime newDate = new DateTime();
+                bool p = DateTime.TryParseExact(d.Key, dateOutputFormat, enUS, DateTimeStyles.None, out newDate);
+                newDate = newDate.AddHours(shift);
+                newTimeseries.Add(newDate.ToString(dateOutputFormat), d.Value);
+            }
+            return newTimeseries;
+        }
+
     }
 }
