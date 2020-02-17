@@ -34,6 +34,7 @@ namespace Web.Services.Models
         /// <returns></returns>
         public async Task<WatershedWorkflowOutput> GetWorkFlowData(WatershedWorkflowInput input)
         {
+            WatershedWorkflowOutput tempOut = new WatershedWorkflowOutput();
             DateTime start = input.DateTimeSpan.StartDate;
             DateTime end = input.DateTimeSpan.EndDate;
 
@@ -41,16 +42,23 @@ namespace Web.Services.Models
             string errorMsg = "";
 
             // Constructs default error output object containing error message.
-            Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+            Utilities.MetaErrorOutput err = new Utilities.MetaErrorOutput();
 
             // Validate all sources.
             //errorMsg = (!Enum.TryParse(input.StreamHydrology, true, out algorithms sAlgos)) ? "ERROR: Algorithm is not currently supported." : "";
             //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg) as WatershedWorkflowOutput; }
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg) as WatershedWorkflowOutput; }
-
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             // SET Attributes to specific values until stack works
             input.TemporalResolution = "daily";
             if(input.RunoffSource == "nldas" || input.RunoffSource == "gldas")
@@ -75,14 +83,21 @@ namespace Web.Services.Models
             {
                 errorMsg = "ERROR: No valid geometry was found";
             }
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg) as WatershedWorkflowOutput; }
-
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             //NCEI station attributes
             if (input.Geometry.GeometryMetadata["precipSource"] == "ncei")
             {                
                 input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-                input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);
-               
+                input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);  
+            }
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
             }
 
             //Getting Stream Flow data
@@ -274,6 +289,7 @@ namespace Web.Services.Models
             //Set NCEI station to closest station regardless of type
             double coverage = 0.0;
             double distance = 100000.0;
+            bool stationFound = false;
             foreach (Utilities.NCEIStations details in result.data)//Opt for closest GHCND station, if any
             {
                 if (details.id.Contains("GHCND"))
@@ -283,14 +299,20 @@ namespace Web.Services.Models
                         input.Geometry.StationID = details.id.ToString();
                         coverage = details.data.datacoverage;
                         distance = details.distance;
+                        stationFound = true;
                     }
                     else if (details.data.datacoverage == coverage && details.distance < distance)
                     {
                         input.Geometry.StationID = details.id.ToString();
                         coverage = details.data.datacoverage;
                         distance = details.distance;
+                        stationFound = true;
                     }
                 }
+            }
+            if (!stationFound)
+            {
+                errorMsg = "ERROR: Unable to find a valid GHCND station.";
             }
             return input.Geometry.StationID;
         }

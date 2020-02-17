@@ -72,7 +72,7 @@ namespace Utilities
                     StreamReader reader = new StreamReader(dataStream);
                     data = reader.ReadToEnd();
                     taskData = JsonSerializer.Deserialize<T>(data, options);
-                    if (taskData.status == "SUCCESS")
+                    if (taskData.status == "SUCCESS" && taskData.data != null)
                     {
                         success = true;
                     }
