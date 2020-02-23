@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.OrgMatter;
+using AQUATOX.Bioaccumulation;
 using AQUATOX.Diagenesis;
+using AQUATOX.Chemicals;
 using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;
@@ -236,7 +238,7 @@ namespace AQUATOX.Animals
 //      public MigrationInputRec[] MigrInput;
 //      public double KD = 0;               // KD calculated for PFA cheimcals
         [JsonIgnore] public double HabitatLimit = 1.0;     // Habitat Limitation nosave
-        [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)
+//      [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)  moved to algae_zoo_tox
         public AllVariables PSameSpecies;   // other state variable that represents the same species, relevant to only Sm and Lg Game Fish
         [JsonIgnore] public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
         [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how animal is dying, (nosave)
@@ -250,8 +252,8 @@ namespace AQUATOX.Animals
         [JsonIgnore] public DateTime LastSedCalcTime = DateTime.MinValue;        // optimization
 
 //      public AnadromousDataRec AnadromousData = null;        // NoSave
-        [JsonIgnore] public double[] DerivedK1;
-        [JsonIgnore] public double[] DerivedK2;        // 9/27/2010 model calculations for alternative BAF (nosave)
+        [JsonIgnore] public double[] DerivedK1 = new double[(int)Consts.LastOrgTxTyp + 1];
+        [JsonIgnore] public double[] DerivedK2 = new double[(int)Consts.LastOrgTxTyp + 1];        // 9/27/2010 model calculations for alternative BAF (nosave)
 
         [JsonIgnore] public double PreyTrophicLevel = 0;
         [JsonIgnore] public double TrophicLevel = 0;
@@ -572,9 +574,9 @@ namespace AQUATOX.Animals
         {
             // Returns rate of transfer of organic toxicant due to defecation by predator
             // This algorithm now utilizes TAnimal.IngestSpecies (11/20/98)
-            double DefToxCount;
-            double EgestRet;
-            double GutEffRed;
+            double DefToxCount=0;
+            double EgestRet=0;
+            double GutEffRed=0;
 
             void DefTox(TPreference P)
             {
@@ -591,11 +593,9 @@ namespace AQUATOX.Animals
              
             int i;
             DefToxCount = 0;
-            if ((MyPrey.Count > 0))
-            {
-                for (i = 0; i < MyPrey.Count; i++)
-                    DefTox(MyPrey[i]);
-            }
+
+            foreach (TPreference TP in MyPrey) DefTox(TP);
+
             return DefToxCount;
         }
 
@@ -1691,167 +1691,93 @@ namespace AQUATOX.Animals
         return Drift();
     }
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------------------------------------------
 
 
-    //public double GillUptake(object ToxType, T_SVLayer ToxLayer)
-    //{
-        
-    //    const double WEffO2 = 0.62;
-    //    // McKim et al. 1985
-    //    double KUptake;
-    //    double PWVolLiters;
-    //    double WVolLiters;
-    //    double Local_K1;
-    //    double Local_K2;
-    //    double O2Bio;
-    //    double OxygenConc;
-    //    //TPorewater PW;
-    //    //TToxics PT;
-    //    double WEffTox;
-    //    double Frac_This_Layer;
-    //    double ToxState;
-    //    T_SVType ToxLoop;
-    //    //UptakeCalcMethodType ChemOption;
-    //    bool SedModelRunning;
-    //    double SizeCorr;
-    //    // ---------------------------------------------------------------------------------------------------------------------------------------
-    //    PWVolLiters = 0;
-    //    WVolLiters = 0;
-    //    result = 0;
-    //    PW = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
-    //    SedModelRunning = PW != null;
-    //    if (ToxLayer > T_SVLayer.SedLayer1)
-    //    {
-    //        return result;
-    //    }
-    //    // no uptake from below the active layer
-    //    if (ToxLayer == T_SVLayer.SedLayer1)
-    //    {
-    //        Frac_This_Layer = 1 - PAnimalData.FracInWaterCol;
-    //        ToxState = AQTSeg.GetState(AllVariables.PoreWater, ToxType, T_SVLayer.SedLayer1);
-    //        PWVolLiters = PW.VolumeInL();
-    //        if (PW.VolumeInM3() < Consts.Tiny)
-    //        {
-    //            return result;
-    //        }
-    //        WVolLiters = AQTSeg.SegVol() * 1e3;
-    //        // m3
-    //        // L/m3
-    //    }
-    //    else
-    //    {
-    //        if (SedModelRunning)
-    //        {
-    //            Frac_This_Layer = PAnimalData.FracInWaterCol;
-    //        }
-    //        else
-    //        {
-    //            Frac_This_Layer = 1;
-    //        }
-    //        ToxState = AQTSeg.GetState(Consts.AssocToxSV(ToxType), T_SVType.StV, T_SVLayer.WaterCol);
-    //    }
-    //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-    //    {
-    //        Poisoned(ToxLoop);
-    //    }
-    //    // Ensure RedGrowth data is up-to-date.  This is required for dietary uptake calculation in SpecDynAction to be uniform
-    //    TStates 3 = AQTSeg;
-    //    PT = 3.AQTSeg.GetStatePointer(NState, ToxType, T_SVLayer.WaterCol);
-    //    if (PT == null)
-    //    {
-    //        return result;
-    //    }
-    //    ChemicalRecord 4 = 3.Chemptrs[ToxType].ChemRec;
-    //    if (4.IsPFA)
-    //    {
-    //        GillUptake_PFAUPTAKE();
-    //    }
-    //    else
-    //    {
-    //        // not PFA
-    //        if (AQTSeg.Chemptrs[ToxType] == null)
-    //        {
-    //            return result;
-    //        }
-    //        ChemOption = 3.Chemptrs[ToxType].Anim_Method;
-    //        if (ChemOption == UptakeCalcMethodType.Default_Meth)
-    //        {
-    //            TStates 5 = AQTSeg;
-    //            PT = 5.AQTSeg.GetStatePointer(NState, ToxType, T_SVLayer.WaterCol);
-    //            if (PT == null)
-    //            {
-    //                return result;
-    //            }
-    //            O2Bio = 5.Location.Remin.O2Biomass;
-    //            OxygenConc = 5.AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-    //            WEffTox = 5.Chemptrs[ToxType].WEffTox(PT.NonDissoc());
-    //            if (OxygenConc > 0.0)
-    //            {
-    //                // 1/d       unitless   mg/L-d       mgO2/mg    mgO2         unitless
-    //                KUptake = (WEffTox * Respiration() * O2Bio) / (OxygenConc * WEffO2);
-    //            }
-    //            else
-    //            {
-    //                KUptake = 0.0;
-    //            }
-    //            Local_K2 = Anim_Tox[ToxType].Entered_K2;
-    //            if (Local_K2 > 96)
-    //            {
-    //                KUptake = KUptake * (96 / Local_K2);
-    //            }
-    //            // scaling factor 10-02-03
-    //            if (State < Consts.Tiny)
-    //            {
-    //                DerivedK1[ToxType] = 0;
-    //            }
-    //            else
-    //            {
-    //                DerivedK1[ToxType] = KUptake / (State * 1e-6);
-    //            }
-    //            // 9/9/2010
-    //            // L/kg D
-    //            // 1/d
-    //            // bmass mg/L
-    //            // kg/mg
-    //            if (ToxLayer == T_SVLayer.WaterCol)
-    //            {
-    //                // ug/L-d       1/d      set to 1.0       ug/L          unitless
-    //                result = KUptake * 5.Diff[ToxType] * ToxState * Frac_This_Layer;
-    //            }
-    //            else
-    //            {
-    //                result = KUptake * 5.PoreDiff[ToxType, T_SVLayer.SedLayer1] * ToxState * Frac_This_Layer * PWVolLiters / WVolLiters;
-    //            }
-    //            // ug/L(wc)-d       1/d          set to 1.0               ug/L(pw)       unitless   *     L(pw)    /   L(wc)
-    //            // (wc)=water column                                 (pw)=pore water
-    //            // Normalizing to Units of the Water Column
-    //        }
-    //        else
-    //        {
-    //            // ChemOption <> Default_Meth
-    //            if (ChemOption == UptakeCalcMethodType.CalcK1)
-    //            {
-    //                // 5/29/2015 add Bio_rate_const (KM) to K2 when estimating K1
-    //                Local_K1 = (Anim_Tox[ToxType].Entered_K2 + Anim_Tox[ToxType].Bio_rate_const) * Anim_Tox[ToxType].Entered_BCF;
-    //            }
-    //            else
-    //            {
-    //                Local_K1 = Anim_Tox[ToxType].Entered_K1;
-    //            }
-    //            DerivedK1[ToxType] = Local_K1;
-    //            TStates 6 = AQTSeg;
-    //            result = Local_K1 * 6.Diff[ToxType] * ToxState * State * 1e-6;
-    //            //ug/L-d  //L/kg-d  // unitless     // ug/L   // mg/L  // kg/mg
-    //        }
-    //    }
-    //    // With AQTSeg
+        public double GillUptake(T_SVType ToxType, T_SVLayer ToxLayer)
+        {
 
-    //    return result;
-    //}
+            const double WEffO2 = 0.62;
+            // McKim et al. 1985
+            double KUptake;
+            double PWVolLiters;
+            double WVolLiters;
+            double Local_K1;
+            double Local_K2;
+            double O2Bio;
+            double OxygenConc;
+            TAnimalTox PT;
+            double WEffTox;
+            double Frac_This_Layer;
+            double ToxState;
+            T_SVType ToxLoop;
+            bool SedModelRunning;
+            double SizeCorr;
+            // ---------------------------------------------------------------------------------------------------------------------------------------
+            PWVolLiters = 0;
+            WVolLiters = 0;
 
-    // -----------------------------------------------------------------------
-    public void Calc_Prom_Recr_Emrg(double Growth)
+            // removed multi-seg porewater gill uptake here, multi-layer sediment / chemical model not in HMS
+            Frac_This_Layer = 1;
+            ToxState = AQTSeg.GetState(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol);
+
+            //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)   // FIXME ANIMAL TOXICITY LINKAGE
+            //{
+            //    Poisoned(ToxLoop); // Ensure RedGrowth data is up-to-date.  This is required for dietary uptake calculation in SpecDynAction to be correct
+            //}
+            
+            PT = AQTSeg.GetStatePointer(NState, ToxType, T_SVLayer.WaterCol) as TAnimalTox;
+            if (PT == null) return 0;
+
+            if (PT.Anim_Method == UptakeCalcMethodType.Default_Meth)
+            {
+                O2Bio = Location.Remin.O2Biomass;
+                OxygenConc = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+                WEffTox = PT.WEffTox(PT.NonDissoc());
+                if (OxygenConc > 0.0)
+                {   // 1/d       unitless   mg/L-d       mgO2/mg    mgO2         unitless
+                    KUptake = (WEffTox * Respiration() * O2Bio) / (OxygenConc * WEffO2);
+                }
+                else KUptake = 0.0;
+
+                Local_K2 = PT.Anim_Tox.Entered_K2;
+                if (Local_K2 > 96)
+                    KUptake = KUptake * (96 / Local_K2);  // scaling factor 10-02-03
+
+                if (State < Consts.Tiny)
+                    DerivedK1[(int)ToxType] = 0;
+                else
+                {
+                    DerivedK1[(int)ToxType] = KUptake / (State * 1e-6); // 9/9/2010
+                }  // L/kg D                     // 1/d  // bmass mg/L // kg/mg
+
+                // removed pore water code
+
+                // ug/L-d       1/d      set to 1.0       ug/L          unitless
+                return KUptake * ToxState * Frac_This_Layer;
+            }
+            else  // non-default method
+            {
+                // ChemOption <> Default_Meth
+                if (PT.Anim_Method == UptakeCalcMethodType.CalcK1)
+                {
+                    // 5/29/2015 add Bio_rate_const (KM) to K2 when estimating K1
+                    Local_K1 = (PT.Anim_Tox.Entered_K2 + PT.Anim_Tox.Bio_rate_const) * PT.Anim_Tox.Entered_BCF;
+                }
+                else
+                {
+                    Local_K1 = PT.Anim_Tox.Entered_K1;
+                }
+                DerivedK1[(int)ToxType] = Local_K1;
+                return Local_K1 * ToxState * State * 1e-6;
+                //ug/L-d  //L/kg-d // ug/L   // mg/L  // kg/mg
+            }
+            
+            // With AQTSeg
+        }
+
+        // -----------------------------------------------------------------------
+        public void Calc_Prom_Recr_Emrg(double Growth)
     {
         // Const  KPro = 0.5; {+1, not YOY}
         TAnimal SmA;

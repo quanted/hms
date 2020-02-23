@@ -257,6 +257,13 @@ namespace Globals
         Freefloat
     } // end TMacroType
 
+    public enum UptakeCalcMethodType   // method for calculating uptake into animals and plants
+    {
+        Default_Meth,
+        CalcBCF,
+        CalcK1,
+        CalcK2
+    }
 
     public class Consts
     {
