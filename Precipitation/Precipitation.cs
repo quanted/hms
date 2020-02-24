@@ -41,6 +41,14 @@ namespace Precipitation
         public ITimeSeriesOutput GetData(out string errorMsg)
         {
             errorMsg = "";
+            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
+            this.Output = iFactory.Initialize();
+
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            {
+                this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
+                this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
+            }
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
@@ -48,10 +56,6 @@ namespace Precipitation
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
-
-            //TODO: Check Source and run specific subcomponent class for source
-            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
-            this.Output = iFactory.Initialize();
 
             switch (this.Input.Source) {
                 case "nldas":

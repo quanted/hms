@@ -27,10 +27,11 @@ namespace Precipitation
             errorMsg = "";
 
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
-            if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
-            {
-                input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
-            }
+            //if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
+            //{
+            //    input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
+            //    output.Metadata.Add("catchment_comid", input.Geometry.ComID.ToString());
+            //}
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
