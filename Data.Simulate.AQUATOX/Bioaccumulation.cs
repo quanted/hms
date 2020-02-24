@@ -272,7 +272,6 @@ namespace AQUATOX.Bioaccumulation
 
             // DERIVATIVE FOR TOXICANT IN DETRITUS
             TRemineralize CP;
-            TSuspendedDetr EpiCP;
             double Lo=0;
             double So = 0;
             double Des = 0;
@@ -521,8 +520,6 @@ namespace AQUATOX.Bioaccumulation
             // ----------------------------------------------------------------
             double FA=0;
             double H2;
-            double BuryInKg;
-            double SedDesorpInKg;
 
             CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPOC_Sediment;
             So = 0;
@@ -586,7 +583,6 @@ namespace AQUATOX.Bioaccumulation
         public double PlantUptake()
         {
             // Integrated MacroUptake into AlgalUptake for ease of coding / code reading  9/16/98 jsc
-            double PFAK2;
             double K2;
             double Local_K1;
             double UptakeLimit;
@@ -648,6 +644,7 @@ namespace AQUATOX.Bioaccumulation
                 else
                     DissocFactor = NonDissoc();
 
+                double Kow = Math.Pow(10, ChemRec.LogKow);
                 Local_K1 = 1 / (1.8e-6 + 1 / (Kow * DissocFactor));
                 // fit to Sijm et al.1998 data for PCBs
 
@@ -817,7 +814,7 @@ namespace AQUATOX.Bioaccumulation
     public class TAnimalTox : TToxics { 
 
         public TAnimalToxRecord Anim_Tox = null;
-        public double RecrSave = 0; 
+        [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)
 
     public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
     {
@@ -858,7 +855,7 @@ namespace AQUATOX.Bioaccumulation
                 if (ChemRec.BCFUptake)
                 {
                     DB = 0;
-                    RecrSave = 0;
+                    RecrSaveTox = 0;
                 }
                 else
                 {
@@ -942,7 +939,7 @@ namespace AQUATOX.Bioaccumulation
                     // Must Be Called After Recr Calculation
                     // + Recr
                     DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
-                    if ((AQTSeg.DerivStep == 5)) RecrSave = Recr;
+                    if ((AQTSeg.DerivStep == 5)) RecrSaveTox = Recr;
                     // derivstep 5 is time X+h
 
                     // removed multi-segment diffusion and turbulent diffusion from HMS (pelagic invertebrates)    

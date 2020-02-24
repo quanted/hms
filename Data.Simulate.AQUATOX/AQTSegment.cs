@@ -11,6 +11,7 @@ using AQUATOX.Chemicals;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
 using AQUATOX.Organisms;
+using AQUATOX.Bioaccumulation;
 
 using System.Linq;
 using Newtonsoft.Json;
@@ -1280,7 +1281,7 @@ namespace AQUATOX.AQTSegment
         {
             AllVariables FLoop;
             TAnimal PFish;
-            TToxics PToxFish;
+            TAnimalTox PToxFish;
             T_SVType ToxLoop;
             for (FLoop = Consts.FirstInvert; FLoop <= Consts.LastFish; FLoop++)
             {
@@ -1291,10 +1292,10 @@ namespace AQUATOX.AQTSegment
                     PFish.State = PFish.State + PFish.RecrSave;
                     for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
                     {
-                        PToxFish = GetStatePointer(FLoop, ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                        PToxFish = GetStatePointer(FLoop, ToxLoop, T_SVLayer.WaterCol) as TAnimalTox;
                         if (PToxFish != null)
                         {
-                           // PToxFish.State = PToxFish.State + PToxFish.RecrSave;  FIXME TOXICS IN FISH RECRUITMENT TRACKING
+                            PToxFish.State = PToxFish.State + PToxFish.RecrSaveTox; 
                         }
                     }
                 }
@@ -3187,8 +3188,6 @@ namespace AQUATOX.AQTSegment
 
         public void ChangeData()     // Make sure all data is updated prior to study run
         {
-            T_SVType Loop2;
-
             foreach (TStateVariable TSV in SV)
             {
                 if (TSV.IsAnimal()) ((TSV) as TAnimal).ChangeData();
@@ -3197,13 +3196,6 @@ namespace AQUATOX.AQTSegment
 
             Location.ChangeData(Location.Locale.ICZMean);
 
-            //for (Loop2 = Consts.FirstOrgTxTyp; Loop2 <= Consts.LastOrgTxTyp; Loop2++)  //FIXME CHEMICAL CHANGEDATA
-            //{
-            //    if (Chemptrs[Loop2] != null)
-            //    {
-            //        Chemptrs[Loop2].ChangeData();
-            //    }
-            //}
         }
 
 

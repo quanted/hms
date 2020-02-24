@@ -2,6 +2,7 @@ using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.Plants;
+using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
 using AQUATOX.Chemicals;
 using AQUATOX.OrgMatter;
@@ -15,8 +16,8 @@ namespace AQUATOX.Organisms
     public class TOrganism : TStateVariable
     {
         public double[] LCInfinite = new double[Consts.NToxs];  // up to 20 toxicants tracked
-        public double[] OrgToxBCF = new double[Consts.NToxs];
-        public double[] PrevFracKill = new double[Consts.NToxs];
+//        public double[] OrgToxBCF = new double[Consts.NToxs];
+        public double[] PrevFracKill = new double[Consts.NToxs];  
         public double[] Resistant = new double[Consts.NToxs];
         public double[,] DeltaCumFracKill = new double[Consts.NToxs, 7];  // Toxicity Tracking Variables
         public double[,] DeltaResistant = new double[Consts.NToxs, 7];  // Toxicity Tracking Variables
@@ -54,7 +55,7 @@ namespace AQUATOX.Organisms
                 }
                 Resistant[ToxLoop] = 0;
                 PrevFracKill[ToxLoop] = 0;
-                OrgToxBCF[ToxLoop] = 0;
+//                OrgToxBCF[ToxLoop] = 0;
                 RedGrowth[ToxLoop] = 0;
                 RedRepro[ToxLoop] = 0;
                 FracPhoto[ToxLoop] = 1.0;
@@ -694,9 +695,8 @@ namespace AQUATOX.Organisms
         //                    13.TSMessage;
         //                }
         //                LCInfinite[ToxLoop] = BCF(LC50_Time / 24.0, ToxLoop) * PlantTox.LC50 * (1 - Math.Exp(-Local_K2 * (LC50_Time / 24.0)));
-        //                // ppb
-        //                // L/kg
-        //                // h/d
+        //                // ppb                // L/kg
+        //                // h/d 
         //                // ug/L
         //                // 1/d
         //                // h
@@ -711,17 +711,15 @@ namespace AQUATOX.Organisms
         } //     CalcRiskConc
 
         //// ------------------------------------------------------------------------
-        public virtual double BCF(double TElapsed, object ToxTyp)
+        public virtual double BCF(double TElapsed, T_SVType ToxTyp)
         {
-            double result;
             double KB;
-            double KOW;
             double KPSed;
             double NondissocVal;
             double Lipid;
             double NondissReduc;
-            TAnimal PA;
-            TPlant PP;
+            TAnimalTox PAT;
+            TAlgaeTox PPT;
             TToxics PT;
             // NLOMFrac,
             double K2;
@@ -729,153 +727,100 @@ namespace AQUATOX.Organisms
             const double DetrOCFrac = 0.526;
             // detritus, Winberg et al., 1971
 
+            PT = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxTyp, T_SVLayer.WaterCol) as TToxics;
             if (IsAnimal())
-            {
-                ChemOption = Chemptrs[ToxTyp].Anim_Method;
-            }
+                ChemOption = PT.Anim_Method;
             else
-            {
-                ChemOption = Chemptrs[ToxTyp].Plant_Method;
-            }
+                ChemOption = PT.Plant_Method;
+
             if (ChemOption != UptakeCalcMethodType.Default_Meth)
-            {
-                // -------------------   BCF = K1 / K2 BELOW  ---------------------------------
-                result = 0;
+            {   // -------------------   BCF = K1 / K2 BELOW  ---------------------------------
                 if (IsAnimal())
                 {
-                    PA = ((this) as TAnimal);
-                    TAnimalToxRecord 3 = PA.Anim_Tox[ToxTyp];
+                    PAT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
+
+                    TAnimalToxRecord ATR = PAT.Anim_Tox;
                     if (ChemOption == UptakeCalcMethodType.CalcBCF)
                     {
-                        if ((3.Entered_K2 < Consts.Tiny))
-                        {
-                            throw new Exception("K2 values (chemical toxicity screen) must be greater than zero (e.g. " + 3.Animal_name + ')');
-                        }
+                        if ((ATR.Entered_K2 < Consts.Tiny))
+                            throw new Exception("K2 values (chemical toxicity screen) must be greater than zero (e.g. " + ATR.Animal_name + ')');
                         else
-                        {
-                            result = 3.Entered_K1 / 3.Entered_K2;
-                        }
+                            return ATR.Entered_K1 / ATR.Entered_K2;
+
                     }
-                    else
-                    {
-                        result = 3.Entered_BCF;
-                    }
-                }
+                    else  return ATR.Entered_BCF;
+                } // end IsAnimal
+
                 if (IsPlant())
                 {
-                    PP = ((this) as TPlant);
-                    TPlantToxRecord 4 = PP.Plant_Tox[ToxTyp];
+                    PPT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAlgaeTox;
+                    TPlantToxRecord PTR = PPT.Plant_Tox;
+
                     if (ChemOption == UptakeCalcMethodType.CalcBCF)
                     {
-                        if ((4.K2 < Consts.Tiny))
-                        {
-                            throw new Exception("K2 values (chemical toxicity screen) must be greater than zero (e.g. " + 4.Plant_name + ')');
-                        }
+                        if ((PTR.K2 < Consts.Tiny))
+                            throw new Exception("K2 values (chemical toxicity screen) must be greater than zero (e.g. " + PTR.Plant_name + ')');
                         else
-                        {
-                            result = 4.K1 / 4.K2;
-                        }
+                            return PTR.K1 / PTR.K2;
                     }
-                    else
-                    {
-                        result = 4.Entered_BCF;
-                    }
+                    else return PTR.Entered_BCF;
                 }
-                OrgToxBCF[ToxTyp] = result;
+
+//                OrgToxBCF[ToxTyp] = result;
                 // Save for FCM calculation
-                return result;
+//                return result;
                 // NON Default Methods
             }
             // -------------------   BCF = K1 / K2 ABOVE  ---------------------------------
+            
             // Default BCF Calculation Below
-            PT = GetStatePointer(Consts.AssocToxSV(ToxTyp), T_SVType.StV, T_SVLayer.WaterCol);
             NondissocVal = PT.NonDissoc();
-            KOW = Chemptrs[ToxTyp].Kow;
+            double Kow = Math.Pow(10, PT.ChemRec.LogKow);
             if (IsAnimal())
             {
-                // (*       PA := TAnimal(Self);
-                // Lipid := PA.CalcLipid;
-                // 
-                // NLOMFrac := 1/ WettoDry - Lipid;
-                // 
-                // BCF := (Lipid *  KOW + NLOMFrac * 0.035 * KOW * (NondissocVal+0.01)) * WettoDry;
-                // {KBW, L/kg}  {frac}  {L/kg}   {frac}           {frac}    {frac}              {frac}               *)
-                // Alternate BCF TURNED OFF 10/15/2010
-                PA = ((this) as TAnimal);
-                // Code Prior to 9/8/2010
+                TAnimal PA = ((this) as TAnimal);
+                PAT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
                 if (IsFish())
                 {
-                    Lipid = PA.CalcLipid;
-                    KB = Lipid * WetToDry() * KOW * (NondissocVal + 0.01);
+                    Lipid = PA.PAnimalData.FishFracLipid;
+                    KB = Lipid * WetToDry() * Kow * (NondissocVal + 0.01);
                     // BCF Test 9/8/2010
-                    K2 = PA.Anim_Tox[ToxTyp].Entered_K2;
+                    K2 = PAT.Anim_Tox.Entered_K2;
                     // BCF Test 9/8/2010   Fix this logic, though if LCInfinite is the only thing this is being used for, maybe remove the TElapsed portion
                     if ((K2 < Consts.Tiny))
-                    {
-                        result = KB * (1.0 - Math.Exp(-K2 * TElapsed));
-                    }
-                    else
-                    {
-                        result = KB;
-                    }
-                    // fish code
-                }
+                         return KB * (1.0 - Math.Exp(-K2 * TElapsed));
+                    else return KB;
+                }    // fish code
+
                 else if (NState >= Consts.FirstDetrInv && NState <= Consts.LastDetrInv)
                 {
-                    PT = GetStatePointer(AllVariables.SuspRefrDetr, ToxTyp, T_SVLayer.WaterCol);
-                    KPSed = PT.CalculateKOM();
-                    // Use Schwarzenbach Eqn. for KPSED
-                    // based on Gobas 1993
-                    result = PA.PAnimalData.FishFracLipid / DetrOCFrac * KPSed;
+                    PT = AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, ToxTyp, T_SVLayer.WaterCol) as TToxics;
+                    KPSed = PT.CalculateKOM();  // Use Schwarzenbach Eqn. for KPSED
+                    return PA.PAnimalData.FishFracLipid / DetrOCFrac * KPSed; // based on Gobas 1993
                 }
                 else
-                {
-                    // Southworth et al. 1978
-                    result = WetToDry() * 0.3663 * Math.Pow(KOW, 0.7520) * (NondissocVal + 0.01);
-                }
-                // not detr invert
-                // animal code
-            }
+                {   // Southworth et al. 1978
+                    return WetToDry() * 0.3663 * Math.Pow(Kow, 0.7520) * (NondissocVal + 0.01);
+                } // non detritivore detr invert
+            }    // animal code
+
             else
             {
                 // Organism is Plant
                 NondissReduc = NondissocVal + 0.2;
-                if (NondissReduc > 1.0)
-                {
-                    NondissReduc = 1.0;
-                }
-                if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
-                {
-                    // dry wt.
-                    result = 0.00575 * Math.Pow(KOW, 0.98) * NondissReduc;
-                }
-                else
-                {
-                    result = NondissocVal * 2.57 * Math.Pow(KOW, 0.93) + (1 - NondissocVal) * 0.257 * Math.Pow(KOW, 0.93);
-                }
-                // modified from Swackhamer & Skoglund 1993, p. 837
-                // 7.29 * POWER(KOW,0.681) * NonDissReduc;
-                // 0.2 * 5 * KOW * NonDissReduc;
-                // dry wt.
-                // 0.2 lipid * WetToDry * KOW, which is Dry
-                ChemicalRecord 5 = Chemptrs[ToxTyp].ChemRec;
-                if (5.IsPFA)
-                {
-                    if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
-                    {
-                        result = 5.PFAMacroBCF;
-                    }
-                    else
-                    {
-                        result = 5.PFAAlgBCF;
-                    }
-                }
-            }
-            // plant code
-            OrgToxBCF[ToxTyp] = result;
-            // Save for FCM calculation
+                if (NondissReduc > 1.0) NondissReduc = 1.0;
 
-            return result;
+                if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
+                    return 0.00575 * Math.Pow(Kow, 0.98) * NondissReduc;  // macrophyte, dry weight
+                else
+                    return NondissocVal * 2.57 * Math.Pow(Kow, 0.93) + (1 - NondissocVal) * 0.257 * Math.Pow(Kow, 0.93);
+                         // modified from Swackhamer & Skoglund 1993, p. 837 
+
+            }  // plant code
+            
+            // OrgToxBCF[ToxTyp] = result;
+            // Save for FCM calculation
+            // return result;
         }
 
         //// --------------------------------------------------------------------------
@@ -1302,7 +1247,6 @@ namespace AQUATOX.Organisms
         // Chronic Effects
         public double GutEffOrgTox(T_SVType ToxTyp)
         {
-            ChemicalRecord CR = Chemptrs[ToxTyp].ChemRec;
 
             if ((NState >= Consts.FirstInvert && NState <= Consts.LastInvert))
             {

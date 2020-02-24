@@ -100,7 +100,7 @@ namespace AQUATOX.Chemicals
     {
         public BioTransType BTType;
         public AllVariables UserSpec;
-        public double[] Percent = new double[(int)Consts.LastOrgTxTyp + 1];
+        public double[] Percent = new double[Consts.NToxs];
     }
 
     public class TToxics : TStateVariable
@@ -111,10 +111,8 @@ namespace AQUATOX.Chemicals
         public ChemicalRecord ChemRec;
         public List<TBioTransObject> BioTrans = null;
         public UptakeCalcMethodType Anim_Method, Plant_Method;
-        public double Kow;  
 
         public double Tox_Air;  // toxicant in air (gas-phase concentration) in g/m3
-        // [JsonIgnore] public double RecrSave = 0;  // recruitment for dothiseverystep.  (nosave)
         public Loadings.TLoadings GillUptake_Link = null;  // optional linkage from JSON if chemicals sorbed to plants, animals, or OM not modeled
         public Loadings.TLoadings Depuration_Link = null;
         public Loadings.TLoadings Sorption_Link = null;
@@ -133,7 +131,6 @@ namespace AQUATOX.Chemicals
             //     RequiresData = true;
             // }
             ppb = 0;
-//          RecrSave = 0;
         }
 
         public static T_SVType AssocToxTyp(AllVariables S)
@@ -488,7 +485,7 @@ namespace AQUATOX.Chemicals
                         if (Aerobic) BTRec = Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
                         else         BTRec = Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
 
-                        FracToMe = BTRec.Percent[(int) SVType] / 100.0;
+                        FracToMe = BTRec.Percent[(int) SVType -2] / 100.0;
                         // fraction of biotrans to this org tox compartment
                         if (FracToMe > 0)
                         {
@@ -558,7 +555,7 @@ namespace AQUATOX.Chemicals
                         }
                     }
                     // Case
-                    FracToMe = BTRec.Percent[(int) SVType] / 100.0;
+                    FracToMe = BTRec.Percent[(int) SVType-2] / 100.0;
                     // fraction of biotrans to this org tox compartment
                     if (FracToMe > 0)
                     {
@@ -677,7 +674,7 @@ namespace AQUATOX.Chemicals
                 // Split into four compartments
                 PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
                 LoadRes = PInputRec.Load.ReturnLoad(TimeIndex) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, -1);
-                ToxLoad = PInputRec.ToxLoad[(int) SVType].ReturnLoad(TimeIndex);
+                ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnLoad(TimeIndex);
 
                 LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
                 // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
@@ -693,7 +690,7 @@ namespace AQUATOX.Chemicals
                             // Split into two or four compartments
                             AddLoad = PInputRec.Load.ReturnAltLoad(TimeIndex, Loop) * ((CPtr) as TDetritus).MultFrac(TimeIndex, true, Loop);
                             // g/d                                                                         // unitless
-                            ToxLoad = PInputRec.ToxLoad[(int) SVType].ReturnAltLoad(TimeIndex, Loop);
+                            ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnAltLoad(TimeIndex, Loop);
                             // ug/kg
                         }
                         else
@@ -926,8 +923,7 @@ namespace AQUATOX.Chemicals
         {
             // Calculate Organic Chemical Sorption to Sediments/ Detritus
             // Returns units of ug/L, Liters of water column or pore water depending on location of sed-detrital toxicant passed
-            double CarrierState, K1, UptakeLimit, ToxState, Kp, Diff1;
-            bool ToxIsPoreW;
+            double CarrierState, K1, UptakeLimit, ToxState, Kp;
 
             //          T_SVLayer PoreLayer;
             //          TPorewater ThisPore;
@@ -953,7 +949,6 @@ namespace AQUATOX.Chemicals
 
             // Sed Detritus is labeled as being in the "WaterCol" though it really resides in SedLayer1
             // This is to provide compatibility when the model runs without the Sediment Sub Model
-            ToxIsPoreW = false;
 
             //if (AQTSeg.SedModelIncluded())
             //{
@@ -1090,7 +1085,7 @@ namespace AQUATOX.Chemicals
 
                 Clear = K2 * TCR * State;
            // ug/L d // 1/d // unitless  // ug/L
-                AnimP.DerivedK2[(int) SVType] = K2;
+                AnimP.DerivedK2[(int) SVType-2] = K2;
             }
             // animal code
             if (Clear < 0)

@@ -796,7 +796,6 @@ namespace AQUATOX.Nutrients
 
         public double NutrRelDefecation()  
         {
-            double result;
             // When Defecation takes place in animals, excess nutrients are converted
             // into NH4.  Sedimented Detritus tends to have a lower fraction of nutrients then
             // the animals which are defecating organic matter.

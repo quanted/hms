@@ -252,8 +252,8 @@ namespace AQUATOX.Animals
         [JsonIgnore] public DateTime LastSedCalcTime = DateTime.MinValue;        // optimization
 
 //      public AnadromousDataRec AnadromousData = null;        // NoSave
-        [JsonIgnore] public double[] DerivedK1 = new double[(int)Consts.LastOrgTxTyp + 1];
-        [JsonIgnore] public double[] DerivedK2 = new double[(int)Consts.LastOrgTxTyp + 1];        // 9/27/2010 model calculations for alternative BAF (nosave)
+        [JsonIgnore] public double[] DerivedK1 = new double[Consts.NToxs];
+        [JsonIgnore] public double[] DerivedK2 = new double[Consts.NToxs];        // 9/27/2010 model calculations for alternative BAF (nosave)
 
         [JsonIgnore] public double PreyTrophicLevel = 0;
         [JsonIgnore] public double TrophicLevel = 0;
@@ -455,10 +455,10 @@ namespace AQUATOX.Animals
             SumPrey = 0;
             MortRates.OtherMort = 0;
 
-            MortRates.OrgPois =  new double[(int)Consts.LastOrgTxTyp+1]; 
+            MortRates.OrgPois =  new double[Consts.NToxs]; 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
-                MortRates.OrgPois[(int) ToxLoop] = 0;
+                MortRates.OrgPois[(int) ToxLoop - 2] = 0;
             }
 
             //for (MigrLoop = 1; MigrLoop <= 5; MigrLoop++)
@@ -591,7 +591,6 @@ namespace AQUATOX.Animals
 
             }
              
-            int i;
             DefToxCount = 0;
 
             foreach (TPreference TP in MyPrey) DefTox(TP);
@@ -1700,8 +1699,6 @@ namespace AQUATOX.Animals
             const double WEffO2 = 0.62;
             // McKim et al. 1985
             double KUptake;
-            double PWVolLiters;
-            double WVolLiters;
             double Local_K1;
             double Local_K2;
             double O2Bio;
@@ -1711,11 +1708,8 @@ namespace AQUATOX.Animals
             double Frac_This_Layer;
             double ToxState;
             T_SVType ToxLoop;
-            bool SedModelRunning;
             double SizeCorr;
             // ---------------------------------------------------------------------------------------------------------------------------------------
-            PWVolLiters = 0;
-            WVolLiters = 0;
 
             // removed multi-seg porewater gill uptake here, multi-layer sediment / chemical model not in HMS
             Frac_This_Layer = 1;
@@ -1745,10 +1739,10 @@ namespace AQUATOX.Animals
                     KUptake = KUptake * (96 / Local_K2);  // scaling factor 10-02-03
 
                 if (State < Consts.Tiny)
-                    DerivedK1[(int)ToxType] = 0;
+                    DerivedK1[(int)ToxType-2] = 0;
                 else
                 {
-                    DerivedK1[(int)ToxType] = KUptake / (State * 1e-6); // 9/9/2010
+                    DerivedK1[(int)ToxType - 2] = KUptake / (State * 1e-6); // 9/9/2010
                 }  // L/kg D                     // 1/d  // bmass mg/L // kg/mg
 
                 // removed pore water code
@@ -1768,7 +1762,7 @@ namespace AQUATOX.Animals
                 {
                     Local_K1 = PT.Anim_Tox.Entered_K1;
                 }
-                DerivedK1[(int)ToxType] = Local_K1;
+                DerivedK1[(int)ToxType - 2] = Local_K1;
                 return Local_K1 * ToxState * State * 1e-6;
                 //ug/L-d  //L/kg-d // ug/L   // mg/L  // kg/mg
             }
@@ -2156,7 +2150,7 @@ namespace AQUATOX.Animals
         // 4/14/2014 avoid zero trophic levels even if no food available
         for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
         {
-            MortRates.OrgPois[(int) ToxLoop] = 0;
+            MortRates.OrgPois[(int) ToxLoop - 2] = 0;
         }
 //        Migr = StratMigration();      // StratMigration calculated first to set IsMigrAnoxia to limit other loss terms in that case
 

@@ -460,8 +460,8 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
         public LoadingsRecord Load;     // Loadings of organics
         public LoadingsRecord Percent_Part;  // Constant or dynamic breakdowns of inflow, PS, NPS loadings
         public LoadingsRecord Percent_Refr;  // Constant or dynamic breakdowns of inflow, PS, NPS loadings
-        public double[] ToxInitCond = new double[(int)Consts.LastOrgTxTyp + 1];         // Tox. exposure of Init. Cond
-        public LoadingsRecord[] ToxLoad = new LoadingsRecord[(int)Consts.LastOrgTxTyp + 1]; // External loadings of toxicant in detritus
+        public double[] ToxInitCond = new double[Consts.NToxs];         // Tox. exposure of Init. Cond
+        public LoadingsRecord[] ToxLoad = new LoadingsRecord[Consts.NToxs]; // External loadings of toxicant in detritus
     } // end DetritalInputRecordType
 
     // Record
