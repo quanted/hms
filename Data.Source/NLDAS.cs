@@ -151,15 +151,15 @@ namespace Data.Source
             string data = "";
             try
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 20;
+                int retries = 0;
+                int maxRetries = 30;
 
                 // Response status message
                 string status = "";
 
-                while (retries > 0 && !status.Contains("OK"))
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
+                    //Thread.Sleep(100);
                     WebRequest wr = WebRequest.Create(url);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -168,8 +168,8 @@ namespace Data.Source
                     data = reader.ReadToEnd();
                     reader.Close();
                     response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK")) { Thread.Sleep(5000); }
+                    retries += 1;
+                    if (!status.Contains("OK")) { Thread.Sleep(1000 * retries * retries); }
                 }
             }
             catch (Exception ex)
