@@ -13,6 +13,9 @@ using AQUATOX.Animals;
 using AQUATOX.Organisms;
 using AQUATOX.Bioaccumulation;
 
+using System.Threading;
+using System.Threading.Tasks;
+
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
@@ -770,10 +773,10 @@ namespace AQUATOX.AQTSegment
             CalculateSumPrey();
             NormDiff(Step);
 
-            foreach (TStateVariable TSV in SV)
-            {
-                TSV.TakeDerivative(Step);
-            }
+            // foreach (TStateVariable TSV in SV)
+
+            Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));
+                
         }
 
 
