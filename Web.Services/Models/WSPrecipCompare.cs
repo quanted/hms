@@ -130,37 +130,31 @@ namespace Web.Services.Models
                     Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                     Longitude = double.Parse(centroidDict["CentroidLongitude"])
                 };
+                string nceiQuery = "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
 
-                string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-                if (flaskURL == null)
-                {
-                    flaskURL = "http://localhost:7777";
-                }
-                Debug.WriteLine("Flask Server URL: " + flaskURL);
-
-                string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
-                //string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326&comid=" + input.Geometry.ComID.ToString();
-
-                //Using FLASK NCDC webservice            
-                string data = DownloadData(out errorMsg, nceiBaseURL);
                 JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
                 {
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                ResultString strResult = JsonSerializer.Deserialize<ResultString>(data, jsonOptions);
-                Result result = new Result();
-                result.id = strResult.id;
-                result.status = strResult.status;
-                result.data = JsonSerializer.Deserialize<List<ResultData>>(strResult.data);
+                
+                // Calling to HMS Flask web service.
+                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(out errorMsg, nceiQuery);
+
                 ////Set NCEI station to closest station regardless of type
-                input.Geometry.StationID = result.data[0].id.ToString();
-                foreach (ResultData details in result.data)//Opt for closest GHCND station, if any
+                double bestCoverage = 0.0;
+                double closestDistance = 10000.0;
+                foreach (NCEIStations details in result.data)//Opt for closest GHCND station, if any
                 {
                     if (details.id.Contains("GHCND"))
                     {
-                        input.Geometry.StationID = details.id.ToString();
-                        break;
+                        if (details.distance <= closestDistance && details.data.datacoverage > bestCoverage)
+                        {
+                            closestDistance = details.distance;
+                            bestCoverage = details.data.datacoverage;
+                            input.Geometry.StationID = details.id.ToString();
+                            input.Geometry.Point = new PointCoordinate() { Latitude = details.data.latitude, Longitude = details.data.longitude };
+                        }
                     }
                 }
             }
@@ -198,11 +192,17 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Set input to precip object.
+            // NCEI local time correction to GMT
             ncei.Input = nInput;
-            //ncei.Input.TemporalResolution = "daily";
-            ncei.Input.TemporalResolution = input.TemporalResolution;
+            ncei.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, ncei.Input.Geometry.Point) as Data.Timezone;
+            //ncei.Input.DateTimeSpan.StartDate = ncei.Input.DateTimeSpan.StartDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
+            //ncei.Input.DateTimeSpan.EndDate = ncei.Input.DateTimeSpan.EndDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
+
+            ncei.Input.TemporalResolution = "daily";
             ncei.Input.Geometry.GeometryMetadata["token"] = (ncei.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncei.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
+            //nResult.Data = Utilities.Time.TimeSeriesShift(-1.0 * ncei.Input.Geometry.Timezone.Offset, nResult.Data, ncei.Input.DateTimeSpan.DateTimeFormat);
+            //nResult.Data = Utilities.TemporalAggregation.Aggregation(input.TemporalResolution, 1, nResult, ncei.Input);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             output = nResult;
             Debug.WriteLine("Data retrieved for: NCEI");
@@ -301,87 +301,6 @@ namespace Web.Services.Models
             output = Utilities.Statistics.GetCompareStatistics(out errorMsg, input, output);
             
             return output;
-        }
-
-        /// <summary>
-        /// Pulls NCEI station details from flask webservice.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
-        {
-            errorMsg = "";
-            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-            if (flaskURL == null)
-            {
-                flaskURL = "http://localhost:7777";
-            }
-            JsonSerializerOptions options = new JsonSerializerOptions()
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            };
-            Debug.WriteLine("Flask Server URL: " + flaskURL);
-
-            string dataURL = flaskURL + "/hms/data?job_id=";
-            WebClient myWC = new WebClient();
-            string data = "";
-            dynamic taskData = "";
-            try
-            {
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-                string jobID = "";
-                while (retries > 0 && !status.Contains("OK"))
-                {
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    jobID = JsonSerializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd(), options)["job_id"];
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK"))
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-
-                retries = 50;
-                status = "";
-                taskData = "";
-                bool success = false;
-                while (retries > 0 && !success && !jobID.Equals(""))
-                {
-                    Thread.Sleep(6000);
-                    WebRequest wr = WebRequest.Create(dataURL + jobID);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    taskData = JsonSerializer.Deserialize<dynamic>(data, options);
-                    if (taskData["status"] == "SUCCESS")
-                    {
-                        success = true;
-                    }
-                    else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
-                    {
-                        break;
-                    }
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Could not find NCEI stations for the given geometry." + ex.Message;
-            }
-            return data;
         }
     }
 }

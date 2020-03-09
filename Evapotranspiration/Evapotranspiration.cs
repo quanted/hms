@@ -133,8 +133,7 @@ namespace Evapotranspiration
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
             {
-                Utilities.Time tz = new Utilities.Time();
-                this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 

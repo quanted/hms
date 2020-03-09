@@ -60,8 +60,7 @@ namespace Web.Services.Models
                 // Set input to precip object.
                 ncei.Input = nInput;
                 //ncei.Input.TemporalResolution = "daily";
-                ncei.Input.TemporalResolution = input.TemporalResolution;
-                ncei.Input.Geometry.GeometryMetadata["token"] = (ncei.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncei.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
+                ncei.Input.TemporalResolution = input.TemporalResolution;              
                 ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
                 outputList.Add(nResult);

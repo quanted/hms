@@ -16,6 +16,7 @@ using Web.Services.Controllers;
 
 namespace Web.Services.Models
 {
+
     /// <summary>
     /// HMS Web Serivce WorkFlow Model
     /// </summary>
@@ -31,8 +32,9 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetWorkFlowData(WatershedWorkflowInput input)
+        public async Task<WatershedWorkflowOutput> GetWorkFlowData(WatershedWorkflowInput input)
         {
+            WatershedWorkflowOutput tempOut = new WatershedWorkflowOutput();
             DateTime start = input.DateTimeSpan.StartDate;
             DateTime end = input.DateTimeSpan.EndDate;
 
@@ -40,16 +42,23 @@ namespace Web.Services.Models
             string errorMsg = "";
 
             // Constructs default error output object containing error message.
-            Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+            Utilities.MetaErrorOutput err = new Utilities.MetaErrorOutput();
 
             // Validate all sources.
             //errorMsg = (!Enum.TryParse(input.StreamHydrology, true, out algorithms sAlgos)) ? "ERROR: Algorithm is not currently supported." : "";
             //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             // SET Attributes to specific values until stack works
             input.TemporalResolution = "daily";
             if(input.RunoffSource == "nldas" || input.RunoffSource == "gldas")
@@ -74,15 +83,21 @@ namespace Web.Services.Models
             {
                 errorMsg = "ERROR: No valid geometry was found";
             }
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
+            }
             //NCEI station attributes
             if (input.Geometry.GeometryMetadata["precipSource"] == "ncei")
             {                
                 input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-                input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);
-
-                
+                input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);  
+            }
+            if (errorMsg.Contains("ERROR"))
+            {
+                tempOut.Metadata = err.ReturnError(errorMsg);
+                return tempOut;
             }
 
             //Getting Stream Flow data
@@ -110,13 +125,13 @@ namespace Web.Services.Models
             {
                 //Setting all to ITimeSeriesOutput
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
-                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x, input.Source), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x, input.Source), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
                 input.Source = input.StreamHydrology;
-                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x, input.Source), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
                 timeSeriesDict.Add("Precipitation", precipOutput);
@@ -166,35 +181,49 @@ namespace Web.Services.Models
                 { "connectivity_table_source", "PlusFlowlineVAA" },
                 { "NHDPlus_url" , "http://www.horizon-systems.com/nhdplus/NHDPlusV2_data.php"}
             };
-            totalOutput.Dataset = "Precipitation, SurfaceRunoff, SubsurfaceRunoff, StreamHydrology";
-            totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + input.StreamHydrology.ToString();
+            //totalOutput.Dataset = "Precipitation, SurfaceRunoff, SubsurfaceRunoff, StreamHydrology";
+            //totalOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + input.StreamHydrology.ToString();
             watch.Stop();
             string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
-            totalOutput.Metadata.Add("Time_elapsed", elapsed);
+            //totalOutput.Metadata.Add("Time_elapsed", elapsed);
 
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            totalOutput.Data = new Dictionary<string, List<string>>();
-            foreach(KeyValuePair<int, Dictionary<string, ITimeSeriesOutput>> kv in data)
-            {
-                string dataString = JsonSerializer.Serialize(kv.Value, options);
-                totalOutput.Data[kv.Key.ToString()] = new List<string> { dataString };
-            }
-            totalOutput.table = new Dictionary<string, string>();
-            foreach (KeyValuePair<string, Dictionary<string, string>> kv in table)
-            {
-                string tableString = JsonSerializer.Serialize(table, options);
-                totalOutput.table[kv.Key] = tableString;
-            }
 
-            return totalOutput;
+            WatershedWorkflowOutput wOutput = new WatershedWorkflowOutput();
+            wOutput.Dataset = "Precipitation, SurfaceRunoff, SubsurfaceRunoff, StreamHydrology";
+            wOutput.DataSource = input.Geometry.GeometryMetadata["precipSource"].ToString() + ", " + input.RunoffSource.ToString() + ", " + input.RunoffSource.ToString() + ", " + input.StreamHydrology.ToString();
+            wOutput.Metadata = totalOutput.Metadata;
+            wOutput.Metadata.Add("Time_elapsed", elapsed);
+            wOutput.Data = new Dictionary<string, Dictionary<string, ITimeSeriesOutput>>();
+            foreach (KeyValuePair<int, Dictionary<string, ITimeSeriesOutput>> kv in data)
+            {
+                wOutput.Data.Add(kv.Key.ToString(), kv.Value);
+            }
+            wOutput.Table = table;
+            
+            //totalOutput.Data = new Dictionary<string, List<string>>();
+            //foreach(KeyValuePair<int, Dictionary<string, ITimeSeriesOutput>> kv in data)
+            //{
+            //    string dataString = JsonSerializer.Serialize(kv.Value, options);
+            //    totalOutput.Data[kv.Key.ToString()] = new List<string> { dataString };
+            //
+            //totalOutput.table = new Dictionary<string, string>();
+            //foreach (KeyValuePair<string, Dictionary<string, string>> kv in table)
+            //{
+            //    string tableString = JsonSerializer.Serialize(table, options);
+            //    totalOutput.table[kv.Key] = tableString;
+            //}
+
+            return wOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x, string column2)
         {
+            column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
             foreach (DataRow dr in dt.Rows)
@@ -208,7 +237,7 @@ namespace Web.Services.Models
             {
                 { "request_time", DateTime.Now.ToString() },
                 { "column_1", "Date" },
-                { "column_2", "Stream Flow" },
+                { "column_2", column2 },
                 { "units", "cubic meters" }
             };
             itimeoutput.Dataset = "Stream Flow";
@@ -253,111 +282,39 @@ namespace Web.Services.Models
                 Longitude = double.Parse(centroidDict["CentroidLongitude"])
             };
 
-            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-            if (flaskURL == null)
-            {
-                flaskURL = "http://localhost:7777";
-            }
-            Debug.WriteLine("Flask Server URL: " + flaskURL);
-
-            string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
-                                                                                                                                                                                                                                                                                                                                    //string nceiBaseURL = flaskURL + "/hms/gis/ncdc/stations/?startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326&comid=" + input.Geometry.ComID.ToString();
+            string nceiQuery = "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";
 
             //Using FLASK NCDC webservice            
-            string data = DownloadData(out errorMsg, nceiBaseURL);
-            JsonSerializerOptions options = new JsonSerializerOptions()
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            };
-            Result result = JsonSerializer.Deserialize<Result>(data, options);
+            Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(out errorMsg, nceiQuery);
             //Set NCEI station to closest station regardless of type
-            input.Geometry.StationID = result.data[0].id.ToString();
-            foreach (ResultData details in result.data)//Opt for closest GHCND station, if any
+            double coverage = 0.0;
+            double distance = 100000.0;
+            bool stationFound = false;
+            foreach (Utilities.NCEIStations details in result.data)//Opt for closest GHCND station, if any
             {
                 if (details.id.Contains("GHCND"))
                 {
-                    input.Geometry.StationID = details.id.ToString();
-                    break;
+                    if (details.data.datacoverage > coverage)
+                    {
+                        input.Geometry.StationID = details.id.ToString();
+                        coverage = details.data.datacoverage;
+                        distance = details.distance;
+                        stationFound = true;
+                    }
+                    else if (details.data.datacoverage == coverage && details.distance < distance)
+                    {
+                        input.Geometry.StationID = details.id.ToString();
+                        coverage = details.data.datacoverage;
+                        distance = details.distance;
+                        stationFound = true;
+                    }
                 }
+            }
+            if (!stationFound)
+            {
+                errorMsg = "ERROR: Unable to find a valid GHCND station.";
             }
             return input.Geometry.StationID;
-        }
-
-        /// <summary>
-        /// Pulls NCEI station details from flask webservice.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
-        {
-            errorMsg = "";
-            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-            if (flaskURL == null)
-            {
-                flaskURL = "http://localhost:7777";
-            }
-            Debug.WriteLine("Flask Server URL: " + flaskURL);
-
-            string dataURL = flaskURL + "/hms/data?job_id=";
-            WebClient myWC = new WebClient();
-            string data = "";
-            dynamic taskData = "";
-            try
-            {
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-                string jobID = "";
-                while (retries > 0 && !status.Contains("OK"))
-                {
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    jobID = JSON.Deserialize<Dictionary<string, string>>(reader.ReadToEnd())["job_id"];
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK"))
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-
-                retries = 50;
-                status = "";
-                taskData = "";
-                bool success = false;
-                while (retries > 0 && !success && !jobID.Equals(""))
-                {
-                    Thread.Sleep(6000);
-                    WebRequest wr = WebRequest.Create(dataURL + jobID);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
-                    if (taskData["status"] == "SUCCESS")
-                    {
-                        success = true;
-                    }
-                    else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
-                    {
-                        break;
-                    }
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Could not find NCEI stations for the given geometry." + ex.Message;
-            }
-            return data;
         }
     }
 }

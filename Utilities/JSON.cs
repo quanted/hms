@@ -125,6 +125,34 @@ namespace Utilities
         }
     }
 
+    public class IntegerConverter : JsonConverter<int>
+    {
+        public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
+            {
+                string value = reader.GetString();
+                try
+                {
+                    return int.Parse(value);
+                }
+                catch (FormatException)
+                {
+                    throw new JsonException();
+                }
+            }
+            else
+            {
+                return reader.GetInt32();
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+        {
+            writer.WriteNumberValue(value);
+        }
+    }
+
     public class BooleanConverter : JsonConverter<Boolean>
     {
         public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

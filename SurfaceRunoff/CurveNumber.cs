@@ -34,7 +34,7 @@ namespace SurfaceRunoff
                 input.Source = precipSource;
                 ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
-                if (input.Geometry.ComID == -1)
+                if (input.Geometry.ComID == 0 || input.Geometry.ComID == -1)
                 {
                     // Validate comid
                     input.Geometry.ComID = GetComID(out errorMsg, input.Geometry.Point);
@@ -155,7 +155,7 @@ namespace SurfaceRunoff
         /// <param name="errorMsg"></param>
         /// <param name="comid"></param>
         /// <returns></returns>
-        private int GetComID(out string errorMsg, PointCoordinate point)
+        public static int GetComID(out string errorMsg, PointCoordinate point)
         {
             errorMsg = "";
             int com = 0;

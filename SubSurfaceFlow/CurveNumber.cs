@@ -21,7 +21,13 @@ namespace SubSurfaceFlow
 
             ITimeSeriesOutput runoffData = new TimeSeriesOutput();
             bool getRunoff = true;
-            if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
+            if (input.Geometry.ComID == 0 || input.Geometry.ComID == -1)
+            {
+                // Validate comid
+                input.Geometry.ComID = SurfaceRunoff.CurveNumber.GetComID(out errorMsg, input.Geometry.Point);
+            }
+            
+            if ((input.Geometry.ComID != 0 || input.Geometry.ComID != -1) && input.Geometry.Point.Latitude == -9999)
             {
                 input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
             }
