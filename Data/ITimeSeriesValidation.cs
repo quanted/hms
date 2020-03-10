@@ -11,13 +11,13 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        protected string[] validDatasets = {
+        static protected string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
             "temperature", "wind", "dewpoint", "humidity"
         };
 
-        protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
+        static protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
             ["precipitation"] =  new List<string>{ "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
             ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
@@ -39,7 +39,7 @@ namespace Data
             ["surfacepressure"] = new List<string> { "gldas" }
         };
 
-        protected string[] validRemoteData =
+        static protected string[] validRemoteData =
         {
             "nldas", "gldas", "trmm", "ncei", "daymet", "prism"
         };
