@@ -285,7 +285,7 @@ namespace Web.Services.Models
             string nceiQuery = "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";
 
             //Using FLASK NCDC webservice            
-            Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(out errorMsg, nceiQuery);
+            Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(nceiQuery).Result;
             //Set NCEI station to closest station regardless of type
             double coverage = 0.0;
             double distance = 100000.0;

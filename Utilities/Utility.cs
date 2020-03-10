@@ -13,7 +13,7 @@ namespace Utilities
 {
     public class Utility
     {
-        public static string errorMessage = "";
+        public string errorMessage = "";
         const double minLat = 25.0625;
         const double maxLat = 52.9375;
         const double minLon = -124.9375;

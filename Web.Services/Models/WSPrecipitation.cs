@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Web;
 using Utilities;
@@ -13,7 +14,6 @@ namespace Web.Services.Models
     /// </summary>
     public class WSPrecipitation
     {
-
         private enum PrecipSources{ nldas, gldas, trmm, ncei, daymet, wgen, prism, nwm };
 
         /// <summary>

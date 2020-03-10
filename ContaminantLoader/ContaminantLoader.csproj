@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
   </ItemGroup>
 
   <ItemGroup>

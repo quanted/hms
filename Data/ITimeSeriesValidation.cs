@@ -11,13 +11,13 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        static string[] validDatasets = {
+        protected string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
             "temperature", "wind", "dewpoint", "humidity"
         };
 
-        static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
+        protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
             ["precipitation"] =  new List<string>{ "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
             ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
@@ -39,7 +39,7 @@ namespace Data
             ["surfacepressure"] = new List<string> { "gldas" }
         };
 
-        static string[] validRemoteData =
+        protected string[] validRemoteData =
         {
             "nldas", "gldas", "trmm", "ncei", "daymet", "prism"
         };
@@ -419,11 +419,11 @@ namespace Data
             if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
-                try
+                if(File.Exists(@".\App_Data\" + "url_info.txt"))
                 {
                     urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
                 }
-                catch (FileNotFoundException)
+                else
                 {
                     urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
                 }

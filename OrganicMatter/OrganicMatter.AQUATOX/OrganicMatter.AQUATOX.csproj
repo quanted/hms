@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
     <ProjectReference Include="..\..\Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
   </ItemGroup>

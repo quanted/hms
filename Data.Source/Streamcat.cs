@@ -5,6 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Text.Json;
+using Serilog;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Data.Source
 {
@@ -28,7 +31,7 @@ namespace Data.Source
         public Catchment GetCatchmentData(out string errorMsg, int comid)
         {
             errorMsg = "";
-            string rawData = GetStreamcatData(out errorMsg, comid);
+            string rawData = GetStreamcatData(comid).Result;
             dynamic streamcatData = JsonSerializer.Deserialize<dynamic>(rawData);
             Catchment catchment = SetCatchmentData(out errorMsg, streamcatData.output);
             return catchment;
@@ -40,9 +43,8 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="comid"></param>
         /// <returns></returns>
-        private string GetStreamcatData(out string errorMsg, int comid)
+        private async Task<string> GetStreamcatData(int comid)
         {
-            errorMsg = "";
             string aoi = "Catchment%2FWatershed";
             string metrics = "Agriculture;Hydrology;Land%20Cover;Soils;Urban";
             string requestUrl = String.Format(
@@ -51,35 +53,36 @@ namespace Data.Source
                 "&pLandscapeMetricClass=Disturbance;Natural&pFilenameOverride=AUTO", comid, aoi, metrics);
 
             string data = "";
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
             try
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 5;
-
-                // Response status message
+                int retries = 0;
+                int maxRetries = 10;
                 string status = "";
-                while (retries > 0 && !status.Contains("OK"))
+
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    WebRequest wr = WebRequest.Create(requestUrl);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    wm = await hc.GetAsync(requestUrl);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(200);
+                        Thread.Sleep(500 * retries);
                     }
                 }
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to download streamcat data.");
                 return null;
             }
+            wm.Dispose();
+            hc.Dispose();
             return data;
         }
 

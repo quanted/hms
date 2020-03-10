@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 //using System.ComponentModel.DataAnnotations;
@@ -256,6 +257,7 @@ namespace Data
             TimeSeriesInput validatedInput = ITimeSeriesValidation.Validate(out errorMsg, dataset, input) as TimeSeriesInput;
             if (errorMsg.Contains("ERROR"))
             {
+                Log.Warning(errorMsg);
                 return input;
             }
             return validatedInput;
@@ -270,14 +272,13 @@ namespace Data
         /// <returns></returns>
         public static string GetBaseURL(string source, string dataset)
         {
-            string errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
 
-            try
+            if(File.Exists(@".\App_Data\" + "url_info.txt"))
             {
                 urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
             }
-            catch (FileNotFoundException)
+            else
             {
                 urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
             }
@@ -290,7 +291,7 @@ namespace Data
             }
             catch
             {
-                errorMsg = "ERROR: Unable to construct base url from the specified dataset and provided data source.";
+                Log.Warning("ERROR: Unable to construct base url from dataset: {0}, and source: {1}.", dataset, source);
                 return "";
             }
         }

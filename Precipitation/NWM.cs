@@ -133,17 +133,18 @@ namespace Precipitation
                     retries -= 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(100);
+                        Thread.Sleep(500);
                     }
                 }
 
-                retries = 50;
+                Thread.Sleep(500);
+                int maxRetries = 100;
+                retries = 0;
                 status = "";
                 taskData = "";
                 bool success = false;
-                while (retries > 0 && !success && !jobID.Equals(""))
+                while (retries < maxRetries && !success && !jobID.Equals(""))
                 {
-                    Thread.Sleep(6000);
                     WebRequest wr = WebRequest.Create(dataURL + jobID);
                     HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                     status = response.StatusCode.ToString();
@@ -157,11 +158,17 @@ namespace Precipitation
                     }
                     else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
                     {
+                        reader.Close();
+                        response.Close();
                         break;
+                    }
+                    else
+                    {
+                        retries += 1;
+                        Thread.Sleep(5000);
                     }
                     reader.Close();
                     response.Close();
-                    retries -= 1;
                 }
             }
             catch (Exception ex)

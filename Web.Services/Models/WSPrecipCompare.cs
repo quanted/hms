@@ -139,7 +139,7 @@ namespace Web.Services.Models
                 };
                 
                 // Calling to HMS Flask web service.
-                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(out errorMsg, nceiQuery);
+                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(nceiQuery).Result;
 
                 ////Set NCEI station to closest station regardless of type
                 double bestCoverage = 0.0;
