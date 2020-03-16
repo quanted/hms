@@ -2,16 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using Utilities;
 using Web.Services.Controllers;
 
 namespace Web.Services.Models
@@ -77,6 +69,11 @@ namespace Web.Services.Models
             else if (input.Geometry.HucID != null)
             {
                 string len = input.Geometry.HucID.Length.ToString();
+                if(input.Geometry.HucID.Length < 12)
+                {
+                    tempOut.Metadata = err.ReturnError("ERROR: HUC type invalid or currently unsupported. Provided level: " + len);
+                    return tempOut;
+                }
                 dt = sn.prepareStreamNetworkForHUC(input.Geometry.HucID.ToString(), "huc_" + len + "_num", out errorMsg, out lst);
             }
             else

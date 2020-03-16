@@ -419,14 +419,15 @@ namespace Data
             if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
-                if(File.Exists(@".\App_Data\" + "url_info.txt"))
+                string path = ".\\App_Data\\" + "url_info.txt";
+                if (!File.Exists(@path))
                 {
-                    urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+                    path = "/app/App_Data/url_info.txt";
                 }
-                else
-                {
-                    urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
-                }
+
+
+                urls = Data.Files.FileToDictionary(path);
+
                 Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
                 foreach (string ds in dataset)
                 {

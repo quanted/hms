@@ -19,15 +19,20 @@ namespace Data
         public static Dictionary<string, string> FileToDictionary(string fileName)
         {
             Dictionary<string, string> fileValues = new Dictionary<string, string>();
-            foreach (string line in File.ReadLines(fileName))
+            using (StreamReader sr = new StreamReader(fileName))
             {
-                string[] lineValues = line.Split(' ');
-                if (!fileValues.ContainsKey(lineValues[0]) && lineValues.Length > 1)
+                while (!sr.EndOfStream)
                 {
-                    fileValues.Add(lineValues[0], lineValues[1]);
+                    string line = sr.ReadLine();
+                    string[] lineValues = line.Split(' ');
+                    if (!fileValues.ContainsKey(lineValues[0]) && lineValues.Length > 1)
+                    {
+                        fileValues.Add(lineValues[0], lineValues[1]);
+                    }
                 }
+                sr.Close();
+                return fileValues;                
             }
-            return fileValues;
         }
 
     }
