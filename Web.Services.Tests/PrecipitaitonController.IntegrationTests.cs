@@ -9,6 +9,7 @@ using Data;
 using System.Diagnostics;
 using System.Threading;
 using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -84,8 +85,8 @@ namespace Web.Services.Tests
         /// Integration test constructor creates test server and test client.
         /// </summary>
         public PrecipitaitonControllerIntegrationTests()
-        {          
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+        {
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

@@ -41,7 +41,7 @@ namespace Data.Source
 
             // Uses the constructed url to download time series data.
             string data = DownloadData(url, 0).Result;
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return data;
         }

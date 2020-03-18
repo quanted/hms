@@ -1,5 +1,4 @@
-﻿using System;
-using AQUATOX.AQTSegment;
+﻿using AQUATOX.AQTSegment;
 using Globals;
 using AQUATOX.Volume;
 using AQUATOX.AQSite;

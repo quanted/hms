@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using AQUATOXOrganicMatter;
-using System.Diagnostics;
 
 namespace OrganicMatter.AQUATOX.UnitTests
 {

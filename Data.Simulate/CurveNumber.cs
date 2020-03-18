@@ -1,14 +1,8 @@
 ﻿using Data.Source;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Web;
-using System.Text.Json;
 
 namespace Data.Simulate
 {
@@ -187,6 +181,7 @@ namespace Data.Simulate
             {
                 string jsonString = r.ReadToEnd();
                 dynamic cnData = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return cnData;
             }
         }
@@ -202,6 +197,7 @@ namespace Data.Simulate
             {
                 string jsonString = r.ReadToEnd();
                 dynamic cnConditions = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return cnConditions;
             }
         }
@@ -217,6 +213,7 @@ namespace Data.Simulate
             {
                 string jsonString = r.ReadToEnd();
                 dynamic ndvi = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return ndvi;
             }
         }

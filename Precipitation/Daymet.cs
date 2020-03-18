@@ -1,9 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace Precipitation
 {
@@ -160,7 +158,7 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="modifier"></param>
         /// <returns></returns>
-        public Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
+        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, string timeseries, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
         {
             errorMsg = "";
             Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>();
@@ -222,7 +220,7 @@ namespace Precipitation
         /// <param name="input"></param>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
+        private Boolean ValidateInputs(ITimeSeriesInput input, out string errorMsg)
         {
             errorMsg = "";
             List<string> errors = new List<string>();
