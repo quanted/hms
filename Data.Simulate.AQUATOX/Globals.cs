@@ -2,7 +2,7 @@
 
 
 namespace Globals
-{    
+{
     public enum AllVariables
     {
         H2OTox,
@@ -219,7 +219,7 @@ namespace Globals
         public double StoreStepSize;
         public double MinStepSize;
         public double RelativeError;
-//        public bool Placeholder;    // equilibrium fugacity disabled
+//      public bool Placeholder;    // equilibrium fugacity disabled
         public bool SaveBRates;
         public bool AlwaysWriteHypo;
         public bool ShowIntegration;
@@ -231,16 +231,16 @@ namespace Globals
         public bool NotUsedBCFUptake;     // Switched to chemical record 2/15/2013
         public bool StepSizeInDays;
         public bool ModelTSDays;
-        public bool Spinup_Mode;     // to v 3.56
-        public bool NFix_UseRatio;     // to v 3.66    // 3/16/2010, option to use NFix Ratio
-        public double NtoPRatio;    // to v 3.67     // 3/18/2010, capability to specify NFix Ratio
-        public bool Spin_Nutrients;    // to v 3.77
+        public bool Spinup_Mode;     
+        public bool NFix_UseRatio;   // 3/16/2010, option to use NFix Ratio
+        public double NtoPRatio;     // 3/18/2010, capability to specify NFix Ratio
+        public bool Spin_Nutrients;  
         public double FixStepSize;
-        public bool UseFixStepSize;     // to 3.79
-        public bool Internal_Nutrients;    // New to 3.83 and 3.1 plus
-        public bool T1IsAggregate;    // to 3.94
-        public bool AmmoniaIsDriving;     // to 3.94
-        public bool TSedDetrIsDriving;     // to 3.94
+        public bool UseFixStepSize;  
+        public bool Internal_Nutrients;    
+        public bool T1IsAggregate;    
+        public bool AmmoniaIsDriving; 
+        public bool TSedDetrIsDriving; 
     } // end Setup_Record
 
     public enum DetrDataType

@@ -1,5 +1,6 @@
 ﻿using AQUATOX.AQTSegment;
 using AQUATOX.Nutrients;
+using AQUATOX.Chemicals;
 using AQUATOX.Bioaccumulation;
 using Stream.Hydrology.AQUATOX;
 using Globals;

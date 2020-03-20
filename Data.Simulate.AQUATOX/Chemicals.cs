@@ -6,6 +6,7 @@ using AQUATOX.OrgMatter;
 using AQUATOX.Nutrients;
 using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
+using AQUATOX.Diagenesis;
 using AQUATOX.Organisms;
 using AQUATOX.Plants;
 using Newtonsoft.Json;
@@ -103,12 +104,15 @@ namespace AQUATOX.Chemicals
         public double[] Percent = new double[Consts.NToxs];
     }
 
+    [JsonObject]
     public class TToxics : TStateVariable
     {
         [JsonIgnore] public double ppb = 0;
         public AllVariables Carrier = AllVariables.NullStateVar;
         public bool IsAGGR = false;
         public ChemicalRecord ChemRec;
+        public virtual bool ShouldSerializeChemRec()  { return true;}  // only output JSON for H2OTox ChemRec
+
         public List<TBioTransObject> BioTrans = null;
         public UptakeCalcMethodType Anim_Method, Plant_Method;
 
@@ -133,9 +137,16 @@ namespace AQUATOX.Chemicals
             ppb = 0;
         }
 
-        public static T_SVType AssocToxTyp(AllVariables S)
+        //public static T_SVType AssocToxTyp(AllVariables S)
+        //{
+        //    return (T_SVType)((int)(S) + 2);
+        //}
+
+        public override void SetToInitCond() 
         {
-            return (T_SVType)((int)(S) + 2);
+            base.SetToInitCond();
+            if (NState != AllVariables.H2OTox) 
+                ChemRec = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).ChemRec;
         }
 
 
@@ -438,16 +449,16 @@ namespace AQUATOX.Chemicals
         {
             double result = 0;
 
-            if ((NState >= Consts.FirstAnimal)&&(NState<=Consts.LastAnimal))
-            {
-               TAnimalTox AnTox = (this) as TAnimalTox;
-               result = State * AnTox.Anim_Tox.Bio_rate_const;
-            }
-            if ((NState >= Consts.FirstPlant) && (NState <= Consts.LastPlant))
-            {
-                TAlgaeTox AZTox = (this) as TAlgaeTox;
-                result = State * AZTox.Plant_Tox.Bio_rate_const;
-            }
+            //if ((NState >= Consts.FirstAnimal)&&(NState<=Consts.LastAnimal))  //fixme enable biotransformation
+            //{
+            //   TAnimalTox AnTox = (this) as TAnimalTox;
+            //   result = State * AnTox.Anim_Tox.Bio_rate_const;
+            //}
+            //if ((NState >= Consts.FirstPlant) && (NState <= Consts.LastPlant))
+            //{
+            //    TAlgaeTox AZTox = (this) as TAlgaeTox;
+            //    result = State * AZTox.Plant_Tox.Bio_rate_const;
+            //}
 
             return result * AQTSeg.SegVol() * 1000.0 * 1e-9;
             // kg   (ug/L)          (m3)     (L/m3)   (kg/ug)
@@ -472,6 +483,7 @@ namespace AQUATOX.Chemicals
             TToxics ToxPtr;
 
             MBTSum = 0;
+
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
                 // loop through all org toxicants
@@ -482,8 +494,10 @@ namespace AQUATOX.Chemicals
                     if ((ToxPtr.State > 0))
                     {
                         // if this toxicant exists then
-                        if (Aerobic) BTRec = Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
+                        if (Aerobic) BTRec = ToxPtr.Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
                         else         BTRec = Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
+
+                        if (BTRec == null) return 0;
 
                         FracToMe = BTRec.Percent[(int) SVType -2] / 100.0;
                         // fraction of biotrans to this org tox compartment
@@ -526,7 +540,7 @@ namespace AQUATOX.Chemicals
             {
                 // loop through all org toxicants
                 // if this toxicant is relevant then
-                if ((ToxLoop != SVType) && (AQTSeg.GetState(NState, ToxLoop, T_SVLayer.WaterCol) > Consts.Tiny))
+                if ((ToxLoop != SVType) && (AQTSeg.GetStateVal(NState, ToxLoop, T_SVLayer.WaterCol) > Consts.Tiny))
                 {
                     BTRec = Get_BioTrans_Record(BioTransType.BTUserSpecified, NState);
                     // see if species specific Biotrans data exists
@@ -674,7 +688,8 @@ namespace AQUATOX.Chemicals
                 // Split into four compartments
                 PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
                 LoadRes = PInputRec.Load.ReturnLoad(TimeIndex) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, -1);
-                ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnLoad(TimeIndex);
+                if (PInputRec.ToxLoad[(int)SVType - 2] == null) ToxLoad = 0;
+                  else ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnLoad(TimeIndex);
 
                 LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
                 // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
@@ -690,8 +705,9 @@ namespace AQUATOX.Chemicals
                             // Split into two or four compartments
                             AddLoad = PInputRec.Load.ReturnAltLoad(TimeIndex, Loop) * ((CPtr) as TDetritus).MultFrac(TimeIndex, true, Loop);
                             // g/d                                                                         // unitless
-                            ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnAltLoad(TimeIndex, Loop);
-                            // ug/kg
+                            if (PInputRec.ToxLoad[(int)SVType - 2] == null) ToxLoad = 0;
+                              else ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnAltLoad(TimeIndex, Loop);
+                                 // ug/kg
                         }
                         else
                         {
@@ -858,7 +874,7 @@ namespace AQUATOX.Chemicals
             double KOW;
             double IonCorr;
             double NonDiss;
-            if ((NState < AllVariables.ReDOMPore) || (NState > Consts.LastDetr) || (SVType < Consts.FirstOrgTxTyp) || (SVType <= Consts.LastOrgTxTyp))
+            if ((NState < AllVariables.ReDOMPore) || (NState > Consts.LastDetr) || (SVType < Consts.FirstOrgTxTyp) || (SVType > Consts.LastOrgTxTyp))
             {
                 throw new Exception("Programming Error, CalculateKOM must be passed a detrital toxicant");
             }
@@ -1057,7 +1073,7 @@ namespace AQUATOX.Chemicals
                 ChemOption = Plant_Method;
                 AlgalP = ((CP) as TPlant);
                 if (ChemOption == UptakeCalcMethodType.CalcK2)
-                    K2 = ((TAlgaeTox) this).Plant_Tox.K1 / ((TAlgaeTox)this).Plant_Tox.Entered_BCF;
+                    K2 = ((TAlgaeTox)this).Plant_Tox.K1 / ((TAlgaeTox)this).Plant_Tox.Entered_BCF;
                 else
                     K2 = ((TAlgaeTox)this).Plant_Tox.K2;
 
@@ -1163,8 +1179,8 @@ namespace AQUATOX.Chemicals
         public override void Derivative(ref double DB)
         {
             // Derivative for Toxicant Dissolved in Water
-            //double ThisPPB =0;
-            //double Dec =0;
+            double ThisPPB =0;
+            double Dec =0;
             double Lo =0;
             double Hyd =0;
             double Pho =0;
@@ -1198,15 +1214,14 @@ namespace AQUATOX.Chemicals
             //TPorewater ToTPoreWater;
             //TPoreWaterTox ToTPoreWaterTox;
             TToxics PT;
-            //TDetritus PD;
-            //TPOC_Sediment TPOC;
-            //TPOCTox TPOCT;
+            TDetritus PD;
+            TPOC_Sediment TPOC;
+            TPOCTox TPOCT;
             AllVariables NsLoop;
-            //AllVariables StartLoop;
-            //AllVariables DecompLoop;
-            //TAlgaeTox AlgalToxPtr;
+            AllVariables DecompLoop;
+            TAlgaeTox AlgalToxPtr;
             bool SedModelRunning;
-            //double UnitFix;
+            double UnitFix;
             //double DissSorpInKG;
             // Derivative for Toxicant Dissolved in Water
             SedModelRunning = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1) != null;
@@ -1233,12 +1248,10 @@ namespace AQUATOX.Chemicals
                 Lo = Loading;
                 //if (AQTSeg.EstuarySegment)   {  Entr = EstuaryEntrainment();     }
 
-                //// save for tox loss output & categorization
-                //if (Entr > 0)
-                //{  LoadInKg = (Lo + Entr) * SegVol() * 1000.0 * 1e-9;     }
-                //else
-                //{  LoadInKg = Lo * _wvar3.SegVol() * 1000.0 * 1e-9;       }
-                //// kg      // ug/L          // m3    // L/m3  // kg/ug
+                // save for tox loss output & categorization
+                //if (Entr > 0)  {  LoadInKg = (Lo + Entr) * SegVol() * 1000.0 * 1e-9;     }
+                //else  {  LoadInKg = Lo * _wvar3.SegVol() * 1000.0 * 1e-9;       }
+                //    // kg      // ug/L          // m3    // L/m3  // kg/ug
 
                 //TotOOSLoad[DerivStep] = TotOOSLoad[_wvar3.DerivStep] + LoadInKg;
                 //ToxLoadH2O[DerivStep] = ToxLoadH2O[_wvar3.DerivStep] + LoadInKg;
@@ -1247,8 +1260,8 @@ namespace AQUATOX.Chemicals
                 Pho = Photolysis();
                 Mic = MicrobialMetabolism(ref FracAerobic);
 
-                //Mic_in_Aer = Microbial_BioTrans_To_This_SV(true);
-                //Mic_in_Anaer = Microbial_BioTrans_To_This_SV(false);
+                Mic_in_Aer = Microbial_BioTrans_To_This_SV(true);
+                Mic_in_Anaer = Microbial_BioTrans_To_This_SV(false);
 
                 Vl = Volatilization();
                 ToxDis = Washout();
@@ -1263,18 +1276,14 @@ namespace AQUATOX.Chemicals
                 //DissWash[_wvar5.DerivStep] = _wvar6.DissWash[_wvar5.DerivStep] + OOSDriftInKg;
 
                 //if (LinkedMode)
-                //{
                 //    Inflow = WashIn();
-                //}
                 //if (LinkedMode && (!CascadeRunning))
                 //{
                 //    DiffUp = SegmentDiffusion(true);
                 //    DiffDown = SegmentDiffusion(false);
                 //}
                 //else if (!LinkedMode)
-                //{
                 //    TDF = TurbDiff();  // stratification
-                //}
 
                 //ToTPoreWaterTox = AQTSeg.GetStatePointer(AllVariables.PoreWater, ToxType, T_SVLayer.SedLayer1);   // Diffusion from/to pore waters
                 //if (ToTPoreWaterTox != null)
@@ -1314,115 +1323,103 @@ namespace AQUATOX.Chemicals
                 //}
 
                 if (!ChemRec.BCFUptake)
-                {
-                    // Animal and plant sorption / desorption
-                    // If the sed submodel is being utilized then seddetr
-                    //if (SedModelRunning)
-                    //{
-                    //    // decomposition, sorption and desorption is
-                    //    StartLoop = AllVariables.DissRefrDetr;
-                    //}
-                    //else
-                    //{
-                    //    StartLoop = AllVariables.SedmRefrDetr;
-                    //}
-                    // associated with the tox in the active layer's pore water
-                    // not the tox in the water column . . .
-                    //Decomp = 0;
-                    //for (DecompLoop = StartLoop; DecompLoop <= Consts.LastDetr; DecompLoop++)
-                    //{
-                    //    PD = (TDetritus) AQTSeg.GetStatePointer(DecompLoop, T_SVType.StV, T_SVLayer.WaterCol);
-                    //    if ((PD != null))
-                    //    {
-                    //        Dec = PD.Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
-                    //        ThisPPB = GetPPB(DecompLoop, SVType, T_SVLayer.WaterCol);
-                    //        Decomp = Decomp + (Dec * ThisPPB * 1e-6);
-                    //    }
-                    //}
+                {  //   Animal and plant sorption / desorption
+                    Decomp = 0;
+                    for (DecompLoop = AllVariables.SedmRefrDetr; DecompLoop <= Consts.LastDetr; DecompLoop++)
+                    {
+                        PD = (TDetritus)AQTSeg.GetStatePointer(DecompLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                        if ((PD != null))
+                        {
+                            Dec = PD.Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                            ThisPPB = GetPPB(DecompLoop, SVType, T_SVLayer.WaterCol);
+                            Decomp = Decomp + (Dec * ThisPPB * 1e-6);
+                        }
+                    }
 
-                    //if (AQTSeg.Diagenesis_Included())
-                    //{
-                    //    for (DecompLoop = AllVariables.POC_G1; DecompLoop <= AllVariables.POC_G3; DecompLoop++)
-                    //    {
-                    //        TPOC = AQTSeg.GetStatePointer(DecompLoop, T_SVType.StV, T_SVLayer.SedLayer2);
-                    //        if ((TPOC != null))
-                    //        {
-                    //            Dec = TPOC.Mineralization();
-                    //            // g/m3 sed. d
-                    //            ThisPPB = GetPPB(DecompLoop, SVType, T_SVLayer.SedLayer2);
-                    //            Decomp = Decomp + (Dec * ThisPPB * 1e-6) * AQTSeg.DiagenesisVol(2) / Location.Morph.SegVolum;
-                    //            // ug/L day =  mg/L sed. d + ( ug/kg * kg/mg) *  m3 sed           /  m3 water
-                    //        }
-                    //    }
-                    //}
+                    if (AQTSeg.Diagenesis_Included())
+                    {
+                        for (DecompLoop = AllVariables.POC_G1; DecompLoop <= AllVariables.POC_G3; DecompLoop++)
+                        {
+                            TPOC = AQTSeg.GetStatePointer(DecompLoop, T_SVType.StV, T_SVLayer.SedLayer2) as TPOC_Sediment;
+                            if ((TPOC != null))
+                            {
+                                Dec = TPOC.Mineralization();
+                                // g/m3 sed. d
+                                ThisPPB = GetPPB(DecompLoop, SVType, T_SVLayer.SedLayer2);
+                                Decomp = Decomp + (Dec * ThisPPB * 1e-6) * AQTSeg.DiagenesisVol(2) / Location.Morph.SegVolum;
+                                // ug/L day =  mg/L sed. d + ( ug/kg * kg/mg) *  m3 sed           /  m3 water
+                            }
+                        }
+                    }
 
-                    //DetrSorption = 0;
-                    //DetrDesorption = 0;
-                    //for (NsLoop = StartLoop; NsLoop <= Consts.LastDetr; NsLoop++)
-                    //{
-                    //    PT = (TToxics) AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol);
-                    //    if ((PT != null))
-                    //    {
-                    //        // DetrSorption = DetrSorption + PT.Sorption();
-                    //        DetrDesorption = DetrDesorption + PT.Desorption();
-                    //    }
-                    //}
+                    DetrSorption = 0;
+                    DetrDesorption = 0;
+                    for (NsLoop = AllVariables.SedmRefrDetr; NsLoop <= Consts.LastDetr; NsLoop++)
+                    {
+                        PT = (TToxics)AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol);
+                        if ((PT != null))
+                        {
+                            // DetrSorption = DetrSorption + PT.Sorption();
+                            DetrDesorption = DetrDesorption + PT.Desorption();
+                        }
+                    }
 
-                    //if (AQTSeg.Diagenesis_Included())
-                    //{
-                    //    for (NsLoop = AllVariables.POC_G1; NsLoop <= AllVariables.POC_G3; NsLoop++)
-                    //    {
-                    //        UnitFix = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000);
-                    //        // m2/L                   // m2            // m3     // L/m3
-                    //        TPOCT = AQTSeg.GetStatePointer(NsLoop, ToxType, T_SVLayer.SedLayer2);
-                    //        if ((TPOCT != null))
-                    //        {
-                    //            DetrSorption = DetrSorption + TPOCT.Sorption() * UnitFix;
-                    //            DetrDesorption = DetrDesorption + TPOCT.Desorption() * UnitFix;
-                    //            // ug/L d          // ug/m2 d           // m2/L                 }
-                    //    }
-                    //}
+                    if (AQTSeg.Diagenesis_Included())
+                    {
+                        for (NsLoop = AllVariables.POC_G1; NsLoop <= AllVariables.POC_G3; NsLoop++)
+                        {
+                            UnitFix = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000);
+                            // m2/L                   // m2            // m3     // L/m3
+                            TPOCT = AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.SedLayer2) as TPOCTox;
+                            if ((TPOCT != null))
+                            {
+                                DetrSorption = DetrSorption + TPOCT.Sorption() * UnitFix;
+                                DetrDesorption = DetrDesorption + TPOCT.Desorption() * UnitFix;
+                                // ug/L d          // ug/m2 d           // m2/L                 }
+                            }
+                        }
+                    }
 
-                    //PlantSorp = 0;
-                    //for (NsLoop = Consts.FirstPlant; NsLoop <= Consts.LastPlant; NsLoop++)
-                    //{
-                    //    AlgalToxPtr = (AQTSeg.GetStatePointer(NsLoop, ToxType, T_SVLayer.WaterCol));
-                    //    if (!(AlgalToxPtr == null))
-                    //    {
-                    //        PlantSorp = PlantSorp + AlgalToxPtr.PlantUptake();
-                    //    }
-                    //}
+                        PlantSorp = 0;
+                        for (NsLoop = Consts.FirstPlant; NsLoop <= Consts.LastPlant; NsLoop++)
+                        {
+                            AlgalToxPtr = (AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol)) as TAlgaeTox;
+                            if (!(AlgalToxPtr == null))
+                            {
+                                PlantSorp = PlantSorp + AlgalToxPtr.PlantUptake();
+                            }
+                        }
 
-                    //GillSorption = 0;
-                    //for (NsLoop = Consts.FirstAnimal; NsLoop <= Consts.LastAnimal; NsLoop++)
-                    //{
-                    //    if (!(AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol) == null))
-                    //    {
-                    //        GillSorption = GillSorption + ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).GillUptake(ToxType, T_SVLayer.WaterCol);
-                    //    }
-                    //}
+                        GillSorption = 0;
+                        for (NsLoop = Consts.FirstAnimal; NsLoop <= Consts.LastAnimal; NsLoop++)
+                        {
+                            if (!(AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol) == null))
+                            {
+                                GillSorption = GillSorption + ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).GillUptake(SVType, T_SVLayer.WaterCol);
+                            }
+                        }
 
-                    //// save for tox loss output & categorization
-                    //DissSorpInKG = (DetrSorption + PlantSorp + GillSorption) * Volume_Last_Step * 1000.0 * 1e-9;
-                    //// kg = ( ug/L + ug/L + ug/L ) *  m3 *  L/m3 * kg/ug
-                    //DissSorp[DerivStep] = DissSorp[DerivStep] + DissSorpInKG;
+                        // save for tox loss output & categorization
+                        //DissSorpInKG = (DetrSorption + PlantSorp + GillSorption) * Volume_Last_Step * 1000.0 * 1e-9;
+                        // kg = ( ug/L + ug/L + ug/L ) *  m3 *  L/m3 * kg/ug
+                        //DissSorp[DerivStep] = DissSorp[DerivStep] + DissSorpInKG;
 
-                    //ToTPoreWater = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
-                    //Dep = 0;
-                    //for (NsLoop = Consts.FirstBiota; NsLoop <= Consts.LastBiota; NsLoop++)
-                    //{
-                    //    PT = (AQTSeg.GetStatePointer(NsLoop, Consts.AssocToxTyp(NState), T_SVLayer.WaterCol));
-                    //    if (PT != null)
-                    //    {
-                    //        FracInWater = 1;
-                    //        if (SedModelRunning && (NsLoop >= Consts.FirstAnimal && NsLoop <= Consts.LastAnimal) && (ToTPoreWater.VolumeInM3() > Consts.Tiny))
-                    //        {
-                    //            FracInWater = ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).PAnimalData.FracInWaterCol;
-                    //        }
-                    //        Dep = Dep + PT.Depuration() * FracInWater;
-                    //    }
-                    //}
-                }
+                        //ToTPoreWater = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);
+                        Dep = 0;
+                        for (NsLoop = Consts.FirstBiota; NsLoop <= Consts.LastBiota; NsLoop++)
+                        {
+                            PT = (AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol)) as TToxics;
+                            if (PT != null) Dep = Dep + PT.Depuration();
+
+                            //{  pore water code omitted
+                            //    //FracInWater = 1;
+                            //    if (SedModelRunning && (NsLoop >= Consts.FirstAnimal && NsLoop <= Consts.LastAnimal) && (ToTPoreWater.VolumeInM3() > Consts.Tiny))
+                            //        FracInWater = ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).PAnimalData.FracInWaterCol;
+                            //    Dep = Dep + PT.Depuration(); * FracInWater;
+                            //}
+                        }
+
+                    }  // If Not Estimate By BCF
 
                 if (GillUptake_Link != null) GillSorption = GillUptake_Link.ReturnLoad(AQTSeg.TPresent);
                 if (Depuration_Link != null) Dep = Depuration_Link.ReturnLoad(AQTSeg.TPresent);
@@ -1433,7 +1430,7 @@ namespace AQUATOX.Chemicals
 
                 DB = Lo - Hyd - Pho - Mic - Vl - ToxDis + Inflow + TDF + Mic_in_Aer + Mic_in_Anaer + DiffUp + DiffDown + DiffSed + Entr;
                 DB = DB + Decomp - DetrSorption + DetrDesorption - InorgSorpt + InorgDesorpt - GillSorption + Dep - PlantSorp + PoreWUp - PoreWDown;
-            }  // If Not Estimate By BCF
+            }  
 
            //  Derivative_WriteRates();
         }
@@ -1459,6 +1456,7 @@ namespace AQUATOX.Chemicals
 
         public TBioTransObject Get_BioTrans_Record(BioTransType BT, AllVariables US)
         {
+            if (BioTrans == null) return null;
             foreach (TBioTransObject BioRec in BioTrans)
             { 
               if ((BioRec.BTType == BT) && (BioRec.UserSpec == US))

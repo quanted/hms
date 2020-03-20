@@ -7,11 +7,43 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
 using Data;
 using System.ComponentModel;
+using Web.Services.Models;
+using Web.Services.Controllers;
+using System.Collections.Generic;
 
-
-namespace GUI.AQUATOX
+namespace GUI.AQUATOX.Workflow
 {
-    public partial class AQTTestForm : Form
+    /// <summary>
+    /// WaterQuality Input that implements TimeSeriesInput object.
+    /// </summary>
+    public class WaterQualityInput
+    {
+        /// <summary>
+        /// Specified dataset for the workflow
+        /// </summary>
+        //[Required]
+        //public List<List<string>> ConnectivityTable { get; set; }     //To load from file, will be added at a later date.
+
+        /// <summary>
+        /// TaskID required for data storage in mongodb
+        /// </summary>
+        public string TaskID { get; set; }
+
+        /// <summary>
+        /// Data source for data retrieval
+        /// If value is 'nldas': surface runoff and subsurface flow will be from nldas (no precip will be downloaded); 
+        /// If value is 'ncei', precip data will be downloaded from the closest station to the catchment and curvenumber will be used for surface runoff/subsurface flow.
+        /// </summary>
+        public string DataSource { get; set; }
+
+        public int MinNitrate { get; set; }
+        public int MaxNitrate { get; set; }
+        public int MinAmmonia { get; set; }
+        public int MaxAmmonia { get; set; }
+
+    }
+
+    public partial class AQTWorkflowForm : Form
     {
         private Chart chart1 = new Chart();
         private BackgroundWorker Worker = new BackgroundWorker();
@@ -23,7 +55,7 @@ namespace GUI.AQUATOX
         
         public AQTSim aQTS = null;
 
-        public AQTTestForm()
+        public AQTWorkflowForm()
         {
             InitializeComponent();
             Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
@@ -67,7 +99,7 @@ namespace GUI.AQUATOX
 
         }
 
-        private void AQTTestForm_Load(object sender, EventArgs e)
+        private void AQTWorkflowForm_Load(object sender, EventArgs e)
         {
 
         }
@@ -75,7 +107,6 @@ namespace GUI.AQUATOX
         public void DisplaySVs()
 
         {
-            TStateVariable TSV1 = null;
             string outtxt = "Date, ";
             bool SuppressText = true;
 
@@ -87,9 +118,8 @@ namespace GUI.AQUATOX
             chart1.Series.Clear();
             int sercnt = 0;
 
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.output != null)
+            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
             {
-                TSV1 = TSV; // identify TSV with output that is not null
                 int cnt = 0;
                 Series ser = chart1.Series.Add(TSV.PName);
                 outtxt = outtxt + TSV.PName.Replace(",", "") + ", ";  // suppress commas in name for CSV output
@@ -116,11 +146,12 @@ namespace GUI.AQUATOX
 
             if (!SuppressText)
             {
+                TStateVariable TSV1 = aQTS.AQTSeg.SV[0];
                 for (int i = 0; i < TSV1.output.Data.Keys.Count; i++)
                 {
                     bool writedate = true;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.output != null)
-                        {
+                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+                    {
                         ITimeSeriesOutput ito = TSV.output;
                         if (writedate)
                         {
@@ -178,12 +209,20 @@ namespace GUI.AQUATOX
 
         private void integrate_Click(object sender, EventArgs e)
         {
-            if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
-            else
-            {
-                progressBar1.Visible = true;
-                Worker.RunWorkerAsync();
-            }
+            WSWatershedWorkFlow workFlow = new WSWatershedWorkFlow();
+            WatershedWorkflowInput workflowInput = new WatershedWorkflowInput();  //add examples
+            workFlow.GetWorkFlowData(workflowInput);         // 
+            
+            //results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+            // return new ObjectResult(results);
+
+
+            //if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
+            //else
+            //{
+            //    progressBar1.Visible = true;
+            //    Worker.RunWorkerAsync();
+            //}
         }
 
 

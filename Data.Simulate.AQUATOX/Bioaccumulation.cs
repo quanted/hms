@@ -17,6 +17,8 @@ namespace AQUATOX.Bioaccumulation
     public class TSuspSedimentTox : TToxics
     {
 
+        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+
         public TSuspSedimentTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
 
@@ -68,6 +70,8 @@ namespace AQUATOX.Bioaccumulation
 
     public class TParticleTox : TToxics
     {
+        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+
         public TParticleTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
 
@@ -571,6 +575,8 @@ namespace AQUATOX.Bioaccumulation
     public class TAlgaeTox : TToxics
 
     {
+        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+
         public TPlantToxRecord Plant_Tox = null;
 
         public TAlgaeTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
@@ -811,7 +817,7 @@ namespace AQUATOX.Bioaccumulation
 
     } // end TAlgaeTox
 
-    public class TAnimalTox : TToxics { 
+    public class TAnimalTox : TToxics {
 
         public TAnimalToxRecord Anim_Tox = null;
         [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)

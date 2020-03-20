@@ -207,7 +207,7 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public double yerror = 0;          // holds error term from RKCK
         [JsonIgnore] public double yscale = 0;          // use in Integration
         [JsonIgnore] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
-        public AQUATOXTSOutput output;  // public and evenly-spaced results following integration / interpolation
+        public AQUATOXTSOutput output = null;  // public and evenly-spaced results following integration / interpolation
 
         [JsonIgnore] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
         public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
@@ -258,7 +258,6 @@ namespace AQUATOX.AQTSegment
                  ((this) as TOrganism).CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
                                                               // the appropriate RISKCONC, LCINFINITE, and K2
                                                               // Set Oyster Category
-
                 }
 
             // Initialize BCF calculation   // FIXME TOX EFFECTS
@@ -293,24 +292,17 @@ namespace AQUATOX.AQTSegment
             //    P.State = P.InitialCond;
             //}
 
-            //// Initialize Toxics  // FIXME TOX EFFECTS
-            //if ((P.SVType >= Consts.FirstOrgTxTyp && P.SVType <= Consts.LastOrgTxTyp) || (P.NState >= Consts.FirstOrgTox && P.NState <= Consts.LastOrgTox))
-            //{
-            //    ((P) as TToxics).ppb = 0;
-            //    if ((P.NState >= Consts.FirstAnimal && P.NState <= Consts.LastAnimal) && (P.SVType >= Consts.FirstOrgTxTyp && P.SVType <= Consts.LastOrgTxTyp))
-            //    {
-            //        ((P) as TToxics).InitialLipid();
-            //    }
-            //    ((P) as TToxics).IsAGGR = false;
-            //    if ((P.SVType == Consts.FirstToxTyp) && T1IsAGGR)
-            //    {
-            //        ((P) as TToxics).IsAGGR = true;
-            //    }
-            //    if ((P.NState == Consts.FirstOrgTox) && T1IsAGGR)
-            //    {
-            //        ((P) as TToxics).IsAGGR = true;
-            //    }
-            //}
+            // Initialize Toxics  
+            if ((SVType >= Consts.FirstOrgTxTyp) && (SVType <= Consts.LastOrgTxTyp))
+            {
+                ((this) as TToxics).ppb = 0;
+
+                ((this) as TToxics).IsAGGR = false;
+                if ((SVType == Consts.FirstOrgTxTyp) && (AQTSeg.PSetup.T1IsAggregate))
+                {
+                    ((this) as TToxics).IsAGGR = true;
+                }
+            }
 
         }
 
@@ -785,12 +777,11 @@ namespace AQUATOX.AQTSegment
             if (p.State < Consts.Tiny)
             {
                 p.State = 0.0;
-                //if (P.NState in [FirstOrgTox..LastOrgTox]) or  FIXME CHEMICAL IN ORGANISMS
-                //  (P.SVType in [FirstOrgTxTyp..LastOrgTxTyp])
-                //  then TToxics(P).PPB:=0;
+                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
+                  ((TToxics)p).ppb = 0;
 
             }
-}
+        }
 
         public void TryRKStep_CheckZeroStateAllSVs()
         {
@@ -994,9 +985,8 @@ namespace AQUATOX.AQTSegment
             if (p.State < 0)
             {
                 p.State = 0.0;
-                //if (P.NState in [FirstOrgTox..LastOrgTox]) or  FIXME CHEMICAL IN ORGANISMS
-                //  (P.SVType in [FirstOrgTxTyp..LastOrgTxTyp])
-                //  then TToxics(P).PPB:=0;
+                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
+                    ((TToxics)p).ppb = 0;
 
             }
         }
@@ -1698,7 +1688,7 @@ namespace AQUATOX.AQTSegment
             if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[SV.restimes.Count - 1]).TotalDays > Consts.VSmall)
             {
                 SV.restimes.Add(TimeIndex);
-                foreach (TStateVariable TSV in SV)
+                foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
                 {
                     res = TSV.State;
                     if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
@@ -1706,6 +1696,9 @@ namespace AQUATOX.AQTSegment
                         res = res * SegVol() / SurfaceArea();
                         //  g/m2  g/m3     m3         m2
                     }
+                    //if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))
+                      //  res = GetPPB(TSV.NState, TSV.SVType, TSV.Layer);
+
                     TSV.Results.Add(res);
                 }
             }
@@ -1895,36 +1888,37 @@ namespace AQUATOX.AQTSegment
 
             }
 
-            foreach (TStateVariable TSV in SV)
-            {
-                if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
-                if (TSV.Results.Count == 0) return "No results saved for SV " + TSV.PName;
+            foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
+                {
+                    if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
+                    if (TSV.Results.Count == 0) return "No results saved for SV " + TSV.PName;
 
-                TSV.output = new AQUATOXTSOutput();
-                TSV.output.Dataset = TSV.PName;
-                TSV.output.DataSource = "AQUATOX";
-                TSV.output.Metadata = new Dictionary<string, string>()
+                    TSV.output = new AQUATOXTSOutput();
+                    TSV.output.Dataset = TSV.PName;
+                    TSV.output.DataSource = "AQUATOX";
+                    TSV.output.Metadata = new Dictionary<string, string>()
                 {
                     {"AQUATOX_HMS_Version", "1.0.0"},
                     {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
                     {"Result Unit", TSV.StateUnit},
                 };
 
-                TSV.output.Data = new Dictionary<string, List<string>>();
-                List<string> vallist = new List<string>();
-                vallist.Add(TSV.Results[0].ToString(Consts.ValFormatString));
-                TSV.output.Data.Add(SV.restimes[0].ToString(Consts.DateFormatString), vallist);
-                for (int i = 1; i <= numsteps; i++)
-                {
-                    DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
-                    if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
-                    else val = InstantaneousConc(out errmsg, steptime, TSV.Results, StartIndices[i - 1]);
-                    vallist = new List<string>();
-                    vallist.Add(val.ToString(Consts.ValFormatString));
-                    TSV.output.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
-                    if (errmsg != "") return errmsg;
+                    TSV.output.Data = new Dictionary<string, List<string>>();
+                    List<string> vallist = new List<string>();
+                    vallist.Add(TSV.Results[0].ToString(Consts.ValFormatString));
+                    TSV.output.Data.Add(SV.restimes[0].ToString(Consts.DateFormatString), vallist);
+                    for (int i = 1; i <= numsteps; i++)
+                    {
+                        DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
+                        if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
+                        else val = InstantaneousConc(out errmsg, steptime, TSV.Results, StartIndices[i - 1]);
+                        vallist = new List<string>();
+                        vallist.Add(val.ToString(Consts.ValFormatString));
+                        TSV.output.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
+                        if (errmsg != "") return errmsg;
+                    }
                 }
-            }
+                else TSV.output = null;  // if !TrackResults
             return "";
         }
 
@@ -2578,9 +2572,9 @@ namespace AQUATOX.AQTSegment
                         // g/m3                       // g/m3
                         Sed = Sed + PP.Sedimentation() * Frac * NFrac;
                     }
-                    //else  // FIXME Toxicant in animals
-                    //{ Sed = Sed + PP.Sedimentation() * Frac * GetPPB(PP.NState, Typ, PP.Layer) * 1e-3;
-                    //} // ug/m3           // g/m3             // ug/kg                            // kg/g
+                    else  
+                    { Sed = Sed + PP.Sedimentation() * Frac * GetPPB(PP.NState, Typ, PP.Layer) * 1e-3;
+                    } // ug/m3           // g/m3             // ug/kg                            // kg/g
                 }
                 // not linkedphyto
             }  // algae
@@ -2617,8 +2611,8 @@ namespace AQUATOX.AQTSegment
                 if ((Typ == T_SVType.StV))
                     Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac;
                 //else
-                //    // ug/m3                      g/m3                      ug/kg                     kg/g
-                //    Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac * GetPPB(P.NState, Typ, P.Layer) * 1e-3;
+                    // ug/m3                      g/m3                      ug/kg                     kg/g
+                    Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac * GetPPB(P.NState, Typ, P.Layer) * 1e-3;
             }
             // Detritus
 
@@ -3345,7 +3339,7 @@ namespace AQUATOX.AQTSegment
             double PPBResult;
 
             // ns must be a toxicant state variable or the program will halt
-            if (T >= Consts.FirstOrgTxTyp && T <= Consts.LastOrgTxTyp) throw new Exception("Programming Error, GetPPB has been passed a non-toxicant.");
+            if (!(T >= Consts.FirstOrgTxTyp && T <= Consts.LastOrgTxTyp)) throw new Exception("Programming Error, GetPPB has been passed a non-toxicant.");
 
             if ( Diagenesis_Included() && ((S== AllVariables.SedmRefrDetr)||(S==AllVariables.SedmLabDetr)) )
             {
@@ -3360,11 +3354,10 @@ namespace AQUATOX.AQTSegment
             if (PT == null) return 0;
             if (PT.IsAGGR)  return PT.ppb;
 
+            ToxState = PT.State;
+            if (S == AllVariables.H2OTox) return ToxState;      // Toxicant Dissolved in Water already in ug/L
+
             CarrierState = GetState(S, T_SVType.StV, L);
-            ToxState = GetState(S, T, L);
-
-            if (S == AllVariables.H2OTox) return PT.State;      // Toxicant Dissolved in Water already in ug/L
-
             if ((CarrierState < Consts.Tiny) || (ToxState < Consts.Tiny)) return 0;
 
             PPBResult = ToxState / CarrierState * 1e6;             // Toxicant in Carrier in water
@@ -3767,7 +3760,8 @@ namespace AQUATOX.AQTSegment
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
-                                          typeof(TSandSiltClay), typeof(InteractionFields)}; 
+                                          typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TSuspSedimentTox), typeof(TParticleTox),
+                                          typeof(TAlgaeTox), typeof(TPlantToxRecord)}; 
     }
 }
 
