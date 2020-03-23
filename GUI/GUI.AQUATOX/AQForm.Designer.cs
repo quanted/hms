@@ -37,13 +37,14 @@ namespace GUI.AQUATOX
             this.integrate = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.graphbutton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadJSON
             // 
             this.loadJSON.Location = new System.Drawing.Point(26, 21);
             this.loadJSON.Name = "loadJSON";
-            this.loadJSON.Size = new System.Drawing.Size(104, 28);
+            this.loadJSON.Size = new System.Drawing.Size(91, 28);
             this.loadJSON.TabIndex = 0;
             this.loadJSON.Text = "Load JSON";
             this.loadJSON.UseVisualStyleBackColor = true;
@@ -51,9 +52,9 @@ namespace GUI.AQUATOX
             // 
             // saveJSON
             // 
-            this.saveJSON.Location = new System.Drawing.Point(154, 21);
+            this.saveJSON.Location = new System.Drawing.Point(136, 21);
             this.saveJSON.Name = "saveJSON";
-            this.saveJSON.Size = new System.Drawing.Size(104, 28);
+            this.saveJSON.Size = new System.Drawing.Size(87, 28);
             this.saveJSON.TabIndex = 0;
             this.saveJSON.Text = "Save JSON";
             this.saveJSON.UseVisualStyleBackColor = true;
@@ -61,9 +62,9 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(284, 21);
+            this.integrate.Location = new System.Drawing.Point(240, 21);
             this.integrate.Name = "integrate";
-            this.integrate.Size = new System.Drawing.Size(107, 28);
+            this.integrate.Size = new System.Drawing.Size(85, 28);
             this.integrate.TabIndex = 1;
             this.integrate.Text = "Integrate";
             this.integrate.UseVisualStyleBackColor = true;
@@ -93,9 +94,20 @@ namespace GUI.AQUATOX
             this.progressBar1.TabIndex = 3;
             this.progressBar1.Visible = false;
             // 
+            // graphbutton
+            // 
+            this.graphbutton.Location = new System.Drawing.Point(348, 21);
+            this.graphbutton.Name = "graphbutton";
+            this.graphbutton.Size = new System.Drawing.Size(76, 28);
+            this.graphbutton.TabIndex = 1;
+            this.graphbutton.Text = "Graph";
+            this.graphbutton.UseVisualStyleBackColor = true;
+            this.graphbutton.Click += new System.EventHandler(this.graph_Click);
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(893, 532);
+            this.Controls.Add(this.graphbutton);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.integrate);
@@ -115,6 +127,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button integrate;
         private System.Windows.Forms.TextBox textBox1;
         private ProgressBar progressBar1;
+        private Button graphbutton;
     }
 
 

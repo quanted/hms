@@ -752,7 +752,7 @@ namespace AQUATOX.Animals
         // diagenesis model included
         if (((Prey == AllVariables.SedmRefrDetr)&&(Prey == AllVariables.SedmLabDetr)) && AQTSeg.Diagenesis_Included())
               PreyState = AQTSeg.Diagenesis_Detr(Prey);
-        else  PreyState = AQTSeg.GetState(Prey, T_SVType.StV, T_SVLayer.WaterCol);         // mg/L wc
+        else  PreyState = AQTSeg.GetStateVal(Prey, T_SVType.StV, T_SVLayer.WaterCol);         // mg/L wc
 
         if (PreyState <= 0) return 0;
         
@@ -937,16 +937,13 @@ namespace AQUATOX.Animals
         {
             TCorr = AQTSeg.TCorr(PAnimalData.Q10, PAnimalData.TRef, PAnimalData.TOpt, PAnimalData.TMax);
             // Stroganov
-            RoutineResp = PAnimalData.EndogResp;
-            // legacy name elsewhere in code
-            SpecDynAction = PAnimalData.KResp * (Consumption() - Defecation());
-            // Hewett & Johnson '92
-            // 10-24-12 include inverts
-            if ((IsFish() || IsPlanktonInvert()))
-            {
-                // Kitchell et al., 1974; Park et al., 1974.  Account for Crowding in fish, address KCAP in inverts
-                DensityDep = 1 + (IncrResp * State) / KCAP_in_g_m3();
-            }
+            RoutineResp = PAnimalData.EndogResp;  // legacy name elsewhere in code
+            SpecDynAction = PAnimalData.KResp * (Consumption() - Defecation());    // Hewett & Johnson '92
+
+            if ((IsFish() || IsPlanktonInvert())) // 10-24-12 include inverts
+                {
+                DensityDep = 1 + (IncrResp * State) / KCAP_in_g_m3();  // Kitchell et al., 1974; Park et al., 1974.  Account for Crowding in fish, address KCAP in inverts
+                }
             else
             {
                 DensityDep = 1;
@@ -966,12 +963,10 @@ namespace AQUATOX.Animals
                 }
                 else
                 {
-                    Activity = PAnimalData.ACT;
-                    // Set 2
+                    Activity = PAnimalData.ACT;  // Set 2
                     TFn = TCorr;
                 }
-                BasalResp = PAnimalData.RA * 1.5;
-                // conversion from O2 to organic matter
+                BasalResp = PAnimalData.RA * 1.5;   // conversion from O2 to organic matter
                 StdResp = State * BasalResp * Math.Pow(PAnimalData.MeanWeight, PAnimalData.RB) * TFn * DensityDep * Activity;
                 // <-------------------- STDRESP_PRED -------------------- > < ActiveResp_PRED >
             }
@@ -2183,13 +2178,12 @@ namespace AQUATOX.Animals
             Calc_Prom_Recr_Emrg(Co - De - Re - Ex - Ga);
             if (NState < AllVariables.Fish1)
             {
-                Pgn = PromoteGain;
+                Pgn = PromoteGain;  
                 PLs = PromoteLoss;
             }
             Fi = PAnimalData.Fishing_Frac * State;
             //if (AQTSeg.LinkedMode)   DrI = Washin();
-            Recr = Recruit;
-            // Recr value is used in DoThisEveryStep
+            Recr = Recruit;   // Recr value is used in DoThisEveryStep
             Emrg = EmergeInsect;
             if (!IsPlanktonInvert())  Entr = Scour_Entrainment();    // Plankton invertebrates are subject to currents
 

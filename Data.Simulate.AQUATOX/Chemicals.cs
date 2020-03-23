@@ -1005,7 +1005,7 @@ namespace AQUATOX.Chemicals
             //    }
             //}
 
-            if (!(NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
+            if (!((NState >= AllVariables.POC_G1) && (NState <= AllVariables.POC_G3)))  // if not diagenesis
             {
                 return K1 * ToxState * UptakeLimit * CarrierState * 1e-6;
                 // ug/L-d = L/kgdry-d * ug/L * unitless  * mg/L * kg/mg

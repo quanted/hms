@@ -14,59 +14,6 @@ using System.Linq;
 
 namespace AQUATOX.Bioaccumulation
 {
-    public class TSuspSedimentTox : TToxics
-    {
-
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-
-        public TSuspSedimentTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
-        { }
-
-        // --------------------------------------------------------------------------------------------------------------
-        // *************************************
-        // *      TSuspSedimentTOX OBJECT      *
-        // *************************************
-        public override void Derivative(ref double DB)
-        {
-            double ScourTox=0;
-            double DeposTox=0;
-            double Sorpt =0;
-            double Desorpt =0;
-            // TBottomSediment TopLayer;
-            TDetritus CP;
-            double WashO=0;
-            double WashI=0;
-            double FracAerobic=0;
-            double Mic=0;
-            double Mic_in_Aer, Mic_in_Anaer;
-            // --------------------------------------------------
-
-            if (IsAGGR)
-            {
-                DB = 0.0;
-                return;
-            }
-            double Lo = Loading;
-
-            CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
-            // Susp sediment in which this tox is located
-
-            //removed multi-layer tox code here
-
-            WashO = CP.Washout() * GetPPB(NState, SVType, Layer) * 1e-6;
-
-            Mic = MicrobialMetabolism(ref FracAerobic);    // returns FracAerobic which is not used
-            Mic_in_Aer = Microbial_BioTrans_To_This_SV(true);
-            Mic_in_Anaer = Microbial_BioTrans_To_This_SV(false);
-            Sorpt = Sorption();
-            Desorpt = Desorption();
-
-            DB = Lo + ScourTox - DeposTox - WashO + WashI - Mic + Mic_in_Aer + Mic_in_Anaer + Sorpt - Desorpt;
-            // all units ug(chemical)/L (wc) d
-        }
-
-    } // end TSuspSedimentTox
-
 
     public class TParticleTox : TToxics
     {

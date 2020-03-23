@@ -1696,8 +1696,9 @@ namespace AQUATOX.AQTSegment
                         res = res * SegVol() / SurfaceArea();
                         //  g/m2  g/m3     m3         m2
                     }
-                    //if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))
-                      //  res = GetPPB(TSV.NState, TSV.SVType, TSV.Layer);
+
+                    //if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  //fixme output chem PPB
+                    //    res = ((TToxics)TSV).ppb; 
 
                     TSV.Results.Add(res);
                 }
@@ -3760,8 +3761,8 @@ namespace AQUATOX.AQTSegment
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
-                                          typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TSuspSedimentTox), typeof(TParticleTox),
-                                          typeof(TAlgaeTox), typeof(TPlantToxRecord)}; 
+                                          typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox),
+                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord)}; 
     }
 }
 

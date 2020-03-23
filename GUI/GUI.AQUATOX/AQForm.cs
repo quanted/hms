@@ -276,6 +276,13 @@ namespace GUI.AQUATOX
 
         }
 
+        private void graph_Click(object sender, EventArgs e)
+        {
+            if (aQTS==null) return;
 
+            textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
+            Application.DoEvents();
+            DisplaySVs();
+        }
     }
 }
