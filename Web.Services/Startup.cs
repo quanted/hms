@@ -95,7 +95,7 @@ namespace Web.Services
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 
-            app.UseMiddleware<GCMiddleware>();
+            //app.UseMiddleware<GCMiddleware>();
             app.UseSerilogRequestLogging();
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
