@@ -73,13 +73,6 @@ namespace Web.Services.Controllers
             _diagnosticContext = diagnosticContext;
         }
 
-        public IActionResult Index()
-        {
-            _diagnosticContext.Set("CatalogLoadTime", 1423);
-            return View();
-        }
-
-
         /// <summary>
         /// POST method for submitting a request for precipitation data.
         /// </summary>
