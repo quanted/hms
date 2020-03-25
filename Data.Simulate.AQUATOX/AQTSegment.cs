@@ -252,15 +252,8 @@ namespace AQUATOX.AQTSegment
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
 
-            if (SVType == T_SVType.StV)   
-            if (IsPlantOrAnimal())
-               {
-                 ((this) as TOrganism).CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
-                                                              // the appropriate RISKCONC, LCINFINITE, and K2
-                                                              // Set Oyster Category
-                }
 
-            // Initialize BCF calculation   // FIXME TOX EFFECTS
+            // Initialize BCF calculation   // FIXME CALC BCF FOR TOX EFFECTS
             //if (P.Layer < T_SVLayer.SedLayer1)
             //{
             //    for (TLP = Consts.FirstOrgTxTyp; TLP <= Consts.LastOrgTxTyp; TLP++)
@@ -765,9 +758,9 @@ namespace AQUATOX.AQTSegment
             CalculateSumPrey();
             NormDiff(Step);
 
-            // foreach (TStateVariable TSV in SV)
+            foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME
                 
         }
 
@@ -913,7 +906,7 @@ namespace AQUATOX.AQTSegment
                                 {
 
                                     MaxError = Math.Abs(TSV.yerror / TSV.yscale);    // maximum error of all differential equations evaluated
-                                    ErrVar = TSV;                                  // save error variable for later use in screen display
+                                    ErrVar = TSV;                                   // save error variable for later use in screen display
                                 }
                             }
                         }
@@ -1056,7 +1049,7 @@ namespace AQUATOX.AQTSegment
                     }
                 }
 
-                //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)    FIXME CHEMICAL EFFECTS
+                //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)    FIXME CHEMICAL EFFECTS CALCULATION
                 //{
                 //    WeightedCumFracKill = (Consts.C1 * TOR.DeltaCumFracKill[ToxLoop, 1] + Consts.C3 * TOR.DeltaCumFracKill[ToxLoop, 3] + Consts.C4 * TOR.DeltaCumFracKill[ToxLoop, 4] + Consts.C6 * TOR.DeltaCumFracKill[ToxLoop, 6]) * hdid;
                 //    WeightedTempResistant = (Consts.C1 * TOR.DeltaResistant[ToxLoop, 1] + Consts.C3 * TOR.DeltaResistant[ToxLoop, 3] + Consts.C4 * TOR.DeltaResistant[ToxLoop, 4] + Consts.C6 * TOR.DeltaResistant[ToxLoop, 6]) * hdid;
@@ -1085,7 +1078,7 @@ namespace AQUATOX.AQTSegment
                         TOR.AmmoniaResistant[ionized] = 0;
                     }
 
-                    //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  FIXME CHEMICAL EFFECTS
+                    //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  FIXME CHEMICAL EFFECTS CALCULATION
                     //{
                     //    TOR.PrevFracKill[ToxLoop] = 0;
                     //    TOR.Resistant[ToxLoop] = 0;
@@ -1697,8 +1690,8 @@ namespace AQUATOX.AQTSegment
                         //  g/m2  g/m3     m3         m2
                     }
 
-                    //if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  //fixme output chem PPB
-                    //    res = ((TToxics)TSV).ppb; 
+                    if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  //fixme output chem PPB
+                        res = ((TToxics)TSV).ppb; 
 
                     TSV.Results.Add(res);
                 }
@@ -1936,8 +1929,88 @@ namespace AQUATOX.AQTSegment
         }
 
 
+                // ----------------------------------------------------------
+        public void CopySuspDetrData()
+        {
+            // Copies Data stored within DissRefrDetr into the Initial Conditions of the two or four detrital
+            // compartments: supports SuspDetr input Interface
+            TRemineralize PR;
+            TDissRefrDetr PD;
+            AllVariables Loop;
+            T_SVType SVLoop;
+            double MultFrac;
+            // ----------------------------------------------------------        
+
+            void CalcMultFrac(AllVariables NS, T_SVType S_Type)
+            {
+                // Gets the correct fraction to multiply the general loadings
+                // data by to fit the appropriate compartment / data type
+                double ConvertFrac, RefrFrac, PartFrac, RefrPercent, PartPercent;
+
+                MultFrac = 1.0;
+                ConvertFrac = 1.0;
+                if (S_Type > T_SVType.StV) return;     // Tox data is ppb, so it stays const. for four compartments regardless of breakdown
+
+                RefrPercent = PD.InputRecord.Percent_RefrIC;
+                PartPercent = PD.InputRecord.Percent_PartIC;
+                if (NS >= AllVariables.DissRefrDetr && NS <= AllVariables.DissLabDetr)
+                     PartFrac = 1 - (PartPercent / 100);
+                else PartFrac = (PartPercent / 100);
+
+                if ((NS == AllVariables.DissRefrDetr) || (NS == AllVariables.SuspRefrDetr))
+                {      RefrFrac = (RefrPercent / 100);      }
+                else { RefrFrac = 1 - (RefrPercent / 100);  }
+
+                switch (PD.InputRecord.DataType)
+                {   case DetrDataType.CBOD:
+                        ConvertFrac = Location.Conv_CBOD5_to_OM(RefrPercent);
+                        break;
+                    case DetrDataType.Org_Carb:
+                        ConvertFrac = Consts.Detr_OM_2_OC;
+                        break;
+                }
+
+                MultFrac = ConvertFrac * RefrFrac * PartFrac;
+            }
+
+        // ---------------------------------------------------------------
+
+            PD = GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDissRefrDetr;
+            for (SVLoop = T_SVType.StV; SVLoop <= Consts.LastOrgTxTyp; SVLoop++)
+            {
+                // Loop through state variable type and then each associated toxicant type
+                if (SVLoop != T_SVType.Porewaters)
+                {
+                    if ((SVLoop == T_SVType.StV) || GetStatePointer(AllVariables.H2OTox, SVLoop, T_SVLayer.WaterCol) != null)
+                    {
+                        for (Loop = AllVariables.DissRefrDetr; Loop <= AllVariables.SuspLabDetr; Loop++)
+                        {  // Loop through each detritus record in water col.
+
+                            CalcMultFrac(Loop, SVLoop);   // Determine MultFrac for Initial condition
+
+                            PR = GetStatePointer(Loop, SVLoop, T_SVLayer.WaterCol) as TRemineralize;
+                            if (PR != null)
+                            {
+                                DetritalInputRecordType PDIR = PD.InputRecord;
+                                if (SVLoop == T_SVType.StV)
+                                    {
+                                        PR.InitialCond = PDIR.InitCond * MultFrac;
+                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                    }
+                                else PR.InitialCond = PDIR.ToxInitCond[(int)SVLoop - 2];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---------------------------------------------------------------
+
         public void SVsToInitConds()
         {
+            CopySuspDetrData();
+
             TVolume TV = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
             TV.SetToInitCond();
             foreach (TStateVariable TSV in SV)
@@ -2497,9 +2570,8 @@ namespace AQUATOX.AQTSegment
                     Def = Def + Def2Detr * PA.Defecation() * NFrac;
                 // g/m3                 // g/m3
 
-//                else
-               // Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;  FIXME TOXICANT LINKAGE
-              // ug/m3 // unitless    // ug/L           // L/m3
+                else Def = Def + Def2Detr * PA.DefecationTox(Typ) * 1e3;  
+                        // ug/m3 // unitless    // ug/L           // L/m3
             }
         }
 
@@ -3761,7 +3833,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(TPOC_Sediment), typeof(TPON_Sediment), typeof(TPOP_Sediment), typeof(TMethane), typeof(TSulfide_Sediment),
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
-                                          typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox),
+                                          typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
                                           typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord)}; 
     }
 }

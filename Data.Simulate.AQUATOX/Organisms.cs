@@ -824,7 +824,7 @@ namespace AQUATOX.Organisms
         }
 
         //// --------------------------------------------------------------------------
-        //public void Poisoned_Calculate_Internal_Toxicity()   FIXME ADD WHEN ADDING ECOTOXICOLOGY
+        //public void Poisoned_Calculate_Internal_Toxicity()   FIXME ADD WHEN ADDING CHEM EFFECTS
         //{
         //    double ToxPPB;
         //    // PPB of the toxicant in the organism

@@ -114,6 +114,8 @@ namespace AQUATOX.Chemicals
         public virtual bool ShouldSerializeChemRec()  { return true;}  // only output JSON for H2OTox ChemRec
 
         public List<TBioTransObject> BioTrans = null;
+        public virtual bool ShouldSerializeBioTrans() { return true; }  // only output BioTrans for H2OTox ChemRec
+
         public UptakeCalcMethodType Anim_Method, Plant_Method;
 
         public double Tox_Air;  // toxicant in air (gas-phase concentration) in g/m3
@@ -130,10 +132,6 @@ namespace AQUATOX.Chemicals
         public TToxics(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             Carrier = Carry;
-            // if (Ns >= Consts.FirstOrgTox && Ns <= Consts.LastOrgTox)
-            // {
-            //     RequiresData = true;
-            // }
             ppb = 0;
         }
 
@@ -144,9 +142,43 @@ namespace AQUATOX.Chemicals
 
         public override void SetToInitCond() 
         {
+            double Wet2Dry, Mass;
+
             base.SetToInitCond();
             if (NState != AllVariables.H2OTox) 
                 ChemRec = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).ChemRec;
+
+            // Toxicant that is neither buried nor dissolved in water must have its InitCond converted
+            // to mass from ppb.  Utilizes wettodry, so must be after CalcWetToDry call
+            if ((Layer == T_SVLayer.WaterCol) && (NState != AllVariables.H2OTox))
+            {
+                Double CarrierState = AQTSeg.GetState(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
+
+                if (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SuspLabDetr)
+                    Wet2Dry = 1.0;
+                else
+                    Wet2Dry = WetToDry();
+
+                // detritus input in dry weight units, no conversion necessary, 9-29-2006
+                Mass = InitialCond * Wet2Dry / 1e6 * CarrierState;
+                // ug/L dry        (ug/kg wet) (dry/wet) (mg/kg)     (mg/L)
+                State = Mass;
+            }
+
+            // Buried Toxicant, toxicant in diagenesis model must have InitCond converted to ug/m2 from ppb
+            if ((NState == AllVariables.BuriedRefrDetr)|| (NState == AllVariables.BuriedLabileDetr) || (Layer > T_SVLayer.WaterCol))  // > WaterCol = diagenesis
+            {
+                Double CarrierState = AQTSeg.GetState(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
+                Mass = InitialCond * WetToDry() * 1e-3 * CarrierState;
+              // ug/m2    (ug/kg)     (unitless)  (kg/g)    (g/m2)
+                if ((NState >= AllVariables.POC_G1 && NState <= AllVariables.POC_G3))
+                {
+                    Mass = InitialCond * WetToDry() * 1e-3 * CarrierState * AQTSeg.Diagenesis_Params.H2.Val;
+                } // ug/m2  (ug/kg)      (unitless)  (kg/g)    (g/m3)                                  (m)
+
+                State = Mass;
+            }
+
         }
 
 
@@ -331,7 +363,7 @@ namespace AQUATOX.Chemicals
                 if (TWind == null) WindLd = 0.1;
                 else WindLd = TWind.State * 0.5;
                 // m/s at 10 m to m/s at 10 cm based on Banks, 1975
-                if (WindLd < 0.05) WindLd = 0.05;
+                if (WindLd < 0.1) WindLd = 0.1;
 
                 KGas = 168.0 * WindLd * Math.Pow((18.0 / ChemRec.MolWt), 0.25);
                 // Thomann & Muller,'87
@@ -447,22 +479,19 @@ namespace AQUATOX.Chemicals
 
         public double Biotransformation()
         {
-            double result = 0;
+            if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
+            {
+                TAnimalTox AnTox = (this) as TAnimalTox;
+                return State * AnTox.Anim_Tox.Bio_rate_const;
+            }
+            if ((NState >= Consts.FirstPlant) && (NState <= Consts.LastPlant))
+            {
+                TAlgaeTox AZTox = (this) as TAlgaeTox;
+                return State * AZTox.Plant_Tox.Bio_rate_const;
+            }
 
-            //if ((NState >= Consts.FirstAnimal)&&(NState<=Consts.LastAnimal))  //fixme enable biotransformation
-            //{
-            //   TAnimalTox AnTox = (this) as TAnimalTox;
-            //   result = State * AnTox.Anim_Tox.Bio_rate_const;
-            //}
-            //if ((NState >= Consts.FirstPlant) && (NState <= Consts.LastPlant))
-            //{
-            //    TAlgaeTox AZTox = (this) as TAlgaeTox;
-            //    result = State * AZTox.Plant_Tox.Bio_rate_const;
-            //}
-
-            return result * AQTSeg.SegVol() * 1000.0 * 1e-9;
-            // kg   (ug/L)          (m3)     (L/m3)   (kg/ug)
-
+            return 0;
+            // removed tox MB accounting in KG
         }
 
         // (**************************************************************)
@@ -480,36 +509,33 @@ namespace AQUATOX.Chemicals
             TBioTransObject BTRec;
             double MicrobM;
             double FracAerobic =0;
-            TToxics ToxPtr;
+            TToxics ToxPtr, H2OTox;
 
             MBTSum = 0;
 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
-                // loop through all org toxicants
+                // loop through all org toxicants in water
                 ToxPtr = AQTSeg.GetStatePointer(NState, ToxLoop, Layer) as TToxics;
+                H2OTox = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, Layer) as TToxics;
 
-                if (ToxPtr != null)
-                {
-                    if ((ToxPtr.State > 0))
+                if (ToxPtr != null)  // if this toxicant exists then
+                {                    
+                    if (Aerobic) BTRec = H2OTox.Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
+                    else         BTRec = H2OTox.Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
+
+                    if (BTRec == null) return 0;
+
+                    FracToMe = BTRec.Percent[(int) SVType -2] / 100.0;
+                    // fraction of biotrans to this org tox compartment
+                    if (FracToMe > 0)
                     {
-                        // if this toxicant exists then
-                        if (Aerobic) BTRec = ToxPtr.Get_BioTrans_Record(BioTransType.BTAerobicMicrobial, AllVariables.NullStateVar);
-                        else         BTRec = Get_BioTrans_Record(BioTransType.BTAnaerobicMicrobial, AllVariables.NullStateVar);
+                        MicrobM = ToxPtr.MicrobialMetabolism(ref FracAerobic);
+                        // also returns frac aerobic
+                        if (Aerobic) MicrobM = MicrobM * FracAerobic;
+                        else         MicrobM = MicrobM * (1 - FracAerobic);
 
-                        if (BTRec == null) return 0;
-
-                        FracToMe = BTRec.Percent[(int) SVType -2] / 100.0;
-                        // fraction of biotrans to this org tox compartment
-                        if (FracToMe > 0)
-                        {
-                            MicrobM = ToxPtr.MicrobialMetabolism(ref FracAerobic);
-                            // also returns frac aerobic
-                            if (Aerobic) MicrobM = MicrobM * FracAerobic;
-                            else         MicrobM = MicrobM * (1 - FracAerobic);
-
-                            MBTSum = MBTSum + (MicrobM * FracToMe);
-                        }
+                        MBTSum = MBTSum + (MicrobM * FracToMe);
                     }
                 }
             }
@@ -530,40 +556,39 @@ namespace AQUATOX.Chemicals
             TBioTransObject BTRec;
             TAnimal AnimPtr;
             double FracToMe;
-            TToxics AnimToxPtr;
+            TToxics AnimToxPtr, WaterTox;
             if (!(NState >= Consts.FirstBiota && NState <= Consts.LastBiota))
             {
                 throw new Exception("Programming Error, BioTrans_To_This_Org must be passed an organism");
             }
+
             BTSum = 0;
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
                 // loop through all org toxicants
+                WaterTox = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) as TToxics;
                 // if this toxicant is relevant then
                 if ((ToxLoop != SVType) && (AQTSeg.GetStateVal(NState, ToxLoop, T_SVLayer.WaterCol) > Consts.Tiny))
                 {
-                    BTRec = Get_BioTrans_Record(BioTransType.BTUserSpecified, NState);
+                    BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTUserSpecified, NState);
                     // see if species specific Biotrans data exists
                     if (BTRec == null)
                     {
                         switch (NState)
                         {
                             // otherwise, use general parameterization
-                            // Modify the A .. B: Consts.FirstAlgae .. Consts.LastAlgae
-                            case Consts.FirstAlgae:
-                                BTRec = Get_BioTrans_Record(BioTransType.BTAlgae, AllVariables.NullStateVar);
+                            case AllVariables AV when (AV >= Consts.FirstPlant) && (AV <= Consts.LastPlant):
+                                BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTAlgae, AllVariables.NullStateVar);
                                 break;
-                            // Modify the A .. B: Consts.FirstFish .. Consts.LastFish
-                            case Consts.FirstFish:
-                                BTRec = Get_BioTrans_Record(BioTransType.BTFish, AllVariables.NullStateVar);
+                            case AllVariables AV when (AV >= Consts.FirstFish) && (AV <= Consts.LastFish):
+                                BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTFish, AllVariables.NullStateVar);
                                 break;
                             default:
                                 AnimPtr = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
                                 if ((AnimPtr.PAnimalData.Animal_Type == "Benthic Insect"))
-                                    BTRec = Get_BioTrans_Record(BioTransType.BTBenthInsect, AllVariables.NullStateVar);
+                                    BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTBenthInsect, AllVariables.NullStateVar);
                                 else
-                                    BTRec = Get_BioTrans_Record(BioTransType.BTOtherInvert, AllVariables.NullStateVar);
-
+                                    BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTOtherInvert, AllVariables.NullStateVar);
                                 break;
                                 // else
                         }
@@ -1359,7 +1384,7 @@ namespace AQUATOX.Chemicals
                         PT = (TToxics)AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol);
                         if ((PT != null))
                         {
-                            // DetrSorption = DetrSorption + PT.Sorption();
+                            DetrSorption = DetrSorption + PT.Sorption();
                             DetrDesorption = DetrDesorption + PT.Desorption();
                         }
                     }

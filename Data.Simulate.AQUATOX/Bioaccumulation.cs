@@ -18,6 +18,7 @@ namespace AQUATOX.Bioaccumulation
     public class TParticleTox : TToxics
     {
         public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
 
         public TParticleTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
@@ -457,15 +458,15 @@ namespace AQUATOX.Bioaccumulation
         // -------------------------------------------------------------------------
         public override void Derivative(ref double db)
         {
-            double So;
-            double Des;
-            double DepTox;
-            double Minrl;
-            double Bur;
-            double Pred;
-            double Mic_In_Anaer;
-            double Hydr;
-            double MM;
+            double So =0;
+            double Des = 0;
+            double DepTox = 0;
+            double Minrl = 0;
+            double Bur = 0;
+            double Pred = 0;
+            double Mic_In_Anaer = 0;
+            double Hydr = 0;
+            double MM = 0;
             TPOC_Sediment CP;
             double PP;
             // ----------------------------------------------------------------
@@ -473,15 +474,6 @@ namespace AQUATOX.Bioaccumulation
             double H2;
 
             CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPOC_Sediment;
-            So = 0;
-            Des = 0;
-            DepTox = 0;
-            Minrl = 0;
-            Bur = 0;
-            Pred = 0;
-            Mic_In_Anaer = 0;
-            Hydr = 0;
-            MM = 0;
             if (IsAGGR)
             {
                 db = 0.0;
@@ -523,6 +515,7 @@ namespace AQUATOX.Bioaccumulation
 
     {
         public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
 
         public TPlantToxRecord Plant_Tox = null;
 
@@ -769,7 +762,11 @@ namespace AQUATOX.Bioaccumulation
         public TAnimalToxRecord Anim_Tox = null;
         [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)
 
-    public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
+        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
+        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
+
+
+        public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
     {
     }
 

@@ -260,39 +260,6 @@ namespace AQUATOX.Animals
 
         // ChangeData MUST be called when the underlying data record is changed
         // ------------------------------------------------------------------------
-        //public void Assign_Anim_Tox()  // fixme chemical effects on animals
-        //{
-        //    int FoundToxIndx;
-        //    int i;
-        //    TAnimalToxRecord ATR;
-        //    T_SVType ToxLoop;
-        //    string DataName;
-        //    DataName = PAnimalData.ToxicityRecord.ToLower();
-        //    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-        //    {
-        //        if (AQTSeg.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, T_SVLayer.WaterCol) != null)
-        //        {
-        //            FoundToxIndx = -1;
-        //            // 10/27/2009
-        //            for (i = 0; i < Chemptrs[ToxLoop].Anim_Tox.Count; i++)
-        //            {
-        //                ATR = Chemptrs[ToxLoop].Anim_Tox.At(i);
-        //                if (ATR.Animal_name.ToLower() == DataName)
-        //                {
-        //                    FoundToxIndx = i;
-        //                }
-        //            }
-        //            if (FoundToxIndx == -1)
-        //            {
-        //                throw new Exception("Error!  " + Consts.OutputText(NState, SVType, T_SVLayer.WaterCol, "", false, false, 0) + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + Chemptrs[ToxLoop].ChemRec.ChemName + "\'s animal toxicity data.  Study cannot be executed.");
-        //            }
-        //            ATR = Chemptrs[ToxLoop].Anim_Tox.At(FoundToxIndx);
-        //            Anim_Tox[ToxLoop] = ATR;
-        //        }
-        //    }
-        //}
-
-        // ------------------------------------------------------------------------
         public override void SetToInitCond()
         {
             base.SetToInitCond();
@@ -307,8 +274,10 @@ namespace AQUATOX.Animals
             if ((PAnimalData.Animal_Type == "Fish") || (IsPlanktonInvert()))
                 PAnimalData.AveDrift = 0;
 
-            // Assign_Anim_Tox();    fixme CHEM EFFECTS
-            // CalcRiskConc(true);  fixme CHEM EFFECTS
+            // Assign_Anim_Tox();   Not Required Anim_Tox Record is assigned within JSON
+            CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
+                                   // the appropriate RISKCONC, LCINFINITE, and K2
+                                   // Set Oyster Category
         }
         // ------------------------------------------------------------------------
         public int iTrophInt(AllVariables ns)
@@ -632,7 +601,7 @@ namespace AQUATOX.Animals
         public double AggregateRedGrowth()
         {
             return 0;
-        }   // FIXME TOXIC EFFECTS
+        }   // FIXME TOXIC EFFECTS GROWTH
     //    
     //    T_SVType ToxLoop;
     //    double AggRedGrowth;
@@ -1351,7 +1320,7 @@ namespace AQUATOX.Animals
             // mg/L-d
             // mg/L-d
             Setup_Record SR = AQTSeg.PSetup;
-            //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // FIXME TOXIC EFFECTS
+            //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // FIXME TOXIC EFFECTS, MORT, RED GROWTH, ETC.
             //{
             //    if ((SR.UseExternalConcs && (AQTSeg.GetState(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) > 0)) || 
             //            ((!SR.UseExternalConcs) && (AQTSeg.GetState(NState, ToxLoop, T_SVLayer.WaterCol) > 0)))

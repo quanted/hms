@@ -202,8 +202,7 @@ namespace AQUATOX.Plants
             NutrLim_Step = 1;
 
             HabitatLimit = PHabitat_Limit();   //previously set in CalcRiskConc
-            // CalcRiskConc(true);  fixme CHEM EFFECTS
-
+            CalcRiskConc(true);   // Using ToxicityRecord Initialize Organisms                                   
         }
 
 

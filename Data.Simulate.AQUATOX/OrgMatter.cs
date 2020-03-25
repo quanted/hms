@@ -41,14 +41,11 @@ public class TDetritus : TRemineralize
                throw new Exception("Programming Error:  Mult Frac is not relevant to Sed. Detritus");
             
             ConvertFrac = 1.0;
-            if (IsAlt)
-            {   RefrPercent = PInputRec.Percent_Refr.ReturnAltLoad(TimeIndex, PAltLdg);  }
-            else
-            {   RefrPercent = PInputRec.Percent_Refr.ReturnLoad(TimeIndex); }
-            if (IsAlt)
-            {   PartPercent = PInputRec.Percent_Part.ReturnAltLoad(TimeIndex, PAltLdg);  }
-            else
-            {   PartPercent = PInputRec.Percent_Part.ReturnLoad(TimeIndex);  }
+            if (IsAlt) RefrPercent = PInputRec.Percent_Refr.ReturnAltLoad(TimeIndex, PAltLdg);  
+            else  RefrPercent = PInputRec.Percent_Refr.ReturnLoad(TimeIndex); 
+
+            if (IsAlt) PartPercent = PInputRec.Percent_Part.ReturnAltLoad(TimeIndex, PAltLdg);  
+            else  PartPercent = PInputRec.Percent_Part.ReturnLoad(TimeIndex);  
 
             if ((NState == AllVariables.DissRefrDetr) || (NState == AllVariables.DissLabDetr))
             {         PartFrac = 1 - (PartPercent / 100);  }
@@ -642,7 +639,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
         //Constructor  Init( Ns,  SVT,  aName,  P,  IC,  IsTempl)
         public TDissRefrDetr(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            //T_SVType ToxLoop;
+            int ToxLoop;
             int Alt_Loop;
             InputRecord.DataType = DetrDataType.Org_Matt;
             InputRecord.InitCond = 0;
@@ -665,19 +662,11 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                 InputRecord.Percent_Refr.Alt_Loadings[Alt_Loop].ConstLoad = 90;
             }
 
-            //for (ToxLoop = Consts.FirstToxTyp; ToxLoop <= Consts.LastToxTyp; ToxLoop++)
-            //{
-            //    InputRecord.ToxInitCond[ToxLoop] = 0;
-            //    InputRecord.ToxLoad[ToxLoop] = L;
-            //    InputRecord.ToxLoad[ToxLoop].Loadings = new TLoadings(10, 20);
-            //    for (Alt_Loop = Alt_LoadingsType.PointSource; Alt_Loop <= Alt_LoadingsType.NonPointSource; Alt_Loop++)
-            //    {
-            //        InputRecord.ToxLoad[ToxLoop].Alt_UseConstant[Alt_Loop] = true;
-            //        InputRecord.ToxLoad[ToxLoop].Alt_ConstLoad[Alt_Loop] = 0;
-            //        InputRecord.ToxLoad[ToxLoop].Alt_Loadings[Alt_Loop] = new TLoadings(10, 20);
-            //        InputRecord.ToxLoad[ToxLoop].Alt_MultLdg[Alt_Loop] = 1;
-            //    }
-            //}
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                InputRecord.ToxInitCond[ToxLoop] = 0;
+                InputRecord.ToxLoad[ToxLoop] = null;
+            }
             // with InputRecord
             // TRemineralize
 
