@@ -5,6 +5,7 @@ using AQUATOX.Nutrients;
 using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
 using AQUATOX.Diagenesis;
+using AQUATOX.OrgMatter;
 using AQUATOX.Organisms;
 using AQUATOX.Plants;
 using Newtonsoft.Json;
