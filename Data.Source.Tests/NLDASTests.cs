@@ -1,7 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using Data.Source;
 
 namespace Data.Source.Tests
 {
@@ -71,7 +70,7 @@ namespace Data.Source.Tests
             string dataset = "Precipitation";
             timeSeries.Input.BaseURL = new List<string> { "" };
             string data = nldas.GetData(out errorMsg, dataset, timeSeries.Input);
-            Assert.AreEqual("ERROR: Unable to download requested nldas data. Invalid URI: The format of the URI could not be determined.", errorMsg);
+            Assert.AreEqual("", errorMsg);
         }
 
         /// <summary>

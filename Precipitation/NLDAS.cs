@@ -3,10 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using Utilities;
 using MathNet.Numerics.LinearAlgebra;
-using System.Diagnostics;
 
 namespace Precipitation
 {
@@ -27,11 +24,6 @@ namespace Precipitation
             errorMsg = "";
 
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
-            //if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
-            //{
-            //    input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
-            //    output.Metadata.Add("catchment_comid", input.Geometry.ComID.ToString());
-            //}
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
             string data = nldas.GetData(out errorMsg, "PRECIP", input);
@@ -146,13 +138,11 @@ namespace Precipitation
             }
             int hour = 0;
             int day = 0;
-            //Debug.WriteLine("Element Count: " + output.Data.Values.Count.ToString());
             int i0 = (output.DataSource.Equals("nldas")) ? 1 : 0;
             for (int i = i0; i < output.Data.Keys.Count; i++)
             {
                 hour = i % (hours);
                 day = i / (hours);
-                //Debug.WriteLine("Count: " + (output.Data.Keys.Count).ToString() + "; i: " + i.ToString() + "; day: " + day.ToString() + "; hour: " + hour.ToString() + "; value: " + output.Data.Values.ElementAt(i)[0]);
                 dValues[day][hour] = modifier * Double.Parse(output.Data.Values.ElementAt(i - i0)[0]);
             }
 
@@ -169,7 +159,6 @@ namespace Precipitation
                 j++;
             }
             TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
-            Debug.WriteLine("Total MathNet calculation time for " + output.Data.Keys.Count + " records: " + t1.Subtract(t0).ToString());
             return tempData0;
         }
 

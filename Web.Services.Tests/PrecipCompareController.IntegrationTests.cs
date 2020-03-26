@@ -9,6 +9,7 @@ using Data;
 using System.Diagnostics;
 using System.Threading;
 using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -165,7 +166,7 @@ namespace Web.Services.Tests
         /// GHCND daily 7 year request json string for testing a valid request
         /// </summary>
         const string dailySevenYear =
-            "{ \"dataset\": \"Precipitation\", \"sourceList\": [ \"nldas\", \"gldas\", \"daymet\", \"prism\" ], \"source\": \"compare\", \"Weighted\": false, " +
+            "{ \"dataset\": \"Precipitation\", \"sourceList\": [ \"nldas\", \"daymet\", \"prism\" ], \"source\": \"compare\", \"Weighted\": false, " +
             "\"ExtremeDaily\": 5, \"ExtremeTotal\": 10, \"dateTimeSpan\": { \"startDate\": \"2000-01-01T00:00:00\", \"endDate\": \"2006-12-31T00:00:00\" }, " +
             "\"geometry\": { \"comID\": 6411690, \"StationID\": \"GHCND:USW00013874\", \"geometryMetadata\": {}, \"timezone\": { \"name\": \"EST\", \"offset\": -5, " +
             "\"dls\": true } }, \"temporalResolution\": \"annual\", \"timeLocalized\": true}";
@@ -184,7 +185,7 @@ namespace Web.Services.Tests
         /// </summary>
         public PrecipCompareControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

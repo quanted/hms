@@ -1,10 +1,8 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
-using Globals;
 
 namespace AQUATOX.Loadings
 {

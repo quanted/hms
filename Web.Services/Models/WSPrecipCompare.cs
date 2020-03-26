@@ -1,12 +1,8 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Utilities;
 using Web.Services.Controllers;
 using System.Diagnostics;
@@ -85,14 +81,14 @@ namespace Web.Services.Models
                 errorMsg = "ERROR: Invalid input parameters.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             }
-            
+
             Debug.WriteLine("Precip compare request recieved...");
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output = oFactory.Initialize();
             //input.SourceList.Add("ncei");
             output.DataSource = string.Join(" - ", input.SourceList.ToArray());
 
-            if(input.Geometry.GeometryMetadata == null)
+            if (input.Geometry.GeometryMetadata == null)
             {
                 input.Geometry.GeometryMetadata = new Dictionary<string, string>();
             }
@@ -102,9 +98,9 @@ namespace Web.Services.Models
                 errorMsg = "ERROR: ComID required for spatial weighted average.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             }
-            
+
             //In case of annual comparison, make sure that a valid input must have more than one year (i.e. start and end year are not the same).
-            if(input.TemporalResolution == "annual" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
+            if (input.TemporalResolution == "annual" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
             {
                 errorMsg = "ERROR: More than one year must be given for annual comparison.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -137,9 +133,9 @@ namespace Web.Services.Models
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                
+
                 // Calling to HMS Flask web service.
-                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(out errorMsg, nceiQuery);
+                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(nceiQuery).Result;
 
                 ////Set NCEI station to closest station regardless of type
                 double bestCoverage = 0.0;
@@ -168,13 +164,13 @@ namespace Web.Services.Models
                     input.Geometry.GeometryMetadata.Add("dailyThreshold", input.ExtremeDaily.ToString());
                     input.Geometry.GeometryMetadata.Add("totalThreshold", input.ExtremeTotal.ToString());
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     errorMsg = "ERROR: One or more threshold values for extreme events were not provided.";
                     if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
                 }
             }
-            
+
             input.Source = "ncei";
             input.SourceList.Remove("ncei");
             // Validate precipitation sources.
@@ -183,7 +179,7 @@ namespace Web.Services.Models
 
             List<Precipitation.Precipitation> precipList = new List<Precipitation.Precipitation>();
             List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
-                        
+
             // NCEI Call
             Precipitation.Precipitation ncei = new Precipitation.Precipitation();
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
@@ -192,19 +188,24 @@ namespace Web.Services.Models
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Set input to precip object.
-            // NCEI local time correction to GMT
             ncei.Input = nInput;
-            ncei.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, ncei.Input.Geometry.Point) as Data.Timezone;
             //ncei.Input.DateTimeSpan.StartDate = ncei.Input.DateTimeSpan.StartDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
             //ncei.Input.DateTimeSpan.EndDate = ncei.Input.DateTimeSpan.EndDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
 
-            ncei.Input.TemporalResolution = "daily";
+            //ncei.Input.TemporalResolution = "daily";
             ncei.Input.Geometry.GeometryMetadata["token"] = (ncei.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncei.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
             //nResult.Data = Utilities.Time.TimeSeriesShift(-1.0 * ncei.Input.Geometry.Timezone.Offset, nResult.Data, ncei.Input.DateTimeSpan.DateTimeFormat);
             //nResult.Data = Utilities.TemporalAggregation.Aggregation(input.TemporalResolution, 1, nResult, ncei.Input);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             output = nResult;
+            ncei.Input.Geometry.Point = new PointCoordinate()
+            {
+                Latitude = Convert.ToDouble(output.Metadata["ncei_latitude"]),
+                Longitude = Convert.ToDouble(output.Metadata["ncei_longitude"])
+            };
+            ncei.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, ncei.Input.Geometry.Point) as Data.Timezone;
+
             Debug.WriteLine("Data retrieved for: NCEI");
 
             // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Web;
-using System.Diagnostics;
+using Serilog;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Data.Source
 {
@@ -34,7 +33,7 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(out errorMsg, url);
+            string data = DownloadData(url, 0).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -136,40 +135,46 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
+        private async Task<string> DownloadData(string url, int retries)
         {
-            errorMsg = "";
             string data = "";
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
+            int maxRetries = 10;
             try
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 20;
-
-                // Response status message
                 string status = "";
 
-                while (retries > 0 && !status.Contains("OK"))
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK")) { Thread.Sleep(5000); }
+                    wm = await hc.GetAsync(url);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(1000 * retries);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested trmm data. " + ex.Message;
-                Debug.WriteLine(errorMsg);
-                Debug.WriteLine(url);
+                if(retries < maxRetries)
+                {
+                    retries += 1;
+                    Log.Warning("Error: Failed to download trmm data. Retry {0}:{1}", retries, maxRetries);
+                    Random r = new Random();
+                    Thread.Sleep(5000 + (r.Next(10) * 1000));
+                    return this.DownloadData(url, retries).Result;
+                }
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to download trmm data.");
                 return null;
             }
+            wm.Dispose();
+            hc.Dispose();
             return data;
         }
 

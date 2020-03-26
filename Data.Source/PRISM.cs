@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -71,7 +70,7 @@ namespace Data.Source
             string parameters = ConstructParameterString(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(url, parameters).Result;
+            string data = DownloadData(url, parameters, 0).Result;
             if (data.Contains("ERROR")) { errorMsg = data; return null; }
 
             return data;
@@ -123,34 +122,48 @@ namespace Data.Source
         /// <param name="url"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private async Task<string> DownloadData(string url, string parameters)
+        private async Task<string> DownloadData(string url, string parameters, int retries)
         {
             string data = "";
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
+            HttpContent content = new StringContent(parameters, Encoding.UTF8, "application/json");
+            int maxRetries = 10;
+
             try
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 5;
-
-                // Response status message
                 string status = "";
 
-                var content = new StringContent(parameters, Encoding.UTF8, "application/json");
-                using (var client = new HttpClient())
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    while (retries > 0 && !status.Contains("OK"))
+                    wm = await hc.PostAsync(url, content);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
+                    if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(100);
-                        var response = await client.PostAsync(url, content);
-                        data =  await response.Content.ReadAsStringAsync();
-                        status = response.StatusCode.ToString();
-                        retries -= 1;
+                        Thread.Sleep(1000 * retries);
                     }
                 }
             }
             catch (Exception ex)
             {
-                return "ERROR: Unable to download requested prism data. " + ex.Message;
+                if (retries < maxRetries)
+                {
+                    retries += 1;
+                    Log.Warning("Error: Failed to download prism data. Retry {0}:{1}", retries, maxRetries);
+                    Random r = new Random();
+                    Thread.Sleep(5000 + (r.Next(10) * 1000));
+                    return this.DownloadData(url, parameters, retries).Result;
+                }
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to download prism data.");
+                return null;
             }
+            wm.Dispose();
+            hc.Dispose();
             return data;
         }
 

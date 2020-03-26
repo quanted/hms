@@ -6,8 +6,10 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Runtime.Serialization;
-using Utilities;
 using System.Text.Json;
+using Serilog;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Data.Source
 {
@@ -114,7 +116,7 @@ namespace Data.Source
             string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string csv = DownloadData(out errorMsg, token, url);
+            string csv = DownloadData(token, url, 0).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
             if (!csv.Equals("{}"))
             {
@@ -166,36 +168,49 @@ namespace Data.Source
         /// <param name="token">Required for accessing ncdc data.</param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string token, string url)
+        private async Task<string> DownloadData(string token, string url, int retries)
         {
-                errorMsg = "";
-            try
-            {              
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-                string data = "";
+            string data = "";
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
+            hc.DefaultRequestHeaders.Add("token", token);
+            int maxRetries = 10;
 
-                while (retries > 0 && !status.Contains("OK"))
+            try
+            {
+                string status = "";
+
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    Thread.Sleep(333);
-                    WebRequest wr = WebRequest.Create(url);
-                    wr.Headers.Add("token", token);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    wm = await hc.GetAsync(url);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(1000 * retries);
+                    }
                 }
-                return data;
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download NCEI station data. " + ex.Message;
+                if (retries < maxRetries)
+                {
+                    retries += 1;
+                    Log.Warning("Error: Failed to download ncei data. Retry {0}:{1}", retries, maxRetries);
+                    Random r = new Random();
+                    Thread.Sleep(5000 + (r.Next(10) * 1000));
+                    return this.DownloadData(token, url, retries).Result;
+                }
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to download ncei data.");
                 return null;
             }
+            wm.Dispose();
+            hc.Dispose();
+            return data;
         }
 
         /// <summary>

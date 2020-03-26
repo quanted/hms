@@ -1,8 +1,5 @@
 ﻿using Data;
-using SurfaceRunoff;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SubSurfaceFlow
 {
@@ -48,6 +45,8 @@ namespace SubSurfaceFlow
             // TODO: Add a call to fetch the catchment from the point (lat,lng) values. Possibly EPA waters web service
             int comid = (string.IsNullOrWhiteSpace(input.Geometry.ComID.ToString())) ? 0 : input.Geometry.ComID;
             double bfPercent = GetCatchmentBaseflowPercent(out errorMsg, comid);
+            if (errorMsg.Contains("ERROR")) { return null; }
+
 
             ITimeSeriesOutput bfOutput = CalculateBaseflow(out errorMsg, bfPercent, input, runoffData);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -123,6 +122,7 @@ namespace SubSurfaceFlow
             if (results.Count == 0)
             {
                 errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
+                return -1.0;
             }
             return double.Parse(results["Percent"]);
         }

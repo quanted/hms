@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 
 namespace Utilities
@@ -34,6 +32,7 @@ namespace Utilities
                     {
                         file.WriteLine(l);
                     }
+                    file.Close();
                 }
             }
             catch (System.IO.IOException ex)

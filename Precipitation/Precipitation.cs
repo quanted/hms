@@ -1,7 +1,5 @@
 ﻿using Data;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Precipitation
 {
@@ -140,7 +138,7 @@ namespace Precipitation
                     return Daymet.CheckStatus(this.Input);
                 case "ncei":
                     return NCDC.CheckStatus(this.Input);
-                // TODO: Add check status function for PRISM
+                // TODO: Add check status function for PRISM, nwm, trmm
                 default:
                     return new Dictionary<string, string>() { { "status", "invalid source" } };
             }

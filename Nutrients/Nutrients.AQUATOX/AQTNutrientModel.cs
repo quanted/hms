@@ -1,5 +1,4 @@
-﻿using System;
-using Globals;
+﻿using Globals;
 using AQUATOX.AQTSegment;
 using AQUATOX.Nutrients;
 using Stream.Hydrology.AQUATOX;

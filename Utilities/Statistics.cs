@@ -2,12 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Statistics;
 using MathNet.Numerics.LinearAlgebra;
-using System.Diagnostics;
 
 namespace Utilities
 {

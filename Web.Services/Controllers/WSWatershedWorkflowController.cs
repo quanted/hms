@@ -3,12 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Utilities;
 using Web.Services.Models;
 
 namespace Web.Services.Controllers

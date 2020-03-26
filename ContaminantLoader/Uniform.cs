@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Random;
 using Data;
 using System.Globalization;
 using System.Linq;
-using System.Text.Json;
 
 namespace ContaminantLoader
 {

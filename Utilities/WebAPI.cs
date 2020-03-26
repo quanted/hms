@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Utilities
 {
@@ -17,9 +17,8 @@ namespace Utilities
         /// <param name="errorMsg"></param>
         /// <param name="queryString"></param>
         /// <returns></returns>
-        public static T RequestData<T>(out string errorMsg, string queryString)
+        public static async Task<T> RequestData<T>(string queryString)
         {
-            errorMsg = "";
             string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
             if (flaskURL == null)
             {
@@ -33,44 +32,54 @@ namespace Utilities
             };
             string requestURL = flaskURL + queryString;
             string dataURL = flaskURL + "/hms/data?job_id=";
-            WebClient myWC = new WebClient();
             string data = "";
+
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
+            try
+            {
+                int retries = 0;
+                int maxRetries = 10;
+                string status = "";
+
+                while (retries < maxRetries && !status.Contains("OK"))
+                {
+                    wm = await hc.GetAsync(requestURL);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(100 * retries);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to send flask request");
+                return default(T);
+            }
+            string jobID = JsonSerializer.Deserialize<Dictionary<string, string>>(data, options)["job_id"];
+
+            Thread.Sleep(1000);
+
             dynamic taskData = "";
             try
             {
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-                string jobID = "";
-                while (retries > 0 && !status.Contains("OK"))
-                {
-                    WebRequest wr = WebRequest.Create(requestURL);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    jobID = JsonSerializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd(), options)["job_id"];
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK"))
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-
-                retries = 50;
-                status = "";
-                taskData = "";
+                int retries = 0;
+                int maxRetries = 100;
+                string status = "";
                 bool success = false;
-                while (retries > 0 && !success && !jobID.Equals(""))
+                while (retries < maxRetries && !success && !jobID.Equals(""))
                 {
-                    Thread.Sleep(6000);
-                    WebRequest wr = WebRequest.Create(dataURL + jobID);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    System.IO.Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
+                    wm = await hc.GetAsync(requestURL);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
                     taskData = JsonSerializer.Deserialize<T>(data, options);
                     if (taskData.status == "SUCCESS" && taskData.data != null)
                     {
@@ -78,17 +87,24 @@ namespace Utilities
                     }
                     else if (taskData.status == "FAILURE" || taskData.status == "PENDING")
                     {
+
                         break;
                     }
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    else
+                    {
+                        Thread.Sleep(5000);
+                    }
+                    retries += 1;
                 }
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Could not find NCEI stations for the given geometry." + ex.Message;
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "ERROR: unable to complete request to flask request.");
+                return default(T);
             }
+
             return taskData;
         }
 

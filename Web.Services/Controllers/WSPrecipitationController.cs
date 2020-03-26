@@ -1,8 +1,8 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Services.Models;
 
@@ -66,6 +66,13 @@ namespace Web.Services.Controllers
     [Produces("application/json")]
     public class WSPrecipitationController : Controller
     {
+        readonly IDiagnosticContext _diagnosticContext;
+
+        public WSPrecipitationController(IDiagnosticContext diagnosticContext)
+        {
+            _diagnosticContext = diagnosticContext;
+        }
+
         /// <summary>
         /// POST method for submitting a request for precipitation data.
         /// </summary>

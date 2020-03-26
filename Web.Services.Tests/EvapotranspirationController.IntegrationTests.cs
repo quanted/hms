@@ -9,6 +9,7 @@ using Data;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -31,7 +32,7 @@ namespace Web.Services.Tests
         /// GLDAS request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
-            "{\"source\": \"gldas\", \"algorithm\": \"gldas\", \"dateTimeSpan\": {\"startDate\": \"2009-01-01T00:00:00\",\"endDate\": \"2009-12-31T00:00:00\"," +
+            "{\"source\": \"gldas\", \"algorithm\": \"gldas\", \"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
@@ -215,7 +216,7 @@ namespace Web.Services.Tests
         /// <summary>
         /// Penman Daily gldas request json string for testing a valid request
         /// </summary>
-        const string penmandailyGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2009-01-01T00:00:00\", \"endDate\": \"2009-12-31T00:00:00\"," +
+        const string penmandailyGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2010-01-01T00:00:00\", \"endDate\": \"2010-12-31T00:00:00\"," +
             " \"dateTimeFormat\": \"yyyy-MM-dd HH\" }, \"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
@@ -321,7 +322,7 @@ namespace Web.Services.Tests
         /// <summary>
         /// Penman Monthly gldas request json string for testing a valid request
         /// </summary>
-        const string penmanMonthlyGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2009-01-01T00:00:00\", \"endDate\": \"2009-12-31T00:00:00\"," +
+        const string penmanMonthlyGldasRequest = "{ \"source\": \"gldas\", \"algorithm\": \"penmandaily\", \"Albedo\": 0.23, \"dateTimeSpan\": { \"startDate\": \"2010-01-01T00:00:00\", \"endDate\": \"2010-12-31T00:00:00\"," +
             " \"dateTimeFormat\": \"yyyy-MM-dd HH\" }, \"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
@@ -341,7 +342,7 @@ namespace Web.Services.Tests
         /// </summary>
         public EvapotranspirationControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
             _client.Timeout = new System.TimeSpan(0, 10, 0); //Many tests were failing due to timeout errors
         }

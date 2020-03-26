@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AQUATOX.AQTSegment;
-using AQUATOX.AQSite;
-using AQUATOX.OrgMatter;
 using AQUATOX.Nutrients;
 using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;

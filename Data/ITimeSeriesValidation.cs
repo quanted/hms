@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.IO;
 
@@ -11,13 +10,13 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        static string[] validDatasets = {
+        static protected string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
             "temperature", "wind", "dewpoint", "humidity"
         };
 
-        static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
+        static protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
             ["precipitation"] =  new List<string>{ "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
             ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
@@ -39,7 +38,7 @@ namespace Data
             ["surfacepressure"] = new List<string> { "gldas" }
         };
 
-        static string[] validRemoteData =
+        static protected string[] validRemoteData =
         {
             "nldas", "gldas", "trmm", "ncei", "daymet", "prism"
         };
@@ -419,14 +418,15 @@ namespace Data
             if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
-                try
+                string path = ".\\App_Data\\" + "url_info.txt";
+                if (!File.Exists(@path))
                 {
-                    urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+                    path = "/app/App_Data/url_info.txt";
                 }
-                catch (FileNotFoundException)
-                {
-                    urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
-                }
+
+
+                urls = Data.Files.FileToDictionary(path);
+
                 Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
                 foreach (string ds in dataset)
                 {

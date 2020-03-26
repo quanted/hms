@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
 using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -42,7 +43,7 @@ namespace Web.Services.Tests
         /// </summary>
         public SubSurfaceFlowControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

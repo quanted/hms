@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Web;
-using System.Diagnostics;
+using Serilog;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Data.Source
 {
@@ -41,7 +40,7 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
 
-            List<string> data = DownloadData(out errorMsg, url);
+            List<string> data = DownloadData(url, 0).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -130,44 +129,54 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private List<string> DownloadData(out string errorMsg, List<string> urls)
+        private async Task<List<string>> DownloadData(List<string> urls, int retries)
         {
-            errorMsg = "";
             List<string> data = new List<string>();
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
             foreach (string url in urls)
             {
                 string _data = "";
+                int maxRetries = 10;
+
                 try
                 {
-                    // TODO: Read in max retry attempt from config file.
-                    int retries = 10;
-
-                    // Response status message
                     string status = "";
 
-                    while (retries > 0 && !status.Contains("OK"))
+                    while (retries < maxRetries && !status.Contains("OK"))
                     {
-                        Thread.Sleep(200);
-                        WebRequest wr = WebRequest.Create(url);
-                        HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                        status = response.StatusCode.ToString();
-                        Stream dataStream = response.GetResponseStream();
-                        StreamReader reader = new StreamReader(dataStream);
-                        _data = reader.ReadToEnd();
-                        reader.Close();
-                        response.Close();
-                        retries -= 1;
+                        wm = await hc.GetAsync(url);
+                        var response = wm.Content;
+                        status = wm.StatusCode.ToString();
+                        _data = await wm.Content.ReadAsStringAsync();
+                        retries += 1;
+                        if (!status.Contains("OK"))
+                        {
+                            Thread.Sleep(1000 * retries);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    errorMsg = "ERROR: Unable to download requested gldas data.\n" + ex.Message;
-                    Debug.WriteLine(errorMsg);
+                    if (retries < maxRetries)
+                    {
+                        retries += 1;
+                        Log.Warning("Error: Failed to download gldas data. Retry {0}:{1}", retries, maxRetries);
+                        Random r = new Random();
+                        Thread.Sleep(5000 + (r.Next(10) * 1000));
+                        return this.DownloadData(urls, retries).Result;
+                    }
+
+                    wm.Dispose();
+                    hc.Dispose();
+                    Log.Warning(ex, "Error: Failed to download gldas data.");
                     return null;
                 }
                 data.Add(_data);
             }
-            return data;
+            wm.Dispose();
+            hc.Dispose();
+            return data;           
         }
 
         /// <summary>

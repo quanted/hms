@@ -1,7 +1,5 @@
-﻿using System;
-using Globals;
+﻿using Globals;
 using AQUATOX.AQTSegment;
-using Stream.Hydrology.AQUATOX;
 using AQUATOXNutrientModel;
 
 namespace Diagenesis.AQUATOX

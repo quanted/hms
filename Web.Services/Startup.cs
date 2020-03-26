@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +7,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
 using Web.Services.Controllers;
-using Utilities;
+using Serilog;
 
 namespace Web.Services
 {
@@ -28,13 +25,6 @@ namespace Web.Services
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            /*services.AddMvc().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.WriteIndented = true;
-                options.JsonSerializerOptions.AllowTrailingCommas = true;
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            });*/
-
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.WriteIndented = true;
@@ -52,14 +42,6 @@ namespace Web.Services
 
             services.AddCors();
 
-            // Add our repository type
-            // services.AddSingleton<ITodoRepository, TodoRepository>();
-
-            //Set the comments path for the swagger json and ui.
-            // var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-            // var xmlPath = Path.Combine(basePath, "XmlComments.xml");
-            // var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
-
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -68,7 +50,6 @@ namespace Web.Services
                     Version = "v1",
                     Description = "Swagger documentation for HMS REST API with example requests and responses."
                 });
-
 
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, "XmlComments.xml");
                 var xmlDataPath = Path.Combine(AppContext.BaseDirectory, "XmlCommentsData.xml");
@@ -114,6 +95,8 @@ namespace Web.Services
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 
+            //app.UseMiddleware<GCMiddleware>();
+            app.UseSerilogRequestLogging();
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
             // Enable static files middleware.

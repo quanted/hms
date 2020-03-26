@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Text;
-using System.IO;
-using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using Data;
@@ -13,7 +10,7 @@ namespace Utilities
 {
     public class Utility
     {
-        public static string errorMessage = "";
+        public string errorMessage = "";
         const double minLat = 25.0625;
         const double maxLat = 52.9375;
         const double minLon = -124.9375;
