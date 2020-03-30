@@ -13,15 +13,16 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetDelineationData(WatershedDelineationInput input)
+        public async Task<WatershedDelineationOutput> GetDelineationData(WatershedDelineationInput input)
         {
             string errorMsg = "";
+            string comids = "";
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
             
 
-            WatershedDelineation.Streams streamNetwork = new WatershedDelineation.Streams(input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["stopCOMID"], null);
-            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input);
+            WatershedDelineation.Streams streamNetwork = new WatershedDelineation.Streams(input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["endCOMID"], null);
+            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input, input.contaminantInflow, out comids);
 
             /* Stream Network Delineation
             List<string> lst = new List<string>();
@@ -49,10 +50,12 @@ namespace Web.Services.Models
             DataTable dt = sn.prepareStreamNetworkForHUC(input.Geometry.HucID.ToString(), gtype, out errorMsg, out lst);             //list of coms?
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }*/
 
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput delinOutput = oFactory.Initialize();
+            //ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            //ITimeSeriesOutput delinOutput = oFactory.Initialize();
 
-            //Format data into ITimeSeriesOutput format.
+            WatershedDelineationOutput delinOutput = new WatershedDelineationOutput();
+
+            /*Format data into ITimeSeriesOutput format. Dates as primary keys
             foreach(string date in travelPath.First.Value.timestepData.Keys)
             {
                 List<string> lv = new List<string>();
@@ -61,7 +64,39 @@ namespace Web.Services.Models
                     lv.AddRange(node.timestepData[date]);
                 }
                 delinOutput.Data.Add(date,lv);//delinOutput.Data.Add(date, travelPath.First.Value.timestepData[date]);
+            }*/
+
+            delinOutput.Data = new Dictionary<string, Dictionary<string, List<string>>>();
+            List<string> lv = new List<string>();
+            foreach (StreamSegment node in travelPath)
+            {
+                Dictionary<string, List<string>> timesteps = node.timestepData;
+                delinOutput.Data.Add(node.comID, timesteps);//delinOutput.Data.Add(date, travelPath.First.Value.timestepData[date]);
             }
+
+
+
+            delinOutput.Dataset = "time_of_travel";
+            delinOutput.DataSource = "nwm";
+            delinOutput.Metadata = new Dictionary<string, string>()
+            {
+                { "request_time", DateTime.Now.ToString() },
+                { "column_1", "Date" },
+                { "column_2", "ComID" },
+                { "column_3", "Length (km)" },
+                { "column_4", "Velocity(m/s)" },
+                { "column_5", "Flow (m^3/s)" },
+                { "column_6", "Contaminated" },
+                { "catchments", comids.TrimEnd(',')}/*,
+                { "column_7", "ComID" },
+                { "column_8", "Length (km)" },
+                { "column_9", "Velocity(m/s)" },
+                { "column_10", "Flow (m^3/s)" },
+                { "column_11", "Contaminated" }*/
+            };
+            // Adds Timezone info to metadata
+            //delinOutput.Metadata.Add(input.Source + "_timeZone", input.Geometry.Timezone.Name);
+            //delinOutput.Metadata.Add(input.Source + "_tz_offset", input.Geometry.Timezone.Offset.ToString());
 
             return delinOutput;
         }

@@ -50,7 +50,7 @@ namespace Web.Services.Models
                 LeafAreaIndices = input.LeafAreaIndices,
                 AirTemperature = input.AirTemperature,
                 UserData = input.UserData
-        };
+            };
 
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();

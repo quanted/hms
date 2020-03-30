@@ -13,7 +13,7 @@ namespace Web.Services.Models
     public class WSPrecipExtraction
     {
 
-        private enum PrecipSources { extraction, nldas, gldas, ncei, daymet, prism };
+        private enum PrecipSources { extraction, nldas, gldas, ncei, daymet, prism, trmm };
 
         /// <summary>
         /// Gets workflow data.

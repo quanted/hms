@@ -13,7 +13,18 @@ namespace Web.Services.Controllers
     /// </summary>
     public class WatershedDelineationInput : TimeSeriesInput
     {
+        public List<List<object>> contaminantInflow { get; set; }
+    }
 
+    /// <summary>
+    /// WorkFlow Output object
+    /// </summary>
+    public class WatershedDelineationOutput
+    { 
+        public string Dataset { get; set; }
+        public string DataSource { get; set; }
+        public Dictionary<string, string> Metadata { get; set; }
+        public Dictionary<string, Dictionary<string, List<string>>> Data { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -78,7 +89,7 @@ namespace Web.Services.Controllers
     /// DelineationCompare controller for HMS.
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
-    [Route("api/hydrology/delineation/")]
+    [Route("api/workflow/timeoftravel")]//[Route("api/hydrology/delineation/")]
     [Produces("application/json")]
     public class WSWatershedDelineationController : Controller
     {
@@ -95,7 +106,7 @@ namespace Web.Services.Controllers
             var stpWatch = System.Diagnostics.Stopwatch.StartNew();
 
             WSWatershedDelineation watershed = new WSWatershedDelineation();
-            ITimeSeriesOutput results = await watershed.GetDelineationData(watershedInput);
+            WatershedDelineationOutput results = await watershed.GetDelineationData(watershedInput);
             results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
 
             stpWatch.Stop();

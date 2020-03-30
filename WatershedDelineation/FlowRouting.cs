@@ -195,6 +195,7 @@ namespace WatershedDelineation
                 }
             });
 
+            string missingComs = "";
             foreach (string com in validList)
             {
                 if (precipitation[com].Output.GetType().Equals(typeof(TimeSeriesOutput)) || precipitation[com].Output.GetType().Equals(typeof(ITimeSeriesOutput)))
@@ -203,6 +204,10 @@ namespace WatershedDelineation
                     surfaceFlow[com].Input.InputTimeSeries["precipitation"] = (TimeSeriesOutput)precipitation[com].Output;
                     subsurfaceFlow[com].Input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
                     subsurfaceFlow[com].Input.InputTimeSeries["precipitation"] = (TimeSeriesOutput)precipitation[com].Output;
+                }
+                else
+                {
+                    missingComs += com + ", ";
                 }
             }
 
@@ -259,6 +264,16 @@ namespace WatershedDelineation
             if (flaskURL == null)
             {
                 flaskURL = "http://localhost:7777";
+            }
+
+            if (!errComs.Equals(""))
+            {
+                errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output. ";
+            }
+
+            if (!missingComs.Equals(""))
+            {
+                errorMsg += "Could not complete data requests for Com IDs: " + missingComs + "Their data values have been marked as invalid (-9999). ";
             }
 
             switch (streamAlgorithm)
@@ -484,11 +499,7 @@ namespace WatershedDelineation
                     }
                     return ds;
             }
-
-            if (!errComs.Equals(""))
-            {
-                errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output.";
-            }
+            
             return ds;
         }
         

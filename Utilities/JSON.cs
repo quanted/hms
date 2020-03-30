@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -182,7 +183,16 @@ namespace Utilities
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Debug.Assert(typeToConvert == typeof(DateTime));
-            return DateTime.Parse(reader.GetString());
+            DateTime date = new DateTime();
+            string dateString = reader.GetString();
+            if (DateTime.TryParse(dateString, out date)) { }
+            else if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)) { }
+            else if (DateTime.TryParseExact(dateString, "MM/dd/yyyy HH", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)) { }
+            else
+            {
+                throw new FormatException();
+            }
+            return date;
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
