@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Data;
 using Web.Services.Models;
@@ -16,13 +13,13 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Swashbuckle TotalFlow POST request example
     /// </summary>
-    public class TotalFlowInputExample : IExamplesProvider
+    public class TotalFlowInputExample : IExamplesProvider<TotalFlowInput>
     {
         /// <summary>
         /// Get example function.
         /// </summary>
         /// <returns></returns>
-        public object GetExamples()
+        public TotalFlowInput GetExamples()
         {
             TotalFlowInput example = new TotalFlowInput()
             {
@@ -32,8 +29,8 @@ namespace Web.Services.Controllers
                     StartDate = new DateTime(2015, 01, 01),
                     EndDate = new DateTime(2015, 12, 31)
                 },
-                GeometryType = "huc",
-                GeometryInput = "11010001",
+                GeometryType = "comid",
+                GeometryInput = "1049831",
             };
             return example;
         }
@@ -42,19 +39,18 @@ namespace Web.Services.Controllers
     /// <summary>
     /// Total Flow controller for HMS
     /// </summary>
-    [Produces("application/json")]
+    [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/totalflow")]
+    [Produces("application/json")]
     public class WSTotalFlowController : Controller
     {
         /// <summary>
-        /// POST method for getting total flow data.
+        /// POST method for submitting a request for total flow data.
         /// </summary>
         /// <param name="tfInput"></param>
         /// <returns>ITimeSeriesOutput</returns>
         [HttpPost]
-        [Route("")]
-        [Route("v1.0")]
-        [SwaggerRequestExample(typeof(TotalFlowInput), typeof(TotalFlowInputExample))]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]TotalFlowInput tfInput)
         {
             WSTotalFlow tFlow = new WSTotalFlow();

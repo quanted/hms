@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Temperature
 {
@@ -112,6 +111,9 @@ namespace Temperature
                     output.Data = MonthlyValues(out errorMsg, output, input, "low");
                     output.Metadata.Add("column_2", "Min Temperature");
                     return output;
+                case "hourly":
+                    output.Metadata.Add("column_2", "Hourly Average Temperature");
+                    return output;
                 default:
                     return output;
             }
@@ -177,7 +179,7 @@ namespace Temperature
                     {
                         case "all":
                         default:
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat),
@@ -187,7 +189,7 @@ namespace Temperature
                             );
                             break;
                         case "avg":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (average).ToString(input.DataValueFormat)
@@ -195,7 +197,7 @@ namespace Temperature
                             );
                             break;
                         case "high":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat)
@@ -203,7 +205,7 @@ namespace Temperature
                             );
                             break;
                         case "low":
-                            average = sum / dayIndex;
+                            average = sum / (dayIndex + 1);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (low).ToString(input.DataValueFormat)

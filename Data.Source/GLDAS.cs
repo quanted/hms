@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Web;
+using Serilog;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Data.Source
 {
@@ -27,12 +28,19 @@ namespace Data.Source
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
+            if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
+            {
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy", null);
+                TimeSpan ts = new TimeSpan(23, 00, 0);
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
+            }
+            
             // Constructs the url for the NLDAS data request and it's query string.
             List<string> url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            // Uses the constructed url to download time series data.
-            List<string> data = DownloadData(out errorMsg, url);
+
+            List<string> data = DownloadData(url, 0).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -54,8 +62,11 @@ namespace Data.Source
             // #2 start is in GLDAS 2.0, end is in GLDAS 2.1
             // #3 both are in GLDAS 2.1
             DateTime gldas21 = new DateTime(2010, 01, 01);
+            var test = DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21);
             if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0)            // #3
             {
+                //string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
+
                 //Add Start and End Date
                 string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
                 DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
@@ -63,11 +74,11 @@ namespace Data.Source
 
                 string url1 = cInput.BaseURL[0] +
                     @"%28" + cInput.Geometry.Point.Longitude.ToString() +
-                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" + 
+                    @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
                     @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2";
                 urls.Add(url1);
             }
-            else if(DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
+            else if (DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
             {
                 string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
 
@@ -99,10 +110,10 @@ namespace Data.Source
 
                 //Add Start and End Date for GLDAS 2.0
                 string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-                DateTime tempDate1 = gldas21.AddHours(3);
-                string[] endDT1 = tempDate1.ToString("yyyy-MM-dd HH").Split(' ');
+                //DateTime tempDate1 = gldas21.AddHours(3);
+                string[] endDT1 = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
 
-                string url1 = cInput.BaseURL[0] +
+                string url1 = gldas2Url +
                     @"%28" + cInput.Geometry.Point.Longitude.ToString() +
                     @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
                     @"&startDate=" + startDT1[0] + @"T" + startDT1[1] + @"&endDate=" + endDT1[0] + "T" + endDT1[1] + @"&type=asc2";
@@ -118,43 +129,54 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private List<string> DownloadData(out string errorMsg, List<string> urls)
+        private async Task<List<string>> DownloadData(List<string> urls, int retries)
         {
-            errorMsg = "";
             List<string> data = new List<string>();
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
             foreach (string url in urls)
             {
                 string _data = "";
+                int maxRetries = 10;
+
                 try
                 {
-                    // TODO: Read in max retry attempt from config file.
-                    int retries = 5;
-
-                    // Response status message
                     string status = "";
 
-                    while (retries > 0 && !status.Contains("OK"))
+                    while (retries < maxRetries && !status.Contains("OK"))
                     {
-                        Thread.Sleep(100);
-                        WebRequest wr = WebRequest.Create(url);
-                        HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                        status = response.StatusCode.ToString();
-                        Stream dataStream = response.GetResponseStream();
-                        StreamReader reader = new StreamReader(dataStream);
-                        _data = reader.ReadToEnd();
-                        reader.Close();
-                        response.Close();
-                        retries -= 1;
+                        wm = await hc.GetAsync(url);
+                        var response = wm.Content;
+                        status = wm.StatusCode.ToString();
+                        _data = await wm.Content.ReadAsStringAsync();
+                        retries += 1;
+                        if (!status.Contains("OK"))
+                        {
+                            Thread.Sleep(1000 * retries);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    errorMsg = "ERROR: Unable to download requested gldas data.\n" + ex.Message;
+                    if (retries < maxRetries)
+                    {
+                        retries += 1;
+                        Log.Warning("Error: Failed to download gldas data. Retry {0}:{1}", retries, maxRetries);
+                        Random r = new Random();
+                        Thread.Sleep(5000 + (r.Next(10) * 1000));
+                        return this.DownloadData(urls, retries).Result;
+                    }
+
+                    wm.Dispose();
+                    hc.Dispose();
+                    Log.Warning(ex, "Error: Failed to download gldas data.");
                     return null;
                 }
                 data.Add(_data);
             }
-            return data;
+            wm.Dispose();
+            hc.Dispose();
+            return data;           
         }
 
         /// <summary>
@@ -198,6 +220,7 @@ namespace Data.Source
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, metadataList, output);
             output.Data = SetData(out errorMsg, dataList, input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+
             return output;
         }
 
@@ -273,6 +296,13 @@ namespace Data.Source
             }
             return dataDict;
         }
+
+        public ITimeSeriesOutput MergeTimeseries(ITimeSeriesOutput firstOutput, ITimeSeriesOutput secondOutput)
+        {
+            firstOutput.Data = firstOutput.Data.Concat(secondOutput.Data).GroupBy(k => k.Key).ToDictionary(g => g.Key, g => g.First().Value);
+            return firstOutput;
+        }
+
 
         /// <summary>
         /// Directly downloads from the source using the testInput object. Used for checking the status of the GLDAS endpoints.

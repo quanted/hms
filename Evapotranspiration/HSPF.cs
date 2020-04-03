@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Globalization;
 using Data;
@@ -201,9 +199,9 @@ namespace Evapotranspiration
                 TMAX = thr;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHhourly(shhr, thr);
+                RHmin = Utilities.Utility.CalculateRH(shhr, thr, 1013.25);
                 RHmax = RHmin;
-
+                                
                 // Set relHumidityHr to RHmin or RHmax.
                 relHumidityHr = RHmin;
 
@@ -273,8 +271,8 @@ namespace Evapotranspiration
                 SC = 0.1645 * Math.Sin(2 * BB) - 0.1255 * Math.Cos(BB) - 0.025 * Math.Sin(BB);
 
                 ws = (pi / 12) * ((Hour + 0.06667 * (LZ - LM) + SC) - 12);
-                w1 = ws - pi * 1 / 24;
-                w2 = ws + pi * 1 / 24;
+                w1 = ws - pi * 1.0 / 24.0;
+                w2 = ws + pi * 1.0 / 24.0;
                 RA = (12.0 * 60.0 / pi) * 0.082 * dr * ((w2 - w1) * Math.Sin(radian) * Math.Sin(sigma2) +
                       Math.Cos(radian) * Math.Cos(sigma2) * (Math.Sin(w2) - Math.Sin(w1)));
 

@@ -1,7 +1,5 @@
 ﻿using Data;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SurfaceRunoff
 {
@@ -45,8 +43,7 @@ namespace SurfaceRunoff
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && this.Input.Geometry.Point != null)
             {
-                Utilities.Time tz = new Utilities.Time();
-                this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
             else
@@ -82,7 +79,7 @@ namespace SurfaceRunoff
             };
 
             // Adds Geometry metadata to the output metadata. NOT WORKING
-            this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
+            // this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
             this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);

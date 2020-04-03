@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +7,8 @@ using Data;
 using System.Diagnostics;
 using Xunit;
 using Web.Services.Models;
+using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -32,7 +33,7 @@ namespace Web.Services.Tests
         /// </summary>
         public SolarControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 
@@ -46,17 +47,22 @@ namespace Web.Services.Tests
         [InlineData(requestString)]
         public async Task MeteorologyValidRequests(string inputString)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
             string endpoint = "api/meteorology/solar";
-            SolarCalculatorInput input = JsonConvert.DeserializeObject<SolarCalculatorInput>(inputString);
+            SolarCalculatorInput input = JsonSerializer.Deserialize<SolarCalculatorInput>(inputString, options);
             Debug.WriteLine("Integration Test: Solar controller; Endpoint: " + endpoint + "; Data source: " + input.Model);
             var response = await _client.PostAsync(
                 endpoint,
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(365, resultObj.Data.Count);
         }
 

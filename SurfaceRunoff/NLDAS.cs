@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SurfaceRunoff
 {
@@ -22,6 +21,10 @@ namespace SurfaceRunoff
         {
             errorMsg = "";
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
+            if (input.Geometry.ComID > 1 && input.Geometry.Point.Latitude == -9999)
+            {
+                input.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
+            }
             string data = nldas.GetData(out errorMsg, "Surface_Flow", input);
             if (errorMsg.Contains("ERROR")) { return null; }
 

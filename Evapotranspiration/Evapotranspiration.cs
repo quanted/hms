@@ -2,11 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Evapotranspiration
 {
@@ -132,9 +128,8 @@ namespace Evapotranspiration
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
-            {                
-                Utilities.Time tz = new Utilities.Time();
-                this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+            {
+                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 
@@ -147,7 +142,7 @@ namespace Evapotranspiration
             //this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
 
             //Error checking and data validation
-            if(this.Input.Source != "gldas" && this.Algorithm == "gldas" )
+            if (this.Input.Source != "gldas" && this.Algorithm == "gldas")
             {
                 errorMsg = "ERROR: GLDAS algorithm requires GLDAS data source.";
                 return null;
@@ -157,7 +152,7 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: NLDAS algorithm requires NLDAS data source.";
                 return null;
             }
-            if (this.Input.Source == "daymet" && this.Algorithm != "hamon" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
+            if (this.Input.Source == "daymet" && this.Algorithm != "hamon" && this.Algorithm != "hargreaves" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
             {
                 errorMsg = "ERROR: Algorithm is incompatible with Daymet data source.";
                 return null;
@@ -167,20 +162,11 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: Algorithm is incompatible with NCDC data source.";
                 return null;
             }
-            if ((this.Algorithm != "hamon" || this.Algorithm != "gldas") && this.Input.Source == "gldas" && (this.Input.DateTimeSpan.StartDate.Year > 2010 || this.Input.DateTimeSpan.EndDate.Year > 2010))
+            if(this.Algorithm == "hargreaves" && this.Input.TemporalResolution == "hourly")
             {
-                errorMsg = "ERROR: No data available for the requested Source/Algorithm/Date range.";
+                errorMsg = "ERROR: Algorithm does not support hourly aggregation.";
                 return null;
             }
-            if (this.Input.Source == "custom")
-            {
-                if (this.Algorithm == "penmanhourly" || this.Algorithm == "hspf")
-                {
-                    errorMsg = "ERROR: Hourly algorithms do not yet support custom data.";
-                    return null;
-                }
-                this.Input.Geometry.GeometryMetadata["userdata"] = UserData;
-            }           
 
             switch (this.Algorithm)
             {
@@ -359,6 +345,13 @@ namespace Evapotranspiration
                     this.Output = hspf.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
+                case "hargreaves":
+                    Hargreaves hargreaves = new Hargreaves();
+                    hargreaves.Latitude = this.Input.Geometry.Point.Latitude;
+                    hargreaves.Longitude = this.Input.Geometry.Point.Longitude;
+                    this.Output = hargreaves.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 default:
                     errorMsg = "ERROR: 'Algorithm' for evapotranspiration was not found among available sources or is invalid.";
                     break;
@@ -375,7 +368,80 @@ namespace Evapotranspiration
 
             return this.Output;
         }
-        
+
+        /* <summary>
+        /// Get Evapotranspiration data function.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
+        public ITimeSeriesOutput GetHamonData(out string errorMsg)
+        {
+            errorMsg = "";
+
+            // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
+            {
+                Utilities.Time tz = new Utilities.Time();
+                this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                if (errorMsg.Contains("ERROR")) { return null; }
+            }
+
+            //TODO: Check Source and run specific subcomponent class for source
+            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
+            this.Output = iFactory.Initialize();
+            Elevation elev = new Elevation(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude);
+            Utilities.Time offsets = new Utilities.Time();
+
+            // Hamon Evapotranspiration Data call
+            Hamon hamon = new Hamon();
+            hamon.Latitude = this.Input.Geometry.Point.Latitude;
+            hamon.Longitude = this.Input.Geometry.Point.Longitude;
+            switch (this.Input.Source)
+            {
+                case "nldas":
+                    // NLDAS Precipitation Data call
+                    NLDAS nldas = new NLDAS();
+                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "gldas":
+                    // GLDAS Precipitation Data call
+                    GLDAS gldas = new GLDAS();
+                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "ncei":
+                // NCDC Precipitation Data call
+                //NCDC ncdc = new NCDC();
+                //this.Output = ncdc.GetData(out errorMsg, this.Output, this.Input);
+                //if (errorMsg.Contains("ERROR")) { return null; }
+                //this.Input.Source = "ncei";
+                //break;
+                case "daymet":
+                    // daymet Precipitation Data call
+                    Daymet daymet = new Daymet();
+                    this.Output = daymet.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                default:
+                    errorMsg = "ERROR: 'Source' for precipitation was not found among available sources or is invalid.";
+                    break;
+            };
+            this.Output = hamon.Compute(this.Input, this.Output, this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude, this.Input.DateTimeSpan.StartDate.ToString(), this.Input.DateTimeSpan.EndDate.ToString(), (int)this.Input.Geometry.Timezone.Offset, out errorMsg);
+            if (errorMsg.Contains("ERROR")) { return null; }
+
+            // Adds Geometry metadata to the output metadata. NOT WORKING
+            this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
+
+            // Adds Timezone info to metadata
+            this.Output.Metadata.Add(this.Algorithm + "_timeZone", this.Input.Geometry.Timezone.Name);
+            this.Output.Metadata.Add(this.Algorithm + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+
+            //TODO: Add output format control
+
+            return this.Output;
+        }*/
+
         /// <summary>
         /// Check evapotranspiration data endpoints.
         /// </summary>

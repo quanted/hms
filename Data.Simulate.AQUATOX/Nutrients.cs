@@ -3,6 +3,9 @@ using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
+using AQUATOX.Plants;
+using AQUATOX.Organisms;
+using AQUATOX.Animals;
 using Newtonsoft.Json;
 using Globals;
 
@@ -15,113 +18,79 @@ namespace AQUATOX.Nutrients
         public void Check_Nutrient_IC()
         {
             // if using TN or TP for init cond
-            TNO3Obj PNO3;
-            TPO4Obj PPO4;
             TNH4Obj PNH4;
-            TStateVariable ThisVar;
-            // TPlant PPl;
-            double Nut2Org;
-            double CNutrient;
-            AllVariables NutrLoop;
+            double CNutrient, Nut2Org;
             AllVariables NSLoop;
 
-            PNO3 = (TNO3Obj)AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-            PPO4 = (TPO4Obj)AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-            for (NutrLoop = AllVariables.Nitrate; NutrLoop <= AllVariables.Phosphate; NutrLoop++)
-            {
-                if (((NutrLoop == AllVariables.Nitrate) && (PNO3.TN_IC)) || ((NutrLoop == AllVariables.Phosphate) && (PPO4.TP_IC)))
+            if (!((NState == AllVariables.Nitrate) || (NState == AllVariables.Phosphate))) return;  // procedure for TP and TN only
+            if (!((SVType == T_SVType.StV) || (Layer == T_SVLayer.WaterCol))) return;
+
+            if (((NState == AllVariables.Nitrate) && (((TNO3Obj)this).TN_IC)) || ((NState == AllVariables.Phosphate) && (((TPO4Obj)this).TP_IC)))
                 {
-                    if (NutrLoop == AllVariables.Nitrate)
-                    {
-                        ThisVar = ((PNO3) as TStateVariable);
-                    }
-                    else
-                    {
-                        ThisVar = ((PPO4) as TStateVariable);
-                    }
-                    CNutrient = ThisVar.State;
-                    // Total Nutrient in mg/L
+                    CNutrient = State;   // Total Nutrient in mg/L
+
                     for (NSLoop = AllVariables.DissRefrDetr; NSLoop <= AllVariables.SuspLabDetr; NSLoop++)
                     {
-                        if (AQTSeg.GetState(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                        if (AQTSeg.GetStateVal(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
                         {
-                            if (NutrLoop == AllVariables.Nitrate)
+                            if (NState == AllVariables.Nitrate)
                             {
-                                switch (NSLoop)
-                                {
-                                    case AllVariables.SuspRefrDetr:
-                                        Nut2Org = Location.Remin.N2Org_Refr;
-                                        break;
-                                    case AllVariables.SuspLabDetr:
-                                        Nut2Org = Location.Remin.N2OrgLab;
-                                        break;
-                                    case AllVariables.DissRefrDetr:
-                                        Nut2Org = Location.Remin.N2OrgDissRefr;
-                                        break;
-                                    default:
-                                        // DissLabDetr:
-                                        Nut2Org = Location.Remin.N2OrgDissLab;
-                                        break;
-                                }
-                                // Case
-                            }
+                            Nut2Org = NSLoop switch
+                            {
+                                AllVariables.SuspRefrDetr => Location.Remin.N2Org_Refr,
+                                AllVariables.SuspLabDetr => Location.Remin.N2OrgLab,
+                                AllVariables.DissRefrDetr => Location.Remin.N2OrgDissRefr,
+                                _ => Location.Remin.N2OrgDissLab,
+                            };
+                            // Case
+                        }
                             else
                             {
-                                switch (NSLoop)
-                                {
-                                    case AllVariables.SuspRefrDetr:
-                                        Nut2Org = Location.Remin.P2Org_Refr;
-                                        break;
-                                    case AllVariables.SuspLabDetr:
-                                        Nut2Org = Location.Remin.P2OrgLab;
-                                        break;
-                                    case AllVariables.DissRefrDetr:
-                                        Nut2Org = Location.Remin.P2OrgDissRefr;
-                                        break;
-                                    default:
-                                        // DissLabDetr:
-                                        Nut2Org = Location.Remin.P2OrgDissLab;
-                                        break;
-                                }
-                            }
+                            Nut2Org = NSLoop switch
+                            {
+                                AllVariables.SuspRefrDetr => Location.Remin.P2Org_Refr,
+                                AllVariables.SuspLabDetr => Location.Remin.P2OrgLab,
+                                AllVariables.DissRefrDetr => Location.Remin.P2OrgDissRefr,
+                                _ => Location.Remin.P2OrgDissLab,
+                            };
+                        }
                             // Case
                             CNutrient = CNutrient - AQTSeg.GetState(NSLoop, T_SVType.StV, T_SVLayer.WaterCol) * Nut2Org;
                             // mg/L     // mg/L             // mg/L      // N2Org
                         }
                     }
-                    //for (NSLoop = Globals.FirstPlant; NSLoop <= Globals.LastPlant; NSLoop++)
-                    //{  FIXME LINKAGE TO PLANTS  TN_IC, or TP_IC
-                    //    PPl = AQTSeg.GetStatePointer(NSLoop, T_SVType.StV, T_SVLayer.WaterCol);
-                    //    if (PPl != null)
-                    //    {
-                    //        if (PPl.IsPhytoplankton())
-                    //        {
-                    //            if (NutrLoop == AllVariables.Nitrate)
-                    //            {
-                    //                Nut2Org = PPl.PAlgalRec.N2OrgInit;
-                    //            }
-                    //            else
-                    //            {
-                    //                Nut2Org = PPl.PAlgalRec.P2OrgInit;
-                    //            }
-                    //            CNutrient = CNutrient - PPl.State * Nut2Org;
-                    //            // mg/L     // mg/L     // mg/L    // N2Org
-                    //        }
-                    //    }
-                    //}
-                    if (CNutrient < 0)
+
+                    for (NSLoop = Consts.FirstPlant; NSLoop <= Consts.LastPlant; NSLoop++)
                     {
-                        CNutrient = 0;
+                        TStateVariable TSV = AQTSeg.GetStatePointer(NSLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (TSV != null)
+                        {
+                            TPlant PPl = TSV as TPlant;
+                            if (PPl.IsPhytoplankton())
+                            {
+                                if (NState == AllVariables.Nitrate)
+                                {
+                                    Nut2Org = PPl.PAlgalRec.N2OrgInit;
+                                }
+                                else
+                                {
+                                    Nut2Org = PPl.PAlgalRec.P2OrgInit;
+                                }
+                                CNutrient = CNutrient - PPl.State * Nut2Org;
+                                // mg/L     // mg/L     // mg/L    // N2Org
+                            }
+                        }
                     }
-                    ThisVar.State = CNutrient;
-                    if (NutrLoop == AllVariables.Nitrate)
+                    if (CNutrient < 0) CNutrient = 0;
+                    State = CNutrient;
+
+                    if (NState == AllVariables.Nitrate)
                     {
                         // No ammonia if nitrogen initial condition is input as Total N
                         PNH4 = (TNH4Obj)AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
                         PNH4.State = 0;
                     }
                 }
-            }
         }
 
 
@@ -218,11 +187,17 @@ namespace AQUATOX.Nutrients
             if (CNutrient < 0) AddLoad = 0;
         }
 
+
+        public override void SetToInitCond()
+        {
+            base.SetToInitCond();
+            Check_Nutrient_IC();
+        }
         // ------------------------------------------------------------------------------------------------
         public void CalculateLoad_TotNutrient_Dynamic_Inflow(ref DateTime TimeIndex, ref double Inflow, ref double SegVolume)
         {
             double CNutrient;
-            //double PlantInflow;
+            double PlantInflow;
             double DetrInflow;
             TStateVariable PSV;
             AllVariables nsLoop;
@@ -244,29 +219,24 @@ namespace AQUATOX.Nutrients
                 }
             }
 
-            //for (nsLoop = Consts.FirstPlant; nsLoop <= Consts.LastPlant; nsLoop++)  // FIXME PLANT LINKAGE
-            //{
-            //    PSV = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    if (PSV != null)
-            //    {
-            //        if (((PSV) as TPlant).IsPhytoplankton())
-            //        {
-            //            InflLoad = ((PSV) as TStateVariable).GetInflowLoad(TimeIndex);
-            //            // Inflow Loadings Only
-            //            PlantInflow = InflLoad * Inflow / SegVolume;
-            //            // Inflow Loadings Only
-            //            if (NState == AllVariables.Phosphate)
-            //            {
-            //                CNutrient = CNutrient - PlantInflow * ((PSV) as TPlant).P_2_Org();
-            //            }
-            //            else
-            //            {
-            //                CNutrient = CNutrient - PlantInflow * ((PSV) as TPlant).N_2_Org();
-            //            }
-            //            // mg/L d         // mg/L d   // mg/L d                    // N2Org
-            //        }
-            //    }
-            //}
+            for (nsLoop = Consts.FirstPlant; nsLoop <= Consts.LastPlant; nsLoop++) 
+            {
+                PSV = AQTSeg.GetStatePointer(nsLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (PSV != null)
+                {
+                    if (((PSV) as TPlant).IsPhytoplankton())
+                    {
+                        InflLoad = ((PSV) as TStateVariable).GetInflowLoad(TimeIndex);
+                        // Inflow Loadings Only
+                        PlantInflow = InflLoad * Inflow / SegVolume;
+                        // Inflow Loadings Only
+                        if (NState == AllVariables.Phosphate)
+                             CNutrient = CNutrient - PlantInflow * ((PSV) as TPlant).P_2_Org();
+                        else CNutrient = CNutrient - PlantInflow * ((PSV) as TPlant).N_2_Org();
+                    }        // mg/L d     // mg/L d   // mg/L d                    // N2Org
+
+                }
+            }
 
             if (CNutrient < 0) CNutrient = 0;
 
@@ -292,7 +262,7 @@ namespace AQUATOX.Nutrients
             PNO3 = (TNO3Obj)AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
             Loading = 0;
             SegVolume = AQTSeg.SegVol();
-            Inflow = Location.Morph.InflowH2O; // * (Location.Morph.OOSInflowFrac);  Fixme Linked Mode
+            Inflow = Location.Morph.InflowH2O; // * (Location.Morph.OOSInflowFrac);  Removed Linked Mode Logic
 
             if (LoadsRec.Loadings.NoUserLoad)
             {
@@ -394,7 +364,6 @@ namespace AQUATOX.Nutrients
         // ---------------------------process equations--------------------------
         public double SumDetrDecomp(T_SVType OType, bool SedOnly)
         {
-            double result;
             // If OType=NTrack returns sum of detrital decomp into ammonia
             // If OType=NTrack returns sum detrital decomp into dissolved phosphorus
             // otherwise returns sum of detrital decomposition in terms of organic matter
@@ -417,7 +386,7 @@ namespace AQUATOX.Nutrients
 
             for (Loop = Consts.FirstDetr; Loop <= EndLoop; Loop++)
             {
-                ReminRecord _wvar1 = Location.Remin;
+                ReminRecord RR = Location.Remin;
                 RP = (TRemineralize)AQTSeg.GetStatePointer(Loop, T_SVType.StV, T_SVLayer.WaterCol);
                 if ((RP == null))
                 {
@@ -425,398 +394,366 @@ namespace AQUATOX.Nutrients
                 }
                 else
                 {
-                    Decomp = RP.Decomposition(_wvar1.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                    Decomp = RP.Decomposition(RR.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
                 }
 
                 if (OType == T_SVType.NTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * _wvar1.N2OrgDissLab;
+                        Decomp = Decomp * RR.N2OrgDissLab;
                     }
                     else
                     {
-                        Decomp = Decomp * _wvar1.N2OrgLab;
+                        Decomp = Decomp * RR.N2OrgLab;
                     }
                 }
                 if (OType == T_SVType.PTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * _wvar1.P2OrgDissLab;
+                        Decomp = Decomp * RR.P2OrgDissLab;
                     }
                     else
                     {
-                        Decomp = Decomp * _wvar1.P2OrgLab;
+                        Decomp = Decomp * RR.P2OrgLab;
                     }
                 }
                 SumDecomp = SumDecomp + Decomp;
             }
-            result = SumDecomp;
-            return result;
+            return SumDecomp;
         }
 
-        //public void CalcAnimPredn_NutrPred(TAnimal P)
-        //{
-        // FIXME LINKAGE TO ANIMALS
 
-        //double Cons;
-        //double PreyNutr2Org;
-        //double PredNutr2Org;
-        //double DiffNutrFrac;
-        //if (P.IsAnimal())
-        //{
-        //    if (NState == AllVariables.Phosphate)
-        //    {
-        //        PredNutr2Org = P.PAnimalData.P2Org;
-        //    }
-        //    else
-        //    {
-        //        PredNutr2Org = P.PAnimalData.N2Org;
-        //    }
-        //    PreyNutr2Org = 0;
-        //    Cons = P.EatEgest(Loadings.EatOrEgest.Eat);
-        //    if (Cons > 0)
-        //    {
-        //        if (NState == AllVariables.Phosphate)
-        //        {
-        //            PreyNutr2Org = P.PhosCons / Cons;
-        //        }
-        //        else
-        //        {
-        //            PreyNutr2Org = P.NitrCons / Cons;
-        //        }
-        //    }
-        //    DiffNutrFrac = PredNutr2Org - PreyNutr2Org;
-        //    NetPredation = NetPredation - Cons * DiffNutrFrac;
-        //}
-        //}
 
         // -------------------------
         // sum instantaneous
         // contributions from
         // each process to Detr
         // -------------------------
-        //public double CalcAnimPredn()  //FIXME Animal Linkage
-        //{
-        //    double result;
-        //    double NetPredation;
-        //    int i;
-        //    // excr
-        //    NetPredation = 0.0;
-        //    for (i = 0; i < AQTSeg.Count; i++)
-        //    {
-        //        CalcAnimPredn_NutrPred(AQTSeg.At(i));
-        //    }
-        //    result = NetPredation;
-        //    return result;
-        //}
+        public double CalcAnimPredn()  
+        {
+            double NetPredation;
+            // -----------------------------------------------------------
+            void CalcAnimPredn_NutrPred(TStateVariable P)
+            {
+                double Cons;
+                double PreyNutr2Org;
+                double PredNutr2Org;
+                double DiffNutrFrac;
+                if (P.IsAnimal())
+                {
+                    TAnimal PA = (TAnimal)P;
+                    if (NState == AllVariables.Phosphate) 
+                         PredNutr2Org = PA.PAnimalData.P2Org;
+                    else PredNutr2Org = PA.PAnimalData.N2Org;
+ 
+                    PreyNutr2Org = 0;
+                    Cons = PA.EatEgest(false);
+                    if (Cons > 0)
+                    {
+                        if (NState == AllVariables.Phosphate)
+                             PreyNutr2Org = PA.PhosCons / Cons;
+                        else PreyNutr2Org = PA.NitrCons / Cons;
+                    }
+                    DiffNutrFrac = PredNutr2Org - PreyNutr2Org;
+                    NetPredation = NetPredation - Cons * DiffNutrFrac;
+                }
+            }
+            // -----------------------------------------------------------
+            NetPredation = 0.0;
+            foreach (TStateVariable TSV in AQTSeg.SV) CalcAnimPredn_NutrPred(TSV);
+            return NetPredation;
+        }
 
-        // Remineralization
-        //public double NutrRelPeriScr()  //FIXME Plant Linkage
-        //{
-        //    double result;
-        //    // When Periphyton is scoured into phytoplankton nutrient balance must
-        //    // be maintained if they have different stochiometry
-        //    AllVariables PeriLoop;
-        //    AllVariables PhytLoop;
-        //    TPlant PPeri;
-        //    TPlant PPhyt;
-        //    double NRPS;
-        //    double j;
-        //    double Nut2OrgPeri;
-        //    double Nut2OrgPhyt;
-        //    NRPS = 0;
-        //    for (PhytLoop = FirstAlgae; PhytLoop <= LastAlgae; PhytLoop++)
-        //    {
-        //        for (PeriLoop = FirstAlgae; PeriLoop <= LastAlgae; PeriLoop++)
-        //        {
-        //            PPhyt = AQTSeg.GetStatePointer(PhytLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //            PPeri = AQTSeg.GetStatePointer(PeriLoop, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if ((PPhyt != null) && (PPeri != null))
-        //            {
-        //                if ((PPeri.PSameSpecies == PPhyt.NState))
-        //                {
-        //                    PPeri.CalcSlough();
-        //                    // update sloughevent
-        //                    if (PPeri.SloughEvent)
-        //                    {
-        //                        if ((NState == AllVariables.Ammonia))
-        //                        {
-        //                            Nut2OrgPeri = PPeri.N_2_Org();
-        //                        }
-        //                        else
-        //                        {
-        //                            Nut2OrgPeri = PPeri.P_2_Org();
-        //                        }
-        //                        if ((NState == AllVariables.Ammonia))
-        //                        {
-        //                            Nut2OrgPhyt = PPhyt.N_2_Org();
-        //                        }
-        //                        else
-        //                        {
-        //                            Nut2OrgPhyt = PPhyt.P_2_Org();
-        //                        }
-        //                        j = -999;
-        //                        // signal to not write mass balance tracking
-        //                        PPeri.Derivative(j);
-        //                        // update sloughing
-        //                        NRPS = NRPS + PPeri.Sloughing * (1 / 3) * (Nut2OrgPeri - Nut2OrgPhyt);
-        //                        // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    result = NRPS;
-        //    return result;
-        //}
+        public double NutrRelPeriScr()
+        {
+            // When Periphyton is scoured into phytoplankton nutrient balance must
+            // be maintained if they have different stochiometry
+            AllVariables PeriLoop;
+            AllVariables PhytLoop;
+            TPlant PPeri;
+            TPlant PPhyt;
+            double NRPS;
+            double j;
+            double Nut2OrgPeri;
+            double Nut2OrgPhyt;
+            NRPS = 0;
+            for (PhytLoop = Consts.FirstAlgae; PhytLoop <= Consts.LastAlgae; PhytLoop++)
+            {
+                for (PeriLoop = Consts.FirstAlgae; PeriLoop <= Consts.LastAlgae; PeriLoop++)
+                {
+                    PPhyt = AQTSeg.GetStatePointer(PhytLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    PPeri = AQTSeg.GetStatePointer(PeriLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    if ((PPhyt != null) && (PPeri != null))
+                    {
+                        if ((PPeri.PSameSpecies == PPhyt.NState))
+                        {
+                            PPeri.CalcSlough();
+                            // update sloughevent
+                            if (PPeri.SloughEvent)
+                            {
+                                if ((NState == AllVariables.Ammonia))
+                                    Nut2OrgPeri = PPeri.N_2_Org();
+                                else
+                                    Nut2OrgPeri = PPeri.P_2_Org();
+                                
+                                if ((NState == AllVariables.Ammonia))
+                                    Nut2OrgPhyt = PPhyt.N_2_Org();
+                                else
+                                    Nut2OrgPhyt = PPhyt.P_2_Org();
 
-        // -------------------------------------------------------------------------------------------------------
-        //public double NutrRelGamLoss()  // FIXME Animal Linkage
-        //{
-        //    double result;
-        //    // When Gameteloss takes place in animals, (-->SuspLabDetr)
-        //    // excess nutrients are converted into NH4.
-        //    AllVariables ns;
-        //    TAnimal PAn;
-        //    double DiffNFrac;
-        //    double NGL;
-        //    NGL = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            ReminRecord _wvar1 = Location.Remin;
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - _wvar1.N2OrgLab;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - _wvar1.P2OrgLab;
-        //            }
-        //            NGL = NGL + PAn.GameteLoss() * DiffNFrac;
-        //        }
-        //    }
-        //    result = NGL;
-        //    return result;
-        //}
+                                j = -999;  // signal to not write mass balance tracking
+                                PPeri.Derivative(ref j);  // update sloughing
+                                NRPS = NRPS + PPeri.Sloughing * (1 / 3) * (Nut2OrgPeri - Nut2OrgPhyt);
+                                // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
+                            }
+                        }
+                    }
+                }
+            }
+            return NRPS;
+        }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double NutrRelMortality()  // FIXME animal and plant linkage
-        //{
-        //    double result;
-        //    // When Anim & Plant die, excess nutrients are converted into NH4;
-        //    // Detritus tends to have a lower fraction of nutrients then the dying organisms.
-        //    // Macrophyte breakage and Tox Dislodge are included in mortality here
-        //    // for accounting of nutrient mass.
-        //    AllVariables ns;
-        //    TDetritus PDRD;
-        //    TDetritus PDLD;
-        //    TDetritus PPRD;
-        //    TDetritus PPLD;
-        //    TOrganism POr;
-        //    double Mort;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double NMort;
-        //    double j;
-        //    double FracMult;
-        //    double Nut2Org_Refr;
-        //    double Nut2Org_Lab;
-        //    double Nut2Org_DissRefr;
-        //    double Nut2Org_DissLab;
-        //    PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PPRD = AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PPLD = AQTSeg.GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_Refr = _wvar1.N2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.N2OrgLab;
-        //        Nut2Org_DissRefr = _wvar1.N2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.N2OrgDissLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_Refr = _wvar1.P2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.P2OrgLab;
-        //        Nut2Org_DissRefr = _wvar1.P2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.P2OrgDissLab;
-        //    }
-        //    NMort = 0;
-        //    for (ns = FirstBiota; ns <= LastBiota; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            POr = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = PDRD.Mort_To_Detr(ns) * Nut2Org_DissRefr + PPRD.Mort_To_Detr(ns) * Nut2Org_Refr + PPLD.Mort_To_Detr(ns) * Nut2Org_Lab + PDLD.Mort_To_Detr(ns) * Nut2Org_DissLab;
-        //            DiffNFrac = POr.NutrToOrg(NState) - DetrNFrac;
-        //            Mort = POr.Mortality();
-        //            if (POr.IsMacrophyte())
-        //            {
-        //                Mort = Mort + ((POr) as TMacrophyte).Breakage();
-        //            }
-        //            if (POr.IsPlant() && (!POr.IsMacrophyte()))
-        //            {
-        //                TPlant _wvar2 = ((POr) as TPlant);
-        //                Mort = Mort + _wvar2.ToxicDislodge();
-        //                ((POr) as TPlant).CalcSlough();
-        //                // update sloughevent
-        //                if (_wvar2.SloughEvent)
-        //                {
-        //                    j = -999;
-        //                    // signal to not write mass balance tracking
-        //                    ((POr) as TPlant).Derivative(j);
-        //                    // update sloughing
-        //                    if (_wvar2.PSameSpecies == AllVariables.NullStateVar)
-        //                    {
-        //                        FracMult = 1.0;
-        //                    }
-        //                    else
-        //                    {
-        //                        FracMult = 2 / 3;
-        //                    }
-        //                    // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
-        //                    Mort = Mort + _wvar2.Sloughing * FracMult;
-        //                }
-        //            }
-        //            NMort = NMort + Mort * DiffNFrac;
-        //        }
-        //    }
-        //    result = NMort;
-        //    return result;
-        //}
+        public double NutrRelGamLoss()  
+        {
+            // When Gameteloss takes place in animals, (-->SuspLabDetr)
+            // excess nutrients are converted into NH4.
+            AllVariables ns;
+            TAnimal PAn;
+            double DiffNFrac;
+            double NGL;
+            NGL = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    ReminRecord RR = Location.Remin;
+
+                    if (NState == AllVariables.Ammonia)
+                          DiffNFrac = PAn.PAnimalData.N2Org - RR.N2OrgLab;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org - RR.P2OrgLab;
+
+                    NGL = NGL + PAn.GameteLoss() * DiffNFrac;
+                }
+            }
+            return NGL;
+        }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double NutrRelPlantSink()  // FIXME Plant Linkage
-        //{
-        //    double result;
-        //    // When Plants sink, excess nutrients are converted into NH4;
-        //    // Sedimented Detritus tends to have a lower fraction of nutrients then
-        //    // the sinking plants
-        //    AllVariables ns;
-        //    AllVariables ploop;
-        //    TDetritus PSRD;
-        //    TDetritus PSLD;
-        //    TPlant PPl;
-        //    TPlant PPeri;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double NSink;
-        //    double Nut2Org_Refr;
-        //    double Nut2Org_Lab;
-        //    double PeriMass;
-        //    double NumPeriLinks;
-        //    double PeriNFrac;
-        //    double PNFrac2;
-        //    result = 0;
-        //    PSRD = AQTSeg.GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PSLD = AQTSeg.GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    if (PSRD == null)
-        //    {
-        //        return result;
-        //    }
-        //    // diagenesis model in place
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_Refr = _wvar1.N2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.N2OrgLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_Refr = _wvar1.P2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.P2OrgLab;
-        //    }
-        //    NSink = 0;
-        //    for (ns = FirstAlgae; ns <= LastAlgae; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (PPl.IsLinkedPhyto())
-        //            {
-        //                PeriNFrac = 0;
-        //                PNFrac2 = 0;
-        //                NumPeriLinks = 0;
-        //                PeriMass = 0;
-        //                for (ploop = FirstAlgae; ploop <= LastAlgae; ploop++)
-        //                {
-        //                    PPeri = AQTSeg.GetStatePointer(ploop, T_SVType.StV, T_SVLayer.WaterCol);
-        //                    if (PPeri != null)
-        //                    {
-        //                        if ((PPeri.IsPeriphyton()) && (PPeri.PSameSpecies == PPl.NState))
-        //                        {
-        //                            NumPeriLinks = NumPeriLinks + 1.0;
-        //                            PeriMass = PeriMass + PPeri.State;
-        //                            if (NState == AllVariables.Ammonia)
-        //                            {
-        //                                PeriNFrac = PeriNFrac + PPeri.State * PPeri.N_2_Org();
-        //                            }
-        //                            else
-        //                            {
-        //                                PeriNFrac = PeriNFrac + PPeri.State * PPeri.P_2_Org();
-        //                            }
-        //                            if (PeriMass < VSmall)
-        //                            {
-        //                                if (NState == AllVariables.Ammonia)
-        //                                {
-        //                                    PNFrac2 = PNFrac2 + PPeri.N_2_Org();
-        //                                }
-        //                                else
-        //                                {
-        //                                    PNFrac2 = PNFrac2 + PPeri.P_2_Org();
-        //                                }
-        //                            }
-        //                        }
-        //                    }
-        //                    // will count itself and any other peiphyton species linked to this phytoplankton
-        //                }
-        //                // 9/20/2004 debug against zero periphyton
-        //                if (PeriMass < VSmall)
-        //                {
-        //                    // used to split evenly among peri comps.
-        //                    PeriNFrac = PNFrac2 / NumPeriLinks;
-        //                }
-        //                else
-        //                {
-        //                    PeriNFrac = PeriNFrac / PeriMass;
-        //                }
-        //                // used to weight by mass of periphyton comps.
-        //                if (NState == AllVariables.Ammonia)
-        //                {
-        //                    DiffNFrac = PPl.N_2_Org() - PeriNFrac;
-        //                }
-        //                else
-        //                {
-        //                    DiffNFrac = PPl.P_2_Org() - PeriNFrac;
-        //                }
-        //                NSink = NSink + PPl.Sedimentation() * DiffNFrac;
-        //            }
-        //            else
-        //            {
-        //                // not linked phyto
-        //                DetrNFrac = PSRD.PlantSink_To_Detr(ns) * Nut2Org_Refr + PSLD.PlantSink_To_Detr(ns) * Nut2Org_Lab;
-        //                if (NState == AllVariables.Ammonia)
-        //                {
-        //                    DiffNFrac = PPl.N_2_Org() - DetrNFrac;
-        //                }
-        //                else
-        //                {
-        //                    DiffNFrac = PPl.P_2_Org() - DetrNFrac;
-        //                }
-        //                NSink = NSink + PPl.Sedimentation() * DiffNFrac;
-        //            }
-        //        }
-        //    }
-        //    result = NSink;
-        //    return result;
-        //}
-        // -------------------------------------------------------------------------------------------------------
+        public double NutrRelMortality()  
+        {
+            // When Anim & Plant die, excess nutrients are converted into NH4;
+            // Detritus tends to have a lower fraction of nutrients then the dying organisms.
+            // Macrophyte breakage and Tox Dislodge are included in mortality here
+            // for accounting of nutrient mass.
+            AllVariables ns;
+            TDetritus PDRD;
+            TDetritus PDLD;
+            TDetritus PPRD;
+            TDetritus PPLD;
+            TOrganism POr;
+            double Mort;
+            double DetrNFrac;
+            double DiffNFrac;
+            double NMort;
+            double j;
+            double FracMult;
+            double Nut2Org_Refr;
+            double Nut2Org_Lab;
+            double Nut2Org_DissRefr;
+            double Nut2Org_DissLab;
+            PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            PPRD = AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            PPLD = AQTSeg.GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
+            }
+            else
+            {
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
+            }
+            NMort = 0;
+            for (ns = Consts.FirstBiota; ns <= Consts.LastBiota; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    POr = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TOrganism;
+                    DetrNFrac = PDRD.Mort_To_Detr(ns) * Nut2Org_DissRefr + PPRD.Mort_To_Detr(ns) * Nut2Org_Refr + PPLD.Mort_To_Detr(ns) * Nut2Org_Lab + PDLD.Mort_To_Detr(ns) * Nut2Org_DissLab;
+                    DiffNFrac = POr.NutrToOrg(NState) - DetrNFrac;
+                    Mort = POr.Mortality();
+                    if (POr.IsMacrophyte())
+                    {
+                        Mort = Mort + ((POr) as TMacrophyte).Breakage();
+                    }
+                    if (POr.IsPlant() && (!POr.IsMacrophyte()))
+                    {
+                        TPlant TP = ((POr) as TPlant);
+                        Mort = Mort + TP.ToxicDislodge();
+                        ((POr) as TPlant).CalcSlough();
+                        // update sloughevent
+                        if (TP.SloughEvent)
+                        {
+                            j = -999;
+                            // signal to not write mass balance tracking
+                            ((POr) as TPlant).Derivative(ref j);
+                            // update sloughing
+                            if (TP.PSameSpecies == AllVariables.NullStateVar)
+                            {
+                                FracMult = 1.0;
+                            }
+                            else
+                            {
+                                FracMult = 2.0 / 3.0;
+                            }
+                            // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
+                            Mort = Mort + TP.Sloughing * FracMult;
+                        }
+                    }
+                    NMort = NMort + Mort * DiffNFrac;
+                }
+            }
+            return NMort;
+        }
+
+     //    -------------------------------------------------------------------------------------------------------
+        public double NutrRelPlantSink()   
+        {
+            double result;
+        // When Plants sink, excess nutrients are converted into NH4;
+        // Sedimented Detritus tends to have a lower fraction of nutrients then
+        // the sinking plants
+        AllVariables ns;
+        AllVariables ploop;
+        TDetritus PSRD;
+        TDetritus PSLD;
+        TPlant PPl;
+        TPlant PPeri;
+        double DetrNFrac;
+        double DiffNFrac;
+        double NSink;
+        double Nut2Org_Refr;
+        double Nut2Org_Lab;
+        double PeriMass;
+        double NumPeriLinks;
+        double PeriNFrac;
+        double PNFrac2;
+        result = 0;
+            PSRD = AQTSeg.GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            PSLD = AQTSeg.GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            if (PSRD == null)
+            {
+                return result;  
+            }
+
+
+            // diagenesis model in place
+            ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
+            }
+            else
+            {
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
+            }
+            NSink = 0;
+            for (ns = Consts.FirstAlgae; ns <= Consts.LastAlgae; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    if (PPl.IsLinkedPhyto())
+                    {
+                        PeriNFrac = 0;
+                        PNFrac2 = 0;
+                        NumPeriLinks = 0;
+                        PeriMass = 0;
+                        for (ploop = Consts.FirstAlgae; ploop <= Consts.LastAlgae; ploop++)
+                        {
+                            PPeri = AQTSeg.GetStatePointer(ploop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                            if (PPeri != null)
+                            {
+                                if ((PPeri.IsPeriphyton()) && (PPeri.PSameSpecies == PPl.NState))
+                                {
+                                    NumPeriLinks = NumPeriLinks + 1.0;
+                                    PeriMass = PeriMass + PPeri.State;
+                                    if (NState == AllVariables.Ammonia)
+                                    {
+                                        PeriNFrac = PeriNFrac + PPeri.State* PPeri.N_2_Org();
+                                    }
+                                    else
+                                    {
+                                        PeriNFrac = PeriNFrac + PPeri.State* PPeri.P_2_Org();
+                                    }
+                                    if (PeriMass<Consts.VSmall)
+                                    {
+                                        if (NState == AllVariables.Ammonia)
+                                        {
+                                            PNFrac2 = PNFrac2 + PPeri.N_2_Org();
+                                        }
+                                        else
+                                        {
+                                            PNFrac2 = PNFrac2 + PPeri.P_2_Org();
+                                        }
+                                    }
+                                }
+                            }
+                            // will count itself and any other peiphyton species linked to this phytoplankton
+                        }
+                        // 9/20/2004 debug against zero periphyton
+                        if (PeriMass< Consts.VSmall)
+                        {
+                            // used to split evenly among peri comps.
+                            PeriNFrac = PNFrac2 / NumPeriLinks;
+                        }
+                        else
+                        {
+                            PeriNFrac = PeriNFrac / PeriMass;
+                        }
+                        // used to weight by mass of periphyton comps.
+                        if (NState == AllVariables.Ammonia)
+                        {
+                            DiffNFrac = PPl.N_2_Org() - PeriNFrac;
+                        }
+                        else
+                        {
+                            DiffNFrac = PPl.P_2_Org() - PeriNFrac;
+                        }
+                        NSink = NSink + PPl.Sedimentation() * DiffNFrac;
+                    }
+                    else
+                    {
+                        // not linked phyto
+                        DetrNFrac = PSRD.PlantSink_To_Detr(ns) * Nut2Org_Refr + PSLD.PlantSink_To_Detr(ns) * Nut2Org_Lab;
+                        if (NState == AllVariables.Ammonia)
+                        {
+                            DiffNFrac = PPl.N_2_Org() - DetrNFrac;
+                        }
+                        else
+                        {
+                            DiffNFrac = PPl.P_2_Org() - DetrNFrac;
+                        }
+                        NSink = NSink + PPl.Sedimentation() * DiffNFrac;
+                    }
+                }
+            }
+            return NSink;
+        }
+//         -------------------------------------------------------------------------------------------------------
         public double NutrRelColonization()  
         {
         // When organic matter is colonized from Refr--> Labile, nutrients
@@ -857,351 +794,272 @@ namespace AQUATOX.Nutrients
             return SumColonize;
         }
 
-        //public double NutrRelDefecation()  // FIXME ANIMAL LINKAGE
-        //{
-        //    double result;
-        //    // When Defecation takes place in animals, excess nutrients are converted
-        //    // into NH4.  Sedimented Detritus tends to have a lower fraction of nutrients then
-        //    // the animals which are defecating organic matter.
-        //    AllVariables ns;
-        //    TAnimal PAn;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double NDef;
-        //    double Nut2Org_Refr;
-        //    double Nut2Org_Lab;
-        //    // NutrRelDefecation := 0;
-        //    // If AQTSeg.Diagenesis_Included then exit;  6/6/08, procedure now relevant to diagenesis model
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_Refr = _wvar1.N2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.N2OrgLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_Refr = _wvar1.P2Org_Refr;
-        //        Nut2Org_Lab = _wvar1.P2OrgLab;
-        //    }
-        //    NDef = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = (1 - Def2SedLabDetr) * Nut2Org_Refr + Def2SedLabDetr * Nut2Org_Lab;
-        //            if (AQTSeg.Diagenesis_Included())
-        //            {
-        //                DetrNFrac = Nut2Org_Lab;
-        //            }
-        //            // 6/6/2008, diagenesis defecation has same nutrients as labile detritus
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
-        //            }
-        //            NDef = NDef + PAn.Defecation() * DiffNFrac;
-        //        }
-        //    }
-        //    result = NDef;
-        //    return result;
-        //}
+        public double NutrRelDefecation()  
+        {
+            // When Defecation takes place in animals, excess nutrients are converted
+            // into NH4.  Sedimented Detritus tends to have a lower fraction of nutrients then
+            // the animals which are defecating organic matter.
+            AllVariables ns;
+            TAnimal PAn;
+            double DetrNFrac;
+            double DiffNFrac;
+            double NDef;
+            double Nut2Org_Refr;
+            double Nut2Org_Lab;
+            // NutrRelDefecation := 0;
+            // If AQTSeg.Diagenesis_Included then exit;  6/6/08, procedure now relevant to diagenesis model
+            ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_Refr = RR.N2Org_Refr;
+                Nut2Org_Lab = RR.N2OrgLab;
+            }
+            else
+            {
+                Nut2Org_Refr = RR.P2Org_Refr;
+                Nut2Org_Lab = RR.P2OrgLab;
+            }
+            NDef = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    DetrNFrac = (1 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
+                    if (AQTSeg.Diagenesis_Included())
+                    {
+                        DetrNFrac = Nut2Org_Lab;
+                    }
+                    // 6/6/2008, diagenesis defecation has same nutrients as labile detritus
+                    if (NState == AllVariables.Ammonia)
+                          DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
+
+                    NDef = NDef + PAn.Defecation() * DiffNFrac;
+                }
+            }
+            return NDef;
+        }
+
+       //  -------------------------------------------------------------------------------------------------------
+        public double CalcAnimResp_Excr()  
+        {
+            // When Excretion (5/13/2013 and respiration) takes place in animals, _excess_ nutrients are converted
+            // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
+            // the animals which are excreting organic matter.
+            AllVariables ns;
+            TAnimal PAn;
+            double DetrNFrac;
+            double DiffNFrac;
+            double Excret;
+            double Nut2Org_DissRefr;
+            double Nut2Org_DissLab;
+            TDetritus PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            TDetritus PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
+            }
+            else
+            {
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
+            }
+            Excret = 0;
+            for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
+                    if (NState == AllVariables.Ammonia)
+                    {
+                        DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
+                    }
+                    else
+                    {
+                        DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
+                    }
+                    // was AnimExcretion
+                    Excret = Excret + PAn.Respiration() * DiffNFrac;
+                    // 5/13/2013
+                }
+            }
+            return Excret;
+        }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double CalcAnimResp_Excr()  // FIXME ANIMAL Linkage
-        //{
-        //    double result;
-        //    // When Excretion (5/13/2013 and respiration) takes place in animals, _excess_ nutrients are converted
-        //    // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
-        //    // the animals which are excreting organic matter.
-        //    AllVariables ns;
-        //    TDetritus PDRD;
-        //    TDetritus PDLD;
-        //    TAnimal PAn;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double Excret;
-        //    double Nut2Org_DissRefr;
-        //    double Nut2Org_DissLab;
-        //    PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_DissRefr = _wvar1.N2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.N2OrgDissLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_DissRefr = _wvar1.P2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.P2OrgDissLab;
-        //    }
-        //    Excret = 0;
-        //    for (ns = FirstAnimal; ns <= LastAnimal; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
-        //            }
-        //            // was AnimExcretion
-        //            Excret = Excret + PAn.Respiration() * DiffNFrac;
-        //            // 5/13/2013
-        //        }
-        //    }
-        //    result = Excret;
-        //    return result;
-        //}
-
-        // 5/13/2013
-        // Function TRemineralize.CalcAnimResp: Double;
-        // Var ns: AllVariables;
-        // PAn: TAnimal;
-        // Resp: Double;
-        // Nutr2Org: Double;
-        // Begin
-        // Resp := 0;
-        // For ns := FirstAnimal to LastAnimal do
-        // If AQTSeg.GetState(ns,StV,WaterCol)>0 then
-        // Begin
-        // PAn := AQTSeg.GetStatePointer(ns,StV,WaterCol);
-        // If NState=Ammonia
-        // then Nutr2Org := PAn.PAnimalData^.N2Org
-        // else Nutr2Org := PAn.PAnimalData^.P2Org ;
-        // Resp := Resp +  PAn.Respiration * Nutr2Org;
-        // End;
-        // CalcAnimResp := Resp;
-        // End;
-        // -------------------------------------------------------------------------------------------------------
-        //public double CalcPhotoResp()  // FIXME Plant Linkage
-        //{
-        //    double result;
-        //    // When photorespiration takes place in plants, excess nutrients are converted
-        //    // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
-        //    // the plants which are going through photorespiration
-        //    AllVariables ns;
-        //    TDetritus PDRD;
-        //    TDetritus PDLD;
-        //    TPlant PPl;
-        //    double DetrNFrac;
-        //    double DiffNFrac;
-        //    double PhotoRsp;
-        //    double Nut2Org_DissRefr;
-        //    double Nut2Org_DissLab;
-        //    PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-        //    ReminRecord _wvar1 = Location.Remin;
-        //    if (NState == AllVariables.Ammonia)
-        //    {
-        //        Nut2Org_DissRefr = _wvar1.N2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.N2OrgDissLab;
-        //    }
-        //    else
-        //    {
-        //        Nut2Org_DissRefr = _wvar1.P2OrgDissRefr;
-        //        Nut2Org_DissLab = _wvar1.P2OrgDissLab;
-        //    }
-        //    PhotoRsp = 0;
-        //    for (ns = FirstPlant; ns <= LastPlant; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                DiffNFrac = PPl.N_2_Org() - DetrNFrac;
-        //            }
-        //            else
-        //            {
-        //                DiffNFrac = PPl.P_2_Org() - DetrNFrac;
-        //            }
-        //            PhotoRsp = PhotoRsp + PPl.PhotoResp() * DiffNFrac;
-        //        }
-        //    }
-        //    result = PhotoRsp;
-        //    return result;
-        //}
+        public double CalcPhotoResp()  
+        {
+            // When photorespiration takes place in plants, excess nutrients are converted
+            // into NH4.  Dissolved Detritus tends to have a lower fraction of nutrients then
+            // the plants which are going through photorespiration
+            AllVariables ns;
+            TDetritus PDRD;
+            TDetritus PDLD;
+            TPlant PPl;
+            double DetrNFrac;
+            double DiffNFrac;
+            double PhotoRsp;
+            double Nut2Org_DissRefr;
+            double Nut2Org_DissLab;
+            PDRD = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            PDLD = AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
+            ReminRecord RR = Location.Remin;
+            if (NState == AllVariables.Ammonia)
+            {
+                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_DissLab = RR.N2OrgDissLab;
+            }
+            else
+            {
+                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_DissLab = RR.P2OrgDissLab;
+            }
+            PhotoRsp = 0;
+            for (ns = Consts.FirstPlant; ns <= Consts.LastPlant; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
+                    if (NState == AllVariables.Ammonia)
+                    {
+                        DiffNFrac = PPl.N_2_Org() - DetrNFrac;
+                    }
+                    else
+                    {
+                        DiffNFrac = PPl.P_2_Org() - DetrNFrac;
+                    }
+                    PhotoRsp = PhotoRsp + PPl.PhotoResp() * DiffNFrac;
+                }
+            }
+            return PhotoRsp;
+        }
 
         // -------------------------------------------------------------------------------------------------------
-        //public double CalcDarkResp() // FIXME Plant Linkage
-        //{
-        //    double result;
-        //    // When dark respiration occurs, excess nutrients are converted into NH4.
-        //    AllVariables ns;
-        //    TPlant PPl;
-        //    double Resp;
-        //    double Nutr2Org;
-        //    Resp = 0;
-        //    for (ns = FirstPlant; ns <= LastPlant; ns++)
-        //    {
-        //        if (AQTSeg.GetState(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-        //        {
-        //            PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-        //            if (NState == AllVariables.Ammonia)
-        //            {
-        //                Nutr2Org = PPl.N_2_Org();
-        //            }
-        //            else
-        //            {
-        //                Nutr2Org = PPl.P_2_Org();
-        //            }
-        //            Resp = Resp + PPl.Respiration() * Nutr2Org;
-        //        }
-        //    }
-        //    result = Resp;
-        //    return result;
-        //}
+        public double CalcDarkResp()  // When dark respiration occurs, excess nutrients are converted into NH4.
+        {
+            AllVariables ns;
+            TPlant PPl;
+            double Resp;
+            double Nutr2Org;
+            Resp = 0;
+            for (ns = Consts.FirstPlant; ns <= Consts.LastPlant; ns++)
+            {
+                if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
+                {
+                    PPl = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                    if (NState == AllVariables.Ammonia)   Nutr2Org = PPl.N_2_Org();
+                    else                                  Nutr2Org = PPl.P_2_Org();
+                    Resp = Resp + PPl.Respiration() * Nutr2Org;
+                }
+            }
+            return Resp;
+        }
 
-        //    public void Assimilation_AddAssim(TStateVariable P)   // Assimilation of nutrients by algae    FIXME Plant Linkage
-        //    {
-        //        TPlant PP;
-        //        double UptkNut;
-        //        const double UptakeCO2 = 0.53;
-        //        UptkNut = 0;
-        //        if ((P.IsPlant()))
-        //        {
-        //            PP = ((P) as TPlant);
-        //            if ((new ArrayList(new object[] { AllVariables.Ammonia, AllVariables.Nitrate }).Contains(NState)) && (PP.IsFixingN()))
-        //            {
-        //                return;
-        //            }
-        //            // N-fixation, not assimilation from the water column
-        //            if ((NState == AllVariables.CO2) && PP.Is_Pcp_CaCO3())
-        //            {
-        //                return;
-        //            }
-        //            // 10-26-2007 Because plants are deriving C from the bicarbonate reaction,
-        //            // their photosynthesis does not result in a loss of CO2.
-        //            PlantRecord _wvar1 = PP.PAlgalRec;
-        //            // JSC 9-25-2002, bryophytes assimilate nutrients
-        //            // JSC 10-21-2007, Free-floating macro. assimilate nutrients
-        //            if ((P.IsAlgae()) || (_wvar1.PlantType == "Bryophytes") || ((_wvar1.PlantType == "Macrophytes") && (PP.MacroType == TMacroType.Freefloat)))
-        //            {
-        //                PlantRecord _wvar2 = PP.PAlgalRec;
-        //                if (NState != AllVariables.CO2)
-        //                {
-        //                    if (new ArrayList(new object[] { AllVariables.Ammonia, AllVariables.Nitrate }).Contains(NState))
-        //                    {
-        //                        TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol);
-        //                    }
-        //                    else
-        //                    {
-        //                        TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol);
-        //                    }
-        //                    if (AQTSeg.SetupRec.Internal_Nutrients && (TNIP != null))
-        //                    {
-        //                        // mg/L
-        //                        // ug/L
-        //                        // mg/ug
-        //                        UptkNut = TNIP.Uptake() * 1e-3;
-        //                    }
-        //                    else
-        //                    {
-        //                        // external nutrients
-        //                        if (new ArrayList(new object[] { AllVariables.Ammonia, AllVariables.Nitrate }).Contains(NState))
-        //                        {
-        //                            UptkNut = PP.N_2_Org() * PP.Photosynthesis();
-        //                        }
-        //                        else
-        //                        {
-        //                            UptkNut = PP.P_2_Org() * PP.Photosynthesis();
-        //                        }
-        //                        // mg/L
-        //                        // g/g
-        //                        // mg/L
-        //                    }
-        //                    if (new ArrayList(new object[] { AllVariables.Ammonia, AllVariables.Nitrate }).Contains(NState))
-        //                    {
-        //                        if (((_wvar2.KN + SVA) * (_wvar2.KN + SVN)) != 0)
-        //                        {
-        //                            NH4Pref = SVA * SVN / ((_wvar2.KN + SVA) * (_wvar2.KN + SVN)) + SVA * _wvar2.KN / ((SVA + SVN) * (_wvar2.KN + SVN));
-        //                        }
-        //                        else
-        //                        {
-        //                            NH4Pref = 0;
-        //                        }
-        //                        // Protect Against Div by 0
-        //                    }
-        //                }
-        //                switch (NState)
-        //                {
-        //                    case AllVariables.Ammonia:
-        //                        // non CO2 code
-        //                        Assim = Assim + UptkNut * NH4Pref;
-        //                        break;
-        //                    case AllVariables.Nitrate:
-        //                        // total nutr assimilated = Sum(photosyn * uptake * proportion)
-        //                        // g/cu m-d                     g/cu m-d  ~Redfield ratio unitless
-        //                        Assim = Assim + UptkNut * (1.0 - NH4Pref);
-        //                        break;
-        //                    case AllVariables.Phosphate:
-        //                        Assim = Assim + UptkNut;
-        //                        break;
-        //                    case AllVariables.CO2:
-        //                        // mg/L
-        //                        Assim = Assim + PP.Photosynthesis() * UptakeCO2;
-        //                        break;
-        //                }
-        //                // case
-        //                // mg/L
-        //                // mg/L
-        //                // g/g
-        //            }
-        //            // with PP PAlgalRec
-        //        }
-        //        // if is plant
+        // -------------------------------------
+        // assimilation of nutrient by algae
+        // incl. ammonia preference factor of
+        // Thomann and Fitzpatrick, 1982
+        // used in WASP (Ambrose et al., 1991)
+        // -------------------------------------
+        public double Assimilation()  
+        {
+            double Assim;
+            double SVN, SVA, NH4Pref = 0;
+            const double N2NO3 = 0.23;
+            const double N2NH4 = 0.78;
 
-        //    }
 
-        //    // -------------------------------------------------------------------------------------------------------
-        //    // -------------------------------------
-        //    // assimilation of nutrient by algae
-        //    // incl. ammonia preference factor of
-        //    // Thomann and Fitzpatrick, 1982
-        //    // used in WASP (Ambrose et al., 1991)
-        //    // -------------------------------------
-        //    public double Assimilation()
-        //    {
-        //        double result;
-        //        double Assim;
-        //        double SVN;
-        //        double SVA;
-        //        double NH4Pref;
-        //        T_N_Internal_Plant TNIP;
-        //        const double N2NO3 = 0.23;
-        //        const double N2NH4 = 0.78;
-        //        // Add Assim
-        //        int i;
-        //        Assim = 0.0;
-        //        SVN = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) * N2NO3;
-        //        SVA = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) * N2NH4;
-        //        if ((SVA > 0) || (SVN > 0))
-        //        {
-        //            // prevent Div by 0
-        //            TStates _wvar3 = AQTSeg;
-        //            for (i = 0; i < _wvar3.Count; i++)
-        //            {
-        //                Assimilation_AddAssim(_wvar3.At(i));
-        //            }
-        //        }
-        //        result = Assim;
-        //        return result;
-        //    }
+            void Assimilation_AddAssim(TStateVariable P)   // Assimilation of nutrients by algae    
+            {
+                TPlant PP;
+                double UptkNut;
+                const double UptakeCO2 = 0.53;
+                UptkNut = 0;
+                if ((P.IsPlant()))
+                {
+                    PP = ((P) as TPlant);
+                    if (((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate)) && (PP.IsFixingN())) return; // N-fixation, not assimilation from the water column
+                    if ((NState == AllVariables.CO2) && PP.Is_Pcp_CaCO3()) return;    // 10-26-2007 Because plants are deriving C from the bicarbonate reaction, their photosynthesis does not result in a loss of CO2.
 
-        } // end TRemineralize
+                    PlantRecord PAR = PP.PAlgalRec;
+                    // JSC 9-25-2002, bryophytes assimilate nutrients
+                    // JSC 10-21-2007, Free-floating macro. assimilate nutrients
+                    if ((P.IsAlgae()) || (PAR.PlantType == "Bryophytes") || ((PAR.PlantType == "Macrophytes") && (PP.MacroType == TMacroType.Freefloat)))
+                    {
+                        if (NState != AllVariables.CO2)
+                        {
+                            //if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))   // FIXME Internal Nutrients
+                            //     TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol);
+                            //else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol);
 
-        public class TPO4Obj : TRemineralize
+                            //if (AQTSeg.PSetupRec.Internal_Nutrients && (TNIP != null))
+                            //{   // mg/L    // ug/L      // mg/ug
+                            //    UptkNut = TNIP.Uptake() * 1e-3;
+                            //}
+                            //else
+                            //{
+                            // external nutrients
+
+                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                                UptkNut = PP.N_2_Org() * PP.Photosynthesis();
+                            else
+                                UptkNut = PP.P_2_Org() * PP.Photosynthesis();
+                            // mg/L     // g/g               // mg/L
+
+                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                            {
+                                if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
+                                    NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                else
+                                    NH4Pref = 0;  // Protect Against Div by 0
+                            }
+                        }   // non CO2 code
+
+                        switch (NState)
+                        {
+                            case AllVariables.Ammonia:
+                                Assim = Assim + UptkNut * NH4Pref;
+                                // total nutr assimilated = Sum(photosyn * uptake * proportion)
+                                // g/cu m-d                     g/cu m-d  ~Redfield ratio unitless
+                                break;
+
+                            case AllVariables.Nitrate:
+                                Assim = Assim + UptkNut * (1.0 - NH4Pref);
+                                break;
+
+                            case AllVariables.Phosphate:
+                                Assim = Assim + UptkNut;  // mg/L
+                                break;
+
+                            case AllVariables.CO2:
+                                Assim = Assim + PP.Photosynthesis() * UptakeCO2;
+                                break;   // mg/L      // mg/L        // g/g
+
+                        }   // switch
+                    }   // if relevant plant type
+                }      // if is plant          
+            }         // AddAssim     
+
+        
+
+            Assim = 0.0;
+            SVN = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) * N2NO3;
+            SVA = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) * N2NH4;
+
+            if ((SVA > 0) || (SVN > 0))
+                foreach (TStateVariable TSV in AQTSeg.SV) Assimilation_AddAssim(TSV);
+
+            return Assim;
+        }
+
+    } // end TRemineralize
+
+    public class TPO4Obj : TRemineralize
         {
         // Function AtmosDeposition : double ;
         public double FracAvail = 0;
@@ -1230,16 +1088,16 @@ namespace AQUATOX.Nutrients
             Remin = Remin + SumDetrDecomp(T_SVType.PTrack, false);  
             // mg P/ L       // mg P/ L
                 
-            //Remin = Remin + CalcPhotoResp();   // FIXME PLANT LINKAGE
-            //Remin = Remin + CalcDarkResp();     // FIXME PLANT LINKAGE
-            //Remin = Remin + CalcAnimResp_Excr();    // FIXME ANIMAL LINKAGE
-            //Remin = Remin + CalcAnimPredn();        // FIXME ANIMAL LINKAGE
-            //Remin = Remin + NutrRelDefecation();    // FIXME ANIMAL LINKAGE
+            Remin = Remin + CalcPhotoResp();    
+            Remin = Remin + CalcDarkResp();      
+            Remin = Remin + CalcAnimResp_Excr();    
+            Remin = Remin + CalcAnimPredn();        
+            Remin = Remin + NutrRelDefecation();    
             Remin = Remin + NutrRelColonization();  
-            //Remin = Remin + NutrRelPlantSink();  // FIXME PLANT LINKAGE
-            //Remin = Remin + NutrRelMortality();  // FIXME ANIMAL, PLANT LINKAGE
-            //Remin = Remin + NutrRelGamLoss();    // FIXME ANIMAL LINKAGE
-            //Remin = Remin + NutrRelPeriScr();    // FIXME PLANT LINKAGE
+            Remin = Remin + NutrRelPlantSink();  
+            Remin = Remin + NutrRelMortality();
+            Remin = Remin + NutrRelGamLoss();       
+            Remin = Remin + NutrRelPeriScr();    
             return Remin;
             }
 
@@ -1257,8 +1115,8 @@ namespace AQUATOX.Nutrients
             public void Derivative_WriteRates()
             {
                 // PO4Obj
-                //Setup_Record _wvar1 = AQTSeg.SetupRec;
-                //if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
+                //Setup_Record _1 = AQTSeg.SetupRec;
+                //if ((_1.SaveBRates || _1.ShowIntegration))
                 //{
                 //    ClearRate();
                 //    SaveRate("State", State);
@@ -1300,18 +1158,18 @@ namespace AQUATOX.Nutrients
                 //double LayerInKg;
 
                 //MBLoadRecord MBLR = AQTSeg.MBLoadArray[AllVariables.Phosphate];  // FIXME mass balance tracking
-                //LoadInKg = Lo * _wvar1.SegVol() * 1000.0 * 1e-6;
-                //MBLR.BoundLoad[_wvar1.DerivStep] = _wvar2.BoundLoad[_wvar1.DerivStep] + LoadInKg;
+                //LoadInKg = Lo * _1.SegVol() * 1000.0 * 1e-6;
+                //MBLR.BoundLoad[_1.DerivStep] = .BoundLoad[_1.DerivStep] + LoadInKg;
                 // Load into modeled system
 
                 //  LoadInKg = (Lo + WaI) * AQTSeg.SegVol() * 1000.0 * 1e-6;
                 //// kg P       // mg P/L        // m3      // L/m3  // kg/mg 
                 //{
-                //    LoadInKg = (Lo + WaI + En) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //    LoadInKg = (Lo + WaI + En) * _1.SegVol() * 1000.0 * 1e-6;
                 //}
-                //MBLR.TotOOSLoad[_wvar1.DerivStep] = _wvar2.TotOOSLoad[_wvar1.DerivStep] + LoadInKg;
-                //MBLR.LoadH2O[_wvar1.DerivStep] = _wvar2.LoadH2O[_wvar1.DerivStep] + LoadInKg;
-                //MBLossRecord _wvar3 = _wvar1.MBLossArray[AllVariables.Phosphate];
+                //MBLR.TotOOSLoad[_1.DerivStep] = .TotOOSLoad[_1.DerivStep] + LoadInKg;
+                //MBLR.LoadH2O[_1.DerivStep] = .LoadH2O[_1.DerivStep] + LoadInKg;
+                //MBLossRecord _3 = _1.MBLossArray[AllVariables.Phosphate];
 
                 //    MorphRecord Morph = AQTSeg.Location.Morph;
                 //// * OOSDischFrac
@@ -1322,28 +1180,28 @@ namespace AQUATOX.Nutrients
                 //// m3
                 //// L/m3
                 //// kg/mg
-                //_wvar3.BoundLoss[_wvar1.DerivStep] = _wvar3.BoundLoss[_wvar1.DerivStep] + LossInKg;
+                //_3.BoundLoss[_1.DerivStep] = _3.BoundLoss[_1.DerivStep] + LossInKg;
                 //// Loss from the modeled system
                 //if (En < 0)
                 //{
                 //    // *OOSDischFrac
-                //    LossInKg = (-En + WaO) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //    LossInKg = (-En + WaO) * _1.SegVol() * 1000.0 * 1e-6;
                 //}
                 //// 3/20/2014 remove OOSDischFrac
-                //_wvar3.TotalNLoss[_wvar1.DerivStep] = _wvar3.TotalNLoss[_wvar1.DerivStep] + LossInKg;
-                //_wvar3.TotalWashout[_wvar1.DerivStep] = _wvar3.TotalWashout[_wvar1.DerivStep] + LossInKg;
-                //_wvar3.WashoutH2O[_wvar1.DerivStep] = _wvar3.WashoutH2O[_wvar1.DerivStep] + LossInKg;
-                //LossInKg = CaCO3srb * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //_3.TotalNLoss[_1.DerivStep] = _3.TotalNLoss[_1.DerivStep] + LossInKg;
+                //_3.TotalWashout[_1.DerivStep] = _3.TotalWashout[_1.DerivStep] + LossInKg;
+                //_3.WashoutH2O[_1.DerivStep] = _3.WashoutH2O[_1.DerivStep] + LossInKg;
+                //LossInKg = CaCO3srb * _1.SegVol() * 1000.0 * 1e-6;
                 //// kg P   // mg P/L          // m3    // L/m3  // kg/mg
-                //_wvar3.TotalNLoss[_wvar1.DerivStep] = _wvar3.TotalNLoss[_wvar1.DerivStep] + LossInKg;
-                //_wvar3.BoundLoss[_wvar1.DerivStep] = _wvar3.BoundLoss[_wvar1.DerivStep] + LossInKg;
+                //_3.TotalNLoss[_1.DerivStep] = _3.TotalNLoss[_1.DerivStep] + LossInKg;
+                //_3.BoundLoss[_1.DerivStep] = _3.BoundLoss[_1.DerivStep] + LossInKg;
                 //// Loss from the modeled system
-                //_wvar3.CaCO3Sorb[_wvar1.DerivStep] = _wvar3.CaCO3Sorb[_wvar1.DerivStep] + LossInKg;
-                //MBLayerRecord _wvar5 = _wvar1.MBLayerArray[AllVariables.Phosphate];
-                //LayerInKg = (TD + DiffUp + DiffDown) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //_3.CaCO3Sorb[_1.DerivStep] = _3.CaCO3Sorb[_1.DerivStep] + LossInKg;
+                //MBLayerRecord _5 = _1.MBLayerArray[AllVariables.Phosphate];
+                //LayerInKg = (TD + DiffUp + DiffDown) * _1.SegVol() * 1000.0 * 1e-6;
                 //// kg N  // mg P/L                           // m3     // L/m3 // kg/mg
-                //_wvar5.NTurbDiff[_wvar1.DerivStep] = _wvar5.NTurbDiff[_wvar1.DerivStep] + LayerInKg;
-                //_wvar5.NNetLayer[_wvar1.DerivStep] = _wvar5.NNetLayer[_wvar1.DerivStep] + LayerInKg;
+                //_5.NTurbDiff[_1.DerivStep] = _5.NTurbDiff[_1.DerivStep] + LayerInKg;
+                //_5.NNetLayer[_1.DerivStep] = _5.NNetLayer[_1.DerivStep] + LayerInKg;
 
             }
 
@@ -1369,7 +1227,7 @@ namespace AQUATOX.Nutrients
 
             Lo = Loading;
             Remin = Remineralization();
-            // Assm = Assimilation();  fixme plant linkage
+            Assm = Assimilation();  
             if (Assimilation_Link != null) Assm = Assimilation_Link.ReturnLoad(AQTSeg.TPresent);
 
             WaO = Washout();
@@ -1399,19 +1257,19 @@ namespace AQUATOX.Nutrients
                 DiaFlx = PSed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
               // mg/L d  // g/m3 sed1 d         // m3 sed1               // m3 water
 
-                //_wvar6.Diag_Track[TAddtlOutput.TSP_Diag, _wvar6.DerivStep] = PSed.Flux2Water() * _wvar7.H1.Val * 1e3;
+                //_6.Diag_Track[TAddtlOutput.TSP_Diag, _6.DerivStep] = PSed.Flux2Water() * _7.H1.Val * 1e3;
                 //// mg/m2 d                  //    // g/m3 sed d                //    // m                //    // mg/g
 
-                // MBLayerRecord _wvar9 = _wvar6.MBLayerArray[AllVariables.Phosphate];
+                // MBLayerRecord _9 = _6.MBLayerArray[AllVariables.Phosphate];
                 // 3/16/2010 track total P flux from diagenesis into water column in kg since start of simulation
-                // PFluxKg = DiaFlx * _wvar6.SegVol() * 1000.0 * 1e-6;
+                // PFluxKg = DiaFlx * _6.SegVol() * 1000.0 * 1e-6;
                 // kg     // mg/L        // m3     // L/m3   // kg/mg
-                // _wvar9.PFluxD[_wvar6.DerivStep] = _wvar9.PFluxD[_wvar6.DerivStep] + PFluxKg;
+                // _9.PFluxD[_6.DerivStep] = _9.PFluxD[_6.DerivStep] + PFluxKg;
             }
 
-            //ReminRecord RR = AQTSeg.Location.Remin;   // FIXME PLANT LINKAGE CALCITE PCPT
-            //CaCO3srb = RR.KD_P_Calcite * State * AQTSeg.CalcitePcpt() * 1e-6;
-            // mg P/L d     // L/Kg       // mg/L  // mg Calcite/L d     // kg/mg
+            ReminRecord RR = AQTSeg.Location.Remin;   
+            CaCO3srb = RR.KD_P_Calcite * State * AQTSeg.CalcitePcpt() * 1e-6;
+          // mg P/L d     // L/Kg       // mg/L  // mg Calcite/L d     // kg/mg
 
             if (CalcitePcpt_Link != null) CaCO3srb = CalcitePcpt_Link.ReturnLoad(AQTSeg.TPresent);  // JSON linkage
 
@@ -1441,7 +1299,6 @@ namespace AQUATOX.Nutrients
         public Loadings.TLoadings Plant_Remin_Link = null;
         public Loadings.TLoadings OM_Remin_Link = null;
 
-
         public TNH4Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             }
@@ -1452,7 +1309,6 @@ namespace AQUATOX.Nutrients
             // ---------------------------------
             public double Nitrification()
             {
-                double result;
                 double T;
                 double p;
                 double Nitrify;
@@ -1485,8 +1341,7 @@ namespace AQUATOX.Nutrients
                 {
                     Nitrify = 0.0;
                 }
-                result = Nitrify;
-                return result;
+                return Nitrify;
             }
 
             // real
@@ -1497,18 +1352,18 @@ namespace AQUATOX.Nutrients
              double Remin;
              Remin = 0;
 
-                //PhotoResp = CalcPhotoResp();  // When photorespiration takes place in plants, excess nutrients are converted into NH4  // FIXME Plant Linkage
-                //DarkResp = CalcDarkResp();  // When dark respiration occurs, excess nutrients are converted into NH4. // FIXME Plant Linkage
+                PhotoResp = CalcPhotoResp();  // When photorespiration takes place in plants, excess nutrients are converted into NH4  
+                DarkResp = CalcDarkResp();     // When dark respiration occurs, excess nutrients are converted into NH4. 
 
-                //AnimExcr = CalcAnimResp_Excr(); // FIXME Animal Linkage // direct respiration losses plus excess nutrient losses from excretion to detritus
-                //AnimPredn = CalcAnimPredn();   // FIXME Animal Linkage  // When predation occurs, differences in nutrients are refelcted in W.C.
+                AnimExcr = CalcAnimResp_Excr(); // direct respiration losses plus excess nutrient losses from excretion to detritus
+                AnimPredn = CalcAnimPredn();     // When predation occurs, differences in nutrients are refelcted in W.C.
 
                 SvNutrRelColonization = NutrRelColonization();  
-                //SvNutrRelMortality = NutrRelMortality(); // FIXME Animal and Plant LInkage
-                //SvNutrRelGamLoss = NutrRelGamLoss();  // FIXME Animal Linkage
-                //SvNutrRelPeriScr = NutrRelPeriScr();  // FIXME Plant Linkage
-                //SvNutrRelPlantSink = NutrRelPlantSink();  // FIXME Plant Linkage
-                //SvNutrRelDefecation = NutrRelDefecation(); // FIXME Animal Linkage
+                SvNutrRelMortality = NutrRelMortality(); 
+                SvNutrRelGamLoss = NutrRelGamLoss();  
+                SvNutrRelPeriScr = NutrRelPeriScr();   
+                SvNutrRelPlantSink = NutrRelPlantSink();
+                SvNutrRelDefecation = NutrRelDefecation();  
 
             SvSumDetrDecomp = SumDetrDecomp(T_SVType.NTrack, false);
 
@@ -1525,8 +1380,8 @@ namespace AQUATOX.Nutrients
             // --------------------------------------------------
             public void Derivative_WriteRates()
             {
-                //Setup_Record _wvar1 = AQTSeg.SetupRec;
-                //if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
+                //Setup_Record _1 = AQTSeg.SetupRec;
+                //if ((_1.SaveBRates || _1.ShowIntegration))
                 //{
                 //    ClearRate();
                 //    SaveRate("State", State);
@@ -1579,11 +1434,11 @@ namespace AQUATOX.Nutrients
                 //double LossInKg;
                 //double LayerInKg;
 
-                //MBLoadRecord _wvar2 = _wvar1.MBLoadArray[AllVariables.Nitrate];
-                //LoadInKg = Lo * _wvar1.SegVol() * 1000.0 * 1e-6;
-                //_wvar2.BoundLoad[_wvar1.DerivStep] = _wvar2.BoundLoad[_wvar1.DerivStep] + LoadInKg;
+                //MBLoadRecord  = _1.MBLoadArray[AllVariables.Nitrate];
+                //LoadInKg = Lo * _1.SegVol() * 1000.0 * 1e-6;
+                //.BoundLoad[_1.DerivStep] = .BoundLoad[_1.DerivStep] + LoadInKg;
                 //// Load into modeled system
-                //LoadInKg = (Lo + WaI) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //LoadInKg = (Lo + WaI) * _1.SegVol() * 1000.0 * 1e-6;
                 //// kg N
                 //// mg N/L
                 //// m3
@@ -1591,40 +1446,40 @@ namespace AQUATOX.Nutrients
                 //// kg/mg
                 //if (En > 0)
                 //{
-                //    LoadInKg = (Lo + WaI + En) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //    LoadInKg = (Lo + WaI + En) * _1.SegVol() * 1000.0 * 1e-6;
                 //}
-                //_wvar2.TotOOSLoad[_wvar1.DerivStep] = _wvar2.TotOOSLoad[_wvar1.DerivStep] + LoadInKg;
-                //_wvar2.LoadH2O[_wvar1.DerivStep] = _wvar2.LoadH2O[_wvar1.DerivStep] + LoadInKg;
-                //MBLossRecord _wvar3 = _wvar1.MBLossArray[AllVariables.Nitrate];
-                //MorphRecord _wvar4 = _wvar1.Location.Morph;
+                //.TotOOSLoad[_1.DerivStep] = .TotOOSLoad[_1.DerivStep] + LoadInKg;
+                //.LoadH2O[_1.DerivStep] = .LoadH2O[_1.DerivStep] + LoadInKg;
+                //MBLossRecord _3 = _1.MBLossArray[AllVariables.Nitrate];
+                //MorphRecord _4 = _1.Location.Morph;
                 //// * OOSDischFrac
-                //LossInKg = WaO * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //LossInKg = WaO * _1.SegVol() * 1000.0 * 1e-6;
                 //// 3/20/2014 remove OOSDischFrac
                 //// kg N
                 //// mg N/L
                 //// m3
                 //// L/m3
                 //// kg/mg
-                //_wvar3.BoundLoss[_wvar1.DerivStep] = _wvar3.BoundLoss[_wvar1.DerivStep] + LossInKg;
+                //_3.BoundLoss[_1.DerivStep] = _3.BoundLoss[_1.DerivStep] + LossInKg;
                 //// Loss from the modeled system
                 //if (En < 0)
                 //{
                 //    // * OOSDischFrac
-                //    LossInKg = (-En + WaO) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //    LossInKg = (-En + WaO) * _1.SegVol() * 1000.0 * 1e-6;
                 //}
                 //// 3/20/2014 remove OOSDischFrac
-                //_wvar3.TotalNLoss[_wvar1.DerivStep] = _wvar3.TotalNLoss[_wvar1.DerivStep] + LossInKg;
-                //_wvar3.TotalWashout[_wvar1.DerivStep] = _wvar3.TotalWashout[_wvar1.DerivStep] + LossInKg;
-                //_wvar3.WashoutH2O[_wvar1.DerivStep] = _wvar3.WashoutH2O[_wvar1.DerivStep] + LossInKg;
-                //MBLayerRecord _wvar5 = _wvar1.MBLayerArray[AllVariables.Nitrate];
-                //LayerInKg = (TD + DiffUp + DiffDown) * _wvar1.SegVol() * 1000.0 * 1e-6;
+                //_3.TotalNLoss[_1.DerivStep] = _3.TotalNLoss[_1.DerivStep] + LossInKg;
+                //_3.TotalWashout[_1.DerivStep] = _3.TotalWashout[_1.DerivStep] + LossInKg;
+                //_3.WashoutH2O[_1.DerivStep] = _3.WashoutH2O[_1.DerivStep] + LossInKg;
+                //MBLayerRecord _5 = _1.MBLayerArray[AllVariables.Nitrate];
+                //LayerInKg = (TD + DiffUp + DiffDown) * _1.SegVol() * 1000.0 * 1e-6;
                 //// kg N
                 //// mg N/L
                 //// m3
                 //// L/m3
                 //// kg/mg
-                //_wvar5.NTurbDiff[_wvar1.DerivStep] = _wvar5.NTurbDiff[_wvar1.DerivStep] + LayerInKg;
-                //_wvar5.NNetLayer[_wvar1.DerivStep] = _wvar5.NNetLayer[_wvar1.DerivStep] + LayerInKg;
+                //_5.NTurbDiff[_1.DerivStep] = _5.NTurbDiff[_1.DerivStep] + LayerInKg;
+                //_5.NNetLayer[_1.DerivStep] = _5.NNetLayer[_1.DerivStep] + LayerInKg;
                 //// with
 
             }
@@ -1661,7 +1516,7 @@ namespace AQUATOX.Nutrients
                 Re = Remineralization();
                 Ni = Nitrification();
 
-                // Assm = Assimilation();  fixme Plant Linkage
+                Assm = Assimilation(); 
                 if (Assimilation_Link != null) Assm = Assimilation_Link.ReturnLoad(AQTSeg.TPresent);
 
                 WaO = Washout();
@@ -1692,7 +1547,7 @@ namespace AQUATOX.Nutrients
                 MorphRecord MR = AQTSeg.Location.Morph;
                 DiaFlx = NSed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
                 // mg/L d  // g/m3 sed1 d /    // m3 sed1               // m3 water
-                // _wvar6.Diag_Track[TAddtlOutput.NH3_Diag, _wvar6.DerivStep] = NSed.Flux2Water() * _wvar7.H1.Val * 1e3;
+                // _6.Diag_Track[TAddtlOutput.NH3_Diag, _6.DerivStep] = NSed.Flux2Water() * _7.H1.Val * 1e3;
             }  // mg/m2 d            // g/m3 sed d            // m            // mg/g
 
 
@@ -1724,7 +1579,6 @@ namespace AQUATOX.Nutrients
             // -------------------------------------------------------------------------------------------------------
             public double Denitrification()
             {
-                double result;
                 // , Sed_Surf_Corr
                 double T, O2;
                 double p;
@@ -1733,7 +1587,7 @@ namespace AQUATOX.Nutrients
                 double EnvironLim;
                 if (State > Consts.VSmall)
                 {
-                    ReminRecord _wvar1 = Location.Remin;
+                    ReminRecord _1 = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
                     p = AQTSeg.pHCorr(5.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
@@ -1747,7 +1601,7 @@ namespace AQUATOX.Nutrients
                     DOCorr =  O2 / (0.5 + O2);
                     }
                     EnvironLim = (1.0 - DOCorr) * T * p;
-                    Denitrify = (_wvar1.KDenitri_Wat * EnvironLim) * State;
+                    Denitrify = (_1.KDenitri_Wat * EnvironLim) * State;
                     // 3/13/09 Reformulated
 
                     // (*     With AQTSeg do
@@ -1763,15 +1617,14 @@ namespace AQUATOX.Nutrients
                 {
                     Denitrify = 0.0;
                 }
-                result = Denitrify;
-                return result;
+                return Denitrify;
             }
 
             // --------------------------------------------------
             public void Derivative_WriteRates()
             {
-                //Setup_Record _wvar1 = AQTSeg.SetupRec;  // FIXME Output Rates
-                //if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
+                //Setup_Record _1 = AQTSeg.SetupRec;  // FIXME Output Rates
+                //if ((_1.SaveBRates || _1.ShowIntegration))
                 //{
                 //    ClearRate();
                 //    SaveRate("State", State);
@@ -1811,12 +1664,12 @@ namespace AQUATOX.Nutrients
         //    double LoadInKg;
         //    double LossInKg;
         //    double LayerInKg;
-        //    TStates _wvar1 = AQTSeg;
-        //    MBLoadRecord _wvar2 = _wvar1.MBLoadArray[AllVariables.Nitrate];
-        //    LoadInKg = Lo * _wvar1.SegVol() * 1000.0 * 1e-6;
-        //    _wvar2.BoundLoad[_wvar1.DerivStep] = _wvar2.BoundLoad[_wvar1.DerivStep] + LoadInKg;
+        //    TStates _1 = AQTSeg;
+        //    MBLoadRecord  = _1.MBLoadArray[AllVariables.Nitrate];
+        //    LoadInKg = Lo * _1.SegVol() * 1000.0 * 1e-6;
+        //    .BoundLoad[_1.DerivStep] = .BoundLoad[_1.DerivStep] + LoadInKg;
         //    // Load into modeled system
-        //    LoadInKg = (Lo + WaI) * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //    LoadInKg = (Lo + WaI) * _1.SegVol() * 1000.0 * 1e-6;
         //    // kg N
         //    // mg N/L
         //    // m3
@@ -1824,50 +1677,50 @@ namespace AQUATOX.Nutrients
         //    // kg/mg
         //    if ((En > 0))
         //    {
-        //        LoadInKg = (Lo + WaI + En) * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //        LoadInKg = (Lo + WaI + En) * _1.SegVol() * 1000.0 * 1e-6;
         //    }
-        //    _wvar2.TotOOSLoad[_wvar1.DerivStep] = _wvar2.TotOOSLoad[_wvar1.DerivStep] + LoadInKg;
-        //    _wvar2.LoadH2O[_wvar1.DerivStep] = _wvar2.LoadH2O[_wvar1.DerivStep] + LoadInKg;
-        //    MBLossRecord _wvar3 = _wvar1.MBLossArray[AllVariables.Nitrate];
-        //    MorphRecord _wvar4 = _wvar1.Location.Morph;
+        //    .TotOOSLoad[_1.DerivStep] = .TotOOSLoad[_1.DerivStep] + LoadInKg;
+        //    .LoadH2O[_1.DerivStep] = .LoadH2O[_1.DerivStep] + LoadInKg;
+        //    MBLossRecord _3 = _1.MBLossArray[AllVariables.Nitrate];
+        //    MorphRecord _4 = _1.Location.Morph;
         //    // * OOSDischFrac
-        //    LossInKg = WaO * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //    LossInKg = WaO * _1.SegVol() * 1000.0 * 1e-6;
         //    // 3/20/2014 remove OOSDischFrac
         //    // kg N
         //    // mg N/L
         //    // m3
         //    // L/m3
         //    // kg/mg
-        //    _wvar3.BoundLoss[_wvar1.DerivStep] = _wvar3.BoundLoss[_wvar1.DerivStep] + LossInKg;
+        //    _3.BoundLoss[_1.DerivStep] = _3.BoundLoss[_1.DerivStep] + LossInKg;
         //    // Loss from the modeled system
         //    if (En < 0)
         //    {
         //        // * OOSDischFrac
-        //        LossInKg = (-En + WaO) * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //        LossInKg = (-En + WaO) * _1.SegVol() * 1000.0 * 1e-6;
         //    }
         //    // 3/20/2014 remove OOSDischFrac
-        //    _wvar3.TotalNLoss[_wvar1.DerivStep] = _wvar3.TotalNLoss[_wvar1.DerivStep] + LossInKg;
-        //    _wvar3.TotalWashout[_wvar1.DerivStep] = _wvar3.TotalWashout[_wvar1.DerivStep] + LossInKg;
-        //    _wvar3.WashoutH2O[_wvar1.DerivStep] = _wvar3.WashoutH2O[_wvar1.DerivStep] + LossInKg;
-        //    LossInKg = Denitr * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //    _3.TotalNLoss[_1.DerivStep] = _3.TotalNLoss[_1.DerivStep] + LossInKg;
+        //    _3.TotalWashout[_1.DerivStep] = _3.TotalWashout[_1.DerivStep] + LossInKg;
+        //    _3.WashoutH2O[_1.DerivStep] = _3.WashoutH2O[_1.DerivStep] + LossInKg;
+        //    LossInKg = Denitr * _1.SegVol() * 1000.0 * 1e-6;
         //    // kg N
         //    // mg N/L
         //    // m3
         //    // L/m3
         //    // kg/mg
-        //    _wvar3.TotalNLoss[_wvar1.DerivStep] = _wvar3.TotalNLoss[_wvar1.DerivStep] + LossInKg;
-        //    _wvar3.BoundLoss[_wvar1.DerivStep] = _wvar3.BoundLoss[_wvar1.DerivStep] + LossInKg;
+        //    _3.TotalNLoss[_1.DerivStep] = _3.TotalNLoss[_1.DerivStep] + LossInKg;
+        //    _3.BoundLoss[_1.DerivStep] = _3.BoundLoss[_1.DerivStep] + LossInKg;
         //    // Loss from the modeled system
-        //    _wvar3.Denitrify[_wvar1.DerivStep] = _wvar3.Denitrify[_wvar1.DerivStep] + LossInKg;
-        //    MBLayerRecord _wvar5 = _wvar1.MBLayerArray[AllVariables.Nitrate];
-        //    LayerInKg = (TD + DiffUp + DiffDown) * _wvar1.SegVol() * 1000.0 * 1e-6;
+        //    _3.Denitrify[_1.DerivStep] = _3.Denitrify[_1.DerivStep] + LossInKg;
+        //    MBLayerRecord _5 = _1.MBLayerArray[AllVariables.Nitrate];
+        //    LayerInKg = (TD + DiffUp + DiffDown) * _1.SegVol() * 1000.0 * 1e-6;
         //    // kg N
         //    // mg N/L
         //    // m3
         //    // L/m3
         //    // kg/mg
-        //    _wvar5.NTurbDiff[_wvar1.DerivStep] = _wvar5.NTurbDiff[_wvar1.DerivStep] + LayerInKg;
-        //    _wvar5.NNetLayer[_wvar1.DerivStep] = _wvar5.NNetLayer[_wvar1.DerivStep] + LayerInKg;
+        //    _5.NTurbDiff[_1.DerivStep] = _5.NTurbDiff[_1.DerivStep] + LayerInKg;
+        //    _5.NNetLayer[_1.DerivStep] = _5.NNetLayer[_1.DerivStep] + LayerInKg;
         //    // with
 
         //}
@@ -1897,7 +1750,7 @@ namespace AQUATOX.Nutrients
             Lo = Loading;
             Nitr = P.Nitrification();
             Denitr = Denitrification();
-            //  NO3Assim = Assimilation();   FIXME PLANT LINNKAGE
+            NO3Assim = Assimilation();   
             if (Assimilation_Link != null) NO3Assim = Assimilation_Link.ReturnLoad(AQTSeg.TPresent);
 
             WaO = Washout();
@@ -1926,7 +1779,7 @@ namespace AQUATOX.Nutrients
                 DiaFlx = N2Sed.Flux2Water() * AQTSeg.DiagenesisVol(1) / MR.SegVolum;
                 // mg/L d    // g/m3 sed1 d           // m3 sed1                 // m3 water
 
-                //_wvar6.Diag_Track[TAddtlOutput.No3_Diag, _wvar6.DerivStep] = N2Sed.Flux2Water() * _wvar7.H1.Val * 1e3;
+                //_6.Diag_Track[TAddtlOutput.No3_Diag, _6.DerivStep] = N2Sed.Flux2Water() * _7.H1.Val * 1e3;
             }    //mg / m2 d       // g/m3 sed d        // m        // mg/g
 
 
@@ -1959,18 +1812,15 @@ namespace AQUATOX.Nutrients
         // --------------------------------
         public double AtmosExch_CO2Sat()
         {
-            double result;
             double TKelvin;
-            double CO2Henry;
-            // Henry's Law constant for CO2
-            const double pCO2 = 0.00035;
-            // atmos. partial pressure for CO2
+            double CO2Henry;               // Henry's Law constant for CO2
+            const double pCO2 = 0.00035;   // atmos. partial pressure for CO2
             // make variable?  This number is rising
             const double MCO2 = 44000.0;
             if (ImportCo2Equil)
             {
                 // Import CO2Equil from CO2SYS or equivalent
-                result = CO2Equil.ReturnTSLoad(AQTSeg.TPresent);
+                return CO2Equil.ReturnTSLoad(AQTSeg.TPresent);
             }
             else
             {
@@ -1978,10 +1828,9 @@ namespace AQUATOX.Nutrients
                 TKelvin = 273.15 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
                 CO2Henry = MCO2 * Math.Pow(10.0, (2385.73 / TKelvin - 14.0184 + 0.0152642 * TKelvin));
                 // g/cu m atm  mg CO2/mole
-                result = CO2Henry * pCO2;
+                return CO2Henry * pCO2;
                 // g/cu m   g/cu m-atm atm
             }
-            return result;
         }
 
         // real
@@ -1992,59 +1841,28 @@ namespace AQUATOX.Nutrients
         // ----------------------------------------------------------
         public double AtmosExch()
         {
-            double result;
             // temp adjustment, Churchill et al., 1962
             const double MolWtCO2 = 44.0;
             const double MolWtO2 = 32.0;
             double KLiqCO2;
             TO2Obj P;
             // atmosexch
-            result = 0;
-            //            if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)    {  return result;     }
+            //            if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)   return 0;    
 
             P = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj);
 
             KLiqCO2 = P.KReaer() * Math.Pow((MolWtO2 / MolWtCO2), 0.25);              // Schwarzenbach et al., 1993:
             // 1/d        1/d
-            result = KLiqCO2 * (AtmosExch_CO2Sat() - State);
+            return KLiqCO2 * (AtmosExch_CO2Sat() - State);
             // g/cu m-d    1/d        g/cu m  g/cu m
-
-            return result;
-        }
-
-        //public void SumPhotosynthesis_AddPhoto(TStateVariable P)
-        //{
-        //    TPlant PP;
-        //    if (P.IsPlant())
-        //    {
-        //        PP = ((P) as TPlant);
-        //        Add = Add + PP.Photosynthesis();
-        //    }
-        //}
-
-        // atmosexch
-        // -------------------
-        //public double SumPhotosynthesis()
-        //{
-        //    double result;
-        //    double Add;
-        //    int i;
-        //    Add = 0.0;
-        //    TStates _wvar1 = AQTSeg;
-        //    for (i = 0; i < _wvar1.Count; i++)
-        //    {
-        //        SumPhotosynthesis_AddPhoto(_wvar1.At(i));
-        //    }
-        //    result = Add;
-        //    return result;
-        //}
+        }     // atmosexch
 
         // Winberg
         // --------------------------------------------------
         //public void Derivative_WriteRates()
         //{
-        //    Setup_Record _wvar1 = AQTSeg.SetupRec;
-        //    if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
+        //    Setup_Record _1 = AQTSeg.SetupRec;
+        //    if ((_1.SaveBRates || _1.ShowIntegration))
         //    {
         //        ClearRate();
         //        SaveRate("State", State);
@@ -2102,17 +1920,17 @@ namespace AQUATOX.Nutrients
             WaO = 0;
             WaI = 0;
             En = 0;
-            ReminRecord _wvar2 = Location.Remin;
+            ReminRecord RR = Location.Remin;
             O2P = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj);
             Lo = Loading;
 
             De = CO2Biomass * SumDetrDecomp(T_SVType.StV, false);
             if (OM_Decomp_Link != null) De = OM_Decomp_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // Re = CO2Biomass * O2P.SumRespiration(false);   // fixme animal, plant linkage
+            Re = CO2Biomass * O2P.SumRespiration(false);   
             if (Respiration_Link != null) Re = Respiration_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // CO2Assim = Assimilation();  fixme plant linkage assimilation
+            CO2Assim = Assimilation(); 
             if (Assimilation_Link != null) CO2Assim = Assimilation_Link.ReturnLoad(AQTSeg.TPresent);
 
             AE = AtmosExch();
@@ -2149,8 +1967,8 @@ namespace AQUATOX.Nutrients
 
     public class TO2Obj : TRemineralize
     {
-        public double Threshhold = 0;
-        public bool CalcDuration = false;
+        //public double Threshhold = 0;
+        //public bool CalcDuration = false;
         public bool NoLoadOrWash = false;
 
         public Loadings.TLoadings Photosynthesis_Link = null;
@@ -2163,8 +1981,8 @@ namespace AQUATOX.Nutrients
         //Constructor  init( Ns,  SVT,  aName,  P,  IC,  IsTempl)
         public TO2Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            CalcDuration = false;
-            Threshhold = 1.0;
+            //CalcDuration = false;
+            //Threshhold = 1.0;
             NoLoadOrWash = false;
             // TRemineralize
 
@@ -2194,16 +2012,11 @@ namespace AQUATOX.Nutrients
         public double KReaer()
         {
             double result;
-            double KReaer1;
-            double KReaer2;
-            double Vel;
-            double TransitionDepth;
+            double KReaer1, KReaer2, Vel, TransitionDepth;
             double Wnd;
             double OxygenTransfer;
             double ZDepth;
-            double H;
-            double U;
-            // depth and discharge in English units
+            double H, U;   // depth and discharge in English units
             const double Theta = 1.024;
             double Temp = (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol));
             if ( Temp < AQTSeg.Ice_Cover_Temp())  // (AQTSeg.VSeg == VerticalSegments.Hypolimnion) || 
@@ -2222,9 +2035,9 @@ namespace AQUATOX.Nutrients
                 // m/s         // cm/s                                                                        // m/cm
                 if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
 
-                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
+                TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);  // m/s at 10 m
                 if (TWind == null) Wnd = 0.1;
-                else Wnd = TWind.State;  // m/s at 10 m
+                else Wnd = TWind.State;  
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
                 KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;
@@ -2280,7 +2093,6 @@ namespace AQUATOX.Nutrients
         // ----------------------------------
         public double Reaeration_O2Sat()
         {
-            double result;
             double TKelvin;
             double Salt;
             double lnCsf;
@@ -2302,157 +2114,107 @@ namespace AQUATOX.Nutrients
             AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100;
             // Fractional effect due to altitude from Zison et al. 1978
             // m
-            result = Math.Exp(lnCss) * AltEffect;
+            return Math.Exp(lnCss) * AltEffect;
             // 8/19/2008, Changed to APHA code as in Thomann & Mueller
             // (*       O2Sat := 1.4277 * exp(-173.492 + 24963.39/TKelvin + 143.3483
             // * ln(TKelvin/100.0) - 0.218492 * TKelvin
             // + Salt * (-0.033096 + 0.00014259 * TKelvin - 1.7e-7 * SQR(TKelvin)));  {JSC 8/18/2008, Change from SQRT to SQR}  *)
-
-            return result;
         }
 
         // KReaer
         // -------------------------------------------------------------------------------------------------------
         public double Reaeration()
+            // reaeration is additive to the derivative therefore
+            // a positive number is oxygen from the air to the WC
+            // a negative number is oxygen from the WC to the air
         {
             double result;
             //const double MPH2MPS = 0.447;
             //const double Theta = 1.024;
             // temp adjustment, Churchill et al., 1962
             // MolWt = 44.0;
-            //double BlG;
-            //double Other;
+            double BlG;
+            double Other;
             double ZDepth;
             double ZZDepth;
-            //AllVariables AlgLoop;
+            AllVariables AlgLoop;
             // ---------------------------------
             double O2S;
             // Reaeration
-            // reaeration is additive to the derivative therefore
-            // a positive number is oxygen from the air to the WC
-            // a negative number is oxygen from the WC to the air
+
             ZDepth = Location.MeanThick; // [VerticalSegments.Epilimnion];
-            //BlG = 0;
-            // count cyanobacteria (blue-greens) biomass
-            //for (AlgLoop = FirstBlGreen; AlgLoop <= LastBlGreen; AlgLoop++)  fixme plants
-            //{
-            //    if (GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-            //    {
-            //        BlG = BlG + GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    }
-            //}
-            //Other = 0;
-            // count other algae biomass, excluding macrophytes
-            //for (AlgLoop = FirstDiatom; AlgLoop <= LastGreens; AlgLoop++)
-            //{
-            //    if (GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-            //    {
-            //        Other = Other + GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    }
-            //}
-            //for (AlgLoop = AllVariables.OtherAlg1; AlgLoop <= AllVariables.OtherAlg2; AlgLoop++)
-            //{
-            //    if (GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) > 0)
-            //    {
-            //        Other = Other + GetState(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
-            //    }
-            //}
-            //if ((BlG > 1.0) && (BlG > Other))
-            //{
-            //    ZZDepth = 0.25;
-            //}
-            //else
+            BlG = 0;  // count cyanobacteria(blue-greens) biomass
+            for (AlgLoop = Consts.FirstBlGreen; AlgLoop <= Consts.LastBlGreen; AlgLoop++) 
             {
-                ZZDepth = ZDepth;
+                double GSV = AQTSeg.GetStateVal(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (GSV > 0) BlG = BlG + GSV;
             }
-            // 10-15-2001, Modificaiton to account for Cyanobacteria Blooms
-            if (ZZDepth > ZDepth)
+            Other = 0; //   count other algae biomass, excluding macrophytes
+            for (AlgLoop = Consts.FirstDiatom; AlgLoop <= Consts.LastGreens; AlgLoop++)
             {
-                ZZDepth = ZDepth;
+                double GSV = AQTSeg.GetStateVal(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (GSV > 0) Other = Other + GSV;
             }
-            // bullet-proof
+            for (AlgLoop = AllVariables.OtherAlg1; AlgLoop <= AllVariables.OtherAlg2; AlgLoop++)
+            {
+                double GSV = AQTSeg.GetStateVal(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (GSV > 0) Other = Other + GSV;
+            }
+            if ((BlG > 1.0) && (BlG > Other))  ZZDepth = 0.25;              // 10-15-2001, Modificaiton to account for Cyanobacteria Blooms
+            else  ZZDepth = ZDepth;
+
+            if (ZZDepth > ZDepth)  ZZDepth = ZDepth;  // bullet-proof
+
             O2S = Reaeration_O2Sat();
-            if (ZZDepth < Globals.Consts.Tiny)
-            {
-                result = 0;
-            }
-            else
-            {
-                result = KReaer() * (O2S - State) * ZDepth / ZZDepth;
-            }
-            // mg/L d       1/d       mg/L   mg/L  correct for bl-gr bloom
-            if (State > (O2S * 2))
-            {
-                // 10/27/2010  Oxygen is limited to twice saturation in the event of
-                if ((result > (O2S * 2) - State))
-                {
-                    // ice cover or hypolimnion, extra goes to reaeration in this special case
-                    // 5/7/2012 refined logic so that reaeration is not inadvertently _reduced_ by this code (fix of 6-13-2011 bug)
+            if (ZZDepth < Globals.Consts.Tiny) result = 0;
+            else result = KReaer() * (O2S - State) * ZDepth / ZZDepth;
+               // mg/L d     1/d       mg/L   mg/L  correct for bl-gr bloom
+
+            if (State > (O2S * 2))                // 10/27/2010  Oxygen is limited to twice saturation in the event of
+                if ((result > (O2S * 2) - State)) // ice cover or hypolimnion, extra goes to reaeration in this special case
+                {                                 // 5/7/2012 refined logic so that reaeration is not inadvertently _reduced_ by this code (fix of 6-13-2011 bug)
                     result = (O2S * 2) - State;
                 }
-            }
+
             return result;
         }
 
-        //public void SumPhotosynthesis_AddPhoto(TStateVariable P)
-        //{
-        //    TPlant PP;
-        //    if (P.IsPlant())
-        //    {
-        //        PP = ((P) as TPlant);
-        //        Add = Add + PP.Photosynthesis();
-        //    }
-        //}
+        // ---------------------------------------------------------------------------------
+        public double SumPhotosynthesis()
+        {
+            double Add;
 
-        // sumphotosynthesis
-        // -------------------
-        //public double SumPhotosynthesis()
-        //{
-        //    double result;
-        //    double Add;
-        //    int i;
-        //    Add = 0.0;
-        //    TStates _wvar1 = AQTSeg;
-        //    for (i = 0; i < _wvar1.Count; i++)
-        //    {
-        //        SumPhotosynthesis_AddPhoto(_wvar1.At(i));
-        //    }
-        //    result = Add;
-        //    return result;
-        //}
+            void SumPhotosynthesis_AddPhoto(TStateVariable P)
+            {
+                if (P.IsPlant()) Add = Add + ((P) as TPlant).Photosynthesis();
+            }
 
-        //public void SumRespiration_AddResp(TStateVariable P)
-        //{
-        //    TOrganism PP;
-        //    if ((P.IsPlant()) || (!PlantOnly && P.IsPlantOrAnimal()))
-        //    {
-        //        PP = ((P) as TOrganism);
-        //        Add = Add + PP.Respiration();
-        //    }
-        //}
+            Add = 0.0;
+            foreach (TStateVariable TSV in AQTSeg.SV) SumPhotosynthesis_AddPhoto(TSV);
+            return Add;
+        }
+        // ---------------------------------------------------------------------------------
 
-        // sumprod
-        // -------------------
-        //public double SumRespiration(bool PlantOnly)
-        //{
-        //    double result;
-        //    double Add;
-        //    int i;
-        //    Add = 0.0;
-        //    TStates _wvar1 = AQTSeg;
-        //    for (i = 0; i < _wvar1.Count; i++)
-        //    {
-        //        SumRespiration_AddResp(_wvar1.At(i));
-        //    }
-        //    result = Add;
-        //    return result;
-        //}
+        public double SumRespiration(bool PlantOnly)
+        {
+            double Add;
 
-        // --------------------------------------------------
+            void AddResp(TStateVariable P)
+            {
+                if ((P.IsPlant()) || (!PlantOnly && P.IsPlantOrAnimal()))
+                    Add = Add + ((P) as TOrganism).Respiration();
+            }
+
+            Add = 0.0;
+            foreach (TStateVariable TSV in AQTSeg.SV) AddResp(TSV);
+            return Add;
+        }
+        // ---------------------------------------------------------------------------------
+
         //public void Derivative_WriteRates()
         //{
-        //    Setup_Record _wvar1 = AQTSeg.SetupRec;
-        //    if ((_wvar1.SaveBRates || _wvar1.ShowIntegration))
+        //    Setup_Record _1 = AQTSeg.SetupRec;
+        //    if ((_1.SaveBRates || _1.ShowIntegration))
         //    {
         //        ClearRate();
         //        SaveRate("State", State);
@@ -2492,35 +2254,35 @@ namespace AQUATOX.Nutrients
         {
             AQTSeg.Anoxic = (State < 0.25);
 
-            //TStates _wvar1 = AQTSeg;
-            //if (_wvar1.Stratified)
+            //TStates _1 = AQTSeg;
+            //if (_1.Stratified)
             //{
-            //    if (_wvar1.VSeg == VerticalSegments.Hypolimnion)
+            //    if (_1.VSeg == VerticalSegments.Hypolimnion)
             //    {
-            //        OtherSegment = _wvar1.EpiSegment;
+            //        OtherSegment = _1.EpiSegment;
             //    }
             //    else
             //    {
-            //        OtherSegment = _wvar1.HypoSegment;
+            //        OtherSegment = _1.HypoSegment;
             //    }
             //}
-            //if ((State < 0.25) || (_wvar1.Stratified && (OtherSegment.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol) < 0.25)))
+            //if ((State < 0.25) || (_1.Stratified && (OtherSegment.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol) < 0.25)))
             //{
-            //    _wvar1.Anoxic = true;
+            //    _1.Anoxic = true;
             //}
             //else
             //{
-            //    _wvar1.Anoxic = false;
+            //    _1.Anoxic = false;
             //}
-            //if (_wvar1.Stratified)
+            //if (_1.Stratified)
             //{
-            //    OtherSegment.Anoxic = _wvar1.Anoxic;
+            //    OtherSegment.Anoxic = _1.Anoxic;
             //}
         }
 
         public override void Derivative(ref double DB)
         {
-            //const double O2Photo = 1.6;
+            const double O2Photo = 1.6;
             // see Bowie et al., 1985 for numerous references
             double Lo = 0;
             double TD = 0;
@@ -2554,7 +2316,7 @@ namespace AQUATOX.Nutrients
 
             if (SOD_Link != null) SOD2 = SOD_Link.ReturnLoad(AQTSeg.TPresent);  // linkage if no diagenesis attached
 
-            // Resp = _wvar2.O2Biomass * SumRespiration(false);            // fixme animal, plant linkage 
+            Resp = RR.O2Biomass * SumRespiration(false);            
             if (Respiration_Link != null) Resp = Respiration_Link.ReturnLoad(AQTSeg.TPresent);
 
             TNH4Obj PNH4  = (TNH4Obj)(AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol));
@@ -2568,14 +2330,13 @@ namespace AQUATOX.Nutrients
 
             Lo = Loading;
 
-            // Pho = O2Photo * SumPhotosynthesis();  // FIXME Plant linkage
+            Pho = O2Photo * SumPhotosynthesis();  
             // mg O2/L =  o2/photo bio. * mg biomass / L
             if (Photosynthesis_Link != null) Pho = Photosynthesis_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;  
+            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;    // FIXME calculation of GPP and NPP disabled for now
             // g O2/m2 d            // g/m3 d            // m3            // m2
-
-            // DarkResp = _wvar2.O2Biomass * SumRespiration(true);  
+            // DarkResp = .O2Biomass * SumRespiration(true);  
             // AQTSeg.NPP[.DerivStep] = (Pho - DarkResp) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;
             // g O2/m2 d            // g/m3 d  // m3           // m2
 

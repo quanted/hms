@@ -1,9 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Web.Services.Models
 {
@@ -12,8 +10,7 @@ namespace Web.Services.Models
     /// </summary>
     public class WSPrecipitation
     {
-
-        private enum PrecipSources{ nldas, gldas, ncdc, daymet, wgen, prism };
+        private enum PrecipSources{ nldas, gldas, trmm, ncei, daymet, wgen, prism, nwm };
 
         /// <summary>
         /// Gets precipitation data using the given TimeSeriesInput parameters.
@@ -28,6 +25,7 @@ namespace Web.Services.Models
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Validate precipitation sources.
+            if(input.Source == "ncdc") { input.Source = "ncei"; }
             errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid.": "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
@@ -41,7 +39,7 @@ namespace Web.Services.Models
             // If error occurs in input validation and setup, errorMsg is added to metadata of an empty object.
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }           
 
-            if (precip.Input.Source.Contains("ncdc"))
+            if (precip.Input.Source.Contains("ncei"))
             {
                 precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
@@ -50,6 +48,8 @@ namespace Web.Services.Models
             ITimeSeriesOutput result = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, precip.Input, result);
             return result;
         }
     }

@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Text;
-using Microsoft.Data.Sqlite;
 
 namespace Utilities
 {
@@ -25,32 +23,42 @@ namespace Utilities
             Dictionary<string, string> data = new Dictionary<string, string>();
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
             connectionStringBuilder.DataSource = dbPath;
-
-            using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
+            try
             {
-                con.Open();
-                SQLiteCommand com = con.CreateCommand();
-                com.CommandText = query;
-                using (SQLiteDataReader reader = com.ExecuteReader())
+                using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
                 {
-                    while (reader.Read())
+                    con.Open();
+                    SQLiteCommand com = con.CreateCommand();
+                    com.CommandText = query;
+                    using (SQLiteDataReader reader = com.ExecuteReader())
                     {
-                        for (int i = 0; i < reader.FieldCount; i++)
+                        while (reader.Read())
                         {
-                            if (reader.IsDBNull(i))
+                            for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                return data;
-                            }
-                            var k = reader.GetName(i);
-                            var v = reader.GetValue(i).ToString();
+                                if (reader.IsDBNull(i))
+                                {
+                                    return data;
+                                }
+                                var k = reader.GetName(i);
+                                var v = reader.GetValue(i).ToString();
 
-                            data.Add(k, v);
+                                if (!data.ContainsKey(k))
+                                {
+                                    data.Add(k, v);
+                                }
+                            }
                         }
                     }
+                    con.Close();
                 }
-                con.Close();
+                return data;
             }
-            return data;
+            catch(SQLiteException ex)
+            {
+                Log.Warning(ex, "Error querying sqlite database.");
+                return data;
+            }
         }        
     }
 }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Precipitation
 {
@@ -108,11 +107,11 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput TemporalAggregation(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
             output.Metadata.Add("wgen_temporalresolution", input.TemporalResolution);
-            output.Metadata.Add("wgen_column_1", "Date");
+            output.Metadata.Add("column_1", "Date");
 
             if (!input.Units.Contains("imperial")) { output.Metadata["wgen_unit"] = "mm"; }
 
@@ -120,15 +119,19 @@ namespace Precipitation
             {
                 case "weekly":
                     output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("wgen_column_2", "Weekly Total");
+                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("wgen_column_2", "Monthly Total");
+                    output.Metadata.Add("column_2", "Monthly Total");
+                    return output;
+                case "yearly":
+                    output.Data = YearlyAggregatedSum(out errorMsg, 1.0, output, input);
+                    output.Metadata.Add("column_2", "Yearly Total");
                     return output;
                 default:
                     output.Data = (!input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
-                    output.Metadata.Add("wgen_column_2", "Daily Total");
+                    output.Metadata.Add("column_2", "Daily Total");
                     return output;
             }
         }
@@ -146,6 +149,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = 25.4;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             for (int i = 0; i < output.Data.Count; i++)
             {
@@ -172,6 +182,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
 
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
@@ -211,6 +228,13 @@ namespace Precipitation
 
             // Unit conversion coefficient
             double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
 
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
@@ -230,6 +254,55 @@ namespace Precipitation
                 else
                 {
                     sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                }
+            }
+            return tempData;
+        }
+
+        /// <summary>
+        /// Yearly aggregated sums for precipitation data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> YearlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+
+            DateTime iDate = new DateTime();
+            double sum = 0.0;
+
+            // Unit conversion coefficient
+            double unit = (!input.Units.Contains("imperial")) ? 25.4 : 1.0;
+            if (output.Metadata.ContainsKey("wgen_unit"))
+            {
+                if (output.Metadata["wgen_unit"] == "mm")
+                {
+                    unit = 1.0;
+                }
+            }
+            iDate = DateTime.Parse(output.Data.Keys.ElementAt(0).Split(" ")[0]);
+
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            List<string> values = new List<string> { "" };
+            DateTime date = new DateTime();
+            bool last = false;
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                date = DateTime.Parse(output.Data.Keys.ElementAt(i).Split(" ")[0]);
+                last = (date.Month == 12 && date.Day == 31) ? true : false;
+                if (last)
+                {
+                    sum += Double.Parse(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
+                    iDate = date;
+                    sum = 0;
+                    last = false;
+                }
+                else
+                {
+                    sum += Double.Parse(output.Data[output.Data.Keys.ElementAt(i)][0]);
                 }
             }
             return tempData;

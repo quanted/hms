@@ -95,30 +95,26 @@
             "2002-11-05T00:00:00": 0.0345,
             "2002-12-03T00:00:00": 0.041000001
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0.002596186,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -136,8 +132,7 @@
       "PShowRates^": true,
       "LoadNotes1": "Loading: T-5 '96-02 mean monthly NH4-T as N",
       "LoadNotes2": "Howell Cr. ",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TNO3Obj",
@@ -229,30 +224,26 @@
             "2002-11-05T00:00:00": 0.318000004,
             "2002-12-03T00:00:00": 0.250999987
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0.000965249,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -274,8 +265,7 @@
       "TN_IC": false,
       "TN_Inflow": false,
       "TN_PS": false,
-      "TN_NPS": false,
-      "SuppressComma": true
+      "TN_NPS": false
     },
     {
       "$type": "TPO4Obj",
@@ -367,30 +357,26 @@
             "2002-11-05T00:00:00": 0.074000001,
             "2002-12-03T00:00:00": 0.048
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0.00059912,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -414,8 +400,7 @@
       "TP_IC": false,
       "TP_Inflow": false,
       "TP_PS": false,
-      "TP_NPS": false,
-      "SuppressComma": true
+      "TP_NPS": false
     },
     {
       "$type": "TCO2Obj",
@@ -434,10 +419,8 @@
           "NoUserLoad": false,
           "UseConstant": true,
           "ConstLoad": 0.7,
-          "MultLdg": 1,
-          "SuppressComma": true
-        },
-        "SuppressComma": true
+          "MultLdg": 1
+        }
       },
       "PRequiresData": false,
       "PHasData": false,
@@ -453,8 +436,7 @@
       "PShowRates^": true,
       "LoadNotes1": "Values from Default Reservior",
       "LoadNotes2": "Loading: Guess",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TO2Obj",
@@ -474,30 +456,26 @@
           "NoUserLoad": false,
           "UseConstant": true,
           "ConstLoad": 6.6003,
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -515,8 +493,7 @@
       "PShowRates^": true,
       "LoadNotes1": "Howell Cr. Mean Monthly",
       "LoadNotes2": "",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TSedRefrDetr",
@@ -533,10 +510,8 @@
           "NoUserLoad": false,
           "UseConstant": true,
           "ConstLoad": 0.001,
-          "MultLdg": 1,
-          "SuppressComma": true
-        },
-        "SuppressComma": true
+          "MultLdg": 1
+        }
       },
       "PRequiresData": false,
       "PHasData": false,
@@ -552,8 +527,7 @@
       "PShowRates^": true,
       "LoadNotes1": "IC from Onondaga Lake, NY",
       "LoadNotes2": "Loadings: small value greater than 0",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TSedLabileDetr",
@@ -570,10 +544,8 @@
           "NoUserLoad": false,
           "UseConstant": true,
           "ConstLoad": 0.001,
-          "MultLdg": 1,
-          "SuppressComma": true
-        },
-        "SuppressComma": true
+          "MultLdg": 1
+        }
       },
       "PRequiresData": false,
       "PHasData": false,
@@ -589,8 +561,7 @@
       "PShowRates^": true,
       "LoadNotes1": "IC from Coralville Reservoir [2.5]",
       "LoadNotes2": "Loadings: small number greater than 0",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TDissRefrDetr",
@@ -691,30 +662,26 @@
               "2002-11-05T00:00:00": 15.49999952,
               "2002-12-03T00:00:00": 15.69999981
             },
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           "Alt_Loadings": [
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 0,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 0,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 0,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             }
           ]
         },
@@ -725,30 +692,26 @@
             "NoUserLoad": false,
             "UseConstant": true,
             "ConstLoad": 5.74,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           "Alt_Loadings": [
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 5.74,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 5.74,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 5.74,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             }
           ]
         },
@@ -759,34 +722,29 @@
             "NoUserLoad": false,
             "UseConstant": true,
             "ConstLoad": 60,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           "Alt_Loadings": [
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 50,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 50,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             },
             {
               "$type": "TLoadings",
               "UseConstant": true,
               "ConstLoad": 50,
-              "MultLdg": 1,
-              "SuppressComma": true
+              "MultLdg": 1
             }
           ]
-        },
-        "SuppressComma": true
+        }
       },
       "InitialCond": 18.204919034904,
       "State": 0,
@@ -885,30 +843,26 @@
             "2002-11-05T00:00:00": 13.8797845701744,
             "2002-12-03T00:00:00": 14.0588788298607
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -926,8 +880,7 @@
       "PShowRates^": true,
       "LoadNotes1": "IC mean monthly TOC 1995-2002 OW-4 1-DOC/TOC = 18.",
       "LoadNotes2": "Loadings: mean monthly TOC 1995-2002 T-5: 1-DOC/TO",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TDissLabDetr",
@@ -1028,30 +981,26 @@
             "2002-11-05T00:00:00": 13.8797845701744,
             "2002-12-03T00:00:00": 14.0588788298607
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -1069,8 +1018,7 @@
       "PShowRates^": true,
       "LoadNotes1": "",
       "LoadNotes2": "",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TSuspRefrDetr",
@@ -1171,30 +1119,26 @@
             "2002-11-05T00:00:00": 0.8452149738256,
             "2002-12-03T00:00:00": 0.8561209896393
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -1212,8 +1156,7 @@
       "PShowRates^": true,
       "LoadNotes1": "",
       "LoadNotes2": "",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TSuspLabDetr",
@@ -1314,30 +1257,26 @@
             "2002-11-05T00:00:00": 0.8452149738256,
             "2002-12-03T00:00:00": 0.8561209896393
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -1355,8 +1294,7 @@
       "PShowRates^": true,
       "LoadNotes1": "",
       "LoadNotes2": "",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TVolume",
@@ -4030,8 +3968,7 @@
             "2003-06-09T00:00:00": 34225716.75,
             "2003-06-10T00:00:00": 34339761.6
           },
-          "MultLdg": 1,
-          "SuppressComma": true
+          "MultLdg": 1
         },
         "Alt_Loadings": [
           {
@@ -11953,8 +11890,7 @@
               "2002-09-29T00:00:00": 198172.622,
               "2002-09-30T00:00:00": 178600.0174
             },
-            "MultLdg": 1.8,
-            "SuppressComma": true
+            "MultLdg": 1.8
           },
           {
             "$type": "TLoadings",
@@ -15299,15 +15235,13 @@
               "2003-02-04T00:00:00": 1265707.986,
               "2003-02-05T00:00:00": 887597.3141
             },
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           },
           {
             "$type": "TLoadings",
             "UseConstant": true,
             "ConstLoad": 0,
-            "MultLdg": 1,
-            "SuppressComma": true
+            "MultLdg": 1
           }
         ]
       },
@@ -15330,8 +15264,7 @@
       "StratInflow": 2,
       "StratOutflow": 2,
       "StratAutomatically": true,
-      "Hourly": false,
-      "SuppressComma": true
+      "Hourly": false
     },
     {
       "$type": "TTemperature",
@@ -15443,10 +15376,8 @@
             "2002-11-05T00:00:00": 24.38999939,
             "2002-12-03T00:00:00": 15.53999996
           },
-          "MultLdg": 1,
-          "SuppressComma": true
-        },
-        "SuppressComma": true
+          "MultLdg": 1
+        }
       },
       "PRequiresData": false,
       "PHasData": false,
@@ -15462,8 +15393,7 @@
       "PShowRates^": true,
       "LoadNotes1": "IC: Jan-Dec Mean '99 [17]",
       "LoadNotes2": "Valuation: OW-4 Mean Monthly",
-      "PTrackResults^": true,
-      "SuppressComma": true
+      "PTrackResults^": true
     },
     {
       "$type": "TpHObj",
@@ -15480,10 +15410,8 @@
           "NoUserLoad": false,
           "UseConstant": true,
           "ConstLoad": 8.8157,
-          "MultLdg": 1,
-          "SuppressComma": true
-        },
-        "SuppressComma": true
+          "MultLdg": 1
+        }
       },
       "PRequiresData": false,
       "PHasData": false,
@@ -15500,8 +15428,7 @@
       "LoadNotes1": "",
       "LoadNotes2": "",
       "PTrackResults^": true,
-      "alkalinity": 1000,
-      "SuppressComma": true
+      "alkalinity": 1000
     }
   ],
   "MeanDischarge": 0,
@@ -15513,10 +15440,8 @@
       "NoUserLoad": false,
       "UseConstant": true,
       "ConstLoad": 0,
-      "MultLdg": 1,
-      "SuppressComma": true
-    },
-    "SuppressComma": true
+      "MultLdg": 1
+    }
   },
   "Shade": {
     "$type": "LoadingsRecord",
@@ -15525,10 +15450,8 @@
       "NoUserLoad": false,
       "UseConstant": true,
       "ConstLoad": 0,
-      "MultLdg": 1,
-      "SuppressComma": true
-    },
-    "SuppressComma": true
+      "MultLdg": 1
+    }
   },
   "Z_Thermocline": {
     "$type": "LoadingsRecord",
@@ -15537,10 +15460,8 @@
       "NoUserLoad": true,
       "UseConstant": false,
       "ConstLoad": 0,
-      "MultLdg": 1,
-      "SuppressComma": true
-    },
-    "SuppressComma": true
+      "MultLdg": 1
+    }
   },
   "CalcVelocity": true,
   "Hourly": false,
@@ -15570,8 +15491,7 @@
     "Detritus.OmitPS": false,
     "Detritus.OmitDP": false,
     "Detritus.OmitNPS": false,
-    "Detritus.SetMult": false,
-    "SuppressComma": true
+    "Detritus.SetMult": false
   },
   "PSavePPB^": true,
   "PSaveBAFs^": true,
@@ -15620,8 +15540,7 @@
     "Internal_Nutrients": false,
     "T1IsAggregate": false,
     "AmmoniaIsDriving": false,
-    "TSedDetrIsDriving": false,
-    "SuppressComma": true
+    "TSedDetrIsDriving": false
   },
   "Location": {
     "$type": "TAQTSite",
@@ -15745,8 +15664,7 @@
       "FD_Refuge_Coeff": -0.15,
       "XFD_Refuge_Coeff": "default",
       "HalfSatOysterRefuge": 80,
-      "XHalfSatOysterRefuge": "default",
-      "SuppressComma": true
+      "XHalfSatOysterRefuge": "default"
     },
     "Discharge[Epilimnion]": 0,
     "Discharge[Hypolimnion]": 0,
@@ -15814,15 +15732,13 @@
       "KDenitri_Bot": 0.2,
       "XKDenitri_Bot": "Default",
       "KDenitri_Wat": 0.09,
-      "XKDenitri_Wat": "Default",
-      "SuppressComma": true
+      "XKDenitri_Wat": "Default"
     },
     "SiteType": 3,
     "MeanThick[Epilimnion]": 0,
     "MeanThick[Hypolimnion]": 0,
     "P_Shape": -0.4,
-    "TotDischarge": 0,
-    "SuppressComma": true
+    "TotDischarge": 0
   },
   "LoadChem1": false,
   "LoadChem2": false,
@@ -15843,6 +15759,5 @@
   "LoadChem17": false,
   "LoadChem18": false,
   "LoadChem19": false,
-  "LoadChem20": false,
-  "SuppressComma": true
+  "LoadChem20": false
 }

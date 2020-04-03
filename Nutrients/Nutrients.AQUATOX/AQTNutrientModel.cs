@@ -1,5 +1,4 @@
-﻿using System;
-using Globals;
+﻿using Globals;
 using AQUATOX.AQTSegment;
 using AQUATOX.Nutrients;
 using Stream.Hydrology.AQUATOX;
@@ -17,6 +16,8 @@ namespace AQUATOXNutrientModel
         /// Holds the AQUATOX Simulation
         /// </summary>
         public AQTSim AQSim;
+
+        public string outputString;
 
         /// <summary>
         /// Instantiates an AQUATOX Nutrients model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
@@ -40,6 +41,7 @@ namespace AQUATOXNutrientModel
                     if (errmsg == "")
                     {
                         errmsg = AQSim.SaveJSON(ref json);
+                        this.outputString = AQSim.ExportJSON(ref json);
                     }
                 }
             }

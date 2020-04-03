@@ -1,7 +1,5 @@
 ﻿using Data;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Temperature
 {
@@ -111,6 +109,9 @@ namespace Temperature
                 case "monthly-low":
                     output.Data = NLDAS.MonthlyValues(out errorMsg, output, input, "low");
                     output.Metadata.Add("column_2", "Min Temperature");
+                    return output;
+                case "hourly":
+                    output.Metadata.Add("column_2", "Hourly Average Temperature");
                     return output;
                 default:
                     return output;

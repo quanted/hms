@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.IO;
 
@@ -11,33 +10,37 @@ namespace Data
     /// </summary>
     public class ITimeSeriesValidation
     {
-        static string[] validDatasets = {
-            "precipitation", "evapotranspiration", "nutrients", "organicmatter",
-            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff",
-            "temperature"
+        static protected string[] validDatasets = {
+            "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
+            "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
+            "temperature", "wind", "dewpoint", "humidity"
         };
 
-        static Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
+        static protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
-            ["precipitation"] =  new List<string>{ "nldas", "gldas", "daymet", "ncdc", "prism", "wgen" },
-            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "grangergray", "hamon", "hspf",
+            ["precipitation"] =  new List<string>{ "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
+            ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
                 "mcjannett", "mortoncrae", "mortoncrwe", "ncdc", "penmandaily", "penmanhourly",
                 "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
             ["nutrients"] = new List<string> { "aquatox" },
             ["organicmatter"] = new List<string> { "aquatox"},
+            ["radiation"]  = new List<string> { "nldas", "gldas", "daymet"},
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncdc", "daymet" }
-
+            ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
+            ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
+            ["dewpoint"] = new List<string> { "prism" },
+            ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
+            ["surfacepressure"] = new List<string> { "gldas" }
         };
 
-        static string[] validRemoteData =
+        static protected string[] validRemoteData =
         {
-            "nldas", "gldas", "ncdc", "daymet", "prism"
+            "nldas", "gldas", "trmm", "ncei", "daymet", "prism"
         };
 
         /// <summary>
@@ -415,14 +418,15 @@ namespace Data
             if (validRemoteData.Contains(source.ToLower()))
             {
                 Dictionary<string, string> urls = new Dictionary<string, string>();
-                try
+                string path = ".\\App_Data\\" + "url_info.txt";
+                if (!File.Exists(@path))
                 {
-                    urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
+                    path = "/app/App_Data/url_info.txt";
                 }
-                catch (FileNotFoundException)
-                {
-                    urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
-                }
+
+
+                urls = Data.Files.FileToDictionary(path);
+
                 Dictionary<string, string> caselessUrls = new Dictionary<string, string>(urls, StringComparer.OrdinalIgnoreCase);
                 foreach (string ds in dataset)
                 {

@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
@@ -14,10 +14,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
+    <ProjectReference Include="..\DewPoint\DewPoint.csproj" />
+    <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\Pressure\Pressure.csproj" />
+    <ProjectReference Include="..\Radiation\Radiation.csproj" />
+    <ProjectReference Include="..\Solar\Solar.csproj" />
+    <ProjectReference Include="..\Temperature\Temperature.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\Wind\Wind.csproj" />
   </ItemGroup>
 
 </Project>

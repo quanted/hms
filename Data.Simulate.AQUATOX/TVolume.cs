@@ -9,10 +9,10 @@ namespace AQUATOX.Volume
 
     public enum VolumeMethType
     {
-        Manning,
-        KeepConst,
-        Dynam, 
-        KnownVal
+        Manning,    // 0
+        KeepConst,  // 1
+        Dynam,      // 2
+        KnownVal    // 3
     } // end VolumeMethType
 
    
@@ -406,7 +406,7 @@ namespace AQUATOX.Volume
             DateIndex = TimeIndex.AddDays ( -1);
             do
             {
-                DateIndex.AddDays(1);
+                DateIndex = DateIndex.AddDays(1);
                 N = N + 1;
                 CalculateLoad(DateIndex);
                 DynamVol = DynamVol + InflowLoad - DischargeLoad - Evaporation();

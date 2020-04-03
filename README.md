@@ -1,6 +1,6 @@
 # HMS
 
-[![Build Status](https://travis-ci.org/quanted/hms.svg?branch=dev)](https://travis-ci.org/quanted/hms)    [![Codacy Badge](https://api.codacy.com/project/badge/Grade/41e76175cb5a42bab24562c342f396a2)](https://www.codacy.com/app/dbsmith88/hms?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quanted/hms&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.com/quanted/hms.svg?branch=dev)](https://travis-ci.org/quanted/hms)    [![Codacy Badge](https://api.codacy.com/project/badge/Grade/41e76175cb5a42bab24562c342f396a2)](https://www.codacy.com/app/dbsmith88/hms?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quanted/hms&amp;utm_campaign=Badge_Grade)    [![Coverage Status](https://coveralls.io/repos/github/quanted/hms/badge.svg?branch=dev)](https://coveralls.io/github/quanted/hms?branch=dev)
 
 ### Description
 Hydologic Micro Services (HMS) is a collection of services for retrieving hydrologic data and executing models that are accessible through a REST API. HMS is written in .NET Core 2 and developed using [Visual Studio 2017](https://www.visualstudio.com/downloads/). 
@@ -18,7 +18,7 @@ All endpoints have been documented using [swagger](https://swagger.io/), impleme
 To use docker, docker needs to be installed for your development platform, download available [here](https://docs.docker.com/install/). Docker will require access to a shared drive and a network adapter that has internet access. Using Docker in Visual Studio will also need the docker support plugin.
 
 #### Build
-The docker container and image for HMS can be build using either the CLI for docker or docker-compose. From Visual Studio, select docker-compose and set as Startup Project. Docker can now be an option for running the solution. Running with Docker will build from the dockerfile in Web.Services, which can be found [here](https://github.com/quanted/hms/blob/dev/Web.Services/Dockerfile), and construct a docker container that will provide the same functionality as a web server. The same process can be done from the command line using 'docker' using the dockerfile or 'docker-compose'. Once the container is up and running, the endpoints will be accessible through the localhost and the port that was assigned to the docker container'. 
+The docker container and image for HMS can be build using either the CLI for docker or docker-compose. From Visual Studio, select docker-compose and set as Startup Project. Docker can now be an option for running the solution. Running with Docker will build from the dockerfile in Web.Services, which can be found [here](https://github.com/quanted/hms/blob/dev/Web.Services/Dockerfile), and construct a docker container that will provide the same functionality as a web server. The same process can be done from the command line using 'docker' using the dockerfile or 'docker-compose'. Once the container is up and running, the endpoints will be accessible through the localhost and the port that was assigned to the docker container'.
 
 #### Data Request Flow Diagram
 ![HMS Data Request Flow Diagram](https://github.com/quanted/hms/blob/dev/hms_stack%20_flow_diagram.png)

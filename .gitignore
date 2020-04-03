@@ -18,6 +18,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+TestResults/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -26,7 +27,6 @@ bld/
 
 # Database files
 *.db
-*.csv
 *.sqlite3
 *.sqlite
 *.zip

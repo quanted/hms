@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Data;
 using Xunit;
 
@@ -30,6 +29,60 @@ namespace Precipitation.Tests
 
         [Trait("Priority", "1")]
         [Theory]
+        [InlineData(2)]
+        public void GetYears(int expected)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject)
+            };
+            GLDAS gldas = new GLDAS();
+            Dictionary<string, bool> status = gldas.GetYears(precip.Input);
+            Assert.Equal(expected, status.Count);
+        }
+
+        [Trait("Priority", "1")]
+        [Theory]
+        [InlineData(true)]
+        public void CheckYears(bool expected)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
+                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
+            };
+            GLDAS gldas = new GLDAS();
+            Dictionary<string, bool> status = new Dictionary<string, bool>();
+            status.Add("2015", false);
+            status.Add("2016", false);
+            bool complete = gldas.CheckYears(status, precip.Output);
+            Assert.Equal(expected, complete);
+        }
+
+        [Trait("Priority", "1")]
+        [Theory]
+        [InlineData("default", "2015-01-01 01", 0.0)]
+        [InlineData("daily", "2015-01-01 00", 0.64)]
+        [InlineData("weekly", "2015-01-01 00", 37.94)]
+        [InlineData("monthly", "2015-01-01 00", 79.56)]
+        [InlineData("yearly", "2015-01-01 01", 1261.94)]
+        public void TemporalAggregation(string aggregation, string date, double expected)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
+                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
+            };
+            string errorMsg = "";
+            GLDAS gldas = new GLDAS();
+            precip.Input.TemporalResolution = aggregation;
+            precip.Output = gldas.TemporalAggregation(out errorMsg, precip.Output, precip.Input);
+            double value = Math.Round(Convert.ToDouble(precip.Output.Data[date][0]) / 3600, 2);
+            Assert.Equal(expected, value);
+        }
+
+        [Trait("Priority", "1")]
+        [Theory]
         [InlineData("2015-01-01 01", 0.0)]
         [InlineData("2015-06-04 04", 23.98)]
         [InlineData("2015-12-24 07", 6257)]
@@ -45,6 +98,33 @@ namespace Precipitation.Tests
             };
             Dictionary<string, List<string>> hourlyData = GLDAS.ConvertToHourly(out errorMsg, precip.Output, precip.Input);
             Assert.Equal(expected, Convert.ToDouble(hourlyData[date][0]));
+        }
+
+        const string invalidStartDateInput = "{\"Source\":\"gldas\",\"DateTimeSpan\":{\"StartDate\":\"1945-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidStartDateError = "ERROR: Start date is not valid.";
+        const string invalidEndDateInput = "{\"Source\":\"gldas\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2116-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidEndDateError = "ERROR: End date is not valid.";
+        const string invalidLatInput = "{\"Source\":\"gldas\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":-65,\"Longitude\":-83.355723},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidLatError = "ERROR: Latitude is not valid.";
+        const string invalidLonInput = "{\"Source\":\"gldas\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":181},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
+        const string invalidLonError = "ERROR: Longitude is not valid.";
+
+        [Theory]
+        [InlineData(invalidStartDateInput, invalidStartDateError)]
+        [InlineData(invalidEndDateInput, invalidEndDateError)]
+        [InlineData(invalidLatInput, invalidLatError)]
+        [InlineData(invalidLonInput, invalidLonError)]
+        public void ValidateInput(string input, string errorMsg)
+        {
+            Precipitation precip = new Precipitation
+            {
+                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
+                Output = null
+            };
+            string error = "";
+            GLDAS gldas = new GLDAS();
+            precip.Output = gldas.GetData(out error, precip.Output, precip.Input);
+            Assert.Contains(errorMsg, error);
         }
     }
 }

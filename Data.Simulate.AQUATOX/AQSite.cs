@@ -14,7 +14,7 @@ namespace AQUATOX.AQSite
     } // end StreamTypes
 
 
-    public struct SiteRecord
+    public class SiteRecord
     {
         public string SiteName;
         public double ECoeffWater;
@@ -38,15 +38,7 @@ namespace AQUATOX.AQSite
         public string XLightMean;
         public double LightRange;
         public string XLightRange;
-        public double AlkCaCO3;
-        public string XAlkCaCO3;
-        public double HardCaCO3;
-        public string XHardCaCO3;
         public string SiteComment;
-        public double SO4ConC;
-        public string XSO4Conc;
-        public double TotalDissSolids;
-        public string XTotalDissSolids;
         public StreamTypes StreamType;
         public double Channel_Slope;
         public string XChannel_Slope;
@@ -79,31 +71,31 @@ namespace AQUATOX.AQSite
         public double FallVel_silt;        // silt fall velocity, m/s
         public string XFallVel_silt;
         // ESTUARY ADDITIONS BELOW
-        public double SiteWidth;
-        public string XSiteWidth;         // m2
-        public double amplitude1;
-        public double k1;
-        public string ConstRef1;        // s2
-        public double amplitude2;
-        public double k2;
-        public string ConstRef2;        // n2
-        public double amplitude3;
-        public double k3;
-        public string ConstRef3;        // k1
-        public double amplitude4;
-        public double k4;
-        public string ConstRef4;        // o1
-        public double amplitude5;
-        public double k5;
-        public string ConstRef5;        // SSA
-        public double amplitude6;
-        public double k6;
-        public string ConstRef6;        // SA
-        public double amplitude7;
-        public double k7;
-        public string ConstRef7;        // P1
-        public double amplitude8;
-        public double k8;
+        //public double SiteWidth;
+        //public string XSiteWidth;         // m2
+        //public double amplitude1;
+        //public double k1;
+        //public string ConstRef1;        // s2
+        //public double amplitude2;
+        //public double k2;
+        //public string ConstRef2;        // n2
+        //public double amplitude3;
+        //public double k3;
+        //public string ConstRef3;        // k1
+        //public double amplitude4;
+        //public double k4;
+        //public string ConstRef4;        // o1
+        //public double amplitude5;
+        //public double k5;
+        //public string ConstRef5;        // SSA
+        //public double amplitude6;
+        //public double k6;
+        //public string ConstRef6;        // SA
+        //public double amplitude7;
+        //public double k7;
+        //public string ConstRef7;        // P1
+        //public double amplitude8;
+        //public double k8;
         public string ConstRef8;
         public double Min_Vol_Frac;
         public string XMin_Vol_Frac;
@@ -112,8 +104,8 @@ namespace AQUATOX.AQSite
         public bool EnterTotalLength;
         public double TotalLength;
         public string XTotalLength;
-        public double ECoeffSED;
-        public string XECoeffSED;
+        public double ECoeffSed;
+        public string XECoeffSed;
         public double ECoeffDOM;
         public string XECoeffDOM;
         public double ECoeffPOM;
@@ -135,19 +127,15 @@ namespace AQUATOX.AQSite
     } // end SiteRecord
 
 
-    public struct ReminRecord
-{
+    public class ReminRecord
+    {
     public string RemRecName;
     public double DecayMax_Lab;
     public string XDecayMax_Lab;
-    public double Q10_NotUsed;
-    public string XQ10;
     public double TOpt;
     public string XTOpt;
     public double TMax;
     public string XTMax;
-    public double TRef_NotUsed;
-    public string XTRef;
     public double pHMin;
     public string XpHMin;
     public double pHMax;
@@ -162,18 +150,12 @@ namespace AQUATOX.AQSite
     public string XO2N;
     public double KSed;
     public string XKsed;
-    public double PSedRelease_NotUsed;
-    public string XPSedrelease;
-    public double NSedRelease_NotUsed;
-    public string XNSedRelease;
     public double DecayMax_Refr;    // g/g d
     public string XDecayMax_Refr;
-    // ESTUARY ADDITIONS BELOW
     public double KSedTemp;
     public string XKSedTemp;
     public double KSedSalinity;
     public string XKSedSalinity;
-    // ESTUARY ADDITIONS Above
     public double P2Org_Refr;
     public string XP2Org_Refr;
     public double N2Org_Refr;
@@ -181,7 +163,7 @@ namespace AQUATOX.AQSite
     public double Wet2DryPRefr;
     public string XWet2DryPRefr;
     public double Wet2DryPLab;
-    public string Xet2DryPLab;
+    public string XWet2DryPLab;
     public double Wet2DrySRefr;
     public string XWet2DrySRefr;
     public double Wet2DrySLab;
@@ -196,8 +178,8 @@ namespace AQUATOX.AQSite
     public string XP2OrgDissRefr;
     public double KD_P_Calcite;    // Sorption of P to CaCO3, L/Kg
     public string XKD_P_Calcite;
-//    public double NotUsed;         // Was BOD5_CBODu
-//    public string XNotUsed;      // XBOD5_CBODu
+        //    public double NotUsed;         // Was BOD5_CBODu
+        //    public string XNotUsed;      // XBOD5_CBODu
     public double KNitri;
     public string XKNitri;
     public double KDenitri_Bot;
@@ -205,10 +187,10 @@ namespace AQUATOX.AQSite
     public double KDenitri_Wat;
     public string XKDenitri_Wat;
 
-} // end ReminRecord
+    } // end ReminRecord
 
 
-    public struct MorphRecord          // Hold Results of Variable Morphometry
+    public class MorphRecord          // Hold Results of Variable Morphometry
 
     {
         public double SegVolum;     // segment volume last good solution step
@@ -229,7 +211,7 @@ namespace AQUATOX.AQSite
         TribInput,
         Marine
     } // end SiteTypes
-    
+
 
     public class TAQTSite
     {
@@ -240,7 +222,7 @@ namespace AQUATOX.AQSite
         [JsonIgnore] public double MeanThick;
         [JsonIgnore] public double P_Shape = 0;
         [JsonIgnore] public double TotDischarge = 0;    // was originally Q in older code
-        [JsonIgnore] public MorphRecord Morph;  // variable morphometry results, NoSave
+        [JsonIgnore] public MorphRecord Morph = new MorphRecord();  // variable morphometry results, NoSave
         [JsonIgnore] public double ICSurfArea = 0;
 
         // DeltaMorph procedures have been moved to TVOLUME.DELTAVOLUME found in STATE.INC
@@ -349,7 +331,7 @@ namespace AQUATOX.AQSite
                 return 0.040; // natural stream
             }
 
-        }    
+        }
 
 
         public void ChangeData(double ZM)
@@ -420,4 +402,3 @@ namespace AQUATOX.AQSite
 
 
 }
-

@@ -1,7 +1,5 @@
 ﻿using Data;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Precipitation
 {
@@ -41,18 +39,21 @@ namespace Precipitation
         public ITimeSeriesOutput GetData(out string errorMsg)
         {
             errorMsg = "";
-
-            // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc"))
-            {
-                Utilities.Time tz = new Utilities.Time();
-                this.Input.Geometry.Timezone = tz.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
-                if (errorMsg.Contains("ERROR")) { return null; }
-            }
-
-            //TODO: Check Source and run specific subcomponent class for source
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
+
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            {
+                this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
+                this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
+            }
+
+            // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
+            {
+                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                if (errorMsg.Contains("ERROR")) { return null; }
+            }
 
             switch (this.Input.Source) {
                 case "nldas":
@@ -67,11 +68,12 @@ namespace Precipitation
                     this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
-                case "ncdc":
+                case "ncei":
                     // NCDC Precipitation Data call
                     NCDC ncdc = new NCDC();
                     this.Output = ncdc.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
+                    this.Input.Source = "ncei";
                     break;
                 case "daymet":
                     // daymet Precipitation Data call
@@ -89,6 +91,18 @@ namespace Precipitation
                     // PRISM Precipitation Data call
                     PRISM prism = new PRISM();
                     this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "trmm":
+                    // TRMM Precipitation Data call
+                    TRMM trmm = new TRMM();
+                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input);
+                    if(errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "nwm":
+                    // wgen Precipitation Data call
+                    NWM nwm = new NWM();
+                    this.Output = nwm.GetData(out errorMsg, this.Output, this.Input);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
@@ -122,9 +136,9 @@ namespace Precipitation
                     return GLDAS.CheckStatus(this.Input);
                 case "daymet":
                     return Daymet.CheckStatus(this.Input);
-                case "ncdc":
+                case "ncei":
                     return NCDC.CheckStatus(this.Input);
-                // TODO: Add check status function for PRISM
+                // TODO: Add check status function for PRISM, nwm, trmm
                 default:
                     return new Dictionary<string, string>() { { "status", "invalid source" } };
             }

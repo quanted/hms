@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Text;
-using System.IO;
-using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using Data;
@@ -13,7 +10,7 @@ namespace Utilities
 {
     public class Utility
     {
-        public static string errorMessage = "";
+        public string errorMessage = "";
         const double minLat = 25.0625;
         const double maxLat = 52.9375;
         const double minLon = -124.9375;
@@ -412,34 +409,25 @@ namespace Utilities
             return root1;
         }
 
-        public static double CalculateRHmin(double SpecificHumidity, double Temperature)
+        public static double CalculateRH(double SpecificHumidity, double Temperature, double Pressure)
         {
-            // Calculate minimum relative humidity here.
-            double RHmin = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature)/(Temperature + 243.5)); //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHmin = 100 * (e / es);
-            return RHmin;
-        }
-
-        public static double CalculateRHmax(double SpecificHumidity, double Temperature)
-        {
-            // Calculate maximum relative humidity here.
-            double RHmax = 0.0;
-            double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));//double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHmax = 100 * (e / es);
-            return RHmax;
-        }
-
-        public static double CalculateRHhourly(double SpecificHumidity, double Temperature)
-        {
-            // Calculate hourly relative humidity here.
-            double RHhourly = 0.0;
+            // Calculate relative humidity here.
+            double RH = 0.0;
+            double e = SpecificHumidity * Pressure / (0.378 * SpecificHumidity + 0.622);
+            //double es = 0.6108 * Math.Exp(17.27 * Temperature / (Temperature + 237.3));
             double es = 6.112 * Math.Exp((17.67 * Temperature) / (Temperature + 243.5));
-            double e = SpecificHumidity * 1013.25 / (0.378 * SpecificHumidity + 0.622);
-            RHhourly = 100 * (e / es);
-            return RHhourly;
+            RH = e / es;
+
+            if(RH > 1.0)
+            {
+                RH = 1.0;
+            }
+            else if (RH < 0.0)
+            {
+                RH = 0.0;
+            }
+
+            return RH * 100;
         }
 
         public static int CalculateMortonMethod(string method)

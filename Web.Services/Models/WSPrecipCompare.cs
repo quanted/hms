@@ -1,19 +1,17 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Utilities;
 using Web.Services.Controllers;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace Web.Services.Models
 {
     /// <summary>
-    /// Result structure of the json string retrieved from ncdc.
+    /// Result structure of the json string retrieved from ncei.
     /// </summary>
     public class Result
     {
@@ -23,7 +21,17 @@ namespace Web.Services.Models
     }
 
     /// <summary>
-    /// ResultData structure of the json string retrieved from ncdc.
+    /// Result structure of the json string retrieved from ncei.
+    /// </summary>
+    public class ResultString
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+        public string data { get; set; }
+    }
+
+    /// <summary>
+    /// ResultData structure of the json string retrieved from ncei.
     /// </summary>
     public class ResultData
     {
@@ -34,7 +42,7 @@ namespace Web.Services.Models
     }
 
     /// <summary>
-    /// StationData structure of the json string retrieved from ncdc.
+    /// StationData structure of the json string retrieved from ncei.
     /// </summary>
     public class StationData
     {
@@ -55,46 +63,54 @@ namespace Web.Services.Models
     public class WSPrecipCompare
     {
 
-        private enum PrecipSources { compare, nldas, gldas, ncdc, daymet, wgen };
+        private enum PrecipSources { compare, nldas, gldas, ncei, daymet, wgen };
 
         /// <summary>
         /// Gets workflow data.
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetPrecipCompareData(PrecipCompareInput input)
+        public async Task<ITimeSeriesOutput> GetPrecipCompareData(PrecipitationCompareInput input)
         {
             string errorMsg = "";
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
-
-            /*TODO:
-            1. DONE: Only make calls to data sources specified by user
-            2. DONE: Find NCDC station nearest to COMID centroid if no station is provided
-            3. Aggregate by weighted spatial average if user chooses to do so
-            4. Aggregate daily/monthly/yearly/extreme events
-               a. If extreme event, handle cases with daily/5 day total thresholds
-            5. Check for errors such as missing NCDC data
-               a. Possibly add notes to metadata if some data is missing from output
-            */
-
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput output = oFactory.Initialize();
-            input.SourceList.Add("ncdc");
-            output.DataSource = string.Join(" - ", input.SourceList.ToArray());
-
-
-            if (input.Weighted)
+            if (input == null)
             {
-                errorMsg = "ERROR: Weighted spatial average is currently unavailable.";
+                errorMsg = "ERROR: Invalid input parameters.";
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             }
-            input.Weighted = false;
 
-            //NCDC station is required. If only a ComID is provided, use catchment centroid coordinates to find nearest NCDC station.
+            Debug.WriteLine("Precip compare request recieved...");
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output = oFactory.Initialize();
+            //input.SourceList.Add("ncei");
+            output.DataSource = string.Join(" - ", input.SourceList.ToArray());
+
+            if (input.Geometry.GeometryMetadata == null)
+            {
+                input.Geometry.GeometryMetadata = new Dictionary<string, string>();
+            }
+
+            if (input.Weighted && input.Geometry.ComID <= 0)
+            {
+                errorMsg = "ERROR: ComID required for spatial weighted average.";
+                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            }
+
+            //In case of annual comparison, make sure that a valid input must have more than one year (i.e. start and end year are not the same).
+            if (input.TemporalResolution == "annual" && input.DateTimeSpan.StartDate.Year == input.DateTimeSpan.EndDate.Year)
+            {
+                errorMsg = "ERROR: More than one year must be given for annual comparison.";
+                if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            }
+
+            //NCEI station is required. If only a ComID is provided, use catchment centroid coordinates to find nearest NCEI station.
             if (input.Geometry.StationID == null)
             {
+
+
                 errorMsg = "";
                 string dbPath = "./App_Data/catchments.sqlite";
                 string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + input.Geometry.ComID.ToString();
@@ -110,39 +126,53 @@ namespace Web.Services.Models
                     Latitude = double.Parse(centroidDict["CentroidLatitude"]),
                     Longitude = double.Parse(centroidDict["CentroidLongitude"])
                 };
+                string nceiQuery = "/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
 
-                string ncdcBaseURL = "http://localhost:7777/hms/gis/ncdc/stations/?latitude=" + centroid.Latitude.ToString() + "&longitude=" + centroid.Longitude.ToString() + "&geometry=point&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326";//"&comid=" + input.Geometry.ComID.ToString() +
-                //string ncdcBaseURL = "http://localhost:7777/hms/gis/ncdc/stations/?startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&crs=4326&comid=" + input.Geometry.ComID.ToString();
+                JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
 
-                //Using FLASK NCDC webservice            
-                string data = DownloadData(out errorMsg, ncdcBaseURL);
-                //return null;
-                Result result = JSON.Deserialize<Result>(data);
-                //Set NCDC station to closest station regardless of type
-                input.Geometry.StationID = result.data[0].id.ToString();
-                foreach (ResultData details in result.data)//Opt for closest GHCND station, if any
+                // Calling to HMS Flask web service.
+                Utilities.NCEIResult result = Utilities.WebAPI.RequestData<Utilities.NCEIResult>(nceiQuery).Result;
+
+                ////Set NCEI station to closest station regardless of type
+                double bestCoverage = 0.0;
+                double closestDistance = 10000.0;
+                foreach (NCEIStations details in result.data)//Opt for closest GHCND station, if any
                 {
                     if (details.id.Contains("GHCND"))
                     {
-                        input.Geometry.StationID = details.id.ToString();
-                        break;
+                        if (details.distance <= closestDistance && details.data.datacoverage > bestCoverage)
+                        {
+                            closestDistance = details.distance;
+                            bestCoverage = details.data.datacoverage;
+                            input.Geometry.StationID = details.id.ToString();
+                            input.Geometry.Point = new PointCoordinate() { Latitude = details.data.latitude, Longitude = details.data.longitude };
+                        }
                     }
                 }
             }
             input.Geometry.GeometryMetadata.Add("stationID", input.Geometry.StationID);
 
             //Check for extreme events and required parameters
-            if (input.TemporalResolution != "daily" && input.TemporalResolution != "monthly" && input.TemporalResolution != "yearly")
+            if (input.TemporalResolution == "extreme_5")
             {
-                //Extreme Precipitation Events are essentially combined. 
-                if(input.DailyThreshold > input.FiveDayThreshold)
+                try
                 {
-
+                    input.Geometry.GeometryMetadata.Add("dailyThreshold", input.ExtremeDaily.ToString());
+                    input.Geometry.GeometryMetadata.Add("totalThreshold", input.ExtremeTotal.ToString());
                 }
-            }      
+                catch (Exception ex)
+                {
+                    errorMsg = "ERROR: One or more threshold values for extreme events were not provided.";
+                    if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+                }
+            }
 
-            input.Source = "ncdc";
-            input.SourceList.Remove("ncdc");
+            input.Source = "ncei";
+            input.SourceList.Remove("ncei");
             // Validate precipitation sources.
             errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -150,21 +180,33 @@ namespace Web.Services.Models
             List<Precipitation.Precipitation> precipList = new List<Precipitation.Precipitation>();
             List<ITimeSeriesOutput> outputList = new List<ITimeSeriesOutput>();
 
-            // NCDC Call
-            Precipitation.Precipitation ncdc = new Precipitation.Precipitation();
+            // NCEI Call
+            Precipitation.Precipitation ncei = new Precipitation.Precipitation();
             // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
             ITimeSeriesInputFactory nFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput nInput = nFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Set input to precip object.
-            ncdc.Input = nInput;
-            //ncdc.Input.TemporalResolution = "daily";
-            ncdc.Input.TemporalResolution = input.TemporalResolution;
-            ncdc.Input.Geometry.GeometryMetadata["token"] = (ncdc.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncdc.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-            ITimeSeriesOutput nResult = ncdc.GetData(out errorMsg);
+            ncei.Input = nInput;
+            //ncei.Input.DateTimeSpan.StartDate = ncei.Input.DateTimeSpan.StartDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
+            //ncei.Input.DateTimeSpan.EndDate = ncei.Input.DateTimeSpan.EndDate.AddHours(ncei.Input.Geometry.Timezone.Offset);
+
+            //ncei.Input.TemporalResolution = "daily";
+            ncei.Input.Geometry.GeometryMetadata["token"] = (ncei.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? ncei.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
+            ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
+            //nResult.Data = Utilities.Time.TimeSeriesShift(-1.0 * ncei.Input.Geometry.Timezone.Offset, nResult.Data, ncei.Input.DateTimeSpan.DateTimeFormat);
+            //nResult.Data = Utilities.TemporalAggregation.Aggregation(input.TemporalResolution, 1, nResult, ncei.Input);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
             output = nResult;
+            ncei.Input.Geometry.Point = new PointCoordinate()
+            {
+                Latitude = Convert.ToDouble(output.Metadata["ncei_latitude"]),
+                Longitude = Convert.ToDouble(output.Metadata["ncei_longitude"])
+            };
+            ncei.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, ncei.Input.Geometry.Point) as Data.Timezone;
+
+            Debug.WriteLine("Data retrieved for: NCEI");
 
             // Construct Precipitation objects for Parallel execution in the preceeding Parallel.ForEach statement.
             foreach (string source in input.SourceList)
@@ -172,15 +214,15 @@ namespace Web.Services.Models
                 // Precipitation object
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
                 PointCoordinate point = new PointCoordinate();
-                if (output.Metadata.ContainsKey("ncdc_latitude") && output.Metadata.ContainsKey("ncdc_longitude"))
+                if (output.Metadata.ContainsKey("ncei_latitude") && output.Metadata.ContainsKey("ncei_longitude"))
                 {
-                    point.Latitude = Convert.ToDouble(output.Metadata["ncdc_latitude"]);
-                    point.Longitude = Convert.ToDouble(output.Metadata["ncdc_longitude"]);
+                    point.Latitude = Convert.ToDouble(output.Metadata["ncei_latitude"]);
+                    point.Longitude = Convert.ToDouble(output.Metadata["ncei_longitude"]);
                     input.Geometry.Point = point;
                 }
                 else
                 {
-                    errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCDC station.";
+                    errorMsg = "ERROR: Coordinate information was not found or is invalid for the specified NCEI station.";
                 }
                 // ITimeSeriesInputFactory object used to validate and initialize all variables of the input object.
                 ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
@@ -190,9 +232,15 @@ namespace Web.Services.Models
 
                 // Set input to precip object.
                 precip.Input = sInput;
-                //precip.Input.TemporalResolution = "daily";
                 precip.Input.TemporalResolution = input.TemporalResolution;
-
+                if(precip.Input.TemporalResolution == "extreme_5")
+                {
+                    precip.Input.TemporalResolution = "daily";
+                }
+                else if(precip.Input.TemporalResolution == "annual")
+                {
+                    precip.Input.TemporalResolution = "yearly";
+                }
                 precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
                 if (!precip.Input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
                 {
@@ -200,6 +248,8 @@ namespace Web.Services.Models
                 }
 
                 precipList.Add(precip);
+                string debugString = "Input object constructed for: " + source;
+                Debug.WriteLine(debugString);
             }
 
             List<string> errorList = new List<string>();
@@ -216,6 +266,8 @@ namespace Web.Services.Models
                     errorList.Add(errorM);
                     outputList.Add(result);
                 }
+                string debugString = "Data retrieved for: " + precip.Input.Source;
+                Debug.WriteLine(debugString);
             });
 
             if (errorList.FindIndex(errorStr => errorStr.Contains("ERROR")) != -1)
@@ -223,104 +275,33 @@ namespace Web.Services.Models
                 return err.ReturnError(string.Join(",", errorList.ToArray()));
             }
 
-
+            Debug.WriteLine("Precip Compare data has been collected");
             foreach (ITimeSeriesOutput result in outputList)
             {
-                /*Spatial weighted average aggregation
-                ITimeSeriesOutput updated = result;
-                if (input.Weighted && updated.Data.Count > 0)
+                string debugString = "Total data points from source: " + result.DataSource + " = " + result.Data.Count.ToString();
+                Debug.WriteLine(debugString);
+                ITimeSeriesOutput aggregated = oFactory.Initialize();
+                //Spatial weighted average aggregation
+                if (input.Weighted && result.Data.Count > 0)
                 {
                     Utilities.CatchmentAggregation cd = new Utilities.CatchmentAggregation();
                     Utilities.GeometryData gd = null;
                     input.Geometry.GeometryMetadata["precipSource"] = result.DataSource.ToString();
                     gd = cd.getData(input, new List<string> { input.Geometry.ComID.ToString() }, out errorMsg);
-                    ITimeSeriesOutput aggregated = cd.getCatchmentAggregation(input, result, gd, input.Weighted);
-                    ITimeSeriesOutput reduced = oFactory.Initialize();
-                    foreach (var data in aggregated.Data)
-                    {
-                        //TODO: Reformat this to take sum and average of all cell values and use that as data for timeseries.
-                        reduced.Data.Add(data.Value[0], new List<string> { data.Value[3].ToString() });//Will cause crashes
-                    }
+                    aggregated = cd.getCatchmentAggregation(input, result, gd, input.Weighted);
+                    result.Data = aggregated.Data;
                 }
-                output = Utilities.Merger.MergeTimeSeries(output, updated);*/
                 output = Utilities.Merger.MergeTimeSeries(output, result);
+                if (result.Metadata.Values.Contains("ERROR"))
+                {
+                    output.Metadata.Add(result.DataSource.ToString() + " ERROR", "The service is unavailable or returned no valid data.");
+                }
             }
-
-            output.Metadata.Add("column_1", "Date");
-            output.Metadata.Add("column_2", "ncdc");
-            //TODO: Update Statistics 
-            //output = Utilities.Statistics.GetStatistics(out errorMsg, output);
-
+            //output.Metadata.Add("column_1", "Date");
+            //output.Metadata.Add("column_2", "ncei");
+            output = Utilities.Statistics.GetCompareStatistics(out errorMsg, input, output);
+            
             return output;
-        }
-
-        /// <summary>
-        /// Pulls NCDC station details from flask webservice.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
-        {
-            errorMsg = "";
-            string dataURL = "http://localhost:7777/hms/data?job_id=";
-            WebClient myWC = new WebClient();
-            string data = "";
-            dynamic taskData = "";
-            try
-            {
-                int retries = 5;                                        // Max number of request retries
-                string status = "";                                     // response status code
-                string jobID = "";
-                while (retries > 0 && !status.Contains("OK"))
-                {
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    jobID = JSON.Deserialize<Dictionary<string, string>>(reader.ReadToEnd())["job_id"];
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                    if (!status.Contains("OK"))
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-
-                retries = 50;
-                status = "";
-                taskData = "";
-                bool success = false;
-                while (retries > 0 && !success && !jobID.Equals(""))
-                {
-                    Thread.Sleep(6000);
-                    WebRequest wr = WebRequest.Create(dataURL + jobID);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    taskData = JSON.Deserialize<dynamic>(data);
-                    if (taskData["status"] == "SUCCESS")
-                    {
-                        success = true;
-                    }
-                    else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
-                    {
-                        break;
-                    }
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
-                }
-            }
-            catch (Exception ex)
-            {
-                errorMsg = "ERROR: Could not find NCDC stations for the given geometry." + ex.Message;
-            }
-            return data;
         }
     }
 }

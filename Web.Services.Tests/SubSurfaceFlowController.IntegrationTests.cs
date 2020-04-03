@@ -1,13 +1,15 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Services.Controllers;
 using Xunit;
+using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -41,7 +43,7 @@ namespace Web.Services.Tests
         /// </summary>
         public SubSurfaceFlowControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 
@@ -56,17 +58,23 @@ namespace Web.Services.Tests
         [InlineData(gldasRequest)]
         public async Task ValidRequests(string inputString)
         {
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Thread.Sleep(1000);
             string endpoint = "api/hydrology/subsurfaceflow";
-            SubSurfaceFlowInput input = JsonConvert.DeserializeObject<SubSurfaceFlowInput>(inputString);
+            SubSurfaceFlowInput input = JsonSerializer.Deserialize<SubSurfaceFlowInput>(inputString, options);
             Debug.WriteLine("Integration Test: SubsurfaceFlow controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint,
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(365, resultObj.Data.Count);
         }
 

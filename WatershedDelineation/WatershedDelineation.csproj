@@ -1,20 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
-    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="2.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="3.1.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ContaminantLoader\ContaminantLoader.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
     <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />
     <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />

@@ -1,7 +1,5 @@
 ﻿using Data;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Utilities
 {
@@ -53,7 +51,36 @@ namespace Utilities
             return output;
         }
 
-
-
+        public ITimeSeriesOutput Clone()
+        {
+            return this.ReturnError("ERROR: Problem setting up output.");
+        }
     }
+
+    public class MetaErrorOutput
+    {
+
+        public Dictionary<string, string> Metadata { get; set; }
+
+        /// <summary>
+        /// Default ErrorOutput constructor
+        /// </summary>
+        public MetaErrorOutput()
+        {
+            this.Metadata = new Dictionary<string, string>();
+        }
+
+        /// <summary>
+        /// Returns ITimeSeries object containing the errorMsg in the metadata.
+        /// </summary>
+        /// <param name="errorMsg">Error message to be pasted to the MetaData in the output.</param>
+        /// <returns>ITimeSeries</returns>
+        public Dictionary<string, string> ReturnError(string errorMsg)
+        {
+            Dictionary<string, string> output = new Dictionary<string, string>();
+            output["ERROR"] = errorMsg;
+            return output;
+        }
+    }
+
 }

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
-using System.Web;
 using System.Threading;
-using System.IO;
+using Serilog;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Data.Source
 {
@@ -27,13 +28,20 @@ namespace Data.Source
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
+            if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
+            {
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy", null);
+                TimeSpan ts = new TimeSpan(23, 00, 0);
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
+            }
+            
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(out errorMsg, url);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            string data = DownloadData(url, 0).Result;
+            if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return data;
         }
@@ -137,37 +145,46 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string DownloadData(out string errorMsg, string url)
+        private async Task<string> DownloadData(string url, int retries)
         {
-            errorMsg = "";
             string data = "";
+            HttpClient hc = new HttpClient();
+            HttpResponseMessage wm = new HttpResponseMessage();
+            int maxRetries = 10;
+
             try
             {
-                // TODO: Read in max retry attempt from config file.
-                int retries = 5;
-
-                // Response status message
                 string status = "";
 
-                while (retries > 0 && !status.Contains("OK"))
+                while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    Thread.Sleep(100);
-                    WebRequest wr = WebRequest.Create(url);
-                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                    status = response.StatusCode.ToString();
-                    Stream dataStream = response.GetResponseStream();
-                    StreamReader reader = new StreamReader(dataStream);
-                    data = reader.ReadToEnd();
-                    reader.Close();
-                    response.Close();
-                    retries -= 1;
+                    wm = await hc.GetAsync(url);
+                    var response = wm.Content;
+                    status = wm.StatusCode.ToString();
+                    data = await wm.Content.ReadAsStringAsync();
+                    retries += 1;
+                    if (!status.Contains("OK")) { 
+                        Thread.Sleep(1000 * retries); 
+                    }
                 }
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                if (retries < maxRetries)
+                {
+                    retries += 1;
+                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}", retries, maxRetries);
+                    Random r = new Random();
+                    Thread.Sleep(5000 + (r.Next(10) * 1000));
+                    return this.DownloadData(url, retries).Result;
+                }
+                wm.Dispose();
+                hc.Dispose();
+                Log.Warning(ex, "Error: Failed to download nldas data.");
                 return null;
             }
+            wm.Dispose();
+            hc.Dispose();
             return data;
         }
 

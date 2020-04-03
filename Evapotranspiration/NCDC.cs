@@ -6,9 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
-using Newtonsoft.Json;
+using Utilities;
 
 namespace Evapotranspiration
 {
@@ -16,9 +17,16 @@ namespace Evapotranspiration
     {
         public string DATE { get; set; }
         public string STATION { get; set; }
+        [JsonConverter(typeof(DoubleConverter))]
         public double TMAX { get; set; }
+        [JsonConverter(typeof(DoubleConverter))]
+
         public double TMIN { get; set; }
+        [JsonConverter(typeof(DoubleConverter))]
+
         public double AWND { get; set; }
+        [JsonConverter(typeof(DoubleConverter))]
+
         public double PRCP { get; set; }
     }
 
@@ -29,7 +37,7 @@ namespace Evapotranspiration
             string data = "";
             string errorMsg = "";
             string[] station = inpt.Geometry.GeometryMetadata["stationID"].ToString().Split(':');
-            string url = "https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=" + station[1] + "&startDate=" + inpt.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + inpt.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&format=json&units=metric";
+            string url = "https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=" + station[1] + "&startDate=" + inpt.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + inpt.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + "&format=json&units=metric";
             WebClient myWC = new WebClient();
             try
             {
@@ -58,9 +66,14 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: Unable to download data from Daymet. " + ex.Message;
                 return null;
             }
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true,
+            };
+            options.Converters.Add(new DoubleConverter());
+            List<NCDCEntry> datalist = JsonSerializer.Deserialize<List<NCDCEntry>>(data, options);
 
-            List<NCDCEntry> datalist = JsonConvert.DeserializeObject<List<NCDCEntry>>(data);
-            
             string date = "";
             DataTable dtMinMax = new DataTable();
             dtMinMax.Columns.Add("Date");

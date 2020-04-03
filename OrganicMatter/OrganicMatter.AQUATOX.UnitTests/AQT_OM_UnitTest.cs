@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using AQUATOXOrganicMatter;
-using System.Diagnostics;
 
 namespace OrganicMatter.AQUATOX.UnitTests
 {
@@ -20,7 +18,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
         }
 
         [TestMethod]
-        public void AQTNutrients_ValidJSON()
+        public void AQT_OM_ValidJSON()
         {
             string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
             string json = GetTestFile(filePath);
@@ -33,7 +31,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
 
 
         [TestMethod]
-        public void AQTNutrients_Check_Data_Requirements()
+        public void AQT_OM_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
             string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";

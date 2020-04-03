@@ -1,10 +1,8 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
-using Globals;
 
 namespace AQUATOX.Loadings
 {
@@ -86,7 +84,8 @@ namespace AQUATOX.Loadings
 
                 foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
                 {
-                    if (!(DateTime.TryParse(entry.Key, out DateTime date)))
+                    string dateString = (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key;
+                    if (!(DateTime.TryParse(dateString, out DateTime date)))
                           throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
                     if (!(Double.TryParse(entry.Value[0], out double val)))
                         throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace Data
 {
@@ -72,6 +69,13 @@ namespace Data
         /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
         /// </summary>
         Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <returns></returns>
+        ITimeSeriesInput Clone(List<string> dataset);
 
     }
 
@@ -145,8 +149,19 @@ namespace Data
         /// <summary>
         /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
         /// </summary>
-        [JsonProperty(TypeNameHandling = TypeNameHandling.None)]
         public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
+
+        /// <summary>
+        /// Creates a new ITimeSeriesInput from the current object.
+        /// </summary>
+        /// <returns></returns>
+        public ITimeSeriesInput Clone(List<string> dataset)
+        {
+            string errorMsg = "";
+            TimeSeriesInputFactory factory = new TimeSeriesInputFactory();
+            TimeSeriesInput newInput = (TimeSeriesInput)factory.SetTimeSeriesInput(this, dataset, out errorMsg);
+            return newInput;
+        }
 
     }
 
@@ -238,286 +253,28 @@ namespace Data
             TimeSeriesInput validatedInput = ITimeSeriesValidation.Validate(out errorMsg, dataset, input) as TimeSeriesInput;
             if (errorMsg.Contains("ERROR"))
             {
+                Log.Warning(errorMsg);
                 return input;
             }
-            //foreach(string ds in dataset)
-            //{
-            //    validatedInput.BaseURL.Add(GetBaseURL(input.Source, ds, out errorMsg));
-            //}
             return validatedInput;
         }
 
         /// <summary>
-        /// OBSOLETE
-        /// TimeSeriesInputFactory function for validating and setting TimeSeriesInput objects.
+        /// 
+        /// 
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="source"></param>
         /// <param name="dataset"></param>
-        /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public ITimeSeriesInput OBS_SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
+        public static string GetBaseURL(string source, string dataset)
         {
-            errorMsg = "";
-            TimeSeriesInput newInput = new TimeSeriesInput();
-
-            // Below preforms validation of required parameters when attempting to initialize dataset component inputs.
-            // TODO: Append error messages to array and output to errorMsg on return.
-            List<string> errors = new List<string>();
-
-            // Validates that the source string is not null or empty.
-            if (String.IsNullOrWhiteSpace(input.Source))
-            {
-                errors.Add("ERROR: Required 'Source' parameter was not found or is invalid.");
-                //errorMsg += "ERROR: Required 'Source' parameter was not found or is invalid.";
-                //return newInput;
-            }
-            else
-            {
-                newInput.Source = input.Source;
-            }
-
-            // Validating Geometry object
-            if (input.Geometry == null)
-            {
-                errors.Add("ERROR: No geometry values found in the provided parameters.");
-                //errorMsg += "ERROR: No geometry values found in the provided parameters.";
-                //return newInput;
-            }
-            else
-            {
-                // Validates that the Latitude parameter is not invalid
-                if (!input.Source.Contains("ncdc") && !input.Source.Contains("compare"))
-                {
-                    if (input.Geometry.Point == null)
-                    {
-                        errors.Add("ERROR: No geometry values found in the provided parameters.");
-                        //errorMsg += "ERROR: No geometry values found in the provided parameters.";
-                        //return newInput;
-                    }
-                    else if (Double.IsNaN(input.Geometry.Point.Latitude))
-                    {
-                        errors.Add("ERROR: Required 'Latitude' parameter was not found or is invalid.");
-                        //errorMsg += "ERROR: Required 'Latitude' parameter was not found or is invalid.";
-                    }
-                    // Validates that the Longitude parameter is not invalid
-                    else if (Double.IsNaN(input.Geometry.Point.Longitude))
-                    {
-                        errors.Add("ERROR: Required 'Longitude' parameter was not found or is invalid.");
-                        //errorMsg += "ERROR: Required 'Longitude' parameter was not found or is invalid.";
-                    }
-
-                    if (!(errors.Any(s => s.Contains("Latitude")) || errors.Any(s => s.Contains("Longitude")) || errors.Any(s => s.Contains("geometry"))))
-                    {
-                        if (input.Geometry.Point.Latitude > -90 && input.Geometry.Point.Latitude < 90 &&
-                        input.Geometry.Point.Longitude > -180 && input.Geometry.Point.Longitude < 180)
-                        {
-                            IPointCoordinate pC = new PointCoordinate()
-                            {
-                                Latitude = input.Geometry.Point.Latitude,
-                                Longitude = input.Geometry.Point.Longitude
-                            };
-                            newInput.Geometry = new TimeSeriesGeometry()
-                            {
-                                Point = (PointCoordinate)pC
-                            };
-                        }
-                        else
-                        {
-                            IPointCoordinate pC = new PointCoordinate()
-                            {
-                                Latitude = 0,
-                                Longitude = 0
-                            };
-                            newInput.Geometry = new TimeSeriesGeometry()
-                            {
-                                Point = (PointCoordinate)pC
-                            };
-                            errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
-                        }
-                    }
-                    else
-                    {
-                        IPointCoordinate pC = new PointCoordinate()
-                        {
-                            Latitude = 0,
-                            Longitude = 0
-                        };
-                        newInput.Geometry = new TimeSeriesGeometry()
-                        {
-                            Point = (PointCoordinate)pC
-                        };
-                        errors.Add("ERROR: Latitude or Longitude value is not a valid coordinate.");
-                    }
-                }
-                else
-                {
-                    if (!input.Geometry.GeometryMetadata.ContainsKey("stationID"))
-                    {
-                        errors.Add("ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.");
-                        //errorMsg += "ERROR: " + input.Source + " used as source but no stationID value was found in Geometry.GeometryMetadata.";
-                    }
-
-                    IPointCoordinate pC = new PointCoordinate()
-                    {
-                        Latitude = 0.0,
-                        Longitude = 0.0
-                    };
-                    newInput.Geometry = new TimeSeriesGeometry() { Point = (PointCoordinate)pC };
-                }
-
-                newInput.Geometry.GeometryMetadata = input.Geometry.GeometryMetadata ?? new Dictionary<string, string>();
-                newInput.Geometry.Description = input.Geometry.Description ?? "";
-
-                // Validates and sets Timezone information
-                if (input.Geometry.Timezone == null)
-                {
-                    newInput.Geometry.Timezone = new Timezone()
-                    {
-                        Name = "",
-                        Offset = 0.0,
-                        DLS = false
-                    };
-                }
-                else
-                {
-                    newInput.Geometry.Timezone = new Timezone() { };
-                    newInput.Geometry.Timezone.Name = (String.IsNullOrWhiteSpace(input.Geometry.Timezone.Name)) ? "TZNotSet" : input.Geometry.Timezone.Name;
-                    newInput.Geometry.Timezone.Offset = (Double.IsNaN(input.Geometry.Timezone.Offset)) ? 0.0 : input.Geometry.Timezone.Offset;
-                    if (newInput.Geometry.Timezone.Offset > 12 || newInput.Geometry.Timezone.Offset < -12)
-                    {
-                        errors.Add("ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + newInput.Geometry.Timezone.Offset.ToString());
-                        //errorMsg += "ERROR: Timezone offset value is not a valid timezone. Timezone offset provided: " + newInput.Geometry.Timezone.Offset.ToString();
-                    }
-                    newInput.Geometry.Timezone.DLS = (input.Geometry.Timezone.DLS == true) ? true : false;
-                }
-            }
-
-            if (input.DateTimeSpan == null)
-            {
-                errors.Add("ERROR: DateTimeSpan object is null. DateTimeSpan, with a StartDate and EndDate, is required.");
-                //errorMsg += "ERROR: DateTimeSpan object is null. DateTimeSpan, with a StartDate and EndDate, is required.";
-                //return newInput;
-            }
-            else
-            {
-                // Validates that the StartDate parameter is not invalid
-                if (input.DateTimeSpan.StartDate.Equals(DateTime.MinValue))
-                {
-                    errors.Add("ERROR: Required 'StartDate' parameter was not found or is invalid.");
-                    //errorMsg += "ERROR: Required 'StartDate' parameter was not found or is invalid.";
-                }
-                // Validates that the EndDate parameter is not invalid
-                if (input.DateTimeSpan.EndDate.Equals(DateTime.MinValue))
-                {
-                    errors.Add("ERROR: Required 'EndDate' parameter was not found or is invalid.");
-                    //errorMsg += "ERROR: Required 'EndDate' parameter was not found or is invalid.";
-                }
-                if (!errorMsg.Contains("StartDate") || !errorMsg.Contains("EndDate"))
-                {
-                    newInput.DateTimeSpan = new DateTimeSpan()
-                    {
-                        StartDate = input.DateTimeSpan.StartDate,
-                        EndDate = input.DateTimeSpan.EndDate
-                    };
-                }
-                if (DateTime.Compare(newInput.DateTimeSpan.StartDate, newInput.DateTimeSpan.EndDate) >= 0)
-                {
-                    errors.Add("ERROR: Start date must be before end date.");
-                    //errorMsg += "ERROR: Start date must be before end date.";
-                }
-
-                // Validates DateTime output format
-                newInput.DateTimeSpan.DateTimeFormat = (String.IsNullOrWhiteSpace(input.DateTimeSpan.DateTimeFormat)) ? "yyyy-MM-dd HH" : input.DateTimeSpan.DateTimeFormat;
-                try
-                {
-                    string dateTest = newInput.DateTimeSpan.StartDate.ToString(newInput.DateTimeSpan.DateTimeFormat);
-                }
-                catch (FormatException fe)
-                {
-                    errors.Add("ERROR: Problem with the DateTimeFormat. Provided DateTimeFormat: " + newInput.DateTimeSpan.DateTimeFormat + ". Error Message: " + fe.Message);
-                    //errorMsg += "ERROR: Problem with the DateTimeFormat. Provided DateTimeFormat: " + newInput.DateTimeSpan.DateTimeFormat + ". Error Message: " + fe.Message;
-                }
-            }
-
-
-            // Validates the DataValueFormat parameter
-            newInput.DataValueFormat = (String.IsNullOrWhiteSpace(input.DataValueFormat)) ? "E3" : input.DataValueFormat;
-            try
-            {
-                double testValue = 12345.678901;
-                string testString = testValue.ToString(newInput.DataValueFormat);
-            }
-            catch (FormatException fe)
-            {
-                errors.Add("ERROR: Problem with the DateValueFormat. Provded DataValueFormat: " + newInput.DataValueFormat + ". ErrorMessage: " + fe.Message);
-                //errorMsg += "ERROR: Problem with the DateValueFormat. Provded DataValueFormat: " + newInput.DataValueFormat + ". ErrorMessage: " + fe.Message;
-            }
-
-            // Validates TemporalResolution parameter
-            newInput.TemporalResolution = (String.IsNullOrWhiteSpace(input.TemporalResolution)) ? "default" : input.TemporalResolution.ToLower();
-            string[] validTemporalResolutions = new string[] { "hourly", "daily", "weekly", "monthly", "seasonal", "yearly", "default" };
-            // For non-uniform timeseries, leave as default.
-            if (!Array.Exists(validTemporalResolutions, element => element == newInput.TemporalResolution))
-            {
-                newInput.TemporalResolution = "default";
-            }
-
-            // Validates TimeLocalized parameter, validation provided in the conditional check.
-            newInput.TimeLocalized = (input.TimeLocalized == true) ? true : false;
-
-            // Validates Units parameter
-            newInput.Units = (String.IsNullOrWhiteSpace(input.Units)) ? "metric" : input.Units;
-            string[] validUnits = new string[] { "metric", "imperial", "default" };
-            if (!Array.Exists(validUnits, element => element == newInput.Units))
-            {
-                newInput.Units = "default";
-            }
-
-            // Validates OutputFormat parameter
-            newInput.OutputFormat = (String.IsNullOrWhiteSpace(input.OutputFormat)) ? "json" : input.OutputFormat;
-            string[] validOutputFormat = new string[] { "json", "default" };
-            if (!Array.Exists(validOutputFormat, element => element == newInput.OutputFormat))
-            {
-                newInput.OutputFormat = "default";
-            }
-
-            newInput.BaseURL = new List<string>();
-            foreach (string ds in dataset)
-            {
-                string tempError = "";
-                newInput.BaseURL.Add(GetBaseURL(input.Source, ds, out tempError));
-                if (tempError.Contains("ERROR"))
-                {
-                    //errorMsg += tempError;
-                    errors.Add(tempError);
-                }
-            }
-
-            // Assign ITimeSeriesInput, if null assign empty ITimeSeriesOutput
-            if (input.InputTimeSeries == null)
-            {
-                ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-                newInput.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-            }
-            else
-            {
-                newInput.InputTimeSeries = input.InputTimeSeries;
-            }
-            errorMsg = string.Join(" ", errors.ToArray());
-
-            return newInput;
-        }
-
-        private static string GetBaseURL(string source, string dataset, out string errorMsg)
-        {
-            errorMsg = "";
             Dictionary<string, string> urls = new Dictionary<string, string>();
 
-            try
+            if(File.Exists(@".\App_Data\" + "url_info.txt"))
             {
                 urls = Data.Files.FileToDictionary(@".\App_Data\" + "url_info.txt");
             }
-            catch (FileNotFoundException)
+            else
             {
                 urls = Data.Files.FileToDictionary("/app/App_Data/url_info.txt");
             }
@@ -530,10 +287,11 @@ namespace Data
             }
             catch
             {
-                errorMsg = "ERROR: Unable to construct base url from the specified dataset and provided data source.";
+                Log.Warning("ERROR: Unable to construct base url from dataset: {0}, and source: {1}.", dataset, source);
                 return "";
             }
         }
+
     }
 
 

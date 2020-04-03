@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MathNet.Numerics.Distributions;
 using MathNet.Numerics.Statistics;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -13,23 +11,125 @@ namespace Utilities
     public class Statistics
     {
 
-
         /// <summary>
-        /// Gets the statistic details for the given data parameter.
+        /// Generic statistics calculation, dataset/source independent
         /// </summary>
         /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
         /// <param name="data"></param>
-        /// <param name="compareIndex">Index of the source to be compared against.</param>
         /// <returns></returns>
-        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesOutput data)
+        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data)
         {
             errorMsg = "";
-            int notSkipped = 0;
+            int missingDays = 0;
+
+            Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
+            Vector<double> mSum = matrix.ColumnSums();
+            double[] mMean = new double[matrix.ColumnCount];
+            double[] mMax = new double[matrix.ColumnCount];
+            double[] mSTD = new double[matrix.ColumnCount];
+            double[] mVar = new double[matrix.ColumnCount];
+            double[] mMedian = new double[matrix.ColumnCount];
+            double[] mEntropy = new double[matrix.ColumnCount];
+            double[] mGeoMean = new double[matrix.ColumnCount];
+            double[] mSkewness = new double[matrix.ColumnCount];
+            double[] mRMS = new double[matrix.ColumnCount];
+            double[] m99 = new double[matrix.ColumnCount];
+            double[] m99Count = new double[matrix.ColumnCount];
+            double[] m95 = new double[matrix.ColumnCount];
+            double[] m95Count = new double[matrix.ColumnCount];
+            double[] m75 = new double[matrix.ColumnCount];
+            double[] m75Count = new double[matrix.ColumnCount];
+            double[] mZeroCount = new double[matrix.ColumnCount];
+
+            for (int i = 0; i < matrix.ColumnCount; i++)
+            {
+                DescriptiveStatistics desc = new DescriptiveStatistics(matrix.Column(i));
+                mMean[i] = desc.Mean;
+                mMax[i] = desc.Maximum;
+                mSTD[i] = desc.StandardDeviation;
+                mVar[i] = desc.Variance;
+                mMedian[i] = matrix.Column(i).Median();
+                mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
+                mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
+                mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
+                mRMS[i] = MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i));
+                m99[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 99);
+                m95[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95);
+                m75[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 75);
+
+                Func<double, bool> isAbove99 = (v) => (v >= m99[i]);
+                Func<double, bool> isAbove95 = (v) => (v >= m95[i]);
+                Func<double, bool> isAbove75 = (v) => (v >= m75[i]);
+                Func<double, bool> isZero = (v) => (v == 0);
+
+                m99Count[i] = matrix.Column(i).Where(isAbove99).Count();
+                m95Count[i] = matrix.Column(i).Where(isAbove95).Count();
+                m75Count[i] = matrix.Column(i).Where(isAbove75).Count();
+                mZeroCount[i] = matrix.Column(i).Where(isZero).Count();
+            }
+
+            List<string> columns = new List<string>();
+            for (int i = 0; i < matrix.ColumnCount; i++)
+            {
+                if(data.Metadata.Keys.Contains("column_" + (i + 2)))
+                {
+                    columns.Add(data.Metadata["column_" + (i + 2)] + "_");
+                }
+                else if (columns.Count != i + 1 && matrix.ColumnCount > 1)
+                {
+                    columns.Add("column_" + (i + 2) + "_");
+                }
+                else
+                {
+                    columns.Add("column_" + (i + 2) + "_");
+                }
+                //else if (matrix.ColumnCount == 1)
+                //{
+                //    columns.Add("");
+                //}
+            }
+
+            for (int i = 0; i < matrix.ColumnCount; i++)
+            {
+                // MathNet.Numerics
+                data.Metadata.Add(columns[i].Trim() + "sum", mSum[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "mean", mMean[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "max", mMax[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "standard_deviation", mSTD[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "variance", mVar[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "median", mMedian[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "entropy", mEntropy[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "geometric_mean", mGeoMean[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "skewness", mSkewness[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "root_mean_square", mRMS[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "99_percentile", m99[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "99_percentile_count", m99Count[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "95_percentile", m95[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "95_percentile_count", m95Count[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "75_percentile", m75[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "75_percentile_count", m75Count[i].ToString());
+                data.Metadata.Add(columns[i].Trim() + "zero_count", mZeroCount[i].ToString());
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// Comparison workflow statistics calculations
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static ITimeSeriesOutput GetCompareStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data)
+        {
+            errorMsg = "";
+            int missingDays = 0;
 
             // Array of sources in the order they were added to the Data object.
             string[] sources = data.DataSource.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
-            Matrix<double> matrix = BuildMatrix(data.Data, true);
+            Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
             Vector<double> mSum = matrix.ColumnSums();
             double[] mMean = new double[matrix.ColumnCount];
             double[] mMax = new double[matrix.ColumnCount];
@@ -38,7 +138,6 @@ namespace Utilities
             double[][] mPearson = new double[matrix.ColumnCount][];
             double[] mCovariance = new double[matrix.ColumnCount];
             double[] mMedian = new double[matrix.ColumnCount];
-            double[] mMode = new double[matrix.ColumnCount];
             double[] mEntropy = new double[matrix.ColumnCount];
             double[] mGeoMean = new double[matrix.ColumnCount];
             double[] mSkewness = new double[matrix.ColumnCount];
@@ -52,17 +151,6 @@ namespace Utilities
             double[] m75Count = new double[matrix.ColumnCount];
             double[] mZeroCount = new double[matrix.ColumnCount];
 
-            // Precipitation Comparison Specific Stats
-            // TODO: Break calculations in getStatistics up into separate Methods, by groups (dataset specific and general stats)
-            double[] pDryDays = new double[matrix.ColumnCount];
-            double[] pWetDays = new double[matrix.ColumnCount];
-            double[] pHeavyDays = new double[matrix.ColumnCount];
-            // dry, wet, heavy values are only used on precipitation, the cutoff values can be customized by setting the following keys in data.Metadata ["dryDay", "wetDay", "heavyDay"]
-            // TODO: Add documentation to input request and if precip copy over keys corresponding to these values to the output metadata
-            double dryValue = (data.Metadata.ContainsKey("dryDay")) ? Double.Parse(data.Metadata["dryDay"]) : 1.0;
-            double wetValue = (data.Metadata.ContainsKey("wetDay")) ? Double.Parse(data.Metadata["wetDay"]) : 1.0;
-            double heavyValue = (data.Metadata.ContainsKey("heavyDay")) ? Double.Parse(data.Metadata["heavyDay"]) : 10.0;
-
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
                 DescriptiveStatistics desc = new DescriptiveStatistics(matrix.Column(i));
@@ -70,7 +158,7 @@ namespace Utilities
                 mMax[i] = desc.Maximum;
                 mSTD[i] = desc.StandardDeviation;
                 mVar[i] = desc.Variance;
-                if(i == 0)
+                if (i == 0)
                 {
                     mCovariance[i] = 0.0;
                     mR2[i] = 0.0;
@@ -81,7 +169,6 @@ namespace Utilities
                     mR2[i] = MathNet.Numerics.GoodnessOfFit.RSquared(matrix.Column(0), matrix.Column(i));
                 }
                 mMedian[i] = matrix.Column(i).Median();
-                mMode[i] = MathNet.Numerics.Distributions.Normal.Estimate(matrix.Column(i)).Mode;
                 mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
                 mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
                 mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
@@ -100,55 +187,35 @@ namespace Utilities
                 m75Count[i] = matrix.Column(i).Where(isAbove75).Count();
                 mZeroCount[i] = matrix.Column(i).Where(isZero).Count();
 
-                if (data.Dataset == "Precipitation")
-                {
-                    Func<double, bool> isDryDay = (v) => (v < dryValue);
-                    Func<double, bool> isWetDay = (v) => (v >= wetValue);
-                    Func<double, bool> isHeavyDay = (v) => (v >= heavyValue);
-                    pDryDays[i] = matrix.Column(i).Where(isDryDay).Count();
-                    pWetDays[i] = matrix.Column(i).Where(isWetDay).Count();
-                    pHeavyDays[i] = matrix.Column(i).Where(isHeavyDay).Count();
-                }
-
                 for (int j = 0; j < matrix.ColumnCount; j++)
                 {
-                    if(j == 0)
+                    if (j == 0)
                     {
                         mPearson[i] = new double[matrix.ColumnCount];
                     }
                     if (i == j)
                     {
-                        mPearson[i][j] = 0.0;
+                        mPearson[i][j] = 1.0;
                     }
                     else
                     {
+                        int test1 = matrix.Column(i).Count;
+                        int test2 = matrix.Column(j).Count;
                         mPearson[i][j] = MathNet.Numerics.Statistics.Correlation.Pearson(matrix.Column(i), matrix.Column(j));
                     }
                 }
             }
 
-            double[] gore = CalculateGORE(mMean, data.Data);
+            double[] datasetCompare = new double[0];
 
-            //double[] sums = CalculateSums(data.Data, out notSkipped);
+            // DatasetCompare set to Gore for precipitation
+            if (data.Dataset == "Precipitation")
+            {
+                datasetCompare = CalculateGORE(mMean, data.Data);
+            }
 
-            //double[] dailyAverage = CalculateDailyAverage(sums, data.Data, notSkipped);
-            //double[] stdDeviation = CalculateStandardDeviation(dailyAverage, data.Data, notSkipped);
-            //double[] goreAvg = CalculateAverageGORE(dailyAverage, data.Data);
-            //double[] rSquared = CalculateDetermination(data.Data);
-
-            // calculated GORE value
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
-                //data.Metadata.Add(sources[i].Trim() + "_gore", goreAvg[i].ToString());
-                //data.Metadata.Add(sources[i].Trim() + "_average", dailyAverage[i].ToString());
-                //data.Metadata.Add(sources[i].Trim() + "_sum", sums[i].ToString());
-                //data.Metadata.Add(sources[i].Trim() + "_standard_deviation", stdDeviation[i].ToString());
-                if (i != 0)
-                {
-                    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", gore[i].ToString());
-                    //    data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_R-Squared", rSquared[i].ToString());
-                }
-
                 // MathNet.Numerics
                 data.Metadata.Add(sources[i].Trim() + "_sum", mSum[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_mean", mMean[i].ToString());
@@ -156,7 +223,6 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_standard_deviation", mSTD[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_variance", mVar[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_median", mMedian[i].ToString());
-                data.Metadata.Add(sources[i].Trim() + "_mode", mMode[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_entropy", mEntropy[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_geometric_mean", mGeoMean[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_skewness", mSkewness[i].ToString());
@@ -168,23 +234,59 @@ namespace Utilities
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile", m75[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_75_percentile_count", m75Count[i].ToString());
                 data.Metadata.Add(sources[i].Trim() + "_zero_count", mZeroCount[i].ToString());
+                data.Metadata.Add(sources[i].Trim() + "_missing_days", missingDays.ToString());
                 if (i != 0)
                 {
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_covariance", mCovariance[i].ToString());
                     data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_r_squared", mR2[i].ToString());
                 }
-                for(int j = 0; j < matrix.ColumnCount; j++)
+                for (int j = 0; j < matrix.ColumnCount; j++)
                 {
-                    data.Metadata.Add(sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_coefficient", mPearson[i][j].ToString());
+                    string key = sources[i].Trim() + "_" + sources[j].Trim() + "_pearson_coefficient";
+                    if (!data.Metadata.Keys.Contains(key))
+                    {
+                        data.Metadata.Add(key, mPearson[i][j].ToString());
+                    }
                 }
 
                 if (data.Dataset == "Precipitation")
                 {
+           
+                    // Precipitation Comparison Specific Stats
+                    double[] pDryDays = new double[matrix.ColumnCount];
+                    double[] pWetDays = new double[matrix.ColumnCount];
+                    double[] pHeavyDays = new double[matrix.ColumnCount];
+
+                    // dry, wet, heavy values are only used on precipitation, the cutoff values can be customized by setting the following keys in data.Metadata ["dryDay", "wetDay", "heavyDay"]
+                    // TODO: Add documentation to input request and if precip copy over keys corresponding to these values to the output metadata
+                    double dryValue = (data.Metadata.ContainsKey("dryDay")) ? Double.Parse(data.Metadata["dryDay"]) : 1.0;
+                    double wetValue = (data.Metadata.ContainsKey("wetDay")) ? Double.Parse(data.Metadata["wetDay"]) : 1.0;
+                    double heavyValue = (data.Metadata.ContainsKey("heavyDay")) ? Double.Parse(data.Metadata["heavyDay"]) : 10.0;
+
+                    Func<double, bool> isDryDay = (v) => (v < dryValue);
+                    Func<double, bool> isWetDay = (v) => (v >= wetValue);
+                    Func<double, bool> isHeavyDay = (v) => (v >= heavyValue);
+                    pDryDays[i] = matrix.Column(i).Where(isDryDay).Count();
+                    pWetDays[i] = matrix.Column(i).Where(isWetDay).Count();
+                    pHeavyDays[i] = matrix.Column(i).Where(isHeavyDay).Count();
+
+                    if (i != 0)
+                    {
+                        data.Metadata.Add(sources[i].Trim() + "_" + sources[0].Trim() + "_gore", datasetCompare[i].ToString());
+                    }
+
                     data.Metadata.Add(sources[i].Trim() + "_dry_days", pDryDays[i].ToString());
                     data.Metadata.Add(sources[i].Trim() + "_wet_days", pWetDays[i].ToString());
                     data.Metadata.Add(sources[i].Trim() + "_heavy_days", pHeavyDays[i].ToString());
                 }
 
+            }
+
+            data.Metadata.Add("missing_days", missingDays.ToString());
+
+            if (input.TemporalResolution == "extreme_5")
+            {
+                SumExtremeValues(out errorMsg, input, ref data);
             }
 
             return data;
@@ -196,8 +298,10 @@ namespace Utilities
         /// <param name="data"></param>
         /// <param name="excludeAcrossSources">Exclude data if missing from any source</param>
         /// <returns></returns>
-        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources)
+        private static Matrix<double> BuildMatrix(Dictionary<string, List<string>> data, bool excludeAcrossSources, out int missingDays)
         {
+            missingDays = 0;
+
             // calculate daily values to get sums
             if (data == null || data.Count < 1)
                 return null;
@@ -211,9 +315,19 @@ namespace Utilities
             {
                 bool missingData = false;
                 List<double> row = new List<double>();
+                if (timeseries.Key.Contains("Total"))
+                {
+                    break;
+                }
                 for (int i = 0; i < cols; i++)
                 {
                     double dval;
+                    if (i >= timeseries.Value.Count)
+                    {
+                        missingData = true;
+                        row.Add(-9999);
+                        continue;
+                    }
                     if (Double.TryParse(timeseries.Value.ElementAt(i), out dval))
                         row.Add(dval);                        
                     else
@@ -229,6 +343,10 @@ namespace Utilities
                 else
                     lstTable.Add(row);               
             }
+
+            missingDays = rows - lstTable.Count;
+            rows = lstTable.Count;
+
 
             double[][] arrayTable = new double[rows][];
             for (int i=0; i<rows; i++)            
@@ -489,6 +607,110 @@ namespace Utilities
             }
 
             return r2;
+        }
+
+        /// <summary>
+        /// Sums the values for each recorded value to return a dictionary of values based on extreme event parameters.
+        /// Requires summing of daily values first.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static void SumExtremeValues(out string errorMsg, ITimeSeriesInput inputData, ref ITimeSeriesOutput dailyData)
+        {
+            errorMsg = "";
+            List<string> removeDates = new List<string>();
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = dailyData.Data.Keys.ElementAt(0).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            string endstring = dailyData.Data.Keys.ElementAt(dailyData.Data.Keys.Count - 1).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double sum = 0.0;
+            double fiveDaySum = 0.0;
+            double dailySum = 0.0;
+
+            Queue<KeyValuePair<string, double>> previousFiveDays = new Queue<KeyValuePair<string, double>>();
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(0).Key, double.Parse(dailyData.Data.ElementAt(0).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(1).Key, double.Parse(dailyData.Data.ElementAt(1).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(2).Key, double.Parse(dailyData.Data.ElementAt(2).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(3).Key, double.Parse(dailyData.Data.ElementAt(3).Value[0])));
+            previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.ElementAt(4).Key, double.Parse(dailyData.Data.ElementAt(4).Value[0])));
+            //Add new value at every iteration, and take sum of all items to find the total
+
+            for (int i = 0; i < dailyData.Data.Count; i++)
+            {
+                fiveDaySum = 0.0;
+                if (i > 4)//Skip first five checks
+                {
+                    foreach (KeyValuePair<string, double> pair in previousFiveDays)
+                    {
+                        double val = pair.Value;
+                        if (val < -1.0)
+                        {
+                            //If a value is missing for ncdc, take average of all other sources, if that value is negative, just use 0
+                            val = 0.0;    //Double arithmetic here may be causing issues with travis build
+                            for (int x = 1; x < dailyData.Data.ElementAt(i).Value.Count - 1; x++)
+                            {
+                                val += double.Parse(dailyData.Data.ElementAt(i).Value[x]);
+                            }
+                            val /= dailyData.Data.ElementAt(i).Value.Count - 1;
+                            if (val < -1.0)
+                            {
+                                val = 0.0;
+                            }
+                        }
+                        fiveDaySum += val;
+                    }
+                }
+                dailySum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                if (dailySum < -1)
+                {
+                    dailySum = 0.0;
+                }
+                string dateString = dailyData.Data.Keys.ElementAt(i).ToString().Substring(0, dailyData.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //Daily >= thresh, AND 5days >= thresh
+                    sum = dailySum + fiveDaySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else if (dailySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //daily < thresh AND 5days >= thresh
+                    sum = fiveDaySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else if (dailySum >= Convert.ToDouble(inputData.Geometry.GeometryMetadata["dailyThreshold"]) && fiveDaySum < Convert.ToDouble(inputData.Geometry.GeometryMetadata["totalThreshold"]))
+                {
+                    //daily >= thresh AND 5days < thresh
+                    sum = dailySum;
+                    dict.Add(iDate.ToString(inputData.DateTimeSpan.DateTimeFormat), sum);
+                    newDate = iDate;
+                    sum = double.Parse(dailyData.Data.ElementAt(i).Value[0]);
+                }
+                else
+                {
+                    removeDates.Add(dailyData.Data.Keys.ElementAt(i));//sum += dailySum;
+                }
+                previousFiveDays.Dequeue();
+                previousFiveDays.Enqueue(new KeyValuePair<string, double>(dailyData.Data.Keys.ElementAt(i), double.Parse(dailyData.Data.ElementAt(i).Value[0])));
+            }
+
+            foreach (KeyValuePair<string, double> pair in dict)
+            {
+                dailyData.Data[pair.Key][0] = pair.Value.ToString();
+            }
+
+            foreach (string date in removeDates)
+            {
+                dailyData.Data.Remove(date);
+            }
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Web.Services.Models
 {
@@ -44,6 +42,9 @@ namespace Web.Services.Models
             // Gets the Temperature data.
             ITimeSeriesOutput result = temp.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, temp.Input, result);
 
             return result;
         }

@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
-//using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Filters;
+using Web.Services.Controllers;
+using Serilog;
 
 namespace Web.Services
 {
@@ -29,37 +25,63 @@ namespace Web.Services
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc().AddJsonOptions(options =>
+            services.AddControllers().AddJsonOptions(options =>
             {
-                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                options.JsonSerializerOptions.WriteIndented = true;
+                options.JsonSerializerOptions.AllowTrailingCommas = true;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.Converters.Add(new Utilities.IntegerConverter());
+                options.JsonSerializerOptions.Converters.Add(new Utilities.DoubleConverter());
+                options.JsonSerializerOptions.Converters.Add(new Utilities.BooleanConverter());
+                options.JsonSerializerOptions.Converters.Add(new Utilities.DateTimeConverterUsingDateTimeParse());
+                options.JsonSerializerOptions.IgnoreNullValues = true;
             });
+
             services.AddLogging();
 
             services.AddCors();
 
-            // Add our repository type
-            // services.AddSingleton<ITodoRepository, TodoRepository>();
-
-            //Set the comments path for the swagger json and ui.
-            var basePath = PlatformServices.Default.Application.ApplicationBasePath;
-            var xmlPath = Path.Combine(basePath, "XmlComments.xml");
-            var xmlDataPath = Path.Combine(basePath, "XmlCommentsData.xml");
-
-            services.AddSwaggerExamples();
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info {
+                c.SwaggerDoc("v1", new OpenApiInfo {
                     Title = "HMS REST API",
                     Version = "v1",
                     Description = "Swagger documentation for HMS REST API with example requests and responses."
                 });
-                
+
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, "XmlComments.xml");
+                var xmlDataPath = Path.Combine(AppContext.BaseDirectory, "XmlCommentsData.xml");
+
                 c.IncludeXmlComments(xmlPath);
                 c.IncludeXmlComments(xmlDataPath);
 
                 c.ExampleFilters();
             });
+
+            // ---- Swashbuckle Swagger Examples for POST requests ---- //
+
+            services.AddSwaggerExamplesFromAssemblyOf<ContaminantLoaderInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<DewPointInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<EvapotranspirationInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<HumidityInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<PrecipitationInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<PressureInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<RadiationInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SoilMoistureInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SolarInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SolarCalcInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SubSurfaceFlowInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<SurfaceRunoffInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<TemperatureInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<TotalFlowInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<WatershedDelineationInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<WatershedWorkflowInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<WindInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<PrecipitationCompareInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<PrecipitationExtractionInputExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<WaterQualityInputExample>();
 
         }
 
@@ -73,12 +95,13 @@ namespace Web.Services
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 
+            //app.UseMiddleware<GCMiddleware>();
+            app.UseSerilogRequestLogging();
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader());
 
             // Enable static files middleware.
             app.UseStaticFiles();
-            app.UseMvc();
-            //app.UseMvcWithDefaultRoute();
+            // app.UseMvcWithDefaultRoute();
 ;
             app.UseSwagger();
 
@@ -86,11 +109,14 @@ namespace Web.Services
             app.UseSwaggerUI(c =>
             {
                 // Routing through IIS as a subdomain requires the following  line for swagger.json to be accessible.
-                //c.SwaggerEndpoint("/HMSWS/swagger/v1/swagger.json", "HMS REST API V1");
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "HMS REST API V1");
             });
 
-            // Logger setup and configuration
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

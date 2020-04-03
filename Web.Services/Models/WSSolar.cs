@@ -5,6 +5,7 @@ using Data;
 using System.Globalization;
 using System.Threading.Tasks;
 
+
 namespace Web.Services.Models
 {
     /// <summary>
@@ -15,12 +16,12 @@ namespace Web.Services.Models
         /// <summary>
         /// Calculator model: 'Day' or 'Year'
         /// </summary>
-        public string Model;
+        public string Model { get; set; }
 
         /// <summary>
         /// Calculation localtime for when model='year', default='12:00:00'
         /// </summary>
-        public string LocalTime;
+        public string LocalTime { get; set; }
 
     }
 
@@ -248,6 +249,7 @@ namespace Web.Services.Models
             }
 
             soCal.GetCalculatorData();
+
             return soCal.Output;
         }
     }

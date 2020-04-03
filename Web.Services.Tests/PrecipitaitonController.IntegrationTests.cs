@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using Web.Services.Controllers;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.TestHost;
 using System.Net.Http;
@@ -8,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using System.Text;
 using Data;
 using System.Diagnostics;
+using System.Threading;
+using System.Text.Json;
+using Serilog;
 
 namespace Web.Services.Tests
 {
@@ -63,7 +65,7 @@ namespace Web.Services.Tests
         /// NCDC daily request json string for testing a valid request
         /// </summary>
         const string ncdcRequest =
-             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+             "{\"source\": \"ncdc\",\"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
             "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
@@ -83,8 +85,8 @@ namespace Web.Services.Tests
         /// Integration test constructor creates test server and test client.
         /// </summary>
         public PrecipitaitonControllerIntegrationTests()
-        {          
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+        {
+            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 
@@ -98,25 +100,31 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
-        [InlineData(gldasRequest, 365)]
+        [InlineData(gldasRequest, 366)]
         [InlineData(daymetRequest, 365)]
-        [InlineData(prismRequest, 364)]         //Will always fail as prism web service is not active. TODO: Fix end date, cutting off last day.
+        [InlineData(prismRequest, 365)]         //Passing?
         [InlineData(ncdcRequest, 365)]
         [InlineData(wgenRequest, 365)]
         public async Task ValidRequests(string precipInputString, int expected)
         {
-            string endpoint = "api/hydrology/precipitation";
-            PrecipitationInput input = JsonConvert.DeserializeObject<PrecipitationInput>(precipInputString);
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            };
+            Thread.Sleep(1000);
+            string endpoint = "api/meteorology/precipitation";
+            PrecipitationInput input = JsonSerializer.Deserialize<PrecipitationInput>(precipInputString, options);
             input.TemporalResolution = "daily";
             Debug.WriteLine("Integration Test: Precipitation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
             var response = await _client.PostAsync(
                 endpoint, 
-                new StringContent(JsonConvert.SerializeObject(input), Encoding.UTF8, "application/json"));
+                new StringContent(JsonSerializer.Serialize(input, options), Encoding.UTF8, "application/json"));
 
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
-            TimeSeriesOutput resultObj = JsonConvert.DeserializeObject<TimeSeriesOutput>(result);
+            TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
             Assert.Equal(expected, resultObj.Data.Count);
         }
 

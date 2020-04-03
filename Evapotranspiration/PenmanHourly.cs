@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Globalization;
 using Data;
@@ -196,9 +194,17 @@ namespace Evapotranspiration
                 TMAX = thr;
 
                 // Convert specific humidity to relative humidity here.  
-                RHmin = Utilities.Utility.CalculateRHhourly(shhr, thr);
+                RHmin = Utilities.Utility.CalculateRH(shhr, thr, 1013.25);
                 RHmax = RHmin;
-
+                
+                // Check relative humidities
+                if (RHmax < RHmin)
+                {
+                    double swap = RHmin;
+                    RHmin = RHmax;
+                    RHmax = swap;
+                }
+                               
                 // Set relHumidityHr to RHmin or RHmax (it makes no difference in this case).
                 relHumidityHr = RHmin;
 

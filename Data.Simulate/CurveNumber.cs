@@ -1,15 +1,8 @@
 ﻿using Data.Source;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Web;
 
 namespace Data.Simulate
 {
@@ -187,7 +180,8 @@ namespace Data.Simulate
             using(StreamReader r = new StreamReader(filePath, System.Text.Encoding.UTF8))
             {
                 string jsonString = r.ReadToEnd();
-                dynamic cnData = JsonConvert.DeserializeObject(jsonString);
+                dynamic cnData = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return cnData;
             }
         }
@@ -202,7 +196,8 @@ namespace Data.Simulate
             using (StreamReader r = new StreamReader(filePath))
             {
                 string jsonString = r.ReadToEnd();
-                dynamic cnConditions = JsonConvert.DeserializeObject(jsonString);
+                dynamic cnConditions = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return cnConditions;
             }
         }
@@ -217,7 +212,8 @@ namespace Data.Simulate
             using (StreamReader r = new StreamReader(filePath))
             {
                 string jsonString = r.ReadToEnd();
-                dynamic ndvi = JsonConvert.DeserializeObject(jsonString);
+                dynamic ndvi = System.Text.Json.JsonSerializer.Deserialize<dynamic>(jsonString);
+                r.Close();
                 return ndvi;
             }
         }
