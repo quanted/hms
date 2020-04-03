@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -107,7 +108,7 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public LinkedList<StreamSegment> GetStreams(ITimeSeriesInput input, List<List<object>> contaminantInflow, out string comids)
+        public LinkedList<StreamSegment> GetStreams(ITimeSeriesInput input, List<List<object>> contaminantInflow, string inflowSource, out string comids)
         {
             string errorMsg = "";
             // Constructs default error output object containing error message.
@@ -124,8 +125,6 @@ namespace WatershedDelineation
 
             RootObject networkObject = Utilities.JSON.Deserialize<RootObject>(data);
 
-            //TODO: Use data from contaminantInflow list
-
             comids = "";
             foreach(NtNavResultsStandard stream in networkObject.output.ntNavResultsStandard)
             {
@@ -138,6 +137,20 @@ namespace WatershedDelineation
             WatershedDelineation.NWM nwm = new WatershedDelineation.NWM();
             string nwmdata = nwm.GetData(out errorMsg, nwmUrl);
             NWMObject nwmObjectData = Utilities.JSON.Deserialize<NWMObject>(nwmdata);
+
+            Dictionary<string, int> inflowDict = new Dictionary<string, int>();
+            //Iterate over input table to format as dictionary
+            //TODO: Can output object from Front end be formatted as a dictionary?
+            if (inflowSource.Equals("Input Table"))
+            {
+                foreach (List<object> vals in contaminantInflow)
+                {
+                    string[] formats = { "yyyy-MM-dd HH", "yyyy-M-d H" };
+                    string dt = vals[0].ToString() + " " + vals[1].ToString();
+                    DateTime x = DateTime.ParseExact(dt, formats, CultureInfo.InvariantCulture);
+                    inflowDict.Add(x.ToString("yyyy-MM-dd HH"), Int32.Parse(vals[2].ToString()));
+                }
+            }
 
             //Iterate through the COMIDs and stream lengths in the returned JSON and add them to the LinkedList
             foreach (NtNavResultsStandard stream in networkObject.output.ntNavResultsStandard)
@@ -159,6 +172,7 @@ namespace WatershedDelineation
             }
             
             //Calculate which streams got contaminated at each time step
+            //TODO: Algorithm does not incorporate flow values into contamination calculation
             for (int timeStep = 0; timeStep < 18; timeStep++)
             {
                 string timeindex = travelPath.First.Value.velocities_mPerSec.Keys.ElementAt(timeStep);
@@ -174,7 +188,11 @@ namespace WatershedDelineation
                     {
                         stream.Value.contaminated[timeindex.ToString()] = true;
                     }
-                    List<string> combined = new List<string> { stream.Value.comID, stream.Value.length_km.ToString(), stream.Value.flows_m3PerSec[timeindex][0].ToString(), stream.Value.velocities_mPerSec[timeindex][1].ToString(), stream.Value.contaminated[timeindex].ToString() };
+                    if(inflowSource.Equals("Input Table"))
+                    {
+                        stream.Value.flows_m3PerSec[timeindex][0] = inflowDict[timeindex];
+                    }
+                    List<string> combined = new List<string> { stream.Value.comID, stream.Value.length_km.ToString(), stream.Value.velocities_mPerSec[timeindex][1].ToString(), stream.Value.flows_m3PerSec[timeindex][0].ToString(), stream.Value.contaminated[timeindex].ToString() };
                     stream.Value.timestepData.Add(timeindex, combined);
                 }
             }
