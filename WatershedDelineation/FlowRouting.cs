@@ -286,6 +286,8 @@ namespace WatershedDelineation
                     errorMsg = "ERROR: Algorithm is not currently supported.";
                     break;
                 case "nwm":
+                    errorMsg = "ERROR: NWM stream flow data is currently disabled.";
+                    break;
                     for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
                     {
                         COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
@@ -467,7 +469,7 @@ namespace WatershedDelineation
                             double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
                             double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
                             double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
-                            dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
+                            dtStreamFlow.Rows[i][COMID] = ((dsub * area * 1000) + (dsur * area * 1000)) / 86400;//dsub + dsur;            m^3/day (1day/86400sec) => m^3/s
 
 
                             //Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
@@ -493,7 +495,9 @@ namespace WatershedDelineation
                                     continue;
                                 }
                                 //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
-                                dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
+                                //dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
+                                dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dtStreamFlow.Rows[i][fromCom]) + Convert.ToDouble(dtStreamFlow.Rows[i][COMID]);
+
                             }
                         }
                     }

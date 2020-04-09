@@ -4,6 +4,56 @@
         <name>Web.Services</name>
     </assembly>
     <members>
+        <member name="T:Web.Services.Controllers.ContaminantLoaderInput">
+            <summary>
+            ContaminantLoader Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.ContaminantLoaderInputExample">
+            <summary>
+            Swashbuckle ContaminantLoader POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.ContaminantLoaderInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSContaminantLoaderController">
+            <summary>
+            ContaminantLoader controller for HMS.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Web.Services.Controllers.WSContaminantLoaderController.POST(Web.Services.Controllers.ContaminantLoaderInput)" -->
+        <member name="T:Web.Services.Controllers.DewPointInput">
+            <summary>
+            Dew Point Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.DewPointInputExample">
+            <summary>
+            Swashbuckle Dew Point POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.DewPointInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSDewPointController">
+            <summary>
+            DewPoint controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSDewPointController.POST(Web.Services.Controllers.DewPointInput)">
+            <summary>
+            POST method for submitting a request for dew point temperature data.
+            </summary>
+            <param name="tempInput">Parameters for retrieving dew point data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
         <member name="T:Web.Services.Controllers.EvapotranspirationInput">
             <summary>
             Evapotranspiration Input that implements TimeSeriesInput object
@@ -105,28 +155,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.EvapotranspirationInputExampleFull">
-            <summary>
-            Swashbuckle Evapotranspiration POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.EvapotranspirationInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.EvapotranspirationOutputExample">
-            <summary>
-            Swashbucle Evapotranspiration Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.EvapotranspirationOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSEvapotranspirationController">
             <summary>
             Evapotranspiration controller for HMS.
@@ -134,9 +162,42 @@
         </member>
         <member name="M:Web.Services.Controllers.WSEvapotranspirationController.POST(Web.Services.Controllers.EvapotranspirationInput)">
             <summary>
-            POST Method for getting evapotranspiration data.
+            POST method for submitting a request for evapotranspiration data.
             </summary>
             <param name="evapoInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.HumidityInput">
+            <summary>
+            Humidity Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.HumidityInput.Relative">
+            <summary>
+            Relative or Specific Humidity
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.HumidityInputExample">
+            <summary>
+            Swashbuckle Humidity POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.HumidityInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSHumidityController">
+            <summary>
+            Humidity controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHumidityController.POST(Web.Services.Controllers.HumidityInput)">
+            <summary>
+            POST method for submitting a request for humidity data.
+            </summary>
+            <param name="tempInput">Parameters for retrieving humidity data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
         <member name="T:Web.Services.Controllers.PrecipitationInput">
@@ -155,28 +216,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.PrecipitationInputExampleFull">
-            <summary>
-            Swashbuckle Precipitation POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.PrecipitationInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.PrecipitationOutputExample">
-            <summary>
-            Swashbucle Precipitation Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.PrecipitationOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSPrecipitationController">
             <summary>
             Precipitation controller for HMS.
@@ -184,9 +223,65 @@
         </member>
         <member name="M:Web.Services.Controllers.WSPrecipitationController.POST(Web.Services.Controllers.PrecipitationInput)">
             <summary>
-            POST Method for getting precipitation data.
+            POST method for submitting a request for precipitation data.
             </summary>
             <param name="precipInput">Parameters for retrieving precipitation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.PressureInput">
+            <summary>
+            Pressure Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.PressureInputExample">
+            <summary>
+            Swashbuckle Pressure POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.PressureInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSPressureController">
+            <summary>
+            Pressure controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSPressureController.POST(Web.Services.Controllers.PressureInput)">
+            <summary>
+            POST method for submitting a request for pressure data.
+            </summary>
+            <param name="tempInput">Parameters for retrieving pressure data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.RadiationInput">
+            <summary>
+            Radiation Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.RadiationInputExample">
+            <summary>
+            Swashbuckle Radiation POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.RadiationInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSRadiationController">
+            <summary>
+            Radiation controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSRadiationController.POST(Web.Services.Controllers.RadiationInput)">
+            <summary>
+            POST method for submitting a request for radiation data.
+            </summary>
+            <param name="tempInput">Parameters for retrieving radiation data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
         <member name="T:Web.Services.Controllers.SoilMoistureInput">
@@ -210,28 +305,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.SoilMoistureInputExampleFull">
-            <summary>
-            Swashbuckle SoilMoisture POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SoilMoistureInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.SoilMoistureOutputExample">
-            <summary>
-            Swashbucle SoilMoisture Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SoilMoistureOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSSoilMoistureController">
             <summary>
             SoilMoisture controller for HMS.
@@ -239,10 +312,20 @@
         </member>
         <member name="M:Web.Services.Controllers.WSSoilMoistureController.POST(Web.Services.Controllers.SoilMoistureInput)">
             <summary>
-            POST Method for getting SoilMoisture data.
+            POST method for submitting a request for soil moisture data.
             </summary>
             <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.SolarInput">
+            <summary>
+            Solar Data input object
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.SolarInput.input">
+            <summary>
+            Input Dictionary, containing unknown values.
+            </summary>
         </member>
         <member name="T:Web.Services.Controllers.SolarInputExample">
             <summary>
@@ -299,12 +382,12 @@
             </summary>  
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.WSMeteorolgySolarController">
+        <member name="T:Web.Services.Controllers.WSMeteorologySolarController">
             <summary>
             Meterology Solar HMS endpoint class
             </summary>
         </member>
-        <member name="M:Web.Services.Controllers.WSMeteorolgySolarController.POSTSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
+        <member name="M:Web.Services.Controllers.WSMeteorologySolarController.POSTSolarCalculator(Web.Services.Models.SolarCalculatorInput)">
             <summary>
             NOAA Solar Calculator 
             </summary>
@@ -327,28 +410,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.SubSurfaceFlowInputExampleFull">
-            <summary>
-            Swashbuckle SubSurfaceFlow POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SubSurfaceFlowInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.SubSurfaceFlowOutputExample">
-            <summary>
-            Swashbucle SubSurfaceFlow Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SubSurfaceFlowOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSSubSurfaceFlowController">
             <summary>
             SubSurfaceFlow controller for HMS.
@@ -356,7 +417,7 @@
         </member>
         <member name="M:Web.Services.Controllers.WSSubSurfaceFlowController.POST(Web.Services.Controllers.SubSurfaceFlowInput)">
             <summary>
-            POST Method for getting SubSurfaceFlow data.
+            POST method for submitting a request for subsurface flow data.
             </summary>
             <param name="ssFlowInput">Parameters for retrieving SubSurfaceFlow data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
@@ -364,6 +425,11 @@
         <member name="T:Web.Services.Controllers.SurfaceRunoffInput">
             <summary>
             SurfaceRunoff Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.SurfaceRunoffInput.PrecipSource">
+            <summary>
+            OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.SurfaceRunoffInputExample">
@@ -377,28 +443,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.SurfaceRunoffInputExampleFull">
-            <summary>
-            Swashbuckle SurfaceRunoff POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SurfaceRunoffInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.SurfaceRunoffOutputExample">
-            <summary>
-            Swashbucle SurfaceRunoff Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.SurfaceRunoffOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSSurfaceRunoffController">
             <summary>
             SurfaceRunoff controller for HMS.
@@ -406,7 +450,7 @@
         </member>
         <member name="M:Web.Services.Controllers.WSSurfaceRunoffController.POST(Web.Services.Controllers.SurfaceRunoffInput)">
             <summary>
-            POST Method for getting SurfaceRunoff data.
+            POST method for submitting a request for surface runoff data.
             </summary>
             <param name="runoffInput">Parameters for retrieving SurfaceRunoff data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
@@ -427,28 +471,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.TemperatureInputExampleFull">
-            <summary>
-            Swashbuckle Temperature POST request example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.TemperatureInputExampleFull.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.TemperatureOutputExample">
-            <summary>
-            Swashbucle Temperature Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.TemperatureOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Controllers.WSTemperatureController">
             <summary>
             Temperature controller for HMS.
@@ -456,7 +478,7 @@
         </member>
         <member name="M:Web.Services.Controllers.WSTemperatureController.POST(Web.Services.Controllers.TemperatureInput)">
             <summary>
-            POST Method for getting evapotranspiration data.
+            POST method for submitting a request for evapotranspiration data.
             </summary>
             <param name="tempInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
@@ -479,7 +501,7 @@
         </member>
         <member name="M:Web.Services.Controllers.WSTotalFlowController.POST(Web.Services.Models.TotalFlowInput)">
             <summary>
-            POST method for getting total flow data.
+            POST method for submitting a request for total flow data.
             </summary>
             <param name="tfInput"></param>
             <returns>ITimeSeriesOutput</returns>
@@ -503,55 +525,275 @@
             <param name="dataset"></param>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.WorkFlowCompareInput">
+        <member name="T:Web.Services.Controllers.WatershedDelineationInput">
+            <summary>
+            Delineation Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WatershedDelineationOutput">
+            <summary>
+            WorkFlow Output object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WatershedDelineationInputExample">
+            <summary>
+            Swashbuckle DelineationCompare POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WatershedDelineationInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSWatershedDelineationController">
+            <summary>
+            DelineationCompare controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWatershedDelineationController.POST(Web.Services.Controllers.WatershedDelineationInput)">
+            <summary>
+            POST method for submitting a request for delineation compare data.
+            Source parameter must contain a value, but value is not used.
+            </summary>
+            <param name="watershedInput">Parameters for retrieving DelineationCompare data. Required fields: Dataset, SourceList</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WatershedWorkflowInput">
             <summary>
             WorkFlow Input that implements TimeSeriesInput object.
             </summary>
         </member>
-        <member name="P:Web.Services.Controllers.WorkFlowCompareInput.Dataset">
+        <member name="P:Web.Services.Controllers.WatershedWorkflowInput.RunoffSource">
             <summary>
-            Specified dataset for the workflow
+            OPTIONAL: Specifies the requested source for Runoff Data
             </summary>
         </member>
-        <member name="P:Web.Services.Controllers.WorkFlowCompareInput.SourceList">
+        <member name="P:Web.Services.Controllers.WatershedWorkflowInput.StreamHydrology">
             <summary>
-            List of sources for the workflow.
+            OPTIONAL: Specifies the requested Stream Hydrology Algorithm to use
             </summary>
         </member>
-        <member name="T:Web.Services.Controllers.WorkFlowCompareInputExample">
+        <member name="P:Web.Services.Controllers.WatershedWorkflowInput.Aggregation">
+            <summary>
+            OPTIONAL: States whether or not runoff should be aggregated by catchments
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WatershedWorkflowOutput">
+            <summary>
+            WorkFlow Output object
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WatershedWorkflowInputExample">
             <summary>
             Swashbuckle WorkFlowCompare POST request example
             </summary>
         </member>
-        <member name="M:Web.Services.Controllers.WorkFlowCompareInputExample.GetExamples">
+        <member name="M:Web.Services.Controllers.WatershedWorkflowInputExample.GetExamples">
             <summary>
             Get example function.
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Controllers.WorkFlowCompareOutputExample">
-            <summary>
-            Swashbucle WorkFlowCompare Output example
-            </summary>
-        </member>
-        <member name="M:Web.Services.Controllers.WorkFlowCompareOutputExample.GetExamples">
-            <summary>
-            Get example function.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Web.Services.Controllers.WSWorkFlowCompareController">
+        <member name="T:Web.Services.Controllers.WSWatershedWorkflowController">
             <summary>
             WorkFlowCompare controller for HMS.
             </summary>
         </member>
-        <member name="M:Web.Services.Controllers.WSWorkFlowCompareController.POST(Web.Services.Controllers.WorkFlowCompareInput)">
+        <member name="M:Web.Services.Controllers.WSWatershedWorkflowController.POST(Web.Services.Controllers.WatershedWorkflowInput)">
             <summary>
-            POST Method for getting WorkFlowCompare data.
+            POST method for submitting a request for getting workflow compare data.
             Source parameter must contain a value, but value is not used.
             </summary>
             <param name="workflowInput">Parameters for retrieving WorkFlowCompare data. Required fields: Dataset, SourceList</param>
             <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WindInput">
+            <summary>
+            Wind Input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="F:Web.Services.Controllers.WindInput.Component">
+            Wind component
+            User request for U, V values and/or speed, direction. All input is made upper case for comparison.
+            Valid values: U/V, SPEED/DIR (SPEED/DIRECTION), ALL
+            Defaults: ALL 
+        </member>
+        <member name="T:Web.Services.Controllers.WindInputExample">
+            <summary>
+            Swashbuckle Wind POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WindInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSWindController">
+            <summary>
+            Wind controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWindController.POST(Web.Services.Controllers.WindInput)">
+            <summary>
+            POST method for submitting a request for wind data.
+            </summary>
+            <param name="tempInput">Parameters for retrieving wind data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.PrecipitationCompareInput">
+            <summary>
+            PrecipitationCompare Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationCompareInput.Dataset">
+            <summary>
+            Specified dataset for the workflow
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationCompareInput.SourceList">
+            <summary>
+            List of sources for the workflow.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationCompareInput.Weighted">
+            <summary>
+            States whether or not precip should be aggregated by grid cells (weighted spatial average).
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationCompareInput.ExtremeDaily">
+            <summary>
+            Daily precip threshold in mm.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationCompareInput.ExtremeTotal">
+            <summary>
+            Five day total precip threshold in mm.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.PrecipitationExtractionInput">
+            <summary>
+            PrecipitationExtraction Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationExtractionInput.Dataset">
+            <summary>
+            Specified dataset for the workflow
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationExtractionInput.SourceList">
+            <summary>
+            List of sources for the workflow.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.PrecipitationCompareInputExample">
+            <summary>
+            Swashbuckle Precipitation POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.PrecipitationCompareInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.PrecipitationExtractionInputExample">
+            <summary>
+            Swashbuckle Precipitation Data Extraction POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.PrecipitationExtractionInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSWorkflowPrecipController">
+            <summary>
+            WorkflowPrecip controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWorkflowPrecipController.POSTComparison(Web.Services.Controllers.PrecipitationCompareInput)">
+            <summary>
+            POST method for submitting a request for precip comparison data.
+            Source parameter must contain a value, but value is not used.
+            </summary>
+            <param name="precipInput">Parameters for retrieving PrecipComparison data. Required fields: Dataset, SourceList, Weighted, Extreme params</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWorkflowPrecipController.POSTExtraction(Web.Services.Controllers.PrecipitationExtractionInput)">
+            <summary>
+            POST method for submitting a request for precip extraction data.
+            Source parameter must contain a value, but value is not used.
+            </summary>
+            <param name="precipInput">Parameters for retrieving PrecipExtraction data. Required fields: Dataset, SourceList</param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WaterQualityInput">
+            <summary>
+            WaterQuality Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.WaterQualityInput.TaskID">
+            <summary>
+            TaskID required for data storage in mongodb
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.WaterQualityInput.DataSource">
+            <summary>
+            Data source for data retrieval
+            If value is 'nldas': surface runoff and subsurface flow will be from nldas (no precip will be downloaded); 
+            If value is 'ncei', precip data will be downloaded from the closest station to the catchment and curvenumber will be used for surface runoff/subsurface flow.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.WaterQualityInputExample">
+            <summary>
+            Swashbuckle Water Quality POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WaterQualityInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSWorkflowWaterQualityController">
+            <summary>
+            Workflow Water Quality controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSWorkflowWaterQualityController.POSTComparison(Web.Services.Controllers.WaterQualityInput)">
+            <summary>
+            POST method to submit a request for water quality data.
+            dataSource can be 'nldas' or 'ncei', which will pull data from GHCND:US1NCCM0006
+            </summary>
+            <param name="waterqualityInput"></param>
+            <returns>ITimeSeries</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSContaminantLoader">
+            <summary>
+            HMS Web Service ContaminantLoader Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSContaminantLoader.LoadContaminant(Web.Services.Controllers.ContaminantLoaderInput)">
+            <summary>
+            Gets pressure data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSDewPoint">
+            <summary>
+            HMS Web Service Dew Point Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSDewPoint.GetDewPoint(Data.ITimeSeriesInput)">
+            <summary>
+            Gets dew point temperature data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSEvapotranspiration">
             <summary>
@@ -560,7 +802,63 @@
         </member>
         <member name="M:Web.Services.Models.WSEvapotranspiration.GetEvapotranspiration(Web.Services.Controllers.EvapotranspirationInput)">
             <summary>
-            Gets evapotranspiration data using the given TimeSeriesInput parameters.
+            Gets Data Source evapotranspiration data (NLDAS, GLDAS) using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSHumidity">
+            <summary>
+            HMS Web Service Humidity Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSHumidity.GetHumidity(Web.Services.Controllers.HumidityInput)">
+            <summary>
+            Gets humidty data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.Result">
+            <summary>
+            Result structure of the json string retrieved from ncei.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.ResultString">
+            <summary>
+            Result structure of the json string retrieved from ncei.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.ResultData">
+            <summary>
+            ResultData structure of the json string retrieved from ncei.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.StationData">
+            <summary>
+            StationData structure of the json string retrieved from ncei.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.WSPrecipCompare">
+            <summary>
+            HMS Web Service PrecipCompare Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSPrecipCompare.GetPrecipCompareData(Web.Services.Controllers.PrecipitationCompareInput)">
+            <summary>
+            Gets workflow data.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSPrecipExtraction">
+            <summary>
+            HMS Web Serivce WorkFlow Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSPrecipExtraction.GetWorkFlowData(Web.Services.Controllers.PrecipitationExtractionInput)">
+            <summary>
+            Gets workflow data.
             </summary>
             <param name="input"></param>
             <returns></returns>
@@ -575,6 +873,30 @@
             Gets precipitation data using the given TimeSeriesInput parameters.
             </summary>
             <param name="input">ITimeSeriesInput</param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSPressure">
+            <summary>
+            HMS Web Service Pressure Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSPressure.GetPressure(Web.Services.Controllers.PressureInput)">
+            <summary>
+            Gets pressure data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSRadiation">
+            <summary>
+            HMS Web Service Radiation Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSRadiation.GetRadiation(Web.Services.Controllers.RadiationInput)">
+            <summary>
+            Gets radiation data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSSoilMoisture">
@@ -594,12 +916,12 @@
             Solar Calculator Input object
             </summary>
         </member>
-        <member name="F:Web.Services.Models.SolarCalculatorInput.Model">
+        <member name="P:Web.Services.Models.SolarCalculatorInput.Model">
             <summary>
             Calculator model: 'Day' or 'Year'
             </summary>
         </member>
-        <member name="F:Web.Services.Models.SolarCalculatorInput.LocalTime">
+        <member name="P:Web.Services.Models.SolarCalculatorInput.LocalTime">
             <summary>
             Calculation localtime for when model='year', default='12:00:00'
             </summary>
@@ -655,6 +977,13 @@
             <param name="input"></param>
             <returns></returns>
         </member>
+        <member name="M:Web.Services.Models.WSSubSurfaceFlow.SpatiallyWeightedAverage(Data.ITimeSeriesInput)">
+            <summary>
+            Calculates spatially weighted average for sub-surface runoff over a specified catchment comID
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Models.WSSurfaceRunoff">
             <summary>
             HMS Web Service SurfaceRunoff Model
@@ -663,6 +992,13 @@
         <member name="M:Web.Services.Models.WSSurfaceRunoff.GetSurfaceRunoff(Data.ITimeSeriesInput)">
             <summary>
             Gets SurfaceRunoff data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSSurfaceRunoff.SpatiallyWeightedAverage(Data.ITimeSeriesInput)">
+            <summary>
+            Calculates spatially weighted average for surface runoff over a specified catchment comID
             </summary>
             <param name="input"></param>
             <returns></returns>
@@ -684,19 +1020,19 @@
             Input class for Total Flow (subsurface flow and surface flow)
             </summary>
         </member>
-        <member name="F:Web.Services.Models.TotalFlowInput.GeometryType">
+        <member name="P:Web.Services.Models.TotalFlowInput.GeometryType">
             <summary>
             Specifies the type of geometry provided
             Valid values: "huc", "commid", "catchmentid", "catchment", "flowline", "points"
             </summary>
         </member>
-        <member name="F:Web.Services.Models.TotalFlowInput.GeometryInput">
+        <member name="P:Web.Services.Models.TotalFlowInput.GeometryInput">
             <summary>
             Contains the geometry data, type specified by geometry Type. 
             Valid formats are: an ID for type huc, commid, and catchmentid; geojson for types catchment and flowline; and points for type points
             </summary>
         </member>
-        <member name="F:Web.Services.Models.TotalFlowInput.GeometryInputs">
+        <member name="P:Web.Services.Models.TotalFlowInput.GeometryInputs">
             <summary>
             Contains the type as key and input as value, used when multiple inputs are needed for a request
             </summary>
@@ -711,12 +1047,12 @@
             Response from HMS-GIS
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryData.geometry">
+        <member name="P:Web.Services.Models.GeometryData.geometry">
             <summary>
             Geometry component of HMS-GIS response
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryData.metadata">
+        <member name="P:Web.Services.Models.GeometryData.metadata">
             <summary>
             Metadata component of HMS-GIS response
             </summary>
@@ -726,7 +1062,7 @@
             Catchments
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Catchment.points">
+        <member name="P:Web.Services.Models.Catchment.points">
             <summary>
             List of points in the Catchment
             </summary>
@@ -736,27 +1072,27 @@
             Catchment point data
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Point.latitude">
+        <member name="P:Web.Services.Models.Point.latitude">
             <summary>
             Latitude of centroid
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Point.longitude">
+        <member name="P:Web.Services.Models.Point.longitude">
             <summary>
             Longitude of centroid
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Point.cellArea">
+        <member name="P:Web.Services.Models.Point.cellArea">
             <summary>
             Total cell area
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Point.containedArea">
+        <member name="P:Web.Services.Models.Point.containedArea">
             <summary>
             Cell area that intersects the catchment
             </summary>
         </member>
-        <member name="F:Web.Services.Models.Point.percentArea">
+        <member name="P:Web.Services.Models.Point.percentArea">
             <summary>
             Percent coverage of the intersection
             </summary>
@@ -766,12 +1102,12 @@
             Point object
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryPoint.Latitude">
+        <member name="P:Web.Services.Models.GeometryPoint.Latitude">
             <summary>
             Point latitude
             </summary>
         </member>
-        <member name="F:Web.Services.Models.GeometryPoint.Longitude">
+        <member name="P:Web.Services.Models.GeometryPoint.Longitude">
             <summary>
             Point longitude
             </summary>
@@ -788,7 +1124,7 @@
             <param name="input"></param>
             <returns></returns>
         </member>
-        <member name="M:Web.Services.Models.WSTotalFlow.RequestData(System.String,System.String@)">
+        <member name="M:Web.Services.Models.WSTotalFlow.RequestData(System.String)">
             <summary>
             Using the received taskID, the function long-polls the server until the max requests is reached or the status returns success.
             </summary>
@@ -837,14 +1173,45 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Web.Services.Models.WSWorkFlow">
+        <member name="T:Web.Services.Models.WSWaterQuality">
+            <summary>
+            HMS Web Service Water Quality Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSWaterQuality.GetWaterQualityData(Web.Services.Controllers.WaterQualityInput)">
+            <summary>
+            Gets water quality data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Models.WSWatershedDelineation.GetDelineationData(Web.Services.Controllers.WatershedDelineationInput)">
+            <summary>
+            Gets workflow data.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSWatershedWorkFlow">
             <summary>
             HMS Web Serivce WorkFlow Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSWorkFlow.GetWorkFlowData(Web.Services.Controllers.WorkFlowCompareInput)">
+        <member name="M:Web.Services.Models.WSWatershedWorkFlow.GetWorkFlowData(Web.Services.Controllers.WatershedWorkflowInput)">
             <summary>
             Gets workflow data.
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSWind">
+            <summary>
+            HMS Web Service Wind Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSWind.GetWind(Web.Services.Controllers.WindInput)">
+            <summary>
+            Gets wind data using the given TimeSeriesInput parameters.
             </summary>
             <param name="input"></param>
             <returns></returns>
@@ -884,6 +1251,7 @@
             </summary>
             <param name="app"></param>
             <param name="env"></param>
+            <param name="loggerFactory"></param>
         </member>
     </members>
 </doc>

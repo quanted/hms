@@ -120,8 +120,17 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
             if (!csv.Equals("{}"))
             {
-                NCDCCSV results = ReadData(out errorMsg, csv);
-           
+
+                NCDCCSV results;
+                if (stationID.Contains("COOP"))
+                {
+                    results = ParseJson(out errorMsg, csv, tempStartDate, tempEndDate);
+                }
+                else
+                {
+                    results = ReadData(out errorMsg, csv);
+                }
+
                 Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
                 AppendData(ref data, sumValues, input.DateTimeSpan.DateTimeFormat, tempStartDate, tempEndDate, input.TemporalResolution);
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -146,17 +155,21 @@ namespace Data.Source
         {
             errorMsg = "";
             StringBuilder sb = new StringBuilder();
-            sb.Append(baseURL);
 
             if (station.Contains("GHCND"))
             {
+                sb.Append(baseURL);
                 station = station.Remove(0, 6);
                 sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=csv" + "&includeAttributes=true" + "&units=metric");
+            }
+            else if(station.Contains("COOP"))
+            {
+                sb.Append("https://www.ncdc.noaa.gov/cdo-web/api/v2/data?");
+                sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
             else
             {
                 errorMsg = "ERROR: NCEI web service does not currently support the dataset for this station.";
-                sb.Append("datasetid=PRECIP_HLY" + "&stationid=" + station + "&units=metric" + "&startdate=" + startDate.ToString("yyyy-MM-dd") + "&enddate=" + endDate.ToString("yyyy-MM-dd") + "&limit=1000");
             }
             return sb.ToString();
         }
@@ -532,6 +545,7 @@ namespace Data.Source
             return dict;
         }
 
+
         /// <summary>
         /// Adds the key/value pairs from the second dictionary into the first if the key/value does not exist.
         /// </summary>
@@ -746,6 +760,70 @@ namespace Data.Source
 
             }
             return output;
+        }
+
+        public NCDCCSV ParseJson(out string errorMsg, string data, DateTime startDate, DateTime endDate)
+        {
+            errorMsg = "";
+            NCDCCSV results;
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    IgnoreNullValues = true
+                };
+                results = JsonSerializer.Deserialize<NCDCCSV>(data, options);
+            }
+            catch(Exception ex)
+            {
+                errorMsg = ex.Message;
+                return null;
+            }
+            string station = (results.results.Count > 0) ? results.results[0].station : "Unknown";
+            string dtype = (results.results.Count > 0) ? results.results[0].datatype : "Unknown";
+            List<Result> correctedTS = new List<Result>();
+            DateTime currentTimeStep = new DateTime(startDate.Year, startDate.Month, startDate.Day, startDate.Hour, 0, 0);
+            while (currentTimeStep <= endDate)
+            {
+                string dt = currentTimeStep.ToString("yyyy-MM-ddTHH:mm:ss");
+                if (results.results.Count > 0) {
+                    if (results.results[0].date == dt)
+                    {
+                        Result r = results.results[0];
+                        results.results.RemoveAt(0);
+                        correctedTS.Add(r);
+                    }
+                    else
+                    {
+                        Result r = new Result()
+                        {
+                            date = dt,
+                            attributes = ",",
+                            station = station,
+                            datatype = dtype,
+                            value = 0.0
+                        };
+                        correctedTS.Add(r);
+                    }
+                }
+                else
+                {
+                    Result r = new Result()
+                    {
+                        date = dt,
+                        attributes = ",",
+                        station = station,
+                        datatype = dtype,
+                        value = 0.0
+                    };
+                    correctedTS.Add(r);
+                }
+                currentTimeStep = currentTimeStep.AddHours(1);
+            }
+            results.results = correctedTS;
+            return results;           
         }
     }
 }
