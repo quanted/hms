@@ -23,7 +23,7 @@ namespace Web.Services.Models
             
 
             WatershedDelineation.Streams streamNetwork = new WatershedDelineation.Streams(input.Geometry.GeometryMetadata["startCOMID"], input.Geometry.GeometryMetadata["endCOMID"], null);
-            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input, input.contaminantInflow, out comids);
+            LinkedList<StreamSegment> travelPath = streamNetwork.GetStreams(input, input.contaminantInflow, input.inflowSource, out comids);
 
             /* Stream Network Delineation
             List<string> lst = new List<string>();
