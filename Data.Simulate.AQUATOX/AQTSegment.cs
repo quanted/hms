@@ -1976,33 +1976,34 @@ namespace AQUATOX.AQTSegment
         // ---------------------------------------------------------------
 
             PD = GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDissRefrDetr;
-            for (SVLoop = T_SVType.StV; SVLoop <= Consts.LastOrgTxTyp; SVLoop++)
-            {
-                // Loop through state variable type and then each associated toxicant type
-                if (SVLoop != T_SVType.Porewaters)
+            if (PD != null)
+              for (SVLoop = T_SVType.StV; SVLoop <= Consts.LastOrgTxTyp; SVLoop++)
                 {
-                    if ((SVLoop == T_SVType.StV) || GetStatePointer(AllVariables.H2OTox, SVLoop, T_SVLayer.WaterCol) != null)
+                    // Loop through state variable type and then each associated toxicant type
+                    if (SVLoop != T_SVType.Porewaters)
                     {
-                        for (Loop = AllVariables.DissRefrDetr; Loop <= AllVariables.SuspLabDetr; Loop++)
-                        {  // Loop through each detritus record in water col.
+                        if ((SVLoop == T_SVType.StV) || GetStatePointer(AllVariables.H2OTox, SVLoop, T_SVLayer.WaterCol) != null)
+                        {
+                            for (Loop = AllVariables.DissRefrDetr; Loop <= AllVariables.SuspLabDetr; Loop++)
+                            {  // Loop through each detritus record in water col.
 
-                            CalcMultFrac(Loop, SVLoop);   // Determine MultFrac for Initial condition
+                                CalcMultFrac(Loop, SVLoop);   // Determine MultFrac for Initial condition
 
-                            PR = GetStatePointer(Loop, SVLoop, T_SVLayer.WaterCol) as TRemineralize;
-                            if (PR != null)
-                            {
-                                DetritalInputRecordType PDIR = PD.InputRecord;
-                                if (SVLoop == T_SVType.StV)
-                                    {
-                                        PR.InitialCond = PDIR.InitCond * MultFrac;
-                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
-                                    }
-                                else PR.InitialCond = PDIR.ToxInitCond[(int)SVLoop - 2];
+                                PR = GetStatePointer(Loop, SVLoop, T_SVLayer.WaterCol) as TRemineralize;
+                                if (PR != null)
+                                {
+                                    DetritalInputRecordType PDIR = PD.InputRecord;
+                                    if (SVLoop == T_SVType.StV)
+                                        {
+                                            PR.InitialCond = PDIR.InitCond * MultFrac;
+                                            PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                        }
+                                    else PR.InitialCond = PDIR.ToxInitCond[(int)SVLoop - 2];
+                                }
                             }
                         }
                     }
                 }
-            }
         }
 
         // ---------------------------------------------------------------

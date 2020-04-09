@@ -4,6 +4,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Nutrients;
 using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
+using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using AQUATOX.Organisms;
 using AQUATOX.Plants;

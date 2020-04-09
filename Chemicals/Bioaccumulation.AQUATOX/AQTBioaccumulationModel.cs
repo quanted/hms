@@ -19,7 +19,7 @@ namespace AQUATOXBioaccumulation
         public AQTSim AQSim;
 
         /// <summary>
-        /// Instantiates an AQUATOX Chemicals model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
+        /// Instantiates an AQUATOX Bioaccumulation model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
         /// Valid JSON inputs must include an AQUATOX segment with one or more TToxics state variables attached, and valid site record, morphometry data, and PSETUP records.
         /// Example valid JSON inputs and documentation including a list of data requirements may be found in the Chemicals\DOCS directory.
         /// </summary>
@@ -46,15 +46,15 @@ namespace AQUATOXBioaccumulation
         }
 
         /// <summary>
-        /// Instantiates an AQUATOX Chemicals model given an existing AQUATOX Simulation insim.  Used for testing multi-purpose models.
+        /// Instantiates an AQUATOX Bioaccumulation model given an existing AQUATOX Simulation insim.  Used for testing multi-purpose models.
         /// </summary>
-        /// <param name="insim"></param> AQTSim.  The AQUATOX simulation being typecast or tested as an AQUATOX Chemicals Model
+        /// <param name="insim"></param> AQTSim.  The AQUATOX simulation being typecast or tested as an AQUATOX Bioaccumulation Model
         public AQTBioaccumulationModel(AQTSim insim)
         { AQSim = insim; }
 
 
         /// <summary>
-        /// Checks for data requirements for an AQTChemicalsModel including state variable requirements and parameter values.
+        /// Checks for data requirements for an AQTBioaccumulationModel including state variable requirements and parameter values.
         /// </summary>
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
