@@ -14,6 +14,8 @@ namespace Web.Services.Controllers
     public class WatershedDelineationInput : TimeSeriesInput
     {
         public List<List<object>> contaminantInflow { get; set; }
+
+        public string inflowSource { get; set; }
     }
 
     /// <summary>
