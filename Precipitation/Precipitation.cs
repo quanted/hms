@@ -99,6 +99,7 @@ namespace Precipitation
                     this.Output = trmm.GetData(out errorMsg, this.Output, this.Input);
                     if(errorMsg.Contains("ERROR")) { return null; }
                     break;
+
                 case "nwm":
                     // wgen Precipitation Data call
                     NWM nwm = new NWM();
