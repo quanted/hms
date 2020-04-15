@@ -126,13 +126,6 @@ namespace Evapotranspiration
         {
             errorMsg = "";
 
-            // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
-            {
-                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
-                if (errorMsg.Contains("ERROR")) { return null; }
-            }
-
             //COMID Check
             if (Input.Geometry.ComID > 0)
             {
@@ -152,6 +145,13 @@ namespace Evapotranspiration
                     Longitude = double.Parse(centroidDict["CentroidLongitude"])
                 };
                 Input.Geometry.Point = (PointCoordinate) centroid;
+            }
+
+            // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
+            {
+                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                if (errorMsg.Contains("ERROR")) { return null; }
             }
 
             //TODO: Check Source and run specific subcomponent class for source
