@@ -133,6 +133,27 @@ namespace Evapotranspiration
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 
+            //COMID Check
+            if (Input.Geometry.ComID > 0)
+            {
+                errorMsg = "";
+                string dbPath = "./App_Data/catchments.sqlite";
+                string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + Input.Geometry.ComID.ToString();
+                Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
+                if (centroidDict.Count == 0)
+                {
+                    errorMsg = "ERROR: Unable to find catchment in database. ComID: " + Input.Geometry.ComID.ToString();
+                    return null;
+                }
+
+                IPointCoordinate centroid = new PointCoordinate()
+                {
+                    Latitude = double.Parse(centroidDict["CentroidLatitude"]),
+                    Longitude = double.Parse(centroidDict["CentroidLongitude"])
+                };
+                Input.Geometry.Point = (PointCoordinate) centroid;
+            }
+
             //TODO: Check Source and run specific subcomponent class for source
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
