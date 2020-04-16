@@ -125,6 +125,15 @@ namespace Evapotranspiration
         public ITimeSeriesOutput GetData(out string errorMsg)
         {
             errorMsg = "";
+            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
+            this.Output = iFactory.Initialize();
+
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            {
+                this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
+                this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
+            }
+
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
@@ -134,8 +143,6 @@ namespace Evapotranspiration
             }
 
             //TODO: Check Source and run specific subcomponent class for source
-            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
-            this.Output = iFactory.Initialize();
             Elevation elev = new Elevation(this.Input.Geometry.Point.Latitude, this.Input.Geometry.Point.Longitude);
             Utilities.Time offsets = new Utilities.Time();
 
@@ -152,7 +159,7 @@ namespace Evapotranspiration
                 errorMsg = "ERROR: NLDAS algorithm requires NLDAS data source.";
                 return null;
             }
-            if (this.Input.Source == "daymet" && this.Algorithm != "hamon" && this.Algorithm != "hargreaves" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
+            if (this.Input.Source == "daymet" && this.Algorithm != "penmandaily" && this.Algorithm != "hamon" && this.Algorithm != "hargreaves" && this.Algorithm != "mortoncrae" && this.Algorithm != "mortoncrwe" && this.Algorithm != "priestlytaylor")
             {
                 errorMsg = "ERROR: Algorithm is incompatible with Daymet data source.";
                 return null;
