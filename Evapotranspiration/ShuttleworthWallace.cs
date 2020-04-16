@@ -532,10 +532,6 @@ namespace Evapotranspiration
                     }
                     daymets = null;
                     break;
-                case "custom":
-                    CustomData cd = new CustomData();
-                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "shuttleworthwallace");
-                    break;
                 case "nldas":
                 case "gldas":
                 default:

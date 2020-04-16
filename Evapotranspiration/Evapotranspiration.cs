@@ -135,6 +135,27 @@ namespace Evapotranspiration
             }
 
 
+            //COMID Check
+            if (Input.Geometry.ComID > 0)
+            {
+                errorMsg = "";
+                string dbPath = "./App_Data/catchments.sqlite";
+                string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + Input.Geometry.ComID.ToString();
+                Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
+                if (centroidDict.Count == 0)
+                {
+                    errorMsg = "ERROR: Unable to find catchment in database. ComID: " + Input.Geometry.ComID.ToString();
+                    return null;
+                }
+
+                IPointCoordinate centroid = new PointCoordinate()
+                {
+                    Latitude = double.Parse(centroidDict["CentroidLatitude"]),
+                    Longitude = double.Parse(centroidDict["CentroidLongitude"])
+                };
+                Input.Geometry.Point = (PointCoordinate) centroid;
+            }
+
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncdc")) //if (this.Input.Geometry.Timezone.Offset == 0) 
             {
