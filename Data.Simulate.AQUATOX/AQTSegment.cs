@@ -1128,7 +1128,7 @@ namespace AQUATOX.AQTSegment
             bool deleted;
 
             newconc.SVConc = GetStateVal(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if (newconc.SVConc < 0) return;
+            if (newconc.SVConc < 0) newconc.SVConc = 0;
 
             newconc.Time = TPresent;
             PO2Concs.Insert(0, newconc);

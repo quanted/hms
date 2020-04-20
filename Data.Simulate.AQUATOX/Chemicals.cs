@@ -116,6 +116,8 @@ namespace AQUATOX.Chemicals
         public virtual bool ShouldSerializeBioTrans() { return true; }  // only output BioTrans for H2OTox ChemRec
 
         public UptakeCalcMethodType Anim_Method, Plant_Method;
+        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
+        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
 
         public double Tox_Air;  // toxicant in air (gas-phase concentration) in g/m3
         public Loadings.TLoadings GillUptake_Link = null;  // optional linkage from JSON if chemicals sorbed to plants, animals, or OM not modeled
@@ -144,9 +146,13 @@ namespace AQUATOX.Chemicals
             double Wet2Dry, Mass;
 
             base.SetToInitCond();
-            if (NState != AllVariables.H2OTox) 
+            if (NState != AllVariables.H2OTox)
+            {
                 ChemRec = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).ChemRec;
-
+                BioTrans = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).BioTrans;
+                Anim_Method = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).Anim_Method;
+                Plant_Method = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).Plant_Method;
+            }
             // Toxicant that is neither buried nor dissolved in water must have its InitCond converted
             // to mass from ppb.  Utilizes wettodry, so must be after CalcWetToDry call
             if ((Layer == T_SVLayer.WaterCol) && (NState != AllVariables.H2OTox))
