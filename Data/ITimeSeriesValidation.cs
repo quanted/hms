@@ -30,7 +30,7 @@ namespace Data
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
-            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
+            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei" },
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },

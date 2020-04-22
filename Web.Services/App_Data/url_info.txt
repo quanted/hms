@@ -32,6 +32,7 @@ daymet_precipitation_url https://daymet.ornl.gov/data/send/saveData?
 daymet_temperature_url https://daymet.ornl.gov/data/send/saveData?
 daymet_radiation_url https://daymet.ornl.gov/data/send/saveData?
 ncei_precipitation_url https://www.ncei.noaa.gov/access/services/data/v1?
+ncei_temperature_url https://www.ncei.noaa.gov/access/services/data/v1?
 ncei_wind_url https://www.ncei.noaa.gov/access/services/data/v1?
 ncei_station_url https://www.ncdc.noaa.gov/cdo-web/api/v2/stations/
 TIMEZONE_GEE_INT https://134.67.114.1/hms/rest/timezone/

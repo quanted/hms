@@ -33,16 +33,12 @@
 
   <ItemGroup>
     <None Remove="App_Data\url_info.txt" />
-    <None Remove="App_Data\url_info_old.txt" />
     <None Remove="App_Data\XmlComments.xml" />
     <None Remove="App_Data\XmlCommentsData.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="App_Data\url_info.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="App_Data\url_info_old.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="App_Data\XmlComments.xml">
