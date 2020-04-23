@@ -3,24 +3,25 @@ using Data.Source;
 using System;
 using System.Collections.Generic;
 
-namespace Precipitation
+namespace Temperature
 {
-
-    public class NCEIPrecipitation
+    public class NCEITemperature
     {
         public string DATE { get; set; }
         public string STATION { get; set; }
-        public double PRCP { get; set; }
-        public string PRCP_ATTRIBUTES { get; set; }
+        public double TMAX { get; set; }
+        public string TMAX_ATTRIBUTES { get; set; }
+        public double TMIN { get; set; }
+        public string TMIN_ATTRIBUTES { get; set; }
     }
 
     /// <summary>
-    /// Base precipitation ncdc class.
+    /// Base temperature ncei class.
     /// </summary>
-    public class NCDC
+    public class NCEI
     {
         /// <summary>
-        /// Makes the GetData call to the base NCDC class.
+        /// Makes the GetData call to the base NCEI class.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="output"></param>
@@ -30,8 +31,7 @@ namespace Precipitation
         {
             errorMsg = "";
 
-            Data.Source.NCDC ncdc = new Data.Source.NCDC();
-            ITimeSeriesOutput ncdcOutput = output;
+            ITimeSeriesOutput nceiOutput = output;
 
             // Make call to get station metadata and add to output.Metadata
             if (!input.Geometry.GeometryMetadata.ContainsKey("token"))
@@ -51,35 +51,33 @@ namespace Precipitation
                 errorMsg = "ERROR: No NCEI stationID provided. Please provide a valid NCEI stationID.";
                 return null;
             }
-            ncdcOutput.Metadata = SetMetadata(out errorMsg, "ncei", NCEI<NCEIPrecipitation>.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
-            ncdcOutput.Metadata.Add("ncei", input.TemporalResolution);
-            ncdcOutput.Metadata.Add("ncei_units", "mm");
+            nceiOutput.Metadata = SetMetadata(out errorMsg, "ncei", NCEI<NCEITemperature>.GetStationDetails(out errorMsg, station_url, input.Geometry.GeometryMetadata["stationID"], input.Geometry.GeometryMetadata["token"]));
+            nceiOutput.Metadata.Add("ncei", input.TemporalResolution);
+            nceiOutput.Metadata.Add("ncei_units", "C");
 
             // Data aggregation takes place within ncdc.GetData
 
-            Dictionary<string, double> data = new Dictionary<string, double>();
+            Dictionary<string, List<double>> data = new Dictionary<string, List<double>>();
 
             if (input.Geometry.StationID.Contains("GHCND"))
             {
-                NCEI<NCEIPrecipitation> ncei = new NCEI<NCEIPrecipitation>();
-                List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input);
+                NCEI<NCEITemperature> ncei = new NCEI<NCEITemperature>();
+                List<NCEITemperature> preData = ncei.GetData(out errorMsg, "TMIN,TMAX", input);
                 data = this.ParseData(out errorMsg, preData, input.DateTimeSpan.DateTimeFormat);
             }
-            else
-            {
-                data = ncdc.GetData(out errorMsg, "PRCP", input);
-            }
-            if (errorMsg.Contains("ERROR")) { return null; }
 
             // Set resulting data to output.Data
-            ncdcOutput.Data = ConvertDict(out errorMsg, input.DataValueFormat, data);
+            nceiOutput.Data = this.ConvertDict(out errorMsg, input.DataValueFormat, data);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            ncdcOutput.DataSource = "ncei";
-            ncdcOutput.Dataset = "Precipitation";
-            ncdcOutput.Metadata.Add("column_1", "Date");
-            ncdcOutput.Metadata.Add("column_2", "NCEI Total");
-            return ncdcOutput;
+            nceiOutput.DataSource = "ncei";
+            nceiOutput.Dataset = "Temperature";
+            nceiOutput.Metadata.Add("column_1", "Date");
+            nceiOutput.Metadata.Add("column_2", "Temp Max");
+            nceiOutput.Metadata.Add("column_3", "Temp Avg");
+            nceiOutput.Metadata.Add("column_4", "Temp Min");
+            nceiOutput.Metadata.Add("disclaimer_column_3", "Average temperature is the midrange of the tmax and tmin values.");
+            return nceiOutput;
         }
 
         /// <summary>
@@ -89,14 +87,20 @@ namespace Precipitation
         /// <param name="dataFormat"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, double> data)
+        private Dictionary<string, List<string>> ConvertDict(out string errorMsg, string dataFormat, Dictionary<string, List<double>> data)
         {
             errorMsg = "";
 
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
-            foreach(var key in data)
+            foreach(KeyValuePair<string, List<double>> d in data)
             {
-                result.Add(key.Key.ToString(), new List<string>() { data[key.Key.ToString()].ToString(dataFormat) });
+                List<string> dataList = new List<string>()
+                {
+                    d.Value[0].ToString(dataFormat),
+                    ((d.Value[0] + d.Value[1])/2).ToString(dataFormat),
+                    d.Value[1].ToString(dataFormat)
+                };
+                result.Add(d.Key.ToString(), dataList);
             }
             return result;
         }
@@ -120,66 +124,69 @@ namespace Precipitation
         }
 
         /// <summary>
-        /// Calls the function in Data.Source.NCDC that will perform the status check.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public static Dictionary<string, string> CheckStatus(ITimeSeriesInput input)
-        {
-            return Data.Source.NCDC.CheckStatus("Precipitation", input);
-        }
-
-        /// <summary>
-        /// Parse the resulting NCEIPrecipitation list into a dictionary of timestamps and double 
+        /// Parse the resulting NCEIPrecipitation list into a dictionary of timestamps and double values
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="rawdata"></param>
         /// <param name="dateFormat"></param>
         /// <returns></returns>
-        protected Dictionary<string, double> ParseData(out string errorMsg, List<NCEIPrecipitation> rawdata, string dateFormat)
+        protected Dictionary<string, List<double>> ParseData(out string errorMsg, List<NCEITemperature> rawdata, string dateFormat)
         {
             errorMsg = "";
-            Dictionary<string, double> data = new Dictionary<string, double>();
+            Dictionary<string, List<double>> data = new Dictionary<string, List<double>>();
             DateTime iDate;
             DateTime newDate;
             DateTime.TryParse(rawdata[0].DATE, out newDate);
-            double sum = 0.0;
+            double tmaxSum = 0.0;
+            double tminSum = 0.0;
+            int n = 0;
             for (int i = 0; i <= rawdata.Count - 1; i++)
             {
                 DateTime.TryParse(rawdata[i].DATE, out iDate);
                 if (iDate.Date == newDate.Date)
                 {
-                    if (sum < 0)
+                    double tmax = NCEI<NCEITemperature>.AttributeCheck(out errorMsg, rawdata[i].TMAX, rawdata[i].TMAX_ATTRIBUTES);
+                    double tmin = NCEI<NCEITemperature>.AttributeCheck(out errorMsg, rawdata[i].TMIN, rawdata[i].TMIN_ATTRIBUTES);
+                    if (tmax < 0)
                     {
-                        sum = 0;
-                    }
-                    double addition = NCEI<NCEIPrecipitation>.AttributeCheck(out errorMsg, rawdata[i].PRCP, rawdata[i].PRCP_ATTRIBUTES);
-                    if (addition < 0)
-                    {
-                        sum = addition;
+                        tmaxSum = tmax;
                     }
                     else
                     {
-                        sum += addition;
+                        tmaxSum += tmax;
+                    }
+                    if (tmin < 0)
+                    {
+                        tminSum = tmin;
+                    }
+                    else
+                    {
+                        tminSum += tmin;
                     }
                     if (errorMsg.Contains("ERROR")) { return null; }
+                    n += 1;
                 }
                 else
                 {
+                    double tmaxAvg = tmaxSum / n;
+                    double tminAvg = tminSum / n;
                     newDate = newDate.AddHours(-newDate.Hour);
-                    data.Add(newDate.ToString(dateFormat), sum);
+                    data.Add(newDate.ToString(dateFormat), new List<double>() { tmaxAvg, tminAvg });
                     newDate = iDate;
-                    sum = NCEI<NCEIPrecipitation>.AttributeCheck(out errorMsg, rawdata[i].PRCP, rawdata[i].PRCP_ATTRIBUTES);
+                    tmaxSum = NCEI<NCEITemperature>.AttributeCheck(out errorMsg, rawdata[i].TMAX, rawdata[i].TMAX_ATTRIBUTES);
+                    tminSum = NCEI<NCEITemperature>.AttributeCheck(out errorMsg, rawdata[i].TMIN, rawdata[i].TMIN_ATTRIBUTES);
                     if (i == rawdata.Count - 1)
                     {
                         iDate = iDate.AddHours(-iDate.Hour);
-                        data.Add(iDate.ToString(dateFormat), sum);
+                        data.Add(iDate.ToString(dateFormat), new List<double>() { tmaxAvg, tminAvg });
                     }
                     if (errorMsg.Contains("ERROR")) { return null; }
+                    n = 1;
                 }
             }
             return data;
         }
 
     }
+
 }

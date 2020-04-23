@@ -41,7 +41,7 @@ namespace Precipitation
                 {
                     Utilities.ErrorOutput err = new ErrorOutput();
                     output = err.ReturnError("Precipitation", "gldas", errorMsg);
-                    errorMsg = "";
+                    //errorMsg = "";
                     return output;
                 }
                 else

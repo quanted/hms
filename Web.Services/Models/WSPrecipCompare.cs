@@ -63,7 +63,7 @@ namespace Web.Services.Models
     public class WSPrecipCompare
     {
 
-        private enum PrecipSources { compare, nldas, gldas, trmm, ncei, daymet, wgen };
+        private enum PrecipSources { compare, nldas, gldas, ncei, trmm };
 
         /// <summary>
         /// Gets workflow data.

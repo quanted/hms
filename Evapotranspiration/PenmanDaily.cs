@@ -458,10 +458,6 @@ namespace Evapotranspiration
                     }
                     daymets = null;
                     break;
-                case "custom":
-                    CustomData cd = new CustomData();
-                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "penmandaily");
-                    break;
                 case "gldas":
                     ITimeSeriesOutput final = getGldasData(out errorMsg, inpt);
                     return final;
