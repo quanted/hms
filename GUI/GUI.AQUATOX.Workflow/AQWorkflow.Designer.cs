@@ -37,6 +37,7 @@ namespace GUI.AQUATOX.Workflow
             this.integrate = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // loadJSON
@@ -55,7 +56,7 @@ namespace GUI.AQUATOX.Workflow
             this.saveJSON.Name = "saveJSON";
             this.saveJSON.Size = new System.Drawing.Size(104, 28);
             this.saveJSON.TabIndex = 0;
-            this.saveJSON.Text = "Save JSON";
+            this.saveJSON.Text = "Save Output";
             this.saveJSON.UseVisualStyleBackColor = true;
             this.saveJSON.Click += new System.EventHandler(this.saveJSON_Click);
             // 
@@ -77,7 +78,7 @@ namespace GUI.AQUATOX.Workflow
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(876, 175);
+            this.textBox1.Size = new System.Drawing.Size(856, 106);
             this.textBox1.TabIndex = 2;
             // 
             // progressBar1
@@ -87,15 +88,26 @@ namespace GUI.AQUATOX.Workflow
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(441, 21);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(455, 21);
+            this.progressBar1.Size = new System.Drawing.Size(435, 21);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
             this.progressBar1.Visible = false;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(637, 185);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(239, 23);
+            this.comboBox1.TabIndex = 4;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // AQTWorkflowForm
             // 
-            this.ClientSize = new System.Drawing.Size(920, 554);
+            this.ClientSize = new System.Drawing.Size(900, 519);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.integrate);
@@ -115,6 +127,7 @@ namespace GUI.AQUATOX.Workflow
         private System.Windows.Forms.Button integrate;
         private System.Windows.Forms.TextBox textBox1;
         private ProgressBar progressBar1;
+        private ComboBox comboBox1;
     }
 
 

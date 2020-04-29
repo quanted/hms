@@ -18,7 +18,10 @@ namespace AQUATOX.Bioaccumulation
     public class TParticleTox : TToxics
     {
         public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
+        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec\
+        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
+        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
+
 
         public TParticleTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
@@ -516,6 +519,9 @@ namespace AQUATOX.Bioaccumulation
     {
         public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
         public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
+        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
+        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
+
 
         public TPlantToxRecord Plant_Tox = null;
 
@@ -555,8 +561,6 @@ namespace AQUATOX.Bioaccumulation
                 return K1 * ToxState * AlgalPtr.State * 1e-6;        // HMS removed Dif
            // ug/L-d (L/kg-d) (ug/L)      (mg/L)      (kg/mg)
             }
-
-
 
             AlgalPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
             ToxState = AQTSeg.GetState(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol);
@@ -764,7 +768,8 @@ namespace AQUATOX.Bioaccumulation
 
         public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
         public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
-
+        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
+        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
 
         public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
     {

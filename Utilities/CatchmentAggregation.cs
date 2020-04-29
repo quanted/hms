@@ -134,7 +134,11 @@ namespace Utilities
             {
                 dbPath = @".\App_Data\catchments.sqlite";
             }
-            
+            if (!File.Exists(dbPath))
+            {
+                throw new Exception("Cannot find catchments.sqlite");
+            }
+
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
             connectionStringBuilder.DataSource = dbPath;
             DataTable dt = new DataTable();

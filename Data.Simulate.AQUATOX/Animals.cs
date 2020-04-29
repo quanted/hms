@@ -1065,8 +1065,7 @@ namespace AQUATOX.Animals
     public double O2EffectFrac(int O2Eff)
     {
         
-        int[] CALCTIMES = { 1, 4, 12, 24, 48, 96 };
-        // hours
+        int[] CALCTIMES = { 1, 4, 12, 24, 48, 96 };    // hours
         const int CALCSTART1Day = 3;
         const int CALCSTOP = 5;
         int CalcIteration;
@@ -1134,15 +1133,13 @@ namespace AQUATOX.Animals
                     i++;
                 } while (!((i == AQTSeg.PO2Concs.Count) || OverTime));
             }
-            if (Foundone)
+            if (Foundone) // must have enough of a time-record of O2 to make a comparison
             {
-                // must have enough of a time-record of O2 to make a comparison
                 Intercept = O2EffectConc + (0.007 * O2EffectPct);
                 EffectPct = (((MaxO2 - 0.204 + 0.064 * Math.Log(CalcTime)) / (0.191 * Math.Log(CalcTime) + 0.392)) - Intercept) / -0.007;
                 if (EffectPct > 100) EffectPct = 100;
                 if (EffectPct < 0)   EffectPct = 0;
-                if ((EffectFrac * 100 < EffectPct)) EffectFrac = EffectPct / 100;
-                // choose highest effect of time-periods evaluated
+                if ((EffectFrac * 100 < EffectPct)) EffectFrac = EffectPct / 100;  // choose highest effect of time-periods evaluated                
             }
         }
         // Optimization
