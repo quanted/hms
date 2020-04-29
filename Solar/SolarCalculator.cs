@@ -41,15 +41,20 @@ namespace Solar
         {
             string errorMsg = "";
 
+            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
+            this.Output = iFactory.Initialize();
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            {
+                this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
+                this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
+            }
+
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0)
             {
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 return;
             }
-
-            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
-            this.Output = iFactory.Initialize();
 
             // Add defaults to metadata
             this.Output.Metadata.Add("latitude", this.Input.Geometry.Point.Latitude.ToString());
