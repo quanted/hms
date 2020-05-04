@@ -89,8 +89,14 @@ namespace SubSurfaceFlow
             this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
-            this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
-            this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+            if (!this.Output.Metadata.ContainsKey(this.Input.Source + "_timeZone"))
+            {
+                this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
+            }
+            if (!this.Output.Metadata.ContainsKey(this.Input.Source + "_tz_offset"))
+            {
+                this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+            }
 
             //TODO: Add output format control
 
