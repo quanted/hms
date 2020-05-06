@@ -124,7 +124,7 @@ namespace Temperature
         }
 
         /// <summary>
-        /// Parse the resulting NCEIPrecipitation list into a dictionary of timestamps and double values
+        /// Parse the resulting NCEIWind list into a dictionary of timestamps and double values
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="rawdata"></param>

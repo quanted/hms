@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.IO;
 using System.Threading;
+using Serilog;
+using System.Linq;
 
 namespace SurfaceRunoff
 {
@@ -28,7 +30,7 @@ namespace SurfaceRunoff
             {
                 ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
                 string tempSource = input.Source;
-                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
+                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Geometry.GeometryMetadata["precipSource"] : "daymet";
                 input.Source = precipSource;
                 ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
@@ -43,8 +45,13 @@ namespace SurfaceRunoff
                     precipInput.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
+                if(input.Source == "ncei" && input.Geometry.StationID == null)
+                {
+                    Log.Warning("Error for Surface Runoff request using Curve Number with NCEI precipitation data source, missing stationID.");
+                    return null;
+                }
                                                                                
-                precipInput.TemporalResolution = "daily";
+                //precipInput.TemporalResolution = "daily";
                 precipData = GetPrecipData(out errorMsg, precipInput, output);
                 if (errorMsg.Contains("ERROR")) { return null; }
                 input.Source = tempSource;
@@ -70,7 +77,7 @@ namespace SurfaceRunoff
             cnOutput.Metadata.Add("precipSource", precipData.DataSource);
             cnOutput.Metadata.Add("column_1", "Date");
             cnOutput.Metadata.Add("column_2", "Surface Runoff");
-
+            cnOutput.Metadata = this.MergeDictionaries(cnOutput.Metadata, precipData.Metadata);
 
             return cnOutput;
         }
@@ -89,29 +96,6 @@ namespace SurfaceRunoff
             Precipitation.Precipitation precip = new Precipitation.Precipitation();
             precip.Input = input;
             precip.Output = output;
-
-            if (input.Geometry.GeometryMetadata.ContainsKey("precipSource"))
-            {
-                switch (input.Geometry.GeometryMetadata["precipSource"])
-                {
-                    case "nldas":
-                        input.Source = "nldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "gldas":
-                        input.Source = "gldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "daymet":
-                    default:
-                        input.Source = "daymet";
-                        break;
-                }
-            }
-            else
-            {
-                input.Source = "daymet";
-            }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             precip.Input = tempInput;
@@ -222,6 +206,24 @@ namespace SurfaceRunoff
                 }
             }
             return validTSInput;
+        }
+
+        /// <summary>
+        /// Copies all of the key value pairs in dict2 into dict1, duplicates are ignored
+        /// </summary>
+        /// <param name="dict1"></param>
+        /// <param name="dict2"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> MergeDictionaries(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+        {
+            foreach(KeyValuePair<string, string> kv in dict2)
+            {
+                if (!dict1.ContainsKey(kv.Key))
+                {
+                    dict1.Add(kv.Key, kv.Value);
+                }
+            }
+            return dict1;
         }
     }
 }
