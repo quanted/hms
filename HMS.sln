@@ -85,6 +85,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web.Services.Tests", "Web.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bioaccumulation.AQUATOX", "Chemicals\Bioaccumulation.AQUATOX\Bioaccumulation.AQUATOX.csproj", "{61AB2D5B-3778-45B7-BE25-3D73F7184ED8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bioaccumulation.AQUATOX.UnitTests", "Chemicals\Bioaccumulation.AQUATOX.UnitTests\Bioaccumulation.AQUATOX.UnitTests.csproj", "{5EB43694-126D-4A55-BDE8-E2E92E5699FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -421,6 +423,14 @@ Global
 		{61AB2D5B-3778-45B7-BE25-3D73F7184ED8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{61AB2D5B-3778-45B7-BE25-3D73F7184ED8}.Release|x64.ActiveCfg = Release|Any CPU
 		{61AB2D5B-3778-45B7-BE25-3D73F7184ED8}.Release|x64.Build.0 = Release|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

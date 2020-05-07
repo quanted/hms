@@ -44,28 +44,28 @@ namespace Chemicals.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_Chemical_Model_NoChemicals.txt";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoChemicals.txt";
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_Chemical_Model_NopH.txt";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NopH.txt";
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_Chemical_Model_NoVolume.txt";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoVolume.txt";
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\AQUATOX_Chemical_Model_NoLight.txt";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoLight.txt";
             json = File.ReadAllText(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);

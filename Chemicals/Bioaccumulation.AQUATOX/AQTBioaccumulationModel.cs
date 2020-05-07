@@ -3,6 +3,7 @@ using AQUATOX.Nutrients;
 using AQUATOX.Chemicals;
 using AQUATOX.Bioaccumulation;
 using Stream.Hydrology.AQUATOX;
+using System.Linq;
 using Globals;
 
 namespace AQUATOXBioaccumulation
@@ -61,35 +62,17 @@ namespace AQUATOXBioaccumulation
         {
             AQSim.AQTSeg.SetMemLocRec();
 
-            bool FoundTox = false;
-            for (T_SVType Typ = T_SVType.OrgTox1; Typ <= T_SVType.OrgTox20; Typ++)
-                { TToxics TTx = (TToxics)AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, Typ, T_SVLayer.WaterCol);
-                  if (TTx != null) { FoundTox = true; break; }
-                }
-            if (!FoundTox) return "A TToxics (toxicant in the water column) state variable must be included in the simulation. ";
-
-
-            AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
-            string checkvol = AQTVM.CheckDataRequirements();
-            if (checkvol != "") return checkvol;
-
-            TO2Obj TO2 = (TO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TO2 == null) return "An Oxygen state variable or driving variable must be included in the simulation. ";
-
-            TTemperature TTemp = (TTemperature)AQSim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
-
-            TpHObj TpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TpH == null) return "A pH loading variable or state variable must be included in a chemical simulation.";
-            if ((!TpH.UseLoadsRecAsDriver) && (TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
+            foreach (TToxics TT in AQSim.AQTSeg.SV.OfType<TToxics>())
             {
-                TCO2Obj TCO2 = (TCO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
-                if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";
+                if (TT.NState != AllVariables.H2OTox)  // if this is a bioaccumulation state variable and not a toxicant in water
+                {
+                    TToxics TTx = AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, TT.SVType, T_SVLayer.WaterCol) as TToxics;
+                    if (TTx == null) return "The bioaccumulation state variable " + TT.PName + " is present, but the relevant chemical is not present as a state or a driving variable.";
+    
+                    TStateVariable Carry = AQSim.AQTSeg.GetStatePointer(TT.NState, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (Carry == null) return "The bioaccumulation state variable " + TT.PName + " is present, but its carrying organism is not in the simulation.";
+                }
             }
-
-            TLight TLt = (TLight)AQSim.AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TLt == null) return "A Light state variable or driving variable must be included in the simulation. ";
-
             
             return "";
         }
