@@ -28,7 +28,11 @@ namespace Wind
             ITimeSeriesOutput ncdcOutput = output;
 
             // Make call to get station metadata and add to output.Metadata
-            if (input.Geometry.StationID != null && !input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            if (input.Geometry.GeometryMetadata.ContainsKey("stationID"))
+            {
+                input.Geometry.StationID = input.Geometry.GeometryMetadata["stationID"];
+            }
+            else if (input.Geometry.StationID != null && !input.Geometry.GeometryMetadata.ContainsKey("stationID"))
             {
                 input.Geometry.GeometryMetadata.Add("stationID", input.Geometry.StationID);
             }
