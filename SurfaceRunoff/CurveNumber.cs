@@ -216,7 +216,15 @@ namespace SurfaceRunoff
         /// <returns></returns>
         private Dictionary<string, string> MergeDictionaries(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
         {
-            foreach(KeyValuePair<string, string> kv in dict2)
+            if (dict2 == null)
+            {
+                return dict1;
+            }
+            else if (dict1 == null)
+            {
+                return dict2;
+            }
+            foreach (KeyValuePair<string, string> kv in dict2)
             {
                 if (!dict1.ContainsKey(kv.Key))
                 {
