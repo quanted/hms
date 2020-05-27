@@ -20,11 +20,11 @@ namespace AQUATOX.Volume
     {
         // [JsonIgnore] double // LastCalcTA ;  
         // [JsonIgnore] double // LastTimeTA ;        // don't need saving
-        [JsonIgnore] double Inflow = 0;
-        [JsonIgnore] double Discharg = 0;          // don't need saving
-        [JsonIgnore] double InflowLoad = 0;
-        [JsonIgnore] double DischargeLoad = 0;
-        [JsonIgnore] double KnownValueLoad = 0;
+        [JsonIgnore] double Inflow = 0.0;
+        [JsonIgnore] double Discharg = 0.0;          // don't need saving
+        [JsonIgnore] double InflowLoad = 0.0;
+        [JsonIgnore] double DischargeLoad = 0.0;
+        [JsonIgnore] double KnownValueLoad = 0.0;
         // [JsonIgnore] double OOSDischFracLoad = 0;
         // [JsonIgnore] double OOSInflowFracLoad = 0;  // don't need saving
 
@@ -335,7 +335,7 @@ namespace AQUATOX.Volume
             DateIndex = TimeIndex.AddDays(-1);
             do
             {
-                DateIndex = DateIndex.AddDays( 1);
+                DateIndex = DateIndex.AddDays(1);
                 N = N + 1;
                 CalculateLoad(DateIndex);
                 Sum_Disch = Sum_Disch + InflowLoad - KnownValueLoad + KnownVal_Tminus1 - Evaporation();
@@ -345,9 +345,9 @@ namespace AQUATOX.Volume
             } while (!(((DateIndex.AddDays(-365)) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
             result = Sum_Disch / N;
             MV = SumVol / N;
-            if (result < 0)
+            if (result < 0.0)
             {
-                result = 0;
+                result = 0.0;
             }
             CalculateLoad(TimeIndex);
             // reset TVolume values

@@ -172,7 +172,7 @@ namespace AQUATOX.Nutrients
                 if (NState == AllVariables.Ammonia)
                     CNutrient = CNutrient * PS_NH3_in_DIN;
                 if (NState == AllVariables.Nitrate)
-                    CNutrient = CNutrient * (1 - PS_NH3_in_DIN);
+                    CNutrient = CNutrient * (1.0 - PS_NH3_in_DIN);
             }
             else // LdType <> 0
             {
@@ -180,7 +180,7 @@ namespace AQUATOX.Nutrients
                 if (NState == AllVariables.Ammonia)
                     CNutrient = CNutrient * NPS_NH3_in_DIN;
                 if (NState == AllVariables.Nitrate)
-                    CNutrient = CNutrient * (1 - NPS_NH3_in_DIN);
+                    CNutrient = CNutrient * (1.0 - NPS_NH3_in_DIN);
             }
 
             AddLoad = CNutrient;
@@ -244,7 +244,7 @@ namespace AQUATOX.Nutrients
                 CNutrient = CNutrient * Infl_NH3_in_DIN;
 
             if (NState == AllVariables.Nitrate)
-                CNutrient = CNutrient * (1 - Infl_NH3_in_DIN);
+                CNutrient = CNutrient * (1.0 - Infl_NH3_in_DIN);
 
             Loading = CNutrient;
         }
@@ -825,7 +825,7 @@ namespace AQUATOX.Nutrients
                 if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
                 {
                     PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                    DetrNFrac = (1 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
+                    DetrNFrac = (1.0 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
                     if (AQTSeg.Diagenesis_Included())
                     {
                         DetrNFrac = Nut2Org_Lab;
@@ -2033,14 +2033,14 @@ namespace AQUATOX.Nutrients
                 ZDepth = Location.MeanThick;  // [VerticalSegments.Epilimnion]
                 Vel = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) * 0.01;
                 // m/s         // cm/s                                                                        // m/cm
-                if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
+                if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0.0; }           // no velocity reaeration for nonstreams
 
                 TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);  // m/s at 10 m
                 if (TWind == null) Wnd = 0.1;
                 else Wnd = TWind.State;  
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
-                KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;
+                KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864.0) / ZDepth;
                 // 1/d                        m/sec        m
                 if (ZDepth < 0.06)
                 {
@@ -2102,16 +2102,16 @@ namespace AQUATOX.Nutrients
             if (TSV == null) Salt = 0; else Salt = TSV.State;
 
             TKelvin = 273.15 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / Math.Pow(TKelvin, 2) + 1.243800E10 / Math.Pow(TKelvin, 3.0) - 8.621949E11 / Math.Pow(TKelvin, 4.0);
+            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / Math.Pow(TKelvin, 2.0) + 1.243800E10 / Math.Pow(TKelvin, 3.0) - 8.621949E11 / Math.Pow(TKelvin, 4.0);
             if (Salt > 0)
             {
-                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / Math.Pow(TKelvin, 2));
+                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / Math.Pow(TKelvin, 2.0));
             }
             else
             {
                 lnCss = lnCsf;
             }
-            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100;
+            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100.0;
             // Fractional effect due to altitude from Zison et al. 1978
             // m
             return Math.Exp(lnCss) * AltEffect;

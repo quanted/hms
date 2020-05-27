@@ -245,18 +245,18 @@ namespace AQUATOX.AQSite
             }
             else
             {
-                result = (1.0 - P_Shape) * Z / ZMax + P_Shape * Math.Pow(Z / ZMax, 2);
+                result = (1.0 - P_Shape) * Z / ZMax + P_Shape * Math.Pow(Z / ZMax, 2.0);
             }
             // elliptic hyperboloid
             // RAP Fix Eqn. Signs 1-26-2001
             // fraction     unitless      m/m       unitless    m/m
-            if (result < 0)
+            if (result < 0.0)
             {
-                result = 0;
+                result = 0.0;
             }
-            if (result > 1)
+            if (result > 1.0)
             {
-                result = 1;
+                result = 1.0;
             }
             return result;
         }
@@ -288,13 +288,13 @@ namespace AQUATOX.AQSite
             // m
             // m
             }
-            if (FracLit > 1)
+            if (FracLit > 1.0)
             {
-                FracLit = 1;
+                FracLit = 1.0;
             }
-            if (FracLit < 0)
+            if (FracLit < 0.0)
             {
-                FracLit = 0;
+                FracLit = 0.0;
             }
             result = FracLit;
             return result;
@@ -304,10 +304,10 @@ namespace AQUATOX.AQSite
         //Constructor  Init()
         public TAQTSite()
         {
-            MeanThick = 0;
-            P_Shape = 0;
-            TotDischarge = 0;
-            ICSurfArea = 0;
+            MeanThick = 0.0;
+            P_Shape = 0.0;
+            TotDischarge = 0.0;
+            ICSurfArea = 0.0;
         }
 
         public double ManningCoeff()
@@ -373,16 +373,16 @@ namespace AQUATOX.AQSite
                 Slope = 0.0001;
             }
             // site is not a stream
-            Width = Locale.SurfArea / (Locale.SiteLength * 1000);
+            Width = Locale.SurfArea / (Locale.SiteLength * 1000.0);
             // m           // m2             // km         // m/km
 
             // -------------------------------------------------------------
             // BASE FLOW
             // Manning's equation for initial flow depth, rectangular channel
             // -------------------------------------------------------------
-            QBase = (Math.Pow(IDepth, (5 / 3)) * Math.Sqrt(Slope) * Width) / ManningCoeff();
+            QBase = (Math.Pow(IDepth, (5.0 / 3.0)) * Math.Sqrt(Slope) * Width) / ManningCoeff();
             // m3/s          // m                         // m/m    // m       // s/ m^1/3
-            result = QBase * 86400;
+            result = QBase * 86400.0;
             // m3/d  m3/s     s/d
 
             return result;
@@ -393,7 +393,7 @@ namespace AQUATOX.AQSite
             double result;
             // Conversion Factor CBOD * Conv_BOD5 = OM
             double BOD5_CBODu;
-            BOD5_CBODu = 1 / ((100 - RefrPct) / 100);
+            BOD5_CBODu = 1 / ((100.0 - RefrPct) / 100.0);
             result = BOD5_CBODu / Remin.O2Biomass;
             return result;
         }

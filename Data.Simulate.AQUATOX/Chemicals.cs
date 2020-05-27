@@ -6,7 +6,6 @@ using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
 using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
-using AQUATOX.OrgMatter;
 using AQUATOX.Organisms;
 using AQUATOX.Plants;
 using Newtonsoft.Json;
@@ -48,8 +47,8 @@ namespace AQUATOX.Chemicals
         //public string XOxRateConst;
         public double KPSed;
         public string XKPSed;
-        //public double Weibull_Shape;
-        //public string XWeibull_Shape;
+        public double Weibull_Shape;
+        public string XWeibull_Shape;
         public bool ChemIsBase;
         public bool CalcKPSed;
         //public double CohesivesK1;
@@ -65,19 +64,21 @@ namespace AQUATOX.Chemicals
         //public double NonCoh2Kp;
         //public string NonCoh2Ref;
 
-        //// PFA Parameters
-        public bool IsPFA;
-        public string PFAType;
+        // PFA Parameters
+        //public bool IsPFA;
+        //public string PFAType;
         //public double PFAChainLength;
         //public string XPFAChainLength;
-        public double PFASedKom;
-        public string XPFASedKom;
+        //public double PFASedKom;
+        //public string XPFASedKom;
         //public double PFAAlgBCF;
         //public string XPFAAlgBCF;
         //public double PFAMacroBCF;
         //public string XPFAMacroBCF;
-        //public double WeibullSlopeFactor;
-        //public string XWeibullSlopeFactor;
+
+        public double WeibullSlopeFactor;
+        public string XWeibullSlopeFactor;
+
         public bool CalcKOMRefrDOM;
         public double KOMRefrDOM;
         public string XKOMRefrDOM;
@@ -128,7 +129,6 @@ namespace AQUATOX.Chemicals
         public Loadings.TLoadings Desorption_Link = null;
         public Loadings.TLoadings PlantUptake_Link = null;
 
-
         // -------------------------------------
 
         public TToxics(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
@@ -137,11 +137,6 @@ namespace AQUATOX.Chemicals
             ppb = 0;
         }
 
-        //public static T_SVType AssocToxTyp(AllVariables S)
-        //{
-        //    return (T_SVType)((int)(S) + 2);
-        //}
-
         public override void SetToInitCond() 
         {
             double Wet2Dry, Mass;
@@ -149,7 +144,6 @@ namespace AQUATOX.Chemicals
             base.SetToInitCond();
             if (NState != AllVariables.H2OTox)
             {
-                ChemRec = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).ChemRec;
                 BioTrans = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).BioTrans;
                 Anim_Method = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).Anim_Method;
                 Plant_Method = ((TToxics)AQTSeg.GetStatePointer(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol)).Plant_Method;
@@ -308,7 +302,7 @@ namespace AQUATOX.Chemicals
             Thick = AQTSeg.Location.MeanThick;
             PhotRate = ChemRec.PhotolysisRate;
             LightFactor = Solar0 / AveSolar;
-            ScreeningFactor = (RadDistr / RadDistr0) * ((1 - Math.Exp(-Alpha * Thick)) / (Alpha * Thick));
+            ScreeningFactor = (RadDistr / RadDistr0) * ((1.0 - Math.Exp(-Alpha * Thick)) / (Alpha * Thick));
             KPhot = PhotRate * ScreeningFactor * LightFactor;
             PhotoL = KPhot * State;
 
@@ -539,7 +533,7 @@ namespace AQUATOX.Chemicals
                         MicrobM = ToxPtr.MicrobialMetabolism(ref FracAerobic);
                         // also returns frac aerobic
                         if (Aerobic) MicrobM = MicrobM * FracAerobic;
-                        else         MicrobM = MicrobM * (1 - FracAerobic);
+                        else         MicrobM = MicrobM * (1.0 - FracAerobic);
 
                         MBTSum = MBTSum + (MicrobM * FracToMe);
                     }
@@ -866,7 +860,7 @@ namespace AQUATOX.Chemicals
             double pH_Val;   // pH Value
             double Charged;
 
-            if (ChemRec.IsPFA) return 0;
+            // if (ChemRec.IsPFA) return 0;
 
             Charged = 0;
             // DissRefrDetr, PartRefrDetr,  suspLabDetr
@@ -879,9 +873,9 @@ namespace AQUATOX.Chemicals
             if (ChemRec.pka == 0)
             {  return 1;                                                              }
             else if (ChemRec.ChemIsBase)
-            {  return 1 / (1 + Math.Pow(10.0, ChemRec.pka - pH_Val));                 }
+            {  return 1 / (1.0 + Math.Pow(10.0, ChemRec.pka - pH_Val));                 }
             else
-            {  return 1 / (1 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka)));     }
+            {  return 1 / (1.0 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka)));     }
         }
 
         // (************************************)
@@ -916,10 +910,9 @@ namespace AQUATOX.Chemicals
             else
             {   IonCorr = 0.1;      }
 
-            if (ChemRec.IsPFA)
-            {
-                return ChemRec.PFASedKom;
-            }
+            //if (ChemRec.IsPFA)
+            //    return ChemRec.PFASedKom;
+
             NonDiss = NonDissoc();
             // prevent multiple calculations
             KOM = -9999;
@@ -941,22 +934,22 @@ namespace AQUATOX.Chemicals
                 {
                     case AllVariables.DissRefrDetr:
                     case AllVariables.ReDOMPore:
-                        KOM = (NonDiss * 2.88 * Math.Pow(KOW, 0.67) + (1 - NonDiss) * IonCorr * 2.88 * Math.Pow(KOW, 0.67)) * 0.526;
+                        KOM = (NonDiss * 2.88 * Math.Pow(KOW, 0.67) + (1.0 - NonDiss) * IonCorr * 2.88 * Math.Pow(KOW, 0.67)) * 0.526;
                         break;
                     case AllVariables.DissLabDetr:
                     case AllVariables.LaDOMPore:
                         // generalized from Freidig et al. 1998,  Modified 3/13/2009
-                        KOM = (NonDiss * 0.88 * KOW + (1 - NonDiss) * IonCorr * 0.88 * KOW) * 0.526;
+                        KOM = (NonDiss * 0.88 * KOW + (1.0 - NonDiss) * IonCorr * 0.88 * KOW) * 0.526;
                         break;
                     case AllVariables.SedmLabDetr:
                     case AllVariables.SuspLabDetr:
                     case AllVariables.POC_G1:
                         // generalized from Koelmans and Heugens 1998
-                        KOM = (NonDiss * 23.44 * Math.Pow(KOW, 0.61) + (1 - NonDiss) * IonCorr * 23.44 * Math.Pow(KOW, 0.61)) * 0.526;
+                        KOM = (NonDiss * 23.44 * Math.Pow(KOW, 0.61) + (1.0 - NonDiss) * IonCorr * 23.44 * Math.Pow(KOW, 0.61)) * 0.526;
                         break;
                     default:
                         // based on fresh algal detritus parameters in Koelmans, Anzion, & Lijklema 1995
-                        KOM = (NonDiss * 1.38 * Math.Pow(KOW, 0.82) + (1 - NonDiss) * IonCorr * 1.38 * Math.Pow(KOW, 0.82));
+                        KOM = (NonDiss * 1.38 * Math.Pow(KOW, 0.82) + (1.0 - NonDiss) * IonCorr * 1.38 * Math.Pow(KOW, 0.82));
                         break;
                         // SedRefr/suspRefr generalized from Schwarzenbach et al. 1993, p. 275 and Smejtek and Wang, 1993, for ionized compound
                 }
@@ -1159,6 +1152,7 @@ namespace AQUATOX.Chemicals
             double GutEffRed = 0;
             double GutEffTox;
             TAnimal CP;
+
             CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
             SumDiet = 0;
             for (Loop = Consts.FirstDetr; Loop <= Consts.LastAnimal; Loop++)
@@ -1399,7 +1393,7 @@ namespace AQUATOX.Chemicals
                     {
                         for (NsLoop = AllVariables.POC_G1; NsLoop <= AllVariables.POC_G3; NsLoop++)
                         {
-                            UnitFix = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000);
+                            UnitFix = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000.0);
                             // m2/L                   // m2            // m3     // L/m3
                             TPOCT = AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.SedLayer2) as TPOCTox;
                             if ((TPOCT != null))
