@@ -60,6 +60,11 @@ namespace WatershedDelineation
                     dtSubSurfaceRunoff.Columns.Add(tocom);
                     dtStreamFlow.Columns.Add(tocom);
                 }
+                else
+                {
+                    string test = tocom;
+                    // Excluding COMID
+                }
             }
 
             //Initialize these tables with 0s
@@ -117,7 +122,7 @@ namespace WatershedDelineation
             string errComs = "";
             foreach (string com in lst)
             {
-                PointCoordinate centroidPoint = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                PointCoordinate centroidPoint = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 if (centroidPoint != null)
                 {
                     validList.Add(com);
@@ -142,14 +147,14 @@ namespace WatershedDelineation
                 tsi.Source = input.Source;
                 tsi.TemporalResolution = "daily";
                 TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
-                tsGeometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                tsGeometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 tsGeometry.ComID = Convert.ToInt32(com);
                 tsGeometry.GeometryMetadata = input.Geometry.GeometryMetadata;
 
                 ITimeSeriesInput subIn = new TimeSeriesInput();
                 subIn = tsi;
                 subIn.Geometry = tsGeometry;
-                subIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                subIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 subIn.Geometry.ComID = Convert.ToInt32(com);
                 SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
                 sub.Input = inputFactory.SetTimeSeriesInput(subIn, new List<string>() { "subsurfaceflow" }, out errorMsg);
@@ -159,7 +164,7 @@ namespace WatershedDelineation
                 ITimeSeriesInput surfIn = new TimeSeriesInput();
                 surfIn = tsi;
                 surfIn.Geometry = tsGeometry;
-                surfIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                surfIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 surfIn.Geometry.ComID = Convert.ToInt32(com);
                 SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
                 runoff.Input = inputFactory.SetTimeSeriesInput(surfIn, new List<string>() { "surfacerunoff" }, out errorMsg);
@@ -168,7 +173,7 @@ namespace WatershedDelineation
                 ITimeSeriesInput preIn = new TimeSeriesInput();
                 preIn = tsi;
                 preIn.Geometry = tsGeometry;
-                preIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
                 preIn.Source = preIn.Geometry.GeometryMetadata["precipSource"];
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();

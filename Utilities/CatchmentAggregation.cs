@@ -118,7 +118,8 @@ namespace Utilities
             }
             if (geo == "huc_12_num")
             {
-                lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + geoNumber + "'");
+                //lst = SQLiteRequest("Select COMID From HUC12_PU_COMIDs_CONUS Where HUC12='" + geoNumber + "' And ");
+                lst = SQLiteRequest("SELECT P.COMID FROM HUC12_PU_COMIDs_CONUS H INNER JOIN PlusFlowlineVAA P ON H.COMID=P.COMID WHERE H.HUC12='" + geoNumber + "' AND P.CentroidLatitude IS NOT NULL");
             }
             else if (geo == "huc_8_num")
             {
