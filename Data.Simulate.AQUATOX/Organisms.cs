@@ -150,7 +150,7 @@ namespace AQUATOX.Organisms
 
             //    if (AQTSeg.EstuarySegment)
             //    {
-            //        Infl = Location.Morph.InflowH2O[VerticalSegments.Epilimnion] / 2;
+            //        Infl = Location.Morph.InflowH2O[VerticalSegments.Epilimnion] / 2.0;
             //    }    // upstream loadings only, estuary vsn. 10-17-02
 
             if (Infl > 0.0)
@@ -567,7 +567,7 @@ namespace AQUATOX.Organisms
                         Local_K2 = ATR.Entered_K2 + ATR.Bio_rate_const; // 5/11/2015  Add metabolism to k2 for calculations
 
                         if (Local_K2 > 96)
-                            Local_K2 = Local_K2 * (96 / Local_K2);  // scaling factor 10-02-03
+                            Local_K2 = Local_K2 * (96.0 / Local_K2);  // scaling factor 10-02-03
 
                         MeanAge = TA.PAnimalData.LifeSpan;
                         if (MeanAge < Consts.Tiny) throw new Exception("lifespan for " + TA.PName + " is set to zero.  This parameter must be set for bioaccumulation calculations.");
@@ -821,7 +821,7 @@ namespace AQUATOX.Organisms
                 else
                 {
                     // Weibull cumulative equation
-                    Cum_Frac_Eqn_Part = -Math.Pow(ToxPPB / LethalConc, 1 / Shape);
+                    Cum_Frac_Eqn_Part = -Math.Pow(ToxPPB / LethalConc, 1.0 / Shape);
                     // ppb / ppb         unitless
                     CumFracNow = 1.0 - Math.Exp(Cum_Frac_Eqn_Part);
 
@@ -830,14 +830,14 @@ namespace AQUATOX.Organisms
                     if (IsAnimal())
                     {
                         if (AFGrowth < Consts.Tiny) RedGrowth[ToxInt] = 0;
-                        else                        RedGrowth[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFGrowth), 1 / Shape));
+                        else                        RedGrowth[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFGrowth), 1.0 / Shape));
 
                         if (AFRepro < Consts.Tiny)  RedRepro[ToxInt] = 0;
-                        else                        RedRepro[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFRepro), 1 / Shape));
+                        else                        RedRepro[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFRepro), 1.0 / Shape));
                     } 
                     else 
                       if (AFPhoto < Consts.Tiny) FracPhoto[ToxInt] = 1;  // plant
-                      else FracPhoto[ToxInt] = Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFPhoto), 1 / Shape));
+                      else FracPhoto[ToxInt] = Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFPhoto), 1.0 / Shape));
                 }
             }
 
@@ -1041,6 +1041,8 @@ namespace AQUATOX.Organisms
 
             Nonresistant = State * (1.0 - Resistant[ToxInt]);            // 9-14-07 conversion of Resistant from biomass units to fraction units
             // mg/L          mg/L          frac
+
+            // if (CumFracNow == 1.0) FracKill = 1.0; else   JSC Test May 2020
 
             if ((PrevFracKill[ToxInt] >= CumFracNow) || ((1.0 - PrevFracKill[ToxInt])<Consts.Tiny))
                 FracKill = 0.0;

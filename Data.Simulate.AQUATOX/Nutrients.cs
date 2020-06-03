@@ -505,7 +505,7 @@ namespace AQUATOX.Nutrients
 
                                 j = -999;  // signal to not write mass balance tracking
                                 PPeri.Derivative(ref j);  // update sloughing
-                                NRPS = NRPS + PPeri.Sloughing * (1 / 3) * (Nut2OrgPeri - Nut2OrgPhyt);
+                                NRPS = NRPS + PPeri.Sloughing * (1.0 / 3.0) * (Nut2OrgPeri - Nut2OrgPhyt);
                                 // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
                             }
                         }
@@ -1995,7 +1995,7 @@ namespace AQUATOX.Nutrients
         //    double Velocity;
         //    double Wind;
 
-        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) / 100;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
+        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) / 100.0;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
         //    // m/s          // cm/s                                             // m/s
         //    Wind = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
         //    Thick = Location.MeanThick[VerticalSegments.Epilimnion];

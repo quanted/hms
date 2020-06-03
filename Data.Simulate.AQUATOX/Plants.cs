@@ -702,7 +702,7 @@ namespace AQUATOX.Plants
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
                         {   // frac living
                             SloughEvent = true;
-                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
 
                             //AQTSeg.ProgData.SloughDia = true;  update progress bar, N/A for HMS
                             //AQTSeg.ProgData.PeriVis = true;
@@ -712,14 +712,14 @@ namespace AQUATOX.Plants
                     {
                         // filamentous (includes greens and blgreens and should not be confused
                         // with filamentous phytoplankton)
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
+                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2.0) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
                         // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2             m2/mm2
 
                         // 3/19/2013 fcrit of zero means no scour
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
                         {
                             SloughEvent = true;
-                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
 
                             //AQTSeg.ProgData.PeriVis = true;   Progress Dialog Update, N/A HMS
                             //if (NState >= Consts.FirstGreens && NState <= Consts.LastGreens)
@@ -907,7 +907,7 @@ namespace AQUATOX.Plants
                 else LightCorr = 1.25;
 
                 // only half is in spectrum used for photsyn. - Edmondson '56
-                LD = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * (DBott)));
+                LD = (-((LightVal / 2.0) / (LightCorr * LightSat())) * Math.Exp(-EX * (DBott)));
                 // unitless     ly/d                   ly/d           1/m    m        m  
 
                 if (LD < -30) LD = 0;    // Prevent a Crash, JSC
@@ -1624,7 +1624,7 @@ namespace AQUATOX.Plants
             DB = L + Pho - R - Ex - M - Pr - WO + WI - S + Sed2Me - STH + SFE + TD + En + DiffUp + DiffDown - ToxD - Slg + PeriScr + Fl;
             if (SloughEvent)
             {
-                Slg = State - (SloughLevel / 2) + DB;
+                Slg = State - (SloughLevel / 2.0) + DB;
                 // precisely slough to sloughlevel, 11/11/03
                 Sloughing = Slg;
                 DB = DB - Slg;

@@ -393,7 +393,7 @@ namespace AQUATOX.AQSite
             double result;
             // Conversion Factor CBOD * Conv_BOD5 = OM
             double BOD5_CBODu;
-            BOD5_CBODu = 1 / ((100.0 - RefrPct) / 100.0);
+            BOD5_CBODu = 1.0 / ((100.0 - RefrPct) / 100.0);
             result = BOD5_CBODu / Remin.O2Biomass;
             return result;
         }

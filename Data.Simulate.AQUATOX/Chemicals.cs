@@ -871,11 +871,11 @@ namespace AQUATOX.Chemicals
 
             pH_Val = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
             if (ChemRec.pka == 0)
-            {  return 1;                                                              }
+            {  return 1.0;                                                              }
             else if (ChemRec.ChemIsBase)
-            {  return 1 / (1.0 + Math.Pow(10.0, ChemRec.pka - pH_Val));                 }
+            {  return 1.0 / (1.0 + Math.Pow(10.0, ChemRec.pka - pH_Val));                 }
             else
-            {  return 1 / (1.0 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka)));     }
+            {  return 1.0 / (1.0 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka)));     }
         }
 
         // (************************************)
@@ -1265,9 +1265,8 @@ namespace AQUATOX.Chemicals
                 return;
             }
 
-            //if (Consts.Eutrophication || AQTSeg.PSetup.ChemsDrivingVars)
-            //{   DB = 0.0;    }
-            //else
+            if (AQTSeg.PSetup.ChemsDrivingVars)   DB = 0.0;       // if (Consts.Eutrophication|| 
+            else
             {
                 CalculateLoad(AQTSeg.TPresent);
                 Lo = Loading;

@@ -80,9 +80,9 @@ namespace AQUATOX.Volume
             CLength = Location.Locale.SiteLength * 1000;
             // m                        // km     // m/km
             // AVERAGE FLOW DISCHARGE
-            Q = Discharg / 86400;
+            Q = Discharg / 86400.0;
             // m3/s // m3/d  // s/d
-            Width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000);
+            Width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000.0);
             // m                   // sq.m                      // km       // m/km
             Y = Math.Pow((Q * Location.ManningCoeff()) / (Math.Sqrt(Location.Locale.Channel_Slope) * Width), 0.6);
             // m      // m3/s            // s/ m^1/3                                   // m/m         // m
@@ -116,7 +116,7 @@ namespace AQUATOX.Volume
         {
             if (AQTSeg.UseConstEvap)
             {
-                return Location.Locale.MeanEvap * (0.0254 / 365) * Location.Locale.SurfArea;
+                return Location.Locale.MeanEvap * (0.0254 / 365.0) * Location.Locale.SurfArea;
                 // cu m/d             // in/yr    // m/in // d/yr                // sq m
             }
             else
@@ -177,14 +177,14 @@ namespace AQUATOX.Volume
                 WidthCalc = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000);
                 // m                        // sq.m                      // km     // m/km
 
-                Avg_Disch = Location.Discharge / 86400;
-                Channel_Depth = Math.Pow(Avg_Disch * Location.ManningCoeff() / (Math.Sqrt(Location.Locale.Channel_Slope)) * WidthCalc, 3 / 5);
+                Avg_Disch = Location.Discharge / 86400.0;
+                Channel_Depth = Math.Pow(Avg_Disch * Location.ManningCoeff() / (Math.Sqrt(Location.Locale.Channel_Slope)) * WidthCalc, 3.0 / 5.0);
                 Location.Morph.XSecArea = WidthCalc * Channel_Depth;
                 // m2       // m          // m
             }
             else
             {
-                Location.Morph.XSecArea = AQTSeg.Volume_Last_Step / (Location.Locale.SiteLength * 1000);
+                Location.Morph.XSecArea = AQTSeg.Volume_Last_Step / (Location.Locale.SiteLength * 1000.0);
             }                                         // m3                           // km    // m/km
 
         }

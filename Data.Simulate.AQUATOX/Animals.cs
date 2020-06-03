@@ -579,11 +579,11 @@ namespace AQUATOX.Animals
             PrefRun = 100 - PAnimalData.PrefRiffle - PAnimalData.PrefPool;
             HabitatAvail = 0;
 
-            if (PAnimalData.PrefRiffle > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100;
+            if (PAnimalData.PrefRiffle > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100.0;
 
-            if (PAnimalData.PrefPool > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100;
+            if (PAnimalData.PrefPool > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100.0;
 
-            if (PrefRun > 0) HabitatAvail = HabitatAvail + PctRun / 100;
+            if (PrefRun > 0) HabitatAvail = HabitatAvail + PctRun / 100.0;
 
             return HabitatAvail;
     }
@@ -619,16 +619,17 @@ namespace AQUATOX.Animals
     {
         double AggRedRepro = 0;
 
-        //T_SVType ToxLoop;
-        //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-        //{
-        //    if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
-        //    {
-        //        AggRedRepro = AggRedRepro + RedRepro[ToxLoop];
-        //    }
-        //}
+        T_SVType ToxLoop;
+        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+           {
+                if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
+                {
+                    int ToxInt = (int)ToxLoop - 2;
+                    AggRedRepro = AggRedRepro + RedRepro[ToxInt];
+                }
+            }
 
-        AggRedRepro = AggRedRepro + O2EffectFrac(2);    //2=O2Repro_Red
+            AggRedRepro = AggRedRepro + O2EffectFrac(2);    //2=O2Repro_Red
 
         if (AggRedRepro > 1.0)  AggRedRepro = 1.0;
         return AggRedRepro;
@@ -905,11 +906,11 @@ namespace AQUATOX.Animals
 
             if ((IsFish() || IsPlanktonInvert())) // 10-24-12 include inverts
                 {
-                DensityDep = 1 + (IncrResp * State) / KCAP_in_g_m3();  // Kitchell et al., 1974; Park et al., 1974.  Account for Crowding in fish, address KCAP in inverts
+                DensityDep = 1.0 + (IncrResp * State) / KCAP_in_g_m3();  // Kitchell et al., 1974; Park et al., 1974.  Account for Crowding in fish, address KCAP in inverts
                 }
             else
             {
-                DensityDep = 1;
+                DensityDep = 1.0;
             }
             // allometric resp currently implemented for inverts 10/18/2013
             if (PAnimalData.UseAllom_R)
@@ -1680,11 +1681,11 @@ namespace AQUATOX.Animals
                 else KUptake = 0.0;
 
                 Local_K2 = PT.Anim_Tox.Entered_K2;
-                if (Local_K2 > 96)
-                    KUptake = KUptake * (96 / Local_K2);  // scaling factor 10-02-03
+                if (Local_K2 > 96.0)
+                    KUptake = KUptake * (96.0 / Local_K2);  // scaling factor 10-02-03
 
                 if (State < Consts.Tiny)
-                    DerivedK1[(int)ToxType-2] = 0;
+                    DerivedK1[(int)ToxType-2] = 0.0;
                 else
                 {
                     DerivedK1[(int)ToxType - 2] = KUptake / (State * 1e-6); // 9/9/2010
@@ -1778,7 +1779,7 @@ namespace AQUATOX.Animals
                     {
                         AnimalRecord ZR = ((PYounger) as TAnimal).PAnimalData;
                         if ((AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) > 10) && (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) > 20))
-                            PromoteGain = ((PYounger) as TAnimal).State * ZR.PctGamete / 275 * (1.0 - ZR.GMort);
+                            PromoteGain = ((PYounger) as TAnimal).State * ZR.PctGamete / 275.0 * (1.0 - ZR.GMort);
                     }
                     // for veliger "PromoteTo"= Recruitment from sack, "PYounger" = Sack  {to 275 days 4/8/2015}
                     // assumed 300 days above 20 deg C                    {days}  {living frac}

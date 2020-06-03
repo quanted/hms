@@ -552,7 +552,7 @@ namespace AQUATOX.Bioaccumulation
                 else
                     DissocFactor = NonDissoc();
 
-                K1 = 1 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
+                K1 = 1.0 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
 
                 // K1 function is mirrored in CHEMTOX.PAS, any change here needs to be made there
                 double K2 = Plant_Tox.K2;
@@ -595,7 +595,7 @@ namespace AQUATOX.Bioaccumulation
                     DissocFactor = NonDissoc();
 
                 double Kow = Math.Pow(10, ChemRec.LogKow);
-                Local_K1 = 1 / (1.8e-6 + 1.0 / (Kow * DissocFactor));
+                Local_K1 = 1.0 / (1.8e-6 + 1.0 / (Kow * DissocFactor));
                 // fit to Sijm et al.1998 data for PCBs
 
                 UptakeLimit = (AlgalPtr.BCF(0, SVType) * ToxState - GetPPB(NState, SVType, Layer)) / (AlgalPtr.BCF(0, SVType) * ToxState);
