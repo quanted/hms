@@ -119,19 +119,20 @@ namespace WatershedDelineation
 
             //Building list of valid centroids as many are null and will cause map errors if set to (0,0) or (null,null)
             validList = new List<string>();
-            string errComs = "";
-            foreach (string com in lst)
-            {
-                PointCoordinate centroidPoint = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
-                if (centroidPoint != null)
-                {
-                    validList.Add(com);
-                }
-                else
-                {
-                    errComs += com + ", ";
-                }
-            }
+            validList = lst;
+            //string errComs = "";
+            //foreach (string com in lst)
+            //{
+            //    PointCoordinate centroidPoint = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
+            //    if (centroidPoint != null)
+            //    {
+            //        validList.Add(com);
+            //    }
+            //    else
+            //    {
+            //        errComs += com + ", ";
+            //    }
+            //}
 
             ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
             input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyy"));
@@ -271,10 +272,10 @@ namespace WatershedDelineation
                 flaskURL = "http://localhost:7777";
             }
 
-            if (!errComs.Equals(""))
-            {
-                errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output. ";
-            }
+            //if (!errComs.Equals(""))
+            //{
+            //    errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output. ";
+            //}
 
             if (!missingComs.Equals(""))
             {

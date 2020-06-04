@@ -118,8 +118,16 @@ namespace Web.Services.Models
             Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
             int x = 1;
             Dictionary<string, string> meta = new Dictionary<string, string>();
-            foreach (string com in lst)
+            //foreach (string com in lst)
+            foreach(string com in validList)
             {
+                List<string> testData = new List<string>();
+                foreach(DataRow r in ds.Tables[3].Rows)
+                {
+                    string v = r[com].ToString();
+                    testData.Add(v);
+                }
+
                 //Setting all to ITimeSeriesOutput
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
                 ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
