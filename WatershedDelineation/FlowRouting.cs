@@ -122,8 +122,9 @@ namespace WatershedDelineation
             validList = lst;
 
             ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
-            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyy"));
-            
+            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyyHH:mm"));
+            input.Geometry.GeometryMetadata.Add("StreamFlowStartDate", input.DateTimeSpan.StartDate.ToString("MM/dd/yyyyHH:mm"));
+
             foreach (string com in validList)
             {
                 ITimeSeriesInput tsi = new TimeSeriesInput();
@@ -157,6 +158,7 @@ namespace WatershedDelineation
 
                 ITimeSeriesInput preIn = new TimeSeriesInput();
                 preIn = tsi;
+                preIn.TimeLocalized = true;
                 preIn.Geometry = tsGeometry;
                 preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
