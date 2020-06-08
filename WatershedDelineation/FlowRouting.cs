@@ -503,7 +503,6 @@ namespace WatershedDelineation
                                 //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
                                 //dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
                                 dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dtStreamFlow.Rows[i][fromCom]) + Convert.ToDouble(dtStreamFlow.Rows[i][COMID]);
-
                             }
                         }
                     }
