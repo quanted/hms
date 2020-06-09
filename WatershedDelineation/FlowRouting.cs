@@ -158,7 +158,6 @@ namespace WatershedDelineation
 
                 ITimeSeriesInput preIn = new TimeSeriesInput();
                 preIn = tsi;
-                preIn.TimeLocalized = true;
                 preIn.Geometry = tsGeometry;
                 preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
