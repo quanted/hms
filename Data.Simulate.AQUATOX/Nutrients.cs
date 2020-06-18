@@ -977,6 +977,7 @@ namespace AQUATOX.Nutrients
             void Assimilation_AddAssim(TStateVariable P)   // Assimilation of nutrients by algae    
             {
                 TPlant PP;
+                T_N_Internal_Plant TNIP; 
                 double UptkNut;
                 const double UptakeCO2 = 0.53;
                 UptkNut = 0;
@@ -993,30 +994,32 @@ namespace AQUATOX.Nutrients
                     {
                         if (NState != AllVariables.CO2)
                         {
-                            //if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))   // FIXME Internal Nutrients
-                            //     TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol);
-                            //else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol);
+                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate)) 
+                                TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
+                            else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
 
-                            //if (AQTSeg.PSetupRec.Internal_Nutrients && (TNIP != null))
-                            //{   // mg/L    // ug/L      // mg/ug
-                            //    UptkNut = TNIP.Uptake() * 1e-3;
-                            //}
-                            //else
-                            //{
-                            // external nutrients
-
-                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
-                                UptkNut = PP.N_2_Org() * PP.Photosynthesis();
-                            else
-                                UptkNut = PP.P_2_Org() * PP.Photosynthesis();
-                            // mg/L     // g/g               // mg/L
-
-                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                            if (AQTSeg.PSetup.Internal_Nutrients && (TNIP != null))
                             {
-                                if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
-                                    NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                UptkNut = TNIP.Uptake() * 1e-3;
+                                // mg/L    // ug/L      // mg/ug
+                            }
+                            else
+                            {
+                                // external nutrients
+
+                                if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                                    UptkNut = PP.N_2_Org() * PP.Photosynthesis();
                                 else
-                                    NH4Pref = 0;  // Protect Against Div by 0
+                                    UptkNut = PP.P_2_Org() * PP.Photosynthesis();
+                                // mg/L     // g/g               // mg/L
+
+                                if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                                {
+                                    if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
+                                        NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                    else
+                                        NH4Pref = 0;  // Protect Against Div by 0
+                                }
                             }
                         }   // non CO2 code
 

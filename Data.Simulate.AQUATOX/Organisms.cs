@@ -1021,13 +1021,10 @@ namespace AQUATOX.Organisms
                 AnimTox = null;
 
                 if (PlantTox.Plant_Tox.LC50 <= 0.0)
-                {
                     AFPhoto = 0.0;
-                }
                 else
-                {
                     AFPhoto = PlantTox.Plant_Tox.EC50_photo / PlantTox.Plant_Tox.LC50;
-                }
+
                 LC50_Local = PlantTox.Plant_Tox.LC50;
                 K2_Local = PlantTox.Plant_Tox.K2;
                 K2_Local = K2_Local + PlantTox.Plant_Tox.Bio_rate_const;   // 5/11/2015  Add metabolism to k2 for calculations

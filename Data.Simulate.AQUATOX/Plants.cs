@@ -1170,11 +1170,9 @@ namespace AQUATOX.Plants
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
                 {
-                    // g/g OM
-                    // ug N /L
-                    // mg OM/L
-                    // mg/ug
                     return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
+                 // (g/g OM)   =   (ug N /L)                                             /(mg OM/L)*(mg/ug)
+
                 }
                 else
                 {
@@ -1912,12 +1910,30 @@ namespace AQUATOX.Plants
 
     } // end TMacrophyte
 
+
+    // internal nutrients in plants
+    // ------------------   INTERNAL NUTRIENTS OBJECTS --------------------------
+
+
     public class T_N_Internal_Plant : TStateVariable
     {
+        public override void SetToInitCond()
+        {
+            base.SetToInitCond();
+            // initialize internal nutrients in ug/L  
 
-        // code at end of plant.inc  internal nutrients in plants
-        // TMacrophyte.dBdT
-        // ------------------   INTERNAL NUTRIENTS OBJECTS --------------------------
+            TPlant TP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPlant; // associated plant
+            
+            if (SVType == T_SVType.NIntrnl)
+                    InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
+                else
+                    InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit * 1000;
+                      // (ug N/L) =  (mg OM/L)   *              (gN/gOM)   (ug/mg)
+
+                State = InitialCond;
+        }
+
+
         public double Uptake()
         {
             double WC_Conc;

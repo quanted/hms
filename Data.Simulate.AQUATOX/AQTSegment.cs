@@ -252,22 +252,6 @@ namespace AQUATOX.AQTSegment
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
 
-            //// initialize internal nutrients in ug/L  // FIXME INTERNAL NUTRIENTS
-            //if (new ArrayList(new T_SVType[] { T_SVType.NIntrnl, T_SVType.PIntrnl }).Contains(P.SVType))
-            //{
-            //    TP = GetStatePointer(P.NState, T_SVType.StV, T_SVLayer.WaterCol);
-            //    // associated plant
-            //    if (P.SVType == T_SVType.NIntrnl)
-            //    {
-            //        P.InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
-            //    }
-            //    else
-            //    {
-            //        P.InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit * 1000;
-            //    }      // ug N/L      // mg OM/L           // gN/gOM         // ug/mg
-            //    P.State = P.InitialCond;
-            //}
-
             // Initialize Toxics  
             if ((SVType >= Consts.FirstOrgTxTyp) && (SVType <= Consts.LastOrgTxTyp))
             {
@@ -3875,7 +3859,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
                                           typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
-                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord)}; 
+                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant)}; 
     }
 }
 
