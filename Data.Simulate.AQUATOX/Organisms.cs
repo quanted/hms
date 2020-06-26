@@ -498,11 +498,8 @@ namespace AQUATOX.Organisms
         public void CalcRiskConc(bool warn)
         {
             // This procedure should be executed at the beginning of model simulation
-            string DataName;
             string ErrAnsiString;
             int StepLoop;
-            int i;
-            int FoundToxIndx;
             TAnimalToxRecord ATR;
             TPlantToxRecord PTR;
             int ToxLoop;
@@ -535,6 +532,9 @@ namespace AQUATOX.Organisms
             SedResistant = 0;
             SedPrevFracKill = 0;
 
+            if (IsAnimal()) ((TAnimal)this).Assign_Anim_Tox();
+            else ((TPlant)this).Assign_Plant_Tox();
+
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
                 ToxTyp = (T_SVType)ToxLoop + 2;
@@ -554,15 +554,14 @@ namespace AQUATOX.Organisms
                     CalcRiskConc_SetPreyTrophicLevel(NState);
 
                     TAnimal TA = this as TAnimal;
-                    DataName = TA.PAnimalData.ToxicityRecord.ToLower();
                     TA.HabitatLimit = TA.AHabitat_Limit();
-
+                    
                     AnimTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
                     WaterTox = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxTyp, T_SVLayer.WaterCol) as TToxics;
 
                     if ((AnimTox!=null)&&(WaterTox!=null))
                       { 
-                        ATR = AnimTox.Anim_Tox;
+                        ATR = TA.Anim_Tox[ToxLoop];
 
                         Local_K2 = ATR.Entered_K2 + ATR.Bio_rate_const; // 5/11/2015  Add metabolism to k2 for calculations
 
@@ -595,8 +594,6 @@ namespace AQUATOX.Organisms
                             LC50_Time = NewTime;
                         }
 
-                        // ((PTR) as TAnimal).Assign_Anim_Tox();
-
                         LCInfinite[ToxLoop] = BCF(LC50_Time / 24.0, ToxTyp) * ATR.LC50 * (1.0 - Math.Exp(-Local_K2 * (LC50_Time / 24.0)));
                         // (ppb)             (L/kg)           (h/d)                 (ug/L)                    (1/d)        (h)     (h/d)
                     }
@@ -607,8 +604,9 @@ namespace AQUATOX.Organisms
                 {
                     // Organism is Plant
                     TPlant TPl = this as TPlant;
+                    PTR = TPl.Plant_Tox[ToxLoop];
+
                     TPl.IsEunotia = TPl.PAlgalRec.ScientificName.ToLower().IndexOf("eunotia") > 0;
-                    DataName = TPl.PAlgalRec.ToxicityRecord.ToLower();
 
                     TPl.HabitatLimit = TPl.PHabitat_Limit();
 
@@ -617,13 +615,13 @@ namespace AQUATOX.Organisms
 
                     if ((PlantTox != null) && (WaterTox != null))
                     {
-                        PTR = PlantTox.Plant_Tox;
-                        Local_K2 = PTR.K2;
-                        Local_K2 = Local_K2 + PTR.Bio_rate_const; // 5/11/2015  Add metabolism to k2 for calculations
+                        TPl.Assign_Plant_Tox();
+
+
+                        Local_K2 = PTR.K2 + PTR.Bio_rate_const; // 5/11/2015  Add metabolism to k2 for calculations
 
                         if (Local_K2 > 96)
                             Local_K2 = Local_K2 * (96 / Local_K2);   // scaling factor 10-02-03
-
 
                         LC50_Time = PTR.LC50_exp_time;
                         if (warn && (LC50_Time <= 0) && (PTR.LC50 > Consts.Tiny))
@@ -634,6 +632,8 @@ namespace AQUATOX.Organisms
                         {
                             ErrAnsiString = "Warning: EC50 Photosynthesis for " + TPl.PName + " within chemical " + WaterTox.ChemRec.ChemName + " is greater than zero, but no photosynthesis effects will be calculated because LC50 is set to zero.  This means that an application factor cannot be calculated (see eqn 419 in the Tech. Doc).";
                         }
+
+
                         LCInfinite[ToxLoop] = BCF(LC50_Time / 24.0, ToxTyp) * PTR.LC50 * (1.0 - Math.Exp(-Local_K2 * (LC50_Time / 24.0)));
                         // (ppb)             (L/kg)           (h/d)              (ug/L)                    (1/d)        (h)     (h/d)
                     }    // with ChemPtrs
@@ -649,8 +649,6 @@ namespace AQUATOX.Organisms
             double NondissocVal;
             double Lipid;
             double NondissReduc;
-            TAnimalTox PAT;
-            TAlgaeTox PPT;
             TToxics PT;
             // NLOMFrac,
             double K2;
@@ -668,9 +666,7 @@ namespace AQUATOX.Organisms
             {   // -------------------   BCF = K1 / K2 BELOW  ---------------------------------
                 if (IsAnimal())
                 {
-                    PAT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
-
-                    TAnimalToxRecord ATR = PAT.Anim_Tox;
+                    TAnimalToxRecord ATR = ((TAnimal)this).Anim_Tox[ToxInt(ToxTyp)];
                     if (ChemOption == UptakeCalcMethodType.CalcBCF)
                     {
                         if ((ATR.Entered_K2 < Consts.Tiny))
@@ -684,8 +680,7 @@ namespace AQUATOX.Organisms
 
                 if (IsPlant())
                 {
-                    PPT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAlgaeTox;
-                    TPlantToxRecord PTR = PPT.Plant_Tox;
+                    TPlantToxRecord PTR = ((TPlant)this).Plant_Tox[ToxInt(ToxTyp)];
 
                     if (ChemOption == UptakeCalcMethodType.CalcBCF)
                     {
@@ -709,13 +704,12 @@ namespace AQUATOX.Organisms
             if (IsAnimal())
             {
                 TAnimal PA = ((this) as TAnimal);
-                PAT = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
                 if (IsFish())
                 {
                     Lipid = PA.PAnimalData.FishFracLipid;
                     KB = Lipid * WetToDry() * Kow * (NondissocVal + 0.01);
                     // BCF Test 9/8/2010
-                    K2 = PAT.Anim_Tox.Entered_K2;
+                    K2 = PA.Anim_Tox[ToxInt(ToxTyp)].Entered_K2;
                     // BCF Test 9/8/2010   Fix this logic, though if LCInfinite is the only thing this is being used for, maybe remove the TElapsed portion
                     if ((K2 < Consts.Tiny))
                          return KB * (1.0 - Math.Exp(-K2 * TElapsed));
@@ -763,11 +757,13 @@ namespace AQUATOX.Organisms
             double Nonresistant, FracKill;
             double LifeSpan;    // Lifespan of animal in days
             double AFGrowth, AFRepro, AFPhoto;
-            TAnimalTox AnimTox;
             TToxics WaterTox;
+            TAnimalTox AnimTox;
+            TAnimalToxRecord ATR = null;
             TAlgaeTox PlantTox;
+            TPlantToxRecord PTR = null; 
             double LC50_Local, K2_Local, CumFracNow, NewResist;
-            int ToxInt;
+            int TInt;
 
             // --------------------------------------------------------------------------
             void Calculate_Internal_Toxicity()
@@ -778,9 +774,9 @@ namespace AQUATOX.Organisms
                 double Cum_Frac_Eqn_Part;
 
                 CumFracNow = 0;
-                RedGrowth[ToxInt] = 0.0;
-                RedRepro[ToxInt] = 0.0;
-                FracPhoto[ToxInt] = 1.0;
+                RedGrowth[TInt] = 0.0;
+                RedRepro[TInt] = 0.0;
+                FracPhoto[TInt] = 1.0;
 
                 if ((LC50_Local < Consts.Tiny)) return;  // 3/23/2012  if LC50 is zero, no effects, application factors are incalculable so no effects on repro, growth, photosynthesis either
 
@@ -795,20 +791,20 @@ namespace AQUATOX.Organisms
                 ToxPPB = (ToxinOrg / State) * 1e6;
                 // ug/kg         ug/L   /  mg/L     mg/kg
 
-                TElapsed = AQTSeg.CalculateTElapsed(ToxInt);
+                TElapsed = AQTSeg.CalculateTElapsed(TInt);
                 if ((LifeSpan > 0) && (TElapsed > LifeSpan))
                     TElapsed = LifeSpan;    // JSC 8-12-2003
 
                 if ((ToxPPB <= 0.0) || (TElapsed == 0.0)) return;
 
                 if ((K2_Local < Consts.Tiny))
-                    LethalConc = LCInfinite[ToxInt];
+                    LethalConc = LCInfinite[TInt];
                 else if (TElapsed > 4.605 / K2_Local)
-                    LethalConc = LCInfinite[ToxInt];
+                    LethalConc = LCInfinite[TInt];
                 else if ((1.0 - Math.Exp(-K2_Local * TElapsed)) < 0.0001)                 // bullet proof
-                    LethalConc = LCInfinite[ToxInt] / 0.0001;
+                    LethalConc = LCInfinite[TInt] / 0.0001;
                 else
-                    LethalConc = LCInfinite[ToxInt] / (1.0 - Math.Exp(-K2_Local * TElapsed));
+                    LethalConc = LCInfinite[TInt] / (1.0 - Math.Exp(-K2_Local * TElapsed));
                 // ppb           // ppb                             // 1/d         // d
 
                 if (LethalConc == 0)
@@ -829,15 +825,15 @@ namespace AQUATOX.Organisms
 
                     if (IsAnimal())
                     {
-                        if (AFGrowth < Consts.Tiny) RedGrowth[ToxInt] = 0;
-                        else                        RedGrowth[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFGrowth), 1.0 / Shape));
+                        if (AFGrowth < Consts.Tiny) RedGrowth[TInt] = 0;
+                        else                        RedGrowth[TInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFGrowth), 1.0 / Shape));
 
-                        if (AFRepro < Consts.Tiny)  RedRepro[ToxInt] = 0;
-                        else                        RedRepro[ToxInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFRepro), 1.0 / Shape));
+                        if (AFRepro < Consts.Tiny)  RedRepro[TInt] = 0;
+                        else                        RedRepro[TInt] = 1.0 - Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFRepro), 1.0 / Shape));
                     } 
                     else 
-                      if (AFPhoto < Consts.Tiny) FracPhoto[ToxInt] = 1;  // plant
-                      else FracPhoto[ToxInt] = Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFPhoto), 1.0 / Shape));
+                      if (AFPhoto < Consts.Tiny) FracPhoto[TInt] = 1;  // plant
+                      else FracPhoto[TInt] = Math.Exp(-Math.Pow(ToxPPB / (LethalConc * AFPhoto), 1.0 / Shape));
                 }
             }
 
@@ -851,18 +847,18 @@ namespace AQUATOX.Organisms
                 double Slope;
                 double ToxinH2O;        // Toxicant in the water
                 CumFracNow = 0;
-                RedGrowth[ToxInt] = 0;  // 5/3/2017 defaults for no effects if tox is zero
-                RedRepro[ToxInt] = 0;
-                FracPhoto[ToxInt] = 1;
+                RedGrowth[TInt] = 0;  // 5/3/2017 defaults for no effects if tox is zero
+                RedRepro[TInt] = 0;
+                FracPhoto[TInt] = 1;
 
                 SlopeFactor = WaterTox.ChemRec.WeibullSlopeFactor;
                 if (IsAnimal())
-                    if ((AnimTox.Anim_Tox.LC50_Slope > Consts.Tiny))
-                        SlopeFactor = AnimTox.Anim_Tox.LC50_Slope;  // JSC 12/14/2016 allow for animal-chemical-specific slope factor
+                    if ((ATR.LC50_Slope > Consts.Tiny))
+                        SlopeFactor = ATR.LC50_Slope;  // JSC 12/14/2016 allow for animal-chemical-specific slope factor
                 
                 if (IsPlant())
-                    if ((PlantTox.Plant_Tox.LC50_Slope > Consts.Tiny))
-                        SlopeFactor = PlantTox.Plant_Tox.LC50_Slope; // JSC 12/14/2016 allow for plant-chemical-specific slope factor
+                    if ((PTR.LC50_Slope > Consts.Tiny))
+                        SlopeFactor = PTR.LC50_Slope; // JSC 12/14/2016 allow for plant-chemical-specific slope factor
                 
                 ToxinH2O = WaterTox.State;
                 if (ToxinH2O < 0)  return;
@@ -892,24 +888,24 @@ namespace AQUATOX.Organisms
 
                     // 3/9/2012  Remove Requirement for non-zero LC50 to apply EC50_Growth
 
-                    if (AnimTox.Anim_Tox.EC50_growth < Consts.Tiny)
-                        RedGrowth[ToxInt] = 0;
+                    if (ATR.EC50_growth < Consts.Tiny)
+                        RedGrowth[TInt] = 0;
 
                     else
                     {
-                        if ((AnimTox.Anim_Tox.EC50_Growth_Slope > Consts.Tiny))
+                        if ((ATR.EC50_Growth_Slope > Consts.Tiny))
                             // JSC 4/5/2017 allow for animal-chemical-effect specific slope factor
-                            Slope = AnimTox.Anim_Tox.EC50_Growth_Slope / AnimTox.Anim_Tox.EC50_growth;
+                            Slope = ATR.EC50_Growth_Slope / ATR.EC50_growth;
                         else
-                            Slope = SlopeFactor / AnimTox.Anim_Tox.EC50_growth;
+                            Slope = SlopeFactor / ATR.EC50_growth;
                         if (Slope <= 0)
                             throw new Exception(WaterTox.PName + " EC50 Growth Weibull Slope Factor must be greater than zero.");
 
-                        ETA = (-2 * AnimTox.Anim_Tox.EC50_growth * Slope) / Math.Log(0.5);
+                        ETA = (-2 * ATR.EC50_growth * Slope) / Math.Log(0.5);
                         try
                         {
-                            k = -Math.Log(0.5) / Math.Pow(AnimTox.Anim_Tox.EC50_growth, ETA);
-                            RedGrowth[ToxInt] = 1.0 - Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
+                            k = -Math.Log(0.5) / Math.Pow(ATR.EC50_growth, ETA);
+                            RedGrowth[TInt] = 1.0 - Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
                         }
                         catch
                         {
@@ -917,27 +913,27 @@ namespace AQUATOX.Organisms
                         }
                     }
                     // 3/9/2012  Remove Requirement for non-zero LC50 to apply EC50_Repro
-                    if (AnimTox.Anim_Tox.EC50_repro < Consts.Tiny)
+                    if (ATR.EC50_repro < Consts.Tiny)
                     {
-                        RedRepro[ToxInt] = 0;
+                        RedRepro[TInt] = 0;
                     }
                     else
                     {
-                        if ((AnimTox.Anim_Tox.EC50_Repro_Slope > Consts.Tiny))
+                        if ((ATR.EC50_Repro_Slope > Consts.Tiny))
                         {
                             // JSC 4/5/2017 allow for animal-chemical-effect specific slope factor
-                            Slope = AnimTox.Anim_Tox.EC50_Repro_Slope / AnimTox.Anim_Tox.EC50_repro;
+                            Slope = ATR.EC50_Repro_Slope / ATR.EC50_repro;
                         }
                         else
-                            Slope = SlopeFactor / AnimTox.Anim_Tox.EC50_repro;
+                            Slope = SlopeFactor / ATR.EC50_repro;
                         if (Slope <= 0)
                             throw new Exception(WaterTox.PName + " EC50 Repro Weibull Slope Factor must be greater than zero.");
 
-                        ETA = (-2 * AnimTox.Anim_Tox.EC50_repro * Slope) / Math.Log(0.5);
+                        ETA = (-2 * ATR.EC50_repro * Slope) / Math.Log(0.5);
                         try
                         {
-                            k = -Math.Log(0.5) / Math.Pow(AnimTox.Anim_Tox.EC50_repro, ETA);
-                            RedRepro[ToxInt] = 1.0 - Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
+                            k = -Math.Log(0.5) / Math.Pow(ATR.EC50_repro, ETA);
+                            RedRepro[TInt] = 1.0 - Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
                         }
                         catch
                         {
@@ -948,27 +944,27 @@ namespace AQUATOX.Organisms
                 else
                 {
                     // IsPlant
-                    if (PlantTox.Plant_Tox.EC50_photo < Consts.Tiny)
+                    if (PTR.EC50_photo < Consts.Tiny)
                     {
-                        FracPhoto[ToxInt] = 1.0;
+                        FracPhoto[TInt] = 1.0;
                     }
                     else
                     {
                         // 3/9/2012  Remove Requirement for non-zero LC50 to apply EC50_Repro  //10/8/2014 JSC FracPhoto should be set to 1.0 for no effect
-                        if ((PlantTox.Plant_Tox.EC50_Photo_Slope > Consts.Tiny))
+                        if ((PTR.EC50_Photo_Slope > Consts.Tiny))
                         {
                             // JSC 4/5/2017 allow for plant-chemical-effect specific slope factor
-                            Slope = PlantTox.Plant_Tox.EC50_Photo_Slope / PlantTox.Plant_Tox.EC50_photo;
+                            Slope = PTR.EC50_Photo_Slope / PTR.EC50_photo;
                         }
-                        else Slope = SlopeFactor / PlantTox.Plant_Tox.EC50_photo;
+                        else Slope = SlopeFactor / PTR.EC50_photo;
 
                         if (Slope <= 0) throw new Exception(WaterTox.PName + " EC50 Photo Weibull Slope Factor must be greater than zero.");
 
-                        ETA = (-2 * PlantTox.Plant_Tox.EC50_photo * Slope) / Math.Log(0.5);
+                        ETA = (-2 * PTR.EC50_photo * Slope) / Math.Log(0.5);
                         try
                         {
-                            k = -Math.Log(0.5) / Math.Pow(PlantTox.Plant_Tox.EC50_photo, ETA);
-                            FracPhoto[ToxInt] = Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
+                            k = -Math.Log(0.5) / Math.Pow(PTR.EC50_photo, ETA);
+                            FracPhoto[TInt] = Math.Exp(-k * Math.Pow(ToxinH2O, ETA));
                         }
                         catch
                         {
@@ -985,7 +981,7 @@ namespace AQUATOX.Organisms
             AFPhoto = 0.0;
             if ((!AQTSeg.PSetup.UseExternalConcs) && (State == 0)) return 0.0;
             if (!(NState >= Consts.FirstBiota && NState <= Consts.LastBiota)) return 0.0;
-            ToxInt = (int)ToxTyp - 2;
+            TInt = ToxInt(ToxTyp);
             WaterTox = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxTyp, T_SVLayer.WaterCol) as TToxics;
             if (WaterTox == null) return 0.0;
 
@@ -993,73 +989,75 @@ namespace AQUATOX.Organisms
             {
                 AnimTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
                 if (AnimTox == null) return 0.0;
-                if (AnimTox.Anim_Tox == null) return 0.0;
+                ATR = ((TAnimal)this).Anim_Tox[ToxInt(ToxTyp)];
+                if (ATR == null) return 0.0;
 
                 PlantTox = null;
 
-                if (AnimTox.Anim_Tox.LC50 <= 0.0)
+                if (ATR.LC50 <= 0.0)
                 {
                     AFGrowth = 0.0;
                     AFRepro = 0.0;
                 }
                 else
                 {
-                    AFGrowth = AnimTox.Anim_Tox.EC50_growth / AnimTox.Anim_Tox.LC50;
-                    AFRepro = AnimTox.Anim_Tox.EC50_repro / AnimTox.Anim_Tox.LC50;
+                    AFGrowth = ATR.EC50_growth / ATR.LC50;
+                    AFRepro = ATR.EC50_repro / ATR.LC50;
                 }
-                LC50_Local = AnimTox.Anim_Tox.LC50;
-                K2_Local = AnimTox.Anim_Tox.Entered_K2;
-                K2_Local = K2_Local + AnimTox.Anim_Tox.Bio_rate_const;  // 5/11/2015  Add metabolism to k2 for calculations
+                LC50_Local = ATR.LC50;
+                K2_Local = ATR.Entered_K2;
+                K2_Local = K2_Local + ATR.Bio_rate_const;  // 5/11/2015  Add metabolism to k2 for calculations
                 LifeSpan = ((TAnimal)this).PAnimalData.LifeSpan;
             }
             else // is plant
             {
                 PlantTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAlgaeTox;
                 if (PlantTox == null) return 0.0;
-                if (PlantTox.Plant_Tox == null) return 0.0;
+                PTR = ((TPlant)this).Plant_Tox[ToxInt(ToxTyp)];
+                if (PTR == null) return 0.0;
 
                 AnimTox = null;
 
-                if (PlantTox.Plant_Tox.LC50 <= 0.0)
+                if (PTR.LC50 <= 0.0)
                     AFPhoto = 0.0;
                 else
-                    AFPhoto = PlantTox.Plant_Tox.EC50_photo / PlantTox.Plant_Tox.LC50;
+                    AFPhoto = PTR.EC50_photo / PTR.LC50;
 
-                LC50_Local = PlantTox.Plant_Tox.LC50;
-                K2_Local = PlantTox.Plant_Tox.K2;
-                K2_Local = K2_Local + PlantTox.Plant_Tox.Bio_rate_const;   // 5/11/2015  Add metabolism to k2 for calculations
+                LC50_Local = PTR.LC50;
+                K2_Local = PTR.K2;
+                K2_Local = K2_Local + PTR.Bio_rate_const;   // 5/11/2015  Add metabolism to k2 for calculations
                 LifeSpan = 0.0;
             }
 
             if (!AQTSeg.PSetup.UseExternalConcs)  Calculate_Internal_Toxicity();
-            else Calculate_External_Toxicity();
+               else Calculate_External_Toxicity();
 
             if (CumFracNow <= 0.0) return 0.0;
 
-            Nonresistant = State * (1.0 - Resistant[ToxInt]);            // 9-14-07 conversion of Resistant from biomass units to fraction units
+            Nonresistant = State * (1.0 - Resistant[TInt]);            // 9-14-07 conversion of Resistant from biomass units to fraction units
             // mg/L          mg/L          frac
 
             // if (CumFracNow == 1.0) FracKill = 1.0; else   JSC Test May 2020
 
-            if ((PrevFracKill[ToxInt] >= CumFracNow) || ((1.0 - PrevFracKill[ToxInt])<Consts.Tiny))
+            if ((PrevFracKill[TInt] >= CumFracNow) || ((1.0 - PrevFracKill[TInt])<Consts.Tiny))
                 FracKill = 0.0;
             else
-                FracKill = (CumFracNow - PrevFracKill[ToxInt]) / (1.0 - PrevFracKill[ToxInt]);
+                FracKill = (CumFracNow - PrevFracKill[TInt]) / (1.0 - PrevFracKill[TInt]);
 
-            result = Resistant[ToxInt] * State * FracKill + Nonresistant * CumFracNow;
+            result = Resistant[TInt] * State * FracKill + Nonresistant * CumFracNow;
             // mg/L-d        frac             mg/L     g/g-d      mg/L            g/g-d
             NewResist = (State - result) / State;
             // frac = (mg/L) - (mg/L) / (mg/L)
 
-            DeltaResistant[ToxInt, AQTSeg.DerivStep]   = NewResist - Resistant[ToxInt];
-            DeltaCumFracKill[ToxInt, AQTSeg.DerivStep] = CumFracNow - PrevFracKill[ToxInt];
+            DeltaResistant[TInt, AQTSeg.DerivStep]   = NewResist - Resistant[TInt];
+            DeltaCumFracKill[TInt, AQTSeg.DerivStep] = CumFracNow - PrevFracKill[TInt];
             return result;
         }
 
         // ------------------------------------------------------------------------
 
         // Chronic Effects
-        public double GutEffOrgTox(T_SVType ToxTyp)
+        public double GutEffOrgTox()
         {
 
             if ((NState >= Consts.FirstInvert && NState <= Consts.LastInvert))

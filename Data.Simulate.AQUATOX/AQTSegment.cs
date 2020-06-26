@@ -237,6 +237,10 @@ namespace AQUATOX.AQTSegment
             DB = 0;
         }
 
+        public int ToxInt(T_SVType typ)
+        {
+            return (int)typ - 2;
+        }
 
         public virtual void SetToInitCond()
         {
@@ -1683,7 +1687,7 @@ namespace AQUATOX.AQTSegment
         public void WriteResults(DateTime TimeIndex)
         {
             double res = 0;
-            if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[SV.restimes.Count - 1]).TotalDays > Consts.VSmall)
+            if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[^1]).TotalDays > Consts.VSmall)   // last element is ^1
             {
                 SV.restimes.Add(TimeIndex);
                 foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
@@ -2003,7 +2007,7 @@ namespace AQUATOX.AQTSegment
                                             PR.InitialCond = PDIR.InitCond * MultFrac;
                                             PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
                                         }
-                                    else PR.InitialCond = PDIR.ToxInitCond[(int)SVLoop - 2];
+                                    else PR.InitialCond = PDIR.ToxInitCond[PR.ToxInt(SVLoop)];
                                 }
                             }
                         }
@@ -2477,7 +2481,7 @@ namespace AQUATOX.AQTSegment
             PNO32 = (TNO3_Sediment)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
             s = MassTransfer();
             // m/d            // g/m3 d            // m2/d2            // m/d            // g/m3
-            Jn = 2.86 * (PNO31.Denit_Rate(PNO31.State) / s * PNO31.State + PNO32.Denit_Rate(PNO32.State) * PNO32.State) / DR.H2.Val;
+            Jn = 2.86 * (PNO31.Denit_Rate() / s * PNO31.State + PNO32.Denit_Rate() * PNO32.State) / DR.H2.Val;
             // m/d            // g/m3            // m
             return Jc - Jn;
             // g O2/m3 d  // g O2/m3 d
@@ -2912,9 +2916,9 @@ namespace AQUATOX.AQTSegment
                 NSOD = 4.57 * K2NH4 / s * NH4_1;
                 // gO2/gN
                 // Solve for Nitrate
-                K2Denit_1 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1))).Denit_Rate(NO3_1);
+                K2Denit_1 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1))).Denit_Rate();
                 // m2/d2
-                KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate(NO3_2);
+                KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate();
                 // m/d
                 a11 = -Diagenesis_Params.KL12 - K2Denit_1 / s - Diagenesis_Params.w2.Val - s;
                 //                         (m/d)   (m2/d2)   (m/d)                  (m/d)

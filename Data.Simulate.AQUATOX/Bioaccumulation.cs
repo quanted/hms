@@ -15,13 +15,21 @@ using System.Linq;
 namespace AQUATOX.Bioaccumulation
 {
 
-    public class TParticleTox : TToxics
+    public class TSorbedTox : TToxics  // Base class for TParticleTox, and toxicant sorbed to animals and plants
     {
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec\
-        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
-        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
+        public TSorbedTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
+        { }
 
+        public override bool ShouldSerializeChemRec() { return false; }   // only output JSON for H2OTox 
+        public override bool ShouldSerializeBioTrans() { return false; }   // only output BioTrans for H2OTox 
+        public override bool ShouldSerializeAnim_Method() { return false; } // only output Anim_Method for H2OTox 
+        public override bool ShouldSerializePlant_Method() { return false; } // only output Plant_Method for H2OTox
+        public override bool ShouldSerializeChem_Anim_Tox() { return false; } // only output JSON for H2OTox 
+        public override bool ShouldSerializeChem_Plant_Tox() { return false; } // only output JSON for H2OTox 
+    }
+
+        public class TParticleTox : TSorbedTox
+    { 
 
         public TParticleTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
@@ -514,16 +522,9 @@ namespace AQUATOX.Bioaccumulation
         }
     } // end TPOCTox
 
-    public class TAlgaeTox : TToxics
+    public class TAlgaeTox : TSorbedTox
 
     {
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
-        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
-        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
-
-
-        public TPlantToxRecord Plant_Tox = null;
 
         public TAlgaeTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         {
@@ -541,6 +542,7 @@ namespace AQUATOX.Bioaccumulation
             double ToxState;
             double DissocFactor;
             TPlant AlgalPtr;
+            TPlantToxRecord PTR;
             UptakeCalcMethodType ChemOption;
             ChemOption = Plant_Method;
 
@@ -555,7 +557,7 @@ namespace AQUATOX.Bioaccumulation
                 K1 = 1.0 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
 
                 // K1 function is mirrored in CHEMTOX.PAS, any change here needs to be made there
-                double K2 = Plant_Tox.K2;
+                double K2 = AlgalPtr.Plant_Tox[ToxInt(SVType)].K2;
                 if (K2 > 96.0) K1 = K1 * (96.0 / K2);  // scaling factor 10-02-03
 
                 return K1 * ToxState * AlgalPtr.State * 1e-6;        // HMS removed Dif
@@ -566,6 +568,7 @@ namespace AQUATOX.Bioaccumulation
             ToxState = AQTSeg.GetState(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol);
 
             if ((AlgalPtr == null) || (ToxState <= Consts.Tiny)) return 0.0;
+            PTR = AlgalPtr.Plant_Tox[ToxInt(SVType)];
 
             // ---------------------------------------------------------------------
             if (ChemOption != UptakeCalcMethodType.Default_Meth)
@@ -573,11 +576,11 @@ namespace AQUATOX.Bioaccumulation
                 if (ChemOption == UptakeCalcMethodType.CalcK1)
                 {
                     // 5/29/2015, add Bio_rate_const
-                    Local_K1 = (Plant_Tox.K2 + Plant_Tox.Bio_rate_const) * Plant_Tox.Entered_BCF;
+                    Local_K1 = (PTR.K2 + PTR.Bio_rate_const) * PTR.Entered_BCF;
                 }
                 else
                 {
-                    Local_K1 = Plant_Tox.K1;
+                    Local_K1 = PTR.K1;
                 }
 
                 return Local_K1 * ToxState * AlgalPtr.State * 1e-6;
@@ -601,7 +604,7 @@ namespace AQUATOX.Bioaccumulation
                 UptakeLimit = (AlgalPtr.BCF(0, SVType) * ToxState - GetPPB(NState, SVType, Layer)) / (AlgalPtr.BCF(0, SVType) * ToxState);
                 if (UptakeLimit < 0) UptakeLimit = 0;
 
-                K2 = Plant_Tox.K2;
+                K2 = PTR.K2;
                 if (K2 > 96.0)
                 {
                     Local_K1 = Local_K1 * (96.0 / K2); // scaling factor 10-02-03
@@ -761,15 +764,11 @@ namespace AQUATOX.Bioaccumulation
 
     } // end TAlgaeTox
 
-    public class TAnimalTox : TToxics {
+    public class TAnimalTox : TSorbedTox {
 
-        public TAnimalToxRecord Anim_Tox = null;
+        // public TAnimalToxRecord Anim_Tox = null;  6/19/2020 change structure
+
         [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)
-
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
-        public virtual bool ShouldSerializeAnim_Method() { return true; }  // only output Anim_Method for H2OTox ChemRec
-        public virtual bool ShouldSerializePlant_Method() { return true; }  // only output Plant_Method for H2OTox ChemRec
 
         public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
     {
@@ -830,7 +829,7 @@ namespace AQUATOX.Bioaccumulation
                     BioT_out = Biotransformation();
                     BioT_in = Biotrans_To_This_Org();
 
-                    Gill = CP.GillUptake(SVType, T_SVLayer.WaterCol);
+                    Gill = CP.GillUptake(SVType);
 
                     // removed porew water gill uptake
 

@@ -152,7 +152,7 @@ namespace AQUATOX.Diagenesis
             Loading = 0;
         }
 
-        public double Denit_Rate(double NO3Conc)
+        public double Denit_Rate()
         {
             double result;
             // eqns 5.23&24
@@ -311,7 +311,7 @@ namespace AQUATOX.Diagenesis
                 // m/d       // m                // mg/L
                 Nitr = TNH4_1.Nitr_Rate(NH4_1) / s * NH4_1 / DR.H1.Val;
 // EFDC eq. 5-20   // g/m3 d     // m2/d2    // m/d  // g/m3    // m
-                DeNitr = Denit_Rate(State) / s * State / DR.H1.Val;
+                DeNitr = Denit_Rate() / s * State / DR.H1.Val;
                 // g/m3 d        // m2/d2 // m/d // g/m3        // m
                 Flux2Wat = Flux2Water();
                 DB = Nitr - DeNitr - Burial - Flux2Wat - Flux2Anaerobic;
@@ -329,8 +329,8 @@ namespace AQUATOX.Diagenesis
                 // include burial from L1
                 Burial = DR.w2.Val * NO3_2 / DR.H2.Val;
                 // deep burial
-                DeNitr = Denit_Rate(State) * State / DR.H2.Val;
-                // g/m3 d          // m/d   // g/m3      // m
+                DeNitr = Denit_Rate() * State / DR.H2.Val;
+                // g/m3 d     // m/d   // g/m3      // m
                 DB = -DeNitr - Burial + Flux2Anaerobic;
                 // g/m3 d
             }
@@ -907,7 +907,7 @@ namespace AQUATOX.Diagenesis
             PNO3_1 = (TNO3_Sediment) AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
             PNO3_2 = (TNO3_Sediment) AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
             // g/m2 d
-            JO2NO3 = 2.86 * (PNO3_1.Denit_Rate(PNO3_1.State) / S * PNO3_1.State + PNO3_2.Denit_Rate(PNO3_2.State) * PNO3_2.State);
+            JO2NO3 = 2.86 * (PNO3_1.Denit_Rate() / S * PNO3_1.State + PNO3_2.Denit_Rate() * PNO3_2.State);
                      // m/d            // g/m3
             Dia_Flux = Dia_Flux - JO2NO3;
 

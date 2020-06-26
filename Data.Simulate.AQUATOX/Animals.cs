@@ -238,7 +238,7 @@ namespace AQUATOX.Animals
 //      public MigrationInputRec[] MigrInput;
 //      public double KD = 0;               // KD calculated for PFA cheimcals
         [JsonIgnore] public double HabitatLimit = 1.0;     // Habitat Limitation nosave
-//      [JsonIgnore] public TAnimalToxRecord[] Anim_Tox; // pointer to relevant animal toxicity data (nosave)  moved to algae_zoo_tox
+        [JsonIgnore] public TAnimalToxRecord[] Anim_Tox = new TAnimalToxRecord[Consts.NToxs]; // pointer to relevant animal toxicity data (nosave)  
         public AllVariables PSameSpecies;   // other state variable that represents the same species, relevant to only Sm and Lg Game Fish
         [JsonIgnore] public double SumPrey = 0;          // The total sum of available prey to a predator in a given timestep, calculated at the beginning of each timestep
         [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how animal is dying, (nosave)
@@ -262,6 +262,8 @@ namespace AQUATOX.Animals
         // ------------------------------------------------------------------------
         public override void SetToInitCond()
         {
+            Assign_Anim_Tox();
+
             base.SetToInitCond();
             HabitatLimit = AHabitat_Limit();   //previously set in CalcRiskConc
 
@@ -274,7 +276,6 @@ namespace AQUATOX.Animals
             if ((PAnimalData.Animal_Type == "Fish") || (IsPlanktonInvert()))
                 PAnimalData.AveDrift = 0;
 
-            // Assign_Anim_Tox();   Not Required Anim_Tox Record is assigned within JSON
             CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
                                    // the appropriate RISKCONC, LCINFINITE, and K2
                                    // Set Oyster Category
@@ -402,10 +403,8 @@ namespace AQUATOX.Animals
             Blank.XInteraction = "";
 
              PTrophInt = new InteractionFields[iTrophInt(Consts.LastBiota)+1];
-                          for (nsloop = AllVariables.Cohesives; nsloop <= Consts.LastBiota; nsloop++)
-                {
+                         for (nsloop = AllVariables.Cohesives; nsloop <= Consts.LastBiota; nsloop++)
                     PTrophInt[iTrophInt(nsloop)] = Blank;
-                }
 
             PSameSpecies = AllVariables.NullStateVar;
 
@@ -427,7 +426,7 @@ namespace AQUATOX.Animals
             MortRates.OrgPois =  new double[Consts.NToxs]; 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
-                MortRates.OrgPois[(int) ToxLoop - 2] = 0;
+                MortRates.OrgPois[ToxInt(ToxLoop)] = 0;
             }
 
             //for (MigrLoop = 1; MigrLoop <= 5; MigrLoop++)
@@ -447,6 +446,40 @@ namespace AQUATOX.Animals
             LastO2CalcTime[0] = DateTime.MinValue; //TO2Effects.O2Mortality
             LastO2CalcTime[1] = DateTime.MinValue; //TO2Effects.O2Growth_Red
             LastO2CalcTime[2] = DateTime.MinValue; //TO2Effects.O2Repro_Red
+        }
+
+        public void Assign_Anim_Tox()
+        {
+            int FoundToxIndx;
+            int i;
+            TAnimalToxRecord ATR;
+            TToxics TT;
+            int ToxLoop;
+            string DataName;
+            DataName = PAnimalData.ToxicityRecord.ToLower();
+
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                TT = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                if (TT != null)
+                {
+                    FoundToxIndx = -1;
+                    for (i = 0; i < TT.Chem_Anim_Tox.Count; i++)
+                    {
+                        ATR = TT.Chem_Anim_Tox[i];
+                        if (ATR.Animal_name.ToLower() == DataName)
+                        {
+                            FoundToxIndx = i;
+                            break;
+                        }
+                    }
+                    if (FoundToxIndx == -1)
+                        throw new Exception("Error!  " + PAnimalData.AnimalName + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Anim toxicity data.  Study cannot be executed.");
+
+                    ATR = TT.Chem_Anim_Tox[FoundToxIndx];
+                    Anim_Tox[ToxLoop] = ATR;
+                }
+            }
         }
 
         public void ChangeData()
@@ -553,7 +586,7 @@ namespace AQUATOX.Animals
                 double KEgest;
                 double PPBPrey;
                 Ingestion = IngestSpecies(P.nState, P, ref EgestRet, ref GutEffRed);
-                KEgest = (1.0 - GutEffOrgTox(ToxType) * GutEffRed) * Ingestion;
+                KEgest = (1.0 - GutEffOrgTox() * GutEffRed) * Ingestion;
                 PPBPrey = AQTSeg.GetPPB(P.nState, ToxType, T_SVLayer.WaterCol);
                 DefToxCount = DefToxCount + KEgest * PPBPrey * 1e-6;
                 // mg/L-d   ug/kg   kg/mg
@@ -605,9 +638,8 @@ namespace AQUATOX.Animals
         AggRedGrowth = 0;
         for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
         {
-            int ToxInt = (int)ToxLoop - 2;
             if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
-            AggRedGrowth = AggRedGrowth + RedGrowth[ToxInt];
+            AggRedGrowth = AggRedGrowth + RedGrowth[ToxInt(ToxLoop)];
         }
 
         if (AggRedGrowth > 1.0)  AggRedGrowth = 1.0;
@@ -624,8 +656,7 @@ namespace AQUATOX.Animals
            {
                 if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
                 {
-                    int ToxInt = (int)ToxLoop - 2;
-                    AggRedRepro = AggRedRepro + RedRepro[ToxInt];
+                    AggRedRepro = AggRedRepro + RedRepro[ToxInt(ToxLoop)];
                 }
             }
 
@@ -790,7 +821,7 @@ namespace AQUATOX.Animals
                 // -------------------------------------------------------------------------------
                 double GetPreyTrophicLevel(AllVariables NS)
                 {
-                    if (NS < Consts.FirstInvert) return 1;           // all plants and detritus to trophic level 1
+                    if (NS < Consts.FirstInvert) return 1;           // all Anims and detritus to trophic level 1
                     else return ((PSV) as TAnimal).PreyTrophicLevel; // Trophic Level derived from feeding prefs
                 }
                 // -------------------------------------------------------------------------------
@@ -1313,20 +1344,19 @@ namespace AQUATOX.Animals
             Setup_Record SR = AQTSeg.PSetup;
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  
             {
-               int ToxInt = (int)ToxLoop - 2;
                if ((SR.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) > 0)) ||
                         ((!SR.UseExternalConcs) && (AQTSeg.GetStateVal(NState, ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
                     Pois = Poisoned(ToxLoop);
-                    MortRates.OrgPois[ToxInt] = Pois;
+                    MortRates.OrgPois[ToxInt(ToxLoop)] = Pois;
                     Dead = Dead + Pois;
                     // mg/L-d // mg/L-d // mg/L-d
                 }
                 else
                 {
-                    RedGrowth[ToxInt] = 0;  // 5/3/2017 defaults for no effects if tox is zero
-                    RedRepro[ToxInt] = 0;
-                    FracPhoto[ToxInt] = 1;
+                    RedGrowth[ToxInt(ToxLoop)] = 0;  // 5/3/2017 defaults for no effects if tox is zero
+                    RedRepro[ToxInt(ToxLoop)] = 0;
+                    FracPhoto[ToxInt(ToxLoop)] = 1;
                 }
             }
 
@@ -1605,10 +1635,10 @@ namespace AQUATOX.Animals
                     if (PT != null)
                         {
                             PT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TAnimalTox;
-                            EC50Gr = PT.Anim_Tox.EC50_growth;
+                            EC50Gr = Anim_Tox[ToxInt(ToxLoop)].EC50_growth;
                             if (EC50Gr > Consts.Tiny)
                             {
-                                DriftThres = PT.Anim_Tox.Drift_Thresh;   // ug/L
+                                DriftThres = Anim_Tox[ToxInt(ToxLoop)].Drift_Thresh;   // ug/L
                                 ToxLevel = AQTSeg.GetState(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol);
                                 if ((ToxLevel > DriftThres))  // Toxicant Induced Dislodge for this toxicant
                                     Dislodge = Dislodge + (ToxLevel - DriftThres) / ((ToxLevel - DriftThres) + EC50Gr);
@@ -1639,7 +1669,7 @@ namespace AQUATOX.Animals
         // ---------------------------------------------------------------------------------------------------------------------------------------
 
 
-        public double GillUptake(T_SVType ToxType, T_SVLayer ToxLayer)
+        public double GillUptake(T_SVType ToxType)
         {
 
             const double WEffO2 = 0.62;
@@ -1654,7 +1684,6 @@ namespace AQUATOX.Animals
             double Frac_This_Layer;
             double ToxState;
             T_SVType ToxLoop;
-            double SizeCorr;
             // ---------------------------------------------------------------------------------------------------------------------------------------
 
             // removed multi-seg porewater gill uptake here, multi-layer sediment / chemical model not in HMS
@@ -1680,15 +1709,15 @@ namespace AQUATOX.Animals
                 }
                 else KUptake = 0.0;
 
-                Local_K2 = PT.Anim_Tox.Entered_K2;
+                Local_K2 = Anim_Tox[ToxInt(ToxType)].Entered_K2;
                 if (Local_K2 > 96.0)
                     KUptake = KUptake * (96.0 / Local_K2);  // scaling factor 10-02-03
 
                 if (State < Consts.Tiny)
-                    DerivedK1[(int)ToxType-2] = 0.0;
+                    DerivedK1[ToxInt(ToxType)] = 0.0;
                 else
                 {
-                    DerivedK1[(int)ToxType - 2] = KUptake / (State * 1e-6); // 9/9/2010
+                    DerivedK1[ToxInt(ToxType)] = KUptake / (State * 1e-6); // 9/9/2010
                 }  // L/kg D                     // 1/d  // bmass mg/L // kg/mg
 
                 // removed pore water code
@@ -1702,13 +1731,13 @@ namespace AQUATOX.Animals
                 if (PT.Anim_Method == UptakeCalcMethodType.CalcK1)
                 {
                     // 5/29/2015 add Bio_rate_const (KM) to K2 when estimating K1
-                    Local_K1 = (PT.Anim_Tox.Entered_K2 + PT.Anim_Tox.Bio_rate_const) * PT.Anim_Tox.Entered_BCF;
+                    Local_K1 = (Anim_Tox[ToxInt(ToxType)].Entered_K2 + Anim_Tox[ToxInt(ToxType)].Bio_rate_const) * Anim_Tox[ToxInt(ToxType)].Entered_BCF;
                 }
                 else
                 {
-                    Local_K1 = PT.Anim_Tox.Entered_K1;
+                    Local_K1 = Anim_Tox[ToxInt(ToxType)].Entered_K1;
                 }
-                DerivedK1[(int)ToxType - 2] = Local_K1;
+                DerivedK1[ToxInt(ToxType)] = Local_K1;
                 return Local_K1 * ToxState * State * 1e-6;
                 //ug/L-d  //L/kg-d // ug/L   // mg/L  // kg/mg
             }
@@ -2096,7 +2125,7 @@ namespace AQUATOX.Animals
         // 4/14/2014 avoid zero trophic levels even if no food available
         for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
         {
-            MortRates.OrgPois[(int) ToxLoop - 2] = 0;
+            MortRates.OrgPois[ToxInt(ToxLoop)] = 0;
         }
 //        Migr = StratMigration();      // StratMigration calculated first to set IsMigrAnoxia to limit other loss terms in that case
 

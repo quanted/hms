@@ -6,6 +6,7 @@ using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;
+using AQUATOX.Chemicals;
 
 namespace AQUATOX.Plants
 
@@ -157,7 +158,7 @@ namespace AQUATOX.Plants
         public double SinkToHypo = 0;
         // Set in Sedimentation
         public double[] EC50_Photo;
-        [JsonIgnore] public TPlantToxRecord[] Plant_Tox;     // pointer to relevant plant toxicity data (nosave)
+        [JsonIgnore] public TPlantToxRecord[] Plant_Tox = new TPlantToxRecord[Consts.NToxs];     // pointer to relevant plant toxicity data (nosave)
         [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how plant category is dying, (nosave)
         [JsonIgnore] public TMacroType MacroType;        // If plant is macrophyte, what type is it (nosave)
         [JsonIgnore] public bool SloughEvent = false;         // have conditions for a sloughing event been met?  Nosave
@@ -178,14 +179,11 @@ namespace AQUATOX.Plants
         [JsonIgnore] public double HighLt_Limit = 0;         // track for rates, NOSAVE JSC 9-5-2002
         [JsonIgnore] public double ResidenceTime = 0;        // phytoplankton residence time, set in washout, NOSAVE
         [JsonIgnore] public bool IsEunotia = false;          // Is this Eunotia?  Scientific name includes "eunotia,"  NOSAVE
-        public AllVariables PSameSpecies;
+        public AllVariables PSameSpecies = AllVariables.NullStateVar;
 
         public TPlant(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             int ToxLoop;
-            //PSameSpecies = AllVariables.NullStateVar;
-
-            //          PRequiresData = true;
 
             MortRates.OtherMort = 0;
             MortRates.SaltMort = 0;
@@ -197,6 +195,8 @@ namespace AQUATOX.Plants
          
         public override void SetToInitCond()
         {
+            Assign_Plant_Tox();
+
             base.SetToInitCond();
             SinkToHypo = 0;
             SloughEvent = false;
@@ -262,38 +262,41 @@ namespace AQUATOX.Plants
 
         // ChangeData MUST be called when the underlying data record is changed
         // ------------------------------------------------------------------------
-        //public void Assign_Plant_Tox()
-        //{
-        //    int FoundToxIndx;
-        //    int i;
-        //    TPlantToxRecord PTR;
-        //    T_SVType ToxLoop;
-        //    string DataName;
-        //    DataName = PAlgalRec.ToxicityRecord.ToLower();
+        public void Assign_Plant_Tox()
+        {
+            int FoundToxIndx;
+            int i;
+            TPlantToxRecord PTR;
+            TToxics TT;
+            int ToxLoop;
+            string DataName;
+            DataName = PAlgalRec.ToxicityRecord.ToLower();
 
-        //                for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-        //    {
-        //        if (AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1+ToxLoop, T_SVLayer.WaterCol) != null)
-        //        {
-        //            FoundToxIndx = -1;
-        //            // 10/27/2009
-        //            for (i = 0; i < Chemptrs[ToxLoop].Plant_Tox.Count; i++)
-        //            {
-        //                PTR = Chemptrs[ToxLoop].Plant_Tox.At(i);
-        //                if (PTR.Plant_name.ToLower() == DataName)
-        //                {
-        //                    FoundToxIndx = i;
-        //                }
-        //            }
-        //            if (FoundToxIndx == -1)
-        //            {
-        //                throw new Exception("Error!  " + Consts.OutputText(NState, SVType, T_SVLayer.WaterCol, "", false, false, 0) + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + Chemptrs[ToxLoop].ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
-        //            }
-        //            PTR = Chemptrs[ToxLoop].Plant_Tox.At(FoundToxIndx);
-        //            Plant_Tox[ToxLoop] = PTR;
-        //        }
-        //    }
-        //}
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                TT = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                if (TT != null)
+                {
+                    FoundToxIndx = -1;
+                    for (i = 0; i < TT.Chem_Plant_Tox.Count; i++)
+                    {
+                        PTR = TT.Chem_Plant_Tox[i];
+                        if (PTR.Plant_name.ToLower() == DataName)
+                        {
+                            FoundToxIndx = i;
+                            break;
+                        }
+                    }
+                    if (FoundToxIndx == -1)
+                        throw new Exception("Error!  " + PAlgalRec.PlantName + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
+
+                    PTR = TT.Chem_Plant_Tox[FoundToxIndx];
+                    Plant_Tox[ToxLoop] = PTR;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------------
 
         public override double WetToDry()
         {
@@ -885,14 +888,13 @@ namespace AQUATOX.Plants
         // light limitation at depth
         public double LtAtDepth(bool DailyStep)
         {   // HMS Light at Top, Vertical stratification code stripped, not relevant to HMS Work Flows
-            
+            // Floating Macrophytes not subject to light limitation, this function is never executed for them
+
             double LightVal, LD, EX, DBott;
             double LightCorr;
             bool Incl_Periphyton;
             TLight PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
-
-            // Floating Macrophytes not subject to light limitation, this function is never executed for them
-
+                        
             Incl_Periphyton = !(IsPhytoplankton());
             EX = AQTSeg.Extinct(Incl_Periphyton, true, true, false, 0);
             DBott = DepthBottom();

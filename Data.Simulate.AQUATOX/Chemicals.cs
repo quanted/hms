@@ -107,12 +107,20 @@ namespace AQUATOX.Chemicals
 
     [JsonObject]
     public class TToxics : TStateVariable
+     // primary ttoxics state variable required for any chemical simulation
+     // includes chemical database (ChemRec) and chemical toxicity databases (Chem_Anim_Tox and Chem_Plant_Tox)
     {
         [JsonIgnore] public double ppb = 0;
         public AllVariables Carrier = AllVariables.NullStateVar;
         public bool IsAGGR = false;
         public ChemicalRecord ChemRec;
-        public virtual bool ShouldSerializeChemRec()  { return true;}  // only output JSON for H2OTox ChemRec
+        public virtual bool ShouldSerializeChemRec() { return true; }  // only output JSON for H2OTox ChemRec
+
+        public List<TAnimalToxRecord> Chem_Anim_Tox = null;
+        public virtual bool ShouldSerializeChem_Anim_Tox() { return true; }  // only output JSON for H2OTox ChemRec
+
+        public List<TPlantToxRecord> Chem_Plant_Tox = null;
+        public virtual bool ShouldSerializeChem_Plant_Tox() { return true; }  // only output JSON for H2OTox ChemRec
 
         public List<TBioTransObject> BioTrans = null;
         public virtual bool ShouldSerializeBioTrans() { return true; }  // only output BioTrans for H2OTox ChemRec
@@ -479,15 +487,16 @@ namespace AQUATOX.Chemicals
 
         public double Biotransformation()
         {
+            TStateVariable Carry;
+            Carry = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol);
+
             if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
             {
-                TAnimalTox AnTox = (this) as TAnimalTox;
-                return State * AnTox.Anim_Tox.Bio_rate_const;
+                return State * ((TAnimal)Carry).Anim_Tox[ToxInt(SVType)].Bio_rate_const;
             }
             if ((NState >= Consts.FirstPlant) && (NState <= Consts.LastPlant))
             {
-                TAlgaeTox AZTox = (this) as TAlgaeTox;
-                return State * AZTox.Plant_Tox.Bio_rate_const;
+                return State * ((TPlant)Carry).Plant_Tox[ToxInt(SVType)].Bio_rate_const;
             }
 
             return 0;
@@ -526,7 +535,7 @@ namespace AQUATOX.Chemicals
 
                     if (BTRec == null) return 0;
 
-                    FracToMe = BTRec.Percent[(int) SVType -2] / 100.0;
+                    FracToMe = BTRec.Percent[ToxInt(SVType)] / 100.0;
                     // fraction of biotrans to this org tox compartment
                     if (FracToMe > 0)
                     {
@@ -594,7 +603,7 @@ namespace AQUATOX.Chemicals
                         }
                     }
                     // Case
-                    FracToMe = BTRec.Percent[(int) SVType-2] / 100.0;
+                    FracToMe = BTRec.Percent[ToxInt(SVType)] / 100.0;
                     // fraction of biotrans to this org tox compartment
                     if (FracToMe > 0)
                     {
@@ -713,8 +722,8 @@ namespace AQUATOX.Chemicals
                 // Split into four compartments
                 PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
                 LoadRes = PInputRec.Load.ReturnLoad(TimeIndex) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, -1);
-                if (PInputRec.ToxLoad[(int)SVType - 2] == null) ToxLoad = 0;
-                  else ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnLoad(TimeIndex);
+                if (PInputRec.ToxLoad[ToxInt(SVType)] == null) ToxLoad = 0;
+                  else ToxLoad = PInputRec.ToxLoad[ToxInt(SVType)].ReturnLoad(TimeIndex);
 
                 LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
                 // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
@@ -730,8 +739,8 @@ namespace AQUATOX.Chemicals
                             // Split into two or four compartments
                             AddLoad = PInputRec.Load.ReturnAltLoad(TimeIndex, Loop) * ((CPtr) as TDetritus).MultFrac(TimeIndex, true, Loop);
                             // g/d                                                                         // unitless
-                            if (PInputRec.ToxLoad[(int)SVType - 2] == null) ToxLoad = 0;
-                              else ToxLoad = PInputRec.ToxLoad[(int) SVType-2].ReturnAltLoad(TimeIndex, Loop);
+                            if (PInputRec.ToxLoad[ToxInt(SVType)] == null) ToxLoad = 0;
+                              else ToxLoad = PInputRec.ToxLoad[ToxInt(SVType)].ReturnAltLoad(TimeIndex, Loop);
                                  // ug/kg
                         }
                         else
@@ -1097,15 +1106,14 @@ namespace AQUATOX.Chemicals
                 ChemOption = Plant_Method;
                 AlgalP = ((CP) as TPlant);
                 if (ChemOption == UptakeCalcMethodType.CalcK2)
-                    K2 = ((TAlgaeTox)this).Plant_Tox.K1 / ((TAlgaeTox)this).Plant_Tox.Entered_BCF;
+                    K2 = AlgalP.Plant_Tox[ToxInt(SVType)].K1 / AlgalP.Plant_Tox[ToxInt(SVType)].Entered_BCF;
                 else
-                    K2 = ((TAlgaeTox)this).Plant_Tox.K2;
+                    K2 = AlgalP.Plant_Tox[ToxInt(SVType)].K2;
 
                 if (K2 > 96)  K2 = K2 * (96 / K2);
                 // scaling factor 10-02-03
 
-                Clear = K2 * State;
-                // passive
+                Clear = K2 * State;    // passive
             }
             else
             {
@@ -1113,9 +1121,9 @@ namespace AQUATOX.Chemicals
                 ChemOption = Anim_Method;
                 AnimP = ((CP) as TAnimal);
                 if (ChemOption == UptakeCalcMethodType.CalcK2)
-                    K2 = ((TAnimalTox)this).Anim_Tox.Entered_K1 / ((TAnimalTox)this).Anim_Tox.Entered_BCF;
+                    K2 = AnimP.Anim_Tox[ToxInt(SVType)].Entered_K1 / AnimP.Anim_Tox[ToxInt(SVType)].Entered_BCF;
                 else
-                    K2 = ((TAnimalTox)this).Anim_Tox.Entered_K2;
+                    K2 = AnimP.Anim_Tox[ToxInt(SVType)].Entered_K2;
 
                 if (K2 > 96) K2 = K2 * (96 / K2); // scaling factor 10-02-03
                 
@@ -1125,7 +1133,7 @@ namespace AQUATOX.Chemicals
 
                 Clear = K2 * TCR * State;
            // ug/L d // 1/d // unitless  // ug/L
-                AnimP.DerivedK2[(int) SVType-2] = K2;
+                AnimP.DerivedK2[ToxInt(SVType)] = K2;
             }
             // animal code
             if (Clear < 0)
@@ -1161,7 +1169,7 @@ namespace AQUATOX.Chemicals
                 ToxPrey = 0;
                 if (KD > 0)
                 {
-                    GutEffTox = CP.GutEffOrgTox(SVType) * GutEffRed;
+                    GutEffTox = CP.GutEffOrgTox() * GutEffRed;
                     if (AQTSeg.GetStateVal(Loop, SVType, T_SVLayer.WaterCol) > -1)
                     {
                         ToxPrey = GetPPB(Loop, SVType, T_SVLayer.WaterCol) * KD * 1e-6 * GutEffTox;
@@ -1419,7 +1427,7 @@ namespace AQUATOX.Chemicals
                         {
                             if (!(AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol) == null))
                             {
-                                GillSorption = GillSorption + ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).GillUptake(SVType, T_SVLayer.WaterCol);
+                                GillSorption = GillSorption + ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).GillUptake(SVType);
                             }
                         }
 
