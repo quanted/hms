@@ -20,18 +20,19 @@ namespace Radiation
         public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-            bool validInputs = ValidateInputs(input, out errorMsg);
-            if (!validInputs){ return null; }
+            //bool validInputs = ValidateInputs(input, out errorMsg);
+            //if (!validInputs){ return null; }
 
             this.timeseriesData = new Dictionary<string, ITimeSeriesOutput>();
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output1 = oFactory.Initialize();
             ITimeSeriesOutput output2 = oFactory.Initialize();
-            this.GetLongwaveComponent(out errorMsg, input, output1);
+            //this.GetLongwaveComponent(out errorMsg, input, output1);
             this.GetShortwaveComponent(out errorMsg, input, output2);
-            output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
+            //output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
+            output = this.timeseriesData["shortwave"];
 
-            output.Dataset = "DW Radiation";
+            output.Dataset = "Shortwave Radiation";
             output.DataSource = "gldas";
 
             switch (input.TemporalResolution)
@@ -48,10 +49,10 @@ namespace Radiation
                     break;
             }
             output.Metadata["column_1"] = "date";
-            output.Metadata["column_2"] = "longwave";
-            output.Metadata["column_3"] = "shortwave";
+            output.Metadata["column_2"] = "shortwave";
+            //output.Metadata["column_3"] = "shortwave";
             output.Metadata["column_2_units"] = "W/m^2";
-            output.Metadata["column_3_units"] = "W/m^2";
+            //output.Metadata["column_3_units"] = "W/m^2";
 
             return output;
 
