@@ -179,7 +179,7 @@ namespace Temperature
                     {
                         case "all":
                         default:
-                            average = sum / (dayIndex + 1);
+                            average = sum / (dayIndex);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat),
@@ -189,7 +189,7 @@ namespace Temperature
                             );
                             break;
                         case "avg":
-                            average = sum / (dayIndex + 1);
+                            average = sum / (dayIndex);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (average).ToString(input.DataValueFormat)
@@ -197,7 +197,7 @@ namespace Temperature
                             );
                             break;
                         case "high":
-                            average = sum / (dayIndex + 1);
+                            average = sum / (dayIndex);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (high).ToString(input.DataValueFormat)
@@ -205,7 +205,7 @@ namespace Temperature
                             );
                             break;
                         case "low":
-                            average = sum / (dayIndex + 1);
+                            average = sum / (dayIndex);
                             tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
                                     (low).ToString(input.DataValueFormat)
@@ -217,7 +217,7 @@ namespace Temperature
                     high = low = sum = value;
                     allSum += value;
                     iDate = date;
-                    dayIndex = 0;
+                    dayIndex = 1;
                 }
                 else
                 {

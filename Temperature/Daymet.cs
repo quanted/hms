@@ -201,22 +201,23 @@ namespace Temperature
             errorMsg = "";
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             DateTime iDate = new DateTime();
-
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
+            double sum = 0.0;
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                double sum = 0.0;
                 int dayDif = (int)(date - iDate).TotalDays;
                 if (dayDif >= 7)
                 {
-                    double wAverage = sum / 7;
+                    double wAverage = sum / 7.0;
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                     {
                         { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
                         { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
-                        { (wAverage).ToString() }
+                        { (wAverage).ToString(input.DataValueFormat) }
                     });
                     iDate = date;
                     sum = (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
@@ -242,13 +243,16 @@ namespace Temperature
             errorMsg = "";
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             DateTime iDate = new DateTime();
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
             int mDays = 0;
+            double sum = 0.0;
+
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                double sum = 0.0;
                 if (date.Month != iDate.Month)
                 {
                     double wAverage = sum / mDays;
@@ -256,7 +260,7 @@ namespace Temperature
                     {
                         { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
                         { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
-                        { (wAverage).ToString() }
+                        { (wAverage).ToString(input.DataValueFormat) }
                     });
                     mDays = 0;
                     iDate = date;

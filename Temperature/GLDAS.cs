@@ -53,7 +53,6 @@ namespace Temperature
             switch (input.TemporalResolution)
             {
                 case "daily":
-                case "default":
                     // Combined high/low/average
                     output.Data = NLDAS.DailyValues(out errorMsg, output, input, "all");
                     output.Metadata.Add("column_2", "Max Temperature");
@@ -114,6 +113,7 @@ namespace Temperature
                     output.Metadata.Add("column_2", "Hourly Average Temperature");
                     return output;
                 default:
+                case "default":
                     return output;
             }
         }
