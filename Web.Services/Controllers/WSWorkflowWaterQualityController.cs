@@ -1,5 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Threading.Tasks;
@@ -85,17 +86,29 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POSTComparison([FromBody]WaterQualityInput waterqualityInput)
         {
-            if(waterqualityInput.TaskID == null)
+            try
             {
-                waterqualityInput.TaskID = Guid.NewGuid().ToString();
+                if (waterqualityInput.TaskID == null)
+                {
+                    waterqualityInput.TaskID = Guid.NewGuid().ToString();
+                }
+                WSWaterQuality wq = new WSWaterQuality();
+                var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+                ITimeSeriesOutput results = await wq.GetWaterQualityData(waterqualityInput);
+                stpWatch.Stop();
+                results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                return new ObjectResult(results);
             }
-            WSWaterQuality wq = new WSWaterQuality();
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-            ITimeSeriesOutput results = await wq.GetWaterQualityData(waterqualityInput);
-            stpWatch.Stop();
-            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return new ObjectResult(results);
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }

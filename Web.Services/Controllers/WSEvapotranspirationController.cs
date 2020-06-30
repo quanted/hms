@@ -1,5 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections;
@@ -182,14 +183,26 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]EvapotranspirationInput evapoInput)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();   //For Debugging
-            WSEvapotranspiration evapo = new WSEvapotranspiration();
-            ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            watch.Stop();
-            string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
-            results.Metadata.Add("Time Elapsed", elapsed);
-            return new ObjectResult(results);
+            try
+            {
+                var watch = System.Diagnostics.Stopwatch.StartNew();   //For Debugging
+                WSEvapotranspiration evapo = new WSEvapotranspiration();
+                ITimeSeriesOutput results = await evapo.GetEvapotranspiration(evapoInput);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                watch.Stop();
+                string elapsed = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalMinutes.ToString();
+                results.Metadata.Add("Time Elapsed", elapsed);
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Data;
 using Web.Services.Models;
 using Swashbuckle.AspNetCore.Filters;
+using Serilog;
 
 namespace Web.Services.Controllers
 {
@@ -53,9 +54,21 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]TotalFlowInput tfInput)
         {
-            WSTotalFlow tFlow = new WSTotalFlow();
-            ITimeSeriesOutput results = await tFlow.GetTotalFlowData(tfInput);
-            return new ObjectResult(results);
+            try
+            {
+                WSTotalFlow tFlow = new WSTotalFlow();
+                ITimeSeriesOutput results = await tFlow.GetTotalFlowData(tfInput);
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
 
 

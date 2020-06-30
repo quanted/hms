@@ -82,15 +82,27 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]  
         public async Task<IActionResult> POST([FromBody]PrecipitationInput precipInput)
         {
-            Console.WriteLine("INPUT" + precipInput.ToString());
-            WSPrecipitation precip = new WSPrecipitation();
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-            ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            stpWatch.Stop();
-            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString() + " ms", results.Metadata);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return new ObjectResult(results);
+            try
+            {
+                Console.WriteLine("INPUT" + precipInput.ToString());
+                WSPrecipitation precip = new WSPrecipitation();
+                var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+                ITimeSeriesOutput results = await precip.GetPrecipitation(precipInput);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                stpWatch.Stop();
+                results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString() + " ms", results.Metadata);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                return new ObjectResult(results);
+            }
+            catch(Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }
