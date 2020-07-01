@@ -86,6 +86,13 @@ namespace Web.Services.Controllers
         {
             try
             {
+                if(runoffInput.Geometry.GeometryMetadata == null && runoffInput.PrecipSource != null)
+                {
+                    runoffInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()
+                    {
+                        { "precipSource", runoffInput.PrecipSource }
+                    };
+                }
                 WSSurfaceRunoff runoff = new WSSurfaceRunoff();
                 ITimeSeriesOutput results = await runoff.GetSurfaceRunoff(runoffInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

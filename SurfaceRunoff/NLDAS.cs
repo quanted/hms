@@ -200,7 +200,7 @@ namespace SurfaceRunoff
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                if (date.Month != iDate.Month)
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
                     iDate = date;

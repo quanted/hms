@@ -13,7 +13,10 @@ namespace Web.Services.Controllers
     /// </summary>
     public class SubSurfaceFlowInput : TimeSeriesInput
     {
-        // Add extra evapotranspiration specific variables here
+        /// <summary>
+        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// </summary>
+        public string PrecipSource { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -77,6 +80,13 @@ namespace Web.Services.Controllers
         {
             try
             {
+                if (ssFlowInput.Geometry.GeometryMetadata == null && ssFlowInput.PrecipSource != null)
+                {
+                    ssFlowInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()
+                    {
+                        { "precipSource", ssFlowInput.PrecipSource }
+                    };
+                }
                 WSSubSurfaceFlow ssFlow = new WSSubSurfaceFlow();
                 ITimeSeriesOutput results = await ssFlow.GetSubSurfaceFlow(ssFlowInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
