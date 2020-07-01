@@ -55,62 +55,17 @@ namespace Temperature
                 case "daily":
                     // Combined high/low/average
                     output.Data = NLDAS.DailyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
-                    return output;
-                case "daily-avg":
-                    output.Data = NLDAS.DailyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "daily-high":
-                    output.Data = NLDAS.DailyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "daily-low":
-                    output.Data = NLDAS.DailyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
-                    return output;
-                case "weekly":
-                    // Combined high/low/average
-                    output.Data = NLDAS.WeeklyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
-                    return output;
-                case "weekly-avg":
-                    output.Data = NLDAS.WeeklyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "weekly-high":
-                    output.Data = NLDAS.WeeklyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "weekly-low":
-                    output.Data = NLDAS.WeeklyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
+                    output.Metadata.Add("column_2", "Max Temp");
+                    output.Metadata.Add("column_3", "Min Temp");
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 case "monthly":
                     // Combined high/low/average
+                    output.Data = NLDAS.DailyValues(out errorMsg, output, input, "all");
                     output.Data = NLDAS.MonthlyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
-                    return output;
-                case "monthly-avg":
-                    output.Data = NLDAS.MonthlyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "monthly-high":
-                    output.Data = NLDAS.MonthlyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "monthly-low":
-                    output.Data = NLDAS.MonthlyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
-                    return output;
-                case "hourly":
-                    output.Metadata.Add("column_2", "Hourly Average Temperature");
+                    output.Metadata.Add("column_2", "Avg Max Temp");
+                    output.Metadata.Add("column_3", "Avg Min Temp");
+                    output.Metadata.Add("column_4", "Avg Average Temp");
                     return output;
                 default:
                 case "default":

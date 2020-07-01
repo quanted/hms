@@ -57,62 +57,63 @@ namespace Temperature
                 case "default":
                     // Combined max/min/average
                     output.Data = DailyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
+                    output.Metadata.Add("column_2", "Max Temp");
+                    output.Metadata.Add("column_3", "Min Temp");
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
-                case "daily-avg":
-                    output.Data = DailyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "daily-high":
-                    output.Data = DailyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "daily-low":
-                    output.Data = DailyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
-                    return output;
-                case "weekly":
-                    // Combined max/min/average
-                    output.Data = WeeklyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
-                    return output;
-                case "weekly-avg":
-                    output.Data = WeeklyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "weekly-high":
-                    output.Data = WeeklyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "weekly-low":
-                    output.Data = WeeklyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
-                    return output;
+                //case "daily-avg":
+                //    output.Data = DailyValues(out errorMsg, output, input, "avg");
+                //    output.Metadata.Add("column_2", "Average Temperature");
+                //    return output;
+                //case "daily-high":
+                //    output.Data = DailyValues(out errorMsg, output, input, "high");
+                //    output.Metadata.Add("column_2", "Max Temperature");
+                //    return output;
+                //case "daily-low":
+                //    output.Data = DailyValues(out errorMsg, output, input, "low");
+                //    output.Metadata.Add("column_2", "Min Temperature");
+                //    return output;
+                //case "weekly":
+                //    // Combined max/min/average
+                //    output.Data = WeeklyValues(out errorMsg, output, input, "all");
+                //    output.Metadata.Add("column_2", "Max Temperature");
+                //    output.Metadata.Add("column_3", "Min Temperature");
+                //    output.Metadata.Add("column_4", "Average Temperature");
+                //    return output;
+                //case "weekly-avg":
+                //    output.Data = WeeklyValues(out errorMsg, output, input, "avg");
+                //    output.Metadata.Add("column_2", "Average Temperature");
+                //    return output;
+                //case "weekly-high":
+                //    output.Data = WeeklyValues(out errorMsg, output, input, "high");
+                //    output.Metadata.Add("column_2", "Max Temperature");
+                //    return output;
+                //case "weekly-low":
+                //    output.Data = WeeklyValues(out errorMsg, output, input, "low");
+                //    output.Metadata.Add("column_2", "Min Temperature");
+                //    return output;
                 case "monthly":
                     // Combined max/min/average
+                    output.Data = DailyValues(out errorMsg, output, input, "all");
                     output.Data = MonthlyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Low Temperature");
-                    output.Metadata.Add("column_4", "Average Temperature");
+                    output.Metadata.Add("column_2", "Avg Max Temp");
+                    output.Metadata.Add("column_3", "Avg Low Temp");
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
-                case "monthly-avg":
-                    output.Data = MonthlyValues(out errorMsg, output, input, "avg");
-                    output.Metadata.Add("column_2", "Average Temperature");
-                    return output;
-                case "monthly-high":
-                    output.Data = MonthlyValues(out errorMsg, output, input, "high");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    return output;
-                case "monthly-low":
-                    output.Data = MonthlyValues(out errorMsg, output, input, "low");
-                    output.Metadata.Add("column_2", "Min Temperature");
-                    return output;
+                //case "monthly-avg":
+                //    output.Data = MonthlyValues(out errorMsg, output, input, "avg");
+                //    output.Metadata.Add("column_2", "Average Temperature");
+                //    return output;
+                //case "monthly-high":
+                //    output.Data = MonthlyValues(out errorMsg, output, input, "high");
+                //    output.Metadata.Add("column_2", "Max Temperature");
+                //    return output;
+                //case "monthly-low":
+                //    output.Data = MonthlyValues(out errorMsg, output, input, "low");
+                //    output.Metadata.Add("column_2", "Min Temperature");
+                //    return output;
                 case "hourly":
-                    output.Metadata.Add("column_2", "Hourly Average Temperature");
+                    output.Metadata.Add("column_2", "Avg Temp");
                     return output;
                 default:
                     return output;
@@ -232,9 +233,6 @@ namespace Temperature
                     dayIndex++;
                 }
             }
-            tempData.Add("Total Average", new List<string>() { (allSum / output.Data.Count).ToString(input.DataValueFormat) });
-            tempData.Add("Max Temp", new List<string>() { allHigh.ToString(input.DataValueFormat) });
-            tempData.Add("Min Temp", new List<string>() { allLow.ToString(input.DataValueFormat) });
             return tempData;
         }
 
@@ -350,13 +348,9 @@ namespace Temperature
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
 
-            double sum = 0.0;
-            double high = 0.0;
-            double low = 5000;
-
-            double allSum = 0.0;
-            double allHigh = 0.0;
-            double allLow = 5000;
+            double avgSum = 0.0;
+            double lowSum = 0.0;
+            double hiSum = 0.0;
 
             int dayIndex = 0;
 
@@ -369,65 +363,33 @@ namespace Temperature
                 DateTime.TryParse(dateString, out date);
                 if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
-                    double average = 0.0;
-                    switch (type)
-                    {
-                        case "all":
-                        default:
-                            average = sum / dayIndex;
-                            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
+                    double average = avgSum / dayIndex;
+                    double lAverage = lowSum / dayIndex;
+                    double hAverage = hiSum / dayIndex;
+
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
-                                    (high).ToString(input.DataValueFormat),
-                                    (low).ToString(input.DataValueFormat),
+                                    (hAverage).ToString(input.DataValueFormat),
+                                    (lAverage).ToString(input.DataValueFormat),
                                     (average).ToString(input.DataValueFormat)
                                 }
-                            );
-                            break;
-                        case "avg":
-                            average = sum / dayIndex;
-                            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
-                                {
-                                    (average).ToString(input.DataValueFormat)
-                                }
-                            );
-                            break;
-                        case "high":
-                            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
-                                {
-                                    (high).ToString(input.DataValueFormat)
-                                }
-                            );
-                            break;
-                        case "low":
-                            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
-                                {
-                                    (low).ToString(input.DataValueFormat)
-                                }
-                            );
-                            break;
-                    }
-                    double value = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    sum = high = low = value;
-                    allSum += value;
+                    );
+
+                    avgSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                     iDate = date;
-                    dayIndex = 0;
+                    dayIndex = 1;
                 }
                 else
                 {
-                    double value = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    avgSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
 
-                    high = (value > high) ? value : high;
-                    allHigh = (value > allHigh) ? value : allHigh;
-                    low = (value < low) ? value : low;
-                    allLow = (value < allLow) ? value : allLow;
-                    allSum += value;
-                    sum += value;
                     dayIndex++;
                 }
             }
-            tempData.Add("Total Average", new List<string>() { (allSum / output.Data.Count).ToString(input.DataValueFormat) });
-            tempData.Add("Max Temp", new List<string>() { allHigh.ToString(input.DataValueFormat) });
-            tempData.Add("Min Temp", new List<string>() { allLow.ToString(input.DataValueFormat) });
             return tempData;
         }
 
