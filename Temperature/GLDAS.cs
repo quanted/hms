@@ -69,6 +69,7 @@ namespace Temperature
                     return output;
                 default:
                 case "default":
+                    output.Metadata.Add("column_2", "Avg Temp");
                     return output;
             }
         }
