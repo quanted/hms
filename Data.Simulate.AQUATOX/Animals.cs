@@ -638,7 +638,7 @@ namespace AQUATOX.Animals
         AggRedGrowth = 0;
         for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
         {
-            if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
+            if (AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null)
             AggRedGrowth = AggRedGrowth + RedGrowth[ToxInt(ToxLoop)];
         }
 
@@ -654,7 +654,7 @@ namespace AQUATOX.Animals
         T_SVType ToxLoop;
         for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
            {
-                if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
+                if (AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null)
                 {
                     AggRedRepro = AggRedRepro + RedRepro[ToxInt(ToxLoop)];
                 }

@@ -988,7 +988,7 @@ namespace AQUATOX.Organisms
             if (IsAnimal())
             {
                 AnimTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
-                if (AnimTox == null) return 0.0;
+                if ((!AQTSeg.PSetup.UseExternalConcs) && (AnimTox == null)) return 0.0;
                 ATR = ((TAnimal)this).Anim_Tox[ToxInt(ToxTyp)];
                 if (ATR == null) return 0.0;
 
@@ -1012,7 +1012,7 @@ namespace AQUATOX.Organisms
             else // is plant
             {
                 PlantTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAlgaeTox;
-                if (PlantTox == null) return 0.0;
+                if ((!AQTSeg.PSetup.UseExternalConcs) && (PlantTox == null)) return 0.0;
                 PTR = ((TPlant)this).Plant_Tox[ToxInt(ToxTyp)];
                 if (PTR == null) return 0.0;
 

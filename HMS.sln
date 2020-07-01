@@ -87,6 +87,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bioaccumulation.AQUATOX", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bioaccumulation.AQUATOX.UnitTests", "Chemicals\Bioaccumulation.AQUATOX.UnitTests\Bioaccumulation.AQUATOX.UnitTests.csproj", "{5EB43694-126D-4A55-BDE8-E2E92E5699FD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX", "Ecotoxicology\Ecotoxicology.AQUATOX\Ecotoxicology.AQUATOX.csproj", "{76292E84-2EE8-4825-8C92-3578B8E7B8E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX.UnitTests", "Ecotoxicology\Ecotoxicology.AQUATOX.UnitTests\Ecotoxicology.AQUATOX.UnitTests.csproj", "{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -431,6 +435,22 @@ Global
 		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|x64.ActiveCfg = Release|Any CPU
 		{5EB43694-126D-4A55-BDE8-E2E92E5699FD}.Release|x64.Build.0 = Release|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Debug|x64.Build.0 = Debug|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Release|x64.ActiveCfg = Release|Any CPU
+		{76292E84-2EE8-4825-8C92-3578B8E7B8E5}.Release|x64.Build.0 = Release|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Debug|x64.Build.0 = Debug|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.ActiveCfg = Release|Any CPU
+		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
