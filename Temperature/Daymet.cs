@@ -57,9 +57,11 @@ namespace Temperature
             {
                 case "weekly":
                     output.Data = WeeklyAverage(out errorMsg, output, input);
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAverage(out errorMsg, output, input);
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 case "daily":
                 default:
