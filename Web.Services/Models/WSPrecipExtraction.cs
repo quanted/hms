@@ -87,7 +87,7 @@ namespace Web.Services.Models
 
                 // Set input to precip object.
                 precip.Input = sInput;
-                precip.Input.TemporalResolution = "daily";
+                precip.Input.TemporalResolution = input.TemporalResolution;
 
                 //precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
                 if (!precip.Input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
