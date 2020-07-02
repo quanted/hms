@@ -60,6 +60,11 @@ namespace WatershedDelineation
                     dtSubSurfaceRunoff.Columns.Add(tocom);
                     dtStreamFlow.Columns.Add(tocom);
                 }
+                else
+                {
+                    string test = tocom;
+                    // Excluding COMID
+                }
             }
 
             //Initialize these tables with 0s
@@ -114,25 +119,11 @@ namespace WatershedDelineation
 
             //Building list of valid centroids as many are null and will cause map errors if set to (0,0) or (null,null)
             validList = new List<string>();
-            string errComs = "";
-            foreach (string com in lst)
-            {
-                PointCoordinate centroidPoint = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
-                if (centroidPoint != null)
-                {
-                    validList.Add(com);
-                }
-                else
-                {
-                    errComs += com + ", ";
-                }
-            }
+            validList = lst;
 
             ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
-            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyy"));
-            //input.DateTimeSpan.StartDate = new DateTime(input.DateTimeSpan.StartDate.Year, input.DateTimeSpan.StartDate.Month, input.DateTimeSpan.StartDate.Day, 01, 00, 00);
-            //input.DateTimeSpan.EndDate = input.DateTimeSpan.EndDate.AddDays(1.0);
-            //input.DateTimeSpan.EndDate = new DateTime(input.DateTimeSpan.EndDate.Year, input.DateTimeSpan.EndDate.Month, input.DateTimeSpan.EndDate.Day, 00, 00, 00);
+            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyyHH:mm"));
+            input.Geometry.GeometryMetadata.Add("StreamFlowStartDate", input.DateTimeSpan.StartDate.ToString("MM/dd/yyyyHH:mm"));
 
             foreach (string com in validList)
             {
@@ -142,14 +133,14 @@ namespace WatershedDelineation
                 tsi.Source = input.Source;
                 tsi.TemporalResolution = "daily";
                 TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
-                tsGeometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                tsGeometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 tsGeometry.ComID = Convert.ToInt32(com);
                 tsGeometry.GeometryMetadata = input.Geometry.GeometryMetadata;
 
                 ITimeSeriesInput subIn = new TimeSeriesInput();
                 subIn = tsi;
                 subIn.Geometry = tsGeometry;
-                subIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                subIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 subIn.Geometry.ComID = Convert.ToInt32(com);
                 SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
                 sub.Input = inputFactory.SetTimeSeriesInput(subIn, new List<string>() { "subsurfaceflow" }, out errorMsg);
@@ -159,7 +150,7 @@ namespace WatershedDelineation
                 ITimeSeriesInput surfIn = new TimeSeriesInput();
                 surfIn = tsi;
                 surfIn.Geometry = tsGeometry;
-                surfIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                surfIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 surfIn.Geometry.ComID = Convert.ToInt32(com);
                 SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
                 runoff.Input = inputFactory.SetTimeSeriesInput(surfIn, new List<string>() { "surfacerunoff" }, out errorMsg);
@@ -168,7 +159,7 @@ namespace WatershedDelineation
                 ITimeSeriesInput preIn = new TimeSeriesInput();
                 preIn = tsi;
                 preIn.Geometry = tsGeometry;
-                preIn.Geometry.Point = GetCatchmentCentroid(out errorMsg, Convert.ToInt32(com));
+                preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
                 preIn.Source = preIn.Geometry.GeometryMetadata["precipSource"];
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
@@ -266,11 +257,6 @@ namespace WatershedDelineation
                 flaskURL = "http://localhost:7777";
             }
 
-            if (!errComs.Equals(""))
-            {
-                errorMsg = "Could not find coordinates for Com IDs: " + errComs + "They have not been included in the output. ";
-            }
-
             if (!missingComs.Equals(""))
             {
                 errorMsg += "Could not complete data requests for Com IDs: " + missingComs + "Their data values have been marked as invalid (-9999). ";
@@ -288,129 +274,129 @@ namespace WatershedDelineation
                 case "nwm":
                     errorMsg = "ERROR: NWM stream flow data is currently disabled.";
                     break;
-                    for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
-                    {
-                        COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
-                        fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
-                        DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
+                    //for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
+                    //{
+                    //    COMID = dtStreamNetwork.Rows[x]["TOCOMID"].ToString();
+                    //    fromCOMID = dtStreamNetwork.Rows[x]["FROMCOMID"].ToString();
+                    //    DataRow[] drsFromCOMIDs = dtStreamNetwork.Select("TOCOMID = " + COMID);
 
-                        List<string> fromCOMIDS = new List<string>();
-                        foreach (DataRow dr2 in drsFromCOMIDs)
-                        {
-                            fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
-                        }
+                    //    List<string> fromCOMIDS = new List<string>();
+                    //    foreach (DataRow dr2 in drsFromCOMIDs)
+                    //    {
+                    //        fromCOMIDS.Add(dr2["FROMCOMID"].ToString());
+                    //    }
                                                 
-                        Debug.WriteLine("Flask Server URL: " + flaskURL);
-                        baseURL = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + COMID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
-                        WatershedDelineation.NWM watermod = new WatershedDelineation.NWM();
-                        string data = watermod.GetData(out errorMsg, baseURL);
-                        //if (errorMsg.Contains("ERROR")) { break; }
-                        Result result = JSON.Deserialize<Result>(data);
+                    //    Debug.WriteLine("Flask Server URL: " + flaskURL);
+                    //    baseURL = flaskURL + "/hms/nwm/data/?dataset=streamflow&comid=" + COMID + "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+                    //    WatershedDelineation.NWM watermod = new WatershedDelineation.NWM();
+                    //    string data = watermod.GetData(out errorMsg, baseURL);
+                    //    //if (errorMsg.Contains("ERROR")) { break; }
+                    //    Result result = JSON.Deserialize<Result>(data);
 
-                        Dictionary<string, string> dailySF = new Dictionary<string, string>();
-                        double sum = 0;
-                        int ct = 0;
-                        foreach (KeyValuePair<string, string> kvp in result.data.data)
-                        {
-                            sum += Convert.ToDouble(kvp.Value);
-                            ct += 1;
-                            if(ct == 24)
-                            {
-                                sum = sum / 24;
-                                dailySF.Add(kvp.Key, sum.ToString());
-                                ct = 0;
-                                sum = 0;
-                            }
-                        }
+                    //    Dictionary<string, string> dailySF = new Dictionary<string, string>();
+                    //    double sum = 0;
+                    //    int ct = 0;
+                    //    foreach (KeyValuePair<string, string> kvp in result.data.data)
+                    //    {
+                    //        sum += Convert.ToDouble(kvp.Value);
+                    //        ct += 1;
+                    //        if(ct == 24)
+                    //        {
+                    //            sum = sum / 24;
+                    //            dailySF.Add(kvp.Key, sum.ToString());
+                    //            ct = 0;
+                    //            sum = 0;
+                    //        }
+                    //    }
 
-                        for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
-                        {
-                            DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
-                            string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                            if (!validList.Contains(COMID))
-                            {
-                                continue;
-                            }
+                    //    for (int i = 0; i < dtStreamFlow.Rows.Count; i++)
+                    //    {
+                    //        DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                    //        string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                    //        if (!validList.Contains(COMID))
+                    //        {
+                    //            continue;
+                    //        }
 
-                            if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)
-                            {
-                                dtSubSurfaceRunoff.Rows[i][COMID] = -9999;
-                            }
-                            else
-                            {
-                                //DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
-                                //string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                                dtSubSurfaceRunoff.Rows[i][COMID] = subsurfaceFlow[COMID].Output.Data[date][0];
-                            }
+                    //        if (subsurfaceFlow[COMID].Output == null || subsurfaceFlow[COMID].Output.Data.Count == 0)
+                    //        {
+                    //            dtSubSurfaceRunoff.Rows[i][COMID] = -9999;
+                    //        }
+                    //        else
+                    //        {
+                    //            //DateTime datekey = Convert.ToDateTime(dtSubSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                    //            //string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                    //            dtSubSurfaceRunoff.Rows[i][COMID] = subsurfaceFlow[COMID].Output.Data[date][0];
+                    //        }
 
-                            if (surfaceFlow[COMID].Output == null || surfaceFlow[COMID].Output.Data.Count == 0)
-                            {
-                                dtSurfaceRunoff.Rows[i][COMID] = -9999;
-                            }
-                            else
-                            {
-                                //DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
-                                //string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                                dtSurfaceRunoff.Rows[i][COMID] = surfaceFlow[COMID].Output.Data[date][0];
-                            }
+                    //        if (surfaceFlow[COMID].Output == null || surfaceFlow[COMID].Output.Data.Count == 0)
+                    //        {
+                    //            dtSurfaceRunoff.Rows[i][COMID] = -9999;
+                    //        }
+                    //        else
+                    //        {
+                    //            //DateTime datekey = Convert.ToDateTime(dtSurfaceRunoff.Rows[i]["DateTime"].ToString());
+                    //            //string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                    //            dtSurfaceRunoff.Rows[i][COMID] = surfaceFlow[COMID].Output.Data[date][0];
+                    //        }
 
-                            if (precipitation[COMID].Output == null || precipitation[COMID].Output.Data.Count == 0)
-                            {
-                                dtPrecip.Rows[i][COMID] = -9999;
-                            }
-                            else
-                            {
-                                //DateTime datekey = Convert.ToDateTime(dtPrecip.Rows[i]["DateTime"].ToString());
-                                //string date = datekey.ToString("yyyy-MM-dd") + " 00";
-                                dtPrecip.Rows[i][COMID] = precipitation[COMID].Output.Data[date][0];
-                            }
+                    //        if (precipitation[COMID].Output == null || precipitation[COMID].Output.Data.Count == 0)
+                    //        {
+                    //            dtPrecip.Rows[i][COMID] = -9999;
+                    //        }
+                    //        else
+                    //        {
+                    //            //DateTime datekey = Convert.ToDateTime(dtPrecip.Rows[i]["DateTime"].ToString());
+                    //            //string date = datekey.ToString("yyyy-MM-dd") + " 00";
+                    //            dtPrecip.Rows[i][COMID] = precipitation[COMID].Output.Data[date][0];
+                    //        }
 
                             
-                            //date = datekey.ToString("yyyy-MM-dd") + "T00:00:00";
-                            date = datekey.ToString("yyyy-MM-dd") + "T23:00:00";
+                    //        //date = datekey.ToString("yyyy-MM-dd") + "T00:00:00";
+                    //        date = datekey.ToString("yyyy-MM-dd") + "T23:00:00";
 
-                            //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
-                            double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
-                            double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
-                            double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
+                    //        //Fill dtStreamFlow table by adding Surface and SubSurface flow from dtSurfaceRunoff and dtSubSurfaceRunoff tables.  We still need to add boundary condition flows
+                    //        double dsur = Convert.ToDouble(dtSurfaceRunoff.Rows[i][COMID].ToString());
+                    //        double dsub = Convert.ToDouble(dtSubSurfaceRunoff.Rows[i][COMID].ToString());
+                    //        double area = Convert.ToDouble(dtStreamNetwork.Rows[x]["AreaSqKM"]);
 
-                            if (result != null && dailySF.ContainsKey(date)) //if (result != null && result.data.data.ContainsKey(date))
-                            {
-                                dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dailySF[date]) / 35.314667;//Convert cubic feet / sec to meters / sec
-                            }
-                            else
-                            {
-                                dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
-                            }                            
+                    //        if (result != null && dailySF.ContainsKey(date)) //if (result != null && result.data.data.ContainsKey(date))
+                    //        {
+                    //            dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dailySF[date]) / 35.314667;//Convert cubic feet / sec to meters / sec
+                    //        }
+                    //        else
+                    //        {
+                    //            dtStreamFlow.Rows[i][COMID] = (dsub * area / 1000) + (dsur * area / 1000);//dsub + dsur;
+                    //        }                            
                             
-                            /*Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
-                            //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
-                            //  2. dr["FROMCOMID].ToString() = dr["TOCOMID"].ToString().  This can happen at the pour points
-                            //  3. dr["FROMCOMID"].ToString() does not appear in the TOCOMID column of dtStreamNetwork table i.e. FROMCOMID is outside the network
-                            //If multiple streams flow into this stream then add up stream flow time series of the inflow streams.
-                            //There could be multiple bondary condition flows if multiple upstream streams flow into this COMID.            
-                            foreach (string fromCom in fromCOMIDS)
-                            {
-                                if (fromCom == "0")//No boundary condition flows if the stream is a headwater (fromCOMID=0)
-                                {
-                                    continue;
-                                }
-                                if (fromCom == COMID)//No boundary condition if fromCOMID=TOCOMID
-                                {
-                                    continue;
-                                }
-                                DataRow[] drs = dtStreamNetwork.Select("TOCOMID = " + fromCom);
-                                //No boundary condition if fromCOMID is not present in the streamNetwork table under TOCOMID column.  THis means that fromCOMID is outside our network.
-                                if (drs == null || drs.Length == 0)
-                                {
-                                    continue;
-                                }
-                                //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
-                                dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
-                            }*/
-                        }
-                    }
-                    return ds;
+                    //        /*Get stream flow time series for streams flowing into this COMID i.e. bondary condition.  Skip this step in the following three cases:
+                    //        //  1. dr["FROMCOMID"].ToString()="0" in dtStreanNetwork table for this dr["TOCOMID"].ToString() i.e. it is head water stream
+                    //        //  2. dr["FROMCOMID].ToString() = dr["TOCOMID"].ToString().  This can happen at the pour points
+                    //        //  3. dr["FROMCOMID"].ToString() does not appear in the TOCOMID column of dtStreamNetwork table i.e. FROMCOMID is outside the network
+                    //        //If multiple streams flow into this stream then add up stream flow time series of the inflow streams.
+                    //        //There could be multiple bondary condition flows if multiple upstream streams flow into this COMID.            
+                    //        foreach (string fromCom in fromCOMIDS)
+                    //        {
+                    //            if (fromCom == "0")//No boundary condition flows if the stream is a headwater (fromCOMID=0)
+                    //            {
+                    //                continue;
+                    //            }
+                    //            if (fromCom == COMID)//No boundary condition if fromCOMID=TOCOMID
+                    //            {
+                    //                continue;
+                    //            }
+                    //            DataRow[] drs = dtStreamNetwork.Select("TOCOMID = " + fromCom);
+                    //            //No boundary condition if fromCOMID is not present in the streamNetwork table under TOCOMID column.  THis means that fromCOMID is outside our network.
+                    //            if (drs == null || drs.Length == 0)
+                    //            {
+                    //                continue;
+                    //            }
+                    //            //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
+                    //            dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
+                    //        }*/
+                    //    }
+                    //}
+                    //return ds;
                 case "constantvolume":
                 default:
                     for (int x = 0; x < dtStreamNetwork.Rows.Count; x++)
@@ -497,7 +483,6 @@ namespace WatershedDelineation
                                 //Now add up all three time series: streams flow of streams inflowing into this stream, surface runoff, and sub-surface runoff
                                 //dtStreamFlow.Rows[i][COMID] = (Convert.ToDouble(dtStreamFlow.Rows[i][fromCom].ToString()) * area / 1000) + (Convert.ToDouble(dtStreamFlow.Rows[i][COMID].ToString()));// * area / 1000);
                                 dtStreamFlow.Rows[i][COMID] = Convert.ToDouble(dtStreamFlow.Rows[i][fromCom]) + Convert.ToDouble(dtStreamFlow.Rows[i][COMID]);
-
                             }
                         }
                     }

@@ -2,6 +2,7 @@
 using Data.Source;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Temperature
 {
@@ -73,10 +74,20 @@ namespace Temperature
             nceiOutput.DataSource = "ncei";
             nceiOutput.Dataset = "Temperature";
             nceiOutput.Metadata.Add("column_1", "Date");
-            nceiOutput.Metadata.Add("column_2", "Temp Max");
-            nceiOutput.Metadata.Add("column_3", "Temp Avg");
-            nceiOutput.Metadata.Add("column_4", "Temp Min");
-            nceiOutput.Metadata.Add("disclaimer_column_3", "Average temperature is the midrange of the tmax and tmin values.");
+            if (input.TemporalResolution == "monthly")
+            {
+                nceiOutput.Data = MonthlyValues(out errorMsg, nceiOutput, input, "all");
+                nceiOutput.Metadata.Add("column_2", "Avg Max Temp");
+                nceiOutput.Metadata.Add("column_3", "Avg Min Temp");
+                nceiOutput.Metadata.Add("column_4", "Avg Temp");
+            }
+            else
+            {
+                nceiOutput.Metadata.Add("column_2", "Max Temp");
+                nceiOutput.Metadata.Add("column_3", "Min Temp");
+                nceiOutput.Metadata.Add("column_4", "Avg Temp");
+                nceiOutput.Metadata.Add("disclaimer_column_4", "Average temperature is the midrange of the tmax and tmin values.");
+            }
             return nceiOutput;
         }
 
@@ -97,8 +108,8 @@ namespace Temperature
                 List<string> dataList = new List<string>()
                 {
                     d.Value[0].ToString(dataFormat),
-                    ((d.Value[0] + d.Value[1])/2).ToString(dataFormat),
-                    d.Value[1].ToString(dataFormat)
+                    d.Value[1].ToString(dataFormat),
+                    ((d.Value[0] + d.Value[1])/2).ToString(dataFormat)
                 };
                 result.Add(d.Key.ToString(), dataList);
             }
@@ -185,6 +196,67 @@ namespace Temperature
                 }
             }
             return data;
+        }
+
+
+        /// <summary>
+        /// Gets monthly temperature values, calculating and setting to Data average, high and low, depending on request.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <param name="type">"all", "avg", "high", "low"</param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> MonthlyValues(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, string type)
+        {
+            errorMsg = "";
+            DateTime iDate = new DateTime();
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
+
+            double avgSum = 0.0;
+            double lowSum = 0.0;
+            double hiSum = 0.0;
+
+            int dayIndex = 0;
+
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                DateTime date = new DateTime();
+                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out date);
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
+                {
+                    double average = avgSum / dayIndex;
+                    double lAverage = lowSum / dayIndex;
+                    double hAverage = hiSum / dayIndex;
+
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
+                                {
+                                    (hAverage).ToString(input.DataValueFormat),
+                                    (lAverage).ToString(input.DataValueFormat),
+                                    (average).ToString(input.DataValueFormat)
+                                }
+                    );
+
+                    avgSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    iDate = date;
+                    dayIndex = 1;
+                }
+                else
+                {
+                    avgSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+
+                    dayIndex++;
+                }
+            }
+            return tempData;
         }
 
     }

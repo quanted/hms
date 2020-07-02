@@ -120,7 +120,7 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
-        [InlineData(gldasRequest, 366)]
+        [InlineData(gldasRequest, 365)]
         [InlineData(daymetRequest, 365)]
         [InlineData(prismRequest, 365)]
         [InlineData(ncdcRequest, 365)]

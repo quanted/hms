@@ -25,6 +25,7 @@ namespace Web.Services.Models
             ContaminantLoader.ContaminantLoader contam = new ContaminantLoader.ContaminantLoader(input.ContaminantType, input.ContaminantInputType, input.ContaminantInput);
 
             return contam.Result;
+
         }
     }
 }

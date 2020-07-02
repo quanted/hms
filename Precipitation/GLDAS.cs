@@ -32,33 +32,35 @@ namespace Precipitation
             bool dataComplete = false;
             Dictionary<string, bool> years = GetYears(input);
 
-            while (!dataComplete)
-            {
+            //while (!dataComplete)
+            //{
 
-                List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
+            //    List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
 
-                if (errorMsg.Contains("ERROR"))
-                {
-                    Utilities.ErrorOutput err = new ErrorOutput();
-                    output = err.ReturnError("Precipitation", "gldas", errorMsg);
-                    //errorMsg = "";
-                    return output;
-                }
-                else
-                {
-                    if (retries > 0)
-                    {
-                        tempOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-                        gldasOutput = gldas.MergeTimeseries(gldasOutput, tempOutput);
-                    } 
-                    else
-                    {
-                        gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-                    }
-                    dataComplete = CheckYears(years, gldasOutput);
-                    retries++;
-                }
-            }
+            //    if (errorMsg.Contains("ERROR"))
+            //    {
+            //        Utilities.ErrorOutput err = new ErrorOutput();
+            //        output = err.ReturnError("Precipitation", "gldas", errorMsg);
+            //        //errorMsg = "";
+            //        return output;
+            //    }
+            //    else
+            //    {
+            //        if (retries > 0)
+            //        {
+            //            tempOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            //            gldasOutput = gldas.MergeTimeseries(gldasOutput, tempOutput);
+            //        } 
+            //        else
+            //        {
+            //            gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            //        }
+            //        dataComplete = CheckYears(years, gldasOutput);
+            //        retries++;
+            //    }
+            //}
+            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
+            gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 

@@ -15,6 +15,12 @@ namespace Utilities
             {
                 errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
                 return null;
+                //TESTING
+                //return new PointCoordinate()
+                //{
+                //    Latitude = 33.9264,
+                //    Longitude = -83.356
+                //};
             }
             IPointCoordinate centroid = new PointCoordinate()
             {

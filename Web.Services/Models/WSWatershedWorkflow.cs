@@ -116,19 +116,27 @@ namespace Web.Services.Models
             Web.Services.Controllers.WatershedWorkflowOutput totalOutput = new Web.Services.Controllers.WatershedWorkflowOutput();
             /*totalOutput.data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();*/
             Dictionary<int, Dictionary<string, ITimeSeriesOutput>> data = new Dictionary<int, Dictionary<string, ITimeSeriesOutput>>();
-            int x = 1;
             Dictionary<string, string> meta = new Dictionary<string, string>();
-            foreach (string com in lst)
+            //foreach (string com in lst)
+            foreach(string com in validList)
             {
+                /*
+                List<string> testData = new List<string>();
+                foreach(DataRow r in ds.Tables[3].Rows)
+                {
+                    string v = r[com].ToString();
+                    testData.Add(v);
+                }*/
+
                 //Setting all to ITimeSeriesOutput
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
-                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], x, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], com, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], x, input.Source), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], com, input.Source), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], x, input.Source), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], com, input.Source), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
                 input.Source = input.StreamHydrology;
-                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], x, input.Source), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], com, input.Source), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
                 timeSeriesDict.Add("Precipitation", precipOutput);
@@ -137,14 +145,12 @@ namespace Web.Services.Models
                 timeSeriesDict.Add("StreamHydrology", hydrologyOutput);
                 data.Add(Int32.Parse(com), timeSeriesDict);
                 meta = precipOutput.Metadata;
-                x++;
             }
 
             //Turn delineation table to ITimeseries
             /*totalOutput.table = new Dictionary<string, Dictionary<string, string>>();*/
             Dictionary<string, Dictionary<string, string>> table = new Dictionary<string, Dictionary<string, string>>();
 
-            int i = 0;
             foreach (DataRow dr in dt.Rows)
             {
                 //List<string> lv = new List<string>();
@@ -218,7 +224,7 @@ namespace Web.Services.Models
             return wOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput(DataTable dt, int x, string column2)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2)
         {
             column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
@@ -226,7 +232,7 @@ namespace Web.Services.Models
             foreach (DataRow dr in dt.Rows)
             {
                 List<string> lv = new List<string>();
-                lv.Add(dr[x].ToString());
+                lv.Add(dr[com].ToString());
                 itimeoutput.Data.Add(dr[0].ToString(), lv);
             }
 

@@ -48,21 +48,25 @@ namespace Temperature
             output.Metadata.Add("daymet_temporalresolution", input.TemporalResolution);
 
             output.Metadata["daymet_unit"] = (input.Units.Contains("imperial")) ? "F" : "K";
-            output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, false, output, input) : UnitConversion(out errorMsg, true, output, input);
+            //output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, false, output, input) : UnitConversion(out errorMsg, true, output, input);
 
             output.Metadata.Add("column_1", "date");
-            output.Metadata.Add("column_2", "Max Temp");
-            output.Metadata.Add("column_3", "Min Temp");
+            output.Metadata.Add("column_4", "Avg Temp");
             switch (input.TemporalResolution)
             {
                 case "weekly":
                     output.Data = WeeklyAverage(out errorMsg, output, input);
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAverage(out errorMsg, output, input);
+                    output.Metadata.Add("column_2", "Avg Max Temp");
+                    output.Metadata.Add("column_3", "Avg Min Temp");
                     return output;
                 case "daily":
                 default:
+                    output.Metadata.Add("column_2", "Max Temp");
+                    output.Metadata.Add("column_3", "Min Temp");
                     return output;
             }
         }
@@ -141,10 +145,12 @@ namespace Temperature
                 DateTime date2;
                 if (i > 0) { date2 = date.AddDays(Convert.ToInt16(Convert.ToDouble(lineData[1])) - 1); }
                 else { date2 = date; }
+                double avg = ((Convert.ToDouble(lineData[2]) )+ (Convert.ToDouble(lineData[3])))/ 2.0;
                 data.Add(date2.ToString(dateFormat), new List<string>
                 {
                     { (modifier * Convert.ToDouble(lineData[2])).ToString(dataFormat) },
-                    { (modifier * Convert.ToDouble(lineData[3])).ToString(dataFormat) }
+                    { (modifier * Convert.ToDouble(lineData[3])).ToString(dataFormat) },
+                    { (modifier * avg).ToString(dataFormat) }
                 });
             }
             return data;
@@ -201,22 +207,23 @@ namespace Temperature
             errorMsg = "";
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             DateTime iDate = new DateTime();
-
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
+            double sum = 0.0;
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                double sum = 0.0;
                 int dayDif = (int)(date - iDate).TotalDays;
                 if (dayDif >= 7)
                 {
-                    double wAverage = sum / 7;
+                    double wAverage = sum / 7.0;
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                     {
                         { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
                         { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
-                        { (wAverage).ToString() }
+                        { (wAverage).ToString(input.DataValueFormat) }
                     });
                     iDate = date;
                     sum = (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
@@ -242,29 +249,42 @@ namespace Temperature
             errorMsg = "";
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             DateTime iDate = new DateTime();
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
             int mDays = 0;
+            double sum = 0.0;
+            double hiSum = 0.0;
+            double lowSum = 0.0;
+
             for (int i = 0; i < output.Data.Count; i++)
             {
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                double sum = 0.0;
-                if (date.Month != iDate.Month)
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
                     double wAverage = sum / mDays;
+                    double hAverage = hiSum / mDays;
+                    double lAverage = lowSum / mDays;
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                     {
-                        { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
-                        { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
-                        { (wAverage).ToString() }
+                        //{ (output.Data[output.Data.Keys.ElementAt(i)][0]) },
+                        //{ (output.Data[output.Data.Keys.ElementAt(i)][1]) },
+                        { (hAverage).ToString(input.DataValueFormat) },
+                        { (lAverage).ToString(input.DataValueFormat) },
+                        { (wAverage).ToString(input.DataValueFormat) }
                     });
-                    mDays = 0;
+                    mDays = 1;
                     iDate = date;
                     sum = (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
+                    hiSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                 }
                 else
                 {
                     sum += (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
+                    hiSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                     mDays++;
                 }
             }
