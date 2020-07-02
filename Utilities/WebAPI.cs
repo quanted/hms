@@ -73,9 +73,11 @@ namespace Utilities
                 int maxRetries = 100;
                 string status = "";
                 bool success = false;
+                wm = await hc.GetAsync(dataURL + jobID);
+                dataURL = dataURL + jobID;
                 while (retries < maxRetries && !success && !jobID.Equals(""))
                 {
-                    wm = await hc.GetAsync(requestURL);
+                    wm = await hc.GetAsync(dataURL);
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();

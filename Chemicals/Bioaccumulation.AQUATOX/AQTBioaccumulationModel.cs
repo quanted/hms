@@ -72,8 +72,19 @@ namespace AQUATOXBioaccumulation
                     TStateVariable Carry = AQSim.AQTSeg.GetStatePointer(TT.NState, T_SVType.StV, T_SVLayer.WaterCol);
                     if (Carry == null) return "The bioaccumulation state variable " + TT.PName + " is present, but its carrying organism is not in the simulation.";
                 }
+
+                if (TT.NState == AllVariables.H2OTox) // chemical in water, so ensure it's in all biota and organic matter
+                for (AllVariables ns = Consts.FirstDetr; ns <= Consts.LastBiota; ns++)
+                {
+                    TStateVariable carrier = AQSim.AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (carrier != null) 
+                    { 
+                        TStateVariable TTx = AQSim.AQTSeg.GetStatePointer(carrier.NState, TT.SVType, T_SVLayer.WaterCol);
+                        if (TTx == null) return "The chemical " + TT.PName + " is in the simulation but not the bioaccumulation state variable for " + carrier.PName;
+                    }
+                }
+
             }
-            
             return "";
         }
     }

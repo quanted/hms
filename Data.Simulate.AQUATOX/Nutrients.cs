@@ -172,7 +172,7 @@ namespace AQUATOX.Nutrients
                 if (NState == AllVariables.Ammonia)
                     CNutrient = CNutrient * PS_NH3_in_DIN;
                 if (NState == AllVariables.Nitrate)
-                    CNutrient = CNutrient * (1 - PS_NH3_in_DIN);
+                    CNutrient = CNutrient * (1.0 - PS_NH3_in_DIN);
             }
             else // LdType <> 0
             {
@@ -180,7 +180,7 @@ namespace AQUATOX.Nutrients
                 if (NState == AllVariables.Ammonia)
                     CNutrient = CNutrient * NPS_NH3_in_DIN;
                 if (NState == AllVariables.Nitrate)
-                    CNutrient = CNutrient * (1 - NPS_NH3_in_DIN);
+                    CNutrient = CNutrient * (1.0 - NPS_NH3_in_DIN);
             }
 
             AddLoad = CNutrient;
@@ -244,7 +244,7 @@ namespace AQUATOX.Nutrients
                 CNutrient = CNutrient * Infl_NH3_in_DIN;
 
             if (NState == AllVariables.Nitrate)
-                CNutrient = CNutrient * (1 - Infl_NH3_in_DIN);
+                CNutrient = CNutrient * (1.0 - Infl_NH3_in_DIN);
 
             Loading = CNutrient;
         }
@@ -505,7 +505,7 @@ namespace AQUATOX.Nutrients
 
                                 j = -999;  // signal to not write mass balance tracking
                                 PPeri.Derivative(ref j);  // update sloughing
-                                NRPS = NRPS + PPeri.Sloughing * (1 / 3) * (Nut2OrgPeri - Nut2OrgPhyt);
+                                NRPS = NRPS + PPeri.Sloughing * (1.0 / 3.0) * (Nut2OrgPeri - Nut2OrgPhyt);
                                 // 1/3 of periphyton will go to phytoplankton and 2/3 to detritus with sloughing/scour.
                             }
                         }
@@ -825,7 +825,7 @@ namespace AQUATOX.Nutrients
                 if (AQTSeg.GetStateVal(ns, T_SVType.StV, T_SVLayer.WaterCol) > 0)
                 {
                     PAn = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                    DetrNFrac = (1 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
+                    DetrNFrac = (1.0 - Consts.Def2SedLabDetr) * Nut2Org_Refr + Consts.Def2SedLabDetr * Nut2Org_Lab;
                     if (AQTSeg.Diagenesis_Included())
                     {
                         DetrNFrac = Nut2Org_Lab;
@@ -977,6 +977,7 @@ namespace AQUATOX.Nutrients
             void Assimilation_AddAssim(TStateVariable P)   // Assimilation of nutrients by algae    
             {
                 TPlant PP;
+                T_N_Internal_Plant TNIP; 
                 double UptkNut;
                 const double UptakeCO2 = 0.53;
                 UptkNut = 0;
@@ -993,30 +994,32 @@ namespace AQUATOX.Nutrients
                     {
                         if (NState != AllVariables.CO2)
                         {
-                            //if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))   // FIXME Internal Nutrients
-                            //     TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol);
-                            //else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol);
+                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate)) 
+                                TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
+                            else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
 
-                            //if (AQTSeg.PSetupRec.Internal_Nutrients && (TNIP != null))
-                            //{   // mg/L    // ug/L      // mg/ug
-                            //    UptkNut = TNIP.Uptake() * 1e-3;
-                            //}
-                            //else
-                            //{
-                            // external nutrients
-
-                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
-                                UptkNut = PP.N_2_Org() * PP.Photosynthesis();
-                            else
-                                UptkNut = PP.P_2_Org() * PP.Photosynthesis();
-                            // mg/L     // g/g               // mg/L
-
-                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                            if (AQTSeg.PSetup.Internal_Nutrients && (TNIP != null))
                             {
-                                if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
-                                    NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                UptkNut = TNIP.Uptake() * 1e-3;
+                                // mg/L    // ug/L      // mg/ug
+                            }
+                            else
+                            {
+                                // external nutrients
+
+                                if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                                    UptkNut = PP.N_2_Org() * PP.Photosynthesis();
                                 else
-                                    NH4Pref = 0;  // Protect Against Div by 0
+                                    UptkNut = PP.P_2_Org() * PP.Photosynthesis();
+                                // mg/L     // g/g               // mg/L
+
+                                if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                                {
+                                    if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
+                                        NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                    else
+                                        NH4Pref = 0;  // Protect Against Div by 0
+                                }
                             }
                         }   // non CO2 code
 
@@ -1995,7 +1998,7 @@ namespace AQUATOX.Nutrients
         //    double Velocity;
         //    double Wind;
 
-        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) / 100;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
+        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) / 100.0;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
         //    // m/s          // cm/s                                             // m/s
         //    Wind = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
         //    Thick = Location.MeanThick[VerticalSegments.Epilimnion];
@@ -2033,14 +2036,14 @@ namespace AQUATOX.Nutrients
                 ZDepth = Location.MeanThick;  // [VerticalSegments.Epilimnion]
                 Vel = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) * 0.01;
                 // m/s         // cm/s                                                                        // m/cm
-                if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0; }           // no velocity reaeration for nonstreams
+                if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0.0; }           // no velocity reaeration for nonstreams
 
                 TWindLoading TWind = (TWindLoading) AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);  // m/s at 10 m
                 if (TWind == null) Wnd = 0.1;
                 else Wnd = TWind.State;  
 
                 // Schwarzenbach et al., 1993, coverted to m/sec:
-                KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864) / ZDepth;
+                KReaer1 = ((4E-4 + 4E-5 * Wnd * Wnd) * 864.0) / ZDepth;
                 // 1/d                        m/sec        m
                 if (ZDepth < 0.06)
                 {
@@ -2102,16 +2105,16 @@ namespace AQUATOX.Nutrients
             if (TSV == null) Salt = 0; else Salt = TSV.State;
 
             TKelvin = 273.15 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / Math.Pow(TKelvin, 2) + 1.243800E10 / Math.Pow(TKelvin, 3.0) - 8.621949E11 / Math.Pow(TKelvin, 4.0);
+            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / Math.Pow(TKelvin, 2.0) + 1.243800E10 / Math.Pow(TKelvin, 3.0) - 8.621949E11 / Math.Pow(TKelvin, 4.0);
             if (Salt > 0)
             {
-                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / Math.Pow(TKelvin, 2));
+                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / Math.Pow(TKelvin, 2.0));
             }
             else
             {
                 lnCss = lnCsf;
             }
-            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100;
+            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100.0;
             // Fractional effect due to altitude from Zison et al. 1978
             // m
             return Math.Exp(lnCss) * AltEffect;

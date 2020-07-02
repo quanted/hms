@@ -312,6 +312,9 @@ namespace Globals
 
         public const T_SVType FirstOrgTxTyp = T_SVType.OrgTox1;
         public const T_SVType LastOrgTxTyp = T_SVType.OrgTox20;
+
+        public static DateTime StopDate = new DateTime(1994, 7, 30);
+
     }
 
     public class TSVConc

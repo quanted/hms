@@ -230,7 +230,16 @@ namespace Data.Source
         {
             //Explanation of quality flags: https://www1.ncdc.noaa.gov/pub/data/cdo/documentation/GHCND_documentation.pdf
             char[] qualityFlags = new char[] { 'D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'R', 'S', 'T', 'W', 'X', 'Z' };
-            string[] tables = attribute.Split(',');
+
+            List<string> tables = new List<string>();
+            if (attribute != null)
+            {
+                tables = attribute.Split(',').ToList();
+            }
+            else
+            {
+                attribute = "";
+            }
 
             errorMsg = "";
             if (attribute.Contains("[") || attribute.Contains("]"))             // Begin and end of deleted period, during the given hour
@@ -241,14 +250,13 @@ namespace Data.Source
             {
                 return -9999;
             }
-            else if (tables[0].Contains("M") || tables[1].IndexOfAny(qualityFlags) != -1)        // One period of missing data or failed QA check
-            {
-                return -9999;
+            if(tables.Count > 1){
+                if (tables[0].Contains("M") || tables[1].IndexOfAny(qualityFlags) != -1)        // One period of missing data or failed QA check
+                {
+                    return -9999;
+                }
             }
-            else
-            {
-                return value;
-            }
+            return value;
         }
 
     }

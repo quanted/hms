@@ -52,7 +52,7 @@ namespace AQUATOX.Diagenesis
             s = AQTSeg.MassTransfer();
             // m/d
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            fda1 = 1 / (1 + DR.m1.Val * DR.KdNH3.Val);
+            fda1 = 1.0 / (1.0 + DR.m1.Val * DR.KdNH3.Val);
             result = s * (fda1 * State - NH4_0) / DR.H1.Val;
             // g/m3 d      m/d   g/m3    g/m3                m
 
@@ -90,10 +90,10 @@ namespace AQUATOX.Diagenesis
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             NH4_1 = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1);
             NH4_2 = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer2);
-            fda1 = 1 / (1 + DR.m1.Val * DR.KdNH3.Val);
-            fpa1 = 1 - fda1;
-            fda2 = 1 / (1 + DR.m2.Val * DR.KdNH3.Val);
-            fpa2 = 1 - fda2;
+            fda1 = 1.0 / (1.0 + DR.m1.Val * DR.KdNH3.Val);
+            fpa1 = 1.0 - fda1;
+            fda2 = 1.0 / (1.0 + DR.m2.Val * DR.KdNH3.Val);
+            fpa2 = 1.0 - fda2;
             Flux2Anaerobic = -(DR.W12 * (fpa2 * NH4_2 - fpa1 * NH4_1) + DR.KL12 * (fda2 * NH4_2 - fda1 * NH4_1));
             // g/m2 d            m/d     g/m3    g/m3    m/d    g/m3       g/m3
 
@@ -114,7 +114,7 @@ namespace AQUATOX.Diagenesis
                 DB = -Nitr - Burial - Flux2Wat - Flux2Anaerobic;
                 // g/m3 d  // g/m3 d
 
-                if (AQTSeg.Diagenesis_Steady_State)  DB = 0;
+                if (AQTSeg.Diagenesis_Steady_State)  DB = 0.0;
                 // Layer 1 is STEADY STATE
             }
             else
@@ -152,7 +152,7 @@ namespace AQUATOX.Diagenesis
             Loading = 0;
         }
 
-        public double Denit_Rate(double NO3Conc)
+        public double Denit_Rate()
         {
             double result;
             // eqns 5.23&24
@@ -311,7 +311,7 @@ namespace AQUATOX.Diagenesis
                 // m/d       // m                // mg/L
                 Nitr = TNH4_1.Nitr_Rate(NH4_1) / s * NH4_1 / DR.H1.Val;
 // EFDC eq. 5-20   // g/m3 d     // m2/d2    // m/d  // g/m3    // m
-                DeNitr = Denit_Rate(State) / s * State / DR.H1.Val;
+                DeNitr = Denit_Rate() / s * State / DR.H1.Val;
                 // g/m3 d        // m2/d2 // m/d // g/m3        // m
                 Flux2Wat = Flux2Water();
                 DB = Nitr - DeNitr - Burial - Flux2Wat - Flux2Anaerobic;
@@ -329,8 +329,8 @@ namespace AQUATOX.Diagenesis
                 // include burial from L1
                 Burial = DR.w2.Val * NO3_2 / DR.H2.Val;
                 // deep burial
-                DeNitr = Denit_Rate(State) * State / DR.H2.Val;
-                // g/m3 d          // m/d   // g/m3      // m
+                DeNitr = Denit_Rate() * State / DR.H2.Val;
+                // g/m3 d     // m/d   // g/m3      // m
                 DB = -DeNitr - Burial + Flux2Anaerobic;
                 // g/m3 d
             }
@@ -379,7 +379,7 @@ namespace AQUATOX.Diagenesis
             {
                 KDPO41 = DR.KdPO42.Val * Math.Pow(dKDPO41, (O2 / DR.O2critPO4.Val));
             }
-            result = (1 / (1 + DR.m1.Val * KDPO41));
+            result = (1.0 / (1.0 + DR.m1.Val * KDPO41));
             return result;
         }
 
@@ -465,9 +465,9 @@ namespace AQUATOX.Diagenesis
             // --------------------------------------------------
             // TPO4_Sediment.Deriv
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            fpp1 = 1 - fdp1();
-            fdp2 = (1 / (1 + DR.m2.Val * DR.KdPO42.Val));
-            fpp2 = 1 - fdp2;
+            fpp1 = 1.0 - fdp1();
+            fdp2 = (1.0 / (1.0 + DR.m2.Val * DR.KdPO42.Val));
+            fpp2 = 1.0 - fdp2;
             PO4_1 = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);
             PO4_2 = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2);
             Flux2Anaerobic = -((DR.W12 * (fpp2 * PO4_2 - fpp1 * PO4_1) + DR.KL12 * (fdp2 * PO4_2 - fdp1() * PO4_1)));
@@ -907,22 +907,22 @@ namespace AQUATOX.Diagenesis
             PNO3_1 = (TNO3_Sediment) AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
             PNO3_2 = (TNO3_Sediment) AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
             // g/m2 d
-            JO2NO3 = 2.86 * (PNO3_1.Denit_Rate(PNO3_1.State) / S * PNO3_1.State + PNO3_2.Denit_Rate(PNO3_2.State) * PNO3_2.State);
+            JO2NO3 = 2.86 * (PNO3_1.Denit_Rate() / S * PNO3_1.State + PNO3_2.Denit_Rate() * PNO3_2.State);
                      // m/d            // g/m3
             Dia_Flux = Dia_Flux - JO2NO3;
 
             if (Dia_Flux < 0)
                 Dia_Flux = 0;
 
-            CH4Sat = 100 * (1 + AQTSeg.DynamicZMean() / 10) * Math.Pow(1.024, (20 - Temp));
+            CH4Sat = 100.0 * (1.0 + AQTSeg.DynamicZMean() / 10) * Math.Pow(1.024, (20 - Temp));
             // saturation conc of methane in pore water {g 02/m3
-            CSODmax = Math.Min(Math.Sqrt(2 * DR.KL12 * CH4Sat * Dia_Flux), Dia_Flux);
-            SECH_ARG = (DR.KappaCH4.Val * Math.Pow(DR.ThtaCH4.Val, (Temp - 20))) / S;
+            CSODmax = Math.Min(Math.Sqrt(2.0 * DR.KL12 * CH4Sat * Dia_Flux), Dia_Flux);
+            SECH_ARG = (DR.KappaCH4.Val * Math.Pow(DR.ThtaCH4.Val, (Temp - 20.0))) / S;
             // CSOD Equation 10.35 from DiTorro
-            // The hyperbolic secant is defined as HSec(X) = 2 / (Exp(X) + Exp(-X))
+            // The hyperbolic secant is defined as HSec(X) = 2.0 / (Exp(X) + Exp(-X))
             if ((SECH_ARG < 400))
             {
-                CSOD = CSODmax * (1 - (2 / (Math.Exp(SECH_ARG) + Math.Exp(-SECH_ARG))));
+                CSOD = CSODmax * (1.0 - (2.0 / (Math.Exp(SECH_ARG) + Math.Exp(-SECH_ARG))));
             }
             else
             {
@@ -964,8 +964,8 @@ namespace AQUATOX.Diagenesis
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             O2 = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            fdh2s1 = 1 / (1 + DR.m1.Val * DR.KdH2S1.Val);
-            fph2s1 = 1 - fdh2s1;
+            fdh2s1 = 1.0 / (1.0 + DR.m1.Val * DR.KdH2S1.Val);
+            fph2s1 = 1.0 - fdh2s1;
             result = (Math.Pow(DR.KappaH2Sd1.Val, 2) * fdh2s1 + (Math.Pow(DR.KappaH2Sp1.Val, 2) * fph2s1)) * Math.Pow(DR.ThtaH2S.Val, Temp - 20) * O2 / (2 * DR.KMHSO2.Val);
             // g2/m2
 
@@ -1046,10 +1046,10 @@ namespace AQUATOX.Diagenesis
             {
                 Oxid = 0;
             }
-            fdh2s1 = 1 / (1 + DR.m1.Val * DR.KdH2S1.Val);
-            fph2s1 = 1 - fdh2s1;
-            fdh2s2 = 1 / (1 + DR.m2.Val * DR.KdH2S2.Val);
-            fph2s2 = 1 - fdh2s2;
+            fdh2s1 = 1.0 / (1.0 + DR.m1.Val * DR.KdH2S1.Val);
+            fph2s1 = 1.0 - fdh2s1;
+            fdh2s2 = 1.0 / (1.0 + DR.m2.Val * DR.KdH2S2.Val);
+            fph2s2 = 1.0 - fdh2s2;
             COD_0 = AQTSeg.GetState(AllVariables.COD, T_SVType.StV, T_SVLayer.WaterCol);
             H2S_1 = AQTSeg.GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer1);
             H2S_2 = AQTSeg.GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer2);
@@ -1215,10 +1215,10 @@ namespace AQUATOX.Diagenesis
             {
                 KdSi1 = DR.KDSi2.Val * Math.Pow(DR.DKDSi1.Val, (O2 / DR.O2critSi.Val));
             }
-            fdsi1 = (1 / (1 + DR.m1.Val * KdSi1));
-            fpsi1 = 1 - fdsi1;
-            fdsi2 = (1 / (1 + DR.m2.Val * DR.KDSi2.Val));
-            fpsi2 = 1 - fdsi2;
+            fdsi1 = (1.0 / (1.0 + DR.m1.Val * KdSi1));
+            fpsi1 = 1.0 - fdsi1;
+            fdsi2 = (1.0 / (1.0 + DR.m2.Val * DR.KDSi2.Val));
+            fpsi2 = 1.0 - fdsi2;
             if (NState == AllVariables.Avail_Silica)
             {
                 // Particulate Biogenic Silica
