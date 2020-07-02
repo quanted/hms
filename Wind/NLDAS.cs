@@ -148,14 +148,15 @@ namespace Wind
                     double u = Double.Parse(this.timeseriesData["u"].Data[date][0]);
                     double v = Double.Parse(this.timeseriesData["v"].Data[date][0]);
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
-                    double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
-                    timeseries.Add(date, new List<string>() { vel.ToString("E3"), deg.ToString("N3") });
+                    //double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
+                    //timeseries.Add(date, new List<string>() { vel.ToString("E3"), deg.ToString("N3") });
+                    timeseries.Add(date, new List<string>() { vel.ToString("E3") });
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "velocity";
-                output.Metadata["column_3"] = "direction";
+                //output.Metadata["column_3"] = "direction";
                 output.Metadata["column_2_units"] = "m/s";
-                output.Metadata["column_3_units"] = "deg";
+                //output.Metadata["column_3_units"] = "deg";
             }
             else
             {
@@ -164,18 +165,19 @@ namespace Wind
                     double u = Double.Parse(this.timeseriesData["u"].Data[date][0]);
                     double v = Double.Parse(this.timeseriesData["v"].Data[date][0]);
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
-                    double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
-                    timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), deg.ToString("N3") });
+                    //double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
+                    //timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), deg.ToString("N3") });
+                    timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), });
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "v";
                 output.Metadata["column_3"] = "u";
                 output.Metadata["column_4"] = "velocity";
-                output.Metadata["column_5"] = "direction";
+                //output.Metadata["column_5"] = "direction";
                 output.Metadata["column_2_units"] = "m/s";
                 output.Metadata["column_3_units"] = "m/s";
                 output.Metadata["column_4_units"] = "m/s";
-                output.Metadata["column_5_units"] = "deg";
+                //output.Metadata["column_5_units"] = "deg";
             }
             output.Data = timeseries;
         }
@@ -262,6 +264,7 @@ namespace Wind
             DateTime.TryParse(dateString0, out newDate);
             double usum = 0.0;
             double vsum = 0.0;
+            double velsum = 0.0;
             int days = -1;
             for (int i = 0; i < output.Data.Count; i++)
             {
@@ -272,10 +275,12 @@ namespace Wind
                 {
                     usum = usum / days;
                     vsum = vsum / days;
-                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { usum.ToString(), vsum.ToString() } );
+                    velsum = velsum / days;
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { usum.ToString(), vsum.ToString(), velsum.ToString() } );
                     newDate = iDate;
                     usum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     vsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    velsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
                     days = 0;
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
@@ -283,6 +288,7 @@ namespace Wind
                 {
                     usum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     vsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    velsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
                     //days += 1;
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
