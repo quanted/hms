@@ -51,8 +51,8 @@ namespace SubSurfaceFlow
             ITimeSeriesOutput bfOutput = CalculateBaseflow(out errorMsg, bfPercent, input, runoffData);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            bfOutput.DataSource = "curvenumber";
-            bfOutput.Dataset = "subsurfaceflow";
+            bfOutput.DataSource = "Curve Number";
+            bfOutput.Dataset = "SubSurfaceFlow";
             bfOutput.Metadata.Add("comid", input.Geometry.ComID.ToString());
             bfOutput.Metadata.Add("startdate", input.DateTimeSpan.StartDate.ToString());
             bfOutput.Metadata.Add("enddate", input.DateTimeSpan.EndDate.ToString());

@@ -32,3 +32,6 @@ TestResults/
 *.zip
 test_reports/
 
+# Exception Logs
+exception_log.txt
+
