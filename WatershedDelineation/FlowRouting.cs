@@ -132,7 +132,7 @@ namespace WatershedDelineation
                 tsi.DateTimeSpan = input.DateTimeSpan;
                 tsi.Source = input.Source;
                 tsi.TemporalResolution = "daily";
-                tsi.TimeLocalized = true;
+                tsi.TimeLocalized = false;
                 TimeSeriesGeometry tsGeometry = new TimeSeriesGeometry();
                 tsGeometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 tsGeometry.ComID = Convert.ToInt32(com);
