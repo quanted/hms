@@ -53,6 +53,7 @@ namespace Web.Services.Models
             }
             // SET Attributes to specific values until stack works
             input.TemporalResolution = "daily";
+            input.TimeLocalized = true;
             if(input.RunoffSource == "nldas" || input.RunoffSource == "gldas")
             {
                 input.Geometry.GeometryMetadata["precipSource"] = input.RunoffSource;
