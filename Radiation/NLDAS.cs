@@ -189,6 +189,7 @@ namespace Radiation
                     ssum = ssum / days;
                     lsum = lsum / days;
                     output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString(), lsum.ToString() });
+                    //output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString() });
                     newDate = iDate;
                     ssum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     lsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);

@@ -6,6 +6,7 @@ using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;
+using AQUATOX.Chemicals;
 
 namespace AQUATOX.Plants
 
@@ -157,8 +158,8 @@ namespace AQUATOX.Plants
         public double SinkToHypo = 0;
         // Set in Sedimentation
         public double[] EC50_Photo;
-        [JsonIgnore] public TPlantToxRecord[] Plant_Tox;     // pointer to relevant plant toxicity data (nosave)
-//        [JsonIgnore] public MortRatesRecord MortRates;       // Holds data about how plant category is dying, (nosave)
+        [JsonIgnore] public TPlantToxRecord[] Plant_Tox = new TPlantToxRecord[Consts.NToxs];     // pointer to relevant plant toxicity data (nosave)
+        [JsonIgnore] public MortRatesRecord MortRates = new MortRatesRecord();    // Holds data about how plant category is dying, (nosave)
         [JsonIgnore] public TMacroType MacroType;        // If plant is macrophyte, what type is it (nosave)
         [JsonIgnore] public bool SloughEvent = false;         // have conditions for a sloughing event been met?  Nosave
         [JsonIgnore] public double SloughLevel = 0;         // how far will biomass drop in a sloughin event?   NoSave
@@ -178,24 +179,25 @@ namespace AQUATOX.Plants
         [JsonIgnore] public double HighLt_Limit = 0;         // track for rates, NOSAVE JSC 9-5-2002
         [JsonIgnore] public double ResidenceTime = 0;        // phytoplankton residence time, set in washout, NOSAVE
         [JsonIgnore] public bool IsEunotia = false;          // Is this Eunotia?  Scientific name includes "eunotia,"  NOSAVE
-        public AllVariables PSameSpecies;
+        public AllVariables PSameSpecies = AllVariables.NullStateVar;
 
         public TPlant(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            // int ToxLoop;
-            //PSameSpecies = AllVariables.NullStateVar;
+            int ToxLoop;
 
-            //          PRequiresData = true;
-            //MortRates.OtherMort = 0;
-            //MortRates.SaltMort = 0;
-            //for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-            //{
-            //    MortRates.OrgPois[ToxLoop] = 0;
-            //}
+            MortRates.OtherMort = 0;
+            MortRates.SaltMort = 0;
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                MortRates.OrgPois[ToxLoop] = 0;
+            }
         }
          
         public override void SetToInitCond()
         {
+            Assign_Plant_Tox();
+
+
             base.SetToInitCond();
             SinkToHypo = 0;
             SloughEvent = false;
@@ -261,38 +263,41 @@ namespace AQUATOX.Plants
 
         // ChangeData MUST be called when the underlying data record is changed
         // ------------------------------------------------------------------------
-        //public void Assign_Plant_Tox()
-        //{
-        //    int FoundToxIndx;
-        //    int i;
-        //    TPlantToxRecord PTR;
-        //    T_SVType ToxLoop;
-        //    string DataName;
-        //    DataName = PAlgalRec.ToxicityRecord.ToLower();
+        public void Assign_Plant_Tox()
+        {
+            int FoundToxIndx;
+            int i;
+            TPlantToxRecord PTR;
+            TToxics TT;
+            int ToxLoop;
+            string DataName;
+            DataName = PAlgalRec.ToxicityRecord.ToLower();
 
-        //                for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-        //    {
-        //        if (AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1+ToxLoop, T_SVLayer.WaterCol) != null)
-        //        {
-        //            FoundToxIndx = -1;
-        //            // 10/27/2009
-        //            for (i = 0; i < Chemptrs[ToxLoop].Plant_Tox.Count; i++)
-        //            {
-        //                PTR = Chemptrs[ToxLoop].Plant_Tox.At(i);
-        //                if (PTR.Plant_name.ToLower() == DataName)
-        //                {
-        //                    FoundToxIndx = i;
-        //                }
-        //            }
-        //            if (FoundToxIndx == -1)
-        //            {
-        //                throw new Exception("Error!  " + Consts.OutputText(NState, SVType, T_SVLayer.WaterCol, "", false, false, 0) + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + Chemptrs[ToxLoop].ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
-        //            }
-        //            PTR = Chemptrs[ToxLoop].Plant_Tox.At(FoundToxIndx);
-        //            Plant_Tox[ToxLoop] = PTR;
-        //        }
-        //    }
-        //}
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                TT = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                if (TT != null)
+                {
+                    FoundToxIndx = -1;
+                    for (i = 0; i < TT.Chem_Plant_Tox.Count; i++)
+                    {
+                        PTR = TT.Chem_Plant_Tox[i];
+                        if (PTR.Plant_name.ToLower() == DataName)
+                        {
+                            FoundToxIndx = i;
+                            break;
+                        }
+                    }
+                    if (FoundToxIndx == -1)
+                        throw new Exception("Error!  " + PAlgalRec.PlantName + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
+
+                    PTR = TT.Chem_Plant_Tox[FoundToxIndx];
+                    Plant_Tox[ToxLoop] = PTR;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------------
 
         public override double WetToDry()
         {
@@ -308,7 +313,7 @@ namespace AQUATOX.Plants
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) != null)
                 {
-                    AggFracPhoto = AggFracPhoto + (1 - FracPhoto[ToxLoop]);
+                    AggFracPhoto = AggFracPhoto + (1.0 - FracPhoto[ToxLoop]);
                 }
             }
             if (AggFracPhoto > 1.0)
@@ -444,8 +449,8 @@ namespace AQUATOX.Plants
                 if (TSV != null)
                  if (TSV.State > 0)
                     {
-                        Pois = 0; //  Poisoned(ToxLoop);  FIXME TOXIC EFFECTS
-                        //MortRates.OrgPois[ToxLoop] = Pois;
+                        Pois = Poisoned((T_SVType)ToxLoop + 2); 
+                        MortRates.OrgPois[ToxLoop] = Pois;
                         Dead = Dead + Pois;
                     };
             }
@@ -701,7 +706,7 @@ namespace AQUATOX.Plants
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
                         {   // frac living
                             SloughEvent = true;
-                            SloughLevel = State * (1 - (PAlgalRec.PctSloughed / 100));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
 
                             //AQTSeg.ProgData.SloughDia = true;  update progress bar, N/A for HMS
                             //AQTSeg.ProgData.PeriVis = true;
@@ -711,14 +716,14 @@ namespace AQUATOX.Plants
                     {
                         // filamentous (includes greens and blgreens and should not be confused
                         // with filamentous phytoplankton)
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
+                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2.0) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
                         // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2             m2/mm2
 
                         // 3/19/2013 fcrit of zero means no scour
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
                         {
                             SloughEvent = true;
-                            SloughLevel = State * (1 - (PAlgalRec.PctSloughed / 100));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
 
                             //AQTSeg.ProgData.PeriVis = true;   Progress Dialog Update, N/A HMS
                             //if (NState >= Consts.FirstGreens && NState <= Consts.LastGreens)
@@ -884,14 +889,13 @@ namespace AQUATOX.Plants
         // light limitation at depth
         public double LtAtDepth(bool DailyStep)
         {   // HMS Light at Top, Vertical stratification code stripped, not relevant to HMS Work Flows
-            
+            // Floating Macrophytes not subject to light limitation, this function is never executed for them
+
             double LightVal, LD, EX, DBott;
             double LightCorr;
             bool Incl_Periphyton;
             TLight PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
-
-            // Floating Macrophytes not subject to light limitation, this function is never executed for them
-
+                        
             Incl_Periphyton = !(IsPhytoplankton());
             EX = AQTSeg.Extinct(Incl_Periphyton, true, true, false, 0);
             DBott = DepthBottom();
@@ -906,7 +910,7 @@ namespace AQUATOX.Plants
                 else LightCorr = 1.25;
 
                 // only half is in spectrum used for photsyn. - Edmondson '56
-                LD = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * (DBott)));
+                LD = (-((LightVal / 2.0) / (LightCorr * LightSat())) * Math.Exp(-EX * (DBott)));
                 // unitless     ly/d                   ly/d           1/m    m        m  
 
                 if (LD < -30) LD = 0;    // Prevent a Crash, JSC
@@ -1086,7 +1090,7 @@ namespace AQUATOX.Plants
                 if (P2O > Consts.Tiny)
                 {
                     // Internal nutrientsP Limit
-                    PLimit = (1 - (PAlgalRec.Min_P_Ratio / P2O));
+                    PLimit = (1.0 - (PAlgalRec.Min_P_Ratio / P2O));
                 }
                 else PLimit = 0.0;
             }
@@ -1169,11 +1173,9 @@ namespace AQUATOX.Plants
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
                 {
-                    // g/g OM
-                    // ug N /L
-                    // mg OM/L
-                    // mg/ug
                     return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
+                 // (g/g OM)   =   (ug N /L)                                             /(mg OM/L)*(mg/ug)
+
                 }
                 else
                 {
@@ -1262,7 +1264,7 @@ namespace AQUATOX.Plants
                 if (N2O > Consts.Tiny)
                 {
                     // Internal nutrients N Limit
-                    NL = (1 - (PAlgalRec.Min_N_Ratio / N2O));
+                    NL = (1.0 - (PAlgalRec.Min_N_Ratio / N2O));
                 }
                 else
                 {
@@ -1571,16 +1573,16 @@ namespace AQUATOX.Plants
             //bool Trackit;
             bool SurfaceFloater;
             // --------------------------------------------------
-            // int ToxLoop;
+            int ToxLoop;
 
-            //MortRates.OtherMort = 0;
+            MortRates.OtherMort = 0;
             Sloughing = 0;
-            //MortRates.SaltMort = 0;
+            MortRates.SaltMort = 0;
 
-            //for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-            //{
-            //    MortRates.OrgPois[ToxLoop] = 0;
-            //}
+            for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                MortRates.OrgPois[ToxLoop] = 0;
+            }
 
             //Trackit = (DB != -999);
             // signal to not write mass balance tracking
@@ -1623,7 +1625,7 @@ namespace AQUATOX.Plants
             DB = L + Pho - R - Ex - M - Pr - WO + WI - S + Sed2Me - STH + SFE + TD + En + DiffUp + DiffDown - ToxD - Slg + PeriScr + Fl;
             if (SloughEvent)
             {
-                Slg = State - (SloughLevel / 2) + DB;
+                Slg = State - (SloughLevel / 2.0) + DB;
                 // precisely slough to sloughlevel, 11/11/03
                 Sloughing = Slg;
                 DB = DB - Slg;
@@ -1670,18 +1672,18 @@ namespace AQUATOX.Plants
             double Pois;
             int ToxLoop;
             PlantRecord PR = PAlgalRec;
-            Dead = (1 - Math.Exp(-PR.EMort * (1 - AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax)))) * State + (PR.KMort * State);
+            Dead = (1.0 - Math.Exp(-PR.EMort * (1.0 - AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax)))) * State + (PR.KMort * State);
             // emort is approximate maximum fraction killed per day by suboptimal temp.
-            //MortRates.OtherMort = Dead;
-            //MortRates.SaltMort = State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);
-            Dead = Dead + State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);   // MortRates.SaltMort;
+            MortRates.OtherMort = Dead;
+            MortRates.SaltMort = State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);
+            Dead = Dead + MortRates.SaltMort;
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
                 if ((AQTSeg.PSetup.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
                      || ((!AQTSeg.PSetup.UseExternalConcs) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
-                    Pois = 0; //  Poisoned(ToxLoop); FIXME TOXIC EFFECTS -- ADD Poisoned WHEN ADDING ECOTOXICOLOGY 
-                    //MortRates.OrgPois[ToxLoop] = Pois;
+                    Pois = Poisoned((T_SVType)ToxLoop + 2); 
+                    MortRates.OrgPois[ToxLoop] = Pois;
                     Dead = Dead + Pois;
                 }
                 else
@@ -1716,7 +1718,7 @@ namespace AQUATOX.Plants
             KCapEffect = 1.0;  // 10/12/2014 KCap affects photosynthesis for macrophytes, not washout  added to Rel 3.2 4/26/2019
             if ((KCap > Consts.Tiny) && (State >= 0.9 * KCap))
             {
-                KCapEffect = 1 - (State - 0.9 * KCap) / (0.1 * KCap);
+                KCapEffect = 1.0 - (State - 0.9 * KCap) / (0.1 * KCap);
                 if (KCapEffect < 0)
                 {
                     KCapEffect = 0;
@@ -1776,7 +1778,7 @@ namespace AQUATOX.Plants
 
             KCap = KCAP_in_g_m3();
             // g/m3
-            KCapLimit = 1 - ((KCap - State) / KCap);
+            KCapLimit = 1.0 - ((KCap - State) / KCap);
             return KCapLimit * Disch / SegVolume * State;
         // g/cu m-d  (fraction) (cu m/d)   (cu m)   (g/cu m)
 
@@ -1911,12 +1913,30 @@ namespace AQUATOX.Plants
 
     } // end TMacrophyte
 
+
+    // internal nutrients in plants
+    // ------------------   INTERNAL NUTRIENTS OBJECTS --------------------------
+
+
     public class T_N_Internal_Plant : TStateVariable
     {
+        public override void SetToInitCond()
+        {
+            base.SetToInitCond();
+            // initialize internal nutrients in ug/L  
 
-        // code at end of plant.inc  internal nutrients in plants
-        // TMacrophyte.dBdT
-        // ------------------   INTERNAL NUTRIENTS OBJECTS --------------------------
+            TPlant TP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPlant; // associated plant
+            
+            if (SVType == T_SVType.NIntrnl)
+                    InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
+                else
+                    InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit * 1000;
+                      // (ug N/L) =  (mg OM/L)   *              (gN/gOM)   (ug/mg)
+
+                State = InitialCond;
+        }
+
+
         public double Uptake()
         {
             double WC_Conc;

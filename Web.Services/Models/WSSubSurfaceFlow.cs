@@ -42,21 +42,22 @@ namespace Web.Services.Models
             // Gets the SubSurfaceFlow data.
             ITimeSeriesOutput result = null;
             // Catchment, specified by comID, spatially weighted average
-            if (input.Geometry.Point == null)
-            {
-                if (input.Geometry.ComID > 0)
-                {
-                    result = this.SpatiallyWeightedAverage(input);
-                }
-                else
-                {
-                    return err.ReturnError("ERROR: No valid point or catchment comID found in inputs.");
-                }
-            }
-            else
-            {
-                result = subsurf.GetData(out errorMsg);
-            }
+            //if (input.Geometry.Point == null)
+            //{
+            //    if (input.Geometry.ComID > 0)
+            //    {
+            //        result = this.SpatiallyWeightedAverage(input);
+            //    }
+            //    else
+            //    {
+            //        return err.ReturnError("ERROR: No valid point or catchment comID found in inputs.");
+            //    }
+            //}
+            //else
+            //{
+            //    result = subsurf.GetData(out errorMsg);
+            //}
+            result = subsurf.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Get generic statistics

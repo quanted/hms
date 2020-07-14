@@ -15,10 +15,21 @@ using System.Linq;
 namespace AQUATOX.Bioaccumulation
 {
 
-    public class TParticleTox : TToxics
+    public class TSorbedTox : TToxics  // Base class for TParticleTox, and toxicant sorbed to animals and plants
     {
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
+        public TSorbedTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
+        { }
+
+        public override bool ShouldSerializeChemRec() { return false; }   // only output JSON for H2OTox 
+        public override bool ShouldSerializeBioTrans() { return false; }   // only output BioTrans for H2OTox 
+        public override bool ShouldSerializeAnim_Method() { return false; } // only output Anim_Method for H2OTox 
+        public override bool ShouldSerializePlant_Method() { return false; } // only output Plant_Method for H2OTox
+        public override bool ShouldSerializeChem_Anim_Tox() { return false; } // only output JSON for H2OTox 
+        public override bool ShouldSerializeChem_Plant_Tox() { return false; } // only output JSON for H2OTox 
+    }
+
+        public class TParticleTox : TSorbedTox
+    { 
 
         public TParticleTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         { }
@@ -28,7 +39,7 @@ namespace AQUATOX.Bioaccumulation
         public double Derivative_Decomp(AllVariables ns)
         {
             // Labile Compartments only
-            double FracAerobic=0;
+            double FracAerobic=0.0;
             return  ((AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol)) as TRemineralize).Decomposition(AQTSeg.Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
         }
 
@@ -334,7 +345,7 @@ namespace AQUATOX.Bioaccumulation
                     Co = Derivative_ColonizeSedRefrDetr() * pp * 1e-6;
                     SumSed = Derivative_SumPlantSedTox(CP as TDetritus);
                     SumDef = Derivative_SumDefecationTox();
-                    SumDef = SumDef * (1 - Consts.Def2SedLabDetr);
+                    SumDef = SumDef * (1.0 - Consts.Def2SedLabDetr);
 
                     Ing = Derivative_IngestOfCarrier() * pp * 1e-6;
                     Sedm = Derivative_Sediment(SuspDetrVar);
@@ -511,13 +522,9 @@ namespace AQUATOX.Bioaccumulation
         }
     } // end TPOCTox
 
-    public class TAlgaeTox : TToxics
+    public class TAlgaeTox : TSorbedTox
 
     {
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
-
-        public TPlantToxRecord Plant_Tox = null;
 
         public TAlgaeTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         {
@@ -535,6 +542,7 @@ namespace AQUATOX.Bioaccumulation
             double ToxState;
             double DissocFactor;
             TPlant AlgalPtr;
+            TPlantToxRecord PTR;
             UptakeCalcMethodType ChemOption;
             ChemOption = Plant_Method;
 
@@ -546,22 +554,21 @@ namespace AQUATOX.Bioaccumulation
                 else
                     DissocFactor = NonDissoc();
 
-                K1 = 1 / (0.0020 + (500 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
+                K1 = 1.0 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
 
                 // K1 function is mirrored in CHEMTOX.PAS, any change here needs to be made there
-                double K2 = Plant_Tox.K2;
-                if (K2 > 96) K1 = K1 * (96 / K2);  // scaling factor 10-02-03
+                double K2 = AlgalPtr.Plant_Tox[ToxInt(SVType)].K2;
+                if (K2 > 96.0) K1 = K1 * (96.0 / K2);  // scaling factor 10-02-03
 
                 return K1 * ToxState * AlgalPtr.State * 1e-6;        // HMS removed Dif
            // ug/L-d (L/kg-d) (ug/L)      (mg/L)      (kg/mg)
             }
 
-
-
             AlgalPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
             ToxState = AQTSeg.GetState(AllVariables.H2OTox, SVType, T_SVLayer.WaterCol);
 
-            if ((AlgalPtr == null) || (ToxState <= Consts.Tiny)) return 0;
+            if ((AlgalPtr == null) || (ToxState <= Consts.Tiny)) return 0.0;
+            PTR = AlgalPtr.Plant_Tox[ToxInt(SVType)];
 
             // ---------------------------------------------------------------------
             if (ChemOption != UptakeCalcMethodType.Default_Meth)
@@ -569,11 +576,11 @@ namespace AQUATOX.Bioaccumulation
                 if (ChemOption == UptakeCalcMethodType.CalcK1)
                 {
                     // 5/29/2015, add Bio_rate_const
-                    Local_K1 = (Plant_Tox.K2 + Plant_Tox.Bio_rate_const) * Plant_Tox.Entered_BCF;
+                    Local_K1 = (PTR.K2 + PTR.Bio_rate_const) * PTR.Entered_BCF;
                 }
                 else
                 {
-                    Local_K1 = Plant_Tox.K1;
+                    Local_K1 = PTR.K1;
                 }
 
                 return Local_K1 * ToxState * AlgalPtr.State * 1e-6;
@@ -591,16 +598,16 @@ namespace AQUATOX.Bioaccumulation
                     DissocFactor = NonDissoc();
 
                 double Kow = Math.Pow(10, ChemRec.LogKow);
-                Local_K1 = 1 / (1.8e-6 + 1 / (Kow * DissocFactor));
+                Local_K1 = 1.0 / (1.8e-6 + 1.0 / (Kow * DissocFactor));
                 // fit to Sijm et al.1998 data for PCBs
 
                 UptakeLimit = (AlgalPtr.BCF(0, SVType) * ToxState - GetPPB(NState, SVType, Layer)) / (AlgalPtr.BCF(0, SVType) * ToxState);
                 if (UptakeLimit < 0) UptakeLimit = 0;
 
-                K2 = Plant_Tox.K2;
-                if (K2 > 96)
+                K2 = PTR.K2;
+                if (K2 > 96.0)
                 {
-                    Local_K1 = Local_K1 * (96 / K2); // scaling factor 10-02-03
+                    Local_K1 = Local_K1 * (96.0 / K2); // scaling factor 10-02-03
                 }
                 
                 return Local_K1 * UptakeLimit * ToxState * AlgalPtr.State * 1e-6;
@@ -614,9 +621,9 @@ namespace AQUATOX.Bioaccumulation
         {
             AllVariables PlantLoop;
             TPlant PPl;
-            double TPSlough;
+            double TPSlough = 0;
             double j = 0;
-            TPSlough = 0;
+
             for (PlantLoop = Consts.FirstAlgae; PlantLoop <= Consts.LastAlgae; PlantLoop++)
             {
                 PPl = AQTSeg.GetStatePointer(PlantLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
@@ -757,14 +764,11 @@ namespace AQUATOX.Bioaccumulation
 
     } // end TAlgaeTox
 
-    public class TAnimalTox : TToxics {
+    public class TAnimalTox : TSorbedTox {
 
-        public TAnimalToxRecord Anim_Tox = null;
+        // public TAnimalToxRecord Anim_Tox = null;  6/19/2020 change structure
+
         [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)
-
-        public override bool ShouldSerializeChemRec() { return false; }  // only output JSON for H2OTox ChemRec
-        public override bool ShouldSerializeBioTrans() { return false; }  // only output BioTrans for H2OTox ChemRec
-
 
         public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
     {
@@ -825,7 +829,7 @@ namespace AQUATOX.Bioaccumulation
                     BioT_out = Biotransformation();
                     BioT_in = Biotrans_To_This_Org();
 
-                    Gill = CP.GillUptake(SVType, T_SVLayer.WaterCol);
+                    Gill = CP.GillUptake(SVType);
 
                     // removed porew water gill uptake
 
@@ -886,8 +890,15 @@ namespace AQUATOX.Bioaccumulation
                         Recr = CP.Recruit * pp * 1e-6;
                     }
                     Gam = CP.GameteLoss() * pp * 1e-6;
-                    // Must Be Called After Recr Calculation
-                    // + Recr
+                // Must Be Called After Recr Calculation
+                // + Recr
+
+                if (AQTSeg.TPresent > Consts.StopDate)
+                {
+                    RecrSaveTox = RecrSaveTox + Consts.Tiny;  
+                }
+
+
                     DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
                     if ((AQTSeg.DerivStep == 5)) RecrSaveTox = Recr;
                     // derivstep 5 is time X+h

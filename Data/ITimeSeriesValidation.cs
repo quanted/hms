@@ -30,7 +30,7 @@ namespace Data
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
-            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism" },
+            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei" },
             ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },
@@ -94,7 +94,7 @@ namespace Data
             errorTemp = new List<string>();
 
             validInput.TemporalResolution = (string.IsNullOrWhiteSpace(input.TemporalResolution)) ? "default" : input.TemporalResolution;
-            validInput.TimeLocalized = (string.IsNullOrWhiteSpace(input.TimeLocalized.ToString())) ? false : true;
+            validInput.TimeLocalized = (string.IsNullOrWhiteSpace(input.TimeLocalized.ToString())) ? false : input.TimeLocalized;
             validInput.Units = (string.IsNullOrWhiteSpace(input.Units)) ? "metric" : input.Units;
             validInput.OutputFormat = (string.IsNullOrWhiteSpace(input.OutputFormat)) ? "json" : input.OutputFormat;
             validInput.DataValueFormat = (string.IsNullOrWhiteSpace(input.DataValueFormat)) ? "E3" : input.DataValueFormat;

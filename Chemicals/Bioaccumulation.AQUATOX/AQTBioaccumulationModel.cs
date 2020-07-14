@@ -3,6 +3,7 @@ using AQUATOX.Nutrients;
 using AQUATOX.Chemicals;
 using AQUATOX.Bioaccumulation;
 using Stream.Hydrology.AQUATOX;
+using System.Linq;
 using Globals;
 
 namespace AQUATOXBioaccumulation
@@ -19,7 +20,7 @@ namespace AQUATOXBioaccumulation
         public AQTSim AQSim;
 
         /// <summary>
-        /// Instantiates an AQUATOX Chemicals model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
+        /// Instantiates an AQUATOX Bioaccumulation model given a valid JSON input, checks data requirements, integrates, and saves results back to the JSON as iTimeSeries.
         /// Valid JSON inputs must include an AQUATOX segment with one or more TToxics state variables attached, and valid site record, morphometry data, and PSETUP records.
         /// Example valid JSON inputs and documentation including a list of data requirements may be found in the Chemicals\DOCS directory.
         /// </summary>
@@ -46,51 +47,44 @@ namespace AQUATOXBioaccumulation
         }
 
         /// <summary>
-        /// Instantiates an AQUATOX Chemicals model given an existing AQUATOX Simulation insim.  Used for testing multi-purpose models.
+        /// Instantiates an AQUATOX Bioaccumulation model given an existing AQUATOX Simulation insim.  Used for testing multi-purpose models.
         /// </summary>
-        /// <param name="insim"></param> AQTSim.  The AQUATOX simulation being typecast or tested as an AQUATOX Chemicals Model
+        /// <param name="insim"></param> AQTSim.  The AQUATOX simulation being typecast or tested as an AQUATOX Bioaccumulation Model
         public AQTBioaccumulationModel(AQTSim insim)
         { AQSim = insim; }
 
 
         /// <summary>
-        /// Checks for data requirements for an AQTChemicalsModel including state variable requirements and parameter values.
+        /// Checks for data requirements for an AQTBioaccumulationModel including state variable requirements and parameter values.
         /// </summary>
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
             AQSim.AQTSeg.SetMemLocRec();
 
-            bool FoundTox = false;
-            for (T_SVType Typ = T_SVType.OrgTox1; Typ <= T_SVType.OrgTox20; Typ++)
-                { TToxics TTx = (TToxics)AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, Typ, T_SVLayer.WaterCol);
-                  if (TTx != null) { FoundTox = true; break; }
-                }
-            if (!FoundTox) return "A TToxics (toxicant in the water column) state variable must be included in the simulation. ";
-
-
-            AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
-            string checkvol = AQTVM.CheckDataRequirements();
-            if (checkvol != "") return checkvol;
-
-            TO2Obj TO2 = (TO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TO2 == null) return "An Oxygen state variable or driving variable must be included in the simulation. ";
-
-            TTemperature TTemp = (TTemperature)AQSim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
-
-            TpHObj TpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TpH == null) return "A pH loading variable or state variable must be included in a chemical simulation.";
-            if ((!TpH.UseLoadsRecAsDriver) && (TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
+            foreach (TToxics TT in AQSim.AQTSeg.SV.OfType<TToxics>())
             {
-                TCO2Obj TCO2 = (TCO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
-                if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";
+                if (TT.NState != AllVariables.H2OTox)  // if this is a bioaccumulation state variable and not a toxicant in water
+                {
+                    TToxics TTx = AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, TT.SVType, T_SVLayer.WaterCol) as TToxics;
+                    if (TTx == null) return "The bioaccumulation state variable " + TT.PName + " is present, but the relevant chemical is not present as a state or a driving variable.";
+    
+                    TStateVariable Carry = AQSim.AQTSeg.GetStatePointer(TT.NState, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (Carry == null) return "The bioaccumulation state variable " + TT.PName + " is present, but its carrying organism is not in the simulation.";
+                }
+
+                if (TT.NState == AllVariables.H2OTox) // chemical in water, so ensure it's in all biota and organic matter
+                for (AllVariables ns = Consts.FirstDetr; ns <= Consts.LastBiota; ns++)
+                {
+                    TStateVariable carrier = AQSim.AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (carrier != null) 
+                    { 
+                        TStateVariable TTx = AQSim.AQTSeg.GetStatePointer(carrier.NState, TT.SVType, T_SVLayer.WaterCol);
+                        if (TTx == null) return "The chemical " + TT.PName + " is in the simulation but not the bioaccumulation state variable for " + carrier.PName;
+                    }
+                }
+
             }
-
-            TLight TLt = (TLight)AQSim.AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TLt == null) return "A Light state variable or driving variable must be included in the simulation. ";
-
-            
             return "";
         }
     }

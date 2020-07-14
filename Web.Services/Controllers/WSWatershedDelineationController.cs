@@ -1,5 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
@@ -105,15 +106,27 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]WatershedDelineationInput watershedInput)
         {
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                var stpWatch = System.Diagnostics.Stopwatch.StartNew();
 
-            WSWatershedDelineation watershed = new WSWatershedDelineation();
-            WatershedDelineationOutput results = await watershed.GetDelineationData(watershedInput);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                WSWatershedDelineation watershed = new WSWatershedDelineation();
+                WatershedDelineationOutput results = await watershed.GetDelineationData(watershedInput);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
 
-            stpWatch.Stop();
-            long time = stpWatch.ElapsedMilliseconds / 1000;
-            return new ObjectResult(results);
+                stpWatch.Stop();
+                long time = stpWatch.ElapsedMilliseconds / 1000;
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }

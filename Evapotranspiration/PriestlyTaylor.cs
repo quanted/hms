@@ -233,10 +233,6 @@ namespace Evapotranspiration
                     dt = daymetData(inpt, outpt);
                     dt = Utilities.Utility.aggregateData(inpt, dt, "priestlytaylor");
                     break;
-                case "custom":
-                    CustomData cd = new CustomData();
-                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "priestlytaylor");
-                    break;
                 case "gldas":
                     ITimeSeriesOutput final = getGldasData(out errorMsg, inpt);
                     return final;

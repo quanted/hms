@@ -274,7 +274,7 @@ namespace SoilMoisture
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                if (date.Month != iDate.Month)
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
                     double average = 0.0;
                     average = sum / dayIndex;

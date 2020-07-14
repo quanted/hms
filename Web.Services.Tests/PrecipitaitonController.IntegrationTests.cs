@@ -72,6 +72,26 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// NLDAS daily request json string for testing a valid request
+        /// </summary>
+        const string trmmRequest =
+            "{\"source\": \"trmm\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
+        /// NLDAS daily request json string for testing a valid request
+        /// </summary>
+        const string nwmRequest =
+            "{\"source\": \"nwm\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// WGEN daily request json string for testing a valid request
         /// </summary>
         const string wgenRequest =
@@ -100,10 +120,12 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
-        [InlineData(gldasRequest, 366)]
+        [InlineData(gldasRequest, 365)]
         [InlineData(daymetRequest, 365)]
-        [InlineData(prismRequest, 365)]         //Passing?
+        [InlineData(prismRequest, 365)]
         [InlineData(ncdcRequest, 365)]
+        [InlineData(trmmRequest, 366)]
+        //[InlineData(nwmRequest, 365)]
         [InlineData(wgenRequest, 365)]
         public async Task ValidRequests(string precipInputString, int expected)
         {

@@ -1,6 +1,8 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
+using System;
 using System.Threading.Tasks;
 using Web.Services.Models;
 
@@ -60,10 +62,21 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody]ContaminantLoaderInput tempInput)
         {
-            WSContaminantLoader contam = new WSContaminantLoader();
-            ITimeSeriesOutput results = await contam.LoadContaminant(tempInput);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return new ObjectResult(results);
+            try { 
+                WSContaminantLoader contam = new WSContaminantLoader();
+                ITimeSeriesOutput results = await contam.LoadContaminant(tempInput);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }

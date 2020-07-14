@@ -41,6 +41,14 @@ namespace SubSurfaceFlow
         {
             errorMsg = "";
 
+            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
+            this.Output = iFactory.Initialize();
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            {
+                this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
+                this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
+            }
+
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && this.Input.Geometry.Point != null)
             {
@@ -51,10 +59,6 @@ namespace SubSurfaceFlow
             {
                 this.Input.TimeLocalized = false;
             }
-
-            //TODO: Check Source and run specific subcomponent class for source
-            ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
-            this.Output = iFactory.Initialize();
 
             switch (this.Input.Source)
             {
@@ -85,8 +89,14 @@ namespace SubSurfaceFlow
             this.Output.Metadata.Concat(this.Input.Geometry.GeometryMetadata);
 
             // Adds Timezone info to metadata
-            this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
-            this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+            if (!this.Output.Metadata.ContainsKey(this.Input.Source + "_timeZone"))
+            {
+                this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
+            }
+            if (!this.Output.Metadata.ContainsKey(this.Input.Source + "_tz_offset"))
+            {
+                this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+            }
 
             //TODO: Add output format control
 

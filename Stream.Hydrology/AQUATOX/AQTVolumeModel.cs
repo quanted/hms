@@ -64,7 +64,7 @@ namespace Stream.Hydrology.AQUATOX
             TVolume TVol = (TVolume)AQSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
             if (TVol == null) return "A Volume State Variable must be included in the simulation. ";
             if (AQSim.AQTSeg.Location == null) return "The 'Location' object must be populated with site data. ";
-
+            if (AQSim.AQTSeg.Location.Locale == null) return "The 'Location.Locale' object must be populated with site data. ";
             if (AQSim.AQTSeg.Location.Locale.SiteLength < Consts.Tiny) return "SiteLength must be greater than zero.";
             if (AQSim.AQTSeg.Location.SiteType ==  SiteTypes.Stream)
             {

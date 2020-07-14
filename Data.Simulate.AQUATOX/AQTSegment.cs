@@ -237,6 +237,10 @@ namespace AQUATOX.AQTSegment
             DB = 0;
         }
 
+        public int ToxInt(T_SVType typ)
+        {
+            return (int)typ - 2;
+        }
 
         public virtual void SetToInitCond()
         {
@@ -251,39 +255,6 @@ namespace AQUATOX.AQTSegment
             yhold = 0;
 
             for (j = 1; j <= 6; j++) StepRes[j] = 0;
-
-
-            // Initialize BCF calculation   // FIXME CALC BCF FOR TOX EFFECTS
-            //if (P.Layer < T_SVLayer.SedLayer1)
-            //{
-            //    for (TLP = Consts.FirstOrgTxTyp; TLP <= Consts.LastOrgTxTyp; TLP++)
-            //    {
-            //        if ((GetStatePointer(Consts.AssocToxSV(TLP), T_SVType.StV, T_SVLayer.WaterCol) != null))
-            //        {
-            //            if (new ArrayList(new object[] { Consts.FirstDetr, Consts.FirstBiota }).Contains(P.NState))
-            //            {
-            //                ((P) as TOrganism).BCF(0, TLP);
-            //            }
-            //        }
-            //    }
-            //}
-
-
-            //// initialize internal nutrients in ug/L  // FIXME INTERNAL NUTRIENTS
-            //if (new ArrayList(new T_SVType[] { T_SVType.NIntrnl, T_SVType.PIntrnl }).Contains(P.SVType))
-            //{
-            //    TP = GetStatePointer(P.NState, T_SVType.StV, T_SVLayer.WaterCol);
-            //    // associated plant
-            //    if (P.SVType == T_SVType.NIntrnl)
-            //    {
-            //        P.InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
-            //    }
-            //    else
-            //    {
-            //        P.InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit * 1000;
-            //    }      // ug N/L      // mg OM/L           // gN/gOM         // ug/mg
-            //    P.State = P.InitialCond;
-            //}
 
             // Initialize Toxics  
             if ((SVType >= Consts.FirstOrgTxTyp) && (SVType <= Consts.LastOrgTxTyp))
@@ -664,10 +635,12 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public DateTime SimulationDate;  // time integration started
         [JsonIgnore] public DateTime VolumeUpdated;  // 
         [JsonIgnore] public double MeanVolume;       // 
-        [JsonIgnore] public double Volume_Last_Step;    //Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
-        [JsonIgnore] public bool Anoxic = false;        // Is System Anoxic , nosave
+        [JsonIgnore] public double Volume_Last_Step;   // Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
+        [JsonIgnore] public bool Anoxic = false;       // Is System Anoxic , nosave
+        [JsonIgnore] public DateTime[] FirstExposure = new DateTime[Consts.NToxs];   // First exposure to organic toxicant, nosave
+
         [JsonIgnore] public DateTime ModelStartTime;     // Start of model run
-        [JsonIgnore] public int YearNum_PrevStep = 0;      // The year number during the previous step of the model run; used to determine when a year has passed
+        [JsonIgnore] public int YearNum_PrevStep = 0;     // The year number during the previous step of the model run; used to determine when a year has passed
 
         [JsonIgnore] public DateTime LastPctEmbedCalc = DateTime.MinValue;
         [JsonIgnore] public double PercentEmbedded = 0;
@@ -760,7 +733,7 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Enable Parallel.ForEach when not debugging
                 
         }
 
@@ -998,7 +971,7 @@ namespace AQUATOX.AQTSegment
             TAnimal PAnim;
             int MidWinterJulianDate;
             int sl;
-            T_SVType ToxLoop;
+            int ToxLoop;
             int ionized;
             double WeightedCumFracKill;
             double WeightedTempResistant;
@@ -1049,22 +1022,22 @@ namespace AQUATOX.AQTSegment
                     }
                 }
 
-                //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)    FIXME CHEMICAL EFFECTS CALCULATION
-                //{
-                //    WeightedCumFracKill = (Consts.C1 * TOR.DeltaCumFracKill[ToxLoop, 1] + Consts.C3 * TOR.DeltaCumFracKill[ToxLoop, 3] + Consts.C4 * TOR.DeltaCumFracKill[ToxLoop, 4] + Consts.C6 * TOR.DeltaCumFracKill[ToxLoop, 6]) * hdid;
-                //    WeightedTempResistant = (Consts.C1 * TOR.DeltaResistant[ToxLoop, 1] + Consts.C3 * TOR.DeltaResistant[ToxLoop, 3] + Consts.C4 * TOR.DeltaResistant[ToxLoop, 4] + Consts.C6 * TOR.DeltaResistant[ToxLoop, 6]) * hdid;
-                //    if (WeightedCumFracKill > 0)
-                //        TOR.PrevFracKill[ToxLoop] = TOR.PrevFracKill[ToxLoop] + WeightedCumFracKill;
-                //    if (WeightedTempResistant > 0)
-                //        TOR.Resistant[ToxLoop] = TOR.Resistant[ToxLoop] + WeightedTempResistant;
-                //    if (TOR.Resistant[ToxLoop] > 1)
-                //        TOR.Resistant[ToxLoop] = 1;
-                //    for (sl = 1; sl <= 6; sl++)
-                //    {
-                //        TOR.DeltaCumFracKill[ToxLoop, sl] = 0;
-                //        TOR.DeltaResistant[ToxLoop, sl] = 0;
-                //    }
-                //}
+                for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+                {
+                    WeightedCumFracKill = (Consts.C1 * TOR.DeltaCumFracKill[ToxLoop, 1] + Consts.C3 * TOR.DeltaCumFracKill[ToxLoop, 3] + Consts.C4 * TOR.DeltaCumFracKill[ToxLoop, 4] + Consts.C6 * TOR.DeltaCumFracKill[ToxLoop, 6]) * hdid;
+                    WeightedTempResistant = (Consts.C1 * TOR.DeltaResistant[ToxLoop, 1] + Consts.C3 * TOR.DeltaResistant[ToxLoop, 3] + Consts.C4 * TOR.DeltaResistant[ToxLoop, 4] + Consts.C6 * TOR.DeltaResistant[ToxLoop, 6]) * hdid;
+                    if (WeightedCumFracKill > 0)
+                        TOR.PrevFracKill[ToxLoop] = TOR.PrevFracKill[ToxLoop] + WeightedCumFracKill;
+                    if (WeightedTempResistant > 0)
+                        TOR.Resistant[ToxLoop] = TOR.Resistant[ToxLoop] + WeightedTempResistant;
+                    if (TOR.Resistant[ToxLoop] > 1)
+                        TOR.Resistant[ToxLoop] = 1;
+                    for (sl = 1; sl <= 6; sl++)
+                    {
+                        TOR.DeltaCumFracKill[ToxLoop, sl] = 0;
+                        TOR.DeltaResistant[ToxLoop, sl] = 0;
+                    }
+                }
 
                 if (TPresent.DayOfYear == MidWinterJulianDate)
                 {
@@ -1078,12 +1051,12 @@ namespace AQUATOX.AQTSegment
                         TOR.AmmoniaResistant[ionized] = 0;
                     }
 
-                    //for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  FIXME CHEMICAL EFFECTS CALCULATION
-                    //{
-                    //    TOR.PrevFracKill[ToxLoop] = 0;
-                    //    TOR.Resistant[ToxLoop] = 0;
-                    //    FirstExposure[ToxLoop] = 0;
-                    //}
+                    for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+                    {
+                        TOR.PrevFracKill[ToxLoop] = 0;
+                        TOR.Resistant[ToxLoop] = 0;
+                        FirstExposure[ToxLoop] =   DateTime.MinValue;
+                    }
                 }
             }
             if (P.IsAnimal())
@@ -1128,7 +1101,7 @@ namespace AQUATOX.AQTSegment
             bool deleted;
 
             newconc.SVConc = GetStateVal(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if (newconc.SVConc < 0) return;
+            if (newconc.SVConc < 0) newconc.SVConc = 0;
 
             newconc.Time = TPresent;
             PO2Concs.Insert(0, newconc);
@@ -1288,6 +1261,58 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+        // -----------------------------------------------------------------
+        public void DoThisEveryStep_SumAggr()  // 10/6/2014
+        {
+            AllVariables SVLoop;
+            T_SVType OrgLoop, TypLoop;
+            TToxics PTox, PTox2;
+            double SumState, SumPPB;
+
+            PTox = GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1, T_SVLayer.WaterCol) as TToxics;   // orgtox 1 is the aggregate compartment
+            if (PTox == null) return;
+            if (!PTox.IsAGGR) return;
+
+            SumState = 0;
+            SumPPB = 0;
+            for (TypLoop = T_SVType.OrgTox2; TypLoop <= T_SVType.OrgTox20; TypLoop++)
+            {
+                PTox2 = GetStatePointer(AllVariables.H2OTox, TypLoop, T_SVLayer.WaterCol) as TToxics;
+                if (PTox2 != null)
+                {
+                    SumState = SumState + PTox2.State;
+                    SumPPB = SumPPB + PTox2.ppb;
+                }
+            }
+            PTox.State = SumState;  // sum up individual Bins
+
+            PTox.ppb = SumPPB;
+            // sum up Kow Bins (ppb)
+            for (SVLoop = Consts.FirstDetr; SVLoop <= Consts.LastAnimal; SVLoop++)
+            {
+                SumState = 0;
+                SumPPB = 0;
+                PTox = GetStatePointer(SVLoop, T_SVType.OrgTox1, T_SVLayer.WaterCol) as TToxics;
+                if (PTox != null)
+                {
+                    if (PTox.IsAGGR)
+                    {
+                        for (OrgLoop = T_SVType.OrgTox2; OrgLoop <= T_SVType.OrgTox20; OrgLoop++)
+                        {
+                            PTox2 = GetStatePointer(SVLoop, OrgLoop, T_SVLayer.WaterCol) as TToxics;
+                            if (PTox2 != null)
+                            {
+                                SumState = SumState + PTox2.State;
+                                SumPPB = SumPPB + PTox2.ppb;
+                            }
+                        }
+                        PTox.State = SumState;    // sum up Kow Bins
+                        PTox.ppb = SumPPB;        // sum up Kow Bins (ppb)
+                    }
+                }
+            }
+        }
+
         public void DoThisEveryStep_CalculatePercentEmbedded()
         {   // 3-12-08
             double PECalc;
@@ -1296,7 +1321,7 @@ namespace AQUATOX.AQTSegment
             else  PECalc = 100 * (0.077 * Math.Log(Inorg60) - 0.020);
 
             if (PECalc < 0) PECalc = 0;
-            if (PECalc > 100) PECalc = 100;
+            if (PECalc > 100.0) PECalc = 100.0;
             if (PECalc > PercentEmbedded) PercentEmbedded = PECalc;
 
             LastPctEmbedCalc = TPresent;
@@ -1323,13 +1348,13 @@ namespace AQUATOX.AQTSegment
             //    Update_Sed_Bed(TPresent - TPreviousStep);
             //// JSC 2-21-2003, Update sediment bed after each derivative step if sediment model is running
 
-            //// After every step, PrevFracKill must be set to Current FracKill for
-            //// correct computation of POISONED
-            //// Also, for each animal species spawning data must be updated
+            // After every step, PrevFracKill must be set to Current FracKill for
+            // correct computation of POISONED
+            // Also, for each animal species spawning data must be updated
             foreach (TStateVariable TSV in SV)
                 DoThisEveryStep_SetFracKilled_and_Spawned(TSV, hdid);
 
-            //DoThisEveryStep_SumAggr();
+            DoThisEveryStep_SumAggr();
 
             int dayspassed = (TPresent - ModelStartTime).Days;
             CurrentYearNum = (int)((dayspassed + 2.0) / 365.0) + 1;
@@ -1409,7 +1434,7 @@ namespace AQUATOX.AQTSegment
                 {
                     Integrate_SetYScale(TSV);
                 }
-                //                  FinishPoint = (Convert.ToInt32(x * (1 / dxsav)) > Convert.ToInt32(xsav * (1 / dxsav)));
+                //                  FinishPoint = (Convert.ToInt32(x * (1.0 / dxsav)) > Convert.ToInt32(xsav * (1.0 / dxsav)));
 
                 CalcPPB();
                 WriteResults(x); // Write output to Results Collection
@@ -1546,16 +1571,16 @@ namespace AQUATOX.AQTSegment
             {
                 // PERFORM DILUTE-CONCENTRATE
                 if (TSV.Layer == T_SVLayer.WaterCol)
-                    if (((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota)) ||
-                       ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr)) ||
-                       (TSV.NState == AllVariables.H2OTox))
+                    if ( ((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota)) ||
+                         ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr)) ||
+                         ((TSV.NState == AllVariables.H2OTox) && (!PSetup.ChemsDrivingVars)) )
                     {
                         TSV.State = TSV.State / FracChange;
                     }
                 // dilute/concentrate
             }
 
-            //if ((LossVol > 0) || (GainVol > 0))
+            //if ((LossVol > 0) || (GainVol > 0))  Dynamic Stratification N/A to HMS
             //        {
             //            for (i = 0; i < Count; i++)
             //            {
@@ -1585,19 +1610,9 @@ namespace AQUATOX.AQTSegment
             //                        {
             //                            mass = (PSV.State * PrevSegVol) + (GainVol * OtherSegState);
             //                        }
-            //                        // gainvol>0
-            //                        // g
-            //                        // g/m3
-            //                        // m3
-            //                        // m3
-            //                        // g/m3
             //                        PSV.State = mass / NewSegVol;
-            //                        // g/m3
-            //                        // g
-            //                        // m3
             //                        Perform_Dilute_or_Concentrate_Track_Nutrient_Exchange(PSV.NState, mass - MassT0, WorkingTStates);
             //                        // net mass transfer
-            //                        // g
             //                    }
             //                }
             //            }
@@ -1605,7 +1620,7 @@ namespace AQUATOX.AQTSegment
 
             //        if ((LossVol > 0) || (GainVol > 0)) TV.DeltaVolume();
 
-            // pore waters also dilute/concentrate
+            // pore waters also dilute/concentrate  N/A HMS
             //for (LayerLoop = T_SVLayer.SedLayer1; LayerLoop <= Consts.LowestLayer; LayerLoop++)
             //{
             //    if (GetStatePointer(AllVariables.PoreWater, T_SVType.StV, LayerLoop) != null)
@@ -1655,12 +1670,6 @@ namespace AQUATOX.AQTSegment
             //                            {
             //                                PWater = SV.GetStatePointer(Consts.AssocToxSV(ToxLoop), T_SVType.StV, T_SVLayer.WaterCol);
             //                                PWater.State = PWater.State + PTox.State * SV.PWVol_Last_Step[LayerLoop] * SV.SedLayerArea() / SV.SegVol();
-            //                                // ug/L wc
-            //                                // ug/L wc
-            //                                // ug/L pw
-            //                                // m3/m2 pw
-            //                                // m2
-            //                                // m3 wc
             //                            }
             //                            PTox.State = 0;
             //                        }
@@ -1678,7 +1687,7 @@ namespace AQUATOX.AQTSegment
         public void WriteResults(DateTime TimeIndex)
         {
             double res = 0;
-            if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[SV.restimes.Count - 1]).TotalDays > Consts.VSmall)
+            if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[^1]).TotalDays > Consts.VSmall)   // last element is ^1
             {
                 SV.restimes.Add(TimeIndex);
                 foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
@@ -1745,7 +1754,7 @@ namespace AQUATOX.AQTSegment
             //    }
             //    else
             //    {
-            //        result = result * (1 - EpiFrac);
+            //        result = result * (1.0 - EpiFrac);
             //    }
             //}
         }
@@ -1808,7 +1817,7 @@ namespace AQUATOX.AQTSegment
                     Start_SI_Time = Start_Interval_Time;
                 }
 
-                SumThusFar = SumThusFar + ((Start_SI_Val + End_SI_Val) / 2) * (End_SI_Time - Start_SI_Time).TotalDays;
+                SumThusFar = SumThusFar + ((Start_SI_Val + End_SI_Val) / 2.0) * (End_SI_Time - Start_SI_Time).TotalDays;
                 // The area of the relevant trapezoid is calculated above
 
             }
@@ -1954,12 +1963,12 @@ namespace AQUATOX.AQTSegment
                 RefrPercent = PD.InputRecord.Percent_RefrIC;
                 PartPercent = PD.InputRecord.Percent_PartIC;
                 if (NS >= AllVariables.DissRefrDetr && NS <= AllVariables.DissLabDetr)
-                     PartFrac = 1 - (PartPercent / 100);
-                else PartFrac = (PartPercent / 100);
+                     PartFrac = 1.0 - (PartPercent / 100.0);
+                else PartFrac = (PartPercent / 100.0);
 
                 if ((NS == AllVariables.DissRefrDetr) || (NS == AllVariables.SuspRefrDetr))
-                {      RefrFrac = (RefrPercent / 100);      }
-                else { RefrFrac = 1 - (RefrPercent / 100);  }
+                {      RefrFrac = (RefrPercent / 100.0);      }
+                else { RefrFrac = 1.0 - (RefrPercent / 100.0);  }
 
                 switch (PD.InputRecord.DataType)
                 {   case DetrDataType.CBOD:
@@ -1976,33 +1985,34 @@ namespace AQUATOX.AQTSegment
         // ---------------------------------------------------------------
 
             PD = GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDissRefrDetr;
-            for (SVLoop = T_SVType.StV; SVLoop <= Consts.LastOrgTxTyp; SVLoop++)
-            {
-                // Loop through state variable type and then each associated toxicant type
-                if (SVLoop != T_SVType.Porewaters)
+            if (PD != null)
+              for (SVLoop = T_SVType.StV; SVLoop <= Consts.LastOrgTxTyp; SVLoop++)
                 {
-                    if ((SVLoop == T_SVType.StV) || GetStatePointer(AllVariables.H2OTox, SVLoop, T_SVLayer.WaterCol) != null)
+                    // Loop through state variable type and then each associated toxicant type
+                    if (SVLoop != T_SVType.Porewaters)
                     {
-                        for (Loop = AllVariables.DissRefrDetr; Loop <= AllVariables.SuspLabDetr; Loop++)
-                        {  // Loop through each detritus record in water col.
+                        if ((SVLoop == T_SVType.StV) || GetStatePointer(AllVariables.H2OTox, SVLoop, T_SVLayer.WaterCol) != null)
+                        {
+                            for (Loop = AllVariables.DissRefrDetr; Loop <= AllVariables.SuspLabDetr; Loop++)
+                            {  // Loop through each detritus record in water col.
 
-                            CalcMultFrac(Loop, SVLoop);   // Determine MultFrac for Initial condition
+                                CalcMultFrac(Loop, SVLoop);   // Determine MultFrac for Initial condition
 
-                            PR = GetStatePointer(Loop, SVLoop, T_SVLayer.WaterCol) as TRemineralize;
-                            if (PR != null)
-                            {
-                                DetritalInputRecordType PDIR = PD.InputRecord;
-                                if (SVLoop == T_SVType.StV)
-                                    {
-                                        PR.InitialCond = PDIR.InitCond * MultFrac;
-                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
-                                    }
-                                else PR.InitialCond = PDIR.ToxInitCond[(int)SVLoop - 2];
+                                PR = GetStatePointer(Loop, SVLoop, T_SVLayer.WaterCol) as TRemineralize;
+                                if (PR != null)
+                                {
+                                    DetritalInputRecordType PDIR = PD.InputRecord;
+                                    if (SVLoop == T_SVType.StV)
+                                        {
+                                            PR.InitialCond = PDIR.InitCond * MultFrac;
+                                            PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                        }
+                                    else PR.InitialCond = PDIR.ToxInitCond[PR.ToxInt(SVLoop)];
+                                }
                             }
                         }
                     }
                 }
-            }
         }
 
         // ---------------------------------------------------------------
@@ -2012,9 +2022,18 @@ namespace AQUATOX.AQTSegment
             CopySuspDetrData();
 
             TVolume TV = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+
+            foreach (TToxics P in SV.OfType<TToxics>()) 
+                P.ChemRec = ((TToxics)GetStatePointer(AllVariables.H2OTox, P.SVType, T_SVLayer.WaterCol)).ChemRec;
+
             TV.SetToInitCond();
             foreach (TStateVariable TSV in SV)
                 TSV.SetToInitCond();
+
+            for (int ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
+            {
+                FirstExposure[ToxLoop] = DateTime.MinValue;
+            }
 
             PO2Concs.Clear();
             PSedConcs.Clear();
@@ -2049,7 +2068,7 @@ namespace AQUATOX.AQTSegment
                 }
             }
 
-                PercentEmbedded = Location.Locale.BasePercentEmbed;
+            PercentEmbedded = Location.Locale.BasePercentEmbed;
             LastPctEmbedCalc = PSetup.FirstDay;
 
             SOD = -99;
@@ -2228,7 +2247,7 @@ namespace AQUATOX.AQTSegment
                         OverTime = true;
                     }
 
-                    RunningSum = RunningSum + ((PSS.SVConc + LastInorg) / 2) * (LastTime - PSS.Time).TotalDays;
+                    RunningSum = RunningSum + ((PSS.SVConc + LastInorg) / 2.0) * (LastTime - PSS.Time).TotalDays;
                     // mg/L d      // mg/L        // mg/L      // mg/L                                  // d
                     // trapezoidal integration
 
@@ -2239,8 +2258,8 @@ namespace AQUATOX.AQTSegment
 
                 if ((TPresent - LastTime).TotalDays > Consts.Tiny) // must have time - record to process
                 {
-                    if (((TPresent - LastTime).TotalDays < 60) && (MustHave60==1))  // not 60 days of data
-                        result = 0;
+                    if (((TPresent - LastTime).TotalDays < 60.0) && (MustHave60==1))  // not 60 days of data
+                        result = 0.0;
                     else
                         result = RunningSum / (TPresent - LastTime).TotalDays;
                 }                  // mg/L d            // d
@@ -2303,7 +2322,7 @@ namespace AQUATOX.AQTSegment
             double WT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt);
             double YT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt + 2.0);
             // NOT IN CEM MODELS
-            double XT = (Math.Pow(WT, 2) * Math.Pow(1.0 + Math.Sqrt(1.0 + 40.0 / YT), 2)) / 400.0;
+            double XT = (Math.Pow(WT, 2.0) * Math.Pow(1.0 + Math.Sqrt(1.0 + 40.0 / YT), 2)) / 400.0;
             double VT = (TMaxAdapt - Temp) / (TMaxAdapt - TOptAdapt);
             if (VT < 0.0) return 0.0;
             else return Math.Pow(VT, XT) * Math.Exp(XT * (1.0 - VT));     // unitless
@@ -2357,11 +2376,11 @@ namespace AQUATOX.AQTSegment
                 else downflow = Location.Discharge;
 
                 double Avg_Disch = downflow / 86400;
-                if (Avg_Disch<=0) Avg_Disch = Location.Discharge_Using_QBase() / 86400;
+                if (Avg_Disch<=0) Avg_Disch = Location.Discharge_Using_QBase() / 86400.0;
                 //                { m3 / s}             { m3 / d}               {s / d}
 
-                width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000);
-                //{ m}                  { sq.m}                { km}              { m / km}
+                width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000.0);
+                //{ m}                  { sq.m}                { km}            { m / km}
 
                 double slope = Math.Max(Location.Locale.Channel_Slope, 0.00001);
                 channel_depth = Math.Pow(Avg_Disch * Location.ManningCoeff() / (Math.Sqrt(slope) * width), 0.6);
@@ -2372,7 +2391,7 @@ namespace AQUATOX.AQTSegment
             else xsecarea = vol / (Location.Locale.SiteLength * 1000);
                           // m3                    // km      // m/km
             
-            pctrun = 100 - pctriffle - pctpool;
+            pctrun = 100.0 - pctriffle - pctpool;
             if ((CalcVelocity || averaged))
             {
                 upflow = Location.Morph.InflowH2O;  //vseg
@@ -2382,9 +2401,9 @@ namespace AQUATOX.AQTSegment
                     upflow = MeanDischarge;        // m3/d
                     downflow = MeanDischarge;
                 }
-                avgflow = (upflow + downflow) / 2;
+                avgflow = (upflow + downflow) / 2.0;
                 // m3/d   // m3/d    // m3/d
-                runvel = (avgflow / xsecarea) * (1 / 86400.0) * 100.0;
+                runvel = (avgflow / xsecarea) * (1.0 / 86400.0) * 100.0;
                 // cm/s  // m3/d    // m2         // d/s       // cm/m
 
                 if (runvel < 0) runvel = 0;
@@ -2422,7 +2441,7 @@ namespace AQUATOX.AQTSegment
             }
             // cm/s
 
-            return (rifflevel * (pctriffle / 100)) + (runvel * (pctrun / 100)) + (poolvel * (pctpool / 100));
+            return (rifflevel * (pctriffle / 100.0)) + (runvel * (pctrun / 100.0)) + (poolvel * (pctpool / 100.0));
         }
 
 
@@ -2447,7 +2466,7 @@ namespace AQUATOX.AQTSegment
             TPOC_Sediment ppc;
             TNO3_Sediment PNO31;
             TNO3_Sediment PNO32;
-            if ((Layer == T_SVLayer.SedLayer1)) return 0;
+            if ((Layer == T_SVLayer.SedLayer1)) return 0.0;
 
             // determine diagenesis fluxes
             Jc = 0;
@@ -2462,7 +2481,7 @@ namespace AQUATOX.AQTSegment
             PNO32 = (TNO3_Sediment)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2);
             s = MassTransfer();
             // m/d            // g/m3 d            // m2/d2            // m/d            // g/m3
-            Jn = 2.86 * (PNO31.Denit_Rate(PNO31.State) / s * PNO31.State + PNO32.Denit_Rate(PNO32.State) * PNO32.State) / DR.H2.Val;
+            Jn = 2.86 * (PNO31.Denit_Rate() / s * PNO31.State + PNO32.Denit_Rate() * PNO32.State) / DR.H2.Val;
             // m/d            // g/m3            // m
             return Jc - Jn;
             // g O2/m3 d  // g O2/m3 d
@@ -2493,7 +2512,7 @@ namespace AQUATOX.AQTSegment
             //    }
             //    else
             //    {
-            //        result = result * (1 - EpiFrac);
+            //        result = result * (1.0 - EpiFrac);
             //    }
             //}
 
@@ -2506,7 +2525,7 @@ namespace AQUATOX.AQTSegment
         {
             double result;  
             double O2;
-            const double MAX_S = 1;
+            const double MAX_S = 1.0;
             // m/d
             O2 = GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             if ((O2 < Consts.Tiny))
@@ -2545,13 +2564,13 @@ namespace AQUATOX.AQTSegment
                     case AllVariables.POP_G1:
                     case AllVariables.POC_G1:
                         // G1 equivalent to labile
-                        Def2Detr = Consts.Def2SedLabDetr * (1 - Def_to_G3);
+                        Def2Detr = Consts.Def2SedLabDetr * (1.0 - Def_to_G3);
                         break;
                     case AllVariables.PON_G2:
                     case AllVariables.POP_G2:
                     case AllVariables.POC_G2:
                         // G2 equivalent to refractory
-                        Def2Detr = (1 - Consts.Def2SedLabDetr) * (1 - Def_to_G3);
+                        Def2Detr = (1.0 - Consts.Def2SedLabDetr) * (1.0 - Def_to_G3);
                         break;
                     default:
                         Def2Detr = Def_to_G3;
@@ -2562,7 +2581,7 @@ namespace AQUATOX.AQTSegment
                 {
                     AllVariables.PON_G1 => Location.Remin.N2OrgLab,    // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
                     AllVariables.POP_G1 => Location.Remin.P2OrgLab,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
-                    _ => 1 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
+                    _ => 1.0 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 };
                 // Case
                 TAnimal PA = P as TAnimal;
@@ -2606,7 +2625,7 @@ namespace AQUATOX.AQTSegment
                     case AllVariables.POP_G2:
                     case AllVariables.POC_G2:
                         // G2 equivalent to refractory
-                        Frac = (1 - PlantSinkLabile);
+                        Frac = (1.0 - PlantSinkLabile);
                         break;
                     default:
                         Frac = 0;
@@ -2632,7 +2651,7 @@ namespace AQUATOX.AQTSegment
                         break;
                     default:
                         // POCG1..POCG3:
-                        NFrac = 1 / Consts.Detr_OM_2_OC;
+                        NFrac = 1.0 / Consts.Detr_OM_2_OC;
                         break;
                         // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 }
@@ -2676,7 +2695,7 @@ namespace AQUATOX.AQTSegment
                     NFrac = NS switch
                     {
                         AllVariables.POC_G3 => Diagenesis_Params.LigninDetr.Val,
-                        AllVariables.POC_G2 => (1 - Diagenesis_Params.LigninDetr.Val),
+                        AllVariables.POC_G2 => (1.0 - Diagenesis_Params.LigninDetr.Val),
                         _ => 1,   // POC_G1
                     }; 
                 }
@@ -2809,7 +2828,7 @@ namespace AQUATOX.AQTSegment
                 SOD_test = SOD;
             }
             // use SOD prev. time step
-            // POCG1_2 := GetState(POC_G1,StV,SedLayer2) * 32 / 12 ;
+            // POCG1_2 := GetState(POC_G1,StV,SedLayer2) * 32.0 / 12.0 ;
             // {mg O2/L            // mg C /            // mg O2/ mg C
 
             BenthicBiomass = 0;
@@ -2846,7 +2865,7 @@ namespace AQUATOX.AQTSegment
             //                * (O2 / (Km_O2_Dp.val + O2 + 1e-18)) + (DpMin.Val)0.00006 / H2.Val ;
             //(min bioturb)  (m2 / d)(m) 
 
-            DR.KL12 = DR.Dd.Val * Math.Pow(Convert.ToDouble(DR.ThtaDd.Val), (Temp - 20)) / (DR.H2.Val);
+            DR.KL12 = DR.Dd.Val * Math.Pow(Convert.ToDouble(DR.ThtaDd.Val), (Temp - 20.0)) / (DR.H2.Val);
             // m/d      // m2/d                                                                 // m
             // ** NO Dissolved Phase Mixing Coefficient Due to Organism Activities  **
 
@@ -2872,10 +2891,10 @@ namespace AQUATOX.AQTSegment
                 }
                 // avoid crash solving linear eqns.
                 // Solve for Ammonia
-                fda1 = 1 / (1 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdNH3.Val);
-                fpa1 = 1 - fda1;
-                fda2 = 1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdNH3.Val);
-                fpa2 = 1 - fda2;
+                fda1 = 1.0 / (1.0 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdNH3.Val);
+                fpa1 = 1.0 - fda1;
+                fda2 = 1.0 / (1.0 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdNH3.Val);
+                fpa2 = 1.0 - fda2;
                 if (NH4_1 < Consts.Tiny)
                 {
                     K2NH4 = 0;
@@ -2897,9 +2916,9 @@ namespace AQUATOX.AQTSegment
                 NSOD = 4.57 * K2NH4 / s * NH4_1;
                 // gO2/gN
                 // Solve for Nitrate
-                K2Denit_1 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1))).Denit_Rate(NO3_1);
+                K2Denit_1 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1))).Denit_Rate();
                 // m2/d2
-                KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate(NO3_2);
+                KDenit_2 = ((TNO3_Sediment)(GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2))).Denit_Rate();
                 // m/d
                 a11 = -Diagenesis_Params.KL12 - K2Denit_1 / s - Diagenesis_Params.w2.Val - s;
                 //                         (m/d)   (m2/d2)   (m/d)                  (m/d)
@@ -2926,15 +2945,15 @@ namespace AQUATOX.AQTSegment
                     {
                         Jc_O2Equiv = 0;
                     }
-                    CH4Sat = 100 * (1 + DynamicZMean() / 10) * Math.Pow(1.024, (20 - Temp));
+                    CH4Sat = 100 * (1.0 + DynamicZMean() / 10) * Math.Pow(1.024, (20 - Temp));
                     // m
                     CSODmax = Math.Min(Math.Sqrt(2 * Diagenesis_Params.KL12 * CH4Sat * Jc_O2Equiv), Jc_O2Equiv);
                     Sech_Arg = (Diagenesis_Params.KappaCH4.Val * Math.Pow(Diagenesis_Params.ThtaCH4.Val, (Temp - 20))) / s;
                     // CSOD Equation 10.35 from DiTorro
-                    // The hyperbolic secant is defined as HSec(X) = 2 / (Exp(X) + Exp(-X))
+                    // The hyperbolic secant is defined as HSec(X) = 2.0 / (Exp(X) + Exp(-X))
                     if ((Sech_Arg < 400))
                     {
-                        CSOD = CSODmax * (1 - (2 / (Math.Exp(Sech_Arg) + Math.Exp(-Sech_Arg))));
+                        CSOD = CSODmax * (1.0 - (2.0 / (Math.Exp(Sech_Arg) + Math.Exp(-Sech_Arg))));
                     }
                     else
                     {
@@ -2948,10 +2967,10 @@ namespace AQUATOX.AQTSegment
                     HST1 = GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer1);
                     HST2 = GetState(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer2);
                     COD_0 = GetState(AllVariables.COD, T_SVType.StV, T_SVLayer.WaterCol);
-                    fd1 = 1 / (1 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdH2S1.Val);
-                    fp1 = 1 - fd1;
-                    fd2 = 1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdH2S2.Val);
-                    fp2 = 1 - fd2;
+                    fd1 = 1.0 / (1.0 + Diagenesis_Params.m1.Val * Diagenesis_Params.KdH2S1.Val);
+                    fp1 = 1.0 - fd1;
+                    fd2 = 1.0 / (1.0 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdH2S2.Val);
+                    fp2 = 1.0 - fd2;
                     k2Oxid = ((TSulfide_Sediment)(GetStatePointer(AllVariables.Sulfide, T_SVType.StV, T_SVLayer.SedLayer1))).k2Oxid();
                     F12 = Diagenesis_Params.W12 * fp1 + Diagenesis_Params.KL12 * fd1;
                     F21 = Diagenesis_Params.W12 * fp2 + Diagenesis_Params.KL12 * fd2;
@@ -2966,7 +2985,7 @@ namespace AQUATOX.AQTSegment
                     CSOD = (k2Oxid / s) * HST1;
                 }
                 // Test Derived SOD_Test
-                SOD = (SOD_test + CSOD + NSOD) / 2;
+                SOD = (SOD_test + CSOD + NSOD) / 2.0;
                 // g O2/m2 d
                 if (SOD == 0)
                 {
@@ -2991,9 +3010,9 @@ namespace AQUATOX.AQTSegment
                 CalculateSOD_SetL1State(AllVariables.Sulfide, HST1);
                 // Solve PO4
                 fd1 = ((TPO4_Sediment)(GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1))).fdp1();
-                fp1 = 1 - fd1;
-                fd2 = (1 / (1 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdPO42.Val));
-                fp2 = 1 - fd2;
+                fp1 = 1.0 - fd1;
+                fd2 = (1.0 / (1.0 + Diagenesis_Params.m2.Val * Diagenesis_Params.KdPO42.Val));
+                fp2 = 1.0 - fd2;
                 a11 = -fd1 * Diagenesis_Params.KL12 - fp1 * Diagenesis_Params.W12 - fd1 * s - Diagenesis_Params.w2.Val;
                 a12 = fd2 * Diagenesis_Params.KL12 + fp2 * Diagenesis_Params.W12;
                 b1 = -s * PO4_0;
@@ -3149,7 +3168,7 @@ namespace AQUATOX.AQTSegment
 
         public double Photoperiod_Radians(double X)
         {
-            return  Math.PI * X / 180;
+            return  Math.PI * X / 180.0;
         }
 
         // (*****************************************)
@@ -3268,7 +3287,17 @@ namespace AQUATOX.AQTSegment
 
         }
 
-
+        // ---------------------------------------------------------------
+        public double CalculateTElapsed(int Tox)
+        {
+            // Calculates the number of elapsed days since first exposure to the given toxicant
+            // the first exposure to the tox is assumed to be at the first toxicant presence within the simulation.
+            if (FirstExposure[Tox] == DateTime.MinValue) // first exposure not yet initialized
+            {
+                FirstExposure[Tox] = TPresent;  // JSC 9-4-2001  Removed steady-state assumption
+            }
+            return (TPresent - FirstExposure[Tox]).TotalDays + 1;
+        }
         // ---------------------------------------------------------------
         public void CalculateSumPrey()
         {
@@ -3524,7 +3553,7 @@ namespace AQUATOX.AQTSegment
             double T, CCO2, DOM, pH2CO3, Alpha, A, B, C;
 
             T = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);          // deg C
-            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44 * 1000;   // ueq/mg  
+            CCO2 = AQTSeg.GetState(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol) / 44.0 * 1000.0;   // ueq/mg  
             TDissRefrDetr PDOM = (TDissRefrDetr)AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
             if (PDOM == null) DOM = 0;
             else DOM = PDOM.State;   // mg/L
@@ -3532,7 +3561,7 @@ namespace AQUATOX.AQTSegment
             pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
             Alpha = pH2CO3 * CCO2 + pkw;
             A = -Math.Log10(Math.Pow(Alpha, 0.5));
-            B = 1 / Math.Log(10.0);
+            B = 1.0 / Math.Log(10.0);
             C = 2 * (Math.Pow(Alpha, 0.5));
             try
             {
@@ -3606,7 +3635,7 @@ namespace AQUATOX.AQTSegment
             {
                 // NoUserLoad for both Epi and Hypo Temp Loadings
                 AdjustedJulian = TimeIndex.DayOfYear;
-                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182;
+                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182.0;
                 MeanTemp = Location.Locale.TempMean;  // AQTSeg.VSeg
                 TempRange = Location.Locale.TempRange; // AQTSeg.VSeg
                                                        //if (AQTSeg.LinkedMode)
@@ -3616,7 +3645,7 @@ namespace AQUATOX.AQTSegment
                                                        //    TempRange = Location.Locale.TempRange[VerticalSegments.Epilimnion];
                                                        //}
 
-                Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30))));
+                Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30.0))));
                 if (Temperature < 0.0) { Temperature = 0.0; }
 
                 // Temperature = Temperature * MultLdg;                // allow perturbation JSC 1-23-03
@@ -3680,7 +3709,7 @@ namespace AQUATOX.AQTSegment
             // Wetzel (2001).
             // Light:=Light*0.33;   {ave. of values, Wetzel '75, p. 61, Used in Rel2.2 and before
 
-            ShadeVal = 1 - (0.98 * AQTSeg.Shade.ReturnLoad(TimeIndex));   // 11/18/2009  2% of incident radiation is transmitted through canopy
+            ShadeVal = 1.0 - (0.98 * AQTSeg.Shade.ReturnLoad(TimeIndex));   // 11/18/2009  2% of incident radiation is transmitted through canopy
             light = light * ShadeVal;
             State = light;
             DailyLight = light;
@@ -3695,9 +3724,9 @@ namespace AQUATOX.AQTSegment
                 // distribute daily loading over daylight hours
                 pp = AQTSeg.Photoperiod();
                 fracdaypassed = TimeIndex.TimeOfDay.TotalDays;
-                lighttime = fracdaypassed - ((1 - pp) / 2);
-                if ((fracdaypassed < (1 - pp) / 2) || (fracdaypassed > 1 - ((1 - pp) / 2)))  State = 0;
-                else State = (Math.PI / 2) * (light / pp) * Math.Sin(Math.PI * lighttime / pp) * LoadsRec.Loadings.MultLdg * ShadeVal;
+                lighttime = fracdaypassed - ((1.0 - pp) / 2.0);
+                if ((fracdaypassed < (1.0 - pp) / 2.0) || (fracdaypassed > 1.0 - ((1.0 - pp) / 2.0)))  State = 0;
+                else State = (Math.PI / 2.0) * (light / pp) * Math.Sin(Math.PI * lighttime / pp) * LoadsRec.Loadings.MultLdg * ShadeVal;
                 HourlyLight = State;
             }
 
@@ -3834,7 +3863,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
                                           typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
-                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord)}; 
+                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant)}; 
     }
 }
 

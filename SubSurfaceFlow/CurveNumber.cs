@@ -51,12 +51,14 @@ namespace SubSurfaceFlow
             ITimeSeriesOutput bfOutput = CalculateBaseflow(out errorMsg, bfPercent, input, runoffData);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            bfOutput.DataSource = "curvenumber";
-            bfOutput.Dataset = "subsurfaceflow";
+            bfOutput.DataSource = "Curve Number";
+            bfOutput.Dataset = "SubSurfaceFlow";
             bfOutput.Metadata.Add("comid", input.Geometry.ComID.ToString());
             bfOutput.Metadata.Add("startdate", input.DateTimeSpan.StartDate.ToString());
             bfOutput.Metadata.Add("enddate", input.DateTimeSpan.EndDate.ToString());
             bfOutput.Metadata.Add("runoffSource", runoffData.DataSource);
+            bfOutput.Metadata = this.MergeDictionaries(bfOutput.Metadata, runoffData.Metadata);
+            bfOutput.Metadata["column_2"] = "Subsurface Flow";
 
             return bfOutput;
         }
@@ -75,29 +77,6 @@ namespace SubSurfaceFlow
             SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
             runoff.Input = input;
             runoff.Output = output;
-
-            if (input.Geometry.GeometryMetadata.ContainsKey("runoffSource"))
-            {
-                switch (input.Geometry.GeometryMetadata["runoffSource"])
-                {
-                    case "nldas":
-                        input.Source = "nldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "gldas":
-                        input.Source = "gldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "curvenumber":
-                    default:
-                        input.Source = "curvenumber";
-                        break;
-                }
-            }
-            else
-            {
-                input.Source = "curvenumber";
-            }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "surfacerunoff" }, out errorMsg);
             runoff.Input = tempInput;
@@ -153,6 +132,31 @@ namespace SubSurfaceFlow
 
             baseflowOutput.Metadata.Add("baseflowPercent", percent.ToString());
             return baseflowOutput;
+        }
+
+        /// <summary>
+        /// Copies all of the key value pairs in dict2 into dict1, duplicates are ignored
+        /// </summary>
+        /// <param name="dict1"></param>
+        /// <param name="dict2"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> MergeDictionaries(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+        {
+            if(dict2 == null) {
+                return dict1;
+            }
+            else if(dict1 == null)
+            {
+                return dict2;
+            }
+            foreach (KeyValuePair<string, string> kv in dict2)
+            {
+                if (!dict1.ContainsKey(kv.Key))
+                {
+                    dict1.Add(kv.Key, kv.Value);
+                }
+            }
+            return dict1;
         }
     }
 }

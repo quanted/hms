@@ -7,53 +7,28 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
 using Data;
 using System.ComponentModel;
-using Web.Services.Models;
-using Web.Services.Controllers;
 using System.Collections.Generic;
 
 namespace GUI.AQUATOX.Workflow
 {
-    /// <summary>
-    /// WaterQuality Input that implements TimeSeriesInput object.
-    /// </summary>
-    public class WaterQualityInput
-    {
-        /// <summary>
-        /// Specified dataset for the workflow
-        /// </summary>
-        //[Required]
-        //public List<List<string>> ConnectivityTable { get; set; }     //To load from file, will be added at a later date.
 
-        /// <summary>
-        /// TaskID required for data storage in mongodb
-        /// </summary>
-        public string TaskID { get; set; }
-
-        /// <summary>
-        /// Data source for data retrieval
-        /// If value is 'nldas': surface runoff and subsurface flow will be from nldas (no precip will be downloaded); 
-        /// If value is 'ncei', precip data will be downloaded from the closest station to the catchment and curvenumber will be used for surface runoff/subsurface flow.
-        /// </summary>
-        public string DataSource { get; set; }
-
-        public int MinNitrate { get; set; }
-        public int MaxNitrate { get; set; }
-        public int MinAmmonia { get; set; }
-        public int MaxAmmonia { get; set; }
-
-    }
 
     public partial class AQTWorkflowForm : Form
     {
+        public List<ITimeSeriesOutput> output = null;
         private Chart chart1 = new Chart();
         private BackgroundWorker Worker = new BackgroundWorker();
-        private string errmessage;
+        private string errmessage="";
 
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         Series series1 = new Series();
-        
-        public AQTSim aQTS = null;
+
+        // public AQTSim aQTS = null;
+
+        /// <summary>
+        /// WaterQuality Input that implements TimeSeriesInput object.
+        /// </summary>
 
         public AQTWorkflowForm()
         {
@@ -104,69 +79,67 @@ namespace GUI.AQUATOX.Workflow
 
         }
 
+        public Color GetGradients(Color start, Color end, int i,  int steps)
+        {
+            int stepA = ((end.A - start.A) / (steps - 1));
+            int stepR = ((end.R - start.R) / (steps - 1));
+            int stepG = ((end.G - start.G) / (steps - 1));
+            int stepB = ((end.B - start.B) / (steps - 1));
+
+            return Color.FromArgb(start.A + (stepA * i),
+                                  start.R + (stepR * i),
+                                  start.G + (stepG * i),
+                                  start.B + (stepB * i));
+            
+        }
+
         public void DisplaySVs()
 
         {
-            string outtxt = "Date, ";
-            bool SuppressText = true;
+            //            string outtxt = "Date, ";
 
             //outtxt = outtxt + "Times: ";
             //foreach (DateTime Times in aQTS.AQTSeg.SV.restimes)
             //    outtxt = outtxt + Times + ", ";
             //outtxt = outtxt + Environment.NewLine;
 
+            IEnumerable<Color> colors = new List<Color>();
+
             chart1.Series.Clear();
             int sercnt = 0;
 
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+            foreach (ITimeSeriesOutput ITSO in output)
             {
                 int cnt = 0;
-                Series ser = chart1.Series.Add(TSV.PName);
-                outtxt = outtxt + TSV.PName.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+                string COMID;
+                ITSO.Metadata.TryGetValue("wq_workflow_COMID", out COMID);
+                Series ser = chart1.Series.Add(COMID);
+//              outtxt = outtxt + TSV.PName.Replace(",", "") + ", ";  // suppress commas in name for CSV output
 
                 ser.ChartType = SeriesChartType.Line;
                 ser.BorderWidth = 2;
                 ser.MarkerStyle = MarkerStyle.Diamond;
-                ser.Enabled = false;
+                ser.Enabled = true;
+                ser.Color = GetGradients(Color.Red, Color.Blue, sercnt, output.Count);
+
                 sercnt++;
 
-                SuppressText = (TSV.output.Data.Keys.Count > 5000);
-                for (int i = 0; i < TSV.output.Data.Keys.Count; i++)
+                //  SuppressText = (TSV.output.Data.Keys.Count > 5000);
+
+                int indx = comboBox1.SelectedIndex;
+                if (indx < 0) indx = 0;
+
+                for (int i = 0; i < ITSO.Data.Values.Count; i++)
                 {
-                    ITimeSeriesOutput ito = TSV.output;
-                    string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                    ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
+                    string datestr = ITSO.Data.Keys.ElementAt(i).ToString();
+                    Double Val = Convert.ToDouble(ITSO.Data.Values.ElementAt(i)[indx]);
+                    ser.Points.AddXY(DateTime.ParseExact(datestr, "yyyy-MM-dd HH", System.Globalization.CultureInfo.InvariantCulture), Val);
                     cnt++;
                 }
 
             }
 
-            outtxt = outtxt + Environment.NewLine;
 
-            if (!SuppressText)
-            {
-                TStateVariable TSV1 = aQTS.AQTSeg.SV[0];
-                for (int i = 0; i < TSV1.output.Data.Keys.Count; i++)
-                {
-                    bool writedate = true;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
-                    {
-                        ITimeSeriesOutput ito = TSV.output;
-                        if (writedate)
-                        {
-                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                            outtxt = outtxt + datestr + ", ";
-                            writedate = false;
-                        }
-                        Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                        outtxt = outtxt + Val.ToString() + ", ";
-                    }
-                    outtxt = outtxt + Environment.NewLine;
-                }
-            }
-
-            textBox1.Text = outtxt;
         }
 
 
@@ -183,7 +156,7 @@ namespace GUI.AQUATOX.Workflow
                 string json = File.ReadAllText(openFileDialog1.FileName);
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
-                aQTS = Sim;
+                // aQTS = Sim;
 
                 if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
                 else textBox1.Text = err;
@@ -192,8 +165,10 @@ namespace GUI.AQUATOX.Workflow
 
         private void saveJSON_Click(object sender, EventArgs e)
         {
+            if (output == null) { textBox1.Text = "No results to save."; return; }
+
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Test File|*.txt";
+            saveFileDialog1.Filter = "JSON Files|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
             saveFileDialog1.ShowDialog();
 
@@ -201,39 +176,26 @@ namespace GUI.AQUATOX.Workflow
             if (saveFileDialog1.FileName != "")
             {
                 string jsondata = "";
-                string errmessage = aQTS.SaveJSON(ref jsondata);
-                if (errmessage == "") File.WriteAllText(saveFileDialog1.FileName, jsondata);
-                else textBox1.Text = errmessage;
+                jsondata = Newtonsoft.Json.JsonConvert.SerializeObject(output);
+                File.WriteAllText(saveFileDialog1.FileName, jsondata);
+                textBox1.AppendText("Saved to "+ saveFileDialog1.FileName);
             }
         }
 
         private void integrate_Click(object sender, EventArgs e)
         {
-            WSWatershedWorkFlow workFlow = new WSWatershedWorkFlow();
-            WatershedWorkflowInput workflowInput = new WatershedWorkflowInput();  //add examples
-            workFlow.GetWorkFlowData(workflowInput);         // 
-            
-            //results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            // return new ObjectResult(results);
-
-
-            //if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
-            //else
-            //{
-            //    progressBar1.Visible = true;
-            //    Worker.RunWorkerAsync();
-            //}
+            progressBar1.Visible = true;
+            Worker.RunWorkerAsync();
         }
 
-
+        AQWaterQuality workFlow = new AQWaterQuality();
 
         private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
-
-            aQTS.AQTSeg.ProgWorker = worker;
-            errmessage = aQTS.Integrate();
-
+            WaterQualityInput workflowInput = new WaterQualityInput();
+            workflowInput.DataSource = "nwm";
+            output = workFlow.GetWaterQualityData(workflowInput, worker);  
        }
 
        private void Worker_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -244,9 +206,23 @@ namespace GUI.AQUATOX.Workflow
             if (e.Error != null) textBox1.Text = "Error Raised: " + e.Error.Message;
             else if (errmessage == "")
             {
-                textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
+                textBox1.AppendText("Run Completed.  Please wait one moment -- writing and plotting results");
                 Application.DoEvents();
-                DisplaySVs();
+
+                comboBox1.Items.Clear();
+                ITimeSeriesOutput ITSO = output[0];
+
+                string itm, unt;
+                for (int i = 1; i < 10; i++)
+                {
+                    string colnm = "wq_workflow_column_" + i;
+                    ITSO.Metadata.TryGetValue(colnm, out itm);
+                    colnm += "_units";
+                    ITSO.Metadata.TryGetValue(colnm, out unt);
+                    if ((itm != null) && (unt != null)) itm = itm + " (" + unt + ")";
+                    if (itm != null) comboBox1.Items.Add(itm);
+                }
+                comboBox1.SelectedIndex = 0;
                 progressBar1.Visible = false;
             }
             else textBox1.Text = errmessage;
@@ -258,6 +234,7 @@ namespace GUI.AQUATOX.Workflow
         {
             if (e.ProgressPercentage < 100) progressBar1.Value = (e.ProgressPercentage+1);  // workaround of animation bug
             progressBar1.Value = (e.ProgressPercentage);
+            textBox1.AppendText(workFlow.textout); 
         }
 
 
@@ -284,9 +261,7 @@ namespace GUI.AQUATOX.Workflow
                     System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
                     System.Windows.Forms.MessageBox.Show(msgstr);
                 }
-
             }
-
         }
 
         private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e)
@@ -315,6 +290,36 @@ namespace GUI.AQUATOX.Workflow
 
         }
 
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DisplaySVs();
+        }
+    }
+
+    public class WaterQualityInput
+    {
+        /// <summary>
+        /// Specified dataset for the workflow
+        /// </summary>
+        //[Required]
+        //public List<List<string>> ConnectivityTable { get; set; }     //To load from file, will be added at a later date.
+
+        /// <summary>
+        /// TaskID required for data storage in mongodb
+        /// </summary>
+        public string TaskID { get; set; }
+
+        /// <summary>
+        /// Data source for data retrieval
+        /// If value is 'nldas': surface runoff and subsurface flow will be from nldas (no precip will be downloaded); 
+        /// If value is 'ncei', precip data will be downloaded from the closest station to the catchment and curvenumber will be used for surface runoff/subsurface flow.
+        /// </summary>
+        public string DataSource { get; set; }
+
+        public int MinNitrate { get; set; }
+        public int MaxNitrate { get; set; }
+        public int MinAmmonia { get; set; }
+        public int MaxAmmonia { get; set; }
 
     }
 }

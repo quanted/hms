@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.IO;
 using System.Threading;
+using Serilog;
+using System.Linq;
 
 namespace SurfaceRunoff
 {
@@ -28,7 +30,7 @@ namespace SurfaceRunoff
             {
                 ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
                 string tempSource = input.Source;
-                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Source : "daymet";
+                string precipSource = (input.Geometry.GeometryMetadata.ContainsKey("precipSource")) ? input.Geometry.GeometryMetadata["precipSource"] : "daymet";
                 input.Source = precipSource;
                 ITimeSeriesInput precipInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
 
@@ -42,6 +44,11 @@ namespace SurfaceRunoff
                     // Database call for centroid data with specified comid.
                     precipInput.Geometry.Point = Utilities.COMID.GetCentroid(input.Geometry.ComID, out errorMsg);
                     if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                if(input.Source == "ncei" && input.Geometry.StationID == null)
+                {
+                    Log.Warning("Error for Surface Runoff request using Curve Number with NCEI precipitation data source, missing stationID.");
+                    return null;
                 }
                                                                                
                 precipInput.TemporalResolution = "daily";
@@ -63,6 +70,10 @@ namespace SurfaceRunoff
             Data.Simulate.CurveNumber cn = new Data.Simulate.CurveNumber();
             ITimeSeriesOutput cnOutput = cn.Simulate(out errorMsg, input, precipData);
             if (errorMsg.Contains("ERROR")) { return null; }
+            if (input.TemporalResolution == "monthly") 
+            {
+                cnOutput.Data = MonthlyAggregatedSum(out errorMsg, 1.0, cnOutput, input);
+            }
 
             cnOutput.Metadata.Add("comid", input.Geometry.ComID.ToString());
             cnOutput.Metadata.Add("startdate", input.DateTimeSpan.StartDate.ToString());
@@ -70,7 +81,7 @@ namespace SurfaceRunoff
             cnOutput.Metadata.Add("precipSource", precipData.DataSource);
             cnOutput.Metadata.Add("column_1", "Date");
             cnOutput.Metadata.Add("column_2", "Surface Runoff");
-
+            cnOutput.Metadata = this.MergeDictionaries(cnOutput.Metadata, precipData.Metadata);
 
             return cnOutput;
         }
@@ -89,62 +100,12 @@ namespace SurfaceRunoff
             Precipitation.Precipitation precip = new Precipitation.Precipitation();
             precip.Input = input;
             precip.Output = output;
-
-            if (input.Geometry.GeometryMetadata.ContainsKey("precipSource"))
-            {
-                switch (input.Geometry.GeometryMetadata["precipSource"])
-                {
-                    case "nldas":
-                        input.Source = "nldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "gldas":
-                        input.Source = "gldas";
-                        input.TemporalResolution = "daily";
-                        break;
-                    case "daymet":
-                    default:
-                        input.Source = "daymet";
-                        break;
-                }
-            }
-            else
-            {
-                input.Source = "daymet";
-            }
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
             ITimeSeriesInput tempInput = iFactory.SetTimeSeriesInput(input, new List<string>() { "precipitation" }, out errorMsg);
             precip.Input = tempInput;
             precip.Output = precip.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
             return precip.Output;
-        }
-
-        /// <summary>
-        /// CAN BE REPLACED BY static method COMID.GetCentroid()
-        /// Get the catchment centroid from a specified comid.
-        /// Runs SQL query to sqlite database file.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="comid"></param>
-        /// <returns></returns>
-        private PointCoordinate GetCatchmentCentroid(out string errorMsg, int comid)
-        {
-            errorMsg = "";
-            string dbPath = "./App_Data/catchments.sqlite";
-            string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + comid.ToString();
-            Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
-            if (centroidDict.Count == 0)
-            {
-                errorMsg = "ERROR: Unable to find catchment in database. ComID: " + comid.ToString();
-                return null;
-            }
-            IPointCoordinate centroid = new PointCoordinate()
-            {
-                Latitude = double.Parse(centroidDict["CentroidLatitude"]),
-                Longitude = double.Parse(centroidDict["CentroidLongitude"])
-            };
-            return centroid as PointCoordinate;
         }
 
         /// <summary>
@@ -222,6 +183,71 @@ namespace SurfaceRunoff
                 }
             }
             return validTSInput;
+        }
+
+        /// <summary>
+        /// Copies all of the key value pairs in dict2 into dict1, duplicates are ignored
+        /// </summary>
+        /// <param name="dict1"></param>
+        /// <param name="dict2"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> MergeDictionaries(Dictionary<string, string> dict1, Dictionary<string, string> dict2)
+        {
+            if (dict2 == null)
+            {
+                return dict1;
+            }
+            else if (dict1 == null)
+            {
+                return dict2;
+            }
+            foreach (KeyValuePair<string, string> kv in dict2)
+            {
+                if (!dict1.ContainsKey(kv.Key))
+                {
+                    dict1.Add(kv.Key, kv.Value);
+                }
+            }
+            return dict1;
+        }
+
+        /// <summary>
+        /// Monthly aggregated sums for SurfaceRunoff data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> MonthlyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+
+            DateTime iDate = new DateTime();
+            double sum = 0.0;
+
+            // Unit conversion coefficient
+            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
+
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out iDate);
+
+            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                DateTime date = new DateTime();
+                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out date);
+                if (date.Month != iDate.Month || i == output.Data.Count - 1)
+                {
+                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum).ToString(input.DataValueFormat) });
+                    iDate = date;
+                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                }
+                else
+                {
+                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                }
+            }
+            return tempData;
         }
     }
 }

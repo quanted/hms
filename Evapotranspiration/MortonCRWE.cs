@@ -535,10 +535,6 @@ namespace Evapotranspiration
                     data3 = null;
                     inpt.Source = "daymet";
                     break;
-                case "custom":
-                    CustomData cd = new CustomData();
-                    dt = cd.ParseCustomData(inpt, outpt, inpt.Geometry.GeometryMetadata["userdata"].ToString(), "mortoncrwe");
-                    break;
                 case "nldas":
                 case "gldas":
                 default:

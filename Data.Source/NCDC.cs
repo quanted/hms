@@ -116,19 +116,19 @@ namespace Data.Source
             string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string csv = DownloadData(token, url, 0).Result;
+            string json = DownloadData(token, url, 0).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
-            if (!csv.Equals("{}"))
+            if (!json.Equals("{}"))
             {
 
                 NCDCCSV results;
                 if (stationID.Contains("COOP"))
                 {
-                    results = ParseJson(out errorMsg, csv, tempStartDate, tempEndDate);
+                    results = ParseJson(out errorMsg, json, tempStartDate, tempEndDate);
                 }
                 else
                 {
-                    results = ReadData(out errorMsg, csv);
+                    results = ReadData(out errorMsg, json);
                 }
 
                 Dictionary<string, double> sumValues = AggregateData(out errorMsg, input, results, tempStartDate, tempEndDate);
@@ -825,5 +825,6 @@ namespace Data.Source
             results.results = correctedTS;
             return results;           
         }
+
     }
 }

@@ -48,13 +48,13 @@ public class TDetritus : TRemineralize
             else  PartPercent = PInputRec.Percent_Part.ReturnLoad(TimeIndex);  
 
             if ((NState == AllVariables.DissRefrDetr) || (NState == AllVariables.DissLabDetr))
-            {         PartFrac = 1 - (PartPercent / 100);  }
-            else  {   PartFrac = (PartPercent / 100);      }
+            {         PartFrac = 1.0 - (PartPercent / 100.0);  }
+            else  {   PartFrac = (PartPercent / 100.0);      }
 
             if ((NState == AllVariables.DissRefrDetr) || (NState == AllVariables.SuspRefrDetr))
-            {  RefrFrac = (RefrPercent / 100); }
+            {  RefrFrac = (RefrPercent / 100.0); }
             else
-            {  RefrFrac = 1 - (RefrPercent / 100); }
+            {  RefrFrac = 1.0 - (RefrPercent / 100.0); }
 
             // Don't convert Point Source, Non Point Source Loads
             if (!IsAlt)
@@ -392,7 +392,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                     if (P.IsAnimal())
                     {
                         if (NState == AllVariables.SedmLabDetr) Def2Detr = Consts.Def2SedLabDetr;
-                        else Def2Detr = 1 - Consts.Def2SedLabDetr;
+                        else Def2Detr = 1.0 - Consts.Def2SedLabDetr;
 
                         Def = Def + Def2Detr * ((TAnimal)P).Defecation();
                     }
@@ -430,7 +430,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                 //    BenthArea = w3.AreaFrac(w2.MeanThick[VerticalSegments.Epilimnion], w3.ZMax);
                 //    if (w3.VSeg == VerticalSegments.Hypolimnion)
                 //    {
-                //        BenthArea = 1 - BenthArea;
+                //        BenthArea = 1.0 - BenthArea;
                 //    }
                 //    BenthArea = BenthArea * Location.Locale.SurfArea;
                 //    // m2
@@ -822,7 +822,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //    }
             //    else
             //    {
-            //        DetrSinkToHypo = (1 - w6.AreaFrac(w6.MaxEpiThick, w6.ZMax)) * Sedimented;
+            //        DetrSinkToHypo = (1.0 - w6.AreaFrac(w6.MaxEpiThick, w6.ZMax)) * Sedimented;
             //    }
             //    // 10-14-2010 Note that ZMax parameter pertains to both segments in event of stratification
             //    result = Sedimented - DetrSinkToHypo;
