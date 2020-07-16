@@ -62,8 +62,9 @@ namespace Data.Source
             // #2 start is in GLDAS 2.0, end is in GLDAS 2.1
             // #3 both are in GLDAS 2.1
             DateTime gldas21 = new DateTime(2010, 01, 01);
+            bool only21 = true;
             var test = DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21);
-            if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0)            // #3
+            if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0 || only21)            // #3
             {
                 //string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
 

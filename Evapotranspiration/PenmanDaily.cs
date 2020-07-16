@@ -377,7 +377,7 @@ namespace Evapotranspiration
                 double averageRH = (relHumidityMin + relHumidityMax) / 2;
                 Ez = averageRH * Ez0;
 
-                // Wind speed correction based on height
+                /* Wind speed correction based on height
                 double u = 0.0;
                 double ht = 10.0;  // The wind data in the NLDAS database is given at a height of 10 meters.
                 if (ht != 2.0)
@@ -387,13 +387,13 @@ namespace Evapotranspiration
                 else
                 {
                     u = U2;
-                }
+                }*/
 
 
                 //Finding roughness length using equations 2:2.2.4 and 2:2.2.5
                 if (Hc <= 200)
                 {
-                    Zom = Hc / (3 * Math.E);
+                    Zom = 0.123 * Hc;//Hc / (3 * Math.E);
                 }
                 else
                 {
@@ -409,13 +409,11 @@ namespace Evapotranspiration
                 double Rl = 0.0; //Minimum effective stomatal leaf resistance s/m
                 double LAI = 0.0; //Leaf area index of canopy
 
-                Rc = 0.0;//Equation 2:2.2.8 states equates Rc = Rl / (0.5 * LAI), but will SWC uses 0 value.
+                Rc = 0.0;//Equation 2:2.2.8 states equates Rc = Rl / (0.5 * LAI), but SWC uses 0 value.
 
                 //Full ET equation
-                //double numerator = slope * (Hnet - G) + gamma * ((Ez0 - Ez));
-                //double denominator = slope + gamma
                 double Ksegment = 0.622 * lambda * Pair / press;//1710 - (6.85 * tmean);//2:2.2.19
-                double numerator = slope * (Hnet - G) + gamma * Ksegment * ((Ez0 - Ez)/Ra);
+                double numerator = slope * (Hnet - G) + gamma * K1 * Ksegment * ((Ez0 - Ez)/Ra);
                 double denominator = slope + gamma * (1 + (Rc / Ra));
                 
                 PET = numerator / denominator;

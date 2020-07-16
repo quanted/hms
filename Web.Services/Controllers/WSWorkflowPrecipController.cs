@@ -1,5 +1,6 @@
 ﻿using Data;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
@@ -149,13 +150,25 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POSTComparison([FromBody]PrecipitationCompareInput precipCompareInput)
         {
-            WSPrecipCompare precipCompare = new WSPrecipCompare();
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-            ITimeSeriesOutput results = await precipCompare.GetPrecipCompareData(precipCompareInput);
-            stpWatch.Stop();
-            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return new ObjectResult(results);
+            try
+            {
+                WSPrecipCompare precipCompare = new WSPrecipCompare();
+                var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+                ITimeSeriesOutput results = await precipCompare.GetPrecipCompareData(precipCompareInput);
+                stpWatch.Stop();
+                results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
 
         /// <summary>
@@ -169,13 +182,25 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POSTExtraction([FromBody]PrecipitationExtractionInput precipExtractInput)
         {
-            WSPrecipExtraction precipExtract = new WSPrecipExtraction();
-            var stpWatch = System.Diagnostics.Stopwatch.StartNew();
-            ITimeSeriesOutput results = await precipExtract.GetWorkFlowData(precipExtractInput);
-            stpWatch.Stop();
-            results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
-            results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
-            return new ObjectResult(results);
+            try
+            {
+                WSPrecipExtraction precipExtract = new WSPrecipExtraction();
+                var stpWatch = System.Diagnostics.Stopwatch.StartNew();
+                ITimeSeriesOutput results = await precipExtract.GetWorkFlowData(precipExtractInput);
+                stpWatch.Stop();
+                results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString(), results.Metadata);
+                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
+                return new ObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 }

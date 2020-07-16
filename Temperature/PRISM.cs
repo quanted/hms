@@ -54,23 +54,17 @@ namespace Temperature
                 case "default":
                     // Combined max/min/mean
                     output.Data = DailyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Mean Temperature");
-                    return output;
-                case "weekly":
-                    // Combined max/min/average
-                    output.Data = WeeklyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Min Temperature");
-                    output.Metadata.Add("column_4", "Mean Temperature");
+                    output.Metadata.Add("column_2", "Max Temp");
+                    output.Metadata.Add("column_3", "Min Temp");
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 case "monthly":
                     // Combined max/min/mean
+                    output.Data = DailyValues(out errorMsg, output, input, "all");
                     output.Data = MonthlyValues(out errorMsg, output, input, "all");
-                    output.Metadata.Add("column_2", "Max Temperature");
-                    output.Metadata.Add("column_3", "Low Temperature");
-                    output.Metadata.Add("column_4", "Mean Temperature");
+                    output.Metadata.Add("column_2", "Avg Max Temp");
+                    output.Metadata.Add("column_3", "Avg Low Temp");
+                    output.Metadata.Add("column_4", "Avg Temp");
                     return output;
                 default:
                     return output;
@@ -198,11 +192,11 @@ namespace Temperature
             string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
             DateTime.TryParse(dateString0, out iDate);
 
-            double average = 0.0;
-            double max = -9999.9;
-            double min = 9999.9;
-            double maxValue = 0.0;
-            double minValue = 0.0;
+            double avgSum = 0.0;
+            double lowSum = 0.0;
+            double hiSum = 0.0;
+
+            int dayIndex = 0;
 
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
 
@@ -211,23 +205,33 @@ namespace Temperature
                 DateTime date = new DateTime();
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
-                maxValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                minValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
-                max = (maxValue > max) ? maxValue : max;
-                min = (minValue < min) ? minValue : min;
-                average = (average + (maxValue + minValue) / 2) / 2;
                 if (date.Month != iDate.Month || i == output.Data.Count - 1)
                 {
+                    double average = avgSum / dayIndex;
+                    double lAverage = lowSum / dayIndex;
+                    double hAverage = hiSum / dayIndex;
+
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
                                 {
-                                    (max).ToString(input.DataValueFormat),
-                                    (min).ToString(input.DataValueFormat),
+                                    (hAverage).ToString(input.DataValueFormat),
+                                    (lAverage).ToString(input.DataValueFormat),
                                     (average).ToString(input.DataValueFormat)
                                 }
                     );
-                    max = -9999.9;
-                    min = 9999.9;
+
+                    avgSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                     iDate = date;
+                    dayIndex = 1;
+                }
+                else
+                {
+                    avgSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][2]);
+                    hiSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    lowSum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+
+                    dayIndex++;
                 }
             }
             return tempData;

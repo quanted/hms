@@ -5,6 +5,7 @@ using Web.Services.Models;
 using Data;
 using System.Threading.Tasks;
 using Swashbuckle.AspNetCore.Filters;
+using Serilog;
 
 namespace Web.Services.Controllers
 {
@@ -134,9 +135,21 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> GETDefaultOutput()
         {
-            WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = await solar.GetGCSolarOutput();
-            return new ObjectResult(result);
+            try
+            {
+                WSSolar solar = new WSSolar();
+                Dictionary<string, object> result = await solar.GetGCSolarOutput();
+                return new ObjectResult(result);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
 
         /// <summary>
@@ -149,9 +162,21 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> GETDefaultInput()
         {
-            WSSolar solar = new WSSolar();
-            Dictionary<string, object> result = await solar.GetGCSolarDefaultInput();
-            return new ObjectResult(result);
+            try
+            {
+                WSSolar solar = new WSSolar();
+                Dictionary<string, object> result = await solar.GetGCSolarDefaultInput();
+                return new ObjectResult(result);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
 
         /// <summary>
@@ -165,19 +190,31 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POSTCustomInput([FromBody]SolarInput input)
         {
-            WSSolar solar = new WSSolar();
-            if (input.input is null)
+            try
             {
-                Dictionary<string, object> errorMsg = new Dictionary<string, object>()
+                WSSolar solar = new WSSolar();
+                if (input.input is null)
+                {
+                    Dictionary<string, object> errorMsg = new Dictionary<string, object>()
                 {
                     { "Input Error:", "No inputs found in the request or inputs contain invalid formatting." }
                 };
-                return new ObjectResult(errorMsg);
+                    return new ObjectResult(errorMsg);
+                }
+                else
+                {
+                    Dictionary<string, object> result = await solar.GetGCSolarOutput(input.input);
+                    return new ObjectResult(result);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Dictionary<string, object> result = await solar.GetGCSolarOutput(input.input);
-                return new ObjectResult(result);
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
             }
         }
 
@@ -190,10 +227,22 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> GetInputMetadata()
         {
-            WSSolar solar = new WSSolar();
-            Dictionary<string, object> metadata = new Dictionary<string, object>();
-            metadata["Input Variables"] = await solar.GetMetadata();
-            return new ObjectResult(metadata);
+            try
+            {
+                WSSolar solar = new WSSolar();
+                Dictionary<string, object> metadata = new Dictionary<string, object>();
+                metadata["Input Variables"] = await solar.GetMetadata();
+                return new ObjectResult(metadata);
+            }
+            catch (Exception ex)
+            {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+            }
         }
     }
 
@@ -253,19 +302,31 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> POSTSolarCalculator([FromBody]SolarCalculatorInput i)
         {
-            WSSolar solar = new WSSolar();
-            Utilities.ErrorOutput error = new Utilities.ErrorOutput();
-            ITimeSeriesOutput result;
-            if(i is null)
+            try
             {
-                result = error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
+                WSSolar solar = new WSSolar();
+                Utilities.ErrorOutput error = new Utilities.ErrorOutput();
+                ITimeSeriesOutput result;
+                if (i is null)
+                {
+                    result = error.ReturnError("Input Error: No inputs found in the request or inputs contain invalid formatting.");
+                }
+                else
+                {
+                    result = await solar.RunSolarCalculator(i);
+
+                }
+                return new ObjectResult(result);
             }
-            else
+            catch (Exception ex)
             {
-                result = await solar.RunSolarCalculator(i);
-                
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(ex.StackTrace);
+
+                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
             }
-            return new ObjectResult(result);
         }
     }
 }

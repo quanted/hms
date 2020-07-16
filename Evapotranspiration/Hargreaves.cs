@@ -62,7 +62,7 @@ namespace Evapotranspiration
             try
             {
                 TR = tmax - tmin;
-                petHargreaves = 0.0022 * rad * (tmean + 17.8) * Math.Pow(TR, 0.5);
+                petHargreaves = 0.0023 * rad * (tmean + 17.8) * Math.Pow(TR, 0.5);
             }
             catch (Exception ex)
             {

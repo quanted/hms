@@ -43,7 +43,7 @@ namespace Wind
                     break;
             }
             output.Metadata["column_1"] = "date";
-            output.Metadata["column_2"] = "velocity";
+            output.Metadata["column_2"] = "speed";
             output.Metadata["column_2_units"] = "m/s";
 
             return gldasOutput;

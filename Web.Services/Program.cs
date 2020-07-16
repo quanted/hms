@@ -23,6 +23,10 @@ namespace Web.Services
                 .MinimumLevel.Override("Microsoft.AspNewCore", Serilog.Events.LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
+                .WriteTo.Logger(lc => lc
+                    .Filter.ByIncludingOnly(Serilog.Filters.Matching.WithProperty<string>("Type", t => t == "exception"))
+                    .WriteTo.File("App_Data//exception_log.txt", restrictedToMinimumLevel:Serilog.Events.LogEventLevel.Warning)
+                )
                 .CreateLogger();
             
             try
