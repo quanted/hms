@@ -1700,9 +1700,15 @@ namespace AQUATOX.AQTSegment
                     }
 
                     if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  //fixme output chem PPB
-                        res = ((TToxics)TSV).ppb; 
+                        res = ((TToxics)TSV).ppb;
 
-                    TSV.Results.Add(res);
+                    if ((TSV.SVType == T_SVType.NIntrnl) || (TSV.SVType == T_SVType.PIntrnl))  //fixme output internal nutrients in g/g
+                        {
+                            double TP = GetStateVal(TSV.NState, T_SVType.StV, TSV.Layer);
+                            res = (res / TP) * 1e-3;
+                        } // (gN/gOM) =  (ug/L) / (mg/L) * (mg/ug) 
+
+                        TSV.Results.Add(res);
                 }
             }
         }

@@ -41,7 +41,6 @@ namespace Plants.AQUATOX
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -55,6 +54,25 @@ namespace Plants.AQUATOX
             AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
+
+            bool FoundPlant = false;
+            for (AllVariables nS = Consts.FirstPlant; nS <= Consts.LastPlant; nS++)
+            {
+                TStateVariable TPl = AQSim.AQTSeg.GetStatePointer(nS, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TPl != null) 
+                { 
+                    FoundPlant = true; 
+                    if ((AQSim.AQTSeg.PSetup.Internal_Nutrients)&&(nS<=Consts.LastAlgae))  // Exclude Macrophytes
+                    {
+                        TStateVariable TIn = AQSim.AQTSeg.GetStatePointer(nS, T_SVType.NIntrnl, T_SVLayer.WaterCol);
+                        if (TIn == null) return "Internal Nutrients in plants have been selected but there is no internal nitrogen state variable for "+TPl.PName;
+
+                        TIn = AQSim.AQTSeg.GetStatePointer(nS, T_SVType.PIntrnl, T_SVLayer.WaterCol);
+                        if (TIn == null) return "Internal Nutrients in plants have been selected but there is no internal phosphorus state variable for " + TPl.PName;
+                    }
+                }
+            }
+            if (!FoundPlant) return "A TPlant state variable must be included in the simulation. ";
 
             TpHObj PpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
             if ((PpH == null)) return "A pH state variable (or driving variable) must be included in a plant simulation.";
@@ -79,6 +97,5 @@ namespace Plants.AQUATOX
 
             return "";
         }
-
     }
 }
