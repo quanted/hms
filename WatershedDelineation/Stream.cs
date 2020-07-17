@@ -177,9 +177,14 @@ namespace WatershedDelineation
             {
                 string timeindex = travelPath.First.Value.velocities_mPerSec.Keys.ElementAt(timeStep);
                 double totalTravelTime = 0;
+                double traveltimetest = 0;
                 for (LinkedListNode<StreamSegment> stream = travelPath.First; stream != null; stream = stream.Next)
-                {                    
-                    totalTravelTime += stream.Value.velocities_mPerSec[timeindex.ToString()][1] / stream.Value.length_km;
+                {
+                    if (inflowSource.Equals("Input Table"))
+                    {
+                        stream.Value.flows_m3PerSec[timeindex][0] = inflowDict[timeindex];
+                    }
+                    totalTravelTime += ((stream.Value.length_km * 1000) / stream.Value.velocities_mPerSec[timeindex.ToString()][1]) / 3600;
                     if (totalTravelTime >= timeStep)
                     {
                         stream.Value.contaminated[timeindex.ToString()] = false;
@@ -187,11 +192,7 @@ namespace WatershedDelineation
                     else
                     {
                         stream.Value.contaminated[timeindex.ToString()] = true;
-                    }
-                    if(inflowSource.Equals("Input Table"))
-                    {
-                        stream.Value.flows_m3PerSec[timeindex][0] = inflowDict[timeindex];
-                    }
+                    }                    
                     List<string> combined = new List<string> { stream.Value.comID, stream.Value.length_km.ToString(), stream.Value.velocities_mPerSec[timeindex][1].ToString(), stream.Value.flows_m3PerSec[timeindex][0].ToString(), stream.Value.contaminated[timeindex].ToString() };
                     stream.Value.timestepData.Add(timeindex, combined);
                 }
