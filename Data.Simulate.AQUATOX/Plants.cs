@@ -1104,15 +1104,13 @@ namespace AQUATOX.Plants
                 else
                 {
                     PLimit = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) / (AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4);
-                }
-                // unitless  P/PO4           gPO4/cu m    P/PO4            gPO4/cu m            gP/cu m
+                } // unitless =                                                       P/PO4                        gPO4/cu m                                                         P/PO4            gPO4/cu m            gP/cu m
+
             }  // external nutrients
 
 
             if (PLimit < Consts.Small)
-            {
                 PLimit = 0.0;      // RAP, 9/11/95 Tiny -> Small
-            }
 
             return PLimit;
         }
@@ -1172,16 +1170,10 @@ namespace AQUATOX.Plants
             if (AQTSeg.PSetup.Internal_Nutrients && (State > Consts.Tiny))
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
-                {
                     return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
                  // (g/g OM)   =   (ug N /L)                                             /(mg OM/L)*(mg/ug)
 
-                }
-                else
-                {
-                    return PAlgalRec.N2OrgInit;
-                }
-                // rooted macrophyte
+                else return PAlgalRec.N2OrgInit;     // rooted macrophyte
             }
             else
             {
@@ -1200,10 +1192,7 @@ namespace AQUATOX.Plants
 
                 }
                 else
-                {
-                    return PAlgalRec.P2OrgInit;
-                }
-                // rooted macrophyte
+                    return PAlgalRec.P2OrgInit;  // rooted macrophyte
             }
             else
             {
@@ -1969,7 +1958,8 @@ namespace AQUATOX.Plants
                 MinRatio = PR.Min_P_Ratio;
                 MaxUptake = PR.MaxPUptake;
             }
-            return   MaxUptake * (WC_Conc / (HalfSat + WC_Conc)) * (HalfSatInternal / (HalfSatInternal + (Ratio - MinRatio))) * CPlant.State * 1e3;
+
+            return MaxUptake * (WC_Conc / (HalfSat + WC_Conc)) * (HalfSatInternal / (HalfSatInternal + (Ratio - MinRatio))) * CPlant.State * 1e3;
        //  {ug/L d}    {g/g d}    {       unitless            }    {                        unitless                        }   {   mg / L  }  {ug/mg}
 
         }
@@ -2120,12 +2110,14 @@ namespace AQUATOX.Plants
             double Sed = 0;
             double Uptk = 0;
             double Exc = 0;
+            double Exc2 = 0;
             double Rsp = 0;
             double FixN = 0;
 //            double SegVolSave = 0;
             double Sed2Me = 0;
             double MacBrk = 0;
             double Slgh = 0;
+            double Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
 //            double LoadInKg = 0;
             bool SurfaceFloater;
             // ----------------------------------------------------------------
@@ -2150,10 +2142,12 @@ namespace AQUATOX.Plants
                 if (CP.Predation_Link != null) Predt = CP.Predation_Link.ReturnLoad(AQTSeg.TPresent) * N2O;
 
                 Exc = CP.PhotoResp() * N2O;
+                Exc2 = 0.09 * Math.Pow(1.07, (Temp - 20)) * State;  // Adapted from Ambrose 2006 -- JSC  7/12/2020
+
                 Rsp = CP.Respiration() * N2O;
                 MacBrk = ((CP) as TMacrophyte).Breakage() * N2O;
                 // macrophytes
-                DB = Lo + Uptk - (Predt + Mort + Exc + Rsp + MacBrk) - WashO + WashI;
+                DB = Lo + Uptk - (Predt + Mort + Exc + Exc2 + Rsp + MacBrk) - WashO + WashI;
             }
             else if (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae)
             {
@@ -2191,12 +2185,14 @@ namespace AQUATOX.Plants
 
                 Mort = CP.Mortality() * N2O;
                 Exc = CP.PhotoResp() * N2O;
+                Exc2 = 0.09 * Math.Pow(1.07, (Temp - 20)) * State;  // Adapted from Ambrose 2006 -- JSC  7/12/2020
+
                 Rsp = CP.Respiration() * N2O;
 
-                //if ((CP.IsFixingN()) && (SVType == T_SVType.NIntrnl))
-                //{
+                if ((CP.IsFixingN()) && (SVType == T_SVType.NIntrnl))
+                {
                 //    //MBLoadRecord MBLR = 5.MBLoadArray[AllVariables.Nitrate];
-                //    FixN = CP.PAlgalRec.MaxNUptake * CP.State * 1e3;
+                    FixN = CP.PAlgalRec.MaxNUptake * CP.State * 1e3;
                 //    // ug/L d          // g/g d     // mg / L // ug/mg
                 //    SegVolSave = AQTSeg.SegVol();
 
@@ -2205,7 +2201,7 @@ namespace AQUATOX.Plants
 
                 //    //MBLR.TotOOSLoad[5.DerivStep] = MBLR.TotOOSLoad[5.DerivStep] + LoadInKg;
                 //    //MBLR.LoadFixation[5.DerivStep] = MBLR.LoadFixation[5.DerivStep] + LoadInKg;
-                //}
+                }
 
                 ToxD = CP.ToxicDislodge() * N2O;
                 Sed = CP.Sedimentation() * N2O;   // plant sedimentation
@@ -2214,7 +2210,7 @@ namespace AQUATOX.Plants
                      else Slgh = -Derivative_NToPhytoFromSlough();
                 Uptk = Uptake();
                 // algae
-                DB = Lo + Uptk + WashI - (WashO + Predt + Mort + Sed + Exc + Rsp + ToxD + Slgh) - STH + SFE + Flt + Sed2Me + Entr + FixN;
+                DB = Lo + Uptk + WashI - (WashO + Predt + Mort + Sed + Exc + Exc2 + Rsp + ToxD + Slgh) - STH + SFE + Flt + Sed2Me + Entr + FixN;
                 // algae
             }
             // Phytoplankton are subject to currents , diffusion & TD

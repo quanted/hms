@@ -22,6 +22,12 @@ namespace Plants.AQUATOX.UnitTests
             new Plants.AQUATOX.AQTPlants(ref json, out errmsg, false);
             Assert.AreEqual("", errmsg);
 
+            filePath = "..\\..\\..\\..\\DOCS\\AQUATOX_Plant_Model_Internal_Nutrients_Valid.JSON";
+            json = GetTestFile(filePath);
+
+            new Plants.AQUATOX.AQTPlants(ref json, out errmsg, false);
+            Assert.AreEqual("", errmsg);
+
         }
 
         [TestMethod]
@@ -37,33 +43,41 @@ namespace Plants.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_NoVolume.txt";
+            filePath = "..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Plant_Model_NoVolume.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTPlants(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_Missing_CO2.txt";
+            filePath = "..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Plant_Model_Missing_CO2.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTPlants(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_Missing_TSP.txt";
+            filePath = "..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Plant_Model_Missing_TSP.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTPlants(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_Missing_Light.txt";
+            filePath = "..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Plant_Model_Missing_Light.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTPlants(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
+
+            filePath = "..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Plant_Model_Missing_Internal_Nutrient_SV.JSON";
+            json = GetTestFile(filePath);
+            errmsg = "";
+            AQTM = new AQTPlants(ref json, out errmsg, false);
+            errmsg = AQTM.CheckDataRequirements();
+            Assert.AreNotEqual("", errmsg);
+                        
         }
 
         private string GetTestFile(string filePath)

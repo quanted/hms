@@ -1004,23 +1004,20 @@ namespace AQUATOX.Nutrients
                                 // mg/L    // ug/L      // mg/ug
                             }
                             else
-                            {
-                                // external nutrients
-
+                            {   // external nutrients
                                 if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
-                                    UptkNut = PP.N_2_Org() * PP.Photosynthesis();
-                                else
-                                    UptkNut = PP.P_2_Org() * PP.Photosynthesis();
-                                // mg/L     // g/g               // mg/L
+                                      UptkNut = PP.N_2_Org() * PP.Photosynthesis();
+                                else  UptkNut = PP.P_2_Org() * PP.Photosynthesis();
+                                     // mg/L     // g/g               // mg/L
+                            }
 
-                                if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
+                            if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
                                 {
                                     if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
                                         NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
                                     else
                                         NH4Pref = 0;  // Protect Against Div by 0
                                 }
-                            }
                         }   // non CO2 code
 
                         switch (NState)
