@@ -131,13 +131,13 @@ namespace Web.Services.Models
 
                 //Setting all to ITimeSeriesOutput
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
-                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], com, input.Source), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
+                ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], com, input.Source, "Precipitation"), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], com, input.Source), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
+                ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], com, input.Source, "Runoff"), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
-                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], com, input.Source), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
+                ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], com, input.Source, "Baseflow"), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
                 input.Source = input.StreamHydrology;
-                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], com, input.Source), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
+                ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], com, input.Source, "Streamflow"), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
                 timeSeriesDict.Add("Precipitation", precipOutput);
@@ -225,7 +225,7 @@ namespace Web.Services.Models
             return wOutput;
         }
 
-        public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2)
+        public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2, string dataset)
         {
             column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
@@ -244,7 +244,7 @@ namespace Web.Services.Models
                 { "column_2", column2 },
                 { "units", "cubic meters" }
             };
-            itimeoutput.Dataset = "Stream Flow";
+            itimeoutput.Dataset = dataset;
             itimeoutput.DataSource = "curvenumber";
             return itimeoutput;
         }
