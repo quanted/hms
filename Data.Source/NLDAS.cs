@@ -169,7 +169,6 @@ namespace Data.Source
                     retries += 1;
                     if (!status.Contains("OK")) { 
                         Thread.Sleep(1000 * retries);
-                        //Thread.Sleep(3000);
                     }
                 }
             }
@@ -180,7 +179,6 @@ namespace Data.Source
                     retries += 1;
                     Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
-                    //Thread.Sleep(3000);
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
                     return this.DownloadData(url, retries).Result;
                 }
