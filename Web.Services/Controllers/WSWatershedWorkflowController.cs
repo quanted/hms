@@ -132,7 +132,9 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
+                Log.Information("Exception caught processing request to /workflow/watershed/, review exception log file for details.");
                 var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal(workflowInput.ToString());
                 exceptionLog.Fatal(ex.Message);
                 exceptionLog.Fatal(ex.StackTrace);
 
