@@ -169,7 +169,7 @@ namespace WatershedDelineation
             }
 
             object outputListLock = new object();
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
             List<string> precipError = new List<string>();
             List<Task> precipTasks = new List<Task>();
