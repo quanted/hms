@@ -32,7 +32,7 @@ namespace Data.Source
                 DateTime sfsd = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowStartDate"], "MM/dd/yyyyHH:mm", null);
 
                 //TimeSpan ts = new TimeSpan(06, 00, 0);
-                componentInput.DateTimeSpan.EndDate = sfed.Date;//sfed.Date.AddDays(1.0) + ts;
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(7.0);
                 componentInput.DateTimeSpan.StartDate = sfsd.Date;
             }
 
@@ -168,7 +168,7 @@ namespace Data.Source
                     data = await wm.Content.ReadAsStringAsync();
                     retries += 1;
                     if (!status.Contains("OK")) { 
-                        Thread.Sleep(1000 * retries); 
+                        Thread.Sleep(1000 * retries);
                     }
                 }
             }
@@ -177,7 +177,7 @@ namespace Data.Source
                 if (retries < maxRetries)
                 {
                     retries += 1;
-                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}", retries, maxRetries);
+                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
                     return this.DownloadData(url, retries).Result;
