@@ -6,12 +6,13 @@ sudo: required
 before_install:
   - sudo apt-get install nuget
 install:
-  - dotnet restore --ignore-failed-sources HMS.sln
+  - rm -rf GUI/
+  - dotnet restore HMS.sln
 before_depoly:
  - cd ~
 script:
  - "travis_wait 30 sleep 1800 &"
- - dotnet build --no-restore -c Release HMS.sln
+ - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - dotnet test HMS.sln -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
