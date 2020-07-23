@@ -399,6 +399,11 @@
             SubSurfaceFlow Input that implements TimeSeriesInput object
             </summary>
         </member>
+        <member name="P:Web.Services.Controllers.SubSurfaceFlowInput.PrecipSource">
+            <summary>
+            OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+            </summary>
+        </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInputExample">
             <summary>
             Swashbuckle SubSurfaceFlow POST request example

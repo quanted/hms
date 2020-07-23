@@ -76,8 +76,8 @@ namespace Web.Services.Tests
         /// <returns></returns>
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest, 368)]
-        [InlineData(gldasRequest, 368)]
+        [InlineData(nldasRequest, 365)]
+        [InlineData(gldasRequest, 365)]
         [InlineData(daymetRequest, 365)]
         [InlineData(prismRequest, 365)]
         public async Task ValidRequests(string inputString, int expected)
