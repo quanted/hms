@@ -22,7 +22,7 @@ namespace Diagenesis.AQUATOX.UnitTests
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "\\..\\..\\..\\..\\DOCS\\Diagenesis_Model_Valid_JSON.txt";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
 
             string errmsg;
             new AQTDiagenesisModel(ref json, out errmsg, false);
@@ -36,12 +36,37 @@ namespace Diagenesis.AQUATOX.UnitTests
         {
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "\\..\\..\\..\\..\\TEST\\Diagenesis_MissingSVs.JSON";
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
             AQTDiagenesisModel AQTM = new AQTDiagenesisModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
+        }
+
+        private string GetTestFile(string filePath)
+        {
+            string path = System.Environment.CurrentDirectory;
+            string path2 = Path.Combine(path, filePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                var fileName = filePath.Split("\\");
+                path2 = "/home/travis/build/quanted/hms/Diagensis/";
+                foreach (string p in fileName)
+                {
+                    if (!p.Equals(".."))
+                    {
+                        path2 = Path.Combine(path2, p);
+                    }
+                }
+                json = File.ReadAllText(path2);
+            }
+            return json;
         }
 
 
