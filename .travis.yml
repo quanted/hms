@@ -1,13 +1,16 @@
 language: csharp
-dotnet: 3.1
+dotnet: 3.1.202
 mono: latest
 solution: HMS.sln
+sudo: required
+before_install:
+  - sudo apt-get install nuget
+install:
+  - dotnet restore HMS.sln
 before_depoly:
  - cd ~
 script:
  - "travis_wait 30 sleep 1800 &"
- - rm docker-compose.*
- - dotnet restore HMS.sln
  - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
