@@ -6,7 +6,9 @@ sudo: required
 before_install:
   - sudo apt-get install nuget
 install:
-  - dotnet sln remove GUI.AQUATOX
+  - dotnet sln remove GUI/GUI.AQUATOX
+  - dotnet sln remove GUI/GUI.AQUATOX.Electron
+  - dotnet sln remove GUI/GUI.AQUATOX.Workflow
   - dotnet restore HMS.sln
 before_depoly:
  - cd ~
