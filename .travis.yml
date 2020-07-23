@@ -8,9 +8,8 @@ before_depoly:
 script:
  - "travis_wait 30 sleep 1800 &"
  - rm docker-compose.*
- - dotnet restore HMS.sln
- - dotnet build -c Release HMS.sln
- - dotnet build -c Release HMS.sln
+ - dotnet restore -r win-64x HMS.sln
+ - dotnet build -r win-64x -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
  - dotnet test HMS.sln -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
