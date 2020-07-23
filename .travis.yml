@@ -6,7 +6,6 @@ sudo: required
 before_install:
   - sudo apt-get install nuget
 install:
-  - travis_wait 60 mvn install
   - dotnet sln remove GUI/GUI.AQUATOX
   - dotnet sln remove GUI/GUI.AQUATOX.Electron
   - dotnet sln remove GUI/GUI.AQUATOX.Workflow
@@ -14,6 +13,7 @@ install:
 before_depoly:
  - cd ~
 script:
+ - "travis_wait 60 sleep 1800 &"
  - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
