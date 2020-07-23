@@ -374,7 +374,7 @@ namespace Web.Services.Tests
         //[InlineData(penpanGldasRequest, 365)]
         //[InlineData(mcjannettGldasRequest, 365)]
         //[InlineData(penmanopenwaterGldasRequest, 365)]
-        [InlineData(penmandailyGldasRequest, 365)]
+        //[InlineData(penmandailyGldasRequest, 365)]
         //[InlineData(penmanhourlyGldasRequest, 365)]
         //[InlineData(mortoncraeGldasRequest, 365)]
         //[InlineData(mortoncrweGldasRequest, 365)]
@@ -385,7 +385,7 @@ namespace Web.Services.Tests
         //[InlineData(mortoncraeDaymetRequest, 365)]
         //[InlineData(mortoncrweDaymetRequest, 365)]
         [InlineData(penmanMonthlyNldasRequest, 12)]
-        [InlineData(penmanMonthlyGldasRequest, 12)]
+        //[InlineData(penmanMonthlyGldasRequest, 12)]
         [InlineData(ncdcRequest, 365)]
         public async Task ValidRequests(string evapoInputString, int expected)
         {

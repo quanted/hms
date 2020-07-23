@@ -569,8 +569,10 @@ namespace Evapotranspiration
             ITimeSeriesOutputFactory nwFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput nWindOutput = nwFactory.Initialize();
             ITimeSeriesInputFactory nwiFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput nwiInput = nwiFactory.SetTimeSeriesInput(inpt, new List<string>() { "wind" }, out errorMsg);
-            ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "SPEED/DIRECTION", nWindOutput, nwiInput);
+            //ITimeSeriesInput nwiInput = nwiFactory.SetTimeSeriesInput(inpt, new List<string>() { "wind" }, out errorMsg);
+            ITimeSeriesInput nwiInput = nwiFactory.SetTimeSeriesInput(inpt, new List<string>(), out errorMsg);
+            //ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "SPEED/DIRECTION", nWindOutput, nwiInput);
+            ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "All", nWindOutput, nwiInput);
             outputList.Add(nldasWindOutput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
             inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
@@ -592,7 +594,8 @@ namespace Evapotranspiration
             ITimeSeriesOutputFactory nrFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput nRadOutput = nrFactory.Initialize();
             ITimeSeriesInputFactory nriFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput nriInput = nriFactory.SetTimeSeriesInput(inpt, new List<string>() { "radiation" }, out errorMsg);
+            //ITimeSeriesInput nriInput = nriFactory.SetTimeSeriesInput(inpt, new List<string>() { "radiation" }, out errorMsg);
+            ITimeSeriesInput nriInput = nriFactory.SetTimeSeriesInput(inpt, new List<string>(), out errorMsg);
             ITimeSeriesOutput nldasRadOutput = nldasRad.GetData(out errorMsg, nRadOutput, nriInput);
             outputList.Add(nldasRadOutput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);

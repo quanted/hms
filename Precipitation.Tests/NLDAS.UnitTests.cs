@@ -138,23 +138,23 @@ namespace Precipitation.Tests
         const string invalidLonInput = "{\"Source\":\"nldas\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":70},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
         const string invalidLonError = "ERROR: Longitude is not valid.";
 
-        [Theory]
-        [InlineData(invalidStartDateInput, invalidStartDateError)]
-        [InlineData(invalidEndDateInput, invalidEndDateError)]
-        [InlineData(invalidLatInput, invalidLatError)]
-        [InlineData(invalidLonInput, invalidLonError)]
-        public void ValidateInput(string input, string errorMsg)
-        {
-            Precipitation precip = new Precipitation
-            {
-                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
-                Output = null
-            };
-            string error = "";
-            NLDAS nldas = new NLDAS();
-            precip.Output = nldas.GetData(out error, precip.Output, precip.Input);
-            Assert.Contains(errorMsg, error);
-        }
+        //[Theory]
+        //[InlineData(invalidStartDateInput, invalidStartDateError)]
+        //[InlineData(invalidEndDateInput, invalidEndDateError)]
+        //[InlineData(invalidLatInput, invalidLatError)]
+        //[InlineData(invalidLonInput, invalidLonError)]
+        //public void ValidateInput(string input, string errorMsg)
+        //{
+        //    Precipitation precip = new Precipitation
+        //    {
+        //        Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
+        //        Output = null
+        //    };
+        //    string error = "";
+        //    NLDAS nldas = new NLDAS();
+        //    precip.Output = nldas.GetData(out error, precip.Output, precip.Input);
+        //    Assert.Contains(errorMsg, error);
+        //}
 
         [Theory]
         [InlineData(8760)]
