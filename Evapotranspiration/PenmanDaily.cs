@@ -634,17 +634,17 @@ namespace Evapotranspiration
                 double tmin = Convert.ToDouble(timeseries.Value[1]);
                 double tmax = Convert.ToDouble(timeseries.Value[0]);
                 double tmean = Convert.ToDouble(timeseries.Value[2]);
-                double shmin = Convert.ToDouble(timeseries.Value[5]);
-                double shmax = Convert.ToDouble(timeseries.Value[6]);
+                double shmin = Convert.ToDouble(timeseries.Value[6]);
+                double shmax = Convert.ToDouble(timeseries.Value[7]);
                 double wind = Convert.ToDouble(timeseries.Value[3]);
-                double solarRadLongWave = Convert.ToDouble(timeseries.Value[7]) * 0.0864;
-                double solarRadShortWave = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
+                double solarRadLongWave = Convert.ToDouble(timeseries.Value[8]) * 0.0864;
+                double solarRadShortWave = Convert.ToDouble(timeseries.Value[9]) * 0.0864;
                 double solarRad = (solarRadLongWave + solarRadShortWave) / 2;
-                if (timeseries.Value.Count != 10)
+                if (timeseries.Value.Count != 11)
                 {
                     timeseries.Value.Add("101325");
                 }
-                double pressure = Convert.ToDouble(timeseries.Value[9]) / 100; //Convert Pa to mbar
+                double pressure = Convert.ToDouble(timeseries.Value[timeseries.Value.Count-1]) / 100; //Convert Pa to mbar
                 double relHMax = 0.0;
                 double relHMin = 0.0;
                 double petPMD = 0.0;
@@ -661,6 +661,7 @@ namespace Evapotranspiration
                 timeseries.Value[5] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[6] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[7] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
+                timeseries.Value.RemoveAt(10);
                 timeseries.Value.RemoveAt(9);
                 timeseries.Value.RemoveAt(8);
             }
@@ -790,8 +791,8 @@ namespace Evapotranspiration
                 double shmin = Convert.ToDouble(timeseries.Value[4]);
                 double shmax = Convert.ToDouble(timeseries.Value[5]);
                 double wind = Convert.ToDouble(timeseries.Value[3]);
-                double solarRad = Convert.ToDouble(timeseries.Value[7]) * 0.0864;
-                double pressure = Convert.ToDouble(timeseries.Value[8]) / 100; //Convert Pa to mbar
+                double solarRad = Convert.ToDouble(timeseries.Value[6]) * 0.0864;
+                double pressure = Convert.ToDouble(timeseries.Value[7]) / 100; //Convert Pa to mbar
                 double relHMax = 0.0;
                 double relHMin = 0.0;
                 double petPMD = 0.0;
@@ -808,7 +809,7 @@ namespace Evapotranspiration
                 timeseries.Value[5] = relHMin.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[6] = relHMax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[7] = petPMD.ToString("F4", CultureInfo.InvariantCulture);
-                timeseries.Value.RemoveAt(8);
+                //timeseries.Value.RemoveAt(8);
             }
             gldasTempOutput.Dataset = "Evapotranspiration";
             gldasTempOutput.DataSource = "penmandaily";
