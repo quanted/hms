@@ -73,12 +73,16 @@ namespace Bioaccumulation.AQUATOX.UnitTests
             {
                 var fileName = filePath.Split("\\");
                 path2 = "/home/travis/build/quanted/hms/Chemicals/";
-                foreach(string p in fileName)
+                foreach (string p in fileName)
                 {
-                    if(!p.Equals(".."))
+                    if (!p.Equals(".."))
                     {
                         path2 = Path.Combine(path2, p);
                     }
+                }
+                if (!File.Exists(path2))
+                {
+                    path2 = Path.Combine("/home/travis/build/quanted/hms/Chemicals/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
                 }
                 json = File.ReadAllText(path2);
             }
