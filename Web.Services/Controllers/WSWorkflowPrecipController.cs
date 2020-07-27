@@ -85,7 +85,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = 1053791
+                    ComID = 1053791,
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
