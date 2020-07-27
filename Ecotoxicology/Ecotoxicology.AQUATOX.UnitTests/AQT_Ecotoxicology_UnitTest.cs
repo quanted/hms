@@ -46,21 +46,21 @@ namespace Ecotoxicology.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Ecotoxicology_No_Chemical.JSON";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Ecotoxicology_No_Chemical.JSON";
             json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTEcotoxicologyModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Ecotoxicology_No_Biota.JSON";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Ecotoxicology_No_Biota.JSON";
             json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTEcotoxicologyModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Ecotoxicology_Missing_BSV.JSON";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Ecotoxicology_Missing_BSV.JSON";
             json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTEcotoxicologyModel(ref json, out errmsg, false);

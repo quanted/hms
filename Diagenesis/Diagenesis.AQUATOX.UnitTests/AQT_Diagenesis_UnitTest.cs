@@ -35,7 +35,7 @@ namespace Diagenesis.AQUATOX.UnitTests
         public void AQTDiagenesis_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string path2 = path + "\\..\\..\\..\\..\\TEST\\Diagenesis_MissingSVs.JSON";
+            string path2 = path + "\\..\\..\\..\\..\\Test\\Diagenesis_MissingSVs.JSON";
             string json = GetTestFile(path2);
             string errmsg = "";
             AQTDiagenesisModel AQTM = new AQTDiagenesisModel(ref json, out errmsg, false);

@@ -44,14 +44,14 @@ namespace Bioaccumulation.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Bioaccumulation_Missing_Carrier.JSON";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Bioaccumulation_Missing_Carrier.JSON";
             json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTBioaccumulationModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Bioaccumulation_Missing_Chem.JSON";
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Bioaccumulation_Missing_Chem.JSON";
             json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTBioaccumulationModel(ref json, out errmsg, false);
