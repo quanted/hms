@@ -56,7 +56,7 @@ namespace Diagenesis.AQUATOX.UnitTests
             catch (System.IO.FileNotFoundException)
             {
                 var fileName = filePath.Split("\\");
-                path2 = "/home/travis/build/quanted/hms/Diagensis/";
+                path2 = "/home/travis/build/quanted/hms/Diagenesis/";
                 foreach (string p in fileName)
                 {
                     if (!p.Equals(".."))
@@ -66,7 +66,7 @@ namespace Diagenesis.AQUATOX.UnitTests
                 }
                 if (!File.Exists(path2))
                 {
-                    path2 = Path.Combine("/home/travis/build/quanted/hms/Diagensis/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+                    path2 = Path.Combine("/home/travis/build/quanted/hms/Diagenesis/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
                 }
                 json = File.ReadAllText(path2);
             }

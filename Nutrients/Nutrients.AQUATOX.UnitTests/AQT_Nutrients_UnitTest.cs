@@ -109,7 +109,7 @@ namespace Nutrients.AQUATOX.UnitTests
                 }
                 if (!File.Exists(path2))
                 {
-                    path2 = Path.Combine("/home/travis/build/quanted/hms/Nutrients/TEST", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+                    path2 = Path.Combine("/home/travis/build/quanted/hms/Nutrients/TEST", fileName[fileName.Length - 1]);
                 }
                 json = File.ReadAllText(path2);
             }

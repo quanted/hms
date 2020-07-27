@@ -91,7 +91,18 @@ namespace Ecotoxicology.AQUATOX.UnitTests
                 }
                 if (!File.Exists(path2))
                 {
-                    path2 = Path.Combine("/home/travis/build/quanted/hms/Ecotoxicology/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+                    if (fileName[fileName.Length - 2].Equals("DOCS"))
+                    {
+                        path2 = Path.Combine("/home/travis/build/quanted/hms/Ecotoxicology/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+
+                    }
+                    else
+                    {
+                        path2 = Path.Combine("/home/travis/build/quanted/hms/Ecotoxicology/",
+                            fileName[fileName.Length - 3],
+                            fileName[fileName.Length - 2],
+                            fileName[fileName.Length - 1]);
+                    }
                 }
                 json = File.ReadAllText(path2);
             }
