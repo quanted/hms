@@ -16,4 +16,4 @@ script:
  - dotnet build -c Release HMS.sln
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
- - travis_wait 45 dotnet test HMS.sln -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+ - dotnet test HMS.sln -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
