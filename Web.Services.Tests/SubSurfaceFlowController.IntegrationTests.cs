@@ -63,7 +63,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/hydrology/subsurfaceflow";
             SubSurfaceFlowInput input = JsonSerializer.Deserialize<SubSurfaceFlowInput>(inputString, options);
             Debug.WriteLine("Integration Test: SubsurfaceFlow controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

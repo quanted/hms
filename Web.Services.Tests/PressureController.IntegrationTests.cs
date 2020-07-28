@@ -55,7 +55,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/pressure";
             SurfaceRunoffInput input = JsonSerializer.Deserialize<SurfaceRunoffInput>(inputString, options);
             Debug.WriteLine("Integration Test: Surface Pressure controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

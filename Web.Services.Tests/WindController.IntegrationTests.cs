@@ -72,7 +72,7 @@ namespace Web.Services.Tests
         [InlineData(nceiRequest, 365)]
         public async Task ValidRequests(string inputString, int expected)
         {
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/wind";
             JsonSerializerOptions options = new JsonSerializerOptions()
             {

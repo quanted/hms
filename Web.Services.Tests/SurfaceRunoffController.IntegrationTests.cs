@@ -77,7 +77,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/hydrology/surfacerunoff";
             SurfaceRunoffInput input = JsonSerializer.Deserialize<SurfaceRunoffInput>(inputString, options);
             Debug.WriteLine("Integration Test: Surface Runoff controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

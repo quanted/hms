@@ -134,7 +134,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/precipitation";
             PrecipitationInput input = JsonSerializer.Deserialize<PrecipitationInput>(precipInputString, options);
             input.TemporalResolution = "daily";

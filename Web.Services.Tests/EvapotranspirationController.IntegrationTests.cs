@@ -394,7 +394,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
             string endpoint = "api/hydrology/evapotranspiration";
             EvapotranspirationInput input = JsonSerializer.Deserialize<EvapotranspirationInput>(evapoInputString, options);
             Debug.WriteLine("Integration Test: Evapotranspiration controller; Endpoint: " + endpoint + "; Data source: " + input.Source);
