@@ -164,7 +164,8 @@ namespace Precipitation
             int j = 0;
             for (int i = 0; i < output.Data.Count; i += hours)
             {
-                tempData0.Add(tempKeys.ElementAt(i).Replace(" 02", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                string parseDate = tempKeys.ElementAt(i).Split(' ')[0];
+                tempData0.Add(parseDate + " 00", new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
                 j++;
             }
             TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
