@@ -194,6 +194,58 @@ namespace AQUATOX.AQTSegment
         }
     }
 
+    public class TRate
+    {
+        public string Name;
+        public double[] Rate = new double[7];
+
+        public TRate(string Nm)
+        {
+            int Stp;
+            Name = Nm;
+            for (Stp = 0; Stp <= 6; Stp++)
+            {
+                Rate[Stp] = 0;
+            }
+        }
+
+        public double GetRate()
+        {
+            return (Globals.Consts.C1 * Rate[1] + Globals.Consts.C3 * Rate[3] + Globals.Consts.C4 * Rate[4] + Globals.Consts.C6 * Rate[6]);  // RK Solution 
+            
+            //try result = (Globals.Consts.C1 * Rate[1] + Globals.Consts.C3 * Rate[3] + Globals.Consts.C4 * Rate[4] + Globals.Consts.C6 * Rate[6]);  // RK Solution 
+            //catch result = 0;
+            //return result;
+        }
+
+    } // end TRate 
+
+    public class SavedResults
+    {
+        public List<List<double>> Results = new List<List<double>>();   // holds numerical results, internal, not evenly spaced if variable stepsize
+        public List<string> Names = new List<string>();
+        public List<string> Units = new List<string>();
+
+        public void ClearResults()
+        {
+            foreach (List<double> res in Results)
+                res.Clear();
+            Results.Clear();
+            Names.Clear();
+            Units.Clear();
+        }
+
+        public void AddColumn(string nm, string unit)
+        {
+            Names.Add(nm);
+            Units.Add(unit);
+            Results.Add(new List<double>());
+        }
+
+
+    }
+
+
     public class TStateVariable
     {
         public double InitialCond = 0;     // Initial condition
@@ -206,28 +258,30 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public double[] StepRes = new double[7];  // Holds Step Results
         [JsonIgnore] public double yerror = 0;          // holds error term from RKCK
         [JsonIgnore] public double yscale = 0;          // use in Integration
-        [JsonIgnore] public List<double> Results = new List<double>(); // holds numerical results, internal, not evenly spaced if variable stepsize
-        public AQUATOXTSOutput output = null;  // public and evenly-spaced results following integration / interpolation
+        [JsonIgnore] public SavedResults SVResults = null;   // holds numerical results, internal, not evenly spaced if variable stepsize
+
+
+        public AQUATOXTSOutput SVoutput = null;  // public and evenly-spaced results following integration / interpolation
 
         [JsonIgnore] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
         public LoadingsRecord LoadsRec = null;   // Holds all of the Loadings Information for this State Variable  
         public bool UseLoadsRecAsDriver = false; // If user sets this to true, no integration is used but time series driving data from "loadsrec"
         [JsonIgnore] public double Loading = 0;         // Loading of State Variable This time step
-//      bool RequiresData = false;
-//      bool HasData = false;        // If RequiresUnderlyingData and Not HasData then Model cannot be run
+
         public string StateUnit;
         public string LoadingUnit;       // Consts 
 
         [JsonIgnore] public TAQTSite Location = null;    // Pointer to Site in which I'm located
-//      public bool PShowRates = true;      // Does the user want rates written for this SV?
-//      public TCollection RateColl = null; // Collection of saved rates for current timestep
-//      public int RateIndex = 0;
+
+        public bool SaveRates = true;      // Does the user want rates written for this SV?
+        [JsonIgnore] public List<TRate> RateColl = null; // Collection of saved rates for current timestep
+        [JsonIgnore] public int RateIndex = 0;
 
         public string LoadNotes1;
-        public string LoadNotes2;           // Notes associated with loadings
-        public bool TrackResults = true;      // Does the user want to save results for this variable?
-                                                           //public bool IsTemplate = false;       // Is this a member of the template study in a linked system?  True if single study run.
-                                                           //public double[] WashoutStep = new double[7];     // Saved Washout Variables for use in outputting Cascade Outflow, nosave
+        public string LoadNotes2;            // Notes associated with loadings
+        public bool TrackResults = true;     // Does the user want to save results for this variable?
+                                             // public bool IsTemplate = false;       // Is this a member of the template study in a linked system?  True if single study run.
+                                             // public double[] WashoutStep = new double[7];     // Saved Washout Variables for use in outputting Cascade Outflow, nosave
 //        double WashoutAgg = 0;
 //        double LastTimeWrit = 0;
 
@@ -267,7 +321,6 @@ namespace AQUATOX.AQTSegment
                     ((this) as TToxics).IsAGGR = true;
                 }
             }
-
         }
 
         public void TakeDerivative(int Step)
@@ -331,7 +384,7 @@ namespace AQUATOX.AQTSegment
             double Disch = Location.Discharge;
             if (Disch < Globals.Consts.Small) return 0;
             result = Disch * State / AQTSeg.SegVol();
-            // unit / d // m3/d // unit           // cu m.
+         // unit/d // m3/d // unit        // cu m.
 
             // WashoutStep[AllStates.DerivStep] = result * AllStates.SegVol(); // FIXME MB Tracking 
             // 1000*mass                   // mass/L*d            // m3
@@ -590,6 +643,25 @@ namespace AQUATOX.AQTSegment
             return AQTSeg.GetPPB(S, T, L);
         }
 
+        public void ClearRate()
+        {
+            RateIndex = -1;
+            if (RateColl == null)
+                RateColl = new List<TRate>();
+        }
+
+        public void SaveRate(string Nm, double Rt)
+        {
+            TRate PR;
+            RateIndex++;
+            if (RateIndex > RateColl.Count - 1)
+            {
+                PR = new TRate(Nm);
+                RateColl.Add(PR);
+            }
+            PR = RateColl[RateIndex];
+            PR.Rate[AQTSeg.DerivStep] = Rt;
+        }
 
     }  // end TStateVariable
 
@@ -597,7 +669,6 @@ namespace AQUATOX.AQTSegment
     public class TStates : List<TStateVariable>
     {
            [JsonIgnore] public List<DateTime> restimes = new List<DateTime>();
-
     }
 
 
@@ -701,8 +772,10 @@ namespace AQUATOX.AQTSegment
 
         public void ClearResults()
         {
+
             foreach (TStateVariable TSV in SV)
-                if (TSV.Results != null) TSV.Results.Clear(); else TSV.Results = new List<double>();
+                if (TSV.SVResults != null) TSV.SVResults.ClearResults();
+
             if (SV.restimes != null) SV.restimes.Clear(); else SV.restimes = new List<DateTime>();
 
         }
@@ -1421,7 +1494,7 @@ namespace AQUATOX.AQTSegment
             NormDiff(h);
 
             Derivs(x, 1);   
-            WriteResults(TStart); // Write Initial Conditions as the first data Point
+            WriteResults(true, TStart); // Write Initial Conditions as the first data Point
             CalcPPB();
 
             // (**  Start stepping the RungeKutta.....**)
@@ -1437,7 +1510,7 @@ namespace AQUATOX.AQTSegment
                 //                  FinishPoint = (Convert.ToInt32(x * (1.0 / dxsav)) > Convert.ToInt32(xsav * (1.0 / dxsav)));
 
                 CalcPPB();
-                WriteResults(x); // Write output to Results Collection
+                WriteResults(false, x); // Write output to Results Collection
 
                 //                    if (FinishPoint) // if it is time to write rates
                 //                    {      xsav = x;      }
@@ -1504,7 +1577,7 @@ namespace AQUATOX.AQTSegment
             DoThisEveryStep(h_taken);
             CalcPPB();
 
-            WriteResults(x); // Write final step to Results Collection
+            WriteResults(false, x); // Write final step to Results Collection
             return PostProcessResults();
 
         }  // integrate
@@ -1684,31 +1757,74 @@ namespace AQUATOX.AQTSegment
         }
 
         // -------------------------------------------------------------------------------------------------------------------------------
-        public void WriteResults(DateTime TimeIndex)
+        public void WriteResults(bool firstwrite, DateTime TimeIndex)
         {
-            double res = 0;
             if ((SV.restimes.Count == 0) || (TimeIndex - SV.restimes[^1]).TotalDays > Consts.VSmall)   // last element is ^1
             {
                 SV.restimes.Add(TimeIndex);
                 foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
                 {
-                    res = TSV.State;
+                    int rescnt = 0;
+                    double res = TSV.State;
                     if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
                     {
                         res = res * SegVol() / SurfaceArea();
-                        //  g/m2  g/m3     m3         m2
+                    //  g/m2  g/m3     m3         m2
                     }
 
-                    if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  //fixme output chem PPB
-                        res = ((TToxics)TSV).ppb;
+                    if (TSV.SVResults == null) TSV.SVResults = new SavedResults();
 
-                    if ((TSV.SVType == T_SVType.NIntrnl) || (TSV.SVType == T_SVType.PIntrnl))  //fixme output internal nutrients in g/g
+                    if (firstwrite)
                         {
-                            double TP = GetStateVal(TSV.NState, T_SVType.StV, TSV.Layer);
-                            res = (res / TP) * 1e-3;
-                        } // (gN/gOM) =  (ug/L) / (mg/L) * (mg/ug) 
+                            string ustr = TSV.StateUnit;
+                            if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp)) ustr = "ug/L";
+                            TSV.SVResults.AddColumn("", ustr);
+                        }
+                         
+                    TSV.SVResults.Results[rescnt].Add(res);  rescnt++;
 
-                        TSV.Results.Add(res);
+                    if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  // output PPB
+                    {
+                        if (firstwrite) TSV.SVResults.AddColumn("PPB", "PPB");
+                        TSV.SVResults.Results[rescnt].Add(((TToxics)TSV).ppb); rescnt++;
+                    }
+
+                    if ((TSV.SVType == T_SVType.NIntrnl) || (TSV.SVType == T_SVType.PIntrnl))   //output internal nutrients in g/g
+                    {
+                        double TP = GetStateVal(TSV.NState, T_SVType.StV, TSV.Layer);
+                        if (firstwrite) TSV.SVResults.AddColumn("Ratio", "g/gOM");
+                        TSV.SVResults.Results[rescnt].Add((res / TP) * 1e-3); rescnt++;
+                    } //                  (gN/gOM) =    (ug/L)/(mg/L) * (mg/ug) 
+
+                    
+                    if ((PSetup.SaveBRates) && (TSV.SaveRates) && (TSV.RateColl!=null))  // save rates output
+                    foreach (TRate PR in TSV.RateColl)
+                    {
+                        double ThisRate = PR.GetRate();
+                        string ustr = "Fraction";
+                        if ((PR.Name.IndexOf("_LIM") <= 0))
+                        {
+                            if ((PR.Name.IndexOf("GrowthRate2") > 0)) // GrowthRate2 in g/m2
+                            {
+                                ThisRate = ThisRate * SegVol() / SurfaceArea();
+                                //   (g/m2) =   (g/m3)    (m3)       (m2)
+                                ustr = "g/m2";
+                            }
+                            else
+                            {
+                                ustr = "Percent";
+                                if (TSV.State < Globals.Consts.Tiny) ThisRate = 0;// avoid divide by zero
+                                else
+                                {
+                                    try { ThisRate = (ThisRate / TSV.State) * 100; }    // normal rate output
+                                    catch { ThisRate = 0; } // floating point error catch 
+                                }
+                            }
+                        }
+
+                        if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
+                        TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
+                    }
                 }
             }
         }
@@ -1899,35 +2015,48 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
                 {
-                    if (TSV.Results == null) return "Results not initialized for SV " + TSV.PName;
-                    if (TSV.Results.Count == 0) return "No results saved for SV " + TSV.PName;
+                    if (TSV.SVResults == null) return "Results not initialized for SV " + TSV.PName;
+                    if (TSV.SVResults.Results.Count() == 0) return "No results saved for SV " + TSV.PName;
 
-                    TSV.output = new AQUATOXTSOutput();
-                    TSV.output.Dataset = TSV.PName;
-                    TSV.output.DataSource = "AQUATOX";
-                    TSV.output.Metadata = new Dictionary<string, string>()
-                {
-                    {"AQUATOX_HMS_Version", "1.0.0"},
-                    {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
-                    {"Result Unit", TSV.StateUnit},
-                };
+                    TSV.SVoutput = new AQUATOXTSOutput();
+                    TSV.SVoutput.Dataset = TSV.PName;
+                    TSV.SVoutput.DataSource = "AQUATOX";
+                    TSV.SVoutput.Metadata = new Dictionary<string, string>()
+                    {
+                        {"AQUATOX_Version", "4.0.0"},
+                        {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
+                        {"State_Variable", TSV.PName},
+                    };
 
-                    TSV.output.Data = new Dictionary<string, List<string>>();
+                    TSV.SVoutput.Data = new Dictionary<string, List<string>>();
                     List<string> vallist = new List<string>();
-                    vallist.Add(TSV.Results[0].ToString(Consts.ValFormatString));
-                    TSV.output.Data.Add(SV.restimes[0].ToString(Consts.DateFormatString), vallist);
+                    TSV.SVoutput.Data.Add(SV.restimes[0].ToString(Consts.DateFormatString), vallist);
+
+                    for (int onum = 1; onum <= TSV.SVResults.Results.Count() ; onum++)  // add initial conditions, output names, and units
+                    {
+                        vallist.Add(TSV.SVResults.Results[onum-1][0].ToString(Consts.ValFormatString));
+
+                        TSV.SVoutput.Metadata.Add("Name_" + onum.ToString(), TSV.SVResults.Names[onum-1]);  
+                        TSV.SVoutput.Metadata.Add("Unit_" + onum.ToString(), TSV.SVResults.Units[onum - 1]);
+                    }
+
                     for (int i = 1; i <= numsteps; i++)
                     {
-                        DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
-                        if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.Results, StartIndices[i - 1]);
-                        else val = InstantaneousConc(out errmsg, steptime, TSV.Results, StartIndices[i - 1]);
                         vallist = new List<string>();
-                        vallist.Add(val.ToString(Consts.ValFormatString));
-                        TSV.output.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
-                        if (errmsg != "") return errmsg;
+                        DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
+
+                        for (int onum = 1; onum <= TSV.SVResults.Results.Count(); onum++)
+                        {
+                           if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.SVResults.Results[onum - 1], StartIndices[i - 1]);
+                           else val = InstantaneousConc(out errmsg, steptime, TSV.SVResults.Results[onum - 1], StartIndices[i - 1]);
+                           vallist.Add(val.ToString(Consts.ValFormatString));
+                         }
+
+                    TSV.SVoutput.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
+                    if (errmsg != "") return errmsg;
                     }
                 }
-                else TSV.output = null;  // if !TrackResults
+                else TSV.SVoutput = null;  // if !TrackResults
             return "";
         }
 
@@ -2708,7 +2837,7 @@ namespace AQUATOX.AQTSegment
                 // Case
                 if ((Typ == T_SVType.StV))
                     Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac;
-                //else
+                else
                     // ug/m3                      g/m3                      ug/kg                     kg/g
                     Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac * GetPPB(P.NState, Typ, P.Layer) * 1e-3;
             }
@@ -3498,11 +3627,10 @@ namespace AQUATOX.AQTSegment
         }
         // ------------------------------------------------------------------------
 
+    }  // end TAQUATOXSegment
 
-        }  // end TAQUATOXSegment
 
-
-        public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
+    public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
     {
         //public double SalinityUpper = 0;
         //public double SalinityLower = 0;

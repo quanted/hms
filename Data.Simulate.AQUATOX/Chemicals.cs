@@ -403,7 +403,7 @@ namespace AQUATOX.Chemicals
 
             //if (Volat < 0)
             //{
-            //    TStates _wvar3 = AllStates;
+            //    TStates _wvar3 = AQTSeg;
             //    ToxLossRecord _wvar4 = _wvar3.ToxLossArray[OrgType()];
             //    // save for tox loss output & categorization
             //    VolatInKg = -Volat * _wvar3.SegVol() * 1000.0 * 1e-9;
@@ -1239,13 +1239,6 @@ namespace AQUATOX.Chemicals
             double DiffSed =0;
             double PoreWUp =0;
             double PoreWDown =0;
-            //double PWToxLevel =0;
-            //double FracInWater =0;
-            //double FracPoreWUp =0;
-            //double OOSDriftInKg =0;
-            //double LoadInKg =0;
-            //TPorewater ToTPoreWater;
-            //TPoreWaterTox ToTPoreWaterTox;
             TToxics PT;
             TDetritus PD;
             TPOC_Sediment TPOC;
@@ -1259,10 +1252,39 @@ namespace AQUATOX.Chemicals
             // Derivative for Toxicant Dissolved in Water
             SedModelRunning = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1) != null;
 
+            // ------------------------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                // for toxicant dissolved in water
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("State", State);
+                    SaveRate("Load", Lo);
+                    SaveRate("Hydrolysis", Hyd);
+                    SaveRate("Photolysis", Pho);
+                    SaveRate("MicroMet", Mic);
+                    SaveRate("AerMM In", Mic_in_Aer);
+                    SaveRate("AnaerMM In", Mic_in_Anaer);
+                    SaveRate("Volatil", Vl);
+                    SaveRate("ToxDisch", ToxDis);
+                    SaveRate("Inflow", Inflow);
+
+                    SaveRate("GillSorption", GillSorption);
+                    SaveRate("Depuration", Dep);
+                    SaveRate("DetrSorpt", DetrSorption);
+                    SaveRate("Decomp", Decomp);
+                    SaveRate("DetrDesorpt", DetrDesorption);
+                    SaveRate("PlantSorp", PlantSorp);
+                }
+            }
+            // ------------------------------------------------------------------
+
+
             if (IsAGGR)  // is this state variable merely in place to aggregate the concentration of many components?
             {
                 DB = 0.0;
-//                Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;
             }
             if (AQTSeg.PSetup.ChemsDrivingVars)          // 4/5/2017 
@@ -1279,14 +1301,6 @@ namespace AQUATOX.Chemicals
                 CalculateLoad(AQTSeg.TPresent);
                 Lo = Loading;
                 //if (AQTSeg.EstuarySegment)   {  Entr = EstuaryEntrainment();     }
-
-                // save for tox loss output & categorization
-                //if (Entr > 0)  {  LoadInKg = (Lo + Entr) * SegVol() * 1000.0 * 1e-9;     }
-                //else  {  LoadInKg = Lo * _wvar3.SegVol() * 1000.0 * 1e-9;       }
-                //    // kg      // ug/L          // m3    // L/m3  // kg/ug
-
-                //TotOOSLoad[DerivStep] = TotOOSLoad[_wvar3.DerivStep] + LoadInKg;
-                //ToxLoadH2O[DerivStep] = ToxLoadH2O[_wvar3.DerivStep] + LoadInKg;
 
                 Hyd = Hydrolysis();
                 Pho = Photolysis();
@@ -1335,24 +1349,6 @@ namespace AQUATOX.Chemicals
                         }
                     }
                 }
-
-                //ToTPoreWater = AQTSeg.GetStatePointer(AllVariables.PoreWater, T_SVType.StV, T_SVLayer.SedLayer1);  // Pore water interface
-                //if ((ToTPoreWater != null))
-                //{
-                //    if ((ToTPoreWater.VolumeInM3() > Consts.Tiny))
-                //    {
-                //        PWToxLevel = AQTSeg.GetState(AllVariables.PoreWater, ToxType, T_SVLayer.SedLayer1);
-                //        // ug/L pw
-                //        FracPoreWUp = ToTPoreWater.To_Above() / _wvar8.PWVol_Last_Step[T_SVLayer.SedLayer1];
-                //        // frac/d            // m3/m2 d                    // m3/m2
-                //        PoreWUp = PWToxLevel * FracPoreWUp * ToTPoreWater.VolumeInM3() / AQTSeg.SegVol();
-                //        // ug/L(wc) d =  ug/L pw * fraction/d *  m3 pw / m3 wc
-                //        // wc=watercolumn, pw=porewater
-
-                //        PoreWDown = State * ToTPoreWater.From_Above() * SedLayerArea() / SegVol();
-                //        // ug/L(wc) d  = ug/L wc *         m3/m2 d    *        m2      /     m3
-                //    }
-                //}
 
                 if (!ChemRec.BCFUptake)
                 {  //   Animal and plant sorption / desorption
@@ -1442,13 +1438,6 @@ namespace AQUATOX.Chemicals
                         {
                             PT = (AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.WaterCol)) as TToxics;
                             if (PT != null) Dep = Dep + PT.Depuration();
-
-                            //{  pore water code omitted
-                            //    //FracInWater = 1;
-                            //    if (SedModelRunning && (NsLoop >= Consts.FirstAnimal && NsLoop <= Consts.LastAnimal) && (ToTPoreWater.VolumeInM3() > Consts.Tiny))
-                            //        FracInWater = ((AQTSeg.GetStatePointer(NsLoop, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).PAnimalData.FracInWaterCol;
-                            //    Dep = Dep + PT.Depuration(); * FracInWater;
-                            //}
                         }
 
                     }  // If Not Estimate By BCF
@@ -1463,8 +1452,7 @@ namespace AQUATOX.Chemicals
                 DB = Lo - Hyd - Pho - Mic - Vl - ToxDis + Inflow + TDF + Mic_in_Aer + Mic_in_Anaer + DiffUp + DiffDown + DiffSed + Entr;
                 DB = DB + Decomp - DetrSorption + DetrDesorption - InorgSorpt + InorgDesorpt - GillSorption + Dep - PlantSorp + PoreWUp - PoreWDown;
             }  
-
-           //  Derivative_WriteRates();
+          Derivative_WriteRates();
         }
 
         public double WEffTox(double nondissoc)

@@ -238,6 +238,17 @@ namespace AQUATOX.Volume
             // to be negligable.  The toxicant in the pore waters is tracked
             double Evap = Evaporation();
 
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    this.ClearRate();
+                    this.SaveRate("Inflow", Inflow);
+                    this.SaveRate("Discharge", Discharg);
+                    this.SaveRate("Evap", Evap);
+                }
+            }
+
             switch (Calc_Method)
             {
                 case VolumeMethType.KeepConst:
@@ -278,7 +289,7 @@ namespace AQUATOX.Volume
 
             DeltaVolume();
             // change value of TotDischarge
-            // Write Rates for Output
+            Derivative_WriteRates();
 
             DB = Inflow - Discharg - Evap;
             if (Math.Abs(DB) < Globals.Consts.Small)

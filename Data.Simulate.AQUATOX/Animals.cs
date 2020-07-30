@@ -1909,107 +1909,6 @@ namespace AQUATOX.Animals
         }
     }
 
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    T_SVType ToxLoop;
-        //    Setup_Record 1 = AQTSeg.SetupRec;
-        //    if ((1.SaveBRates || 1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", Lo);
-        //        SaveRate("Consumption", Co);
-        //        SaveRate("Defecation", De);
-        //        SaveRate("Respiration", Re);
-        //        SaveRate("Excretion", Ex);
-        //        SaveRate("Fishing", Fi);
-        //        if (!IsPlanktonInvert())
-        //        {
-        //            SaveRate("Scour_Entrain", Entr);
-        //        }
-        //        if (IsInvertebrate() && IsPlanktonInvert())
-        //        {
-        //            if (AQTSeg.EstuarySegment)
-        //            {
-        //                SaveRate("Estuary.Entrain", En);
-        //            }
-        //            if (!AQTSeg.LinkedMode)
-        //            {
-        //                SaveRate("TurbDiff", TD);
-        //            }
-        //            else
-        //            {
-        //                SaveRate("DiffUp", DiffUp);
-        //                SaveRate("DiffDown", DiffDown);
-        //            }
-        //        }
-        //        SaveRate("Predation", Pr);
-        //        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
-        //        {
-        //            if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
-        //                SaveRate(Consts.PrecText(ToxLoop) + " Poisoned", MortRates.OrgPois[ToxLoop]);
-        //                // SaveRate(PrecText(ToxLoop)+' PrevFracKill', PrevFracKill[ToxLoop] );
-        //        }
-        //        // SaveRate('RedGrowth_LIM',AggregateRedGrowth);
-        //        // SaveRate('RedRepro_LIM',AggregateRedRepro);
-        //        SaveRate("Low O2 Mort", MortRates.O2Mort);
-        //        SaveRate("NH3 Mort", MortRates.NH3Mort);
-        //        SaveRate("NH4+ Mort", MortRates.NH4Mort);
-        //        if (AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) != -1)
-        //            SaveRate("Salt Mort", MortRates.SaltMort);
-        //        SaveRate("Other Mort", MortRates.OtherMort);
-        //        if (IsFish()) SaveRate("Susp. Sed. Mort", MortRates.SedMort);
-        //        SaveRate("Mortality", Mo);
-        //        SaveRate("GameteLoss", Ga);
-        //        SaveRate("Gametes", Gametes);
-        //        SaveRate("Washout-Drift", DrO);
-        //        if (AQTSeg.LinkedMode) SaveRate("DriftIn", DrI);
-
-        //        if ((NState >= AllVariables.SmallPI1) && (NState < AllVariables.Fish1))
-        //        {
-        //            // has potential to be size class animal
-        //            if ((State < Consts.Tiny) && (Loading < Consts.Tiny))
-        //            {
-        //                if (IsSmallFish() || IsSmallPI())
-        //                    SaveRate("Promotn. Loss", 0);
-        //                else
-        //                    SaveRate("Promotn. Gain", 0);
-        //                SaveRate("Recruit", 0);
-        //            }
-        //            else
-        //            {
-        //                if (IsSmallFish() || IsSmallPI())
-        //                    SaveRate("Promotn. Loss", PLs);
-        //                else
-        //                    SaveRate("Promotn. Gain", Pgn);
-        //                SaveRate("Recruit", Recr);
-        //            }
-        //        }
-        //        // Sm,Lg GameFish
-        //        if ((OysterCategory > 0))
-        //        {
-        //            // above veliger
-        //            if (OysterCategory > 1)      // gain from lower category
-        //                 SaveRate("Promotn. Gain", Pgn);
-        //            else  SaveRate("Recruit", Pgn);
-        //            // veliger gain from spawning
-        //            // below sack
-        //            if (OysterCategory < 4)
-        //                // promotion to higher category
-        //                SaveRate("Promotn. Loss", PLs);
-        //                else SaveRate("Spawning", PLs);
-        //            // sack "promotion" is spawning
-        //        }
-        //        if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15)   SaveRate("Recruit", Recr);
-        //        if ((PAnimalData.Animal_Type == "Benthic Insect"))  SaveRate("EmergeI", Emrg);
-
-        //        if (CanMigrate()) SaveRate("StratMigration", Migr);
-
-        //        SaveRate("GrowthRate", Co - De - Re - Ex);
-        //        SaveRate("GrowthRate2", Co - De - Re - Ex);
-        //    }
-        //}
 
         // --------------------------------------------------
         //public void Derivative_TrackMB()
@@ -2114,8 +2013,80 @@ namespace AQUATOX.Animals
         double DiffDown=0;
         double Entr=0;
         double En=0;
-        // --------------------------------------------------
-        T_SVType ToxLoop;
+
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                T_SVType ToxLoop;
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Consumption", Co);
+                    SaveRate("Defecation", De);
+                    SaveRate("Respiration", Re);
+                    SaveRate("Excretion", Ex);
+                    SaveRate("Fishing", Fi);
+                    if (!IsPlanktonInvert()) SaveRate("Scour_Entrain", Entr);
+
+                    SaveRate("Predation", Pr);
+                    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+                    {
+                        if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
+                            SaveRate("T"+((int)ToxLoop-1) + " Poisoned", MortRates.OrgPois[ToxInt(ToxLoop)]);
+                    }
+
+                    SaveRate("Low O2 Mort", MortRates.O2Mort);
+                    SaveRate("NH3 Mort", MortRates.NH3Mort);
+                    SaveRate("NH4+ Mort", MortRates.NH4Mort);
+                    if (AQTSeg.GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) != null)
+                        SaveRate("Salt Mort", MortRates.SaltMort);
+                    SaveRate("Other Mort", MortRates.OtherMort);
+                    if (IsFish()) SaveRate("Susp. Sed. Mort", MortRates.SedMort);
+                    SaveRate("Mortality", Mo);
+
+                    SaveRate("GameteLoss", Ga);
+                    SaveRate("Gametes", Gametes);
+                    SaveRate("Washout-Drift", DrO);
+
+                    if ((NState >= AllVariables.SmallPI1) && (NState < AllVariables.Fish1)) // has potential to be size class animal
+                    {
+                        if ((State < Consts.Tiny) && (Loading < Consts.Tiny))
+                        {
+                            if (IsSmallFish() || IsSmallPI())  SaveRate("Promotn. Loss", 0);
+                            else  SaveRate("Promotn. Gain", 0);
+                            SaveRate("Recruit", 0);
+                        }
+                        else
+                        {
+                            if (IsSmallFish() || IsSmallPI()) SaveRate("Promotn. Loss", PLs);
+                            else SaveRate("Promotn. Gain", Pgn);
+                            SaveRate("Recruit", Recr);
+                        }
+                    }  // Sm,Lg GameFish
+
+                    if ((OysterCategory > 0))
+                    {
+                        // above veliger
+                        if (OysterCategory > 1)      
+                             SaveRate("Promotn. Gain", Pgn); // gain from lower category
+                        else SaveRate("Recruit", Pgn); // this is veliger; gains from spawning
+                        
+                        
+                        if (OysterCategory < 4)  // below sack
+                             SaveRate("Promotn. Loss", PLs); // promotion to higher category
+                        else SaveRate("Spawning", PLs);    // this is sack; "promotion" is spawning
+                    }
+
+                    if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15) SaveRate("Recruit", Recr);
+                    if ((PAnimalData.Animal_Type == "Benthic Insect")) SaveRate("EmergeI", Emrg);
+
+                    SaveRate("GrowthRate", Co - De - Re - Ex);
+                    SaveRate("GrowthRate2", Co - De - Re - Ex);
+                }
+            }
+          //  --------------------------------------------------
+
 
         MortRates.OtherMort = 0;
         Fi = 0;
@@ -2123,7 +2094,7 @@ namespace AQUATOX.Animals
         En = 0;
         TrophicLevel = 2;
         // 4/14/2014 avoid zero trophic levels even if no food available
-        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+        for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
         {
             MortRates.OrgPois[ToxInt(ToxLoop)] = 0;
         }
@@ -2183,7 +2154,7 @@ namespace AQUATOX.Animals
         }
         // State>Tiny
 
-        //Derivative_WriteRates();
+        Derivative_WriteRates();
         //Derivative_TrackMB();
     }
 

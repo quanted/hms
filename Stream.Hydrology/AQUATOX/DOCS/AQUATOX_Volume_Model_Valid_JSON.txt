@@ -1066,7 +1066,7 @@
     "StoreStepSize": 1,
     "MinStepSize": 1,
     "RelativeError": 0.0005,
-    "SaveBRates": false,
+    "SaveBRates": true,
     "AlwaysWriteHypo": false,
     "ShowIntegration": false,
     "UseComplexedInBAF": false,

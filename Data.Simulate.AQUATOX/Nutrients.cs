@@ -1112,44 +1112,7 @@ namespace AQUATOX.Nutrients
 
             }
             // --------------------------------------------------
-            public void Derivative_WriteRates()
-            {
-                // PO4Obj
-                //Setup_Record _1 = AQTSeg.SetupRec;
-                //if ((_1.SaveBRates || _1.ShowIntegration))
-                //{
-                //    ClearRate();
-                //    SaveRate("State", State);
-                //    SaveRate("Load", Lo);
-                //    SaveRate("Remin", Remin);
-                //    SaveRate("Assim", Assm);
-                //    SaveRate("Washout", WaO);
-                //    SaveRate("WashIn", WaI);
-                //    if (!AQTSeg.LinkedMode)
-                //    {
-                //        SaveRate("TurbDiff", TD);
-                //    }
-                //    else
-                //    {
-                //        // If Not AQTSeg.CascadeRunning
-                //        // then
-                //        SaveRate("DiffUp", DiffUp);
-                //        SaveRate("DiffDown", DiffDown);
-                //    }
-                //    if (AQTSeg.EstuarySegment)
-                //    {
-                //        SaveRate("Entrainment", En);
-                //    }
-                //    if (PSed != null)
-                //    {
-                //        SaveRate("Diag_Flux", DiaFlx);
-                //    }
-                //    SaveRate("Sorpt.CaCO3", CaCO3srb);
-                //    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-                //}
-            }
 
-            // --------------------------------------------------
             public void Derivative_TrackMB()  // FIXME mass balance tracking
             {
                 // PO4Obj
@@ -1218,7 +1181,27 @@ namespace AQUATOX.Nutrients
             double En =0;
             double DiaFlx=0;
             double CaCO3srb=0;
-            TPO4_Sediment PSed;
+            TPO4_Sediment PSed = null;
+
+
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Remin", Remin);
+                    SaveRate("Assim", Assm);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    if (PSed != null)
+                    {
+                        SaveRate("Diag_Flux", DiaFlx);
+                    }
+                    SaveRate("Sorpt.CaCO3", CaCO3srb);
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                }
+            }
 
             // TrackMB
             // --------------------------------------------------
@@ -1377,55 +1360,6 @@ namespace AQUATOX.Nutrients
              return Remin;
             }
 
-            // --------------------------------------------------
-            public void Derivative_WriteRates()
-            {
-                //Setup_Record _1 = AQTSeg.SetupRec;
-                //if ((_1.SaveBRates || _1.ShowIntegration))
-                //{
-                //    ClearRate();
-                //    SaveRate("State", State);
-                //    SaveRate("Load", Lo);
-                //    SaveRate("Remin", Re);
-                //    SaveRate("Nitrif", Ni);
-                //    SaveRate("Assimil", Assm);
-                //    SaveRate("Washout", WaO);
-                //    SaveRate("WashIn", WaI);
-                //    if (!AQTSeg.LinkedMode)
-                //    {
-                //        SaveRate("TurbDiff", TD);
-                //    }
-                //    else
-                //    {
-                //        // If Not AQTSeg.CascadeRunning
-                //        // then
-                //        SaveRate("DiffUp", DiffUp);
-                //        SaveRate("DiffDown", DiffDown);
-                //    }
-                //    if (AQTSeg.EstuarySegment)
-                //    {
-                //        SaveRate("Entrainment", En);
-                //    }
-                //    if (NSed != null)
-                //    {
-                //        SaveRate("Diag_Flux", DiaFlx);
-                //    }
-                //    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-                //    // RELEASE 3.1 PLUS EXPLICIT AMMONIA REMINERALIZATION OUTPUT  JSC 8/16/2012
-                //    // SaveRate('PhotoResp',PhotoResp);
-                //    // SaveRate('DarkResp',DarkResp);
-                //    // SaveRate('AnimExcr',AnimExcr);
-                //    // SaveRate('AnimPredn',AnimPredn);
-                //    // SaveRate('NutrRelColonization',SvNutrRelColonization);
-                //    // SaveRate('NutrRelMortality',SvNutrRelMortality);
-                //    // SaveRate('NutrRelGamLoss',SvNutrRelGamLoss);
-                //    // SaveRate('NutrRelPeriScr',SvNutrRelPeriScr);
-                //    // SaveRate('NutrRelPlantSink',SvNutrRelPlantSink);
-                //    // SaveRate('NutrRelDefecation',SvNutrRelDefecation);
-                //    // SaveRate('DetritalDecomp',SvSumDetrDecomp);
-                //    // RELEASE 3.1 PLUS EXPLICIT AMMONIA REMINERALIZATION OUTPUT  JSC 8/16/2012
-                // }
-            }
 
             // --------------------------------------------------
             public void Derivative_TrackMB()
@@ -1497,21 +1431,51 @@ namespace AQUATOX.Nutrients
                 double DiffDown=0;
                 double En=0;
                 double DiaFlx=0;
-                TNH4_Sediment NSed;
+                TNH4_Sediment NSed = null;
 
-            // TrackMB
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Remin", Re);
+                    SaveRate("Nitrif", Ni);
+                    SaveRate("Assimil", Assm);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    if (NSed != null)
+                    {
+                        SaveRate("Diag_Flux", DiaFlx);
+                    }
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+
+                    // RELEASE 3.1 PLUS EXPLICIT AMMONIA REMINERALIZATION OUTPUT  JSC 8/16/2012
+                    SaveRate("PhotoResp", PhotoResp);
+                    SaveRate("DarkResp", DarkResp);
+                    SaveRate("AnimExcr", AnimExcr);
+                    SaveRate("AnimPredn", AnimPredn);
+                    SaveRate("NutrRelColonization", SvNutrRelColonization);
+                    SaveRate("NutrRelMortality", SvNutrRelMortality);
+                    SaveRate("NutrRelGamLoss", SvNutrRelGamLoss);
+                    SaveRate("NutrRelPeriScr", SvNutrRelPeriScr);
+                    SaveRate("NutrRelPlantSink", SvNutrRelPlantSink);
+                    SaveRate("NutrRelDefecation", SvNutrRelDefecation);
+                    SaveRate("DetritalDecomp", SvSumDetrDecomp);
+                    // RELEASE 3.1 PLUS EXPLICIT AMMONIA REMINERALIZATION OUTPUT  JSC 8/16/2012
+                }
+            }
             // --------------------------------------------------
             // NH4Obj.Derivative
 
-                Lo = Loading;
+            Lo = Loading;
                 DB = 0;
                 if (AQTSeg.PSetup.AmmoniaIsDriving)
                 {
-                    State = Loading;
+                    State = Loading;                      // 5/24/2013  Ammonia as a driving variable
                     Derivative_WriteRates();
-                    // 5/24/2013  Ammonia as a driving variable
                     return;
-                    // 5/24/2013  Ammonia as a driving variable
                 }
                 Re = Remineralization();
                 Ni = Nitrification();
@@ -1620,42 +1584,6 @@ namespace AQUATOX.Nutrients
                 return Denitrify;
             }
 
-            // --------------------------------------------------
-            public void Derivative_WriteRates()
-            {
-                //Setup_Record _1 = AQTSeg.SetupRec;  // FIXME Output Rates
-                //if ((_1.SaveBRates || _1.ShowIntegration))
-                //{
-                //    ClearRate();
-                //    SaveRate("State", State);
-                //    SaveRate("Load", Lo);
-                //    SaveRate("Nitrif", Nitr);
-                //    SaveRate("DeNitrif", Denitr);
-                //    SaveRate("NO3Assim", NO3Assim);
-                //    SaveRate("Washout", WaO);
-                //    SaveRate("WashIn", WaI);
-                //    if (!AQTSeg.LinkedMode)
-                //    {
-                //        SaveRate("TurbDiff", TD);
-                //    }
-                //    else
-                //    {
-                //        // If Not AQTSeg.CascadeRunning
-                //        // then
-                //        SaveRate("DiffUp", DiffUp);
-                //        SaveRate("DiffDown", DiffDown);
-                //    }
-                //    if (AQTSeg.EstuarySegment)
-                //    {
-                //        SaveRate("Entrainment", En);
-                //    }
-                //    if (N2Sed != null)
-                //    {
-                //        SaveRate("Diag_Flux", DiaFlx);
-                //    }
-                //    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-                //}
-            }
 
         // --------------------------------------------------
         //public void Derivative_TrackMB()  FIXME MB Tracking
@@ -1743,6 +1671,24 @@ namespace AQUATOX.Nutrients
                 TNO3_Sediment N2Sed;
 
             // TrackMB
+
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Nitrif", Nitr);
+                    SaveRate("DeNitrif", Denitr);
+                    SaveRate("NO3Assim", NO3Assim);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    if (N2Sed != null) SaveRate("Diag_Flux", DiaFlx);
+
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                }
+            }
             // --------------------------------------------------
             // NO3Obj.Derivative
 
@@ -1789,8 +1735,8 @@ namespace AQUATOX.Nutrients
             
                 DB = Lo + Nitr - Denitr - NO3Assim - WaO + WaI + TD + DiffUp + DiffDown + En + DiaFlx;
 
-                // Derivative_WriteRates();
-                // Derivative_TrackMB();  // FIXME RATES TRACKING
+                Derivative_WriteRates();
+                // Derivative_TrackMB();  
             }
 
         } // TNO3Obj
@@ -1859,38 +1805,7 @@ namespace AQUATOX.Nutrients
 
         // Winberg
         // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record _1 = AQTSeg.SetupRec;
-        //    if ((_1.SaveBRates || _1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", Lo);
-        //        SaveRate("DetDecmp", De);
-        //        SaveRate("Respiration", Re);
-        //        SaveRate("CO2Assim", CO2Assim);
-        //        SaveRate("AtmosEx", AE);
-        //        SaveRate("Washout", WaO);
-        //        SaveRate("WashIn", WaI);
-        //        if (!AQTSeg.LinkedMode)
-        //        {
-        //            SaveRate("TurbDiff", TD);
-        //        }
-        //        else
-        //        {
-        //            // If Not AQTSeg.CascadeRunning
-        //            // then
-        //            SaveRate("DiffUp", DiffUp);
-        //            SaveRate("DiffDown", DiffDown);
-        //        }
-        //        if (AQTSeg.EstuarySegment)
-        //        {
-        //            SaveRate("Entrainment", En);
-        //        }
-        //        SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-        //    }
-        //}
+
 
         public override void Derivative(ref double DB)
         {
@@ -1908,6 +1823,23 @@ namespace AQUATOX.Nutrients
             double En;
             const double CO2Biomass = 0.526;
             // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("DetDecmp", De);
+                    SaveRate("Respiration", Re);
+                    SaveRate("CO2Assim", CO2Assim);
+                    SaveRate("AtmosEx", AE);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                }
+            }
+            // --------------------------------------------------
+
             // CO2Obj.Derivative
             CO2Assim = 0;
             Re = 0;
@@ -1954,7 +1886,7 @@ namespace AQUATOX.Nutrients
             //}
             DB = Lo + Re + De - CO2Assim + AE - WaO + WaI + TD + DiffUp + DiffDown + En;
 
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
         }
 
         //Constructor  Init( Ns,  SVT,  aName,  P,  IC,  IsTempl)
@@ -2211,43 +2143,6 @@ namespace AQUATOX.Nutrients
         }
         // ---------------------------------------------------------------------------------
 
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record _1 = AQTSeg.SetupRec;
-        //    if ((_1.SaveBRates || _1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", Lo);
-        //        if (!AQTSeg.LinkedMode)
-        //        {
-        //            SaveRate("TurbDiff", TD);
-        //        }
-        //        else
-        //        {
-        //            // If Not AQTSeg.CascadeRunning
-        //            // then
-        //            SaveRate("DiffUp", DiffUp);
-        //            SaveRate("DiffDown", DiffDown);
-        //        }
-        //        SaveRate("Photosyn", Pho);
-        //        SaveRate("Reaer", Reae);
-        //        SaveRate("CBOD", BOD);
-        //        SaveRate("Respiration", Resp);
-        //        SaveRate("Nitrific", Nitr);
-        //        SaveRate("Washout", WaO);
-        //        SaveRate("WashIn", WaI);
-        //        SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-        //        if (AQTSeg.EstuarySegment)
-        //        {
-        //            SaveRate("Entrainment", En);
-        //        }
-        //        if (AQTSeg.Diagenesis_Included())
-        //        {
-        //            SaveRate("SOC", SOC2);
-        //        }
-        //    }
-        //}
 
         // --------------------------------------------------
         public void Derivative_SetAnoxicVar()
@@ -2298,7 +2193,29 @@ namespace AQUATOX.Nutrients
             double WaI = 0;
             double En = 0;
             //double DarkResp = 0;
-            //            TStates OtherSegment;
+            // TStates OtherSegment;
+
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Photosyn", Pho);
+                    SaveRate("Reaer", Reae);
+                    SaveRate("CBOD", BOD);
+                    SaveRate("Respiration", Resp);
+                    SaveRate("Nitrific", Nitr);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                    if (AQTSeg.Diagenesis_Included())
+                    {
+                        SaveRate("SOD", SOD2);
+                    }
+                }
+            }
+
             // --------------------------------------------------
             // TO2Obj.Deriv
 
@@ -2358,7 +2275,7 @@ namespace AQUATOX.Nutrients
             WaI = 0;
         }
         DB = Lo + Reae + Pho - BOD - SOD2 - Resp - Nitr - WaO + WaI + TD + DiffUp + DiffDown + En;
-//          Derivative_WriteRates();
+        Derivative_WriteRates();
         Derivative_SetAnoxicVar();
         }
 

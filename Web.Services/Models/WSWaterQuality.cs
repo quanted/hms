@@ -825,7 +825,7 @@ namespace Web.Services.Models
                 AQTNutrientsModel output = new AQTNutrientsModel(ref textString,out errorMsg, false);
                 //Import ammonia sample output as the input for the boundary condition
                 DateTime iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.AQSim.AQTSeg.SV[0].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[0].SVoutput.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -836,7 +836,7 @@ namespace Web.Services.Models
                 }
                 //Import nitrate sample output as the input for the boundary condition
                 iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.AQSim.AQTSeg.SV[1].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[1].SVoutput.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -879,9 +879,9 @@ namespace Web.Services.Models
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput ammonia = oFactory.Initialize();
             ITimeSeriesOutput nitrate = oFactory.Initialize();
-            ammonia.Data = model.AQSim.AQTSeg.SV[0].output.Data;
+            ammonia.Data = model.AQSim.AQTSeg.SV[0].SVoutput.Data;
             this.completedAmmonia.Add(comid, ammonia);
-            nitrate.Data = model.AQSim.AQTSeg.SV[1].output.Data;
+            nitrate.Data = model.AQSim.AQTSeg.SV[1].SVoutput.Data;
             this.completedNitrate.Add(comid, nitrate);
         }
     }

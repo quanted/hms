@@ -7,7 +7,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
 using Data;
 using System.ComponentModel;
-
+using System.Collections.Generic;
 
 namespace GUI.AQUATOX
 {
@@ -76,7 +76,6 @@ namespace GUI.AQUATOX
 
         {
             TStateVariable TSV1 = null;
-            string outtxt = "Date, ";
             bool SuppressText = true;
 
             //outtxt = outtxt + "Times: ";
@@ -86,42 +85,52 @@ namespace GUI.AQUATOX
 
             chart1.Series.Clear();
             int sercnt = 0;
+            string outtxt = "";
 
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.output != null)
+            foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.SVoutput != null)
             {
-                TSV1 = TSV; // identify TSV with output that is not null
+                TSV1 = TSV; // identify TSV1 with an output that is not null
                 int cnt = 0;
-                Series ser = chart1.Series.Add(TSV.PName);
-                outtxt = outtxt + TSV.PName.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+                if (sercnt == 0) outtxt = "Date, ";
 
-                ser.ChartType = SeriesChartType.Line;
-                ser.BorderWidth = 2;
-                ser.MarkerStyle = MarkerStyle.Diamond;
-                ser.Enabled = false;
-                sercnt++;
+                List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
+                for (int col = 1; col<= vallist.Count() ; col++)
+                    {
+                        string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " "+ 
+                             TSV.SVoutput.Metadata["Name_" + col.ToString()] +
+                             " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+                        Series ser = chart1.Series.Add(sertxt);
 
-                SuppressText = (TSV.output.Data.Keys.Count > 5000);
-                for (int i = 0; i < TSV.output.Data.Keys.Count; i++)
-                {
-                    ITimeSeriesOutput ito = TSV.output;
-                    string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                    ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
-                    cnt++;
-                }
+                        if (col==1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
 
+                        ser.ChartType = SeriesChartType.Line;
+                        ser.BorderWidth = 2;
+                        ser.MarkerStyle = MarkerStyle.Diamond;
+                        ser.Enabled = false;
+                        sercnt++;
+
+                        SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
+                        for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
+                        {
+                            ITimeSeriesOutput ito = TSV.SVoutput;
+                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col-1]);
+                            ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
+                            cnt++;
+                        }
+                    }
             }
 
             outtxt = outtxt + Environment.NewLine;
 
             if (!SuppressText)
             {
-                for (int i = 0; i < TSV1.output.Data.Keys.Count; i++)
+                for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
                 {
                     bool writedate = true;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.output != null)
+                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.SVoutput != null)
                         {
-                        ITimeSeriesOutput ito = TSV.output;
+                        ITimeSeriesOutput ito = TSV.SVoutput;
                         if (writedate)
                         {
                             string datestr = ito.Data.Keys.ElementAt(i).ToString();

@@ -1372,88 +1372,6 @@ namespace AQUATOX.Plants
             return PSlough;
         }
 
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    T_SVType ToxLoop;
-        //    Setup_Record 1 = AQTSeg.PSetup;
-        //    if ((1.SaveBRates || 1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", L);
-        //        SaveRate("Photosyn", Pho);
-        //        SaveRate("Respir", R);
-        //        SaveRate("Excret", Ex);
-        //        for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
-        //        {
-        //            if (AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) != null)
-        //            {
-        //                SaveRate(Consts.PrecText(ToxLoop) + " Poisoned", MortRates.OrgPois[ToxLoop]);
-        //            }
-        //        }
-        //        SaveRate("Other Mort", MortRates.OtherMort);
-        //        if (AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) != -1)
-        //        {
-        //            SaveRate("Salt Mort", MortRates.SaltMort);
-        //        }
-        //        SaveRate("Predation", Pr);
-        //        SaveRate("Washout", WO);
-        //        if (AQTSeg.LinkedMode)
-        //        {
-        //            SaveRate("Washin", WI);
-        //        }
-        //        SaveRate("NetBoundary", L + WI - WO + En + DiffUp + DiffDown + TD);
-        //        if ((IsPeriphyton()))
-        //        {
-        //            SaveRate("SedtoPeri", Sed2Me);
-        //        }
-        //        SaveRate("Sediment", S);
-        //        if (IsPhytoplankton())
-        //        {
-        //            SaveRate("PeriScour", PeriScr);
-        //            if (AQTSeg.EstuarySegment)
-        //            {
-        //                SaveRate("Entrainment", En);
-        //            }
-        //            if (!AQTSeg.LinkedMode)
-        //            {
-        //                SaveRate("TurbDiff", TD);
-        //            }
-        //            else
-        //            {
-        //                // If not AQTSeg.CascadeRunning then
-        //                SaveRate("DiffUp", DiffUp);
-        //                SaveRate("DiffDown", DiffDown);
-        //            }
-        //        }
-        //        if (!IsPhytoplankton())
-        //        {
-        //            SaveRate("Sloughing", Slg);
-        //        }
-        //        SaveRate("SinkToHypo", STH);
-        //        SaveRate("SinkFromEpi", SFE);
-        //        SaveRate("Lt_LIM", Lt_Limit);
-        //        SaveRate("N_LIM", N_Limit);
-        //        SaveRate("PO4_LIM", PO4_Limit);
-        //        SaveRate("CO2_LIM", CO2_Limit);
-        //        SaveRate("Nutr_LIM", Nutr_Limit);
-        //        SaveRate("Temp_LIM", Temp_Limit);
-        //        SaveRate("Chem_LIM", Chem_Limit);
-        //        if ((IsPeriphyton()))
-        //        {
-        //            SaveRate("Vel_LIM", Vel_Limit);
-        //        }
-        //        SaveRate("LowLt_LIM", LowLt_Limit);
-        //        SaveRate("HighLt_LIM", HighLt_Limit);
-        //        if (SurfaceFloater)
-        //        {
-        //            SaveRate("Floating", Fl);
-        //        }
-        //    }
-        //}
-
-        // --------------------------------------------------
         //public void Derivative_TrackMB()
         //{
         //    double NutrFrac;
@@ -1559,8 +1477,64 @@ namespace AQUATOX.Plants
             double PeriScr= 0;
             double Sed2Me= 0;
             double Fl= 0;
+            double L = 0;
             //bool Trackit;
             bool SurfaceFloater;
+            
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                T_SVType ToxLoop;
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", L);
+                    SaveRate("Photosyn", Pho);
+                    SaveRate("Respir", R);
+                    SaveRate("Excret", Ex);
+                    for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+                    {
+                        if (AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) != null)
+                            SaveRate("T" + ((int)ToxLoop - 1) + " Poisoned", MortRates.OrgPois[ToxInt(ToxLoop)]);
+
+                    }
+                    SaveRate("Other Mort", MortRates.OtherMort);
+                    if (AQTSeg.GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) != null)
+                        SaveRate("Salt Mort", MortRates.SaltMort);
+
+                    SaveRate("Predation", Pr);
+                    SaveRate("Washout", WO);
+                    SaveRate("NetBoundary", L + WI - WO + En + DiffUp + DiffDown + TD);
+                    if ((IsPeriphyton()))
+                        SaveRate("SedtoPeri", Sed2Me);
+
+                    SaveRate("Sediment", S);
+                    if (IsPhytoplankton())
+                        SaveRate("PeriScour", PeriScr);
+ 
+                    if (!IsPhytoplankton())
+                        SaveRate("Sloughing", Slg);
+
+                    SaveRate("SinkToHypo", STH);
+                    SaveRate("SinkFromEpi", SFE);
+                    SaveRate("Lt_LIM", Lt_Limit);
+                    SaveRate("N_LIM", N_Limit);
+                    SaveRate("PO4_LIM", PO4_Limit);
+                    SaveRate("CO2_LIM", CO2_Limit);
+                    SaveRate("Nutr_LIM", Nutr_Limit);
+                    SaveRate("Temp_LIM", Temp_Limit);
+                    SaveRate("Chem_LIM", Chem_Limit);
+                    if ((IsPeriphyton()))
+                        SaveRate("Vel_LIM", Vel_Limit);
+
+                    SaveRate("LowLt_LIM", LowLt_Limit);
+                    SaveRate("HighLt_LIM", HighLt_Limit);
+                    if (SurfaceFloater)
+                        SaveRate("Floating", Fl);
+
+                }
+            }
+
             // --------------------------------------------------
             int ToxLoop;
 
@@ -1577,7 +1551,7 @@ namespace AQUATOX.Plants
             // signal to not write mass balance tracking
 
             SurfaceFloater = PAlgalRec.SurfaceFloating;
-            double L = Loading;
+            L = Loading;
             // WI = Washin();
             M = Mortality();  // Mortality calculated first for Chronic Effect Calculation
             Pho = Photosynthesis();
@@ -1620,7 +1594,7 @@ namespace AQUATOX.Plants
                 DB = DB - Slg;
             }
 
-            // Derivative_WriteRates();
+            Derivative_WriteRates();
             // if (Trackit)  Derivative_TrackMB();
 
         }
@@ -1709,27 +1683,19 @@ namespace AQUATOX.Plants
             {
                 KCapEffect = 1.0 - (State - 0.9 * KCap) / (0.1 * KCap);
                 if (KCapEffect < 0)
-                {
                     KCapEffect = 0;
-                }
+
             }
             if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
-            {
                 NL = NutrLimit();   // JSC 8-12-2002
-            }
             else
-            {
                 NL = 1.0; // floating macrophytes are not subject to light limitation
-            }
-            
+
             if ((MacroType == TMacroType.Benthic))
-            {
                 LL = LtLimit(AQTSeg.PSetup.ModelTSDays);
-            }
             else
-            {
                 LL = 1.0;
-            }
+
             PlantRecord PR = PAlgalRec;
             TCorrValue = AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax);
             AggFP = AggregateFracPhoto();
@@ -1742,13 +1708,9 @@ namespace AQUATOX.Plants
             // frac littoral limitation applies to benthic and rooted floating macrophytes only
             FracLit = Location.FracLittoral(AQTSeg.ZEuphotic(), AQTSeg.Volume_Last_Step);
             if ((MacroType != TMacroType.Freefloat))
-            {
                 return SaltEffect * FracLit * Photosyn * HabitatLimit * KCapEffect;
-            }
             else
-            {
                 return SaltEffect * Photosyn * HabitatLimit * KCapEffect;
-            }
         }    
 
         public override double Washout()  // HMS  multi-segment water flow logic disabled
@@ -1773,46 +1735,6 @@ namespace AQUATOX.Plants
 
 //         WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
         }
-
-
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record 1 = AQTSeg.PSetup;
-        //    if ((1.SaveBRates || 1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", L);
-        //        SaveRate("Photosyn", Pho);
-        //        SaveRate("Respir", R);
-        //        SaveRate("Excret", Ex);
-        //        SaveRate("Mort", M);
-        //        SaveRate("Predation", Pr);
-        //        SaveRate("Breakage", Br);
-        //        if (MacroType == TMacroType.Freefloat)
-        //        {
-        //            SaveRate("Washout", WO);
-        //            if (AQTSeg.LinkedMode)
-        //            {
-        //                SaveRate("Washin", WI);
-        //            }
-        //            SaveRate("NetBoundary", L + WI - WO);
-        //        }
-        //        SaveRate("Lt_LIM", Lt_Limit);
-        //        if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
-        //        {
-        //            SaveRate("Nutr_LIM", Nutr_Limit);
-        //            SaveRate("N_LIM", N_Limit);
-        //            SaveRate("PO4_LIM", PO4_Limit);
-        //            SaveRate("CO2_LIM", CO2_Limit);
-        //        }
-        //        SaveRate("Temp_LIM", Temp_Limit);
-        //        SaveRate("Chem_LIM", Chem_Limit);
-        //        SaveRate("LowLt_LIM", LowLt_Limit);
-        //        SaveRate("HighLt_LIM", HighLt_Limit);
-        //    }
-        //}
 
         //// --------------------------------------------------
         //public void Derivative_TrackMB()
@@ -1854,7 +1776,7 @@ namespace AQUATOX.Plants
 
         public override void Derivative(ref double DB)
         {
-            double L;
+            double L =0 ;
             double Pho = 0;
             double R = 0;
             double Ex = 0;
@@ -1863,6 +1785,39 @@ namespace AQUATOX.Plants
             double Br = 0;
             double WO = 0;
             double WI = 0;
+
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", L);
+                    SaveRate("Photosyn", Pho);
+                    SaveRate("Respir", R);
+                    SaveRate("Excret", Ex);
+                    SaveRate("Mort", M);
+                    SaveRate("Predation", Pr);
+                    SaveRate("Breakage", Br);
+                    if (MacroType == TMacroType.Freefloat)
+                    {
+                        SaveRate("Washout", WO);
+                        SaveRate("NetBoundary", L + WI - WO);
+                    }
+                    SaveRate("Lt_LIM", Lt_Limit);
+                    if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
+                    {
+                        SaveRate("Nutr_LIM", Nutr_Limit);
+                        SaveRate("N_LIM", N_Limit);
+                        SaveRate("PO4_LIM", PO4_Limit);
+                        SaveRate("CO2_LIM", CO2_Limit);
+                    }
+                    SaveRate("Temp_LIM", Temp_Limit);
+                    SaveRate("Chem_LIM", Chem_Limit);
+                    SaveRate("LowLt_LIM", LowLt_Limit);
+                    SaveRate("HighLt_LIM", HighLt_Limit);
+                }
+            }
             // --------------------------------------------------
 
             L = Loading;
@@ -1891,7 +1846,7 @@ namespace AQUATOX.Plants
                 DB = L + Pho - R - Ex - M - Pr - WO + WI - Br;
             }
 
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
 
             // floating
@@ -2001,76 +1956,6 @@ namespace AQUATOX.Plants
             return NPSlough;
         }
 
-
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record 1 = AQTSeg.PSetup;
-        //    if ((1.SaveBRates || 1.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Loading", Lo);
-        //        SaveRate("Uptake", Uptk);
-        //        SaveRate("Mortality", Mort);
-        //        SaveRate("Respiration", Rsp);
-        //        SaveRate("Excretion", Exc);
-        //        SaveRate("Predation", Predt);
-        //        if ((NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae) && (((AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol)) as TPlant).IsPhytoplankton()))
-        //        {
-        //            if (!AQTSeg.LinkedMode)
-        //            {
-        //                SaveRate("TurbDiff", TD);
-        //            }
-        //            else
-        //            {
-        //                // If Not AQTSeg.CascadeRunning then
-        //                SaveRate("DiffUp", DiffUp);
-        //                SaveRate("DiffDown", DiffDown);
-        //            }
-        //        }
-        //        if ((NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae) && (!CP.IsPhytoplankton()))
-        //        {
-        //            SaveRate("ToxDislodge", ToxD);
-        //        }
-        //        if (!(NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
-        //        {
-        //            SaveRate("Washout", WashO);
-        //            SaveRate("Washin", WashI);
-        //            SaveRate("SinkToHyp", STH);
-        //            SaveRate("SinkFromEp", SFE);
-        //            if (SurfaceFloater)
-        //            {
-        //                SaveRate("Floating", Flt);
-        //            }
-        //            if (AQTSeg.EstuarySegment)
-        //            {
-        //                SaveRate("Entrainment", Entr);
-        //            }
-        //            SaveRate("NetBoundary", Lo + WashI - WashO + DiffUp + Entr + DiffDown + TD);
-        //        }
-        //        if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
-        //        {
-        //            SaveRate("Washout", WashO);
-        //            SaveRate("Washin", WashI);
-        //            SaveRate("NetBoundary", Lo + WashI - WashO + DiffUp + DiffDown + TD);
-        //            SaveRate("Mac Break", MacBrk);
-        //        }
-        //        if ((CP.IsPeriphyton()))
-        //        {
-        //            SaveRate("Sed to Phyt", Sed2Me);
-        //        }
-        //        if (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae)
-        //        {
-        //            SaveRate("Peri Slough", Slgh);
-        //            SaveRate("Sediment", Sed);
-        //        }
-        //        if ((SVType == T_SVType.NIntrnl) && (NState >= Consts.FirstBlGreen && NState <= Consts.LastBlGreen))
-        //        {
-        //            SaveRate("N Fixation", FixN);
-        //        }
-        //    }
-        //}
-
         public override void Derivative(ref double DB)
         {
             TPlant CP;
@@ -2113,14 +1998,67 @@ namespace AQUATOX.Plants
             double Exc2 = 0;
             double Rsp = 0;
             double FixN = 0;
-//            double SegVolSave = 0;
+//          double SegVolSave = 0;
             double Sed2Me = 0;
             double MacBrk = 0;
             double Slgh = 0;
             double Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-//            double LoadInKg = 0;
+//          double LoadInKg = 0;
             bool SurfaceFloater;
+
             // ----------------------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Loading", Lo);
+                    SaveRate("Uptake", Uptk);
+                    SaveRate("Mortality", Mort);
+                    SaveRate("Respiration", Rsp);
+                    SaveRate("Excretion", Exc);
+                    SaveRate("Predation", Predt);
+
+                    if ((NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae) && (!CP.IsPhytoplankton()))
+                    {
+                        SaveRate("ToxDislodge", ToxD);
+                    }
+                    if (!(NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
+                    {
+                        SaveRate("Washout", WashO);
+                        //SaveRate("Washin", WashI);
+                        SaveRate("SinkToHyp", STH);
+                        SaveRate("SinkFromEp", SFE);
+                        if (SurfaceFloater)
+                        {
+                            SaveRate("Floating", Flt);
+                        }
+
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr);  //  DiffUp + DiffDown + TD;
+                    }
+                    if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
+                    {
+                        SaveRate("Washout", WashO);
+                        //SaveRate("Washin", WashI);
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr);  //  DiffUp + DiffDown + TD;
+                        SaveRate("Mac Break", MacBrk);
+                    }
+                    if ((CP.IsPeriphyton()))
+                        SaveRate("Sed to Phyt", Sed2Me);
+
+                    if (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae)
+                    {
+                        SaveRate("Peri Slough", Slgh);
+                        SaveRate("Sediment", Sed);
+                    }
+
+                    if ((SVType == T_SVType.NIntrnl) && (NState >= Consts.FirstBlGreen && NState <= Consts.LastBlGreen))
+                        SaveRate("N Fixation", FixN);
+
+                }
+            }
+            // ----------------------------------------------------------------
+
             SurfaceFloater = CP.PAlgalRec.SurfaceFloating;
             if ((CP.State < Consts.Tiny))
             {
@@ -2216,8 +2154,7 @@ namespace AQUATOX.Plants
             // Phytoplankton are subject to currents , diffusion & TD
             // HMS eliminated turbulent diffusion and linked-segment diffusion as irrelevant to 0D Model
 
-            //if (NState >= Consts.FirstPlant && NState <= Consts.LastPlant)
-            //{   Derivative_WriteRates();    }
+            Derivative_WriteRates();    
         }
 
 

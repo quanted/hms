@@ -139,7 +139,7 @@ namespace AQUATOX.Bioaccumulation
         //}
 
         // ----------------------------------------------------------
-        public void Derivative_MortalityToDetrTox_SumMortTox(ref double MortTox, AllVariables ns, TOrganism POr)
+        public void MortalityToDetrTox_SumMortTox(ref double MortTox, AllVariables ns, TOrganism POr)
         {
             TDetritus DP;
             double Mort2Detr;
@@ -190,7 +190,7 @@ namespace AQUATOX.Bioaccumulation
             MortTox = 0;
             
             foreach (TOrganism TO in AQTSeg.SV.OfType<TOrganism>())
-                    Derivative_MortalityToDetrTox_SumMortTox(ref MortTox, ns, TO);
+                    MortalityToDetrTox_SumMortTox(ref MortTox, ns, TO);
 
             return MortTox;
         }
@@ -231,11 +231,11 @@ namespace AQUATOX.Bioaccumulation
 
         public override void Derivative(ref double DB)
         {
-//            double M2_L() { return Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000); }
+            //            double M2_L() { return Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000); }
 
             // DERIVATIVE FOR TOXICANT IN DETRITUS
             TRemineralize CP;
-            double Lo=0;
+            double Lo = 0;
             double So = 0;
             double Des = 0;
             double Co = 0;
@@ -256,7 +256,7 @@ namespace AQUATOX.Bioaccumulation
             double ToPW = 0;
             double PWExp = 0;
             double Entr = 0;
-            double FracAerobic =0;
+            double FracAerobic = 0;
             double Mic_in_Aer = 0;
             double Mic_in_Anaer = 0;
             double Resusp = 0;
@@ -274,6 +274,61 @@ namespace AQUATOX.Bioaccumulation
             AllVariables SuspDetrVar;
 
             // ----------------------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("Hydrolysis", Hydr);
+                    SaveRate("MicrobMet", MM);
+                    SaveRate("AerMM In", Mic_in_Aer);
+                    SaveRate("AnaerMM In", Mic_in_Anaer);
+
+                    if (!(NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr))  // if suspended or dissolved sediment
+                    {
+                        SaveRate("Photol", Photo);
+                        SaveRate("Washout", WashO);
+                        SaveRate("Washin", WashI);
+                        SaveRate("MortToDetr", MTD);
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr + DiffUp + DiffDown + TD);
+                    }
+
+                    if (NState >= AllVariables.SedmRefrDetr && NState <= AllVariables.SedmLabDetr)
+                    {
+                        SaveRate("SumDef", SumDef);
+                        SaveRate("SumPlantSed", SumSed);
+                    }
+
+                    if (NState >= AllVariables.SuspRefrDetr && NState <= AllVariables.SuspLabDetr)
+                    {
+                        SaveRate("SinkToHyp", STH);
+                        SaveRate("SinkFromEpi", SFE);
+                    }
+
+                    SaveRate("Sorption", So);
+                    SaveRate("Desorption", Des);
+                    if (!(NState == AllVariables.DissLabDetr)) SaveRate("ColRefr", Co);
+
+                    if (!(NState >= AllVariables.DissRefrDetr && NState <= AllVariables.DissLabDetr))
+                    {
+                        SaveRate("Ingest", Ing);
+                        SaveRate("Sediment", Sedm + DepT);
+                        SaveRate("ReSusp", Resusp);
+                    }
+
+                    if ((SedDetrVar != AllVariables.SedmRefrDetr))
+                        SaveRate("Decomp", Decmp);
+
+                    if ((NState == AllVariables.SuspLabDetr)) // not for refractory compartments
+                        SaveRate("GameteToDetr", GTD);
+
+                    if ((NState >= AllVariables.DissRefrDetr && NState <= AllVariables.DissLabDetr))
+                        SaveRate("SumExcrete", SETTD);
+                }
+            }
+
+            // -------------------------------------------------------------------------
 
             if (IsAGGR)  // chemical variable used to track the aggregation of other chemicals e.g. Total PCB
             {
@@ -454,11 +509,10 @@ namespace AQUATOX.Bioaccumulation
                     Co = Derivative_ColonizeDissRefrDetr() * AQTSeg.GetPPB(NState, SVType, Layer) * 1e-6;
 
                     DB = Lo + So - Des + MTD + SETTD + WashI - (WashO + Co) + Entr - Hydr - Photo - MM + TD + DiffUp + DiffDown + DiffSed + Mic_in_Aer + Mic_in_Anaer + PWExp - ToPW;
-                }
-                // DissRefrDetrTox
+                }  // DissRefrDetrTox
             }
+           Derivative_WriteRates();
         }
-
     } // end TParticleTox
 
     public class TPOCTox : TParticleTox
@@ -481,7 +535,25 @@ namespace AQUATOX.Bioaccumulation
             TPOC_Sediment CP;
             double PP;
             // ----------------------------------------------------------------
-            double FA=0;
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Sorption", So);
+                    SaveRate("Desorption", Des);
+                    SaveRate("Deposit Tox", DepTox);
+                    SaveRate("Mineraliz", Minrl);
+                    SaveRate("BurialTox", Bur);
+                    SaveRate("Predation", Pred);
+                    SaveRate("Hydrolysis", Hydr);
+                    SaveRate("MicrobMet", MM);
+                    SaveRate("AnaerMM In", Mic_In_Anaer);
+                }
+            }
+            // ----------------------------------------------------------------
+
+            double FA =0;
             double H2;
 
             CP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPOC_Sediment;
@@ -519,18 +591,16 @@ namespace AQUATOX.Bioaccumulation
                 // ug/m2 d
                 // input is ug/kg
             }
+          Derivative_WriteRates();
         }
     } // end TPOCTox
 
     public class TAlgaeTox : TSorbedTox
 
     {
-
         public TAlgaeTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
         {
         }
-
-
 
         // -------------------------------------------------------------------------
         public double PlantUptake()
@@ -689,6 +759,53 @@ namespace AQUATOX.Bioaccumulation
             double MacBrk = 0;
             double Slgh = 0;
             bool SurfaceFloater;
+
+            // ----------------------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Loading", Lo);
+                    if ((Carrier >= Consts.FirstAlgae && Carrier <= Consts.LastAlgae) && (!CP.IsPhytoplankton()))
+                    {
+                        SaveRate("ToxDislodge", ToxD);
+                    }
+                    SaveRate("Biotr IN", BioT_In);
+                    SaveRate("Biotr OUT", BioT_Out);
+                    if (!(NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
+                    {
+                        SaveRate("Washout", WashO);
+                        SaveRate("Washin", WashI);
+                        SaveRate("SinkToHyp", STH);
+                        SaveRate("SinkFromEp", SFE);
+                        if (SurfaceFloater)
+                            SaveRate("Floating", Flt);
+
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr);
+                    }
+                    if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
+                    {
+                        SaveRate("Washout", WashO);
+                        SaveRate("Washin", WashI);
+                        SaveRate("NetBoundary", Lo + WashI - WashO);
+                        SaveRate("Mac Break", MacBrk);
+                    }
+                    SaveRate("Uptake", Uptake);
+                    SaveRate("Mortality", Mort);
+                    SaveRate("Predation", Predt);
+                    SaveRate("Depuration", Dep);
+                    SaveRate("Excretion", Exc);
+                    if ((CP.IsPeriphyton()))
+                        SaveRate("Sed to Phyt", Sed2Me);
+
+                    if (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae)
+                    {
+                        SaveRate("Peri Slough", Slgh);
+                        SaveRate("Sediment", Sed);
+                    }
+                }
+            }
             // ----------------------------------------------------------------
             CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
             SurfaceFloater = CP.PAlgalRec.SurfaceFloating;
@@ -758,8 +875,8 @@ namespace AQUATOX.Bioaccumulation
                 // algae
             }
 
+            Derivative_WriteRates();
             // removed phytoplankton current and diffusion (multi-seg variable accounting code)
-
         }
 
     } // end TAlgaeTox
@@ -771,8 +888,8 @@ namespace AQUATOX.Bioaccumulation
         [JsonIgnore] public double RecrSaveTox = 0;  // recruitment for dothiseverystep.  (nosave)
 
         public TAnimalTox(AllVariables Ns, AllVariables Carry, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, Carry, SVT, L, aName, P, IC)
-    {
-    }
+        {
+        }
 
         // ---------------------------------------------------------------------------
         public override void Derivative(ref double DB)
@@ -800,116 +917,157 @@ namespace AQUATOX.Bioaccumulation
                 double EmergI = 0;
                 double Migr = 0;
                 AllVariables BigFishLoop;
-                // ----------------------------------------------------------------
-                AllVariables LargeCompartment;
-                AllVariables SmallCompartment;
 
-                // AnimalDeriv
-                CP = ((AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
-                if (ChemRec.BCFUptake)
+
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
                 {
-                    DB = 0;
-                    RecrSaveTox = 0;
+                    ClearRate();
+                    SaveRate("Loading", Lo);
+
+                    SaveRate("Biotr IN", BioT_in);
+                    SaveRate("Biotr OUT", BioT_out);
+
+                    CP = ((AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
+
+                    if (!CP.IsFish()) SaveRate("EmergInsct", EmergI);
+                    SaveRate("GillUptake", Gill);
+                    SaveRate("DietUptk", Diet);
+                    SaveRate("Depuration", Dep);
+                    // SaveRate('Defecation',Def);  Defecation is implicit in DietUptk
+                    SaveRate("Predation", Predt);
+                    SaveRate("Mortality", Mort);
+                    SaveRate("GameteLoss", Gam);
+                    SaveRate("FishingLoss", Fi);
+                    if (NState >= Consts.FirstInvert && NState <= Consts.LastInvert)
+                    {
+                        SaveRate("Drift", DrifO);
+                    }
+                    if (CP.IsFish())
+                    {
+                        if ((NState < AllVariables.Fish1))
+                        {
+                            // size class fish
+                            if (IsSmallFish())  SaveRate("Promotn. Loss", PLs);
+                            else                SaveRate("Promotn. Gain", PGn);
+                            SaveRate("Recruit", Recr);
+                        }
+                        if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15)
+                        {
+                            SaveRate("Recruit", Recr);
+                        }
+                    }
                 }
-                else
-                {
-                    Lo = Loading;
-                    pp = GetPPB(NState, SVType, Layer);
-
-                    // Removed Estuary entrainment code, migration code 
-
-                    EmergI = CP.EmergeInsect * pp * 1e-6;
-
-                    // removed accounting in kg code
-                
-                    DrifO = CP.Drift() * pp * 1e-6; // invertebrates only
-
-                    // removed accounting in kg code and ToxInCarrier Washin
-
-                    BioT_out = Biotransformation();
-                    BioT_in = Biotrans_To_This_Org();
-
-                    Gill = CP.GillUptake(SVType);
-
-                    // removed porew water gill uptake
-
-                    Diet = SumDietUptake();
-                    Dep = Depuration();
-                    Predt = CP.Predation() * pp * 1e-6;
-                    Mort = CP.Mortality() * pp * 1e-6;
-                    Fi = CP.PAnimalData.Fishing_Frac * CP.State * pp * 1e-6;
-
-                    if (CP.PSameSpecies != AllVariables.NullStateVar)
-                    {
-                        if (!CP.IsSmallFish())
-                        {
-                            LargeCompartment = CP.NState;
-                            SmallCompartment = CP.PSameSpecies;
-                        }
-                        else
-                        {
-                            LargeCompartment = CP.PSameSpecies;
-                            SmallCompartment = CP.NState;
-                        }
-                        Recr = CP.Recruit * GetPPB(LargeCompartment, SVType, Layer) * 1e-6;
-                        PGn = CP.PromoteGain * GetPPB(SmallCompartment, SVType, Layer) * 1e-6;
-                        PLs = CP.PromoteLoss * pp * 1e-6;
-                    }
-                    if ((CP.OysterCategory > 0))
-                    {
-                        if (CP.PromoteGain > Consts.Tiny)
-                        {
-                            SmallCompartment = ((CP.PYounger) as TAnimal).NState;
-                            PGn = CP.PromoteGain * GetPPB(SmallCompartment, SVType, Layer) * 1e-6;
-                        }
-                        if (CP.PromoteLoss > Consts.Tiny)
-                        {
-                            PLs = CP.PromoteLoss * pp * 1e-6;
-                        }
-                    }
-                    // Calculate Recruitment / Promotion for Multi-Age Fish
-                    if ((NState == AllVariables.Fish1))
-                    {
-                        // Calculate Tox movement through Recruitment to YOY of multi-age fish
-                        Recr = 0;
-                        for (BigFishLoop = AllVariables.Fish2; BigFishLoop <= AllVariables.Fish15; BigFishLoop++)
-                        {
-                            if (AQTSeg.GetStatePointer(BigFishLoop, T_SVType.StV, T_SVLayer.WaterCol) != null)
-                            {
-                                LgF = AQTSeg.GetStatePointer(BigFishLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                                LgF.GameteLoss();
-                                // call LgGF^.GameteLoss to get Recruit
-                                Recr = Recr - LgF.Recruit * GetPPB(BigFishLoop, SVType, T_SVLayer.WaterCol) * 1e-6;
-                                // sum recruitment from larger fish
-                            }
-                        }
-                    }
-                    // Fish1
-                    if (NState >= AllVariables.Fish2 && NState <= AllVariables.Fish15)
-                    {
-                        Recr = CP.Recruit * pp * 1e-6;
-                    }
-                    Gam = CP.GameteLoss() * pp * 1e-6;
-                // Must Be Called After Recr Calculation
-                // + Recr
-
-                if (AQTSeg.TPresent > Consts.StopDate)
-                {
-                    RecrSaveTox = RecrSaveTox + Consts.Tiny;  
-                }
-
-
-                    DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
-                    if ((AQTSeg.DerivStep == 5)) RecrSaveTox = Recr;
-                    // derivstep 5 is time X+h
-
-                    // removed multi-segment diffusion and turbulent diffusion from HMS (pelagic invertebrates)    
-
-                }
-                // Not Eutrophication
             }
 
+            // ----------------------------------------------------------------
+            AllVariables LargeCompartment;
+            AllVariables SmallCompartment;
 
+            // AnimalDeriv
+            CP = ((AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
+            if (ChemRec.BCFUptake)
+            {
+                DB = 0;
+                RecrSaveTox = 0;
+            }
+            else
+            {
+                Lo = Loading;
+                pp = GetPPB(NState, SVType, Layer);
+
+                // Removed Estuary entrainment code, migration code 
+
+                EmergI = CP.EmergeInsect * pp * 1e-6;
+
+                // removed accounting in kg code
+                
+                DrifO = CP.Drift() * pp * 1e-6; // invertebrates only
+
+                // removed accounting in kg code and ToxInCarrier Washin
+
+                BioT_out = Biotransformation();
+                BioT_in = Biotrans_To_This_Org();
+
+                Gill = CP.GillUptake(SVType);
+
+                // removed porew water gill uptake
+
+                Diet = SumDietUptake();
+                Dep = Depuration();
+                Predt = CP.Predation() * pp * 1e-6;
+                Mort = CP.Mortality() * pp * 1e-6;
+                Fi = CP.PAnimalData.Fishing_Frac * CP.State * pp * 1e-6;
+
+                if (CP.PSameSpecies != AllVariables.NullStateVar)
+                {
+                    if (!CP.IsSmallFish())
+                    {
+                        LargeCompartment = CP.NState;
+                        SmallCompartment = CP.PSameSpecies;
+                    }
+                    else
+                    {
+                        LargeCompartment = CP.PSameSpecies;
+                        SmallCompartment = CP.NState;
+                    }
+                    Recr = CP.Recruit * GetPPB(LargeCompartment, SVType, Layer) * 1e-6;
+                    PGn = CP.PromoteGain * GetPPB(SmallCompartment, SVType, Layer) * 1e-6;
+                    PLs = CP.PromoteLoss * pp * 1e-6;
+                }
+                if ((CP.OysterCategory > 0))
+                {
+                    if (CP.PromoteGain > Consts.Tiny)
+                    {
+                        SmallCompartment = ((CP.PYounger) as TAnimal).NState;
+                        PGn = CP.PromoteGain * GetPPB(SmallCompartment, SVType, Layer) * 1e-6;
+                    }
+                    if (CP.PromoteLoss > Consts.Tiny)
+                    {
+                        PLs = CP.PromoteLoss * pp * 1e-6;
+                    }
+                }
+                // Calculate Recruitment / Promotion for Multi-Age Fish
+                if ((NState == AllVariables.Fish1))
+                {
+                    // Calculate Tox movement through Recruitment to YOY of multi-age fish
+                    Recr = 0;
+                    for (BigFishLoop = AllVariables.Fish2; BigFishLoop <= AllVariables.Fish15; BigFishLoop++)
+                    {
+                        if (AQTSeg.GetStatePointer(BigFishLoop, T_SVType.StV, T_SVLayer.WaterCol) != null)
+                        {
+                            LgF = AQTSeg.GetStatePointer(BigFishLoop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                            LgF.GameteLoss();
+                            // call LgGF^.GameteLoss to get Recruit
+                            Recr = Recr - LgF.Recruit * GetPPB(BigFishLoop, SVType, T_SVLayer.WaterCol) * 1e-6;
+                            // sum recruitment from larger fish
+                        }
+                    }
+                }
+                // Fish1
+                if (NState >= AllVariables.Fish2 && NState <= AllVariables.Fish15)
+                {
+                    Recr = CP.Recruit * pp * 1e-6;
+                }
+                Gam = CP.GameteLoss() * pp * 1e-6;
+            // Must Be Called After Recr Calculation
+            // + Recr
+
+                if (AQTSeg.TPresent > Consts.StopDate)  RecrSaveTox = RecrSaveTox + Consts.Tiny;  
+
+
+                DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
+                if ((AQTSeg.DerivStep == 5)) RecrSaveTox = Recr;
+            // derivstep 5 is time X+h
+
+            // removed multi-segment diffusion and turbulent diffusion from HMS (pelagic invertebrates)    
+
+            } // else (not BCFUptake)
+
+            Derivative_WriteRates();
+        } // end Derivative
+        
     } // end TAnimalTox
 
 } 

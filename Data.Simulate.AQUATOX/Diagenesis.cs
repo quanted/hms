@@ -37,7 +37,6 @@ namespace AQUATOX.Diagenesis
             result = Math.Pow(KappaNH3, 2) * Math.Pow(DR.ThtaNH3.Val, (Temp - 20)) * DR.KM_NH3.Val / (DR.KM_NH3.Val + NH4_1) * O2 / (2 * DR.KM_O2_NH3.Val + O2);
          //(m2/d2)         (m / d)                    (unitless)                        (mg N / L)   (mgN/L)         (mgN/L) (mg/L)              (mg/L)   (mg/L)
 
-
             return result;
         }
 
@@ -54,7 +53,7 @@ namespace AQUATOX.Diagenesis
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             fda1 = 1.0 / (1.0 + DR.m1.Val * DR.KdNH3.Val);
             result = s * (fda1 * State - NH4_0) / DR.H1.Val;
-            // g/m3 d      m/d   g/m3    g/m3                m
+            // g/m3 d      m/d   g/m3    g/m3             m
 
             return result;
         }
@@ -79,14 +78,40 @@ namespace AQUATOX.Diagenesis
         //    }
         //}
 
+
+
         // rate in g/m3 (sed) d
         public override void Derivative(ref double DB)
         {
-            double fpa1, fda1, fpa2, fda2, s, Nitr, Burial, Flux2Anaerobic, Flux2Wat, Dia_Flux, NH4_2, NH4_1;
+            double fpa1, fda1, fpa2, fda2, s, Nitr=0, Burial=0, Flux2Anaerobic=0, Flux2Wat=0, Dia_Flux=0, NH4_2, NH4_1;
             AllVariables ns;
             TPON_Sediment ppn;
+
             // --------------------------------------------------
-            // TNH4_Sediment.Derivative
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    if (Layer == T_SVLayer.SedLayer1)
+                    {
+                        ClearRate();
+                        SaveRate("Nitrification", Nitr);
+                        SaveRate("Burial", Burial);
+                        SaveRate("Flux2Water", Flux2Wat);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                    else
+                    {
+                        ClearRate();
+                        SaveRate("Dia_Flux", Dia_Flux);
+                        SaveRate("Burial", Burial);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                }
+            }
+                // --------------------------------------------------
+                // TNH4_Sediment.Derivative
+
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             NH4_1 = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1);
             NH4_2 = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer2);
@@ -133,7 +158,7 @@ namespace AQUATOX.Diagenesis
                 DB = Dia_Flux - Burial + Flux2Anaerobic;
                 // g/m3 d                // g/m3 d
             }
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
@@ -245,44 +270,44 @@ namespace AQUATOX.Diagenesis
         //}
 
         // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer1))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Nitrification", Nitr);
-        //        SaveRate("Denitrification", DeNitr);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Water", Flux2Wat);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer2))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Denitrification", DeNitr);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //}
 
         public override void Derivative(ref double DB)
         {
             double s;
-            double Nitr;
-            double DeNitr;
-            double Burial;
-            double Flux2Anaerobic;
-            double Flux2Wat;
+            double Nitr=0;
+            double DeNitr = 0;
+            double Burial = 0;
+            double Flux2Anaerobic = 0;
+            double Flux2Wat = 0;
             double NH4_1;
             double NO3_2;
             double NO3_1;
             TNH4_Sediment TNH4_1;
             // --------------------------------------------------
-            // TNO3_Sediment.Derivative
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    if (Layer == T_SVLayer.SedLayer1)
+                    {
+                        ClearRate();
+                        SaveRate("Nitrification", Nitr);
+                        SaveRate("Denitrification", DeNitr);
+                        SaveRate("Burial", Burial);
+                        SaveRate("Flux2Water", Flux2Wat);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                    else  //SedLayer2
+                    {
+                        ClearRate();
+                        SaveRate("Burial", Burial);
+                        SaveRate("Denitrification", DeNitr);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                }
+            }
+            // --------------------------------------------------
+
             TNH4_1 = (TNH4_Sediment) AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1);
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             NO3_1 = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
@@ -309,8 +334,8 @@ namespace AQUATOX.Diagenesis
             {
                 Burial = DR.w2.Val / DR.H1.Val * State;
                 // m/d       // m                // mg/L
-                Nitr = TNH4_1.Nitr_Rate(NH4_1) / s * NH4_1 / DR.H1.Val;
-// EFDC eq. 5-20   // g/m3 d     // m2/d2    // m/d  // g/m3    // m
+                Nitr = TNH4_1.Nitr_Rate(NH4_1) / s * NH4_1 / DR.H1.Val;  // EFDC eq. 5-20   
+                // g/m3 d     // m2/d2    // m/d  // g/m3    // m
                 DeNitr = Denit_Rate() / s * State / DR.H1.Val;
                 // g/m3 d        // m2/d2 // m/d // g/m3        // m
                 Flux2Wat = Flux2Water();
@@ -334,7 +359,7 @@ namespace AQUATOX.Diagenesis
                 DB = -DeNitr - Burial + Flux2Anaerobic;
                 // g/m3 d
             }
-            // Derivative_WriteRates();
+            Derivative_WriteRates();
             // Derivative_TrackMB();
         }
 
@@ -426,42 +451,42 @@ namespace AQUATOX.Diagenesis
         //    }
         //}
 
-        //// --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer1))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Water", Flux2Wat);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer2))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Dia_Flux", Dia_Flux);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //}
 
         public override void Derivative(ref double DB)
         {
-            double Dia_Flux;
-            double Burial;
-            double Flux2Anaerobic;
-            double Flux2Wat;
-            double PO4_2;
-            double PO4_1;
+            double Dia_Flux=0;
+            double Burial = 0;
+            double Flux2Anaerobic = 0;
+            double Flux2Wat = 0;
+            double PO4_2 = 0;
+            double PO4_1 = 0;
             double fdp2;
             double fpp1;
             double fpp2;
             AllVariables ns;
             TPOP_Sediment ppp;
+
+            //// --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    if (Layer == T_SVLayer.SedLayer1)
+                    {
+                        ClearRate();
+                        SaveRate("Burial", Burial);
+                        SaveRate("Flux2Water", Flux2Wat);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                    else
+                    {
+                        ClearRate();
+                        SaveRate("Dia_Flux", Dia_Flux);
+                        SaveRate("Burial", Burial);
+                        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                    }
+                }
+            }
             // --------------------------------------------------
             // TPO4_Sediment.Deriv
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
@@ -471,11 +496,8 @@ namespace AQUATOX.Diagenesis
             PO4_1 = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);
             PO4_2 = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2);
             Flux2Anaerobic = -((DR.W12 * (fpp2 * PO4_2 - fpp1 * PO4_1) + DR.KL12 * (fdp2 * PO4_2 - fdp1() * PO4_1)));
-            // g/m2 d
-            // m/d
-            // g/m3
-            // m/d
-            // g/m3
+            // {g/m2 d}           {m/d}      {g/m3}      {g/m3}             {m/d}       {g/m3}         {g/m3}
+
             if (Layer == T_SVLayer.SedLayer1)
             {
                 Flux2Anaerobic = Flux2Anaerobic / DR.H1.Val;
@@ -483,25 +505,20 @@ namespace AQUATOX.Diagenesis
             else
             {
                 Flux2Anaerobic = Flux2Anaerobic / DR.H2.Val;
-            }
-            // g/m3 d
-            // g/m2 d
-            // m
+            }     // g/m3 d        // g/m2 d          // m
+
             if (Layer == T_SVLayer.SedLayer1)
             {
                 Burial = DR.w2.Val / DR.H1.Val * State;
-                // m/d
-                // m
-                // g/m3
+                         // m/d        // m      // g/m3
                 Flux2Wat = Flux2Water();
                 // g/ m3 d
                 DB = -Burial - Flux2Wat - Flux2Anaerobic;
                 // g/m3 d
                 if (AQTSeg.Diagenesis_Steady_State)
                 {
-                    DB = 0;
+                    DB = 0;  // Layer 1 is STEADY STATE
                 }
-                // Layer 1 is STEADY STATE
             }
             else
             {
@@ -519,7 +536,7 @@ namespace AQUATOX.Diagenesis
                 DB = Dia_Flux - Burial + Flux2Anaerobic;
                 // g/m3 d
             }
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
@@ -563,12 +580,10 @@ namespace AQUATOX.Diagenesis
             double result;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             result = DR.w2.Val / DR.H2.Val * State;
+                      // m/d        // m    // mg/L
             return result;
         }
 
-        // m/d
-        // m
-        // mg/L
         public double Predn()
         {
             if (NState == AllVariables.POC_G1)
@@ -580,27 +595,26 @@ namespace AQUATOX.Diagenesis
             return 0;
         }
 
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Deposition", Deposition);
-        //        SaveRate("Mineralization", Minrl);
-        //        SaveRate("Burial", Bury);
-        //        SaveRate("Predation", Pred);
-        //    }
-        //}
-
         public override void Derivative(ref double DB)
         {
-            double Minrl;
-            double Deposition;
-            double Bury;
-            double Pred;
+            double Minrl=0;
+            double Deposition = 0;
+            double Bury = 0;
+            double Pred = 0;
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
+
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Deposition", Deposition);
+                    SaveRate("Mineralization", Minrl);
+                    SaveRate("Burial", Bury);
+                    SaveRate("Predation", Pred);
+                }
+            }
+
             Deposition = AQTSeg.CalcDeposition(NState, T_SVType.StV) / DR.H2.Val;
             // mg C/L            // g/m2                                  // m
             if (Deposition_Link != null) Deposition = Deposition + Deposition_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
@@ -619,7 +633,7 @@ namespace AQUATOX.Diagenesis
             //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
 
             DB = Deposition - Minrl - Burial() - Pred;
-         //   Derivative_WriteRates();
+            Derivative_WriteRates();
         }
 
         //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC,  IsTempl)
@@ -657,44 +671,44 @@ namespace AQUATOX.Diagenesis
             return result;
         }
 
-        // --------------------------------------------------
-        //public void Derivative_TrackMB()
-        //{
-        //    double SedVol;
-        //    double LossInKg;
-        //    SedVol = AQTSeg.DiagenesisVol(2);
-        //    LossInKg = (Burial * SedVol * 1e-3);
-        //    // burial loss from the system
-        //    // kg N / d            // g/m3 d            // m3            // kg/g
-        //    TStates DR = AQTSeg;
-        //    MBLossRecord DR = DR.MBLossArray[AllVariables.Nitrate];
-        //    DR.TotalNLoss[DR.DerivStep] = DR.TotalNLoss[DR.DerivStep] + LossInKg;
-        //    DR.BoundLoss[DR.DerivStep] = DR.BoundLoss[DR.DerivStep] + LossInKg;
-        //    // Loss from the system
-        //    DR.Burial[DR.DerivStep] = DR.Burial[DR.DerivStep] + LossInKg;
-        //}
+            // --------------------------------------------------
+            //public void Derivative_TrackMB()
+            //{
+            //    double SedVol;
+            //    double LossInKg;
+            //    SedVol = AQTSeg.DiagenesisVol(2);
+            //    LossInKg = (Burial * SedVol * 1e-3);
+            //    // burial loss from the system
+            //    // kg N / d            // g/m3 d            // m3            // kg/g
+            //    TStates DR = AQTSeg;
+            //    MBLossRecord DR = DR.MBLossArray[AllVariables.Nitrate];
+            //    DR.TotalNLoss[DR.DerivStep] = DR.TotalNLoss[DR.DerivStep] + LossInKg;
+            //    DR.BoundLoss[DR.DerivStep] = DR.BoundLoss[DR.DerivStep] + LossInKg;
+            //    // Loss from the system
+            //    DR.Burial[DR.DerivStep] = DR.Burial[DR.DerivStep] + LossInKg;
+            //}
 
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Deposition", Deposition);
-        //        SaveRate("Mineralization", Minerl);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Predation", Pred);
-        //    }
-        //}
 
-        public override void Derivative(ref double DB)
+
+            public override void Derivative(ref double DB)
         {
-            double Minerl;
-            double Deposition;
-            double Burial;
-            double Pred;
+            double Minerl=0;
+            double Deposition = 0;
+            double Burial = 0;
+            double Pred = 0;
+
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Deposition", Deposition);
+                    SaveRate("Mineralization", Minerl);
+                    SaveRate("Burial", Burial);
+                    SaveRate("Predation", Pred);
+                }
+            }
             // --------------------------------------------------
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             Minerl = Mineralization();
@@ -726,7 +740,7 @@ namespace AQUATOX.Diagenesis
 
             DB = Deposition - Minerl - Burial - Pred;
 
-         // Derivative_WriteRates();
+          Derivative_WriteRates();
          // Derivative_TrackMB();
         }
 
@@ -763,49 +777,49 @@ namespace AQUATOX.Diagenesis
             return result;
         }
 
-        // --------------------------------------------------
-        //public void Derivative_TrackMB()
-        //{
-        //    double SedVol;
-        //    double LossInKg;
-        //    SedVol = AQTSeg.DiagenesisVol(2);
-        //    LossInKg = (Burial * SedVol * 1e-3);
-        //    // burial loss from the system
-        //    // kg N / d
-        //    // g/m3 d
-        //    // m3
-        //    // kg/g
-        //    TStates DR = AQTSeg;
-        //    MBLossRecord DR = DR.MBLossArray[AllVariables.Phosphate];
-        //    DR.TotalNLoss[DR.DerivStep] = DR.TotalNLoss[DR.DerivStep] + LossInKg;
-        //    DR.Burial[DR.DerivStep] = DR.Burial[DR.DerivStep] + LossInKg;
-        //    DR.BoundLoss[DR.DerivStep] = DR.BoundLoss[DR.DerivStep] + LossInKg;
-        //    // Loss from the system
+            // --------------------------------------------------
+            //public void Derivative_TrackMB()
+            //{
+            //    double SedVol;
+            //    double LossInKg;
+            //    SedVol = AQTSeg.DiagenesisVol(2);
+            //    LossInKg = (Burial * SedVol * 1e-3);
+            //    // burial loss from the system
+            //    // kg N / d
+            //    // g/m3 d
+            //    // m3
+            //    // kg/g
+            //    TStates DR = AQTSeg;
+            //    MBLossRecord DR = DR.MBLossArray[AllVariables.Phosphate];
+            //    DR.TotalNLoss[DR.DerivStep] = DR.TotalNLoss[DR.DerivStep] + LossInKg;
+            //    DR.Burial[DR.DerivStep] = DR.Burial[DR.DerivStep] + LossInKg;
+            //    DR.BoundLoss[DR.DerivStep] = DR.BoundLoss[DR.DerivStep] + LossInKg;
+            //    // Loss from the system
 
-        //}
+            //}
 
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Deposition", Deposition);
-        //        SaveRate("Mineralization", Minerl);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Predation", Pred);
-        //    }
-        //}
-        // --------------------------------------------------
 
         public override void Derivative(ref double DB)
         {
-            double Deposition;
-            double Burial;
-            double Minerl;
-            double Pred;
+            double Deposition=0;
+            double Burial=0;
+            double Minerl = 0;
+            double Pred = 0;
+
+            // --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Deposition", Deposition);
+                    SaveRate("Mineralization", Minerl);
+                    SaveRate("Burial", Burial);
+                    SaveRate("Predation", Pred);
+                }
+            }
+            // --------------------------------------------------
+
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
             Minerl = Mineralization();
             Deposition = AQTSeg.CalcDeposition(NState, T_SVType.StV) / DR.H2.Val;
@@ -814,8 +828,7 @@ namespace AQUATOX.Diagenesis
             if (Deposition_Link != null) Deposition = Deposition + Deposition_Link.ReturnLoad(AQTSeg.TPresent) / AQTSeg.DiagenesisVol(2);
             //                    (g/m3 d sediment) = (g/m3 d sediment) + (g/d) / (m3 sediment)
 
-                        // m
-            //            AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] = AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] + Deposition * DR.H2.Val * 1e3;
+            //     AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] = AQTSeg.Diag_Track[TAddtlOutput.POP_Dep, AQTSeg.DerivStep] + Deposition * DR.H2.Val * 1e3;
             // mg/m2 d            // g/m3 sed            // m sed            // mg/g
             Burial = DR.w2.Val / DR.H2.Val * State;
             // g/m3    // m/d      // m       // g/m3
@@ -838,7 +851,7 @@ namespace AQUATOX.Diagenesis
             DB = Deposition - Minerl - Burial - Pred;
             // g/m3 d
 
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
@@ -857,25 +870,12 @@ namespace AQUATOX.Diagenesis
             Loading = 0;
         }
 
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Dia_Flux", Dia_Flux);
-        //        SaveRate("Flux2Water", Flux2Wat);
-        //        SaveRate("Oxidation", Oxid);
-        //    }
-        //}
-
-        public override void Derivative(ref double DB)
+            public override void Derivative(ref double DB)
         {
             double SECH_ARG;
-            double Dia_Flux;
-            double Flux2Wat;
-            double Oxid;
+            double Dia_Flux=0;
+            double Flux2Wat = 0;
+            double Oxid = 0;
             TNO3_Sediment PNO3_1;
             TNO3_Sediment PNO3_2;
             double CSODmax;
@@ -884,8 +884,19 @@ namespace AQUATOX.Diagenesis
             double CH4Sat;
             double S;
             double JO2NO3;
-            Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            // ppt
+            Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;     // ppt
+
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Dia_Flux", Dia_Flux);
+                    SaveRate("Flux2Water", Flux2Wat);
+                    SaveRate("Oxidation", Oxid);
+                }
+            }
+
 
             if (AQTSeg.Sulfide_System())
             {
@@ -894,7 +905,7 @@ namespace AQUATOX.Diagenesis
                 Flux2Wat = 0;
                 Oxid = 0;
                 DB = 0;
-                // Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;
             }
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
@@ -935,7 +946,7 @@ namespace AQUATOX.Diagenesis
             Oxid = CSOD;
             DB = (Dia_Flux - Flux2Wat - Oxid) / DR.H2.Val;
        // g O2eq / m3 d    // g O2eq / m2 d            // m
-            // Derivative_WriteRates();
+            Derivative_WriteRates();
         }
 
         //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC,  IsTempl)
@@ -977,58 +988,50 @@ namespace AQUATOX.Diagenesis
             Loading = 0;
         }
 
-        //public void Derivative_WriteRates()
-        //{
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        if (Layer == T_SVLayer.SedLayer1)
-        //        {
-        //            SaveRate("Oxidation", Oxid);
-        //        }
-        //        if (Layer == T_SVLayer.SedLayer1)
-        //        {
-        //            SaveRate("Flux2Water", Flux2Wat);
-        //        }
-        //        if (Layer == T_SVLayer.SedLayer2)
-        //        {
-        //            SaveRate("Dia_Flux", Dia_Flux);
-        //        }
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //}
-
-        public override void Derivative(ref double DB)
+            public override void Derivative(ref double DB)
         {
-            double Burial;
-            double Oxid;
-            double Dia_Flux;
-            double Flux2Wat;
-            double s;
-            double COD_0;
-            double Flux2Anaerobic;
+            double Burial=0;
+            double Oxid=0;
+            double Dia_Flux=0;
+            double Flux2Wat = 0;
+            double s = 0;
+            double COD_0 = 0;
+            double Flux2Anaerobic=0;
             double H2S_2;
             double H2S_1;
             double fph2s1;
             double fdh2s1;
             double fph2s2;
             double fdh2s2;
-            Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
-            // ppt
+            Diagenesis_Rec DR = AQTSeg.Diagenesis_Params; // ppt
+
+            //-----------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    if (Layer == T_SVLayer.SedLayer1)
+                    {
+                        SaveRate("Oxidation", Oxid);
+                        SaveRate("Flux2Water", Flux2Wat);
+                    }
+                    else
+                    {
+                        SaveRate("Dia_Flux", Dia_Flux);
+                    }
+
+                    SaveRate("Burial", Burial);
+                    SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                }
+            }
+            //-----------------------------------------------
 
             if (!AQTSeg.Sulfide_System())
             {
                 // Goes to Methane Instead
-                Dia_Flux = 0;
-                Flux2Wat = 0;
-                Oxid = 0;
-                Burial = 0;
-                Flux2Anaerobic = 0;
                 DB = 0;
-               //  Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;
             }
             Dia_Flux = AQTSeg.Diagenesis(Layer);
@@ -1061,10 +1064,8 @@ namespace AQUATOX.Diagenesis
             else
             {
                 Flux2Anaerobic = Flux2Anaerobic / DR.H2.Val;
-            }
-            // g/m3 d
-            // g/m2 d
-            // m
+            }      // g/m3 d          // g/m2 d      // m
+
             if (Layer == T_SVLayer.SedLayer2)
             {
                 Flux2Anaerobic = Flux2Anaerobic + DR.w2.Val / DR.H2.Val * H2S_1;
@@ -1101,13 +1102,12 @@ namespace AQUATOX.Diagenesis
                 {
                     DB = -Oxid - Burial - Flux2Wat - Flux2Anaerobic;
                 }
-                // SedLayer1
-            }
+            }  // SedLayer1
             else
             {
-                DB = Dia_Flux - Burial + Flux2Anaerobic;
+                DB = Dia_Flux - Burial + Flux2Anaerobic;  //SedLayer2
             }
-            // Derivative_WriteRates();
+            Derivative_WriteRates();
         }
 
         //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC,  IsTempl)
@@ -1150,61 +1150,56 @@ namespace AQUATOX.Diagenesis
             return result;
         }
 
-        // ----------------------------------------------------------------------
-        //public void Derivative_WriteAvailRates()
-        //{
-        //    // biogenic silica, L2
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Deposition", Deposition);
-        //        SaveRate("Dissolution", Diss);
-        //        SaveRate("Burial", Burial);
-        //    }
-        //}
-
-        //// ----------------------------------------------------------------------
-        //public void Derivative_WriteSilicaRates()
-        //{
-        //    // non-biogenic
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer1))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Water", Flux2Wat);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //    Setup_Record DR = AQTSeg.SetupRec;
-        //    if ((DR.SaveBRates || DR.ShowIntegration) && (Layer == T_SVLayer.SedLayer2))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Dissolution", Diss);
-        //        SaveRate("Burial", Burial);
-        //        SaveRate("Flux2Anaerobic", Flux2Anaerobic);
-        //    }
-        //}
-
         public override void Derivative(ref double DB)
         {
-            double s;
-            double O2;
-            double Diss;
-            double Flux2Anaerobic;
-            double Flux2Wat;
-            double Si_2, Si_1, Si_0;
+            double s=0;
+            double O2 = 0;
+            double Diss = 0;
+            double Flux2Anaerobic = 0;
+            double Flux2Wat = 0;
+            double Si_2 = 0, Si_1 = 0, Si_0 = 0;
             double KdSi1, fdsi1, fdsi2, fpsi1, fpsi2;
-            double Deposition;
-            double Burial;
+            double Deposition = 0;
+            double Burial = 0;
 
             Diagenesis_Rec DR = AQTSeg.Diagenesis_Params;
 
-            // writesilicarates
             // ----------------------------------------------------------------------
+            void Derivative_WriteAvailRates()
+            {
+                // biogenic silica, L2
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Deposition", Deposition);
+                    SaveRate("Dissolution", Diss);
+                    SaveRate("Burial", Burial);
+                }
+            }
+
+                // ----------------------------------------------------------------------
+                void Derivative_WriteSilicaRates()
+                {
+                    // non-biogenic
+                    if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                    {
+                        if (Layer == T_SVLayer.SedLayer1)
+                        {
+                            ClearRate();
+                            SaveRate("Burial", Burial);
+                            SaveRate("Flux2Water", Flux2Wat);
+                            SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                        }
+                        else
+                        {
+                            ClearRate();
+                            SaveRate("Dissolution", Diss);
+                            SaveRate("Burial", Burial);
+                            SaveRate("Flux2Anaerobic", Flux2Anaerobic);
+                        }
+                    }
+                }
+                // ----------------------------------------------------------------------
             // TSilica_Sediment.Derivative
             O2 = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             if ((O2 > DR.O2critSi.Val))
@@ -1230,7 +1225,7 @@ namespace AQUATOX.Diagenesis
                 // m/d                // m                // g/m3
                 DB = Deposition - Diss - Burial;
                 // g/m3 d
-                // Derivative_WriteAvailRates();
+                Derivative_WriteAvailRates();
             }
             if (NState == AllVariables.Silica)
             {
@@ -1274,7 +1269,7 @@ namespace AQUATOX.Diagenesis
                     Diss = Dissolution(fdsi2);
                     DB = Diss - Burial + Flux2Anaerobic;
                 }
-              //   Derivative_WriteSilicaRates();
+              Derivative_WriteSilicaRates();
             }
         }
 
@@ -1299,7 +1294,6 @@ namespace AQUATOX.Diagenesis
             //if ((DR.SaveBRates || DR.ShowIntegration))
             //{
             //    ClearRate();
-            //    SaveRate("State", State);
             //}
         }
 
@@ -1309,9 +1303,7 @@ namespace AQUATOX.Diagenesis
             // TStateVariable
             State = Loading;
             // valuation not loading, no need to adjust for flow and volume
-
         }
-
 
     } // end TCOD
 

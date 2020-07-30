@@ -577,6 +577,30 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             // TDOMPoreWater DetrActiveLayer;
             //AllVariables DOMState;
             // TrackMB
+
+            // ----------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("State", State);
+                    SaveRate("Load", Lo);
+                    SaveRate("DetrFm", DF);
+                    SaveRate("DF_Mortality", DFM);
+                    SaveRate("DF_Excretion", DFE);
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    if (NState != AllVariables.DissRefrDetr)
+                        SaveRate("Decomp", DE);
+
+                    if (NState == AllVariables.DissRefrDetr)
+                        SaveRate("Colonz", Co);
+
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                }
+            }
+
             // --------------------------------------------------
             double FracAerobic=0;
             // DissDetr.Derivative
@@ -624,7 +648,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //Derivative_CalcPW();
 
             DB = Lo + DF - DE - Co - WaO + WaI + TD + DiffUp + DiffDown + DiffSed + PWExp - ToPW + En;
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
@@ -854,62 +878,6 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
         //    result = SFE;
         //    return result;
         //}
-
-        // ----------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    TStates w1 = AQTSeg;
-        //    Setup_Record w2 = w1.SetupRec;
-        //    if ((w2.SaveBRates || w2.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", Lo);
-        //        if ((NState != AllVariables.SuspRefrDetr))
-        //        {
-        //            SaveRate("Decomp", De);
-        //            SaveRate("PlntSlough", PlSlg);
-        //            SaveRate("Macrobreak", McB);
-        //            SaveRate("PlntTDislodge", PlToxD);
-        //        }
-        //        SaveRate("DetrFm", DF);
-        //        SaveRate("DF_Mortality", DFM);
-        //        SaveRate("DF_Excretion", DFE);
-        //        if ((NState == AllVariables.SuspLabDetr))
-        //        {
-        //            SaveRate("DF_Gameteloss", DFG);
-        //        }
-        //        SaveRate("Colonz", Math.Abs(Co));
-        //        SaveRate("Washout", WaO);
-        //        SaveRate("WashIn", WaI);
-        //        SaveRate("Predation", Pr);
-        //        SaveRate("Sedimentation", Se);
-        //        if (w1.SedModelIncluded())
-        //        {
-        //            SaveRate("Resuspension", Re);
-        //        }
-        //        SaveRate("SinkToHypo", STH);
-        //        SaveRate("SinkFromEpi", SFE);
-        //        if (!AQTSeg.LinkedMode)
-        //        {
-        //            SaveRate("TurbDiff", TD);
-        //        }
-        //        else
-        //        {
-        //            // If Not AQTSeg.CascadeRunning
-        //            // then
-        //            SaveRate("DiffUp", DiffUp);
-        //            SaveRate("DiffDown", DiffDown);
-        //        }
-        //        if (AQTSeg.EstuarySegment)
-        //        {
-        //            SaveRate("Entrainment", En);
-        //        }
-        //        SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
-        //        SaveRate("Scour", Scour);
-        //    }
-        //}
-
         // --------------------------------------------------
         //public void Derivative_TrackMB()
         //{
@@ -1011,9 +979,42 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             double DFE=0;
             double DFS=0;
             double DFG=0;
-//            TBuriedDetr1 PBD;
+            //  TBuriedDetr1 PBD;
+
+            // ----------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    if ((NState != AllVariables.SuspRefrDetr))
+                    {
+                        SaveRate("Decomp", De);
+                        SaveRate("PlntSlough", PlSlg);
+                        SaveRate("Macrobreak", McB);
+                        SaveRate("PlntTDislodge", PlToxD);
+                    }
+                    SaveRate("DetrFm", DF);
+                    SaveRate("DF_Mortality", DFM);
+                    SaveRate("DF_Excretion", DFE);
+                    if ((NState == AllVariables.SuspLabDetr))
+                        SaveRate("DF_Gameteloss", DFG);
+
+                    SaveRate("Colonz", Math.Abs(Co));
+                    SaveRate("Washout", WaO);
+                    SaveRate("WashIn", WaI);
+                    SaveRate("Predation", Pr);
+                    SaveRate("Sedimentation", Se);
+                    SaveRate("SinkToHypo", STH);
+                    SaveRate("SinkFromEpi", SFE);
+                    SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
+                    SaveRate("Scour", Scour);
+                }
+            }
+
             // --------------------------------------------------
-//            double M2_M3=0;
+            //            double M2_M3=0;
 
             // TSuspendedDetr.Derivative
 
@@ -1096,7 +1097,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
 
             DB = Lo + DF + Co - De - WaO + WaI - Se + Re - Pr + PlSlg + PlToxD + McB - STH + SFE + TD + En + DiffUp + DiffDown + Scour;
 
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
@@ -1124,32 +1125,6 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
         public TSedimentedDetr(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
         }
-
-        // --------------------------------------------------
-        //public void Derivative_WriteRates()
-        //{
-        //    TStates w1 = AQTSeg;
-        //    Setup_Record w2 = w1.SetupRec;
-        //    if ((w2.SaveBRates || w2.ShowIntegration))
-        //    {
-        //        ClearRate();
-        //        SaveRate("State", State);
-        //        SaveRate("Load", Lo);
-        //        SaveRate("DetrFm", DF);
-        //        SaveRate("DF_Sedimentn.", DFS);
-        //        SaveRate("Colonz", Math.Abs(Co));
-        //        SaveRate("Predation", Pr);
-        //        if ((NState != AllVariables.SedmRefrDetr))
-        //        {
-        //            SaveRate("Decomp", De);
-        //        }
-        //        SaveRate("Sedimentation", Se);
-        //        SaveRate("Resuspension", Re);
-        //        SaveRate("Burial", Bur);
-        //        SaveRate("Scour", Scour);
-        //        SaveRate("Exposure", Exps);
-        //    }
-        //}
 
         //// --------------------------------------------------
         //public void Derivative_TrackMB()
@@ -1230,9 +1205,31 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             double DFS=0;
             double DFG=0;
             // TrackMB
+
+            //    --------------------------------------------------
+            void Derivative_WriteRates()
+            {
+                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                {
+                    ClearRate();
+                    SaveRate("Load", Lo);
+                    SaveRate("DetrFm", DF);
+                    SaveRate("DF_Sedimentn.", DFS);
+                    SaveRate("Colonz", Math.Abs(Co));
+                    SaveRate("Predation", Pr);
+                    if ((NState != AllVariables.SedmRefrDetr))
+                        SaveRate("Decomp", De);
+
+                    SaveRate("Sedimentation", Se);
+                    SaveRate("Resuspension", Re);
+                    SaveRate("Burial", Bur);
+                    SaveRate("Scour", Scour);
+                    SaveRate("Exposure", Exps);
+                }
+            }
             // --------------------------------------------------
             //double M2_M3=0;
-            
+
             // TSedimentedDetr.Derivative
             if ((NState == AllVariables.SedmLabDetr))
             {
@@ -1292,7 +1289,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
 
             DB = Lo + Se - Re + DF + Co - Pr - De + Exps - Bur - Scour;
 
-            //Derivative_WriteRates();
+            Derivative_WriteRates();
             //Derivative_TrackMB();
         }
 
