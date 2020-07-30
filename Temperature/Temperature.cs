@@ -83,6 +83,7 @@ namespace Temperature
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "ncei":
+                case "ncdc":
                     // NCEI Temperature Data call
                     NCEI ncei = new NCEI();
                     this.Output = ncei.GetData(out errorMsg, this.Output, this.Input);

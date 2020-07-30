@@ -28,6 +28,16 @@ namespace Web.Services.Tests
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
+        /// NLDAS request json string for testing a valid request
+        /// </summary>
+        const string nldas2Request =
+            "{\"source\": \"nldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
@@ -45,7 +55,7 @@ namespace Web.Services.Tests
         /// </summary>
         const string curvenumberRequest =
             "{\"source\": \"curvenumber\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
-            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"comid\": 718276," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"comid\": 9203093," +
             "\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
@@ -67,10 +77,11 @@ namespace Web.Services.Tests
         /// <returns></returns>
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest)]
-        [InlineData(gldasRequest)]
+        [InlineData(nldasRequest, 365)]
+        [InlineData(nldas2Request, 12)]
+        [InlineData(gldasRequest, 365)]
         //[InlineData(curvenumberRequest)]
-        public async Task ValidRequests(string inputString)
+        public async Task ValidRequests(string inputString, int expected)
         {
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
@@ -89,7 +100,7 @@ namespace Web.Services.Tests
             var result = await response.Content.ReadAsStringAsync();
             Assert.NotNull(result);
             TimeSeriesOutput resultObj = JsonSerializer.Deserialize<TimeSeriesOutput>(result, options);
-            Assert.Equal(365, resultObj.Data.Count);
+            Assert.Equal(expected, resultObj.Data.Count);
         }
 
     }

@@ -31,6 +31,13 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// NLDAS request json string for testing a valid request, input variation
+        /// </summary>
+        const string nldasRequest2 =
+            "{\"source\": \"nldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"point\": {\"latitude\": 33.925673,\"longitude\": -83.355723},\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}}}";
+
+        /// <summary>
         /// GLDAS request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
@@ -38,6 +45,16 @@ namespace Web.Services.Tests
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
+        /// GLDAS request json string for testing a valid request
+        /// </summary>
+        const string gldasMonthlyRequest =
+            "{\"source\": \"gldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
@@ -68,7 +85,9 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
+        [InlineData(nldasRequest2, 8760)]
         [InlineData(gldasRequest, 366)]
+        [InlineData(gldasMonthlyRequest, 12)]
         [InlineData(nceiRequest, 365)]
         public async Task ValidRequests(string inputString, int expected)
         {

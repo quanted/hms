@@ -55,10 +55,6 @@ namespace SurfaceRunoff
                     output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 3.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
-                case "weekly":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 3.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 3.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");

@@ -84,10 +84,13 @@ namespace Temperature
             Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
             for (int i = 0; i < output.Data.Count; i++)
             {
-                tempData.Add(output.Data.Keys.ElementAt(i).ToString(), new List<string>()
+                List<string> converted = new List<string>();
+                for (int j = 0; j < output.Data[output.Data.Keys.ElementAt(i)].Count; j++)
                 {
-                    ((Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) * (9.0 / 5.0)) - 459.67).ToString(input.DataValueFormat)
-                });
+                    double value = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][j]) * (9.0 / 5.0) + 32.0;
+                    converted.Add(value.ToString(input.DataValueFormat));
+                }
+                tempData.Add(output.Data.Keys.ElementAt(i).ToString(), converted);
             }
             return tempData;
         }
@@ -136,46 +139,46 @@ namespace Temperature
         /// <param name="input"></param>
         /// <param name="type">"all", "avg", "high", "low"</param>
         /// <returns></returns>
-        public static Dictionary<string, List<string>> WeeklyValues(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, string type)
-        {
-            errorMsg = "";
-            DateTime iDate = new DateTime();
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
+        //public static Dictionary<string, List<string>> WeeklyValues(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, string type)
+        //{
+        //    errorMsg = "";
+        //    DateTime iDate = new DateTime();
+        //    string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+        //    DateTime.TryParse(dateString0, out iDate);
 
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            double average = 0.0;
-            double max = -9999.9;
-            double min = 9999.9;
-            double maxValue = 0.0;
-            double minValue = 0.0;
-            for (int i = 0; i < output.Data.Count; i++)
-            {
-                DateTime date = new DateTime();
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
-                DateTime.TryParse(dateString, out date);
-                maxValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                minValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
-                max = (maxValue > max) ? maxValue : max;
-                min = (minValue < min) ? minValue : min;
-                average = (average + (maxValue + minValue) / 2) / 2;
-                int dayDif = (int)(date - iDate).TotalDays;
-                if (dayDif >= 7)
-                {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
-                                {
-                                    (max).ToString(input.DataValueFormat),
-                                    (min).ToString(input.DataValueFormat),
-                                    (average).ToString(input.DataValueFormat)
-                                }
-                    );
-                    max = -9999.9;
-                    min = 9999.9;
-                    iDate = date;
-                }
-            }
-            return tempData;
-        }
+        //    Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+        //    double average = 0.0;
+        //    double max = -9999.9;
+        //    double min = 9999.9;
+        //    double maxValue = 0.0;
+        //    double minValue = 0.0;
+        //    for (int i = 0; i < output.Data.Count; i++)
+        //    {
+        //        DateTime date = new DateTime();
+        //        string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
+        //        DateTime.TryParse(dateString, out date);
+        //        maxValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+        //        minValue = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+        //        max = (maxValue > max) ? maxValue : max;
+        //        min = (minValue < min) ? minValue : min;
+        //        average = (average + (maxValue + minValue) / 2) / 2;
+        //        int dayDif = (int)(date - iDate).TotalDays;
+        //        if (dayDif >= 7)
+        //        {
+        //            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
+        //                        {
+        //                            (max).ToString(input.DataValueFormat),
+        //                            (min).ToString(input.DataValueFormat),
+        //                            (average).ToString(input.DataValueFormat)
+        //                        }
+        //            );
+        //            max = -9999.9;
+        //            min = 9999.9;
+        //            iDate = date;
+        //        }
+        //    }
+        //    return tempData;
+        //}
 
         /// <summary>
         /// Gets monthly temperature values, calculating and setting to Data average, high and low, depending on request.
