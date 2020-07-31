@@ -22,9 +22,20 @@ namespace Utilities
                 return null;
             }
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
+            string cwd = Directory.GetCurrentDirectory();
+            string absPath = "";
+            foreach(string p in cwd.Split(Path.DirectorySeparatorChar))
+            {
+                absPath = Path.Combine(absPath, p);
+                if (p.Equals("hms"))
+                {
+                    break;
+                }
+            }
+            absPath = Path.Combine(absPath, "Web.Services", dbPath);
             Dictionary<string, string> data = new Dictionary<string, string>();
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = dbPath;
+            connectionStringBuilder.DataSource = absPath;
             try
             {
                 using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
