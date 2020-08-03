@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace Data.Source
 {
@@ -103,6 +104,12 @@ namespace Data.Source
                 station = station.Remove(0, 6);
                 sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=json" + "&includeAttributes=true" + "&units=metric");
             }
+            else if (!station.Contains(":"))
+            {
+                // Assuming that the station type is GHCND
+                sb.Append(baseURL);
+                sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=json" + "&includeAttributes=true" + "&units=metric");
+            }
             else
             {
                 errorMsg = "ERROR: NCEI web service does not currently support the dataset for this station.";
@@ -179,7 +186,10 @@ namespace Data.Source
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-
+            if (!stationID.Contains(":"))
+            {
+                stationID = "GHCND:" + stationID;
+            }
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {

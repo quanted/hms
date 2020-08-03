@@ -143,6 +143,7 @@ namespace WatershedDelineation
                 subIn.Geometry = tsGeometry;
                 subIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 subIn.Geometry.ComID = Convert.ToInt32(com);
+                subIn.TimeLocalized = false;
                 SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
                 sub.Input = inputFactory.SetTimeSeriesInput(subIn, new List<string>() { "subsurfaceflow" }, out errorMsg);
                 subsurfaceFlow.Add(com, sub);
@@ -153,6 +154,7 @@ namespace WatershedDelineation
                 surfIn.Geometry = tsGeometry;
                 surfIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 surfIn.Geometry.ComID = Convert.ToInt32(com);
+                surfIn.TimeLocalized = false;
                 SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
                 runoff.Input = inputFactory.SetTimeSeriesInput(surfIn, new List<string>() { "surfacerunoff" }, out errorMsg);
                 surfaceFlow.Add(com, runoff);
@@ -163,6 +165,7 @@ namespace WatershedDelineation
                 preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
                 preIn.Source = preIn.Geometry.GeometryMetadata["precipSource"];
+                preIn.TimeLocalized = false;
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
                 precip.Input = inputFactory.SetTimeSeriesInput(preIn, new List<string>() { "precipitation" }, out errorMsg);
                 precipitation.Add(com, precip);
@@ -178,6 +181,10 @@ namespace WatershedDelineation
                 precipTasks.Add(GetPrecipitation(preF.Value));
             });
             Task.WaitAll(precipTasks.ToArray());
+            foreach(KeyValuePair<string, Precipitation.Precipitation> p in precipitation)
+            {
+                p.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, p.Value.Input, p.Value.Output);
+            }
 
             //Parallel.ForEach(precipitation, options, (KeyValuePair<string, Precipitation.Precipitation> preF) =>
             //{
@@ -218,6 +225,10 @@ namespace WatershedDelineation
                 surfaceTasks.Add(GetRunoff(surF.Value));
             });
             Task.WaitAll(surfaceTasks.ToArray());
+            foreach (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> s in surfaceFlow)
+            {
+                s.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, s.Value.Input, s.Value.Output);
+            }
 
             //Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
             //{
@@ -255,6 +266,10 @@ namespace WatershedDelineation
                 subsurfaceTasks.Add(GetBaseflow(subF.Value));
             });
             Task.WaitAll(subsurfaceTasks.ToArray());
+            foreach (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> s in subsurfaceFlow)
+            {
+                s.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, s.Value.Input, s.Value.Output);
+            }
             //Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
             //{
             //    string errorM = "";

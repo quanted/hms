@@ -111,9 +111,23 @@ namespace Utilities
                 data.Metadata.Add(columns[i].Trim() + "75_percentile_count", m75Count[i].ToString());
                 data.Metadata.Add(columns[i].Trim() + "zero_count", mZeroCount[i].ToString());
             }
+            if (data.Metadata.ContainsKey("column_1"))
+            {
+                data.Metadata["column_1"] = (input.TimeLocalized) ? data.Metadata["column_1"] : data.Metadata["column_1"] + " (GMT)";
+            }
+            else
+            {
+                data.Metadata.Add("column_1", (input.TimeLocalized) ? "Date" : "Date (GMT)");
+            }
+            if (data.Metadata.ContainsKey("timeseries_timezone"))
+            {
+                data.Metadata["timeseries_timezone"] = (input.TimeLocalized) ? input.Geometry.Timezone.Offset.ToString() : "GMT";
+            }
+            else
+            {
+                data.Metadata.Add("timeseries_timezone", (input.TimeLocalized) ? input.Geometry.Timezone.Offset.ToString() : "GMT");
+            }
 
-            data.Metadata["column_1"] = (input.TimeLocalized) ? data.Metadata["column_1"] : data.Metadata["column_1"] + " (GMT)";
-            data.Metadata.Add("timeseries_timezone", (input.TimeLocalized) ? input.Geometry.Timezone.Offset.ToString() : "GMT");
             return data;
         }
 

@@ -64,7 +64,7 @@ namespace Precipitation
 
             Dictionary<string, double> data = new Dictionary<string, double>();
 
-            if (input.Geometry.StationID.Contains("GHCND"))
+            if (input.Geometry.StationID.Contains("GHCND") || !input.Geometry.StationID.Contains(":"))
             {
                 NCEI<NCEIPrecipitation> ncei = new NCEI<NCEIPrecipitation>();
                 List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input);
