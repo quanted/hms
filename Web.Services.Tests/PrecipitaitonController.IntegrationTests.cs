@@ -32,6 +32,14 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// NLDAS daily request json string for testing a valid request
+        /// </summary>
+        const string nldas2Request =
+            "{\"source\": \"nldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"comID\":22340297},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// GLDAS daily request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
@@ -120,6 +128,7 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
+        [InlineData(nldas2Request, 365)]
         [InlineData(gldasRequest, 365)]
         [InlineData(daymetRequest, 365)]
         [InlineData(prismRequest, 365)]

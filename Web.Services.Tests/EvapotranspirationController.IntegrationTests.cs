@@ -29,6 +29,14 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// NLDAS request json string for testing a valid request
+        /// </summary>
+        const string nldas2Request =
+            "{\"source\": \"nldas\", \"algorithm\": \"nldas\", \"dateTimeSpan\": {\"startDate\": \"2009-01-01T00:00:00\",\"endDate\": \"2009-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"comID\":22340297},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// GLDAS request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
@@ -36,6 +44,16 @@ namespace Web.Services.Tests
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
+        /// GLDAS request json string for testing a valid request
+        /// </summary>
+        const string gldas2Request =
+            "{\"source\": \"gldas\", \"algorithm\": \"gldas\", \"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
@@ -355,7 +373,9 @@ namespace Web.Services.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData(nldasRequest, 365)]
+        [InlineData(nldas2Request, 12)]
         [InlineData(gldasRequest, 365)]
+        [InlineData(gldas2Request, 12)]
         [InlineData(hamonNldasRequest, 365)]
         //[InlineData(priestlytaylorNldasRequest, 365)]
         //[InlineData(grangergrayNldasRequest, 365)]

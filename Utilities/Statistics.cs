@@ -111,6 +111,9 @@ namespace Utilities
                 data.Metadata.Add(columns[i].Trim() + "75_percentile_count", m75Count[i].ToString());
                 data.Metadata.Add(columns[i].Trim() + "zero_count", mZeroCount[i].ToString());
             }
+
+            data.Metadata["column_1"] = (input.TimeLocalized) ? data.Metadata["column_1"] : data.Metadata["column_1"] + " (GMT)";
+            data.Metadata.Add("timeseries_timezone", (input.TimeLocalized) ? input.Geometry.Timezone.Offset.ToString() : "GMT");
             return data;
         }
 
