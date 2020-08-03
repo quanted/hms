@@ -181,10 +181,6 @@ namespace WatershedDelineation
                 precipTasks.Add(GetPrecipitation(preF.Value));
             });
             Task.WaitAll(precipTasks.ToArray());
-            foreach(KeyValuePair<string, Precipitation.Precipitation> p in precipitation)
-            {
-                p.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, p.Value.Input, p.Value.Output);
-            }
 
             //Parallel.ForEach(precipitation, options, (KeyValuePair<string, Precipitation.Precipitation> preF) =>
             //{
@@ -225,10 +221,6 @@ namespace WatershedDelineation
                 surfaceTasks.Add(GetRunoff(surF.Value));
             });
             Task.WaitAll(surfaceTasks.ToArray());
-            foreach (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> s in surfaceFlow)
-            {
-                s.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, s.Value.Input, s.Value.Output);
-            }
 
             //Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
             //{
@@ -266,10 +258,6 @@ namespace WatershedDelineation
                 subsurfaceTasks.Add(GetBaseflow(subF.Value));
             });
             Task.WaitAll(subsurfaceTasks.ToArray());
-            foreach (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> s in subsurfaceFlow)
-            {
-                s.Value.Output = Utilities.Statistics.GetStatistics(out errorMsg, s.Value.Input, s.Value.Output);
-            }
             //Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
             //{
             //    string errorM = "";
