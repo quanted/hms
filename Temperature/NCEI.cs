@@ -64,7 +64,7 @@ namespace Temperature
             // Data aggregation takes place within ncdc.GetData
 
             Dictionary<string, List<double>> data = new Dictionary<string, List<double>>();
-            if (input.Geometry.StationID.Contains("GHCND"))
+            if (input.Geometry.StationID.Contains("GHCND") || !input.Geometry.StationID.Contains(":"))
             {
                 NCEI<NCEITemperature> ncei = new NCEI<NCEITemperature>();
                 List<NCEITemperature> preData = ncei.GetData(out errorMsg, "TMIN,TMAX", input);
