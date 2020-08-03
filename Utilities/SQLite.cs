@@ -24,15 +24,24 @@ namespace Utilities
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
             string cwd = Directory.GetCurrentDirectory();
             string absPath = "";
-            foreach(string p in cwd.Split(Path.DirectorySeparatorChar))
+            if (!File.Exists(dbPath))
             {
-                absPath = Path.Combine(absPath, p);
-                if (p.Equals("hms"))
+                foreach (string p in cwd.Split(Path.DirectorySeparatorChar))
                 {
-                    break;
+                    absPath = Path.Combine(absPath, p);
+                    if (p.Equals("hms"))
+                    {
+                        break;
+                    }
                 }
+
+                absPath = Path.Combine(absPath, "Web.Services", dbPath);
             }
-            absPath = Path.Combine(absPath, "Web.Services", dbPath);
+            else
+            {
+                absPath = dbPath;
+            }
+
             Dictionary<string, string> data = new Dictionary<string, string>();
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
             connectionStringBuilder.DataSource = absPath;
