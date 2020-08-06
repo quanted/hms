@@ -19,14 +19,14 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             //bool validInputs = ValidateInputs(input, out errorMsg);
             //if (errorMsg.Contains("ERROR")) { return null; }
-            string data = nldas.GetData(out errorMsg, "PRECIP", input);
+            string data = nldas.GetData(out errorMsg, "PRECIP", input, retries);
             
             ITimeSeriesOutput nldasOutput = output;
             if (errorMsg.Contains("ERROR"))

@@ -63,14 +63,14 @@ namespace Data.Source
         /// <param name="dataset">prism dataset</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
             string url = componentInput.BaseURL[0];
             string parameters = ConstructParameterString(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(url, parameters, 0).Result;
+            string data = DownloadData(url, parameters, retries).Result;
             if (data.Contains("ERROR")) { errorMsg = data; return null; }
 
             return data;

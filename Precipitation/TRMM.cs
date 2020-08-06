@@ -20,7 +20,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
@@ -31,7 +31,7 @@ namespace Precipitation
             }
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
-            string data = trmm.GetData(out errorMsg, "PRECIP", input);
+            string data = trmm.GetData(out errorMsg, "PRECIP", input, retries);
 
             ITimeSeriesOutput trmmOutput = output;
             if (errorMsg.Contains("ERROR"))

@@ -18,7 +18,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>S
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
@@ -28,9 +28,9 @@ namespace Precipitation
 
             ITimeSeriesOutput gldasOutput = output;
             ITimeSeriesOutput tempOutput = null;
-            int retries = 0;
-            bool dataComplete = false;
-            Dictionary<string, bool> years = GetYears(input);
+            //int retries = 0;
+            //bool dataComplete = false;
+            //Dictionary<string, bool> years = GetYears(input);
 
             //while (!dataComplete)
             //{
@@ -59,7 +59,7 @@ namespace Precipitation
             //        retries++;
             //    }
             //}
-            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
+            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input, retries);
             gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }

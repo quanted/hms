@@ -23,11 +23,11 @@ namespace Data.Source
         /// <param name="dataTypeID"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public List<T> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
+        public List<T> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
-            List<T> data = DownLoadData(out errorMsg, dataTypeID, input);
+            List<T> data = DownLoadData(out errorMsg, dataTypeID, input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -40,7 +40,7 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private List<T> DownLoadData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
+        private List<T> DownLoadData(out string errorMsg, string dataTypeID, ITimeSeriesInput input, int retries)
         {
             errorMsg = "";
 
@@ -60,7 +60,7 @@ namespace Data.Source
             string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string json = SendRequest(token, url, 0).Result;
+            string json = SendRequest(token, url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             List<T> data = new List<T>();

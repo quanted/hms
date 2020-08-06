@@ -17,14 +17,14 @@ namespace Precipitation
         /// <param name="input"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (!validInputs) { return null; }
 
             Data.Source.Daymet daymet = new Data.Source.Daymet();
-            string data = daymet.GetData(out errorMsg, "Precip", input);
+            string data = daymet.GetData(out errorMsg, "Precip", input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput daymetOutput = output;

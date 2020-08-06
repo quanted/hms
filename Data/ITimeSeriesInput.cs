@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 
 namespace Data
@@ -86,29 +87,26 @@ namespace Data
     public class TimeSeriesInput : ITimeSeriesInput
     {
         /// <summary>
-        /// REQUIRED: Data source of the timeseries.
+        /// REQUIRED: Source of the timeseries data (i.e. NLDAS, GLDAS).
         /// </summary>
-#if RUNNING_ON_4  // JSC 1/22/2018
-        [Required]   
-#endif
+        [Required]
         public string Source { get; set; }
 
         /// <summary>
-        /// REQUIRED: Contains a start date and end date for the timeseries request.
+        /// REQUIRED: Temporal timeframe of interest, specified by a start and end date.
         /// </summary>
-#if RUNNING_ON_4  // JSC 1/22/2018
         [Required]   
-#endif
         public DateTimeSpan DateTimeSpan { get; set; }
 
         /// <summary>
-        /// REQUIRED: Contains the point, latitude/longitude, for the timeseries request. Metadata may be provided for the geometry.
+        /// REQUIRED: Geospatial area of interest idenifier. Specific identifier is directly related to the Source chosen. Possible options include Point (containing a latitude and longitude), a COMID (stream catchment identifier), stationID (NCEI station identifier), HUC8 (NHD Hydrologic Unit Code 8).
         /// </summary>
+        [Required]
         public TimeSeriesGeometry Geometry { get; set; }
 
         /// <summary>
         /// OPTIONAL: Specifies the output format for the data values in the timeseries.
-        /// DEFAULT: 
+        /// DEFAULT: E3
         /// Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
         /// </summary>
         public string DataValueFormat { get; set; }
@@ -116,12 +114,12 @@ namespace Data
         /// <summary>
         /// OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
         /// DEFAULT: "default"
-        /// VALUES: "default", "hourly", "daily", "weekly", "monthly"
+        /// VALUES: "default", "hourly", "3hourly", "daily", "monthly"
         /// </summary>
         public string TemporalResolution { get; set; }
 
         /// <summary>
-        /// OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the timeseries.
+        /// OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the returned timeseries.
         /// DEFAULT: True
         /// </summary>
         public bool TimeLocalized { get; set; }
@@ -136,7 +134,7 @@ namespace Data
         /// <summary>
         /// OPTIONAL: Specifies output format type.
         /// DEFAULT: "json"
-        /// VALUES: "json", "xml", "csv"
+        /// VALUES: "json"
         /// </summary>
         public string OutputFormat { get; set; }
 
@@ -495,7 +493,7 @@ namespace Data
     }
 
     /// <summary>
-    /// Point geometry object interface.
+    /// Point geometry object for specifying a point geospatial area of interest.
     /// </summary>
     public class PointCoordinate : IPointCoordinate
     {

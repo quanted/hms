@@ -21,7 +21,7 @@ namespace Data.Source
         /// <param name="dataset">trmm dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
 
@@ -33,7 +33,7 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(url, 0).Result;
+            string data = DownloadData(url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;

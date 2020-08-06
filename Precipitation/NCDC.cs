@@ -27,7 +27,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
@@ -67,7 +67,7 @@ namespace Precipitation
             if (input.Geometry.StationID.Contains("GHCND") || !input.Geometry.StationID.Contains(":"))
             {
                 NCEI<NCEIPrecipitation> ncei = new NCEI<NCEIPrecipitation>();
-                List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input);
+                List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input, retries);
                 data = this.ParseData(out errorMsg, preData, input.DateTimeSpan.DateTimeFormat, input.TemporalResolution, input.DateTimeSpan.StartDate, input.DateTimeSpan.EndDate);
             }
             else

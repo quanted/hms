@@ -15,11 +15,11 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
             Data.Source.PRISM prism = new Data.Source.PRISM();
-            string data = prism.GetData(out errorMsg, "ppt", input);
+            string data = prism.GetData(out errorMsg, "ppt", input, retries);
 
             ITimeSeriesOutput prismOutput = output;
             if (errorMsg.Contains("ERROR"))
