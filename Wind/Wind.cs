@@ -65,7 +65,7 @@ namespace Wind
             {
                 this.Input.Units = "metric";
             }
-            this.Input.DataValueFormat = "E3";
+            //this.Input.DataValueFormat = "E3";
 
             switch (this.Input.Source)
             {

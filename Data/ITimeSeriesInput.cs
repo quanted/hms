@@ -318,7 +318,7 @@ namespace Data
     }
 
     /// <summary>
-    /// DateTimeSpan concrete class.
+    /// DateTimeSpan object for specifying the temporal timespan of the returned timeseries data.
     /// </summary>
     public class DateTimeSpan : IDateTimeSpan
     {
@@ -335,6 +335,7 @@ namespace Data
         /// <summary>
         /// Format for the output of DateTime values.
         /// Format Reference: https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
+        /// Default Value: E3
         /// </summary>
         public string DateTimeFormat { get; set; }
     }
@@ -364,7 +365,7 @@ namespace Data
     }
 
     /// <summary>
-    /// Timezone concrete class for timezone information of input geometry.
+    /// Timezone information corresponding to the geospatial area of interest, specified within the Geometry object.
     /// </summary>
     public class Timezone : ITimezone
     {
@@ -380,6 +381,7 @@ namespace Data
 
         /// <summary>
         /// Indicates if day light savings is active or not.
+        /// Currently not being utilized.
         /// </summary>
         public bool DLS { get; set; }
     }
@@ -429,7 +431,7 @@ namespace Data
     }
 
     /// <summary>
-    /// TimeSeries Geometry concrete class for time series components.
+    /// The geospatial area of interest object for the returned time series data. 
     /// </summary>
     public class TimeSeriesGeometry : ITimeSeriesGeometry
     {
@@ -439,27 +441,23 @@ namespace Data
         public string Description { get; set; }
 
         /// <summary>
-        /// Catchment comid
+        /// NHDPlus v2 catchment identifier.
         /// </summary>
         public int ComID { get; set; }
 
         /// <summary>
-        /// ID for NHDPlus boundaries
+        /// NHDPlus v2 Hydrologic Unit Code idendifier, specifically a HUC8 or HUC12 ID.
         /// </summary>
         public string HucID { get; set; }
 
         /// <summary>
-        /// ID for NCDC Stations
+        /// NCEI weather station ID, supports GHCND and COOP stations. If station type is not prepended to the ID, assumed to be GHCND.
         /// </summary>
         public string StationID { get; set; }
 
         /// <summary>
-        /// Lat/lon point for when a coordinates are used as the geometry type.
+        /// Point coordinate object for providing latitude and longitude coordinates.
         /// </summary>
-        /// 
-#if RUNNING_ON_4  // JSC 1/22/2018
-        [Required]   
-#endif
         public PointCoordinate Point { get; set; }
 
         /// <summary>

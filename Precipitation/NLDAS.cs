@@ -66,10 +66,6 @@ namespace Precipitation
                     output.Data = DailyAggregatedSum(out errorMsg, 23, 1.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
-                case "weekly":
-                    output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");
@@ -162,52 +158,6 @@ namespace Precipitation
             }
             TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
             return tempData0;
-        }
-
-        /// <summary>
-        /// Weekly aggregated sums for precipitation data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
-        public static Dictionary<string, List<string>> WeeklyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
-        {
-            errorMsg = "";
-            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
-
-            DateTime iDate = new DateTime();
-            double sum = 0.0;
-
-            // Unit conversion coefficient
-            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-
-            iDate = aggOut.Data.Keys.ElementAt(0).Date;
-
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            List<string> values = new List<string> { "" };
-            DateTime date = new DateTime();
-
-            for (int i = 0; i < aggOut.Data.Count; i++)
-            {
-                date = aggOut.Data.Keys.ElementAt(i).Date;
-                int dayDif = (int)(date - iDate).TotalDays;
-                if (dayDif >= 7)
-                {
-                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
-                    iDate = date;
-                    if (input.Source == "gldas")
-                    {
-                        iDate = iDate.AddHours(-iDate.Hour);//Fixes issue with GLDAS keys being not compatible with other time series in precip compare
-                    }
-                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
-                }
-                else
-                {
-                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
-                }
-            }
-            return tempData;
         }
 
         /// <summary>

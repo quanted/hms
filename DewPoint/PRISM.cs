@@ -54,10 +54,6 @@ namespace DewPoint
                 case "default":
                     output.Metadata.Add("column_2", "Mean Dew Point Temperature");
                     return output;
-                case "weekly":
-                    output.Data = WeeklyValues(out errorMsg, output, input);
-                    output.Metadata.Add("column_2", "Mean Dew Point Temperature");
-                    return output;
                 case "monthly":
                     output.Data = MonthlyValues(out errorMsg, output, input);
                     output.Metadata.Add("column_2", "Mean Dew Point Temperature");

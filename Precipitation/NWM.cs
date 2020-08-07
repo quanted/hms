@@ -77,10 +77,6 @@ namespace Precipitation
                     output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 23, 1.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
-                case "weekly":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");
@@ -100,79 +96,6 @@ namespace Precipitation
             errorMsg = "";
             string result = Utilities.WebAPI.RequestData<string>(url).Result;
             return result;
-
-            //string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-            //if (flaskURL == null)
-            //{
-            //    flaskURL = "http://localhost:7777";
-            //}
-            //Debug.WriteLine("Flask Server URL: " + flaskURL);
-
-            //string dataURL = flaskURL + "/hms/data?job_id=";
-            //WebClient myWC = new WebClient();
-            //string data = "";
-            //dynamic taskData = "";
-            //try
-            //{
-            //    int retries = 5;                                        // Max number of request retries
-            //    string status = "";                                     // response status code
-            //    string jobID = "";
-            //    while (retries > 0 && !status.Contains("OK"))
-            //    {
-            //        WebRequest wr = WebRequest.Create(flaskURL + url);
-            //        HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-            //        status = response.StatusCode.ToString();
-            //        Stream dataStream = response.GetResponseStream();
-            //        StreamReader reader = new StreamReader(dataStream);
-            //        jobID = JSON.Deserialize<Dictionary<string, string>>(reader.ReadToEnd())["job_id"];
-            //        reader.Close();
-            //        response.Close();
-            //        retries -= 1;
-            //        if (!status.Contains("OK"))
-            //        {
-            //            Thread.Sleep(500);
-            //        }
-            //    }
-
-            //    Thread.Sleep(500);
-            //    int maxRetries = 100;
-            //    retries = 0;
-            //    status = "";
-            //    taskData = "";
-            //    bool success = false;
-            //    while (retries < maxRetries && !success && !jobID.Equals(""))
-            //    {
-            //        WebRequest wr = WebRequest.Create(dataURL + jobID);
-            //        HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-            //        status = response.StatusCode.ToString();
-            //        Stream dataStream = response.GetResponseStream();
-            //        StreamReader reader = new StreamReader(dataStream);
-            //        data = reader.ReadToEnd();
-            //        taskData = JSON.Deserialize<dynamic>(data);
-            //        if (taskData["status"] == "SUCCESS")
-            //        {
-            //            success = true;
-            //        }
-            //        else if (taskData["status"] == "FAILURE" || taskData["status"] == "PENDING")
-            //        {
-            //            reader.Close();
-            //            response.Close();
-            //            break;
-            //        }
-            //        else
-            //        {
-            //            retries += 1;
-            //            Thread.Sleep(5000);
-            //        }
-            //        reader.Close();
-            //        response.Close();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    errorMsg = "ERROR: Could not find National Water Model data for the given input. " + ex.Message;
-            //}
-            //return data;
         }
 
         private ITimeSeriesOutput SetDataToOutput(out string errorMsg, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
