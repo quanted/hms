@@ -23,7 +23,7 @@ namespace Chemicals.AQUATOX.UnitTests
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "\\..\\..\\..\\..\\DOCS\\AQUATOX_Chemical_Model_Valid_JSON.txt";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
 
             new AQTChemicalModel(ref json, out errmsg, false);
@@ -36,7 +36,7 @@ namespace Chemicals.AQUATOX.UnitTests
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "\\..\\..\\..\\..\\DOCS\\AQUATOX_Chemical_Model_Valid_JSON.txt";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
 
             AQTChemicalModel AQTM = new AQTChemicalModel(ref json, out errmsg, false);
@@ -44,34 +44,74 @@ namespace Chemicals.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoChemicals.txt";
-            json = File.ReadAllText(path2);
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Chemical_Model_NoChemicals.txt";
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NopH.txt";
-            json = File.ReadAllText(path2);
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Chemical_Model_NopH.txt";
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoVolume.txt";
-            json = File.ReadAllText(path2);
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Chemical_Model_NoVolume.txt";
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            path2 = path + "\\..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Chemical_Model_NoLight.txt";
-            json = File.ReadAllText(path2);
+            path2 = path + "\\..\\..\\..\\..\\TEST\\Invalid\\AQUATOX_Chemical_Model_NoLight.txt";
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTChemicalModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
+        }
+
+        private string GetTestFile(string filePath)
+        {
+            string path = System.Environment.CurrentDirectory;
+            string path2 = Path.Combine(path, filePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                var fileName = filePath.Split("\\");
+                path2 = "/home/travis/build/quanted/hms/Chemicals/";
+                foreach (string p in fileName)
+                {
+                    if (!p.Equals(".."))
+                    {
+                        path2 = Path.Combine(path2, p);
+                    }
+                }
+                if(!File.Exists(path2))
+                {
+                    if (fileName[fileName.Length - 2].Equals("DOCS"))
+                    {
+                        path2 = Path.Combine("/home/travis/build/quanted/hms/Chemicals/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+
+                    }
+                    else
+                    {
+                        path2 = Path.Combine("/home/travis/build/quanted/hms/Chemicals/",
+                            fileName[fileName.Length - 3],
+                            fileName[fileName.Length - 2],
+                            fileName[fileName.Length - 1]);
+                    }
+                }
+                json = File.ReadAllText(path2);
+            }
+            return json;
         }
 
 

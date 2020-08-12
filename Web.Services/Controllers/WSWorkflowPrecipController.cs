@@ -75,6 +75,7 @@ namespace Web.Services.Controllers
             PrecipitationCompareInput example = new PrecipitationCompareInput()
             {
                 Dataset = "Precipitation",
+                Source = "compare",
                 SourceList = new List<String>() { "nldas", "gldas" },
                 Weighted = true,
                 DateTimeSpan = new DateTimeSpan()
@@ -85,7 +86,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = 1053791
+                    ComID = 1053791,
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
@@ -110,6 +112,7 @@ namespace Web.Services.Controllers
             PrecipitationExtractionInput example = new PrecipitationExtractionInput()
             {
                 Dataset = "Precipitation",
+                Source = "extraction",
                 SourceList = new List<String>() { "ncei", "nldas" },
                 DateTimeSpan = new DateTimeSpan()
                 {
@@ -119,7 +122,7 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = 1053791
+                    StationID = "GHCND:USW00013874"
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",

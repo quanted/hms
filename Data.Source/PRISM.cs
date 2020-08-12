@@ -63,14 +63,14 @@ namespace Data.Source
         /// <param name="dataset">prism dataset</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
             string url = componentInput.BaseURL[0];
             string parameters = ConstructParameterString(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(url, parameters, 0).Result;
+            string data = DownloadData(url, parameters, retries).Result;
             if (data.Contains("ERROR")) { errorMsg = data; return null; }
 
             return data;
@@ -243,7 +243,7 @@ namespace Data.Source
                 DateTime.TryParseExact(content.result[0].value[0].data[i][0].ToString(), new string[] { "yyyy-MM-dd" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime newDate);
                 List<string> values = new List<string>();
                 for (int j = 1; j < content.result[0].value[0].data[i].Count; j++) {
-                    values.Add(content.result[0].value[0].data[i][j].ToString());
+                    values.Add(Double.Parse(content.result[0].value[0].data[i][j].ToString()).ToString(dataFormat));
                 }
                 
                 dataDict.Add(newDate.ToString(dateFormat), values);

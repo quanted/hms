@@ -133,10 +133,13 @@ namespace Web.Services.Models
                 input.Source = input.Geometry.GeometryMetadata["precipSource"];
                 ITimeSeriesOutput precipOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[3], com, input.Source, "Precipitation"), gd, input.Aggregation);//cd.getCatchmentAggregation(input, precipResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
+                precipOutput = Utilities.Statistics.GetStatistics(out errorMsg, input, precipOutput);
                 ITimeSeriesOutput surfOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[0], com, input.Source, "Runoff"), gd, input.Aggregation); //dtToITSOutput(ds.Tables[0]); //cd.getCatchmentAggregation(input, surfResult, gd, input.Aggregation);
                 input.Source = input.RunoffSource;
+                surfOutput = Utilities.Statistics.GetStatistics(out errorMsg, input, surfOutput);
                 ITimeSeriesOutput subOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[1], com, input.Source, "Baseflow"), gd, input.Aggregation);//dtToITSOutput(ds.Tables[1]);//cd.getCatchmentAggregation(input, subResult, gd, input.Aggregation);
                 input.Source = input.StreamHydrology;
+                subOutput = Utilities.Statistics.GetStatistics(out errorMsg, input, subOutput);
                 ITimeSeriesOutput hydrologyOutput = cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2], com, input.Source, "Streamflow"), gd, input.Aggregation);// dtToITSOutput(ds.Tables[2]);//cd.getCatchmentAggregation(input, dtToITSOutput(ds.Tables[2]), gd, input.Aggregation);
 
                 Dictionary<string, ITimeSeriesOutput> timeSeriesDict = new Dictionary<string, ITimeSeriesOutput>();
@@ -227,6 +230,7 @@ namespace Web.Services.Models
 
         public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2, string dataset)
         {
+            string errorMsg = "";
             column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();

@@ -19,14 +19,14 @@ namespace Data.Source
         /// <param name="dataSet"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataSet, ITimeSeriesInput input)
+        public string GetData(out string errorMsg, string dataSet, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
             string url = ConstructURL(out errorMsg, dataSet, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(url, 0).Result;
+            string data = DownloadData(url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;

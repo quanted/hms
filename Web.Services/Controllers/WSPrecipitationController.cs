@@ -45,7 +45,8 @@ namespace Web.Services.Controllers
                     {
                         Latitude = 33.925673,
                         Longitude = -83.355723
-                    }
+                    },
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",

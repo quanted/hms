@@ -22,7 +22,7 @@ namespace Diagenesis.AQUATOX.UnitTests
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "\\..\\..\\..\\..\\DOCS\\Diagenesis_Model_Valid_JSON.txt";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
 
             string errmsg;
             new AQTDiagenesisModel(ref json, out errmsg, false);
@@ -35,13 +35,42 @@ namespace Diagenesis.AQUATOX.UnitTests
         public void AQTDiagenesis_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string path2 = path + "\\..\\..\\..\\..\\TEST\\Diagenesis_MissingSVs.JSON";
-            string json = File.ReadAllText(path2);
+            string path2 = path + "\\..\\..\\..\\..\\Test\\Diagenesis_MissingSVs.JSON";
+            string json = GetTestFile(path2);
             string errmsg = "";
             AQTDiagenesisModel AQTM = new AQTDiagenesisModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
+        }
+
+        private string GetTestFile(string filePath)
+        {
+            string path = System.Environment.CurrentDirectory;
+            string path2 = Path.Combine(path, filePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                var fileName = filePath.Split("\\");
+                path2 = "/home/travis/build/quanted/hms/Diagenesis/";
+                foreach (string p in fileName)
+                {
+                    if (!p.Equals(".."))
+                    {
+                        path2 = Path.Combine(path2, p);
+                    }
+                }
+                if (!File.Exists(path2))
+                {
+                    path2 = Path.Combine("/home/travis/build/quanted/hms/Diagenesis/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+                }
+                json = File.ReadAllText(path2);
+            }
+            return json;
         }
 
 

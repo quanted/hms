@@ -1,6 +1,8 @@
 ﻿using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.IO;
+using System.Linq;
 
 namespace Utilities
 {
@@ -20,9 +22,29 @@ namespace Utilities
                 return null;
             }
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
+            string cwd = Directory.GetCurrentDirectory();
+            string absPath = "";
+            if (!File.Exists(dbPath))
+            {
+                foreach (string p in cwd.Split(Path.DirectorySeparatorChar))
+                {
+                    absPath = Path.Combine(absPath, p);
+                    if (p.Equals("hms"))
+                    {
+                        break;
+                    }
+                }
+
+                absPath = Path.Combine(absPath, "Web.Services", dbPath);
+            }
+            else
+            {
+                absPath = dbPath;
+            }
+
             Dictionary<string, string> data = new Dictionary<string, string>();
             SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = dbPath;
+            connectionStringBuilder.DataSource = absPath;
             try
             {
                 using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))

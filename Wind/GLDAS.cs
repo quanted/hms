@@ -139,7 +139,7 @@ namespace Wind
                 if (iDate.Month != newDate.Month || i == output.Data.Count - 1)
                 {
                     sum = sum / days;
-                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { sum.ToString() });
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { sum.ToString(input.DataValueFormat) });
                     newDate = iDate;
                     sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     days = 0;

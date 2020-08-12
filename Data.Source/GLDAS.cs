@@ -21,7 +21,7 @@ namespace Data.Source
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
 
@@ -40,7 +40,7 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
 
-            List<string> data = DownloadData(url, 0).Result;
+            List<string> data = DownloadData(url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;

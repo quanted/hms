@@ -73,10 +73,12 @@ namespace Data.Simulate
         private Dictionary<int, double> GetCN(out string errorMsg, int comid)
         {
             errorMsg = "";
-            string dbPath = "/app/App_Data/hms_database.sqlite3";
+            string dbPath = Path.Combine(".", "app", "App_Data", "hms_database.sqlite3");
+            //string dbPath = "/app/App_Data/hms_database.sqlite3";
             if (!File.Exists(dbPath))
             {
-                dbPath = @".\App_Data\hms_database.sqlite3";
+                dbPath = Path.Combine(".", "App_Data", "hms_database.sqlite3");
+                //dbPath = @".\App_Data\hms_database.sqlite3";
             }
             string query = "SELECT CN_00, CN_01, CN_02, CN_03, CN_04, CN_05, CN_06, CN_07, CN_08, CN_09, CN_10, CN_11, CN_12, CN_13, CN_14, CN_15, CN_16, CN_17, CN_18, CN_19, CN_20, CN_21, CN_22 " +
                 "FROM CurveNumber WHERE ComID = '" + comid.ToString() + "'";

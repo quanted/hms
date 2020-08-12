@@ -83,12 +83,7 @@ namespace Web.Services.Controllers
                     {
                         { "precipSource", "daymet"}
                     },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",

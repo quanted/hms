@@ -65,7 +65,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/hydrology/soilmoisture";
             SoilMoistureInput input = JsonSerializer.Deserialize<SoilMoistureInput>(soilmoistureInputString, options);
             Debug.WriteLine("Integration Test: Soil Moisture controller; Endpoint:" + endpoint + "; Data source: " + input.Source);

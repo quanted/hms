@@ -19,14 +19,14 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             //bool validInputs = ValidateInputs(input, out errorMsg);
             //if (errorMsg.Contains("ERROR")) { return null; }
-            string data = nldas.GetData(out errorMsg, "PRECIP", input);
+            string data = nldas.GetData(out errorMsg, "PRECIP", input, retries);
             
             ITimeSeriesOutput nldasOutput = output;
             if (errorMsg.Contains("ERROR"))
@@ -65,10 +65,6 @@ namespace Precipitation
                 case "daily":
                     output.Data = DailyAggregatedSum(out errorMsg, 23, 1.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
-                    return output;
-                case "weekly":
-                    output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
@@ -155,57 +151,13 @@ namespace Precipitation
             int j = 0;
             for (int i = 0; i < output.Data.Count; i += hours)
             {
-                tempData0.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                string parseDate = tempKeys.ElementAt(i).Split(' ')[0];
+                tempData0.Add(parseDate + " 00", new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
+                //tempData0.Add(tempKeys.ElementAt(i).Replace(" 01", " 00"), new List<string> { (unit * precipRowValues.ElementAt(j)).ToString(input.DataValueFormat) });
                 j++;
             }
             TimeSpan t1 = (DateTime.UtcNow - new DateTime(1970, 1, 1));
             return tempData0;
-        }
-
-        /// <summary>
-        /// Weekly aggregated sums for precipitation data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
-        public static Dictionary<string, List<string>> WeeklyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input)
-        {
-            errorMsg = "";
-            ITimeSeriesAggregation aggOut = ConvertTimeSeries(output);
-
-            DateTime iDate = new DateTime();
-            double sum = 0.0;
-
-            // Unit conversion coefficient
-            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-
-            iDate = aggOut.Data.Keys.ElementAt(0).Date;
-
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            List<string> values = new List<string> { "" };
-            DateTime date = new DateTime();
-
-            for (int i = 0; i < aggOut.Data.Count; i++)
-            {
-                date = aggOut.Data.Keys.ElementAt(i).Date;
-                int dayDif = (int)(date - iDate).TotalDays;
-                if (dayDif >= 7)
-                {
-                    values = new List<string> { (modifier * unit * sum).ToString(input.DataValueFormat) };
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), values);
-                    iDate = date;
-                    if (input.Source == "gldas")
-                    {
-                        iDate = iDate.AddHours(-iDate.Hour);//Fixes issue with GLDAS keys being not compatible with other time series in precip compare
-                    }
-                    sum = aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
-                }
-                else
-                {
-                    sum += aggOut.Data[aggOut.Data.Keys.ElementAt(i)][0]; 
-                }
-            }
-            return tempData;
         }
 
         /// <summary>

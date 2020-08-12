@@ -54,7 +54,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/humidity";
             HumidityInput input = JsonSerializer.Deserialize<HumidityInput>(inputString, options);
             Debug.WriteLine("Integration Test: Humidity controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

@@ -399,6 +399,11 @@
             SubSurfaceFlow Input that implements TimeSeriesInput object
             </summary>
         </member>
+        <member name="P:Web.Services.Controllers.SubSurfaceFlowInput.PrecipSource">
+            <summary>
+            OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+            </summary>
+        </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInputExample">
             <summary>
             Swashbuckle SubSurfaceFlow POST request example
@@ -515,14 +520,6 @@
             <summary>
             Checks endpoints for all datasets.
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Controllers.WSUtilitiesController.DatasetEndpointsCheck(System.String)">
-            <summary>
-            Checks endpoints for a specified dataset.
-            Valid datasets: "evapo", "evapotranspiration", "precip", "precipitation", "soilm", "soilmoisture", "subsurface", "subsurfaceflow", "runoff", "surfacerunoff", "temp", "temperature"
-            </summary>
-            <param name="dataset"></param>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Controllers.WatershedDelineationInput">
@@ -1137,39 +1134,9 @@
             Web Service Utilities Class
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckPrecipEndpoints">
+        <member name="M:Web.Services.Models.WSUtilities.ServiceCheck">
             <summary>
-            Checks the data endpoints for the Precipitation component.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckEvapoEndpoints">
-            <summary>
-            Checks the data endpoints for the Evapotranspiration component.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckSoilMEndpoints">
-            <summary>
-            Checks the data endpoints for the Soil Moisture component.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckSubsurfaceEndpoints">
-            <summary>
-            Checks the data endpoints for the Sub-Surface Flow component.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckRunoffEndpoints">
-            <summary>
-            Checks the data endpoints for the SurfaceRunoff component.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Web.Services.Models.WSUtilities.CheckTempEndpoints">
-            <summary>
-            Checks the data endpoints for the Temperature component.
+            Checks the external data endpoints
             </summary>
             <returns></returns>
         </member>

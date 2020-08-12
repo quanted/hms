@@ -69,12 +69,7 @@ namespace Web.Services.Controllers
                         { "Country", "United States" },
                         { "huc_12_num", "030502040102" }
                     },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",

@@ -18,7 +18,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>S
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
@@ -27,39 +27,7 @@ namespace Precipitation
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
 
             ITimeSeriesOutput gldasOutput = output;
-            ITimeSeriesOutput tempOutput = null;
-            int retries = 0;
-            bool dataComplete = false;
-            Dictionary<string, bool> years = GetYears(input);
-
-            //while (!dataComplete)
-            //{
-
-            //    List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
-
-            //    if (errorMsg.Contains("ERROR"))
-            //    {
-            //        Utilities.ErrorOutput err = new ErrorOutput();
-            //        output = err.ReturnError("Precipitation", "gldas", errorMsg);
-            //        //errorMsg = "";
-            //        return output;
-            //    }
-            //    else
-            //    {
-            //        if (retries > 0)
-            //        {
-            //            tempOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            //            gldasOutput = gldas.MergeTimeseries(gldasOutput, tempOutput);
-            //        } 
-            //        else
-            //        {
-            //            gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            //        }
-            //        dataComplete = CheckYears(years, gldasOutput);
-            //        retries++;
-            //    }
-            //}
-            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input);
+            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input, retries);
             gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
             gldasOutput = TemporalAggregation(out errorMsg, output, input);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -150,10 +118,6 @@ namespace Precipitation
                 case "daily":
                     output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 7, 3.0, output, input);
                     output.Metadata.Add("column_2", "Daily Total");
-                    return output;
-                case "weekly":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 3.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
                     return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 3.0, output, input);
