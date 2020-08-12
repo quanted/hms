@@ -31,7 +31,7 @@ namespace Utilities
             {
                 return System.Text.Json.JsonSerializer.Deserialize<T>(value, options);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("Error deserializing object: " + ex.Message);
                 return default(T);
@@ -55,7 +55,7 @@ namespace Utilities
             {
                 return System.Text.Json.JsonSerializer.Serialize(obj, options);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Write("Error serializing object: " + ex.Message);
                 return null;
@@ -84,120 +84,151 @@ namespace Utilities
                     default:
                         return System.Text.Json.JsonSerializer.Serialize(obj, options);
                     case 1:
-                        return System.Text.Json.JsonSerializer.Serialize(obj, options);                        
+                        return System.Text.Json.JsonSerializer.Serialize(obj, options);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Write("Error serializing object: " + ex.Message);
                 return null;
             }
         }
-    }
-    public class DoubleConverter : JsonConverter<double>
-    {
-        public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
-            {
-                string value = reader.GetString();
-                try
-                {
-                    return Double.Parse(value);
-                }
-                catch (FormatException)
-                {
-                    throw new JsonException();
-                }
-            }
-            else
-            {
-                return reader.GetDouble();
-            }
-        }
 
-        public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
+        public class DoubleConverter : JsonConverter<double>
         {
-            writer.WriteNumberValue(value);
-        }
-    }
-
-    public class IntegerConverter : JsonConverter<int>
-    {
-        public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
+            public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                string value = reader.GetString();
-                try
+                if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
                 {
-                    return int.Parse(value);
+                    string value = reader.GetString();
+                    try
+                    {
+                        return Double.Parse(value);
+                    }
+                    catch (FormatException)
+                    {
+                        throw new JsonException();
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    throw new JsonException();
+                    return reader.GetDouble();
                 }
             }
-            else
+
+            public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
             {
-                return reader.GetInt32();
+                writer.WriteNumberValue(value);
             }
         }
 
-        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
+        public class IntegerConverter : JsonConverter<int>
         {
-            writer.WriteNumberValue(value);
-        }
-    }
-
-    public class BooleanConverter : JsonConverter<Boolean>
-    {
-        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == System.Text.Json.JsonTokenType.String)
+            public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                string value = reader.GetString();
-                try
+                if (reader.TokenType != System.Text.Json.JsonTokenType.Number)
                 {
-                    return Boolean.Parse(value);
+                    string value = reader.GetString();
+                    try
+                    {
+                        return int.Parse(value);
+                    }
+                    catch (FormatException)
+                    {
+                        throw new JsonException();
+                    }
                 }
-                catch (FormatException)
+                else
                 {
-                    throw new JsonException();
+                    return reader.GetInt32();
                 }
             }
-            else
+
+            public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
             {
-                return reader.GetBoolean();
+                writer.WriteNumberValue(value);
             }
         }
 
-        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
+        public class BooleanConverter : JsonConverter<Boolean>
         {
-            writer.WriteBooleanValue(value);
-        }
-    }
-
-    public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
-    {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            Debug.Assert(typeToConvert == typeof(DateTime));
-            DateTime date = new DateTime();
-            string dateString = reader.GetString();
-            if (DateTime.TryParse(dateString, out date)) { }
-            else if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)) { }
-            else if (DateTime.TryParseExact(dateString, "MM/dd/yyyy HH", CultureInfo.InvariantCulture, DateTimeStyles.None, out date)) { }
-            else
+            public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                throw new FormatException();
+                if (reader.TokenType == System.Text.Json.JsonTokenType.String)
+                {
+                    string value = reader.GetString();
+                    try
+                    {
+                        return Boolean.Parse(value);
+                    }
+                    catch (FormatException)
+                    {
+                        throw new JsonException();
+                    }
+                }
+                else
+                {
+                    return reader.GetBoolean();
+                }
             }
-            return date;
+
+            public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
+            {
+                writer.WriteBooleanValue(value);
+            }
         }
 
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
         {
-            writer.WriteStringValue(value.ToString());
+            public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                Debug.Assert(typeToConvert == typeof(DateTime));
+                DateTime date = new DateTime();
+                string dateString = reader.GetString();
+                if (DateTime.TryParse(dateString, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "MM/dd/yyyy HH", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date))
+                {
+                }
+                else
+                {
+                    throw new FormatException();
+                }
+
+                return date;
+            }
+
+            public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(value.ToString());
+            }
+        }
+
+        public class StringConverter : JsonConverter<string>
+        {
+            public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == System.Text.Json.JsonTokenType.String)
+                {
+                    return reader.GetString().ToLower();
+
+                }
+                else
+                {
+                    return reader.GetString();
+                }
+            }
+
+            public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(value);
+            }
         }
     }
 }

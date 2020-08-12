@@ -74,7 +74,7 @@ namespace Data.Source
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,                       
                         IgnoreNullValues = true
                     };
-                    options.Converters.Add(new Utilities.DoubleConverter());
+                    options.Converters.Add(new Utilities.JSON.DoubleConverter());
                     data = JsonSerializer.Deserialize<List<T>>(json, options);
                 }
                 catch (System.Text.Json.JsonException ex)

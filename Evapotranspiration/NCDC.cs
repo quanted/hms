@@ -17,15 +17,15 @@ namespace Evapotranspiration
     {
         public string DATE { get; set; }
         public string STATION { get; set; }
-        [JsonConverter(typeof(DoubleConverter))]
+        [JsonConverter(typeof(JSON.DoubleConverter))]
         public double TMAX { get; set; }
-        [JsonConverter(typeof(DoubleConverter))]
+        [JsonConverter(typeof(JSON.DoubleConverter))]
 
         public double TMIN { get; set; }
-        [JsonConverter(typeof(DoubleConverter))]
+        [JsonConverter(typeof(JSON.DoubleConverter))]
 
         public double AWND { get; set; }
-        [JsonConverter(typeof(DoubleConverter))]
+        [JsonConverter(typeof(JSON.DoubleConverter))]
 
         public double PRCP { get; set; }
     }
@@ -71,7 +71,7 @@ namespace Evapotranspiration
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true,
             };
-            options.Converters.Add(new DoubleConverter());
+            options.Converters.Add(new JSON.DoubleConverter());
             List<NCDCEntry> datalist = JsonSerializer.Deserialize<List<NCDCEntry>>(data, options);
 
             string date = "";

@@ -168,7 +168,8 @@ namespace Evapotranspiration
             Utilities.Time offsets = new Utilities.Time();
 
             //this.Algorithm = (this.Input.Source != null) ? this.Input.Source : this.Algorithm;
-
+            this.Input.Source = this.Input.Source.ToLower();
+            this.Algorithm = this.Algorithm.ToLower();
             //Error checking and data validation
             if (this.Input.Source != "gldas" && this.Algorithm == "gldas")
             {

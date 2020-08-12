@@ -56,7 +56,7 @@ namespace Temperature
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS Temperature Data call

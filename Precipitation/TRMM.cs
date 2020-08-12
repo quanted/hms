@@ -81,6 +81,7 @@ namespace Precipitation
                     output.Data = YearlyAggregatedSum(out errorMsg, 22, 3.0, output, input);
                     output.Metadata.Add("column_2", "Yearly Total");
                     return output;
+                case "default":
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 3.0, output, input) : ConvertToThreeHourly(out errorMsg, output, input);
                     output.Metadata.Add("column_2", "Hourly Average");
