@@ -31,7 +31,7 @@ namespace Web.Services
                 options.JsonSerializerOptions.AllowTrailingCommas = true;
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.Converters.Add(new Utilities.JSON.StringConverter());
+                //options.JsonSerializerOptions.Converters.Add(new Utilities.JSON.StringConverter());
                 options.JsonSerializerOptions.Converters.Add(new Utilities.JSON.IntegerConverter());
                 options.JsonSerializerOptions.Converters.Add(new Utilities.JSON.DoubleConverter());
                 options.JsonSerializerOptions.Converters.Add(new Utilities.JSON.BooleanConverter());

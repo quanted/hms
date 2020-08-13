@@ -58,7 +58,8 @@ namespace Web.Services.Models
 
                 // Set input to precip object.
                 ncei.Input = nInput;
-                //ncei.Input.TemporalResolution = "daily";
+               // ncei.Input.TemporalResolution = "daily"
+
                 ncei.Input.TemporalResolution = input.TemporalResolution;              
                 ITimeSeriesOutput nResult = ncei.GetData(out errorMsg);
                 if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
@@ -87,9 +88,10 @@ namespace Web.Services.Models
 
                 // Set input to precip object.
                 precip.Input = sInput;
-                precip.Input.TemporalResolution = input.TemporalResolution;
-
-                //precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
+                precip.Input.TemporalResolution = (input.TemporalResolution == "default") ? "daily" : input.TemporalResolution;
+                
+                precip.Input.DateTimeSpan.StartDate = precip.Input.DateTimeSpan.StartDate.AddDays(-1);
+                precip.Input.DateTimeSpan.EndDate = precip.Input.DateTimeSpan.EndDate.AddDays(1);
                 if (!precip.Input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
                 {
                     precip.Input.Geometry.GeometryMetadata.Add("leapYear", "correction");

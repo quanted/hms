@@ -64,7 +64,7 @@ namespace Data
 
             if (errors.Count == 0 && ValidateSource(out errorTemp, dataset, input.Source))
             {
-                validInput.Source = input.Source;
+                validInput.Source = input.Source.ToLower();
             }
             errors = errors.Concat(errorTemp).ToList();
             errorTemp = new List<string>();
