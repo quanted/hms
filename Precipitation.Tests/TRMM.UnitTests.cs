@@ -42,15 +42,13 @@ namespace Precipitation.Tests
             };
             Dictionary<string, string> status = TRMM.CheckStatus(precip.Input);
             Assert.Equal("OK", status["status"]);
-
         }
 
 
         [Trait("Priority", "1")]
         [Theory]
         [InlineData("default", "2015-01-01 01", 0.0)]
-        [InlineData("daily", "2015-01-02 01", 2.73)]
-        [InlineData("weekly", "2015-01-01 00", 37.94)]
+        [InlineData("daily", "2015-01-02 00", 2.73)]
         [InlineData("monthly", "2015-01-01 00", 79.54)]
         [InlineData("yearly", "2015-01-01 01", 1262)]
         public void TemporalAggregation(string aggregation, string date, double expected)

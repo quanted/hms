@@ -50,7 +50,6 @@ namespace Precipitation.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData("daily", "2015-01-01 00", 0.0)]
-        [InlineData("weekly", "2015-01-01 00", 46.95)]
         [InlineData("monthly", "2015-01-01 00", 80.28)]
         [InlineData("yearly", "2015-01-01 00", 1772)]
         public void TemporalAggregation(string aggregation, string date, double expected)
@@ -65,9 +64,6 @@ namespace Precipitation.Tests
             precip.Input.TemporalResolution = aggregation;
             precip.Output = prism.TemporalAggregation(out errorMsg, precip.Output, precip.Input);
             Assert.Equal(expected, Convert.ToDouble(precip.Output.Data[date][0]));
-
         }
-
-
     }
 }

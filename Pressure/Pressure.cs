@@ -55,7 +55,7 @@ namespace Pressure
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "gldas":
                     GLDAS gldas = new GLDAS();

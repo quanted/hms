@@ -55,7 +55,7 @@ namespace Precipitation
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 
-            switch (this.Input.Source) {
+            switch (this.Input.Source.ToLower()) {
                 case "nldas":
                     // NLDAS Precipitation Data call
                     NLDAS nldas = new NLDAS();

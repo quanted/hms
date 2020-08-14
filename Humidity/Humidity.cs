@@ -54,7 +54,7 @@ namespace Humidity
 
             if (this.Relative)
             {
-                switch (this.Input.Source)
+                switch (this.Input.Source.ToLower())
                 {
                     case "prism":
                         // PRISM relative humidity Data call
