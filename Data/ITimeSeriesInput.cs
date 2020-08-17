@@ -36,7 +36,7 @@ namespace Data
         /// <summary>
         /// OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
         /// DEFAULT: "default"
-        /// VALUES: "default", "hourly", "daily", "weekly", "monthly"
+        /// VALUES: "default", "hourly", "daily", "monthly"
         /// </summary>
         string TemporalResolution { get; set; }
 
