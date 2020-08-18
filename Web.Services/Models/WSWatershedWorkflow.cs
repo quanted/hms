@@ -231,13 +231,14 @@ namespace Web.Services.Models
         public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2, string dataset)
         {
             string errorMsg = "";
+            int decimials = 3;
             column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
             foreach (DataRow dr in dt.Rows)
             {
                 List<string> lv = new List<string>();
-                lv.Add(dr[com].ToString());
+                lv.Add(Math.Round(Convert.ToDouble(dr[com]), decimials).ToString());
                 itimeoutput.Data.Add(dr[0].ToString(), lv);
             }
 

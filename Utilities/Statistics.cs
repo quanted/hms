@@ -22,6 +22,7 @@ namespace Utilities
         {
             errorMsg = "";
             int missingDays = 0;
+            int decimals = 3;
 
             Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
             Vector<double> mSum = matrix.ColumnSums();
@@ -45,18 +46,18 @@ namespace Utilities
             for (int i = 0; i < matrix.ColumnCount; i++)
             {
                 DescriptiveStatistics desc = new DescriptiveStatistics(matrix.Column(i));
-                mMean[i] = desc.Mean;
-                mMax[i] = desc.Maximum;
-                mSTD[i] = desc.StandardDeviation;
-                mVar[i] = desc.Variance;
-                mMedian[i] = matrix.Column(i).Median();
-                mEntropy[i] = MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i));
-                mGeoMean[i] = MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i));
-                mSkewness[i] = MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i));
-                mRMS[i] = MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i));
-                m99[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 99);
-                m95[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95);
-                m75[i] = MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 75);
+                mMean[i] = Math.Round(desc.Mean, decimals);
+                mMax[i] = Math.Round(desc.Maximum, decimals);
+                mSTD[i] = Math.Round(desc.StandardDeviation, decimals);
+                mVar[i] = Math.Round(desc.Variance, decimals);
+                mMedian[i] = Math.Round(matrix.Column(i).Median(), decimals);
+                mEntropy[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.Entropy(matrix.Column(i)), decimals);
+                mGeoMean[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.GeometricMean(matrix.Column(i)), decimals);
+                mSkewness[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.Skewness(matrix.Column(i)), decimals);
+                mRMS[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.RootMeanSquare(matrix.Column(i)), decimals);
+                m99[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 99), decimals);
+                m95[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 95), decimals);
+                m75[i] = Math.Round(MathNet.Numerics.Statistics.Statistics.Percentile(matrix.Column(i), 75), decimals);
 
                 Func<double, bool> isAbove99 = (v) => (v >= m99[i]);
                 Func<double, bool> isAbove95 = (v) => (v >= m95[i]);
