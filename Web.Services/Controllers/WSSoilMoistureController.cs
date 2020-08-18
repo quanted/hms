@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Services.Models;
+using System.Text.Json;
 
 namespace Web.Services.Controllers
 {
@@ -91,6 +92,12 @@ namespace Web.Services.Controllers
                 var exceptionLog = Log.ForContext("Type", "exception");
                 exceptionLog.Fatal(ex.Message);
                 exceptionLog.Fatal(ex.StackTrace);
+                JsonSerializerOptions options = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(evapoInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
