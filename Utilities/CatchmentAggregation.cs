@@ -348,10 +348,14 @@ namespace Utilities
                 output.Metadata = new Dictionary<string, string>()
                 {
                     { "request_time", DateTime.Now.ToString() },
-                    { "column_1", "Date" },
+                    { "column_1", "Date (GMT)" },
                     { "column_2", result.Dataset.ToString() },
                     { "units", "mm" }
                 };
+                if (result.Dataset.ToLower() == ("streamflow"))
+                {
+                    output.Metadata["units"] = "m^3/sec";
+                }
             }
             output.Dataset = result.Dataset.ToString();
             output.DataSource = input.Source.ToString();
