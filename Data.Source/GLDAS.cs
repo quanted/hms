@@ -30,7 +30,7 @@ namespace Data.Source
 
             if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
             {
-                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy", null);
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy HH:mm", null);
                 TimeSpan ts = new TimeSpan(23, 00, 0);
                 componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
             }
