@@ -28,8 +28,8 @@ namespace Data.Source
             //Fix shallow copied StreamFlow DateTimeSpan
             if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
             {
-                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyyHH:mm", null);
-                DateTime sfsd = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowStartDate"], "MM/dd/yyyyHH:mm", null);
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy HH:mm", null);
+                DateTime sfsd = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowStartDate"], "MM/dd/yyyy HH:mm", null);
 
                 //TimeSpan ts = new TimeSpan(06, 00, 0);
                 componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(7.0);
