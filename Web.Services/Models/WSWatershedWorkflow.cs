@@ -16,7 +16,7 @@ namespace Web.Services.Models
     {
         private enum surfaceSources { nldas, gldas, curvenumber }
         private enum subSources { nldas, gldas }
-        private enum precipSources { nldas, gldas, daymet, wgen, trmm}
+        private enum precipSources { nldas, gldas, daymet, wgen, trmm, prism}
         private enum algorithms { constantvolume }//, changingvolume, kinematicwave }
 
         /// <summary>
