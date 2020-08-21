@@ -70,7 +70,7 @@ namespace Web.Services.Controllers
         {
             WatershedWorkflowInput example = new WatershedWorkflowInput()
             {
-                Source = "nldas",
+                Source = "streamflow",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2014, 07, 01),
