@@ -31,7 +31,7 @@ namespace Data
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
+            ["workflow"] = new List<string> { "streamflow" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },
             ["humidity"] = new List<string> { "prism", "nldas", "gldas" },

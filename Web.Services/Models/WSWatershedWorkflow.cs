@@ -14,9 +14,9 @@ namespace Web.Services.Models
     /// </summary>
     public class WSWatershedWorkFlow
     {
-        private enum surfaceSources { nldas, gldas, nwm, curvenumber }
+        private enum surfaceSources { nldas, gldas, curvenumber }
         private enum subSources { nldas, gldas }
-        private enum precipSources { nldas, gldas, ncei, daymet, wgen, prism, nwm }
+        private enum precipSources { nldas, gldas, daymet, wgen, trmm, prism}
         private enum algorithms { constantvolume }//, changingvolume, kinematicwave }
 
         /// <summary>
@@ -37,20 +37,28 @@ namespace Web.Services.Models
             Utilities.MetaErrorOutput err = new Utilities.MetaErrorOutput();
 
             // Validate all sources.
-            //errorMsg = (!Enum.TryParse(input.StreamHydrology, true, out algorithms sAlgos)) ? "ERROR: Algorithm is not currently supported." : "";
-            //if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
-            errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
+
+            errorMsg = (!Enum.TryParse(input.RunoffSource, true, out surfaceSources sSource)) ? "ERROR: 'RunoffSource' was not found or is invalid." : "";
             if (errorMsg.Contains("ERROR"))
             {
                 tempOut.Metadata = err.ReturnError(errorMsg);
                 return tempOut;
             }
-            errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true, out precipSources pSource)) ? "ERROR: 'Source' was not found or is invalid." : "";
-            if (errorMsg.Contains("ERROR"))
+
+            if (input.RunoffSource.Equals("curvenumber"))
             {
-                tempOut.Metadata = err.ReturnError(errorMsg);
-                return tempOut;
+                errorMsg = (!Enum.TryParse(input.Geometry.GeometryMetadata["precipSource"], true,
+                    out precipSources pSource))
+                    ? "ERROR: 'Source' was not found or is invalid."
+                    : "";
+                if (errorMsg.Contains("ERROR"))
+                {
+                    tempOut.Metadata = err.ReturnError(errorMsg);
+                    return tempOut;
+                }
             }
+            input.Geometry.GeometryMetadata = (input.Geometry.GeometryMetadata == null) ? new Dictionary<string, string>() : input.Geometry.GeometryMetadata;
+
             // SET Attributes to specific values until stack works
             input.TemporalResolution = "daily";
             input.TimeLocalized = false;
@@ -87,16 +95,16 @@ namespace Web.Services.Models
                 return tempOut;
             }
             //NCEI station attributes
-            if (input.Geometry.GeometryMetadata["precipSource"] == "ncei")
-            {                
-                input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
-                input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);  
-            }
-            if (errorMsg.Contains("ERROR"))
-            {
-                tempOut.Metadata = err.ReturnError(errorMsg);
-                return tempOut;
-            }
+            //if (input.Geometry.GeometryMetadata["precipSource"] == "ncei")
+            //{                
+            //    input.Geometry.GeometryMetadata["token"] = "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
+            //    input.Geometry.GeometryMetadata["stationID"] = nceiStation(out errorMsg, input);  
+            //}
+            //if (errorMsg.Contains("ERROR"))
+            //{
+            //    tempOut.Metadata = err.ReturnError(errorMsg);
+            //    return tempOut;
+            //}
 
             //Getting Stream Flow data
             input.Source = input.RunoffSource;
@@ -231,13 +239,14 @@ namespace Web.Services.Models
         public ITimeSeriesOutput dtToITSOutput(DataTable dt, string com, string column2, string dataset)
         {
             string errorMsg = "";
+            int decimials = 3;
             column2 = (column2 == null) ? "Stream Flow" : column2;
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput itimeoutput = oFactory.Initialize();
             foreach (DataRow dr in dt.Rows)
             {
                 List<string> lv = new List<string>();
-                lv.Add(dr[com].ToString());
+                lv.Add(Math.Round(Convert.ToDouble(dr[com]), decimials).ToString());
                 itimeoutput.Data.Add(dr[0].ToString(), lv);
             }
 
