@@ -50,7 +50,7 @@ namespace Radiation
                 default:
                     break;
             }
-            output.Metadata["column_1"] = "date";
+            output.Metadata["column_1"] = "Date";
             output.Metadata["column_2"] = "longwave";
             output.Metadata["column_3"] = "shortwave";
             output.Metadata["column_2_units"] = "W/m^2";

@@ -33,7 +33,7 @@ namespace Radiation
             this.GetShortwaveComponent(out errorMsg, input, output2);
             output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
 
-            output.Dataset = "Shortwave Radiation";
+            output.Dataset = "DW Radiation";
             output.DataSource = "gldas";
 
             switch (input.TemporalResolution)
@@ -49,7 +49,7 @@ namespace Radiation
                 default:
                     break;
             }
-            output.Metadata["column_1"] = "date";
+            output.Metadata["column_1"] = "Date";
             output.Metadata["column_2"] = "longwave";
             output.Metadata["column_3"] = "shortwave";
             output.Metadata["column_2_units"] = "W/m^2";
