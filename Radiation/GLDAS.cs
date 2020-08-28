@@ -29,10 +29,9 @@ namespace Radiation
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput output1 = oFactory.Initialize();
             ITimeSeriesOutput output2 = oFactory.Initialize();
-            //this.GetLongwaveComponent(out errorMsg, input, output1);
+            this.GetLongwaveComponent(out errorMsg, input, output1);
             this.GetShortwaveComponent(out errorMsg, input, output2);
-            //output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
-            output = this.timeseriesData["shortwave"];
+            output = Utilities.Merger.MergeTimeSeries(this.timeseriesData["longwave"], this.timeseriesData["shortwave"]);
 
             output.Dataset = "Shortwave Radiation";
             output.DataSource = "gldas";
@@ -51,10 +50,10 @@ namespace Radiation
                     break;
             }
             output.Metadata["column_1"] = "date";
-            output.Metadata["column_2"] = "shortwave";
-            //output.Metadata["column_3"] = "shortwave";
+            output.Metadata["column_2"] = "longwave";
+            output.Metadata["column_3"] = "shortwave";
             output.Metadata["column_2_units"] = "W/m^2";
-            //output.Metadata["column_3_units"] = "W/m^2";
+            output.Metadata["column_3_units"] = "W/m^2";
 
             return output;
 
@@ -227,18 +226,18 @@ namespace Radiation
                 {
                     ssum = ssum / days;
                     lsum = lsum / days;
-                    //output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString(), lsum.ToString() });
-                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString() });
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString(), lsum.ToString() });
+                    //output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString() });
                     newDate = iDate;
                     ssum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    //lsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    lsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                     days = 0;
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
                 else
                 {
                     ssum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    //lsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
+                    lsum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);
                     if (errorMsg.Contains("ERROR")) { return null; }
                 }
             }

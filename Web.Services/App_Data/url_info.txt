@@ -9,6 +9,7 @@ gldas_evapotranspiration_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/acc
 daymet_evapotranspiration_url https://daymet.ornl.gov/data/send/saveData?
 ncei_evapotranspiration_url https://www.ncdc.noaa.gov/access-data-service/api/v1/data?dataset=daily-summaries&dataTypes=TMAX,TMIN,AWND,PRCP,EVAP&stations=
 nldas_longwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DLWRFsfc&location=NLDAS:
+gldas_longwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:LWdown_f_tavg&location=GEOM:POINT
 nldas_shortwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:DSWRFsfc&location=NLDAS:
 gldas_shortwave_radiation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:SWdown_f_tavg&location=GEOM:POINT
 nldas_humidity_url http://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:SPFH2m&location=NLDAS:
