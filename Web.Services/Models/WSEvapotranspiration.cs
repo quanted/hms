@@ -65,8 +65,7 @@ namespace Web.Services.Models
 
             // Get generic statistics
             // TODO: Handle negative values
-            // result = Utilities.Statistics.GetStatistics(out errorMsg, evapo.Input, result);
-
+            result = Utilities.Statistics.GetStatistics(out errorMsg, evapo.Input, result);
             return result;
         }
     }
