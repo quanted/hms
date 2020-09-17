@@ -562,8 +562,8 @@ namespace Evapotranspiration
             ITimeSeriesInput ntiInput = ntiFactory.SetTimeSeriesInput(inpt, new List<string>() { "temperature" }, out errorMsg);
             ITimeSeriesOutput nldasTempOutput = nldasTemp.GetData(out errorMsg, nTempOutput, ntiInput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Wind.NLDAS nldasWind = new Wind.NLDAS();
             ITimeSeriesOutputFactory nwFactory = new TimeSeriesOutputFactory();
@@ -575,8 +575,8 @@ namespace Evapotranspiration
             ITimeSeriesOutput nldasWindOutput = nldasWind.GetData(out errorMsg, "All", nWindOutput, nwiInput);
             outputList.Add(nldasWindOutput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Humidity.NLDAS nldasHumid = new Humidity.NLDAS();
             ITimeSeriesOutputFactory nhFactory = new TimeSeriesOutputFactory();
@@ -587,8 +587,8 @@ namespace Evapotranspiration
             ITimeSeriesOutput nldasHumidOutput = nldasHumid.GetData(out errorMsg, nHumidOutput, nhiInput);
             outputList.Add(nldasHumidOutput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Radiation.NLDAS nldasRad = new Radiation.NLDAS();
             ITimeSeriesOutputFactory nrFactory = new TimeSeriesOutputFactory();
@@ -599,8 +599,8 @@ namespace Evapotranspiration
             ITimeSeriesOutput nldasRadOutput = nldasRad.GetData(out errorMsg, nRadOutput, nriInput);
             outputList.Add(nldasRadOutput);
             inpt.DateTimeSpan.StartDate = inpt.DateTimeSpan.StartDate.AddHours(-6.0);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
-            inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddDays(-1);
+            //inpt.DateTimeSpan.EndDate = inpt.DateTimeSpan.EndDate.AddHours(-5);
 
             Pressure.GLDAS gpress2 = new Pressure.GLDAS();
             ITimeSeriesOutputFactory gpFactory2 = new TimeSeriesOutputFactory();
