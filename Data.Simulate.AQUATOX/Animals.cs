@@ -13,7 +13,6 @@ using AQUATOX.Organisms;
 namespace AQUATOX.Animals
 
 {
-
     public class AnimalRecord 
     {
         public string AnimalName;
@@ -1126,7 +1125,7 @@ namespace AQUATOX.Animals
         EffectFrac = 0;
         if ((O2EffectConc == 0) || (O2EffectPct > 99.9) || (O2EffectPct < 0.1))
              return 0.0;
-        if (!AQTSeg.PSetup.ModelTSDays) // (AQTSeg.PModelTimeStep == TSHourly)
+        if (!AQTSeg.PSetup.ModelTSDays.Val) // (AQTSeg.PModelTimeStep == TSHourly)
              Cstart = 0;
         else Cstart = CALCSTART1Day;
         for (CalcIteration = Cstart; CalcIteration <= CALCSTOP; CalcIteration++)
@@ -1344,8 +1343,8 @@ namespace AQUATOX.Animals
             Setup_Record SR = AQTSeg.PSetup;
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  
             {
-               if ((SR.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) > 0)) ||
-                        ((!SR.UseExternalConcs) && (AQTSeg.GetStateVal(NState, ToxLoop, T_SVLayer.WaterCol) > 0)))
+               if ((SR.UseExternalConcs.Val && (AQTSeg.GetStateVal(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) > 0)) ||
+                        ((!SR.UseExternalConcs.Val) && (AQTSeg.GetStateVal(NState, ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
                     Pois = Poisoned(ToxLoop);
                     MortRates.OrgPois[ToxInt(ToxLoop)] = Pois;
@@ -2018,7 +2017,7 @@ namespace AQUATOX.Animals
             void Derivative_WriteRates()
             {
                 T_SVType ToxLoop;
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);

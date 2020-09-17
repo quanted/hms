@@ -5,9 +5,11 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
+using Globals;
 using Data;
 using System.ComponentModel;
 using System.Collections.Generic;
+using AQUATOX.Diagenesis;
 
 namespace GUI.AQUATOX
 {
@@ -187,12 +189,7 @@ namespace GUI.AQUATOX
 
         private void integrate_Click(object sender, EventArgs e)
         {
-            if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
-            else
-            {
-                progressBar1.Visible = true;
-                Worker.RunWorkerAsync();
-            }
+
         }
 
 
@@ -292,6 +289,51 @@ namespace GUI.AQUATOX
             textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
             Application.DoEvents();
             DisplaySVs();
+        }
+
+        private void SaveParams(object sender, EventArgs e)
+        {
+            
+
+            Diagenesis_Rec DR = new Diagenesis_Rec();
+            DR.Setup(true);
+
+            //TParameter[] PA = new TParameter[] { DR.m1, DR.m2, DR.H1, DR.w2, DR.KappaNH3f, DR.KappaNH3s, DR.KappaNO3_1f, DR.KappaNO3_1s, 
+            //    DR.KappaNO3_2, DR.KappaCH4, DR.KM_NH3, DR.KM_O2_NH3, DR.KdNH3 };
+
+            //Param_Form PF = new Param_Form();
+            //PF.SuppressComment = true;
+            //PF.SuppressSymbol = true;
+
+            //TParameter[] PA2 = new TParameter[] { DR.KappaCH4, DR.KM_NH3, DR.KM_O2_NH3, DR.KdNH3 };
+
+            //Param_Form PF2 = new Param_Form();
+            //PF2.SuppressComment = false;
+            //PF2.SuppressSymbol = false;
+            //PF.EditParams(ref PA);
+            //PF2.EditParams(ref PA2);
+
+            TParameter[] PA3 = new TParameter[] {DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
+                DR.KappaCH4,DR.KM_NH3,DR.KM_O2_NH3,DR.KdNH3,DR.KdPO42,DR.dKDPO41f,DR.dKDPO41s,DR.O2critPO4,
+                DR.ThtaDd,DR.ThtaNH3,DR.ThtaNO3,DR.ThtaCH4,DR.SALTSW,DR.SALTND,DR.KappaH2Sd1,DR.KappaH2Sp1,DR.ThtaH2S,DR.KMHSO2,DR.KdH2S1,
+                DR.KdH2S2,new TSubheading("Mineralization"),DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
+                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,DR.ksi,DR.ThtaSi,DR.KMPSi,
+                DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   }; 
+            
+            Param_Form PF3 = new Param_Form();
+            PF3.EditParams(ref PA3);
+
+            Setup_Record SR = new Setup_Record();
+            SR.Setup(true);
+            TParameter[] SS = new TParameter[] {new TSubheading("Model Timestep Settings"), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
+                SR.ModelTSDays, new TSubheading("Output Storage Options"), SR.ModelTSDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
+                new TSubheading("Biota Modeling Options"),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
+                new TSubheading("Chemical Options"),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
+            Param_Form SetupForm = new Param_Form();
+            SetupForm.SuppressComment = true;
+            SetupForm.SuppressSymbol = true;
+            SetupForm.EditParams(ref SS);
+
         }
     }
 }

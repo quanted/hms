@@ -101,7 +101,7 @@ namespace AQUATOX.Volume
             {
                 P = -2.99;
             }                // to avoid zero divide
-            ZZMax3 = Math.Pow(Z / ZMx, 3.0);
+            ZZMax3 = AQMath.Cube(Z / ZMx);
             // fraction       m  m          unitless  m   m    m   m
             result = (6.0 * Z / ZMx - 3.0 * (1.0 - P) * (Z / ZMx) * (Z / ZMx) - 2.0 * P * ZZMax3) / (3.0 + P);
             // unitless
@@ -240,7 +240,7 @@ namespace AQUATOX.Volume
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     this.ClearRate();
                     this.SaveRate("Inflow", Inflow);
@@ -317,7 +317,7 @@ namespace AQUATOX.Volume
                 CalculateLoad(DateIndex);
                 Sum_Dl = Sum_Dl + DischargeLoad;
                 Sum_IL = Sum_IL + InflowLoad;
-            } while (!((DateIndex.AddDays( -365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+            } while (!((DateIndex.AddDays( -365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay.Val)));
 
             AverageDischargeLoad = Sum_Dl / N;
             AverageInflowLoad = Sum_IL / N;
@@ -353,7 +353,7 @@ namespace AQUATOX.Volume
                 // handle dynamic evaporation properly
                 KnownVal_Tminus1 = KnownValueLoad;
                 SumVol = SumVol + KnownValueLoad;
-            } while (!(((DateIndex.AddDays(-365)) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+            } while (!(((DateIndex.AddDays(-365)) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay.Val)));
             result = Sum_Disch / N;
             MV = SumVol / N;
             if (result < 0.0)
@@ -392,7 +392,7 @@ namespace AQUATOX.Volume
         //        Location.Discharge[VerticalSegments.Epilimnion] = UpperOutflow();
         //        SumEstVel = SumEstVel + Velocity(0, 0, false);
         //        SumDisch = SumDisch + Location.Discharge[VerticalSegments.Epilimnion];
-        //    } while (!(((DateIndex - 365) >= TimeIndex) || (DateIndex >= SetupRec.LastDay)));
+        //    } while (!(((DateIndex - 365) >= TimeIndex) || (DateIndex >= SetupRec.LastDay.Val)));
         //    MeanDischarge = SumDisch / N;
         //    MeanEstVel = SumEstVel / N;
         //    TPresent = TTPres;
@@ -423,7 +423,7 @@ namespace AQUATOX.Volume
                 DynamVol = DynamVol + InflowLoad - DischargeLoad - Evaporation();
                 // handle dynamic evaporation properly
                 SumVol = SumVol + DynamVol;
-            } while (!((DateIndex.AddDays(-365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay)));
+            } while (!((DateIndex.AddDays(-365) >= TimeIndex) || (DateIndex >= AQTSeg.PSetup.LastDay.Val)));
             result = SumVol / N;
             if (result < 0)
             {

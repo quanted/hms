@@ -998,7 +998,7 @@ namespace AQUATOX.Nutrients
                                 TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
                             else TNIP = AQTSeg.GetStatePointer(PP.NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) as T_N_Internal_Plant;
 
-                            if (AQTSeg.PSetup.Internal_Nutrients && (TNIP != null))
+                            if (AQTSeg.PSetup.Internal_Nutrients.Val && (TNIP != null))
                             {
                                 UptkNut = TNIP.Uptake() * 1e-3;
                                 // mg/L    // ug/L      // mg/ug
@@ -1186,7 +1186,7 @@ namespace AQUATOX.Nutrients
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -1436,7 +1436,7 @@ namespace AQUATOX.Nutrients
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -1471,7 +1471,7 @@ namespace AQUATOX.Nutrients
 
             Lo = Loading;
                 DB = 0;
-                if (AQTSeg.PSetup.AmmoniaIsDriving)
+                if (AQTSeg.PSetup.AmmoniaIsDriving.Val)
                 {
                     State = Loading;                      // 5/24/2013  Ammonia as a driving variable
                     Derivative_WriteRates();
@@ -1675,7 +1675,7 @@ namespace AQUATOX.Nutrients
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -1797,7 +1797,7 @@ namespace AQUATOX.Nutrients
 
             P = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj);
 
-            KLiqCO2 = P.KReaer() * Math.Pow((MolWtO2 / MolWtCO2), 0.25);              // Schwarzenbach et al., 1993:
+            KLiqCO2 = P.KReaer() * Math.Sqrt(Math.Sqrt((MolWtO2 / MolWtCO2)));    // Schwarzenbach et al., 1993.  8/29/2020 Sqrt(Sqrt) rather than Math.Pow( ,0.25) to optimize
             // 1/d        1/d
             return KLiqCO2 * (AtmosExch_CO2Sat() - State);
             // g/cu m-d    1/d        g/cu m  g/cu m
@@ -1825,7 +1825,7 @@ namespace AQUATOX.Nutrients
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -1931,7 +1931,7 @@ namespace AQUATOX.Nutrients
         //    // m/s          // cm/s                                             // m/s
         //    Wind = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
         //    Thick = Location.MeanThick[VerticalSegments.Epilimnion];
-        //    KReaer() = 3.93 * Math.Sqrt(Velocity) / Math.Pow(Thick, 1.5) + (0.728 * Math.Sqrt(Wind) - 0.317 * Wind + 0.0372 * Math.Pow(Wind, 2)) / Thick;
+        //    KReaer() = 3.93 * Math.Sqrt(Velocity) / Math.Pow(Thick, 1.5) + (0.728 * Math.Sqrt(Wind) - 0.317 * Wind + 0.0372 * AQMath.Square(Wind)) / Thick;
         //}
 
         // ----------------------------------------------------------
@@ -1998,7 +1998,7 @@ namespace AQUATOX.Nutrients
                     else if (ZDepth > TransitionDepth)
                     {
                         // O'Connor
-                        KReaer2 = 3.93 * Math.Pow(Vel, 0.50) * Math.Pow(ZDepth, -1.50);
+                        KReaer2 = 3.93 * Math.Sqrt(Vel) * Math.Pow(ZDepth, -1.50);
                     }
                     else
                     {
@@ -2034,10 +2034,10 @@ namespace AQUATOX.Nutrients
             if (TSV == null) Salt = 0; else Salt = TSV.State;
 
             TKelvin = 273.15 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / Math.Pow(TKelvin, 2.0) + 1.243800E10 / Math.Pow(TKelvin, 3.0) - 8.621949E11 / Math.Pow(TKelvin, 4.0);
+            lnCsf = -139.34411 + (1.575701E5 / TKelvin) - 6.642308E7 / AQMath.Square(TKelvin) + 1.243800E10 / AQMath.Cube(TKelvin) - 8.621949E11 / AQMath.Square(AQMath.Square(TKelvin));
             if (Salt > 0)
             {
-                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / Math.Pow(TKelvin, 2.0));
+                lnCss = lnCsf - Salt * (0.017674 - (10.754 / TKelvin) + 2140.7 / AQMath.Square(TKelvin));
             }
             else
             {
@@ -2197,7 +2197,7 @@ namespace AQUATOX.Nutrients
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);

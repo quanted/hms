@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.Extensions.Localization.Internal;
+using Newtonsoft.Json;
 
 
 namespace Globals
@@ -164,7 +166,7 @@ namespace Globals
     //2        NonPointSource
     //    } // end Alt_LoadingsType
 
-                
+
     public enum T_SVType
     {
         StV,
@@ -214,33 +216,98 @@ namespace Globals
 
     public class Setup_Record
     {
-        public DateTime FirstDay;
-        public DateTime LastDay;
-        public double StoreStepSize;
-        public double MinStepSize;
-        public double RelativeError;
-//      public bool Placeholder;    // equilibrium fugacity disabled
-        public bool SaveBRates;
-        public bool AlwaysWriteHypo;
-        public bool ShowIntegration;
-        public bool UseComplexedInBAF;
-        public bool DisableLipidCalc;
-        public bool ChemsDrivingVars;
-        public bool AverageOutput;
-        public bool UseExternalConcs;
-        public bool NotUsedBCFUptake;     // Switched to chemical record 2/15/2013
-        public bool StepSizeInDays;
-        public bool ModelTSDays;
-        public bool Spinup_Mode;     
-        public bool NFix_UseRatio;   // 3/16/2010, option to use NFix Ratio
-        public double NtoPRatio;     // 3/18/2010, capability to specify NFix Ratio
-        public bool Spin_Nutrients;  
-        public double FixStepSize;
-        public bool UseFixStepSize;  
-        public bool Internal_Nutrients;    
-        public bool T1IsAggregate;    
-        public bool AmmoniaIsDriving; 
-        public bool TSedDetrIsDriving; 
+        public TDateParam FirstDay = new TDateParam();
+        public TDateParam LastDay = new TDateParam();
+        public TParameter StoreStepSize = new TParameter();
+        public TParameter MinStepSize = new TParameter();
+        public TParameter RelativeError = new TParameter();
+        public TBoolParam SaveBRates = new TBoolParam();
+        // public TBoolParam AlwaysWriteHypo;  Irrelevant to AQUATOX 4.0
+        // public TBoolParam ShowIntegration;  Irrelevant to AQUATOX 4.0
+        // public TBoolParam UseComplexedInBAF; Irrelevant to AQUATOX 4.0
+        public TBoolParam ChemsDrivingVars = new TBoolParam();
+        public TBoolParam AverageOutput = new TBoolParam();
+        public TBoolParam UseExternalConcs = new TBoolParam();
+        public TBoolParam StepSizeInDays = new TBoolParam();
+        public TBoolParam ModelTSDays = new TBoolParam();
+        // public TBoolParam Spinup_Mode;  Not yet part ofAQUATOX 4.0
+        public TBoolParam NFix_UseRatio= new TBoolParam();   // 3/16/2010, option to use NFix Ratio
+        public TParameter NtoPRatio= new TParameter();     // 3/18/2010, capability to specify NFix Ratio
+        // public TBoolParam Spin_Nutrients;  Not yet part ofAQUATOX 4.0
+        public TParameter FixStepSize = new TParameter();
+        public TBoolParam UseFixStepSize = new TBoolParam();
+        public TBoolParam Internal_Nutrients = new TBoolParam();
+        public TBoolParam T1IsAggregate = new TBoolParam();
+        public TBoolParam AmmoniaIsDriving = new TBoolParam();
+        public TBoolParam TSedDetrIsDriving = new TBoolParam();
+
+        public void Setup(bool DefaultVals)
+        {
+            FirstDay.Name = "End of Model Simulation";
+            LastDay.Name = "End of Model Simulation";
+            StoreStepSize.Name = "Data-storage Step Size (avg. period)";
+            StoreStepSize.Units = "hours or days";
+            MinStepSize.Name = "Minimum Step Size";
+            MinStepSize.Units = "days";
+
+            RelativeError.Name = "Relative Error";
+            RelativeError.Units = "fraction";
+
+            SaveBRates.Name = "Save Derivative Rates for Simulation";
+
+            //ShowIntegration.Name = "
+            //UseComplexedInBAF.Name = "
+
+            ChemsDrivingVars.Name = "Chemicals are 'Driving Variables'";
+            AverageOutput.Name = "Trapezoidally Integrate Results";
+            UseExternalConcs.Name = "Calculate Toxicity using External Concentrations";
+            StepSizeInDays.Name = "Storage Stepsize is Days (not Hours)";
+            ModelTSDays.Name = "Model Stepsize is Days (not Hours)";
+            // Spinup_Mode.Name = "
+
+            NFix_UseRatio.Name = "Calculate Nitrogen Fixation using N to Inorganic P Ratio";
+
+            NtoPRatio.Name = "N to Inorganic P Ratio for N-Fix";
+            NtoPRatio.Units = "ratio";
+
+            //Spin_Nutrients.Name = "
+
+            FixStepSize.Name = "Fixed Step Size";
+            FixStepSize.Units = "days";
+
+            UseFixStepSize.Name = "Use Fixed Step Size";
+            Internal_Nutrients.Name = "Model Nutrients Internally in Plants";
+            T1IsAggregate.Name = "T1 is an aggregate of all other toxicants in study";
+            AmmoniaIsDriving.Name = "Ammonia is a 'Driving Variable'";
+            TSedDetrIsDriving.Name = "Toxicant in Sediment Detritus is a 'Driving Variable'";
+
+            if (DefaultVals)
+            {
+                FirstDay.Val = new DateTime(1999, 1, 1);
+                LastDay.Val = new DateTime(1999, 1, 31);
+                StoreStepSize.Val = 1;
+                StepSizeInDays.Val = true;
+                ModelTSDays.Val = true;
+                RelativeError.Val = 0.001;
+                MinStepSize.Val = 1e-10;
+                SaveBRates.Val = false;
+
+                //AlwaysWriteHypo.Val = false;
+                //ShowIntegration.Val = false;
+                //UseComplexedInBAF.Val = false;
+                //Spinup_Mode.Val = false;
+                // Spin_Nutrients.Val = true;
+
+                UseExternalConcs.Val = false;
+                NFix_UseRatio.Val = false;
+                NtoPRatio.Val = 7.0;
+                FixStepSize.Val = 0.1;
+                UseFixStepSize.Val = false;
+                T1IsAggregate.Val = false;
+                AmmoniaIsDriving.Val = false;
+                TSedDetrIsDriving.Val = false;
+            }
+        }
     } // end Setup_Record
 
     public enum DetrDataType
@@ -309,11 +376,22 @@ namespace Globals
         public const AllVariables FirstBiota = AllVariables.Diatoms1;
         public const AllVariables LastBiota = AllVariables.Fish15;
 
-
         public const T_SVType FirstOrgTxTyp = T_SVType.OrgTox1;
         public const T_SVType LastOrgTxTyp = T_SVType.OrgTox20;
 
-        public static DateTime StopDate = new DateTime(1994, 7, 30);
+    }
+
+    public static class AQMath
+    {
+        public static double Square(double input)
+        {
+            return input * input;
+        }
+
+        public static double Cube(double input)
+        {
+            return input * input * input;
+        }
 
     }
 
@@ -326,86 +404,39 @@ namespace Globals
     public class TParameter
     {
         public double Val;
-        public object Symbol;
-        public object Name;
-        public object Comment;
-        public object Units;
+        [JsonIgnore] public string Symbol ="";   // not user editable;  
+        [JsonIgnore] public string Name;     // not user editable
+        public string Comment = "";
+        [JsonIgnore] public string Units = "";    // not user editable
     } // end TParameter
 
-    public class Diagenesis_Rec
+    public class TBoolParam : TParameter
     {
-        public TParameter m1;        // = 0.5;           //(kg/L) solids concentration in layer 1
-        public TParameter m2;        // = 0.5;           //(kg/L) solids concentration in layer 2
-        public TParameter H1;        // = 0.001;         // meters, 1 mm aerobic layer
-        public TParameter Dd;        // = 0.001;         //(m^2/d) pore water diffusion coefficient
-        public TParameter w2;        // = 0.0003;        //(m/d) deep burial velocity (Q2K uses 0.000005)
-        public TParameter H2;        // = 0.1;           //(m) thickness of sediment anaerobic layer 2
-        public TParameter KappaNH3f;        // = 0.131;  //(m/d) freshwater nitrification velocity
-        public TParameter KappaNH3s;        // = 0.131;  //(m/d) saltwater nitrification velocity
-        public TParameter KappaNO3_1f;      // = 0.1;  //(m/d) freshwater denitrification velocity
-        public TParameter KappaNO3_1s;      // = 0.1;  //(m/d) saltwater denitrification velocity
-        public TParameter KappaNO3_2;        // = 0.25;  //(m/d) denitrification in the anaerobic layer 2
-        public TParameter KappaCH4;        // = 0.7;     //(m/d) methane oxidation in the aerobic sedliment layer 1
-        public TParameter KM_NH3;        // = 0.728;     //(mgN/L) nitrification half-saturation constant for NH4N
-        public TParameter KM_O2_NH3;        // = 0.37;   //(mgO2/L) nitrification half-saturation constant for O2 (DiToro suggests 0.74)
-        public TParameter KdNH3;        // = 1;          //(L/kg) partition coefficient for ammonium in layer 1 and 2
-        public TParameter KdPO42;        // = 20;        //(L/kg) partition coefficient for inorganic P in anaerobic layer 2
-        public TParameter dKDPO41f;        // = 20;      //(unitless) freshwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient   //gp
-        public TParameter dKDPO41s;        // = 20;      //(unitless) saltwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient    //gp
-        public TParameter O2critPO4;        // = 2;      //(mgO2/L) critical O2 concentration for adjustment of partition coefficient for inorganic P
-        public TParameter Unused_ThtaDp;        // = 1.117;     //for bioturbation particle mixing between layers 1-2
-        public TParameter ThtaDd;        // = 1.08;      //for pore water diffusion between layers 1-2
-        public TParameter ThtaNH3;        // = 1.123;    //for nitrification
-        public TParameter ThtaNO3;        // = 1.08;     //for denitrification
-        public TParameter ThtaCH4;        // = 1.079;    //for methane oxidation
-        public TParameter SALTSW;        // = 1;         //(ppt) salinity above which sulfide rather than methane is produced from C diagenesis
-        public TParameter SALTND;        // = 1;         //(ppt) salinity above which saltwater nitrification/denitrification rates are used for aerobic layer
-        public TParameter KappaH2Sd1;        // = 0.2;   //(m/d) aerobic layer reaction velocity for dissolved sulfide oxidation
-        public TParameter KappaH2Sp1;        // = 0.4;   //(m/d) aerobic layer reaction velocity for particulate sulfide oxidation
-        public TParameter ThtaH2S;        // = 1.08;     //(unitless) temperature coefficient for sulfide oxidation
-        public TParameter KMHSO2;        // = 4;         //(mgO2/L) sulfide oxidation normalization constant for O2
-        public TParameter KdH2S1;        // = 100;       //(L/kg) partition coefficient for sulfide in aerobic layer 1
-        public TParameter KdH2S2;        // = 100;       //(L/kg) partition coefficient for sulfide in anaerobic layer 2
-        public TParameter Unused_frpon1;        // = 0.65;      //fraction of class 1 pon
-        public TParameter Unused_frpon2;        // = 0.25;      //fraction of class 2 pon
-        public TParameter Unused_frpoc1;        // = 0.65;      //fraction of class 1 poc
-        public TParameter Unused_frpoc2;        // = 0.2 ;      //fraction of class 2 poc
-        public TParameter Unused_frpop1;        // = 0.65;      //fraction of class 1 pop
-        public TParameter Unused_frpop2;        // = 0.2 ;      //fraction of class 2 pop
-        public TParameter kpon1;        // = 0.035;      //(1/d) G class 1 pon mineralization
-        public TParameter kpon2;        // = 0.0018;     //(1/d) G class 2 pon mineralization
-        public TParameter kpon3;        // = 0;          //(1/d) G class 2 pon mineralization
-        public TParameter kpoc1;        // = 0.035;      //(1/d) G class 1 poc mineralization
-        public TParameter kpoc2;        // = 0.0018;     //(1/d) G class 2 poc mineralization
-        public TParameter kpoc3;        // = 0;          //(1/d) G class 2 poc mineralization
-        public TParameter kpop1;        // = 0.035;      //(1/d) G class 1 pop mineralization
-        public TParameter kpop2;        // = 0.0018;     //(1/d) G class 2 pop mineralization
-        public TParameter kpop3;        // = 0;          //(1/d) G class 2 pop mineralization
-        public TParameter ThtaPON1;        // = 1.1;     //for G class 1 pon
-        public TParameter ThtaPON2;        // = 1.15;    //for G class 2 pon
-        public TParameter ThtaPON3;        // = 1.17;    //for G class 3 pon
-        public TParameter ThtaPOC1;        // = 1.1 ;    //for G class 1 pon
-        public TParameter ThtaPOC2;        // = 1.15;    //for G class 2 pon
-        public TParameter ThtaPOC3;        // = 1.17;    //for G class 3 pon
-        public TParameter ThtaPOP1;        // = 1.1 ;    //for G class 1 pon
-        public TParameter ThtaPOP2;        // = 1.15;    //for G class 2 pon
-        public TParameter ThtaPOP3;        // = 1.17;    //for G class 3 pon
-        public TParameter Unused_POC1R;        // = 0.1;   //reference G1 at which w12base = Dp / H2 at 20 degC for DiToro eqn 13.1
-        public TParameter kBEN_STR;        // = 0.03;    //first-order decay rate constant for benthic stress (1/d) for DiToro eqn 13.3
-        public TParameter Unused_KM_O2_Dp;        // = 4;
-        public TParameter ksi;        // First order dissolution rate for particulate biogenic silica (PSi) at 20 degC in layer 2 (1/day)
-        public TParameter ThtaSi;        // Constant for temperature adjustment of KSi (unitless)
-        public TParameter KMPSi;        // Silica dissolution half-saturation constant for PSi (g Si/m^3)
-        public TParameter SiSat;        // Saturation concentration of silica in pore water (g Si/m^3)
-        public TParameter KDSi2;        // Partition coefficient for Si in Layer 2, controls sorption of dissolved silica to solids (L/Kg d)
-        public TParameter DKDSi1;        // factor that enhances sorption of silica in layer 1 when D.O. exceeds DOcSi (unitless)
-        public TParameter O2critSi;        // Critical dissolved oxygen for silica sorption in layer 1 (mg/L)
-        public TParameter LigninDetr;        // Fraction of suspended detritus that is non-reactive (frac.)
-        // Unused_Dp : TParameter;   = 0.00012;       //(m^2/d) bioturbation particle mixing diffusion coefficient
-        public TParameter Si_Diatom;
-        public double W12;
-        public double KL12;
-    } // end Diagenesis_Rec
+        new public bool Val;
+    }
+
+    public class TDropDownParam : TParameter
+    {
+        new public string Val;
+        public string[] ValList;  // not user editable
+    }
+
+    public class TDateParam : TParameter
+    {
+        new public DateTime Val;
+        public string[] ValList;  // not user editable
+    }
+
+    public class TSubheading : TParameter  // used to format input screens
+    {
+        new public string Val;
+
+        public TSubheading(string Title) : base()
+        {
+            Val = Title;
+        }
+    }
+
 
 }
 

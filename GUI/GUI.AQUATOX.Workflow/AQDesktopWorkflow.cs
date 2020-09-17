@@ -822,8 +822,8 @@ namespace GUI.AQUATOX.Workflow
             
             input.AQSim.AQTSeg.Location.Locale.SiteName = catchment.COMID.ToString();
             input.AQSim.AQTSeg.Location.Locale.SiteLength = catchment.Length;
-            input.AQSim.AQTSeg.PSetup.FirstDay = this.startDate;
-            input.AQSim.AQTSeg.PSetup.LastDay = this.endDate;
+            input.AQSim.AQTSeg.PSetup.FirstDay.Val = this.startDate;
+            input.AQSim.AQTSeg.PSetup.LastDay.Val = this.endDate;
 
             return input;
         }
@@ -839,7 +839,7 @@ namespace GUI.AQUATOX.Workflow
                 AQTNutrientsModel output = new AQTNutrientsModel(ref textString,out errorMsg, false);
                 //Import ammonia sample output as the input for the boundary condition
                 DateTime iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.AQSim.AQTSeg.SV[0].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[0].SVoutput.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -850,7 +850,7 @@ namespace GUI.AQUATOX.Workflow
                 }
                 //Import nitrate sample output as the input for the boundary condition
                 iDate = new DateTime(this.startDate.Year, this.startDate.Month, this.startDate.Day);
-                foreach (var values in output.AQSim.AQTSeg.SV[1].output.Data)
+                foreach (var values in output.AQSim.AQTSeg.SV[1].SVoutput.Data)
                 {
                     if (iDate <= this.endDate)
                     {
@@ -901,9 +901,9 @@ namespace GUI.AQUATOX.Workflow
             ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
             ITimeSeriesOutput ammonia = oFactory.Initialize();
             ITimeSeriesOutput nitrate = oFactory.Initialize();
-            ammonia.Data = model.AQSim.AQTSeg.SV[0].output.Data;
+            ammonia.Data = model.AQSim.AQTSeg.SV[0].SVoutput.Data;
             this.completedAmmonia.Add(comid, ammonia);
-            nitrate.Data = model.AQSim.AQTSeg.SV[1].output.Data;
+            nitrate.Data = model.AQSim.AQTSeg.SV[1].SVoutput.Data;
             this.completedNitrate.Add(comid, nitrate);
         }
     }

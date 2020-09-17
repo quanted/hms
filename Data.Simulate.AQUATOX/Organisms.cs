@@ -577,10 +577,10 @@ namespace AQUATOX.Organisms
 
                         // AnimTox.InitialLipid();  // Initialize Lipid before LCINF calculation 10-7-99
 
-                        if (warn && (ATR.LC50 < Consts.Tiny) && (ATR.EC50_repro > 0) && (!AQTSeg.PSetup.UseExternalConcs))
+                        if (warn && (ATR.LC50 < Consts.Tiny) && (ATR.EC50_repro > 0) && (!AQTSeg.PSetup.UseExternalConcs.Val))
                             ErrAnsiString = "Warning: EC50 Reproduction for " + TA.PName + " within chemical " + WaterTox.ChemRec.ChemName + " is greater than zero, but no reproductive effects will be calculated because LC50 is set to zero. " + " This means that an application factor cannot be calculated (see eqn 420 in the Tech. Doc).";
 
-                        if (warn && (ATR.LC50 < Consts.Tiny) && (ATR.EC50_growth > 0) && (!AQTSeg.PSetup.UseExternalConcs))
+                        if (warn && (ATR.LC50 < Consts.Tiny) && (ATR.EC50_growth > 0) && (!AQTSeg.PSetup.UseExternalConcs.Val))
                             ErrAnsiString = "Warning: EC50 Growth for " + TA.PName + " within chemical " + WaterTox.ChemRec.ChemName + " is greater than zero, but no growth effects will be calculated because LC50 is set to zero. " + " This means that an application factor cannot be calculated (see eqn 418 in the Tech. Doc).";
 
                         LC50_Time = ATR.LC50_exp_time;
@@ -628,7 +628,7 @@ namespace AQUATOX.Organisms
                         {
                             ErrAnsiString = "Warning: LC50 Exposure Time for " + TPl.PName + " within chemical " + WaterTox.ChemRec.ChemName + " is set to zero.  Replacing zero LC50 Exposure Time with a value of 24 hours.";
                         }
-                        if (warn && (PTR.LC50 < Consts.Tiny) && (PTR.EC50_photo > 0) && (!AQTSeg.PSetup.UseExternalConcs))
+                        if (warn && (PTR.LC50 < Consts.Tiny) && (PTR.EC50_photo > 0) && (!AQTSeg.PSetup.UseExternalConcs.Val))
                         {
                             ErrAnsiString = "Warning: EC50 Photosynthesis for " + TPl.PName + " within chemical " + WaterTox.ChemRec.ChemName + " is greater than zero, but no photosynthesis effects will be calculated because LC50 is set to zero.  This means that an application factor cannot be calculated (see eqn 419 in the Tech. Doc).";
                         }
@@ -979,7 +979,7 @@ namespace AQUATOX.Organisms
             AFGrowth = 0;
             AFRepro = 0.0;
             AFPhoto = 0.0;
-            if ((!AQTSeg.PSetup.UseExternalConcs) && (State == 0)) return 0.0;
+            if ((!AQTSeg.PSetup.UseExternalConcs.Val) && (State == 0)) return 0.0;
             if (!(NState >= Consts.FirstBiota && NState <= Consts.LastBiota)) return 0.0;
             TInt = ToxInt(ToxTyp);
             WaterTox = AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxTyp, T_SVLayer.WaterCol) as TToxics;
@@ -988,7 +988,7 @@ namespace AQUATOX.Organisms
             if (IsAnimal())
             {
                 AnimTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAnimalTox;
-                if ((!AQTSeg.PSetup.UseExternalConcs) && (AnimTox == null)) return 0.0;
+                if ((!AQTSeg.PSetup.UseExternalConcs.Val) && (AnimTox == null)) return 0.0;
                 ATR = ((TAnimal)this).Anim_Tox[ToxInt(ToxTyp)];
                 if (ATR == null) return 0.0;
 
@@ -1012,7 +1012,7 @@ namespace AQUATOX.Organisms
             else // is plant
             {
                 PlantTox = AQTSeg.GetStatePointer(NState, ToxTyp, T_SVLayer.WaterCol) as TAlgaeTox;
-                if ((!AQTSeg.PSetup.UseExternalConcs) && (PlantTox == null)) return 0.0;
+                if ((!AQTSeg.PSetup.UseExternalConcs.Val) && (PlantTox == null)) return 0.0;
                 PTR = ((TPlant)this).Plant_Tox[ToxInt(ToxTyp)];
                 if (PTR == null) return 0.0;
 
@@ -1029,7 +1029,7 @@ namespace AQUATOX.Organisms
                 LifeSpan = 0.0;
             }
 
-            if (!AQTSeg.PSetup.UseExternalConcs)  Calculate_Internal_Toxicity();
+            if (!AQTSeg.PSetup.UseExternalConcs.Val)  Calculate_Internal_Toxicity();
                else Calculate_External_Toxicity();
 
             if (CumFracNow <= 0.0) return 0.0;

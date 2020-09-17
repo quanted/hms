@@ -808,8 +808,8 @@ namespace Web.Services.Models
             
             input.AQSim.AQTSeg.Location.Locale.SiteName = catchment.COMID.ToString();
             input.AQSim.AQTSeg.Location.Locale.SiteLength = catchment.Length;
-            input.AQSim.AQTSeg.PSetup.FirstDay = this.startDate;
-            input.AQSim.AQTSeg.PSetup.LastDay = this.endDate;
+            input.AQSim.AQTSeg.PSetup.FirstDay.Val = this.startDate;
+            input.AQSim.AQTSeg.PSetup.LastDay.Val = this.endDate;
 
             return input;
         }

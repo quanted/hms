@@ -270,13 +270,13 @@ namespace AQUATOX.Bioaccumulation
             double ScrT = 0;
             double BrT = 0;
             double ExpT = 0;
-            AllVariables SedDetrVar;
+            AllVariables SedDetrVar = AllVariables.NullStateVar;
             AllVariables SuspDetrVar;
 
             // ----------------------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -333,15 +333,15 @@ namespace AQUATOX.Bioaccumulation
             if (IsAGGR)  // chemical variable used to track the aggregation of other chemicals e.g. Total PCB
             {
                 DB = 0.0;
-//              Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;
             }
             CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TRemineralize;
             pp = GetPPB(NState, SVType, Layer);
 
-            if (((NState==AllVariables.SedmLabDetr)||(NState==AllVariables.SedmRefrDetr)) && (AQTSeg.PSetup.TSedDetrIsDriving))
+            if (((NState==AllVariables.SedmLabDetr)||(NState==AllVariables.SedmRefrDetr)) && (AQTSeg.PSetup.TSedDetrIsDriving.Val))
             {
-//              Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;  // 6/7/2013, toxicant set to loading in CalculateLoad .
 
             }
@@ -537,7 +537,7 @@ namespace AQUATOX.Bioaccumulation
             // ----------------------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Sorption", So);
@@ -560,7 +560,7 @@ namespace AQUATOX.Bioaccumulation
             if (IsAGGR)
             {
                 db = 0.0;
-//              Derivative_WriteRates();
+                Derivative_WriteRates();
                 return;
             }
             if (ChemRec.BCFUptake || (CP.State == 0)) db = 0.0;
@@ -763,7 +763,7 @@ namespace AQUATOX.Bioaccumulation
             // ----------------------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Loading", Lo);
@@ -921,7 +921,7 @@ namespace AQUATOX.Bioaccumulation
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Loading", Lo);
@@ -1053,8 +1053,6 @@ namespace AQUATOX.Bioaccumulation
                 Gam = CP.GameteLoss() * pp * 1e-6;
             // Must Be Called After Recr Calculation
             // + Recr
-
-                if (AQTSeg.TPresent > Consts.StopDate)  RecrSaveTox = RecrSaveTox + Consts.Tiny;  
 
 
                 DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;

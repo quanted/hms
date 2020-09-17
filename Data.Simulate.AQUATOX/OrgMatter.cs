@@ -581,7 +581,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             // ----------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("State", State);
@@ -984,7 +984,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             // ----------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);
@@ -1209,7 +1209,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //    --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", Lo);

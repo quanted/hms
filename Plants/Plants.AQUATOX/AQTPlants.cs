@@ -62,7 +62,7 @@ namespace Plants.AQUATOX
                 if (TPl != null) 
                 { 
                     FoundPlant = true; 
-                    if ((AQSim.AQTSeg.PSetup.Internal_Nutrients)&&(nS<=Consts.LastAlgae))  // Exclude Macrophytes
+                    if ((AQSim.AQTSeg.PSetup.Internal_Nutrients.Val) &&(nS<=Consts.LastAlgae))  // Exclude Macrophytes
                     {
                         TStateVariable TIn = AQSim.AQTSeg.GetStatePointer(nS, T_SVType.NIntrnl, T_SVLayer.WaterCol);
                         if (TIn == null) return "Internal Nutrients in plants have been selected but there is no internal nitrogen state variable for "+TPl.PName;

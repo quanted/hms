@@ -9,6 +9,480 @@ using Globals;
 
 namespace AQUATOX.Diagenesis
 {
+    public class Diagenesis_Rec
+    {
+        public TParameter m1= new TParameter();        // = 0.5;           //(kg/L) solids concentration in layer 1
+        public TParameter m2 = new TParameter();        // = 0.5;           //(kg/L) solids concentration in layer 2
+        public TParameter H1 = new TParameter();        // = 0.001;         // meters, 1 mm aerobic layer
+        public TParameter Dd = new TParameter();        // = 0.001;         //(m^2/d) pore water diffusion coefficient
+        public TParameter w2 = new TParameter();        // = 0.0003;        //(m/d) deep burial velocity (Q2K uses 0.000005)
+        public TParameter H2 = new TParameter();        // = 0.1;           //(m) thickness of sediment anaerobic layer 2
+        public TParameter KappaNH3f = new TParameter();        // = 0.131;  //(m/d) freshwater nitrification velocity
+        public TParameter KappaNH3s = new TParameter();        // = 0.131;  //(m/d) saltwater nitrification velocity
+        public TParameter KappaNO3_1f = new TParameter();      // = 0.1;    //(m/d) freshwater denitrification velocity
+        public TParameter KappaNO3_1s = new TParameter();      // = 0.1;    //(m/d) saltwater denitrification velocity
+        public TParameter KappaNO3_2 = new TParameter();       // = 0.25;   //(m/d) denitrification in the anaerobic layer 2
+        public TParameter KappaCH4 = new TParameter();        // = 0.7;     //(m/d) methane oxidation in the aerobic sedliment layer 1
+        public TParameter KM_NH3 = new TParameter();         // = 0.728;    //(mgN/L) nitrification half-saturation constant for NH4N
+        public TParameter KM_O2_NH3 = new TParameter();       // = 0.37;    //(mgO2/L) nitrification half-saturation constant for O2 (DiToro suggests 0.74)
+        public TParameter KdNH3 = new TParameter();          // = 1;        //(L/kg) partition coefficient for ammonium in layer 1 and 2
+        public TParameter KdPO42 = new TParameter();        // = 20;        //(L/kg) partition coefficient for inorganic P in anaerobic layer 2
+        public TParameter dKDPO41f = new TParameter();        // = 20;      //(unitless) freshwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient   //gp
+        public TParameter dKDPO41s= new TParameter();        // = 20;      //(unitless) saltwater factor that increases the aerobic layer partition coefficient of inorganic P relative to the anaerobic partition coefficient    //gp
+        public TParameter O2critPO4= new TParameter();       // = 2;       //(mgO2/L) critical O2 concentration for adjustment of partition coefficient for inorganic P
+        //public TParameter Unused_ThtaDp= new TParameter();   // = 1.117;   //for bioturbation particle mixing between layers 1-2
+        public TParameter ThtaDd= new TParameter();        // = 1.08;      //for pore water diffusion between layers 1-2
+        public TParameter ThtaNH3= new TParameter();        // = 1.123;    //for nitrification
+        public TParameter ThtaNO3= new TParameter();        // = 1.08;     //for denitrification
+        public TParameter ThtaCH4= new TParameter();        // = 1.079;    //for methane oxidation
+        public TParameter SALTSW= new TParameter();        // = 1;         //(ppt) salinity above which sulfide rather than methane is produced from C diagenesis
+        public TParameter SALTND= new TParameter();        // = 1;         //(ppt) salinity above which saltwater nitrification/denitrification rates are used for aerobic layer
+        public TParameter KappaH2Sd1= new TParameter();        // = 0.2;   //(m/d) aerobic layer reaction velocity for dissolved sulfide oxidation
+        public TParameter KappaH2Sp1= new TParameter();        // = 0.4;   //(m/d) aerobic layer reaction velocity for particulate sulfide oxidation
+        public TParameter ThtaH2S= new TParameter();        // = 1.08;     //(unitless) temperature coefficient for sulfide oxidation
+        public TParameter KMHSO2= new TParameter();        // = 4;         //(mgO2/L) sulfide oxidation normalization constant for O2
+        public TParameter KdH2S1= new TParameter();        // = 100;       //(L/kg) partition coefficient for sulfide in aerobic layer 1
+        public TParameter KdH2S2= new TParameter();        // = 100;       //(L/kg) partition coefficient for sulfide in anaerobic layer 2
+        //public TParameter Unused_frpon1= new TParameter();        // = 0.65;      //fraction of class 1 pon
+        //public TParameter Unused_frpon2= new TParameter();        // = 0.25;      //fraction of class 2 pon
+        //public TParameter Unused_frpoc1= new TParameter();        // = 0.65;      //fraction of class 1 poc
+        //public TParameter Unused_frpoc2= new TParameter();        // = 0.2 ;      //fraction of class 2 poc
+        //public TParameter Unused_frpop1= new TParameter();        // = 0.65;      //fraction of class 1 pop
+        //public TParameter Unused_frpop2= new TParameter();        // = 0.2 ;      //fraction of class 2 pop
+        public TParameter kpon1= new TParameter();        // = 0.035;      //(1/d) G class 1 pon mineralization
+        public TParameter kpon2= new TParameter();        // = 0.0018;     //(1/d) G class 2 pon mineralization
+        public TParameter kpon3= new TParameter();        // = 0;          //(1/d) G class 2 pon mineralization
+        public TParameter kpoc1= new TParameter();        // = 0.035;      //(1/d) G class 1 poc mineralization
+        public TParameter kpoc2= new TParameter();        // = 0.0018;     //(1/d) G class 2 poc mineralization
+        public TParameter kpoc3= new TParameter();        // = 0;          //(1/d) G class 2 poc mineralization
+        public TParameter kpop1= new TParameter();        // = 0.035;      //(1/d) G class 1 pop mineralization
+        public TParameter kpop2= new TParameter();        // = 0.0018;     //(1/d) G class 2 pop mineralization
+        public TParameter kpop3= new TParameter();        // = 0;          //(1/d) G class 2 pop mineralization
+        public TParameter ThtaPON1= new TParameter();        // = 1.1;     //for G class 1 pon
+        public TParameter ThtaPON2= new TParameter();        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPON3= new TParameter();        // = 1.17;    //for G class 3 pon
+        public TParameter ThtaPOC1= new TParameter();        // = 1.1 ;    //for G class 1 pon
+        public TParameter ThtaPOC2= new TParameter();        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPOC3= new TParameter();        // = 1.17;    //for G class 3 pon
+        public TParameter ThtaPOP1= new TParameter();        // = 1.1 ;    //for G class 1 pon
+        public TParameter ThtaPOP2= new TParameter();        // = 1.15;    //for G class 2 pon
+        public TParameter ThtaPOP3= new TParameter();        // = 1.17;    //for G class 3 pon
+        //public TParameter Unused_POC1R= new TParameter();        // = 0.1;   //reference G1 at which w12base = Dp / H2 at 20 degC for DiToro eqn 13.1
+        public TParameter kBEN_STR= new TParameter();        // = 0.03;    //first-order decay rate constant for benthic stress (1/d) for DiToro eqn 13.3
+        //public TParameter Unused_KM_O2_Dp= new TParameter();        // = 4;
+        public TParameter ksi= new TParameter();        // First order dissolution rate for particulate biogenic silica (PSi) at 20 degC in layer 2 (1/day)
+        public TParameter ThtaSi = new TParameter();        // Constant for temperature adjustment of KSi (unitless)
+        public TParameter KMPSi= new TParameter();        // Silica dissolution half-saturation constant for PSi (g Si/m^3)
+        public TParameter SiSat = new TParameter();        // Saturation concentration of silica in pore water (g Si/m^3)
+        public TParameter KDSi2= new TParameter();        // Partition coefficient for Si in Layer 2, controls sorption of dissolved silica to solids (L/Kg d)
+        public TParameter DKDSi1 = new TParameter();        // factor that enhances sorption of silica in layer 1 when D.O. exceeds DOcSi (unitless)
+        public TParameter O2critSi= new TParameter();        // Critical dissolved oxygen for silica sorption in layer 1 (mg/L)
+        public TParameter LigninDetr = new TParameter();        // Fraction of suspended detritus that is non-reactive (frac.)
+        // Unused_Dp : TParameter;   = 0.00012;       //(m^2/d) bioturbation particle mixing diffusion coefficient
+        public TParameter Si_Diatom= new TParameter();
+
+        public double W12;  //calculation not parameter
+        public double KL12; //calculation not parameter
+
+        public void Setup(bool DefaultVals)
+        {
+            m1.Name = "Solids concentration in layer 1";
+            m2.Name = "Solids concentration in layer 2";
+            H1.Name = "Thickness of sediment aerobic layer 1";
+            w2.Name = "Deep burial velocity";
+            H2.Name = "Thickness of sediment anaerobic layer 2";
+            KappaNH3f.Name = "Freshwater nitrification velocity";
+            KappaNH3s.Name = "Saltwater nitrification velocity";
+            KappaNO3_1f.Name = "Freshwater denitrification velocity";
+            KappaNO3_1s.Name = "Saltwater denitrification velocity";
+            KappaNO3_2.Name = "Denitrification in the anaerobic layer 2";
+            KappaCH4.Name = "Methane oxidation in the aerobic sedliment layer 1";
+            KM_NH3.Name = "Nitrification half-saturation constant for NH4N";
+            KM_O2_NH3.Name = "Nitrification half-saturation constant for O2";
+            KdNH3.Name = "Partition coefficient for ammonium in layer 1 and 2";
+            KdPO42.Name = "Partition coefficient for inorganic P in anaerobic layer 2";
+            dKDPO41f.Name = "Freshwater factor, incr. aerobic partition coeff. of inorg. P relative to the anaerobic";
+            dKDPO41s.Name = "Saltwater factor, incr. aerobic partition coeff. of inorg. P relative to the anaerobic";
+            O2critPO4.Name = "Critical O2 conc. for adjustment of partition coefficient for inorganic P";
+            ThtaDd.Name = "Theta for pore water diffusion between layers 1-2";
+            ThtaNH3.Name = "Theta for nitrification";
+            ThtaNO3.Name = "Theta for denitrification";
+            ThtaCH4.Name = "Theta for methane oxidation";
+            SALTSW.Name = "Salinity above which sulfide rather than methane is produced from C diagenesis";
+            SALTND.Name = "Salinity above which saltwater nitr./denitrification rates are used for aerobic layer";
+            KappaH2Sd1.Name = "Aerobic layer reaction velocity for dissolved sulfide oxidation";
+            KappaH2Sp1.Name = "Aerobic layer reaction velocity for particulate sulfide oxidation";
+            ThtaH2S.Name = "Theta for sulfide oxidation";
+            KMHSO2.Name = "Sulfide oxidation normalization constant for O2";
+            KdH2S1.Name = "Partition coefficient for sulfide in aerobic layer 1";
+            KdH2S2.Name = "Partition coefficient for sulfide in anaerobic layer 2";
+            kpon1.Name = "G class 1 pon mineralization";
+            kpon2.Name = "G class 2 pon mineralization";
+            kpon3.Name = "G class 3 pon mineralization";
+            kpoc1.Name = "G class 1 poc mineralization";
+            kpoc2.Name = "G class 2 poc mineralization";
+            kpoc3.Name = "G class 2 poc mineralization";
+            kpop1.Name = "G class 1 pop mineralization";
+            kpop2.Name = "G class 2 pop mineralization";
+            kpop3.Name = "G class 2 pop mineralization";
+            ThtaPON1.Name = "Theta for G class 1 PON";
+            ThtaPON2.Name = "Theta for G class 2 PON";
+            ThtaPON3.Name = "Theta for G class 3 PON";
+            ThtaPOC1.Name = "Theta for G class 1 POC";
+            ThtaPOC2.Name = "Theta for G class 2 POC";
+            ThtaPOC3.Name = "Theta for G class 3 POC";
+            ThtaPOP1.Name = "Theta for G class 1 POP";
+            ThtaPOP2.Name = "Theta for G class 2 POP";
+            ThtaPOP3.Name = "Theta for G class 3 POP";
+            kBEN_STR.Name = "First-order decay rate constant for benthic stress for DiToro eqn 13.3";
+            ksi.Name = "First order dissolution rate for particulate biogenic silica (PSi) at 20 degC in layer 2";
+            ThtaSi.Name = "Constant for temperature adjustment of KSi";
+            KMPSi.Name = "Silica dissolution half-saturation constant for PSi";
+            SiSat.Name = "Saturation concentration of silica in pore water";
+            KDSi2.Name = "Partition coefficient for Si in Layer 2, controls sorption of dissolved silica to solids";
+            DKDSi1.Name = "Factor that enhances sorption of silica in layer 1 when D.O. exceeds DOcSi";
+            O2critSi.Name = "Critical dissolved oxygen for silica sorption in layer 1";
+            LigninDetr.Name = "Fraction of suspended detritus that is non-reactive";
+            Si_Diatom.Name = "Fraction of silica in diatoms (dry)";
+
+            if (DefaultVals) m1.Val = 0.5;
+            m1.Units = "kg/L";
+            m1.Comment = "";
+            m1.Symbol = "m1";
+
+            if (DefaultVals) m2.Val = 0.5;
+            m2.Units = "kg/L";
+            m2.Comment = "";
+            m2.Symbol = "m2";
+
+            if (DefaultVals) H1.Val = 0.001;
+            H1.Units = "m";
+            H1.Comment = "1 mm default, may be increased to speed computation time";
+            H1.Symbol = "H1";
+
+            // {    with Dp do
+            // Begin
+            // Val :=  0.00012;
+            // Units := 'm2/d';  name := 'bioturbation particle mixing diffusion coefficient';
+            // Comment := '';
+            // Symbol := 'Dp';
+            // End;  // unused
+
+            if (DefaultVals) Dd.Val = 0.001;  
+            Dd.Units = "m2/d";
+            Dd.Comment = "";
+            Dd.Symbol = "Dd";
+
+            if (DefaultVals) w2.Val = 0.0003;
+            w2.Units = "m/d";
+            w2.Comment = "(Q2K uses 0.000005)";
+            w2.Symbol = "w2";
+
+            if (DefaultVals) H2.Val = 0.1;
+            H2.Units = "m";
+            H2.Comment = "";
+            H2.Symbol = "H2";
+
+            if (DefaultVals) KappaNH3f.Val = 0.131;
+            KappaNH3f.Units = "m/d";
+            KappaNH3f.Comment = "(Cerco and Cole suggest value of 0.2 m/d for freshwater)";
+            KappaNH3f.Symbol = "KappaNH3f";
+
+            if (DefaultVals) KappaNH3s.Val = 0.131;
+            KappaNH3s.Units = "m/d";
+            KappaNH3s.Comment = "";
+            KappaNH3s.Symbol = "KappaNH3s";
+
+            if (DefaultVals) KappaNO3_1f.Val = 0.1;
+            KappaNO3_1f.Units = "m/d";
+            KappaNO3_1f.Comment = "(Cerco and Cole suggest value of 0.3 m/d for freshwater)";
+            KappaNO3_1f.Symbol = "KappaNO3_1f";
+
+            if (DefaultVals) KappaNO3_1s.Val = 0.1;
+            KappaNO3_1s.Units = "m/d";
+            KappaNO3_1s.Comment = "";
+            KappaNO3_1s.Symbol = "KappaNO3_1s";
+
+            if (DefaultVals) KappaNO3_2.Val = 0.25;
+            KappaNO3_2.Units = "m/d";
+            KappaNO3_2.Comment = "";
+            KappaNO3_2.Symbol = "KappaNO3_2";
+
+            if (DefaultVals) KappaCH4.Val = 0.7;
+            KappaCH4.Units = "m/d";
+            KappaCH4.Comment = "";
+            KappaCH4.Symbol = "KappaCH4";
+
+            if (DefaultVals) KM_NH3.Val = 0.728;
+            KM_NH3.Units = "mgN/L";
+            KM_NH3.Comment = "";
+            KM_NH3.Symbol = "KM_NH3";
+
+            if (DefaultVals) KM_O2_NH3.Val = 0.37;
+            KM_O2_NH3.Units = "mgO2/L";
+            KM_O2_NH3.Comment = "(DiToro suggests 0.74)";
+            KM_O2_NH3.Symbol = "KM_O2_NH3";
+
+            if (DefaultVals) KdNH3.Val = 1.0;
+            KdNH3.Units = "L/kg";
+            KdNH3.Comment = "";
+            KdNH3.Symbol = "KdNH3";
+
+            if (DefaultVals) KdPO42.Val = 100.0;
+            KdPO42.Units = "L/kg";
+            KdPO42.Comment = "(DiToro 2001 suggests value KdPO42=100 L/Kg)";
+            KdPO42.Symbol = "KdPO42";
+
+            if (DefaultVals) dKDPO41f.Val = 20.0;
+            dKDPO41f.Units = "unitless";
+            dKDPO41f.Comment = "(Cerco and Cole 1995 suggest value dKdPO41f=3000)";
+            dKDPO41f.Symbol = "dKDPO41f";
+
+            if (DefaultVals) dKDPO41s.Val = 300.0;
+            dKDPO41s.Units = "unitless";
+            dKDPO41s.Comment = "(DiToro 2001 suggests value dKdPO41s=300)";
+            dKDPO41s.Symbol = "dKDPO41s";
+
+            if (DefaultVals) O2critPO4.Val = 2.0;
+            O2critPO4.Units = "mgO2/L";
+            O2critPO4.Comment = "";
+            O2critPO4.Symbol = "O2critPO4";
+
+            ///Unused_ThtaDp).1.117;
+            ///Unused_ThtaDp).name := 'for bioturbation particle mixing between layers 1-2';
+            //// Comment := '';
+            //// Symbol := 'ThtaDp';
+
+            if (DefaultVals) ThtaDd.Val = 1.08;
+            ThtaDd.Units = "";
+            ThtaDd.Comment = "";
+            ThtaDd.Symbol = "ThtaDd";
+
+            if (DefaultVals) ThtaNH3.Val = 1.123;
+            ThtaNH3.Units = "";
+            ThtaNH3.Comment = "";
+            ThtaNH3.Symbol = "ThtaNH3";
+
+            if (DefaultVals) ThtaNO3.Val = 1.08;
+            ThtaNO3.Units = "";
+            ThtaNO3.Comment = "";
+            ThtaNO3.Symbol = "ThtaNO3";
+
+            if (DefaultVals) ThtaCH4.Val = 1.079;
+            ThtaCH4.Units = "";
+            ThtaCH4.Comment = "";
+            ThtaCH4.Symbol = "ThtaCH4";
+
+            if (DefaultVals) SALTSW.Val = 1.0;
+            SALTSW.Units = "ppt";
+            SALTSW.Comment = "";
+            SALTSW.Symbol = "SALTSW";
+
+            if (DefaultVals) SALTND.Val = 1.0;
+            SALTND.Units = "ppt";
+            SALTND.Comment = "";
+            SALTND.Symbol = "SALTND";
+
+            if (DefaultVals) KappaH2Sd1.Val = 0.2;
+            KappaH2Sd1.Units = "m/d";
+            KappaH2Sd1.Comment = "";
+            KappaH2Sd1.Symbol = "KappaH2Sd1";
+
+            if (DefaultVals) KappaH2Sp1.Val = 0.4;
+            KappaH2Sp1.Units = "m/d";
+            KappaH2Sp1.Comment = "";
+            KappaH2Sp1.Symbol = "KappaH2Sp1";
+
+            if (DefaultVals) ThtaH2S.Val = 1.08;
+            ThtaH2S.Units = "unitless";
+            ThtaH2S.Comment = "";
+            ThtaH2S.Symbol = "ThtaH2S";
+
+            if (DefaultVals) KMHSO2.Val = 4.0;
+            KMHSO2.Units = "mgO2/L";
+            KMHSO2.Comment = "";
+            KMHSO2.Symbol = "KMHSO2";
+
+            if (DefaultVals) KdH2S1.Val = 100.0;
+            KdH2S1.Units = "L/kg";
+            KdH2S1.Comment = "";
+            KdH2S1.Symbol = "KdH2S1";
+
+            if (DefaultVals) KdH2S2.Val = 100.0;
+            KdH2S2.Units = "L/kg";
+            KdH2S2.Comment = "";
+            KdH2S2.Symbol = "KdH2S2";
+
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpon1);
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpon2);
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpoc1);
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpoc2);
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpop1);
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpop2);
+
+            if (DefaultVals) kpon1.Val = 0.035;
+            kpon1.Units = "1/d";
+            kpon1.Comment = "";
+            kpon1.Symbol = "kpon1";
+
+            if (DefaultVals) kpon2.Val = 0.0018;
+            kpon2.Units = "1/d";
+            kpon2.Comment = "";
+            kpon2.Symbol = "kpon2";
+
+            if (DefaultVals) kpon3.Val = 0;
+            kpon3.Units = "1/d";
+            kpon3.Comment = "";
+            kpon3.Symbol = "kpon3";
+
+            if (DefaultVals) kpoc1.Val = 0.035;
+            kpoc1.Units = "1/d";
+            kpoc1.Comment = "";
+            kpoc1.Symbol = "kpoc1";
+
+            if (DefaultVals) kpoc2.Val = 0.0018;
+            kpoc2.Units = "1/d";
+            kpoc2.Comment = "";
+            kpoc2.Symbol = "kpoc2";
+
+            if (DefaultVals) kpoc3.Val = 0.0;
+            kpoc3.Units = "1/d";
+            kpoc3.Comment = "";
+            kpoc3.Symbol = "kpoc3";
+
+            if (DefaultVals) kpop1.Val = 0.035;
+            kpop1.Units = "1/d";
+            kpop1.Comment = "";
+            kpop1.Symbol = "kpop1";
+
+            if (DefaultVals) kpop2.Val = 0.0018;
+            kpop2.Units = "1/d";
+            kpop2.Comment = "";
+            kpop2.Symbol = "kpop2";
+
+            if (DefaultVals) kpop3.Val = 0.0;
+            kpop3.Units = "1/d";
+            kpop3.Comment = "";
+            kpop3.Symbol = "kpop3";
+
+            if (DefaultVals) ThtaPON1.Val = 1.1;
+            ThtaPON1.Units = "";
+            ThtaPON1.Comment = "";
+            ThtaPON1.Symbol = "ThtaPON1";
+
+            if (DefaultVals) ThtaPON2.Val = 1.15;
+            ThtaPON2.Units = "";
+            ThtaPON2.Comment = "";
+            ThtaPON2.Symbol = "ThtaPON2";
+
+            if (DefaultVals) ThtaPON3.Val = 1.17;
+            ThtaPON3.Units = "";
+            ThtaPON3.Comment = "";
+            ThtaPON3.Symbol = "ThtaPON3";
+
+            if (DefaultVals) ThtaPOC1.Val = 1.1;
+            ThtaPOC1.Units = "";
+            ThtaPOC1.Comment = "";
+            ThtaPOC1.Symbol = "ThtaPOC1";
+
+            if (DefaultVals) ThtaPOC2.Val = 1.15;
+            ThtaPOC2.Units = "";
+            ThtaPOC2.Comment = "";
+            ThtaPOC2.Symbol = "ThtaPOC2";
+
+            if (DefaultVals) ThtaPOC3.Val = 1.17;
+            ThtaPOC3.Units = "";
+            ThtaPOC3.Comment = "";
+            ThtaPOC3.Symbol = "ThtaPOC3";
+
+            if (DefaultVals) ThtaPOP1.Val = 1.1;
+            ThtaPOP1.Units = "";
+            ThtaPOP1.Comment = "";
+            ThtaPOP1.Symbol = "ThtaPOP1";
+
+            if (DefaultVals) ThtaPOP2.Val = 1.15;
+            ThtaPOP2.Units = "";
+            ThtaPOP2.Comment = "";
+            ThtaPOP2.Symbol = "ThtaPOP2";
+
+            if (DefaultVals) ThtaPOP3.Val = 1.17;
+            ThtaPOP3.Units = "";
+            ThtaPOP3.Comment = "";
+            ThtaPOP3.Symbol = "ThtaPOP3";
+
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_POC1R);
+            //// with POC1R do
+            //// Begin
+            //// Val :=  0.1;
+            //// Units := 'gC/m3'; name := 'reference G1 at which w12base = Dp/H2 at 20 degC for DiToro eqn 13.1';
+            //// Comment := '';
+            //// Symbol := 'POC1R';
+            //// End;
+
+            if (DefaultVals) kBEN_STR.Val = 0.03;
+            kBEN_STR.Units = "1/day";
+            kBEN_STR.Comment = "";
+            kBEN_STR.Symbol = "kBEN_STR";
+
+            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_KM_O2_Dp);
+            //// with KM_O2_Dp do
+            //// Begin
+            //// Val :=  4.0;
+            //// Units := 'mgO2/L';  name := 'particle mixing half-saturation constant for O2';
+            //// Comment := '';
+            //// Symbol := 'KM_O2_Dp';
+            //// End;
+
+            if (DefaultVals) ksi.Val = 0.5;
+            ksi.Units = "1/day";
+            ksi.Comment = "";
+            ksi.Symbol = "Ksi";
+
+            if (DefaultVals) ThtaSi.Val = 1.1;
+            ThtaSi.Units = "unitless";
+            ThtaSi.Comment = "";
+            ThtaSi.Symbol = "Thta_si";
+
+            if (DefaultVals) KMPSi.Val = 50000;
+            KMPSi.Units = "g Si/m^3";
+            KMPSi.Comment = "";
+            KMPSi.Symbol = "KMPSi";
+
+            if (DefaultVals) SiSat.Val = 40;
+            SiSat.Units = "g Si/m^3";
+            SiSat.Comment = "";
+            SiSat.Symbol = "SiSat";
+
+            if (DefaultVals) KDSi2.Val = 100;
+            KDSi2.Units = "L/Kg";
+            KDSi2.Comment = "";
+            KDSi2.Symbol = "KDSi2";
+
+            if (DefaultVals) DKDSi1.Val = 10;
+            DKDSi1.Units = "unitless";
+            DKDSi1.Comment = "";
+            DKDSi1.Symbol = "DKDSi1";
+
+            if (DefaultVals) O2critSi.Val = 1;
+            O2critSi.Units = "mg/L";
+            O2critSi.Comment = "";
+            O2critSi.Symbol = "O2critSi";
+
+            if (DefaultVals) LigninDetr.Val = 0.01;
+            LigninDetr.Units = "unitless";
+            LigninDetr.Comment = "default";
+            LigninDetr.Symbol = "LigninDetr";
+
+            if (DefaultVals) Si_Diatom.Val = 0.425;
+            Si_Diatom.Units = "g/g dry";
+            Si_Diatom.Comment = "Horne (1994) states that silica makes up 25 to 60% of the dry weight of diatoms.";
+            Si_Diatom.Symbol = "Si_Diatom";
+
+        }
+
+    } // end Diagenesis_Rec
+
+
     public class TNH4_Sediment : TStateVariable
     {
         // TNH4_Sediment
@@ -34,7 +508,7 @@ namespace AQUATOX.Diagenesis
                 KappaNH3 = DR.KappaNH3f.Val;
 
             // EFDC EQ. 5-19
-            result = Math.Pow(KappaNH3, 2) * Math.Pow(DR.ThtaNH3.Val, (Temp - 20)) * DR.KM_NH3.Val / (DR.KM_NH3.Val + NH4_1) * O2 / (2 * DR.KM_O2_NH3.Val + O2);
+            result = AQMath.Square(KappaNH3 ) * Math.Pow(DR.ThtaNH3.Val, (Temp - 20)) * DR.KM_NH3.Val / (DR.KM_NH3.Val + NH4_1) * O2 / (2 * DR.KM_O2_NH3.Val + O2);
          //(m2/d2)         (m / d)                    (unitless)                        (mg N / L)   (mgN/L)         (mgN/L) (mg/L)              (mg/L)   (mg/L)
 
             return result;
@@ -90,7 +564,7 @@ namespace AQUATOX.Diagenesis
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     if (Layer == T_SVLayer.SedLayer1)
                     {
@@ -196,7 +670,7 @@ namespace AQUATOX.Diagenesis
                 {
                     KappaNO3 = DR.KappaNO3_1f.Val;
                 }
-                result = (Math.Pow(KappaNO3, 2) * Math.Pow(DR.ThtaNO3.Val, (Temp - 20)));
+                result = (AQMath.Square(KappaNO3) * Math.Pow(DR.ThtaNO3.Val, (Temp - 20)));
             }
             else
             {
@@ -286,7 +760,7 @@ namespace AQUATOX.Diagenesis
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     if (Layer == T_SVLayer.SedLayer1)
                     {
@@ -469,7 +943,7 @@ namespace AQUATOX.Diagenesis
             //// --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     if (Layer == T_SVLayer.SedLayer1)
                     {
@@ -605,7 +1079,7 @@ namespace AQUATOX.Diagenesis
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Deposition", Deposition);
@@ -700,7 +1174,7 @@ namespace AQUATOX.Diagenesis
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Deposition", Deposition);
@@ -809,7 +1283,7 @@ namespace AQUATOX.Diagenesis
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Deposition", Deposition);
@@ -888,7 +1362,7 @@ namespace AQUATOX.Diagenesis
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Dia_Flux", Dia_Flux);
@@ -1008,7 +1482,7 @@ namespace AQUATOX.Diagenesis
             //-----------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     if (Layer == T_SVLayer.SedLayer1)
@@ -1168,7 +1642,7 @@ namespace AQUATOX.Diagenesis
             void Derivative_WriteAvailRates()
             {
                 // biogenic silica, L2
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Deposition", Deposition);
@@ -1181,7 +1655,7 @@ namespace AQUATOX.Diagenesis
                 void Derivative_WriteSilicaRates()
                 {
                     // non-biogenic
-                    if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                    if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                     {
                         if (Layer == T_SVLayer.SedLayer1)
                         {

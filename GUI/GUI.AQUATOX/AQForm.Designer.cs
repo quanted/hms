@@ -38,6 +38,7 @@ namespace GUI.AQUATOX
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.graphbutton = new System.Windows.Forms.Button();
+            this.ParamsButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadJSON
@@ -78,7 +79,7 @@ namespace GUI.AQUATOX
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(849, 175);
+            this.textBox1.Size = new System.Drawing.Size(853, 175);
             this.textBox1.TabIndex = 2;
             // 
             // progressBar1
@@ -88,7 +89,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(441, 21);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(428, 22);
+            this.progressBar1.Size = new System.Drawing.Size(433, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -104,9 +105,20 @@ namespace GUI.AQUATOX
             this.graphbutton.UseVisualStyleBackColor = true;
             this.graphbutton.Click += new System.EventHandler(this.graph_Click);
             // 
+            // ParamsButton
+            // 
+            this.ParamsButton.Location = new System.Drawing.Point(20, 62);
+            this.ParamsButton.Name = "ParamsButton";
+            this.ParamsButton.Size = new System.Drawing.Size(97, 28);
+            this.ParamsButton.TabIndex = 0;
+            this.ParamsButton.Text = "Edit Params";
+            this.ParamsButton.UseVisualStyleBackColor = true;
+            this.ParamsButton.Click += new System.EventHandler(this.SaveParams);
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(893, 532);
+            this.Controls.Add(this.ParamsButton);
             this.Controls.Add(this.graphbutton);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBox1);
@@ -128,6 +140,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.TextBox textBox1;
         private ProgressBar progressBar1;
         private Button graphbutton;
+        private Button ParamsButton;
     }
 
 

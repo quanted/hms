@@ -379,7 +379,7 @@ namespace AQUATOX.Plants
             // const      actually = KResp
             // KStress = 0.03;
             // not 3.0; RAP 9/5/95
-            LightStress = 1.0 - LtLimit(AQTSeg.PSetup.ModelTSDays);
+            LightStress = 1.0 - LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
             if (LightStress < Consts.Small)
             {
                 LightStress = 0.0;
@@ -428,7 +428,7 @@ namespace AQUATOX.Plants
             {
                 ExcessT = Math.Exp(WaterTemp - PAlgalRec.TMax) / 2.0;
             }
-            Stress = (1.0 - Math.Exp(-PAlgalRec.EMort * (1.0 - (NutrLimit() * LtLimit(AQTSeg.PSetup.ModelTSDays)))));
+            Stress = (1.0 - Math.Exp(-PAlgalRec.EMort * (1.0 - (NutrLimit() * LtLimit(AQTSeg.PSetup.ModelTSDays.Val)))));
             // emort is approximate maximum fraction killed
             // per day by nutrient and light limitation
             Dead = (PAlgalRec.KMort + ExcessT + Stress) * State;
@@ -444,7 +444,7 @@ namespace AQUATOX.Plants
                 RedRepro[ToxLoop] = 0;
                 FracPhoto[ToxLoop] = 1;
 
-                if (SR.UseExternalConcs) TSV = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
+                if (SR.UseExternalConcs.Val) TSV = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
                                     else TSV = AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol); 
                 if (TSV != null)
                  if (TSV.State > 0)
@@ -669,7 +669,7 @@ namespace AQUATOX.Plants
             Wash = 0;   // mg/L d
 
             Nutr = NutrLim_Step;
-            LtL = LtLimit(AQTSeg.PSetup.ModelTSDays);
+            LtL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
             Suboptimal = Nutr * LtL * AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax) * 20;        // 5 to 20 RAP 1-24-05
             if (Suboptimal > 1)  Suboptimal = 1;
 
@@ -699,8 +699,8 @@ namespace AQUATOX.Plants
                     if ((NState >= Consts.FirstDiatom) && (NState <= Consts.LastDiatom))
                     {
                         // Periphyton -- Diatoms
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2) * Math.Pow(Biovol_Dia * UnitArea, (2.0/3.0)) * 1E-6;
-                        // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2                 m2/mm2
+                        DragForce = Rho * DragCoeff * AQMath.Square(DailyVel) * Math.Pow(Biovol_Dia * UnitArea, (2.0/3.0)) * 1E-6;
+                        // kg m/s2  kg/m3 unitless                m/s                     mm3/mm2       mm2                 m2/mm2
                         // 3/19/2013 fcrit of zero means no scour
 
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
@@ -716,8 +716,8 @@ namespace AQUATOX.Plants
                     {
                         // filamentous (includes greens and blgreens and should not be confused
                         // with filamentous phytoplankton)
-                        DragForce = Rho * DragCoeff * Math.Pow(DailyVel, 2.0) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
-                        // kg m/s2  kg/m3 unitless                m/s                    mm3/mm2       mm2             m2/mm2
+                        DragForce = Rho * DragCoeff * AQMath.Square(DailyVel) * Math.Pow((Biovol_Fil * UnitArea), (2.0 / 3.0)) * 1E-6;
+                        // kg m/s2  kg/m3 unitless                m/s                      mm3/mm2       mm2             m2/mm2
 
                         // 3/19/2013 fcrit of zero means no scour
                         if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
@@ -900,13 +900,13 @@ namespace AQUATOX.Plants
             EX = AQTSeg.Extinct(Incl_Periphyton, true, true, false, 0);
             DBott = DepthBottom();
 
-            if (AQTSeg.PSetup.ModelTSDays) LightVal = PL.DailyLight;
+            if (AQTSeg.PSetup.ModelTSDays.Val) LightVal = PL.DailyLight;
             else LightVal = PL.HourlyLight;
 
             if ((EX * DBott) > 20.0) LD = 1.0;
             else
             {
-                if (AQTSeg.PSetup.ModelTSDays) LightCorr = 1.0;
+                if (AQTSeg.PSetup.ModelTSDays.Val) LightCorr = 1.0;
                 else LightCorr = 1.25;
 
                 // only half is in spectrum used for photsyn. - Edmondson '56
@@ -1037,7 +1037,7 @@ namespace AQUATOX.Plants
                 {
                     PeriExt = 1.0;
                 }
-                if (AQTSeg.PSetup.ModelTSDays)
+                if (AQTSeg.PSetup.ModelTSDays.Val)
                 {
                     LL = 0.85 * (2.71828 * P / (E * (DBot - DT))) * (LD - LT) * PeriExt;
                 }
@@ -1055,7 +1055,7 @@ namespace AQUATOX.Plants
                     LL = 0.0;
                 }
                 // RAP, 9/11/95
-                if ((AQTSeg.PSetup.ModelTSDays))  // if daily time step is specified
+                if ((AQTSeg.PSetup.ModelTSDays.Val))  // if daily time step is specified
                 {
                     Lt_Limit = LL;  // save for rate output  JSC 9-5-02
                     Const_a = Math.Exp(-E * DT) * Math.Exp(-E * DBot);
@@ -1084,7 +1084,7 @@ namespace AQUATOX.Plants
         {
             double PLimit;
             double P2O;
-            if (AQTSeg.PSetup.Internal_Nutrients)
+            if (AQTSeg.PSetup.Internal_Nutrients.Val)
             {
                 P2O = P_2_Org();
                 if (P2O > Consts.Tiny)
@@ -1167,7 +1167,7 @@ namespace AQUATOX.Plants
         public double N_2_Org()
         {
             // g N / g OM
-            if (AQTSeg.PSetup.Internal_Nutrients && (State > Consts.Tiny))
+            if (AQTSeg.PSetup.Internal_Nutrients.Val && (State > Consts.Tiny))
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
                     return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
@@ -1183,7 +1183,7 @@ namespace AQUATOX.Plants
 
         public double P_2_Org()
         {
-            if (AQTSeg.PSetup.Internal_Nutrients && (State > Consts.Tiny))
+            if (AQTSeg.PSetup.Internal_Nutrients.Val && (State > Consts.Tiny))
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.PIntrnl, T_SVLayer.WaterCol) != null)
                 {
@@ -1211,7 +1211,7 @@ namespace AQUATOX.Plants
             if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)      // internal nutrients option 3/18/2014
                 return (N_2_Org() < 0.5 * PAlgalRec.NHalfSatInternal);
             
-            if (!AQTSeg.PSetup.NFix_UseRatio)  // added option 3/19/2010
+            if (!AQTSeg.PSetup.NFix_UseRatio.Val)  // added option 3/19/2010
             {
                 Nitrogen = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
                 return (Nitrogen < 0.5 * PAlgalRec.KN);   // Official "Release 3" code
@@ -1224,7 +1224,7 @@ namespace AQUATOX.Plants
                 if (InorgP > Consts.Tiny)
                 {
                     NtoP = (AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol)) / InorgP;
-                    if ((NtoP < AQTSeg.PSetup.NtoPRatio))  return true; // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
+                    if ((NtoP < AQTSeg.PSetup.NtoPRatio.Val))  return true; // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
                 }
                 
             }
@@ -1247,7 +1247,7 @@ namespace AQUATOX.Plants
                 // N-fixation
                 NL = 1.0;
             }
-            else if (AQTSeg.PSetup.Internal_Nutrients)
+            else if (AQTSeg.PSetup.Internal_Nutrients.Val)
             {
                 N2O = N_2_Org();
                 if (N2O > Consts.Tiny)
@@ -1306,7 +1306,7 @@ namespace AQUATOX.Plants
             double NL;
             double TCorrValue;
             TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax);
-            LL = LtLimit(AQTSeg.PSetup.ModelTSDays);
+            LL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
             NL = NutrLimit();
             AggFP = AggregateFracPhoto();
             Temp_Limit = TCorrValue;  // save for rate output  JSC 9-5-02
@@ -1485,7 +1485,7 @@ namespace AQUATOX.Plants
             void Derivative_WriteRates()
             {
                 T_SVType ToxLoop;
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", L);
@@ -1642,8 +1642,8 @@ namespace AQUATOX.Plants
             Dead = Dead + MortRates.SaltMort;
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
-                if ((AQTSeg.PSetup.UseExternalConcs && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
-                     || ((!AQTSeg.PSetup.UseExternalConcs) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
+                if ((AQTSeg.PSetup.UseExternalConcs.Val && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
+                     || ((!AQTSeg.PSetup.UseExternalConcs.Val) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
                     Pois = Poisoned((T_SVType)ToxLoop + 2); 
                     MortRates.OrgPois[ToxLoop] = Pois;
@@ -1692,7 +1692,7 @@ namespace AQUATOX.Plants
                 NL = 1.0; // floating macrophytes are not subject to light limitation
 
             if ((MacroType == TMacroType.Benthic))
-                LL = LtLimit(AQTSeg.PSetup.ModelTSDays);
+                LL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
             else
                 LL = 1.0;
 
@@ -1789,7 +1789,7 @@ namespace AQUATOX.Plants
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", L);
@@ -2009,7 +2009,7 @@ namespace AQUATOX.Plants
             // ----------------------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Loading", Lo);

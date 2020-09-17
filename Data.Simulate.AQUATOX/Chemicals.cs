@@ -773,7 +773,7 @@ namespace AQUATOX.Chemicals
                 else
                     Wet2Dry = WetToDry();
 
-                if ((NState == AllVariables.SedmRefrDetr || NState == AllVariables.SuspLabDetr) && AQTSeg.PSetup.TSedDetrIsDriving)
+                if ((NState == AllVariables.SedmRefrDetr || NState == AllVariables.SuspLabDetr) && AQTSeg.PSetup.TSedDetrIsDriving.Val)
                 {
                     State = Loading * CPtr.State / 1e6;        // 6/7/2013  Directly assign toxicants to sediment on OC Norm basis
                     // ug/L     ug/kg      mg/L    mg/kg
@@ -1256,7 +1256,7 @@ namespace AQUATOX.Chemicals
             void Derivative_WriteRates()
             {
                 // for toxicant dissolved in water
-                if ((AQTSeg.PSetup.SaveBRates) && (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("State", State);
@@ -1287,7 +1287,7 @@ namespace AQUATOX.Chemicals
                 Derivative_WriteRates();
                 return;
             }
-            if (AQTSeg.PSetup.ChemsDrivingVars)          // 4/5/2017 
+            if (AQTSeg.PSetup.ChemsDrivingVars.Val)          // 4/5/2017 
             {
                 base.CalculateLoad(AQTSeg.TPresent);     // TStateVariable
                 DB = 0.0;
@@ -1295,7 +1295,7 @@ namespace AQUATOX.Chemicals
                 return;
             }
 
-            if (AQTSeg.PSetup.ChemsDrivingVars)   DB = 0.0;       // if (Consts.Eutrophication|| 
+            if (AQTSeg.PSetup.ChemsDrivingVars.Val)   DB = 0.0;       // if (Consts.Eutrophication|| 
             else
             {
                 CalculateLoad(AQTSeg.TPresent);

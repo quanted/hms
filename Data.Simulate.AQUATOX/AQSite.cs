@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
+using Globals;
 
 namespace AQUATOX.AQSite
 
@@ -245,7 +246,7 @@ namespace AQUATOX.AQSite
             }
             else
             {
-                result = (1.0 - P_Shape) * Z / ZMax + P_Shape * Math.Pow(Z / ZMax, 2.0);
+                result = (1.0 - P_Shape) * Z / ZMax + P_Shape * AQMath.Square(Z / ZMax);
             }
             // elliptic hyperboloid
             // RAP Fix Eqn. Signs 1-26-2001

@@ -131,7 +131,7 @@ namespace AQUATOX.AQTSegment
                 AQTSeg.ClearResults();
                 AQTSeg.SVsToInitConds();
                 Setup_Record PS = AQTSeg.PSetup;
-                AQTSeg.Integrate(PS.FirstDay, PS.LastDay, PS.RelativeError, PS.MinStepSize, PS.StoreStepSize );
+                AQTSeg.Integrate(PS.FirstDay.Val, PS.LastDay.Val, PS.RelativeError.Val, PS.MinStepSize.Val, PS.StoreStepSize.Val);
                 return "";
             }
             catch (Exception e)
@@ -147,8 +147,8 @@ namespace AQUATOX.AQTSegment
         {
             if (AQTSeg == null) return "AQTSeg not Instantiated";
 
-            AQTSeg.PSetup.FirstDay = StartDate;
-            AQTSeg.PSetup.LastDay = EndDate;
+            AQTSeg.PSetup.FirstDay.Val = StartDate;
+            AQTSeg.PSetup.LastDay.Val = EndDate;
             return Integrate();
         }
 
@@ -316,7 +316,7 @@ namespace AQUATOX.AQTSegment
                 ((this) as TToxics).ppb = 0;
 
                 ((this) as TToxics).IsAGGR = false;
-                if ((SVType == Consts.FirstOrgTxTyp) && (AQTSeg.PSetup.T1IsAggregate))
+                if ((SVType == Consts.FirstOrgTxTyp) && (AQTSeg.PSetup.T1IsAggregate.Val))
                 {
                     ((this) as TToxics).IsAGGR = true;
                 }
@@ -733,42 +733,12 @@ namespace AQUATOX.AQTSegment
         {
             if (SV.Count < 1) return "No State Variables Are Included in this Simulation.";
             if (Equals(PSetup, default(Setup_Record))) return "PSetup data structure must be initialized.";
-            if (PSetup.StoreStepSize < Consts.Tiny) return "PSetup.StoreStepSize must be greater than zero.";
-            if (PSetup.FirstDay >= PSetup.LastDay) return "In PSetup Record, Last Day must be after First Day.";
+            if (PSetup.StoreStepSize.Val < Consts.Tiny) return "PSetup.StoreStepSize must be greater than zero.";
+            if (PSetup.FirstDay.Val >= PSetup.LastDay.Val) return "In PSetup Record, Last Day must be after First Day.";
 
             return "";
         }
 
-
-        // -------------------------------------------------
-        public void SetDefaultSetup()
-        {
-            PSetup.FirstDay = new DateTime(1999, 1, 1);
-            PSetup.LastDay = new DateTime(1999, 1, 31);
-            PSetup.StoreStepSize = 1;
-            PSetup.StepSizeInDays = true;
-            PSetup.ModelTSDays = true;
-            PSetup.RelativeError = 0.001;
-            PSetup.MinStepSize = 1e-10;
-            PSetup.SaveBRates = false;
-            PSetup.AlwaysWriteHypo = false;
-            PSetup.ShowIntegration = false;
-            PSetup.UseComplexedInBAF = false;
-            PSetup.DisableLipidCalc = true;  //disabled 4/28/09
-            PSetup.UseExternalConcs = false;
-            //   PSetup^.BCFUptake         = false;
-            PSetup.Spinup_Mode = false;
-            PSetup.NFix_UseRatio = false;
-            PSetup.NtoPRatio = 7.0;
-            PSetup.Spin_Nutrients = true;
-
-            PSetup.FixStepSize = 0.1;
-            PSetup.UseFixStepSize = false;
-            PSetup.T1IsAggregate = false;
-            PSetup.AmmoniaIsDriving = false;
-            PSetup.TSedDetrIsDriving = false;
-
-        }
 
         public void ClearResults()
         {
@@ -921,13 +891,13 @@ namespace AQUATOX.AQTSegment
             TStateVariable ErrVar;
             double MaxError;
 
-            if (PSetup.UseFixStepSize)
+            if (PSetup.UseFixStepSize.Val)
             {
-                h = PSetup.FixStepSize;  // 2/21/2012 new option
-                if ((x.AddDays(h) > PSetup.LastDay))
+                h = PSetup.FixStepSize.Val;  // 2/21/2012 new option
+                if ((x.AddDays(h) > PSetup.LastDay.Val))
                 {
                     // if stepsize can overshoot, decrease
-                    h = (PSetup.LastDay - x).TotalDays;
+                    h = (PSetup.LastDay.Val - x).TotalDays;
                 }
             }
             else
@@ -940,7 +910,7 @@ namespace AQUATOX.AQTSegment
                 // calculate RKQS 4th and 5th order solutions and estimate error based on their difference
                 MaxError = 0;
                 ErrVar = null;
-                if (!PSetup.UseFixStepSize)
+                if (!PSetup.UseFixStepSize.Val)
                 {
                     foreach (TStateVariable TSV in SV)
                     {
@@ -958,7 +928,7 @@ namespace AQUATOX.AQTSegment
                         }
                     }
                 }
-                if (!PSetup.UseFixStepSize)
+                if (!PSetup.UseFixStepSize.Val)
                 {
                     if ((MaxError >= RelError))
                     {
@@ -980,7 +950,7 @@ namespace AQUATOX.AQTSegment
                     }
                 }
                 // no warning at this time
-            } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PSetup.UseFixStepSize)));
+            } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PSetup.UseFixStepSize.Val)));
             // If (MaxError>1) and (not StepSizeWarned) then
             // Begin
             // StepSizeWarned = true;
@@ -990,7 +960,7 @@ namespace AQUATOX.AQTSegment
             // MessageErr = true;
             // TSMessage;
             // End;
-            if (PSetup.UseFixStepSize)
+            if (PSetup.UseFixStepSize.Val)
             {
                 hnext = h;
             }
@@ -1480,7 +1450,7 @@ namespace AQUATOX.AQTSegment
             x = TStart;
 
 
-            if (PSetup.ModelTSDays) MaxStep = 1.0;
+            if (PSetup.ModelTSDays.Val) MaxStep = 1.0;
                                else MaxStep = 1.0 / 24.0;  // Hourly
             h = MaxStep;
 
@@ -1646,7 +1616,7 @@ namespace AQUATOX.AQTSegment
                 if (TSV.Layer == T_SVLayer.WaterCol)
                     if ( ((TSV.NState>=Globals.Consts.FirstBiota)&&(TSV.NState <= Globals.Consts.LastBiota)) ||
                          ((TSV.NState >= AllVariables.Ammonia) && (TSV.NState <= Globals.Consts.LastDetr)) ||
-                         ((TSV.NState == AllVariables.H2OTox) && (!PSetup.ChemsDrivingVars)) )
+                         ((TSV.NState == AllVariables.H2OTox) && (!PSetup.ChemsDrivingVars.Val)) )
                     {
                         TSV.State = TSV.State / FracChange;
                     }
@@ -1797,7 +1767,7 @@ namespace AQUATOX.AQTSegment
                     } //                  (gN/gOM) =    (ug/L)/(mg/L) * (mg/ug) 
 
                     
-                    if ((PSetup.SaveBRates) && (TSV.SaveRates) && (TSV.RateColl!=null))  // save rates output
+                    if ((PSetup.SaveBRates.Val)&& (TSV.SaveRates) && (TSV.RateColl!=null))  // save rates output
                     foreach (TRate PR in TSV.RateColl)
                     {
                         double ThisRate = PR.GetRate();
@@ -1893,7 +1863,7 @@ namespace AQUATOX.AQTSegment
                     Sal = GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
                     if (Sal > 0.0)
                     {
-                        return (-0.0575 * Sal) + (0.001710523 * Math.Pow(Sal, 1.5)) - (0.0002154996 * Math.Pow(Sal, 2)); // UNESCO (1983), 4/8/2015
+                        return (-0.0575 * Sal) + (0.001710523 * Math.Pow(Sal, 1.5)) - (0.0002154996 * AQMath.Square(Sal)); // UNESCO (1983), 4/8/2015
                     }
                     else return -1.8;  // default if salinity state variable not found {Ocean water with a typical salinity of 35 parts per thousand freezes only at -1.8 degC (28.9 deg F).}
                 case SiteTypes.Stream:
@@ -1977,23 +1947,23 @@ namespace AQUATOX.AQTSegment
         {
             double val;
             string errmsg = "";
-            double stepsize = (PSetup.StoreStepSize);  // step size in days or hours
-            if (!PSetup.StepSizeInDays) stepsize = stepsize / 24;  // convert to step size in days
-            int NumDays = (PSetup.LastDay - PSetup.FirstDay).Days; // number of days in simulation
+            double stepsize = (PSetup.StoreStepSize.Val);  // step size in days or hours
+            if (!PSetup.StepSizeInDays.Val) stepsize = stepsize / 24;  // convert to step size in days
+            int NumDays = (PSetup.LastDay.Val - PSetup.FirstDay.Val).Days; // number of days in simulation
             int numsteps = (int)(NumDays / stepsize); // number of time-steps to be written
 
             if (numsteps <= 0) return "Zero time-steps are written given StoreStepSize and StepSizeInDays flag.";
             if (SV.restimes == null) return "Results Times not initialized for SV List";
             if (SV.restimes.Count == 0) return "No results times saved for SV SV List";
 
-            DateTime lastwritedate = PSetup.FirstDay.AddDays(numsteps * stepsize);
+            DateTime lastwritedate = PSetup.FirstDay.Val.AddDays(numsteps * stepsize);
 
             List<int> StartIndices = new List<int>();  //restime index to start linear interpolation or trapezoidal integration
             int stepindex = 1;
             for (int i = 0; i < SV.restimes.Count; i++)
             {
-                DateTime DateToFind = PSetup.FirstDay.AddDays(stepindex * stepsize);
-                if (PSetup.AverageOutput) //trapezoidal integration
+                DateTime DateToFind = PSetup.FirstDay.Val.AddDays(stepindex * stepsize);
+                if (PSetup.AverageOutput.Val) //trapezoidal integration
                 {
                     if (DateToFind < SV.restimes[i].AddDays(stepsize))  // one time step before the reporting time step for integration
                     {
@@ -2043,11 +2013,11 @@ namespace AQUATOX.AQTSegment
                     for (int i = 1; i <= numsteps; i++)
                     {
                         vallist = new List<string>();
-                        DateTime steptime = PSetup.FirstDay.AddDays(i * stepsize);
+                        DateTime steptime = PSetup.FirstDay.Val.AddDays(i * stepsize);
 
                         for (int onum = 1; onum <= TSV.SVResults.Results.Count(); onum++)
                         {
-                           if (PSetup.AverageOutput) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.SVResults.Results[onum - 1], StartIndices[i - 1]);
+                           if (PSetup.AverageOutput.Val) val = TrapezoidalIntegration(out errmsg, steptime.AddDays(-stepsize), steptime, TSV.SVResults.Results[onum - 1], StartIndices[i - 1]);
                            else val = InstantaneousConc(out errmsg, steptime, TSV.SVResults.Results[onum - 1], StartIndices[i - 1]);
                            vallist.Add(val.ToString(Consts.ValFormatString));
                          }
@@ -2177,14 +2147,14 @@ namespace AQUATOX.AQTSegment
             TLight PL = GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
             if (PL != null)
             {
-                PL.CalculateLoad(PSetup.FirstDay);  // Set DailyLight for First Day
+                PL.CalculateLoad(PSetup.FirstDay.Val);  // Set DailyLight for First Day
                 double MaxDailyLight = PL.DailyLight;
-                for (DateTime LightTest = PSetup.FirstDay.Date.AddDays(1); LightTest <= PSetup.FirstDay.Date.AddDays(365); LightTest = LightTest.AddDays(1))
+                for (DateTime LightTest = PSetup.FirstDay.Val.AddDays(1); LightTest <= PSetup.FirstDay.Val.AddDays(365); LightTest = LightTest.AddDays(1))
                 {   // Get Maximum daily light for one year from simulation start point
                     PL.CalculateLoad(LightTest); // Set DailyLight for "LightTest" Day
                     if (MaxDailyLight < PL.DailyLight) MaxDailyLight = PL.DailyLight;
                 }
-                PL.CalculateLoad(PSetup.FirstDay);  // Reset DailyLight for First Day
+                PL.CalculateLoad(PSetup.FirstDay.Val);  // Reset DailyLight for First Day
 
                 for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
                 {
@@ -2204,7 +2174,7 @@ namespace AQUATOX.AQTSegment
             }
 
             PercentEmbedded = Location.Locale.BasePercentEmbed;
-            LastPctEmbedCalc = PSetup.FirstDay;
+            LastPctEmbedCalc = PSetup.FirstDay.Val;
 
             SOD = -99;
             YearNum_PrevStep = 0;
@@ -2457,7 +2427,7 @@ namespace AQUATOX.AQTSegment
             double WT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt);
             double YT = Math.Log(Q10) * (TMaxAdapt - TOptAdapt + 2.0);
             // NOT IN CEM MODELS
-            double XT = (Math.Pow(WT, 2.0) * Math.Pow(1.0 + Math.Sqrt(1.0 + 40.0 / YT), 2)) / 400.0;
+            double XT = (AQMath.Square(WT) * AQMath.Square(1.0 + Math.Sqrt(1.0 + 40.0 / YT))) / 400.0;
             double VT = (TMaxAdapt - Temp) / (TMaxAdapt - TOptAdapt);
             if (VT < 0.0) return 0.0;
             else return Math.Pow(VT, XT) * Math.Exp(XT * (1.0 - VT));     // unitless
@@ -2480,7 +2450,7 @@ namespace AQUATOX.AQTSegment
                 Salt = GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
             }
 
-            return 1.0 + (1E-3 * (28.14 - (0.0735 * Temp) - (0.00469 * Math.Pow(Temp, 2.0)) + (0.802 - (0.002 * Temp)) * (Salt - 35.0)));
+            return 1.0 + (1E-3 * (28.14 - (0.0735 * Temp) - (0.00469 * AQMath.Square(Temp)) + (0.802 - (0.002 * Temp)) * (Salt - 35.0)));
         }
 
         // mortality
@@ -3128,7 +3098,7 @@ namespace AQUATOX.AQTSegment
                 }
                 else
                 {
-                    ErrorOK = Math.Abs((SOD - SOD_test) / SOD) <= PSetup.RelativeError;
+                    ErrorOK = Math.Abs((SOD - SOD_test) / SOD) <= PSetup.RelativeError.Val;
                 }
                 IterCount++;
                 if (IterCount > 5000)
@@ -3675,7 +3645,7 @@ namespace AQUATOX.AQTSegment
         }
         public double CalculateLoad_asinh(double x)
         {
-            return Math.Log(Math.Sqrt(Math.Pow(x, 2) + 1) + x);
+            return Math.Log(Math.Sqrt(AQMath.Square(x) + 1) + x);
         }
 
         // pH calculation based on Marmorek et al., 1996 (modified Small and Sutton, 1986)
@@ -3692,11 +3662,11 @@ namespace AQUATOX.AQTSegment
             if (PDOM == null) DOM = 0;
             else DOM = PDOM.State;   // mg/L
 
-            pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (Math.Pow(T, 2))) * 0.92);
+            pH2CO3 = Math.Pow(10.0, -(6.57 - 0.0118 * T + 0.00012 * (AQMath.Square(T))) * 0.92);
             Alpha = pH2CO3 * CCO2 + pkw;
-            A = -Math.Log10(Math.Pow(Alpha, 0.5));
+            A = -Math.Log10(Math.Sqrt(Alpha));
             B = 1.0 / Math.Log(10.0);
-            C = 2 * (Math.Pow(Alpha, 0.5));
+            C = 2 * (Math.Sqrt(Alpha));
             try
             {
                 return A + B * CalculateLoad_asinh((Alkalinity - 5.1 * DOM * 0.5) / C);
@@ -3849,11 +3819,11 @@ namespace AQUATOX.AQTSegment
             DailyLight = light;
 
             HourlyLight = 0;
-            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays) && (LoadsRec.Loadings.Hourly))
+            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.Hourly))
                 { HourlyLight = light; }
 
             // 12-5-2016 correction to properly model hourly light time-series inputs
-            if ((!AQTSeg.PSetup.ModelTSDays) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
+            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
             {
                 // distribute daily loading over daylight hours
                 pp = AQTSeg.Photoperiod();
