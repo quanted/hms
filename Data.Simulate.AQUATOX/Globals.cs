@@ -245,7 +245,7 @@ namespace Globals
         {
             FirstDay.Name = "End of Model Simulation";
             LastDay.Name = "End of Model Simulation";
-            StoreStepSize.Name = "Data-storage Step Size (avg. period)";
+            StoreStepSize.Name = "Data-storage Step Size (averaging period)";
             StoreStepSize.Units = "hours or days";
             MinStepSize.Name = "Minimum Step Size";
             MinStepSize.Units = "days";

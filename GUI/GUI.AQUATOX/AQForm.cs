@@ -164,6 +164,9 @@ namespace GUI.AQUATOX
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
                 aQTS = Sim;
+                aQTS.AQTSeg.SetMemLocRec();
+                ParamsButton.Visible = true;
+                Diagenesis.Visible = aQTS.AQTSeg.Diagenesis_Included();
 
                 if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
                 else textBox1.Text = err;
@@ -189,7 +192,12 @@ namespace GUI.AQUATOX
 
         private void integrate_Click(object sender, EventArgs e)
         {
-
+            if (aQTS == null) textBox1.Text = "Simulation not Instantiated";
+            else
+            {
+                progressBar1.Visible = true;
+                Worker.RunWorkerAsync();
+            }
         }
 
 
@@ -291,48 +299,42 @@ namespace GUI.AQUATOX
             DisplaySVs();
         }
 
+
+
         private void SaveParams(object sender, EventArgs e)
         {
-            
+            if (aQTS == null) return;
 
-            Diagenesis_Rec DR = new Diagenesis_Rec();
-            DR.Setup(true);
-
-            //TParameter[] PA = new TParameter[] { DR.m1, DR.m2, DR.H1, DR.w2, DR.KappaNH3f, DR.KappaNH3s, DR.KappaNO3_1f, DR.KappaNO3_1s, 
-            //    DR.KappaNO3_2, DR.KappaCH4, DR.KM_NH3, DR.KM_O2_NH3, DR.KdNH3 };
-
-            //Param_Form PF = new Param_Form();
-            //PF.SuppressComment = true;
-            //PF.SuppressSymbol = true;
-
-            //TParameter[] PA2 = new TParameter[] { DR.KappaCH4, DR.KM_NH3, DR.KM_O2_NH3, DR.KdNH3 };
-
-            //Param_Form PF2 = new Param_Form();
-            //PF2.SuppressComment = false;
-            //PF2.SuppressSymbol = false;
-            //PF.EditParams(ref PA);
-            //PF2.EditParams(ref PA2);
-
-            TParameter[] PA3 = new TParameter[] {DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
-                DR.KappaCH4,DR.KM_NH3,DR.KM_O2_NH3,DR.KdNH3,DR.KdPO42,DR.dKDPO41f,DR.dKDPO41s,DR.O2critPO4,
-                DR.ThtaDd,DR.ThtaNH3,DR.ThtaNO3,DR.ThtaCH4,DR.SALTSW,DR.SALTND,DR.KappaH2Sd1,DR.KappaH2Sp1,DR.ThtaH2S,DR.KMHSO2,DR.KdH2S1,
-                DR.KdH2S2,new TSubheading("Mineralization"),DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
-                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,DR.ksi,DR.ThtaSi,DR.KMPSi,
-                DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   }; 
-            
-            Param_Form PF3 = new Param_Form();
-            PF3.EditParams(ref PA3);
-
-            Setup_Record SR = new Setup_Record();
-            SR.Setup(true);
+            Setup_Record SR = aQTS.AQTSeg.PSetup;
+            SR.Setup(false);
             TParameter[] SS = new TParameter[] {new TSubheading("Model Timestep Settings"), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
-                SR.ModelTSDays, new TSubheading("Output Storage Options"), SR.ModelTSDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
+                SR.ModelTSDays, new TSubheading("Output Storage Options"), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
                 new TSubheading("Biota Modeling Options"),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
                 new TSubheading("Chemical Options"),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
+
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS);
+            SetupForm.EditParams(ref SS, "Simulation Setup", true);
+
+        }
+
+        private void Diagensis(object sender, EventArgs e)
+        {
+            if (aQTS == null) return;
+            Diagenesis_Rec DR = aQTS.AQTSeg.Diagenesis_Params;
+            DR.Setup(false);
+
+            // Diagenesis Parameters setup window
+            TParameter[] PA3 = new TParameter[] { new TSubheading("Diagenesis Parameters"), DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
+                DR.KappaCH4,DR.KM_NH3,DR.KM_O2_NH3,DR.KdNH3,DR.KdPO42,DR.dKDPO41f,DR.dKDPO41s,DR.O2critPO4,
+                DR.ThtaDd,DR.ThtaNH3,DR.ThtaNO3,DR.ThtaCH4,DR.SALTSW,DR.SALTND,DR.KappaH2Sd1,DR.KappaH2Sp1,DR.ThtaH2S,DR.KMHSO2,DR.KdH2S1,
+                DR.KdH2S2,DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
+                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,DR.ksi,DR.ThtaSi,DR.KMPSi,
+                DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
+            
+            Param_Form PF3 = new Param_Form();
+            PF3.EditParams(ref PA3, "Diagenesis Parameters",false);
 
         }
     }

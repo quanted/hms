@@ -39,13 +39,14 @@ namespace GUI.AQUATOX
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.graphbutton = new System.Windows.Forms.Button();
             this.ParamsButton = new System.Windows.Forms.Button();
+            this.Diagenesis = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadJSON
             // 
             this.loadJSON.Location = new System.Drawing.Point(26, 21);
             this.loadJSON.Name = "loadJSON";
-            this.loadJSON.Size = new System.Drawing.Size(91, 28);
+            this.loadJSON.Size = new System.Drawing.Size(91, 24);
             this.loadJSON.TabIndex = 0;
             this.loadJSON.Text = "Load JSON";
             this.loadJSON.UseVisualStyleBackColor = true;
@@ -53,9 +54,9 @@ namespace GUI.AQUATOX
             // 
             // saveJSON
             // 
-            this.saveJSON.Location = new System.Drawing.Point(136, 21);
+            this.saveJSON.Location = new System.Drawing.Point(130, 21);
             this.saveJSON.Name = "saveJSON";
-            this.saveJSON.Size = new System.Drawing.Size(87, 28);
+            this.saveJSON.Size = new System.Drawing.Size(87, 24);
             this.saveJSON.TabIndex = 0;
             this.saveJSON.Text = "Save JSON";
             this.saveJSON.UseVisualStyleBackColor = true;
@@ -63,9 +64,9 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(240, 21);
+            this.integrate.Location = new System.Drawing.Point(26, 57);
             this.integrate.Name = "integrate";
-            this.integrate.Size = new System.Drawing.Size(85, 28);
+            this.integrate.Size = new System.Drawing.Size(85, 25);
             this.integrate.TabIndex = 1;
             this.integrate.Text = "Integrate";
             this.integrate.UseVisualStyleBackColor = true;
@@ -75,11 +76,11 @@ namespace GUI.AQUATOX
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(20, 62);
+            this.textBox1.Location = new System.Drawing.Point(20, 96);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(853, 175);
+            this.textBox1.Size = new System.Drawing.Size(831, 141);
             this.textBox1.TabIndex = 2;
             // 
             // progressBar1
@@ -89,7 +90,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(441, 21);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(433, 23);
+            this.progressBar1.Size = new System.Drawing.Size(411, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -97,9 +98,9 @@ namespace GUI.AQUATOX
             // 
             // graphbutton
             // 
-            this.graphbutton.Location = new System.Drawing.Point(348, 21);
+            this.graphbutton.Location = new System.Drawing.Point(133, 57);
             this.graphbutton.Name = "graphbutton";
-            this.graphbutton.Size = new System.Drawing.Size(76, 28);
+            this.graphbutton.Size = new System.Drawing.Size(85, 25);
             this.graphbutton.TabIndex = 1;
             this.graphbutton.Text = "Graph";
             this.graphbutton.UseVisualStyleBackColor = true;
@@ -107,17 +108,30 @@ namespace GUI.AQUATOX
             // 
             // ParamsButton
             // 
-            this.ParamsButton.Location = new System.Drawing.Point(20, 62);
+            this.ParamsButton.Location = new System.Drawing.Point(237, 20);
             this.ParamsButton.Name = "ParamsButton";
-            this.ParamsButton.Size = new System.Drawing.Size(97, 28);
+            this.ParamsButton.Size = new System.Drawing.Size(91, 25);
             this.ParamsButton.TabIndex = 0;
-            this.ParamsButton.Text = "Edit Params";
+            this.ParamsButton.Text = "Edit Setup";
             this.ParamsButton.UseVisualStyleBackColor = true;
+            this.ParamsButton.Visible = false;
             this.ParamsButton.Click += new System.EventHandler(this.SaveParams);
+            // 
+            // Diagenesis
+            // 
+            this.Diagenesis.Location = new System.Drawing.Point(237, 57);
+            this.Diagenesis.Name = "Diagenesis";
+            this.Diagenesis.Size = new System.Drawing.Size(91, 25);
+            this.Diagenesis.TabIndex = 0;
+            this.Diagenesis.Text = "Diagenesis";
+            this.Diagenesis.UseVisualStyleBackColor = true;
+            this.Diagenesis.Visible = false;
+            this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
             // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(893, 532);
+            this.ClientSize = new System.Drawing.Size(871, 577);
+            this.Controls.Add(this.Diagenesis);
             this.Controls.Add(this.ParamsButton);
             this.Controls.Add(this.graphbutton);
             this.Controls.Add(this.progressBar1);
@@ -141,6 +155,7 @@ namespace GUI.AQUATOX
         private ProgressBar progressBar1;
         private Button graphbutton;
         private Button ParamsButton;
+        private Button Diagenesis;
     }
 
 

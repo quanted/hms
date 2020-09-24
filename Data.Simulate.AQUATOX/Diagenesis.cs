@@ -89,6 +89,7 @@ namespace AQUATOX.Diagenesis
             m1.Name = "Solids concentration in layer 1";
             m2.Name = "Solids concentration in layer 2";
             H1.Name = "Thickness of sediment aerobic layer 1";
+            Dd.Name = "Diffusion coefficient for pore water";
             w2.Name = "Deep burial velocity";
             H2.Name = "Thickness of sediment anaerobic layer 2";
             KappaNH3f.Name = "Freshwater nitrification velocity";
@@ -145,107 +146,183 @@ namespace AQUATOX.Diagenesis
             LigninDetr.Name = "Fraction of suspended detritus that is non-reactive";
             Si_Diatom.Name = "Fraction of silica in diatoms (dry)";
 
-            if (DefaultVals) m1.Val = 0.5;
+            if (DefaultVals)
+            {
+                m1.Val = 0.5;
+                m1.Comment = "";
+                m2.Val = 0.5;
+                m2.Comment = "";
+                H1.Val = 0.001;
+                H1.Comment = "1 mm default, may be increased to speed computation time";
+                Dd.Val = 0.001;
+                Dd.Comment = "";
+                w2.Val = 0.0003;
+                w2.Comment = "(Q2K uses 0.000005)";
+                H2.Val = 0.1;
+                H2.Comment = "";
+                KappaNH3f.Val = 0.131;
+                KappaNH3f.Comment = "(Cerco and Cole suggest value of 0.2 m/d for freshwater)";
+                KappaNH3s.Val = 0.131;
+                KappaNH3s.Comment = "";
+                KappaNO3_1f.Val = 0.1;
+                KappaNO3_1f.Comment = "(Cerco and Cole suggest value of 0.3 m/d for freshwater)";
+                KappaNO3_1s.Val = 0.1;
+                KappaNO3_1s.Comment = "";
+                KappaNO3_2.Val = 0.25;
+                KappaNO3_2.Comment = "";
+                KappaCH4.Val = 0.7;
+                KappaCH4.Comment = "";
+                KM_NH3.Val = 0.728;
+                KM_NH3.Comment = "";
+                KM_O2_NH3.Val = 0.37;
+                KM_O2_NH3.Comment = "(DiToro suggests 0.74)";
+                KdNH3.Val = 1.0;
+                KdNH3.Comment = "";
+                KdPO42.Val = 100.0;
+                KdPO42.Comment = "(DiToro 2001 suggests value KdPO42=100 L/Kg)";
+                dKDPO41f.Val = 20.0;
+                dKDPO41f.Comment = "(Cerco and Cole 1995 suggest value dKdPO41f=3000)";
+                dKDPO41s.Val = 300.0;
+                dKDPO41s.Comment = "(DiToro 2001 suggests value dKdPO41s=300)";
+                O2critPO4.Val = 2.0;
+                O2critPO4.Comment = "";
+                ThtaDd.Val = 1.08;
+                ThtaDd.Comment = "";
+                ThtaNH3.Val = 1.123;
+                ThtaNH3.Comment = "";
+                ThtaNO3.Val = 1.08;
+                ThtaNO3.Comment = "";
+                ThtaCH4.Val = 1.079;
+                ThtaCH4.Comment = "";
+                SALTSW.Val = 1.0;
+                SALTSW.Comment = "";
+                SALTND.Val = 1.0;
+                SALTND.Comment = "";
+                KappaH2Sd1.Val = 0.2;
+                KappaH2Sd1.Comment = "";
+                KappaH2Sp1.Val = 0.4;
+                KappaH2Sp1.Comment = "";
+                ThtaH2S.Val = 1.08;
+                ThtaH2S.Comment = "";
+                KMHSO2.Val = 4.0;
+                KMHSO2.Comment = "";
+                KdH2S1.Val = 100.0;
+                KdH2S1.Comment = "";
+                KdH2S2.Val = 100.0;
+                KdH2S2.Comment = "";
+                kpon1.Val = 0.035;
+                kpon1.Comment = "";
+                kpon2.Val = 0.0018;
+                kpon2.Comment = "";
+                kpon3.Val = 0;
+                kpon3.Comment = "";
+                kpoc1.Val = 0.035;
+                kpoc1.Comment = "";
+                kpoc2.Val = 0.0018;
+                kpoc2.Comment = "";
+                kpoc3.Val = 0.0;
+                kpoc3.Comment = "";
+                kpop1.Val = 0.035;
+                kpop1.Comment = "";
+                kpop2.Val = 0.0018;
+                kpop2.Comment = "";
+                kpop3.Val = 0.0;
+                kpop3.Comment = "";
+                ThtaPON1.Val = 1.1;
+                ThtaPON1.Comment = "";
+                ThtaPON2.Val = 1.15;
+                ThtaPON2.Comment = "";
+                ThtaPON3.Val = 1.17;
+                ThtaPON3.Comment = "";
+                ThtaPOC1.Val = 1.1;
+                ThtaPOC1.Comment = "";
+                ThtaPOC2.Val = 1.15;
+                ThtaPOC2.Comment = "";
+                ThtaPOC3.Val = 1.17;
+                ThtaPOC3.Comment = "";
+                ThtaPOP1.Val = 1.1;
+                ThtaPOP1.Comment = "";
+                ThtaPOP2.Val = 1.15;
+                ThtaPOP2.Comment = "";
+                ThtaPOP3.Val = 1.17;
+                ThtaPOP3.Comment = "";
+                kBEN_STR.Val = 0.03;
+                kBEN_STR.Comment = "";
+                ksi.Val = 0.5;
+                ksi.Comment = "";
+                ThtaSi.Val = 1.1;
+                ThtaSi.Comment = "";
+                SiSat.Val = 40;
+                SiSat.Comment = "";
+                KMPSi.Val = 50000;
+                KMPSi.Comment = "";
+                KDSi2.Val = 100;
+                KDSi2.Comment = "";
+                DKDSi1.Val = 10;
+                DKDSi1.Comment = "";
+                O2critSi.Val = 1;
+                O2critSi.Comment = "";
+                LigninDetr.Val = 0.01;
+                LigninDetr.Comment = "default";
+                Si_Diatom.Val = 0.425;
+                Si_Diatom.Comment = "Horne (1994) states that silica makes up 25 to 60% of the dry weight of diatoms.";
+            }  // end default vals
+
             m1.Units = "kg/L";
-            m1.Comment = "";
             m1.Symbol = "m1";
 
-            if (DefaultVals) m2.Val = 0.5;
             m2.Units = "kg/L";
-            m2.Comment = "";
             m2.Symbol = "m2";
 
-            if (DefaultVals) H1.Val = 0.001;
             H1.Units = "m";
-            H1.Comment = "1 mm default, may be increased to speed computation time";
             H1.Symbol = "H1";
 
-            // {    with Dp do
-            // Begin
-            // Val :=  0.00012;
-            // Units := 'm2/d';  name := 'bioturbation particle mixing diffusion coefficient';
-            // Comment := '';
-            // Symbol := 'Dp';
-            // End;  // unused
-
-            if (DefaultVals) Dd.Val = 0.001;  
             Dd.Units = "m2/d";
-            Dd.Comment = "";
             Dd.Symbol = "Dd";
 
-            if (DefaultVals) w2.Val = 0.0003;
             w2.Units = "m/d";
-            w2.Comment = "(Q2K uses 0.000005)";
             w2.Symbol = "w2";
 
-            if (DefaultVals) H2.Val = 0.1;
             H2.Units = "m";
-            H2.Comment = "";
             H2.Symbol = "H2";
 
-            if (DefaultVals) KappaNH3f.Val = 0.131;
             KappaNH3f.Units = "m/d";
-            KappaNH3f.Comment = "(Cerco and Cole suggest value of 0.2 m/d for freshwater)";
             KappaNH3f.Symbol = "KappaNH3f";
 
-            if (DefaultVals) KappaNH3s.Val = 0.131;
             KappaNH3s.Units = "m/d";
-            KappaNH3s.Comment = "";
             KappaNH3s.Symbol = "KappaNH3s";
 
-            if (DefaultVals) KappaNO3_1f.Val = 0.1;
             KappaNO3_1f.Units = "m/d";
-            KappaNO3_1f.Comment = "(Cerco and Cole suggest value of 0.3 m/d for freshwater)";
             KappaNO3_1f.Symbol = "KappaNO3_1f";
 
-            if (DefaultVals) KappaNO3_1s.Val = 0.1;
             KappaNO3_1s.Units = "m/d";
-            KappaNO3_1s.Comment = "";
             KappaNO3_1s.Symbol = "KappaNO3_1s";
 
-            if (DefaultVals) KappaNO3_2.Val = 0.25;
             KappaNO3_2.Units = "m/d";
-            KappaNO3_2.Comment = "";
             KappaNO3_2.Symbol = "KappaNO3_2";
 
-            if (DefaultVals) KappaCH4.Val = 0.7;
             KappaCH4.Units = "m/d";
-            KappaCH4.Comment = "";
             KappaCH4.Symbol = "KappaCH4";
 
-            if (DefaultVals) KM_NH3.Val = 0.728;
             KM_NH3.Units = "mgN/L";
-            KM_NH3.Comment = "";
             KM_NH3.Symbol = "KM_NH3";
 
-            if (DefaultVals) KM_O2_NH3.Val = 0.37;
             KM_O2_NH3.Units = "mgO2/L";
-            KM_O2_NH3.Comment = "(DiToro suggests 0.74)";
             KM_O2_NH3.Symbol = "KM_O2_NH3";
 
-            if (DefaultVals) KdNH3.Val = 1.0;
             KdNH3.Units = "L/kg";
-            KdNH3.Comment = "";
             KdNH3.Symbol = "KdNH3";
 
-            if (DefaultVals) KdPO42.Val = 100.0;
             KdPO42.Units = "L/kg";
-            KdPO42.Comment = "(DiToro 2001 suggests value KdPO42=100 L/Kg)";
             KdPO42.Symbol = "KdPO42";
 
-            if (DefaultVals) dKDPO41f.Val = 20.0;
             dKDPO41f.Units = "unitless";
-            dKDPO41f.Comment = "(Cerco and Cole 1995 suggest value dKdPO41f=3000)";
             dKDPO41f.Symbol = "dKDPO41f";
 
-            if (DefaultVals) dKDPO41s.Val = 300.0;
             dKDPO41s.Units = "unitless";
-            dKDPO41s.Comment = "(DiToro 2001 suggests value dKdPO41s=300)";
             dKDPO41s.Symbol = "dKDPO41s";
 
-            if (DefaultVals) O2critPO4.Val = 2.0;
             O2critPO4.Units = "mgO2/L";
-            O2critPO4.Comment = "";
             O2critPO4.Symbol = "O2critPO4";
 
             ///Unused_ThtaDp).1.117;
@@ -253,161 +330,94 @@ namespace AQUATOX.Diagenesis
             //// Comment := '';
             //// Symbol := 'ThtaDp';
 
-            if (DefaultVals) ThtaDd.Val = 1.08;
             ThtaDd.Units = "";
-            ThtaDd.Comment = "";
             ThtaDd.Symbol = "ThtaDd";
 
-            if (DefaultVals) ThtaNH3.Val = 1.123;
             ThtaNH3.Units = "";
-            ThtaNH3.Comment = "";
             ThtaNH3.Symbol = "ThtaNH3";
 
-            if (DefaultVals) ThtaNO3.Val = 1.08;
             ThtaNO3.Units = "";
-            ThtaNO3.Comment = "";
             ThtaNO3.Symbol = "ThtaNO3";
 
-            if (DefaultVals) ThtaCH4.Val = 1.079;
             ThtaCH4.Units = "";
-            ThtaCH4.Comment = "";
             ThtaCH4.Symbol = "ThtaCH4";
 
-            if (DefaultVals) SALTSW.Val = 1.0;
             SALTSW.Units = "ppt";
-            SALTSW.Comment = "";
             SALTSW.Symbol = "SALTSW";
 
-            if (DefaultVals) SALTND.Val = 1.0;
             SALTND.Units = "ppt";
-            SALTND.Comment = "";
             SALTND.Symbol = "SALTND";
 
-            if (DefaultVals) KappaH2Sd1.Val = 0.2;
             KappaH2Sd1.Units = "m/d";
-            KappaH2Sd1.Comment = "";
             KappaH2Sd1.Symbol = "KappaH2Sd1";
 
-            if (DefaultVals) KappaH2Sp1.Val = 0.4;
             KappaH2Sp1.Units = "m/d";
-            KappaH2Sp1.Comment = "";
             KappaH2Sp1.Symbol = "KappaH2Sp1";
 
-            if (DefaultVals) ThtaH2S.Val = 1.08;
             ThtaH2S.Units = "unitless";
-            ThtaH2S.Comment = "";
             ThtaH2S.Symbol = "ThtaH2S";
 
-            if (DefaultVals) KMHSO2.Val = 4.0;
             KMHSO2.Units = "mgO2/L";
-            KMHSO2.Comment = "";
             KMHSO2.Symbol = "KMHSO2";
 
-            if (DefaultVals) KdH2S1.Val = 100.0;
             KdH2S1.Units = "L/kg";
-            KdH2S1.Comment = "";
             KdH2S1.Symbol = "KdH2S1";
 
-            if (DefaultVals) KdH2S2.Val = 100.0;
             KdH2S2.Units = "L/kg";
-            KdH2S2.Comment = "";
             KdH2S2.Symbol = "KdH2S2";
 
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpon1);
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpon2);
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpoc1);
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpoc2);
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpop1);
-            //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_frpop2);
-
-            if (DefaultVals) kpon1.Val = 0.035;
             kpon1.Units = "1/d";
-            kpon1.Comment = "";
             kpon1.Symbol = "kpon1";
 
-            if (DefaultVals) kpon2.Val = 0.0018;
             kpon2.Units = "1/d";
-            kpon2.Comment = "";
             kpon2.Symbol = "kpon2";
 
-            if (DefaultVals) kpon3.Val = 0;
             kpon3.Units = "1/d";
-            kpon3.Comment = "";
             kpon3.Symbol = "kpon3";
 
-            if (DefaultVals) kpoc1.Val = 0.035;
             kpoc1.Units = "1/d";
-            kpoc1.Comment = "";
             kpoc1.Symbol = "kpoc1";
 
-            if (DefaultVals) kpoc2.Val = 0.0018;
             kpoc2.Units = "1/d";
-            kpoc2.Comment = "";
             kpoc2.Symbol = "kpoc2";
 
-            if (DefaultVals) kpoc3.Val = 0.0;
             kpoc3.Units = "1/d";
-            kpoc3.Comment = "";
             kpoc3.Symbol = "kpoc3";
 
-            if (DefaultVals) kpop1.Val = 0.035;
             kpop1.Units = "1/d";
-            kpop1.Comment = "";
             kpop1.Symbol = "kpop1";
 
-            if (DefaultVals) kpop2.Val = 0.0018;
             kpop2.Units = "1/d";
-            kpop2.Comment = "";
             kpop2.Symbol = "kpop2";
 
-            if (DefaultVals) kpop3.Val = 0.0;
             kpop3.Units = "1/d";
-            kpop3.Comment = "";
             kpop3.Symbol = "kpop3";
 
-            if (DefaultVals) ThtaPON1.Val = 1.1;
             ThtaPON1.Units = "";
-            ThtaPON1.Comment = "";
             ThtaPON1.Symbol = "ThtaPON1";
 
-            if (DefaultVals) ThtaPON2.Val = 1.15;
             ThtaPON2.Units = "";
-            ThtaPON2.Comment = "";
             ThtaPON2.Symbol = "ThtaPON2";
 
-            if (DefaultVals) ThtaPON3.Val = 1.17;
             ThtaPON3.Units = "";
-            ThtaPON3.Comment = "";
             ThtaPON3.Symbol = "ThtaPON3";
 
-            if (DefaultVals) ThtaPOC1.Val = 1.1;
             ThtaPOC1.Units = "";
-            ThtaPOC1.Comment = "";
             ThtaPOC1.Symbol = "ThtaPOC1";
 
-            if (DefaultVals) ThtaPOC2.Val = 1.15;
             ThtaPOC2.Units = "";
-            ThtaPOC2.Comment = "";
             ThtaPOC2.Symbol = "ThtaPOC2";
 
-            if (DefaultVals) ThtaPOC3.Val = 1.17;
             ThtaPOC3.Units = "";
-            ThtaPOC3.Comment = "";
             ThtaPOC3.Symbol = "ThtaPOC3";
 
-            if (DefaultVals) ThtaPOP1.Val = 1.1;
             ThtaPOP1.Units = "";
-            ThtaPOP1.Comment = "";
             ThtaPOP1.Symbol = "ThtaPOP1";
 
-            if (DefaultVals) ThtaPOP2.Val = 1.15;
             ThtaPOP2.Units = "";
-            ThtaPOP2.Comment = "";
             ThtaPOP2.Symbol = "ThtaPOP2";
 
-            if (DefaultVals) ThtaPOP3.Val = 1.17;
             ThtaPOP3.Units = "";
-            ThtaPOP3.Comment = "";
             ThtaPOP3.Symbol = "ThtaPOP3";
 
             //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_POC1R);
@@ -419,9 +429,7 @@ namespace AQUATOX.Diagenesis
             //// Symbol := 'POC1R';
             //// End;
 
-            if (DefaultVals) kBEN_STR.Val = 0.03;
             kBEN_STR.Units = "1/day";
-            kBEN_STR.Comment = "";
             kBEN_STR.Symbol = "kBEN_STR";
 
             //SetDefaultDiagenesis_SetUnUsed(ref DR.Unused_KM_O2_Dp);
@@ -433,51 +441,33 @@ namespace AQUATOX.Diagenesis
             //// Symbol := 'KM_O2_Dp';
             //// End;
 
-            if (DefaultVals) ksi.Val = 0.5;
             ksi.Units = "1/day";
-            ksi.Comment = "";
             ksi.Symbol = "Ksi";
 
-            if (DefaultVals) ThtaSi.Val = 1.1;
             ThtaSi.Units = "unitless";
-            ThtaSi.Comment = "";
             ThtaSi.Symbol = "Thta_si";
 
-            if (DefaultVals) KMPSi.Val = 50000;
+
             KMPSi.Units = "g Si/m^3";
-            KMPSi.Comment = "";
             KMPSi.Symbol = "KMPSi";
 
-            if (DefaultVals) SiSat.Val = 40;
             SiSat.Units = "g Si/m^3";
-            SiSat.Comment = "";
             SiSat.Symbol = "SiSat";
 
-            if (DefaultVals) KDSi2.Val = 100;
             KDSi2.Units = "L/Kg";
-            KDSi2.Comment = "";
             KDSi2.Symbol = "KDSi2";
 
-            if (DefaultVals) DKDSi1.Val = 10;
             DKDSi1.Units = "unitless";
-            DKDSi1.Comment = "";
             DKDSi1.Symbol = "DKDSi1";
 
-            if (DefaultVals) O2critSi.Val = 1;
             O2critSi.Units = "mg/L";
-            O2critSi.Comment = "";
             O2critSi.Symbol = "O2critSi";
 
-            if (DefaultVals) LigninDetr.Val = 0.01;
             LigninDetr.Units = "unitless";
-            LigninDetr.Comment = "default";
             LigninDetr.Symbol = "LigninDetr";
 
-            if (DefaultVals) Si_Diatom.Val = 0.425;
             Si_Diatom.Units = "g/g dry";
-            Si_Diatom.Comment = "Horne (1994) states that silica makes up 25 to 60% of the dry weight of diatoms.";
             Si_Diatom.Symbol = "Si_Diatom";
-
         }
 
     } // end Diagenesis_Rec
