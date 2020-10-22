@@ -28,6 +28,7 @@ namespace GUI.AQUATOX
         TextBox[] references;
         DateTimePicker[] dateedits;
         CheckBox[] booledits;
+        ComboBox[] dropboxes;
 
         public Param_Form()
         {
@@ -46,9 +47,10 @@ namespace GUI.AQUATOX
                 booledits[index] = new CheckBox();
                 booledits[index].FlatAppearance.BorderSize = 2;
                 booledits[index].Location = new Point(30,top+12);
-                booledits[index].Size = new Size(360, 19);
+                booledits[index].Size = new Size(390, 19);
                 booledits[index].TabIndex = 0 + (2 * index);
                 booledits[index].Text = Param.Name;
+                new ToolTip().SetToolTip(booledits[index], Param.Name);
                 booledits[index].Checked = ((TBoolParam)Param).Val;
                 Controls.Add(booledits[index]);
                 return;
@@ -58,7 +60,7 @@ namespace GUI.AQUATOX
             if (Param is TSubheading)
             {
                 labels[index].Text = ((TSubheading)Param).Val;
-                labels[index].Location = new Point(12, top-4);
+                labels[index].Location = new Point(12, top-2);
                 labels[index].Size = new Size(360, 39);
                 labels[index].Font = new Font(labels[index].Font.FontFamily, 12, FontStyle.Bold);
                 labels[index].TextAlign = ContentAlignment.MiddleLeft;
@@ -69,12 +71,28 @@ namespace GUI.AQUATOX
             labels[index].Location = new Point(12, top);
             labels[index].Size = new Size(labelwidth, 39);
             labels[index].TextAlign = ContentAlignment.MiddleRight;
-            if (SuppressSymbol) textstr = Param.Name;
+            
+            if (SuppressSymbol||(Param is TStringParam)||(Param is TDropDownParam)) textstr = Param.Name;
                 else textstr = Param.Symbol + " (" + Param.Name + ")";
             labels[index].Text = textstr;
             new ToolTip().SetToolTip(labels[index], textstr);
             Controls.Add(labels[index]);
-            
+
+            if (Param is TDropDownParam)
+            {
+                dropboxes[index] = new ComboBox();
+                dropboxes[index].DropDownStyle = ComboBoxStyle.DropDown;
+                if (((TDropDownParam) Param).ValList != null)
+                 dropboxes[index].Items.AddRange(((TDropDownParam)Param).ValList);
+                dropboxes[index].Location = new Point(labelwidth + 22, top + 9);
+                dropboxes[index].Size = new Size(120, 23);
+                dropboxes[index].TabIndex = 0 + (2 * index);
+                dropboxes[index].Text = ((TDropDownParam)Param).Val;
+                Controls.Add(dropboxes[index]);
+                return;
+            }
+
+
             if (Param is TDateParam)
             {
                 dateedits[index] = new DateTimePicker();
@@ -90,9 +108,19 @@ namespace GUI.AQUATOX
 
             edits[index] = new TextBox();
             edits[index].Location = new Point(labelwidth + 22, top + 9);
-            edits[index].Size = new Size(90, 23);
             edits[index].TabIndex = 0 + (2 * index);
-            edits[index].Text = Param.Val.ToString();
+
+            if (Param is TStringParam)
+            {
+                edits[index].Size = new Size(200, 23);
+                edits[index].Text = ((TStringParam)Param).Val;
+            }
+            else
+                    {
+                        edits[index].Size = new Size(90, 23);
+                        edits[index].Text = Param.Val.ToString();
+                    }
+
             Controls.Add(edits[index]);
 
             units[index] = new Label();
@@ -102,7 +130,7 @@ namespace GUI.AQUATOX
             units[index].TextAlign = ContentAlignment.MiddleLeft;
             Controls.Add(units[index]);
 
-            if (!SuppressComment)
+            if (!(SuppressComment|| (Param is TStringParam) || (Param is TDropDownParam)))
                 {
                     references[index] = new TextBox();
                     references[index].Anchor = ((AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left)| AnchorStyles.Right)));
@@ -114,28 +142,37 @@ namespace GUI.AQUATOX
                  }
         }
 
-        public void ReadEdit(ref TParameter Param, int index)
+        public bool ReadEdit(ref TParameter Param, int index)
         {
             double f;
-            if (Param is TSubheading) return;
+            if (Param is TSubheading) return true;
             if (Param is TBoolParam) ((TBoolParam)Param).Val = booledits[index].Checked;
-            else if (Param is TDateParam) ((TDateParam)Param).Val = dateedits[index].Value; 
-            else if (double.TryParse(edits[index].Text, out f)) { Param.Val = f; };
+            else if (Param is TDateParam) ((TDateParam)Param).Val = dateedits[index].Value;
+            else if (Param is TStringParam) ((TStringParam)Param).Val = edits[index].Text;
+            else if (Param is TDropDownParam)
+            { ((TDropDownParam)Param).Val = dropboxes[index].Text; }
+            else if (double.TryParse(edits[index].Text, out f))
+            {
+                Param.Val = f;
+                labels[index].BackColor = DefaultBackColor;
+            }
+            else
+            {
+                labels[index].BackColor = Color.Yellow;
+                return false;
+            };
 
             if (!SuppressComment)
+             if (references[index]!=null)  // comments only for TParameter base object  
                 Param.Comment = references[index].Text;
+            return true;
 
         }
 
 
         private void Param_Form_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (UserCanceled) return;
-
-            for (int i = 0; i < nparam; i++)
-            {
-                ReadEdit(ref plist[i], i);
-            }
+        {   
+            
         }
 
         private void cancel_click(object sender, EventArgs e)
@@ -154,6 +191,25 @@ namespace GUI.AQUATOX
             this.Close();
         }
 
+        private void Param_Form_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (UserCanceled) return;
+
+            bool validinputs = true;
+            for (int i = 0; i < nparam; i++)
+            {
+                validinputs = ReadEdit(ref plist[i], i) && validinputs;
+            }
+
+            if (!validinputs)
+            {
+                MessageBox.Show("Please fix invalid inputs (highlighted) or select cancel", "Information",
+                   MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                   MessageBoxDefaultButton.Button1);
+                e.Cancel = true;
+            }
+        }
+
         public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense)
         {
             if (Dense) Spacing = 28; else Spacing = 36;
@@ -167,6 +223,7 @@ namespace GUI.AQUATOX
             references = new TextBox[nparam];
             dateedits = new DateTimePicker[nparam];
             booledits = new CheckBox[nparam];
+            dropboxes = new ComboBox[nparam];
 
             for (int i=0; i<nparam; i++)
             {

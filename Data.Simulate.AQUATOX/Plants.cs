@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using AQUATOX.OrgMatter;
@@ -11,114 +11,168 @@ using AQUATOX.Chemicals;
 namespace AQUATOX.Plants
 
 {
-
     public class PlantRecord
     {
-        public string PlantName;
-        public string PlantType;
-        public string ToxicityRecord;
-        public double EnteredLightSat;
-        public string XLightSat;
-        public double KPO4;
-        public string XKPO4;
-        public double KN;        // n half Sat
-        public string XKN;
-        public double KCarbon;
-        public string XKCarbon;
-        public double Q10;
-        public string XQ10;
-        public double TOpt;
-        public string XTOpt;
-        public double TMax;
-        public string XTMax;
-        public double TRef;
-        public string XTRef;
-        public double PMax;
-        public string XPMax;
-        public double KResp;
-        public string XKResp;
-        public double KMort;
-        public string XKMort;
-        public double EMort;
-        public string XEMort;
-        public double KSed;
-        public string XKSed;
-        public double ESed;
-        public string XESed;
-        public double P2OrgInit;
-        public string XP2Org;
-        public double N2OrgInit;
-        public string XN2Org;
-        public double ECoeffPhyto;
-        public string XECoeffPhyto;
-        public double CarryCapac;
-        public string XCarryCapac;
-        public double Red_Still_Water;
-        public string XRed_Still_Water;
-        public string Macrophyte_Type;
-        public double Macro_Drift;
-        public string Taxonomic_Type;
-        public double PrefRiffle;
-        public string XPrefRiffle;
-        public double PrefPool;
-        public string XPrefPool;
-        public double FCrit;
-        public string XFCrit;
-        public double Macro_VelMax;
-        public string XVelMax;
+        public TStringParam PlantName = new TStringParam();
+        public TStringParam ScientificName = new TStringParam();
+        public TDropDownParam PlantType = new TDropDownParam();
+        public TDropDownParam ToxicityRecord = new TDropDownParam();
+        public TBoolParam SurfaceFloating = new TBoolParam();
+        public TDropDownParam Macrophyte_Type = new TDropDownParam();
+        public TDropDownParam Taxonomic_Type = new TDropDownParam();
+        public TParameter EnteredLightSat = new TParameter();
+        public TBoolParam UseAdaptiveLight = new TBoolParam();
+        public TParameter MaxLightSat = new TParameter();
+        public TParameter MinLightSat = new TParameter();
+        public TParameter KPO4 = new TParameter();
+        public TParameter KN = new TParameter();
+        public TParameter KCarbon = new TParameter();
+        public TParameter Q10 = new TParameter();
+        public TParameter TOpt = new TParameter();
+        public TParameter TMax = new TParameter();
+        public TParameter TRef = new TParameter();
+        public TParameter PMax = new TParameter();
+        public TParameter KResp = new TParameter();
+        public TParameter Resp20 = new TParameter();
+        public TParameter KMort = new TParameter();
+        public TParameter EMort = new TParameter();
+        public TParameter P2OrgInit = new TParameter();
+        public TParameter N2OrgInit = new TParameter();
+        public TParameter ECoeffPhyto = new TParameter();
+        public TParameter Wet2Dry = new TParameter();
+        public TParameter PlantFracLipid = new TParameter();
+        public TParameter NHalfSatInternal = new TParameter();
+        public TParameter PHalfSatInternal = new TParameter();
+        public TParameter MaxNUptake = new TParameter();
+        public TParameter MaxPUptake = new TParameter();
+        public TParameter Min_N_Ratio = new TParameter();
+        public TParameter Min_P_Ratio = new TParameter();
+        public TParameter Plant_to_Chla = new TParameter();
+        public TParameter KSed1 = new TParameter();
+        public TParameter KSedTemp = new TParameter();
+        public TParameter KSedSalinity = new TParameter();
+        public TParameter ESed = new TParameter();
+        public TParameter CarryCapac = new TParameter();
+        public TParameter Macro_VelMax = new TParameter();
+        public TParameter Red_Still_Water = new TParameter();
+        public TParameter FCrit = new TParameter();
+        public TParameter PctSloughed = new TParameter();
+        public TParameter PrefRiffle = new TParameter();
+        public TParameter PrefPool = new TParameter();
+        public TParameter SalMin_Phot, SalMax_Phot, SalCoeff1_Phot, SalCoeff2_Phot = new TParameter();
+        public TParameter SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort = new TParameter();
 
-        public double KSedTemp;
-        public string XKSedTemp;
-        public double KSedSalinity;
-        public string XKSedSalinity;
+        public void Setup()
+        {
+            PlantName.Name = "Plant Name";
+            ScientificName.Name = "Scientific Name";
+            PlantType.Name = "Plant Type"; PlantType.ValList = new string[] { "Phytoplankton", "Periphyton", "Macrophytes", "Bryophytes" };
+            SurfaceFloating.Name = "Plant is Surface Floating"; SurfaceFloating.Name = "Is this plant surface floating?";
+            Macrophyte_Type.Name = "Macrophyte Type"; Macrophyte_Type.ValList = new string[] { "Benthic", "Rooted floating", "Free-floating" };
+            Taxonomic_Type.Name = "Taxonomic Group"; Taxonomic_Type.ValList = new string[] { "Diatoms", "Greens", "BlueGreens", "Other Algae", "Macrophyte" };
+            ToxicityRecord.Name = "Toxicity Record"; ToxicityRecord.ValList = new string[] { "Diatoms", "Greens", "BlueGreens", "Other Algae", "Macrophyte" };
+            EnteredLightSat.Symbol = "Saturating Light"; EnteredLightSat.Name = "Light saturation level for photosynthesis"; EnteredLightSat.Units = "ly/d";
+            UseAdaptiveLight.Symbol = "Use Adaptive Light"; UseAdaptiveLight.Name = "Use adaptive light construct?"; UseAdaptiveLight.Units = "Boolean";
+            MaxLightSat.Symbol = "Max. Saturating Light"; MaxLightSat.Name = "Maximum light saturation allowed from adaptive light equation"; MaxLightSat.Units = "ly/d";
+            MinLightSat.Symbol = "Min. Saturating Light"; MinLightSat.Name = "Minimum light saturation allowed from adaptive light equation"; MinLightSat.Units = "ly/d";
+            KPO4.Symbol = "P Half-saturation"; KPO4.Name = "Half-saturation constant for phosphorus"; KPO4.Units = "gP/m3";
+            KN.Symbol = "N Half-saturation"; KN.Name = "Half-saturation constant for nitrogen"; KN.Units = "gN/m3";
+            KCarbon.Symbol = "Inorg C Half-saturation"; KCarbon.Name = "Half-saturation constant for carbon"; KCarbon.Units = "gC/m3";
+            Q10.Symbol = "Temp Response Slope"; Q10.Name = "Slope or rate of change per 10°C temperature change"; Q10.Units = "Unitless";
+            TOpt.Symbol = "Optimum Temperature"; TOpt.Name = "Optimum temperature"; TOpt.Units = "°C";
+            TMax.Symbol = "Maximum Temperature"; TMax.Name = "Maximum temperature tolerated"; TMax.Units = "°C";
+            TRef.Symbol = "Min. Adaptation Temp"; TRef.Name = "Adaptation temperature below which there is no acclimation"; TRef.Units = "°C";
+            PMax.Symbol = "Max. Photosynthesis Rate"; PMax.Name = "Maximum photosynthetic rate"; PMax.Units = "1/d";
+            KResp.Symbol = "Photorespiration Coefficient"; KResp.Name = "Coefficient of proportionality between.  Excretion and photosynthesis at optimal light levels"; KResp.Units = "Unitless";
+            Resp20.Symbol = "Resp Rate at 20 deg. C"; Resp20.Name = @"Respiration rate at 20°C "; Resp20.Units = "g/g∙d";
+            KMort.Symbol = "Mortality Coefficient"; KMort.Name = "Intrinsic mortality rate"; KMort.Units = "g/g∙d";
+            EMort.Symbol = "Exponential Mort Coeff"; EMort.Name = "Exponential factor for suboptimal conditions"; EMort.Units = "g/g∙d";
+            P2OrgInit.Symbol = "P to Photosynthate"; P2OrgInit.Name = "Initial ratio of phosphate to organic matter for given species"; P2OrgInit.Units = "fraction dry weight";
+            N2OrgInit.Symbol = "N to Photosynthate"; N2OrgInit.Name = "Initial ratio of nitrate to organic matter for given species"; N2OrgInit.Units = "fraction dry weight";
+            ECoeffPhyto.Symbol = "Light Extinction"; ECoeffPhyto.Name = "Attenuation coefficient for given alga"; ECoeffPhyto.Units = "1/m-g/m3w";
+            Wet2Dry.Symbol = "Wet to Dry"; Wet2Dry.Name = "Ratio of wet weight to dry weight for given species"; Wet2Dry.Units = "Ratio";
+            PlantFracLipid.Symbol = "Fraction that is lipid"; PlantFracLipid.Name = "Fraction of lipid in organism"; PlantFracLipid.Units = "g lipid/g org. Wet";
+            NHalfSatInternal.Symbol = "N Half-saturation Internal"; NHalfSatInternal.Name = "half-saturation constant for intracellular nitrogen"; NHalfSatInternal.Units = "gN / gAFDW";
+            PHalfSatInternal.Symbol = "P Half-saturation Internal"; PHalfSatInternal.Name = "half-saturation constant for intracellular phosphorus"; PHalfSatInternal.Units = "gP / gAFDW";
+            MaxNUptake.Symbol = "N Max Uptake Rate"; MaxNUptake.Name = "the maximum uptake rate for nitrogen"; MaxNUptake.Units = "gN / gAFDW∙d";
+            MaxPUptake.Symbol = "P Max Uptake Rate"; MaxPUptake.Name = "the maximum uptake rate for phosphorus"; MaxPUptake.Units = "gP / gAFDW∙d";
+            Min_N_Ratio.Symbol = "Min N Ratio"; Min_N_Ratio.Name = "the ratio of intracellular nitrogen at which growth ceases  "; Min_N_Ratio.Units = "gN / gAFDW";
+            Min_P_Ratio.Symbol = "Min P Ratio"; Min_P_Ratio.Name = "the ratio of intracellular phosphorus at which growth ceases  "; Min_P_Ratio.Units = "gP / gAFDW";
+            Plant_to_Chla.Symbol = "Phytoplankton: C:Chlorophyll a"; Plant_to_Chla.Name = "ratio of carbon to chlorophyll a"; Plant_to_Chla.Units = "g carbon/g chl. a";
+            KSed1.Symbol = "Phytoplankton: Sedimentation Rate (KSed)"; KSed1.Name = "Intrinsic settling rate"; KSed1.Units = "m/d";
+            KSedTemp.Symbol = "Phytoplankton: Temperature of Obs. KSed"; KSedTemp.Name = "Reference temperature of water for calculating Nhytoplankton sinking rate"; KSedTemp.Units = "deg. C";
+            KSedSalinity.Symbol = "Phytoplankton: Salinity of Obs. KSed"; KSedSalinity.Name = "Reference salinity of water for calculating Nhytoplankton sinking rate"; KSedSalinity.Units = "‰";
+            ESed.Symbol = "Phytoplankton: Exp. Sedimentation Coeff"; ESed.Name = "Exponential settling coefficient"; ESed.Units = "Unitless";
+            CarryCapac.Symbol = "Macrophytes: Carrying Capacity"; CarryCapac.Name = "Macrophyte carrying capacity, converted to g/m3 and used to calculate washout of free-floating macrophytes "; CarryCapac.Units = "g/m2";
+            Macro_VelMax.Symbol = "Macrophytes: VelMax "; Macro_VelMax.Name = "Velocity at which total breakage occurs"; Macro_VelMax.Units = "cm/s ";
+            Red_Still_Water.Symbol = "Periphyton: Reduction in Still Water"; Red_Still_Water.Name = "Reduction in photosynthesis in absence of current"; Red_Still_Water.Units = "Unitless";
+            FCrit.Symbol = "Periphyton: Critical Force (FCrit)"; FCrit.Name = "Critical force necessary to dislodge given periphyton group"; FCrit.Units = "newtons (kg m/s2)";
+            PctSloughed.Symbol = "Percent Lost in Slough Event"; PctSloughed.Name = "Fraction of biomass lost at one time"; PctSloughed.Units = "%";
+            PrefRiffle.Symbol = "Percent in Riffle"; PrefRiffle.Name = "Percentage of biomass of plant that is in riffle, as opposed to run or pool"; PrefRiffle.Units = "%";
+            PrefPool.Symbol = "Percent in Pool"; PrefPool.Name = "Percentage of biomass of plant that is in pool, as opposed to run or riffle"; PrefPool.Units = "%";
+            SalMin_Phot.Symbol = "SalMin Photo."; SalMin_Phot.Name = "Minimum Salinity for Photosynthesis"; SalMin_Phot.Units = "‰";
+            SalMax_Phot.Symbol = "SalMax Photo."; SalMax_Phot.Name = "Maximum Salinity for Photosynthesis"; SalMax_Phot.Units = "‰";
+            SalCoeff1_Phot.Symbol = "SalCoeff1 Photo."; SalCoeff1_Phot.Name = "Salinity Coefficient 1 for Photosynthesis"; SalCoeff1_Phot.Units = "unitless";
+            SalCoeff2_Phot.Symbol = "SalCoeff2 Photo."; SalCoeff2_Phot.Name = "Salinity Coefficient 2 for Photosynthesis"; SalCoeff2_Phot.Units = "unitless";
+            SalMin_Mort.Symbol = "SalMin Mort."; SalMin_Mort.Name = "Minimum Salinity for Mortality"; SalMin_Mort.Units = "‰";
+            SalMax_Mort.Symbol = "SalMax Mort."; SalMax_Mort.Name = "Maximum Salinity for Mortality"; SalMax_Mort.Units = "‰";
+            SalCoeff1_Mort.Symbol = "SalCoeff1 Mort."; SalCoeff1_Mort.Name = "Salinity Coefficient 1 for Mortality"; SalCoeff1_Mort.Units = "unitless";
+            SalCoeff2_Mort.Symbol = "SalCoeff2 Mort."; SalCoeff2_Mort.Name = "Salinity Coefficient 2 for Mortality"; SalCoeff2_Mort.Units = "unitless";
+        }
 
-        // Salinity & Photosynthesis
-        // minimum salinity tolerance 0/00
-        // max salinity tolerance 0/00
-        public double Salmin_Phot;
-        public double SalMax_Phot;
-        public double Salcoeff1_Phot;
-        public double Salcoeff2_Phot;     // unitless
-        public string XSalinity_Phot;
-        // Salinity & Mortility
-        // minimum salinity tolerance 0/00
-        // max salinity tolerance 0/00
-        public double Salmin_Mort;
-        public double SalMax_Mort;
-        public double Salcoeff1_Mort;
-        public double Salcoeff2_Mort;        // unitless
-        public string XSalinity_Mort;
-        public double Wet2Dry;
-        public string XWet2Dry;
-        public double Resp20;
-        public string XResp20;
-        public double PctSloughed;
-        public string XPctSloughed;
-        public bool UseAdaptiveLight;
-        public double MaxLightSat;
-        public string XMaxLightSat;
-        public double MinLightSat;
-        public string XMinLightSat;
-        public string ScientificName;
-        public double PlantFracLipid;
-        public string XPlantFracLipid;
-        public bool SurfaceFloating;
-        public double NHalfSatInternal;
-        public string XNHalfSatInternal;
-        public double PHalfSatInternal;
-        public string XPHalfSatInternal;
-        public double MaxNUptake;
-        public string XMaxNUptake;
-        public double MaxPUptake;
-        public string XMaxPUptake;
-        public double Min_N_Ratio;
-        public string XMin_N_Ratio;
-        public double Min_P_Ratio;
-        public string XMin_P_Ratio;
-        public double Plant_to_Chla;
-        // g carbon/g chlorophyll
-        public string XPlant_to_Chla;
-    } // end PlantRecord
+        //public void ConvertPR(PlantRecord PR)
+        //{
+        //    PlantName.Val = PR.PlantName;
+        //    PlantType.Val = PR.PlantType;
+        //    PlantType.Val = "Test";
+        //    SurfaceFloating.Val = PR.SurfaceFloating;
+        //    Macrophyte_Type.Val = PR.Macrophyte_Type;
+        //    Taxonomic_Type.Val = PR.Taxonomic_Type;
+        //    ToxicityRecord.Val = PR.ToxicityRecord;
+        //    LightSat.Val = PR.EnteredLightSat; LightSat.Comment = PR.XLightSat;
+        //    UseAdaptiveLight.Val = PR.UseAdaptiveLight;
+        //    MaxLightSat.Val = PR.MaxLightSat; MaxLightSat.Comment = PR.XMaxLightSat;
+        //    MinLightSat.Val = PR.MinLightSat; MinLightSat.Comment = PR.XMinLightSat;
+        //    KPO4.Val = PR.KPO4; KPO4.Comment = PR.XKPO4;
+        //    KN.Val = PR.KN; KN.Comment = PR.XKN;
+        //    KCarbon.Val = PR.KCarbon; KCarbon.Comment = PR.XKCarbon;
+        //    Q10.Val = PR.Q10; Q10.Comment = PR.XQ10;
+        //    TOpt.Val = PR.TOpt; TOpt.Comment = PR.XTOpt;
+        //    TMax.Val = PR.TMax; TMax.Comment = PR.XTMax;
+        //    TRef.Val = PR.TRef; TRef.Comment = PR.XTRef;
+        //    PMax.Val = PR.PMax; PMax.Comment = PR.XPMax;
+        //    KResp.Val = PR.KResp; KResp.Comment = PR.XKResp;
+        //    Resp20.Val = PR.Resp20; Resp20.Comment = PR.XResp20;
+        //    KMort.Val = PR.KMort; KMort.Comment = PR.XKMort;
+        //    EMort.Val = PR.EMort; EMort.Comment = PR.XEMort;
+        //    P2OrgInit.Val = PR.P2OrgInit; P2OrgInit.Comment = PR.XP2Org;
+        //    N2OrgInit.Val = PR.N2OrgInit; N2OrgInit.Comment = PR.XN2Org;
+        //    ECoeffPhyto.Val = PR.ECoeffPhyto; ECoeffPhyto.Comment = PR.XECoeffPhyto;
+        //    Wet2Dry.Val = PR.Wet2Dry; Wet2Dry.Comment = PR.XWet2Dry;
+        //    PlantFracLipid.Val = PR.PlantFracLipid; PlantFracLipid.Comment = PR.XPlantFracLipid;
+        //    NHalfSatInternal.Val = PR.NHalfSatInternal; NHalfSatInternal.Comment = PR.XNHalfSatInternal;
+        //    PHalfSatInternal.Val = PR.PHalfSatInternal; PHalfSatInternal.Comment = PR.XPHalfSatInternal;
+        //    MaxNUptake.Val = PR.MaxNUptake; MaxNUptake.Comment = PR.XMaxNUptake;
+        //    MaxPUptake.Val = PR.MaxPUptake; MaxPUptake.Comment = PR.XMaxPUptake;
+        //    Min_N_Ratio.Val = PR.Min_N_Ratio; Min_N_Ratio.Comment = PR.XMin_N_Ratio;
+        //    Min_P_Ratio.Val = PR.Min_P_Ratio; Min_P_Ratio.Comment = PR.XMin_P_Ratio;
+        //    Plant_to_Chla.Val = PR.Plant_to_Chla; Plant_to_Chla.Comment = PR.XPlant_to_Chla;
+        //    KSed.Val = PR.KSed; KSed.Comment = PR.XKSed;
+        //    KSedTemp.Val = PR.KSedTemp; KSedTemp.Comment = PR.XKSedTemp;
+        //    KSedSalinity.Val = PR.KSedSalinity; KSedSalinity.Comment = PR.XKSedSalinity;
+        //    ESed.Val = PR.ESed; ESed.Comment = PR.XESed;
+        //    Carry_Capac.Val = PR.CarryCapac; Carry_Capac.Comment = PR.XCarryCapac;
+        //    Macro_VelMax.Val = PR.Macro_VelMax; Macro_VelMax.Comment = PR.XVelMax;
+        //    Red_Still_Water.Val = PR.Red_Still_Water; Red_Still_Water.Comment = PR.XRed_Still_Water;
+        //    FCrit.Val = PR.FCrit; FCrit.Comment = PR.XFCrit;
+        //    PctSloughed.Val = PR.PctSloughed; PctSloughed.Comment = PR.XPctSloughed;
+        //    PrefRiffle.Val = PR.PrefRiffle; PrefRiffle.Comment = PR.XPrefRiffle;
+        //    PrefPool.Val = PR.PrefPool; PrefPool.Comment = PR.XPrefPool;
+
+        //}
+    }
+
+
 
     public class TPlantToxRecord
     {
@@ -192,7 +246,7 @@ namespace AQUATOX.Plants
                 MortRates.OrgPois[ToxLoop] = 0;
             }
         }
-         
+
         public override void SetToInitCond()
         {
             Assign_Plant_Tox();
@@ -215,14 +269,14 @@ namespace AQUATOX.Plants
             double PrefRun;
             if (Location.SiteType != SiteTypes.Stream) return 1.0;
 
-            PctRun = 100 - AQTSeg.Location.Locale.PctRiffle - AQTSeg.Location.Locale.PctPool;
-            PrefRun = 100 - PAlgalRec.PrefRiffle - PAlgalRec.PrefPool;
+            PctRun = 100 - AQTSeg.Location.Locale.PctRiffle.Val - AQTSeg.Location.Locale.PctPool.Val;
+            PrefRun = 100 - PAlgalRec.PrefRiffle.Val - PAlgalRec.PrefPool.Val;
             HabitatAvail = 0;
-            if (PAlgalRec.PrefRiffle > 0)   HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100;  
+            if (PAlgalRec.PrefRiffle.Val > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle.Val / 100;
 
-            if (PAlgalRec.PrefPool > 0)     HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100;
+            if (PAlgalRec.PrefPool.Val > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool.Val / 100;
 
-            if (PrefRun > 0)                HabitatAvail = HabitatAvail + PctRun / 100;
+            if (PrefRun > 0) HabitatAvail = HabitatAvail + PctRun / 100;
 
             return HabitatAvail;
         }
@@ -240,17 +294,17 @@ namespace AQUATOX.Plants
                 StateUnit = "g/m2 dry";
                 LoadingUnit = "g/m2 dry";
             }
-            if (PAlgalRec.PlantType == "Macrophytes")
+            if (PAlgalRec.PlantType.Val == "Macrophytes")
             {
-                if (PAlgalRec.Macrophyte_Type == "benthic")
+                if (PAlgalRec.Macrophyte_Type.Val == "benthic")
                 {
                     MacroType = TMacroType.Benthic;
                 }
-                else if (PAlgalRec.Macrophyte_Type == "free-floating")
+                else if (PAlgalRec.Macrophyte_Type.Val == "free-floating")
                 {
                     MacroType = TMacroType.Freefloat;
                 }
-                else if (PAlgalRec.Macrophyte_Type == "rooted floating")
+                else if (PAlgalRec.Macrophyte_Type.Val == "rooted floating")
                 {
                     MacroType = TMacroType.Rootedfloat;
                 }
@@ -271,7 +325,7 @@ namespace AQUATOX.Plants
             TToxics TT;
             int ToxLoop;
             string DataName;
-            DataName = PAlgalRec.ToxicityRecord.ToLower();
+            DataName = PAlgalRec.ToxicityRecord.Val.ToLower();
 
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
@@ -289,7 +343,7 @@ namespace AQUATOX.Plants
                         }
                     }
                     if (FoundToxIndx == -1)
-                        throw new Exception("Error!  " + PAlgalRec.PlantName + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
+                        throw new Exception("Error!  " + PAlgalRec.PlantName.Val + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Plant toxicity data.  Study cannot be executed.");
 
                     PTR = TT.Chem_Plant_Tox[FoundToxIndx];
                     Plant_Tox[ToxLoop] = PTR;
@@ -301,7 +355,7 @@ namespace AQUATOX.Plants
 
         public override double WetToDry()
         {
-            return PAlgalRec.Wet2Dry;
+            return PAlgalRec.Wet2Dry.Val;
         }
 
         public double AggregateFracPhoto()
@@ -334,10 +388,10 @@ namespace AQUATOX.Plants
             double MacroArea;
             object PMacro;
             double Salteffect;
-            if ((PAlgalRec.PlantType == "Phytoplankton"))
+            if ((PAlgalRec.PlantType.Val == "Phytoplankton"))
             {
                 // g/cu m-d   1/d    unitless     g/cu m
-                Photosyn = PAlgalRec.PMax * PProdLimit() * State;
+                Photosyn = PAlgalRec.PMax.Val * PProdLimit() * State;
             }
             else
             {
@@ -359,10 +413,10 @@ namespace AQUATOX.Plants
                 Substrate = Location.FracLittoral(AQTSeg.ZEuphotic(), AQTSeg.Volume_Last_Step) + MacroArea;
                 PPL = PProdLimit();
                 Vel_Limit = VLimit();
-                Photosyn = PAlgalRec.PMax * PPL * Vel_Limit * State * Substrate;
+                Photosyn = PAlgalRec.PMax.Val * PPL * Vel_Limit * State * Substrate;
                 // g/m3-d      1/d   unitless  unitless   g/m3    unitless
             }
-            Salteffect = AQTSeg.SalEffect(PAlgalRec.Salmin_Phot, PAlgalRec.SalMax_Phot, PAlgalRec.Salcoeff1_Phot, PAlgalRec.Salcoeff2_Phot);
+            Salteffect = AQTSeg.SalEffect(PAlgalRec.SalMin_Phot.Val, PAlgalRec.SalMax_Phot.Val, PAlgalRec.SalCoeff1_Phot.Val, PAlgalRec.SalCoeff2_Phot.Val);
             return Photosyn * HabitatLimit * Salteffect;
             // with
         }
@@ -386,9 +440,9 @@ namespace AQUATOX.Plants
             }
             // RAP, 9/7/95, KResp should be mult. by LightStress - see Collins et al., 1985
             // + KStress
-            Excrete = Photosynthesis() * (PAlgalRec.KResp * LightStress);
+            Excrete = Photosynthesis() * (PAlgalRec.KResp.Val * LightStress);
             // g/cu m-d  g/cu m-d         unitless unitless     unitless
-            
+
             return Excrete;
         }
 
@@ -400,8 +454,8 @@ namespace AQUATOX.Plants
         {
             double Temp;
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            return PAlgalRec.Resp20 * Math.Pow(1.045, (Temp - 20)) * State;
-         // g/g day        // 1/C                  // deg C       // g/cu m
+            return PAlgalRec.Resp20.Val * Math.Pow(1.045, (Temp - 20)) * State;
+            // g/g day        // 1/C                  // deg C       // g/cu m
         }
 
         // algalrespire
@@ -419,22 +473,22 @@ namespace AQUATOX.Plants
             int ToxLoop;
             double WaterTemp;
             WaterTemp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            if (WaterTemp > PAlgalRec.TMax)
+            if (WaterTemp > PAlgalRec.TMax.Val)
             {
                 // 6-12-2006 Fixed Logic
                 ExcessT = 1.0;
             }
             else
             {
-                ExcessT = Math.Exp(WaterTemp - PAlgalRec.TMax) / 2.0;
+                ExcessT = Math.Exp(WaterTemp - PAlgalRec.TMax.Val) / 2.0;
             }
-            Stress = (1.0 - Math.Exp(-PAlgalRec.EMort * (1.0 - (NutrLimit() * LtLimit(AQTSeg.PSetup.ModelTSDays.Val)))));
+            Stress = (1.0 - Math.Exp(-PAlgalRec.EMort.Val * (1.0 - (NutrLimit() * LtLimit(AQTSeg.PSetup.ModelTSDays.Val)))));
             // emort is approximate maximum fraction killed
             // per day by nutrient and light limitation
-            Dead = (PAlgalRec.KMort + ExcessT + Stress) * State;
+            Dead = (PAlgalRec.KMort.Val + ExcessT + Stress) * State;
             // g/cu m-d               (        g/g-d           )   g/cu m
             //MortRates.OtherMort = Dead;
-            //MortRates.SaltMort = State * SalMort(PAlgalRec.Salmin_Mort, PAlgalRec.SalMax_Mort, PAlgalRec.Salcoeff1_Mort, PAlgalRec.Salcoeff2_Mort);
+            //MortRates.SaltMort = State * SalMort(PAlgalRec.SalMin_Mort.Val, PAlgalRec.SalMax_Mort.Val, PAlgalRec.SalCoeff1_Mort.Val, PAlgalRec.SalCoeff2_Mort.Val);
             //Dead = Dead + MortRates.SaltMort;
             // g/cu m-d                g/cu m-d
             Setup_Record SR = AQTSeg.PSetup;
@@ -445,11 +499,11 @@ namespace AQUATOX.Plants
                 FracPhoto[ToxLoop] = 1;
 
                 if (SR.UseExternalConcs.Val) TSV = AQTSeg.GetStatePointer(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
-                                    else TSV = AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol); 
+                else TSV = AQTSeg.GetStatePointer(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
                 if (TSV != null)
-                 if (TSV.State > 0)
+                    if (TSV.State > 0)
                     {
-                        Pois = Poisoned((T_SVType)ToxLoop + 2); 
+                        Pois = Poisoned((T_SVType)ToxLoop + 2);
                         MortRates.OrgPois[ToxLoop] = Pois;
                         Dead = Dead + Pois;
                     };
@@ -463,19 +517,19 @@ namespace AQUATOX.Plants
 
         public bool IsPeriphyton()
         {
-            return (PAlgalRec.PlantType == "Periphyton");
+            return (PAlgalRec.PlantType.Val == "Periphyton");
         }
 
         public bool IsPhytoplankton()
         {
-            return (PAlgalRec.PlantType == "Phytoplankton");
+            return (PAlgalRec.PlantType.Val == "Phytoplankton");
         }
 
         public bool IsLinkedPhyto()
         {
             AllVariables PLoop;
             TPlant PPeri;
-            if (PAlgalRec.PlantType != "Phytoplankton") return false;
+            if (PAlgalRec.PlantType.Val != "Phytoplankton") return false;
             for (PLoop = Consts.FirstAlgae; PLoop <= Consts.LastAlgae; PLoop++)
             {
                 PPeri = AQTSeg.GetStatePointer(PLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
@@ -524,7 +578,7 @@ namespace AQUATOX.Plants
                 return PPhyto.Sedimentation() / LinkCount;
             else
                 return PPhyto.Sedimentation() * (State / LinkMass);
-                               // mg/L          // mg/L
+            // mg/L          // mg/L
         }
 
         // (**************************************)
@@ -544,18 +598,18 @@ namespace AQUATOX.Plants
             {
                 return 0;
             }
-            if (PAlgalRec.SurfaceFloating)
+            if (PAlgalRec.SurfaceFloating.Val)
             {
                 return 0;
             }
-            SedAccel = Math.Exp(PAlgalRec.ESed * (1.0 - PProdLimit()));
+            SedAccel = Math.Exp(PAlgalRec.ESed.Val * (1.0 - PProdLimit()));
             // Collins & Park, 1989
-            DensFactor = AQTSeg.DensityFactor(PAlgalRec.KSedTemp, PAlgalRec.KSedSalinity);
+            DensFactor = AQTSeg.DensityFactor(PAlgalRec.KSedTemp.Val, PAlgalRec.KSedSalinity.Val);
 
             //if (AQTSeg.EstuarySegment)
             //{
             //    // g/cu m-d   m/d    m     unitless   unitless   g/cu m
-            //    Sink = PAlgalRec.KSed / Thick * DensFactor * SedAccel * State;
+            //    Sink = PAlgalRec.KSed.Val / Thick * DensFactor * SedAccel * State;
             //}
             //else
             {
@@ -563,7 +617,7 @@ namespace AQUATOX.Plants
                 if (AQTSeg.MeanDischarge < Consts.Tiny)
                 {
                     // g/cu m-d   m/d    m      unitless   g/cu m    unitless
-                    Sink = PAlgalRec.KSed / Thick * SedAccel * State * DensFactor;
+                    Sink = PAlgalRec.KSed1.Val / Thick * SedAccel * State * DensFactor;
                 }
                 else
                 {
@@ -583,21 +637,21 @@ namespace AQUATOX.Plants
                         // No SedModel Included
                         if (Location.TotDischarge > AQTSeg.MeanDischarge)
                             Decel = AQTSeg.MeanDischarge / (Location.TotDischarge);
-                                           // cu m/d                    cu m/d
+                        // cu m/d                    cu m/d
                         else
                             Decel = 1;
                     }
-                    Sink = PAlgalRec.KSed / Thick * SedAccel * State * Decel * DensFactor;
+                    Sink = PAlgalRec.KSed1.Val / Thick * SedAccel * State * Decel * DensFactor;
                 }
                 // MeanDisch > Tiny
 
                 //if (!AQTSeg.SedModelIncluded())
                 //{
                 //    // m/sec
-                    if ((AQTSeg.GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) >= 2.5) && (Thick <= 1.0))
-                    {
-                        Sink = 0.0;                  // should be a power fn. of wind & depth
-                    }
+                if ((AQTSeg.GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) >= 2.5) && (Thick <= 1.0))
+                {
+                    Sink = 0.0;                  // should be a power fn. of wind & depth
+                }
                 // }
 
             }  // if Not EstuarySegment
@@ -621,7 +675,7 @@ namespace AQUATOX.Plants
             const double MaxToxSlough = 0.1;
             // 10% per day
             Dislodge = 0;
-            if ((!IsPhytoplankton())&&(Plant_Tox!= null))
+            if ((!IsPhytoplankton()) && (Plant_Tox != null))
             {
                 for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
                 {
@@ -629,7 +683,7 @@ namespace AQUATOX.Plants
                     {
                         if (Plant_Tox[ToxLoop].EC50_dislodge > Consts.Tiny)
                         {
-                            ToxLevel = AQTSeg.GetState(AllVariables.H2OTox, T_SVType.OrgTox1+ToxLoop, T_SVLayer.WaterCol);
+                            ToxLevel = AQTSeg.GetState(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol);
                             // evaluates to -1 if tox not in study
                             if (ToxLevel > 0)
                             {      // Toxicant Induced Dislodge
@@ -646,7 +700,7 @@ namespace AQUATOX.Plants
                 Dislodge = State;
             }
             return Dislodge;
-         // g/m3 d   g/m3 d
+            // g/m3 d   g/m3 d
         }
 
         public double CalcSlough()
@@ -670,8 +724,8 @@ namespace AQUATOX.Plants
 
             Nutr = NutrLim_Step;
             LtL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
-            Suboptimal = Nutr * LtL * AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax) * 20;        // 5 to 20 RAP 1-24-05
-            if (Suboptimal > 1)  Suboptimal = 1;
+            Suboptimal = Nutr * LtL * AQTSeg.TCorr(PAlgalRec.Q10.Val, PAlgalRec.TRef.Val, PAlgalRec.TOpt.Val, PAlgalRec.TMax.Val) * 20;        // 5 to 20 RAP 1-24-05
+            if (Suboptimal > 1) Suboptimal = 1;
 
             // uses nutrlimit calculated at the beginning of this time-step
             if ((!IsPhytoplankton()))
@@ -681,17 +735,17 @@ namespace AQUATOX.Plants
                 // mm3/mm2
                 Biovol_Dia = State / 2.08E-9 * AQTSeg.DynamicZMean();
                 // mm3/mm2
-                AvgVel = AQTSeg.Velocity(PAlgalRec.PrefRiffle, PAlgalRec.PrefPool, true) * 0.01;   // Avg. Velocity exposure of this organism
-          //    {m/s}            {cm/s}                                           {avg}   {m/cm}
+                AvgVel = AQTSeg.Velocity(PAlgalRec.PrefRiffle.Val, PAlgalRec.PrefPool.Val, true) * 0.01;   // Avg. Velocity exposure of this organism
+                                                                                                           //    {m/s}            {cm/s}                                           {avg}   {m/cm}
 
-                DailyVel = AQTSeg.Velocity(PAlgalRec.PrefRiffle, PAlgalRec.PrefPool, false) * 0.01;  // Avg. Velocity exposure of this organism
-          //    {m/s}            {cm/s}                                           {avg}   {m/cm}
+                DailyVel = AQTSeg.Velocity(PAlgalRec.PrefRiffle.Val, PAlgalRec.PrefPool.Val, false) * 0.01;  // Avg. Velocity exposure of this organism
+                                                                                                             //    {m/s}            {cm/s}                                           {avg}   {m/cm}
 
                 if (!(Location.SiteType == SiteTypes.Stream))
                 {
                     AvgVel = 0.003;  // based on KCap of 200 g/m2
                 }
-                
+
                 Adaptation = Math.Pow(AvgVel, 2.0) / 0.006634;
                 // RAP 1/20/2005
                 if (!SloughEvent) // check to see if sloughevent should be initiated
@@ -699,14 +753,14 @@ namespace AQUATOX.Plants
                     if ((NState >= Consts.FirstDiatom) && (NState <= Consts.LastDiatom))
                     {
                         // Periphyton -- Diatoms
-                        DragForce = Rho * DragCoeff * AQMath.Square(DailyVel) * Math.Pow(Biovol_Dia * UnitArea, (2.0/3.0)) * 1E-6;
+                        DragForce = Rho * DragCoeff * AQMath.Square(DailyVel) * Math.Pow(Biovol_Dia * UnitArea, (2.0 / 3.0)) * 1E-6;
                         // kg m/s2  kg/m3 unitless                m/s                     mm3/mm2       mm2                 m2/mm2
                         // 3/19/2013 fcrit of zero means no scour
 
-                        if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
+                        if ((Adaptation > 0) && (PAlgalRec.FCrit.Val > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit.Val * Adaptation))
                         {   // frac living
                             SloughEvent = true;
-                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed.Val / 100.0));
 
                             //AQTSeg.ProgData.SloughDia = true;  update progress bar, N/A for HMS
                             //AQTSeg.ProgData.PeriVis = true;
@@ -720,10 +774,10 @@ namespace AQUATOX.Plants
                         // kg m/s2  kg/m3 unitless                m/s                      mm3/mm2       mm2             m2/mm2
 
                         // 3/19/2013 fcrit of zero means no scour
-                        if ((Adaptation > 0) && (PAlgalRec.FCrit > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit * Adaptation))
+                        if ((Adaptation > 0) && (PAlgalRec.FCrit.Val > Consts.Tiny) && (State > MINBIOMASS) && (DragForce > Suboptimal * PAlgalRec.FCrit.Val * Adaptation))
                         {
                             SloughEvent = true;
-                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed / 100.0));
+                            SloughLevel = State * (1.0 - (PAlgalRec.PctSloughed.Val / 100.0));
 
                             //AQTSeg.ProgData.PeriVis = true;   Progress Dialog Update, N/A HMS
                             //if (NState >= Consts.FirstGreens && NState <= Consts.LastGreens)
@@ -757,14 +811,14 @@ namespace AQUATOX.Plants
             {
                 // Phytoplankton Code
                 Wash = Disch / SegVolume * State;
-         // (g/cu m-d) (cu m/d) (cu m)  (g/cu m)
+                // (g/cu m-d) (cu m/d) (cu m)  (g/cu m)
                 if (Disch < Consts.Tiny) ResidenceTime = 999999;
                 else ResidenceTime = SegVolume / Disch * PhytoResFactor();
-                       // days      // cu m   // cu m/ d    // unitless
+                // days      // cu m   // cu m/ d    // unitless
             }
             // end Phytoplankton Code
 
-//             WashoutStep[AQTSeg.DerivStep] = Wash * AQTSeg.SegVol();
+            //             WashoutStep[AQTSeg.DerivStep] = Wash * AQTSeg.SegVol();
             return Wash;
             // g/m3 d
 
@@ -774,8 +828,8 @@ namespace AQUATOX.Plants
         public double KCAP_in_g_m3()
         {
             // note, deeper sites have lower g/m3 KCAP
-            return PAlgalRec.CarryCapac * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;   //  11/3/2014 replaced static zmean with more consistent conversion
-        //   {g/m3}              {g/m2}                      {m2}               {m3}
+            return PAlgalRec.CarryCapac.Val * Location.Locale.SurfArea.Val / AQTSeg.Volume_Last_Step;   //  11/3/2014 replaced static zmean with more consistent conversion
+                                                                                                    //   {g/m3}              {g/m2}                      {m2}               {m3}
 
 
             // Stratified and linked-mode code removed
@@ -840,22 +894,22 @@ namespace AQUATOX.Plants
                 if (n[1] == 0) LightHist[1] = LightHist[0];
                 if (n[2] == 0) LightHist[2] = LightHist[1];
             } // end LightHistory function
-                                 
-            if (!PAlgalRec.UseAdaptiveLight)  return PAlgalRec.EnteredLightSat;
+
+            if (!PAlgalRec.UseAdaptiveLight.Val) return PAlgalRec.EnteredLightSat.Val;
             LightHistory();
             LightSatCalc = (0.7 * LightHist[0] + 0.2 * LightHist[1] + 0.1 * LightHist[2]);    // 8-20-07
 
             // ensure calculation is within limits, 8-28-2007
-            if (LightSatCalc < PAlgalRec.MinLightSat) LightSatCalc = PAlgalRec.MinLightSat;
-            if (LightSatCalc > PAlgalRec.MaxLightSat) LightSatCalc = PAlgalRec.MaxLightSat;
+            if (LightSatCalc < PAlgalRec.MinLightSat.Val) LightSatCalc = PAlgalRec.MinLightSat.Val;
+            if (LightSatCalc > PAlgalRec.MaxLightSat.Val) LightSatCalc = PAlgalRec.MaxLightSat.Val;
 
             return LightSatCalc;
         }
 
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        
+
         public double LtAtTop(bool DailyStep)  // light limitation at the top of the water column
-            // for HMS implementation, vertical stratification not implemented, hypolimnion code was removed
+                                               // for HMS implementation, vertical stratification not implemented, hypolimnion code was removed
         {
             double LightVal, LT, EX;
             double DTop;
@@ -871,17 +925,17 @@ namespace AQUATOX.Plants
             // only half is in spectrum used for photsyn. - Edmondson '56
             PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
 
-            if (DailyStep) LightVal = PL.DailyLight;  
-                else LightVal = PL.HourlyLight;
+            if (DailyStep) LightVal = PL.DailyLight;
+            else LightVal = PL.HourlyLight;
 
             if (DailyStep) LightCorr = 1.0;
-                else LightCorr = 1.25;
-                
+            else LightCorr = 1.25;
+
             LT = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * DTop));
             // unitless      ly/d                  ly/d                     1/m  m
 
             if (LT < -30) LT = 0;  // Prevent a Crash, JSC
-                else LT = Math.Exp(LT);
+            else LT = Math.Exp(LT);
 
             return LT;
         }         // ltatTop
@@ -895,7 +949,7 @@ namespace AQUATOX.Plants
             double LightCorr;
             bool Incl_Periphyton;
             TLight PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
-                        
+
             Incl_Periphyton = !(IsPhytoplankton());
             EX = AQTSeg.Extinct(Incl_Periphyton, true, true, false, 0);
             DBott = DepthBottom();
@@ -915,8 +969,8 @@ namespace AQUATOX.Plants
 
                 if (LD < -30) LD = 0;    // Prevent a Crash, JSC
                 else LD = Math.Exp(LD);
-            } 
-            
+            }
+
             return LD;
         }  // ltatdepth
 
@@ -925,7 +979,7 @@ namespace AQUATOX.Plants
 
             double DB;
 
-            if (AQTSeg.Location.Locale.UseBathymetry) DB = AQTSeg.Location.Locale.ZMax;
+            if (AQTSeg.Location.Locale.UseBathymetry.Val) DB = AQTSeg.Location.Locale.ZMax.Val;
             else DB = AQTSeg.DynamicZMean();
 
             if ((IsPhytoplankton()))
@@ -934,15 +988,15 @@ namespace AQUATOX.Plants
                 {
                     DB = 2.0;  // algae in top 2 m under ice
                 }
-                
+
                 // Account for buoyancy due to gas vacuoles
-                if ((PAlgalRec.SurfaceFloating) && (DB > 1.0))    // Removed 0.2, 1-13-2005 RAP, 2-2007                     // 3/9/2012 surfacefloating variable
+                if ((PAlgalRec.SurfaceFloating.Val) && (DB > 1.0))    // Removed 0.2, 1-13-2005 RAP, 2-2007                     // 3/9/2012 surfacefloating variable
                 {
                     if ((NutrLimit() > 0.25))  // healthy
                     {
-                        
+
                         if ((AQTSeg.GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) < 3))
-                                                                // wind < 3.0 m/sec, otherwise Langmuir circ.
+                        // wind < 3.0 m/sec, otherwise Langmuir circ.
                         {
                             DB = 0.1;                             // RAP 1-12-2005
                         }
@@ -979,12 +1033,12 @@ namespace AQUATOX.Plants
                 {
                     if ((PPhyt.IsPeriphyton()))
                     {
-                        PeriExtinction = PeriExtinction + PPhyt.PAlgalRec.ECoeffPhyto * AQTSeg.GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
+                        PeriExtinction = PeriExtinction + PPhyt.PAlgalRec.ECoeffPhyto.Val * AQTSeg.GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
                     }
                 }
             }
             return Math.Exp(-PeriExtinction);
-                               // 1/m
+            // 1/m
         }
 
         // (*****************************************)
@@ -1005,10 +1059,10 @@ namespace AQUATOX.Plants
             // -------------------------------------------------
             double PeriExt;
             bool Inhibition;
-//            bool WellMixedLinked;
+            //            bool WellMixedLinked;
             double Const_a;
             LL = 1;
-            if ((PAlgalRec.PlantType == "Macrophytes") && (MacroType == TMacroType.Freefloat))  return LL;  
+            if ((PAlgalRec.PlantType.Val == "Macrophytes") && (MacroType == TMacroType.Freefloat)) return LL;
 
             DBot = DepthBottom();
             DT = 0;  // HMS no vertical stratification
@@ -1025,7 +1079,7 @@ namespace AQUATOX.Plants
                 LD = LtAtDepth(DailyStep);
                 P = AQTSeg.Photoperiod();
 
-                E = AQTSeg.Extinct(false, true, true, PAlgalRec.SurfaceFloating,  0);
+                E = AQTSeg.Extinct(false, true, true, PAlgalRec.SurfaceFloating.Val, 0);
                 // periphyton are not included because "PeriphytExt" handles periphyton extinction
 
 
@@ -1090,20 +1144,20 @@ namespace AQUATOX.Plants
                 if (P2O > Consts.Tiny)
                 {
                     // Internal nutrientsP Limit
-                    PLimit = (1.0 - (PAlgalRec.Min_P_Ratio / P2O));
+                    PLimit = (1.0 - (PAlgalRec.Min_P_Ratio.Val / P2O));
                 }
                 else PLimit = 0.0;
             }
             else
             {
                 // external nutrients
-                if ((AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4) == 0)
+                if ((AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4.Val) == 0)
                 {
                     PLimit = 1.0;
                 }
                 else
                 {
-                    PLimit = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) / (AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4);
+                    PLimit = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) / (AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol) + PAlgalRec.KPO4.Val);
                 } // unitless =                                                       P/PO4                        gPO4/cu m                                                         P/PO4            gPO4/cu m            gP/cu m
 
             }  // external nutrients
@@ -1120,8 +1174,8 @@ namespace AQUATOX.Plants
         {
             // Is this plant precipitating CaCO3?
             // JSC, From 8.25 to 7.5 on 7/2/2009
-            return (AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) >= 7.5) && 
-                !((PAlgalRec.PlantType == "Bryophytes") || (NState == AllVariables.OtherAlg1) || (NState == AllVariables.OtherAlg2));
+            return (AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) >= 7.5) &&
+                !((PAlgalRec.PlantType.Val == "Bryophytes") || (NState == AllVariables.OtherAlg1) || (NState == AllVariables.OtherAlg2));
             // subset of plants, all plants except Bryophytes and "Other Algae" compartments
         }
 
@@ -1148,8 +1202,8 @@ namespace AQUATOX.Plants
             }
             else
             {
-                // RAP, 9/9/95 replaced constant KCO2 with PAlgalRec^.KCarbon
-                CLimit = C2CO2 * CDioxide / (C2CO2 * CDioxide + PAlgalRec.KCarbon);
+                // RAP, 9/9/95 replaced constant KCO2 with PAlgalRec^.KCarbon.Val
+                CLimit = C2CO2 * CDioxide / (C2CO2 * CDioxide + PAlgalRec.KCarbon.Val);
             }
             // unitless C/CO2   gCO2/cu m C/CO2        gCO2/cu m      gC/cu m
             return CLimit;
@@ -1171,13 +1225,13 @@ namespace AQUATOX.Plants
             {
                 if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)
                     return AQTSeg.GetState(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) / State * 1e-3;
-                 // (g/g OM)   =   (ug N /L)                                             /(mg OM/L)*(mg/ug)
+                // (g/g OM)   =   (ug N /L)                                             /(mg OM/L)*(mg/ug)
 
-                else return PAlgalRec.N2OrgInit;     // rooted macrophyte
+                else return PAlgalRec.N2OrgInit.Val;     // rooted macrophyte
             }
             else
             {
-                return PAlgalRec.N2OrgInit;
+                return PAlgalRec.N2OrgInit.Val;
             }
         }
 
@@ -1192,11 +1246,11 @@ namespace AQUATOX.Plants
 
                 }
                 else
-                    return PAlgalRec.P2OrgInit;  // rooted macrophyte
+                    return PAlgalRec.P2OrgInit.Val;  // rooted macrophyte
             }
             else
             {
-                return PAlgalRec.P2OrgInit;
+                return PAlgalRec.P2OrgInit.Val;
             }
         }
 
@@ -1207,16 +1261,16 @@ namespace AQUATOX.Plants
             double NtoP;
 
             if (!(NState >= Consts.FirstBlGreen && NState <= Consts.LastBlGreen)) return false;    // IsFixingN true for cyanobacteria only
-            
+
             if (AQTSeg.GetStatePointer(NState, T_SVType.NIntrnl, T_SVLayer.WaterCol) != null)      // internal nutrients option 3/18/2014
-                return (N_2_Org() < 0.5 * PAlgalRec.NHalfSatInternal);
-            
+                return (N_2_Org() < 0.5 * PAlgalRec.NHalfSatInternal.Val);
+
             if (!AQTSeg.PSetup.NFix_UseRatio.Val)  // added option 3/19/2010
             {
                 Nitrogen = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
-                return (Nitrogen < 0.5 * PAlgalRec.KN);   // Official "Release 3" code
+                return (Nitrogen < 0.5 * PAlgalRec.KN.Val);   // Official "Release 3" code
             }
-            else                 
+            else
             {
                 // 12-16-2009 N Fixing Option
                 InorgP = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
@@ -1224,9 +1278,9 @@ namespace AQUATOX.Plants
                 if (InorgP > Consts.Tiny)
                 {
                     NtoP = (AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol)) / InorgP;
-                    if ((NtoP < AQTSeg.PSetup.NtoPRatio.Val))  return true; // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
+                    if ((NtoP < AQTSeg.PSetup.NtoPRatio.Val)) return true; // If inorganic N over Inorganic P ratio is less than NtoPRatio (Default of 7) then cyanobacteria fix nitrogen
                 }
-                
+
             }
             return false;
         }
@@ -1253,24 +1307,24 @@ namespace AQUATOX.Plants
                 if (N2O > Consts.Tiny)
                 {
                     // Internal nutrients N Limit
-                    NL = (1.0 - (PAlgalRec.Min_N_Ratio / N2O));
+                    NL = (1.0 - (PAlgalRec.Min_N_Ratio.Val / N2O));
                 }
                 else
                 {
                     NL = 0.0;
                 }
-                // with PAlgalRec
+                // with PAlgalRec.Val
             }
             else
             {
                 // external nutrients
-                if ((Nitrogen + PAlgalRec.KN) == 0)
+                if ((Nitrogen + PAlgalRec.KN.Val) == 0)
                 {
                     NL = 1;
                 }
                 else
                 {
-                    NL = Nitrogen / (Nitrogen + PAlgalRec.KN);
+                    NL = Nitrogen / (Nitrogen + PAlgalRec.KN.Val);
                 }
                 // unitless gN/cu m gN/cu m     gN/cu m
             }
@@ -1305,7 +1359,7 @@ namespace AQUATOX.Plants
             double LL;
             double NL;
             double TCorrValue;
-            TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10, PAlgalRec.TRef, PAlgalRec.TOpt, PAlgalRec.TMax);
+            TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10.Val, PAlgalRec.TRef.Val, PAlgalRec.TOpt.Val, PAlgalRec.TMax.Val);
             LL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
             NL = NutrLimit();
             AggFP = AggregateFracPhoto();
@@ -1313,7 +1367,7 @@ namespace AQUATOX.Plants
             Chem_Limit = AggFP;       // save for rate output  JSC 9-5-02
             PL = LL * NL * TCorrValue * AggFP;
             // all unitless
-            if (PL > 1.0)  PL = 1.0; // make sure it is truly a reduction factor
+            if (PL > 1.0) PL = 1.0; // make sure it is truly a reduction factor
 
             return PL;
         }
@@ -1329,14 +1383,14 @@ namespace AQUATOX.Plants
             const double VelCoeff = 0.057;
             if ((Location.SiteType == SiteTypes.Stream))
             {
-                Vel = AQTSeg.Velocity(PAlgalRec.PrefRiffle, PAlgalRec.PrefPool, false);
+                Vel = AQTSeg.Velocity(PAlgalRec.PrefRiffle.Val, PAlgalRec.PrefPool.Val, false);
                 // cm/s
-                VL = Math.Min(1.0, (PAlgalRec.Red_Still_Water + VelCoeff * Vel / (1.0 + VelCoeff * Vel)));
+                VL = Math.Min(1.0, (PAlgalRec.Red_Still_Water.Val + VelCoeff * Vel / (1.0 + VelCoeff * Vel)));
                 // frac                 unitless             // unitless  // m/s    // unitless  // m/s
             }
             else
             {
-                VL = PAlgalRec.Red_Still_Water;
+                VL = PAlgalRec.Red_Still_Water.Val;
             }
             return VL;
         }
@@ -1459,33 +1513,33 @@ namespace AQUATOX.Plants
         public override void Derivative(ref double DB)
         {
             double Pho = 0;
-            double R= 0;
-            double Slg= 0;
-            double ToxD= 0;
-            double Ex= 0;
-            double M= 0;
-            double Pr= 0;
-            double WO= 0;
-            double WI= 0;
-            double S= 0;
-            double STH= 0;
-            double SFE= 0;
-            double TD= 0;
-            double DiffUp= 0;
-            double DiffDown= 0;
-            double En= 0;
-            double PeriScr= 0;
-            double Sed2Me= 0;
-            double Fl= 0;
+            double R = 0;
+            double Slg = 0;
+            double ToxD = 0;
+            double Ex = 0;
+            double M = 0;
+            double Pr = 0;
+            double WO = 0;
+            double WI = 0;
+            double S = 0;
+            double STH = 0;
+            double SFE = 0;
+            double TD = 0;
+            double DiffUp = 0;
+            double DiffDown = 0;
+            double En = 0;
+            double PeriScr = 0;
+            double Sed2Me = 0;
+            double Fl = 0;
             double L = 0;
             //bool Trackit;
             bool SurfaceFloater;
-            
+
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
                 T_SVType ToxLoop;
-                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", L);
@@ -1511,7 +1565,7 @@ namespace AQUATOX.Plants
                     SaveRate("Sediment", S);
                     if (IsPhytoplankton())
                         SaveRate("PeriScour", PeriScr);
- 
+
                     if (!IsPhytoplankton())
                         SaveRate("Sloughing", Slg);
 
@@ -1550,7 +1604,7 @@ namespace AQUATOX.Plants
             //Trackit = (DB != -999);
             // signal to not write mass balance tracking
 
-            SurfaceFloater = PAlgalRec.SurfaceFloating;
+            SurfaceFloater = PAlgalRec.SurfaceFloating.Val;
             L = Loading;
             // WI = Washin();
             M = Mortality();  // Mortality calculated first for Chronic Effect Calculation
@@ -1575,13 +1629,13 @@ namespace AQUATOX.Plants
             //}
 
             if (IsPhytoplankton())
-            {   PeriScr = PeriphytonSlough();   }
+            { PeriScr = PeriphytonSlough(); }
 
             if (!IsPhytoplankton())
-            {   Slg = CalcSlough();             }
+            { Slg = CalcSlough(); }
 
             if (SloughEvent)
-            {  Slg = 0; }  // set precisely below  11/11/03
+            { Slg = 0; }  // set precisely below  11/11/03
 
             // HMS Removed linked mode and stratification code and estuary-mode code
 
@@ -1619,13 +1673,13 @@ namespace AQUATOX.Plants
             const int Gradual = 20;
             // JSC via RAP 11-05-2002
             double Vel;
-            Vel = AQTSeg.Velocity(PAlgalRec.PrefRiffle, PAlgalRec.PrefPool, false);
-            
-            if (Vel >= PAlgalRec.Macro_VelMax) // 11/9/2001 constrain breakage so does not exceed "state" (concentration)
+            Vel = AQTSeg.Velocity(PAlgalRec.PrefRiffle.Val, PAlgalRec.PrefPool.Val, false);
+
+            if (Vel >= PAlgalRec.Macro_VelMax.Val) // 11/9/2001 constrain breakage so does not exceed "state" (concentration)
                 return State;
             else
-                return State * (Math.Exp((Vel - PAlgalRec.Macro_VelMax) / Gradual));
-              // mg/L d  // mg/L        // cm/s              // cm/s         // cm/s
+                return State * (Math.Exp((Vel - PAlgalRec.Macro_VelMax.Val) / Gradual));
+            // mg/L d  // mg/L        // cm/s              // cm/s         // cm/s
 
         }
 
@@ -1635,17 +1689,17 @@ namespace AQUATOX.Plants
             double Pois;
             int ToxLoop;
             PlantRecord PR = PAlgalRec;
-            Dead = (1.0 - Math.Exp(-PR.EMort * (1.0 - AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax)))) * State + (PR.KMort * State);
+            Dead = (1.0 - Math.Exp(-PR.EMort.Val * (1.0 - AQTSeg.TCorr(PR.Q10.Val, PR.TRef.Val, PR.TOpt.Val, PR.TMax.Val)))) * State + (PR.KMort.Val * State);
             // emort is approximate maximum fraction killed per day by suboptimal temp.
             MortRates.OtherMort = Dead;
-            MortRates.SaltMort = State * SalMort(PR.Salmin_Mort, PR.SalMax_Mort, PR.Salcoeff1_Mort, PR.Salcoeff2_Mort);
+            MortRates.SaltMort = State * SalMort(PR.SalMin_Mort.Val, PR.SalMax_Mort.Val, PR.SalCoeff1_Mort.Val, PR.SalCoeff2_Mort.Val);
             Dead = Dead + MortRates.SaltMort;
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
-                if ((AQTSeg.PSetup.UseExternalConcs.Val && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)) 
+                if ((AQTSeg.PSetup.UseExternalConcs.Val && (AQTSeg.GetStateVal(AllVariables.H2OTox, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0))
                      || ((!AQTSeg.PSetup.UseExternalConcs.Val) && (AQTSeg.GetStateVal(NState, T_SVType.OrgTox1 + ToxLoop, T_SVLayer.WaterCol) > 0)))
                 {
-                    Pois = Poisoned((T_SVType)ToxLoop + 2); 
+                    Pois = Poisoned((T_SVType)ToxLoop + 2);
                     MortRates.OrgPois[ToxLoop] = Pois;
                     Dead = Dead + Pois;
                 }
@@ -1686,7 +1740,7 @@ namespace AQUATOX.Plants
                     KCapEffect = 0;
 
             }
-            if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
+            if ((PAlgalRec.PlantType.Val == "Bryophytes") || (MacroType == TMacroType.Freefloat))
                 NL = NutrLimit();   // JSC 8-12-2002
             else
                 NL = 1.0; // floating macrophytes are not subject to light limitation
@@ -1697,21 +1751,21 @@ namespace AQUATOX.Plants
                 LL = 1.0;
 
             PlantRecord PR = PAlgalRec;
-            TCorrValue = AQTSeg.TCorr(PR.Q10, PR.TRef, PR.TOpt, PR.TMax);
+            TCorrValue = AQTSeg.TCorr(PR.Q10.Val, PR.TRef.Val, PR.TOpt.Val, PR.TMax.Val);
             AggFP = AggregateFracPhoto();
             Temp_Limit = TCorrValue;        // save for rate output  JSC 9-5-02
             Chem_Limit = AggFP;             // save for rate output  JSC 9-5-02
 
-            Photosyn = PR.PMax * NL * LL * TCorrValue * AggFP * State;
-          // (g/sq m-d)  (1/d)  (these four terms unitless  )   g/sq m
-            SaltEffect = AQTSeg.SalEffect(PR.Salmin_Phot, PR.SalMax_Phot, PR.Salcoeff1_Phot, PR.Salcoeff2_Phot);
+            Photosyn = PR.PMax.Val * NL * LL * TCorrValue * AggFP * State;
+            // (g/sq m-d)  (1/d)  (these four terms unitless  )   g/sq m
+            SaltEffect = AQTSeg.SalEffect(PR.SalMin_Phot.Val, PR.SalMax_Phot.Val, PR.SalCoeff1_Phot.Val, PR.SalCoeff2_Phot.Val);
             // frac littoral limitation applies to benthic and rooted floating macrophytes only
             FracLit = Location.FracLittoral(AQTSeg.ZEuphotic(), AQTSeg.Volume_Last_Step);
             if ((MacroType != TMacroType.Freefloat))
                 return SaltEffect * FracLit * Photosyn * HabitatLimit * KCapEffect;
             else
                 return SaltEffect * Photosyn * HabitatLimit * KCapEffect;
-        }    
+        }
 
         public override double Washout()  // HMS  multi-segment water flow logic disabled
         {
@@ -1731,9 +1785,9 @@ namespace AQUATOX.Plants
             // g/m3
             KCapLimit = 1.0 - ((KCap - State) / KCap);
             return KCapLimit * Disch / SegVolume * State;
-        // g/cu m-d  (fraction) (cu m/d)   (cu m)   (g/cu m)
+            // g/cu m-d  (fraction) (cu m/d)   (cu m)   (g/cu m)
 
-//         WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
+            //         WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
         }
 
         //// --------------------------------------------------
@@ -1761,7 +1815,7 @@ namespace AQUATOX.Plants
         //        2.TotOOSLoad[1.DerivStep] = 2.TotOOSLoad[1.DerivStep] + LoadInKg;
         //        2.LoadBiota[1.DerivStep] = 2.LoadBiota[1.DerivStep] + LoadInKg;
         //        // bryophytes and freely floating macrophytes assimilate nutrients from water
-        //        if (!(PAlgalRec.PlantType == "Bryophytes") && !(MacroType == TMacroType.Freefloat))
+        //        if (!(PAlgalRec.PlantType.Val == "Bryophytes") && !(MacroType == TMacroType.Freefloat))
         //        {
         //            MBLoadRecord 3 = 1.MBLoadArray[Typ];
         //            // save for tox loss output & categorization
@@ -1776,7 +1830,7 @@ namespace AQUATOX.Plants
 
         public override void Derivative(ref double DB)
         {
-            double L =0 ;
+            double L = 0;
             double Pho = 0;
             double R = 0;
             double Ex = 0;
@@ -1789,7 +1843,7 @@ namespace AQUATOX.Plants
             // --------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Load", L);
@@ -1805,7 +1859,7 @@ namespace AQUATOX.Plants
                         SaveRate("NetBoundary", L + WI - WO);
                     }
                     SaveRate("Lt_LIM", Lt_Limit);
-                    if ((PAlgalRec.PlantType == "Bryophytes") || (MacroType == TMacroType.Freefloat))
+                    if ((PAlgalRec.PlantType.Val == "Bryophytes") || (MacroType == TMacroType.Freefloat))
                     {
                         SaveRate("Nutr_LIM", Nutr_Limit);
                         SaveRate("N_LIM", N_Limit);
@@ -1823,7 +1877,7 @@ namespace AQUATOX.Plants
             L = Loading;
             if ((State < Consts.Tiny))
             {
-               //  WI = WashIn();
+                //  WI = WashIn();
                 DB = L + WI;
             }
             else
@@ -1870,14 +1924,14 @@ namespace AQUATOX.Plants
             // initialize internal nutrients in ug/L  
 
             TPlant TP = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPlant; // associated plant
-            
-            if (SVType == T_SVType.NIntrnl)
-                    InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit * 1000;
-                else
-                    InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit * 1000;
-                      // (ug N/L) =  (mg OM/L)   *              (gN/gOM)   (ug/mg)
 
-                State = InitialCond;
+            if (SVType == T_SVType.NIntrnl)
+                InitialCond = TP.InitialCond * TP.PAlgalRec.N2OrgInit.Val * 1000;
+            else
+                InitialCond = TP.InitialCond * TP.PAlgalRec.P2OrgInit.Val * 1000;
+            // (ug N/L) =  (mg OM/L)   *              (gN/gOM)   (ug/mg)
+
+            State = InitialCond;
         }
 
 
@@ -1897,25 +1951,25 @@ namespace AQUATOX.Plants
                 if ((CPlant.IsFixingN())) return 0;   // N-fixation, not assimilation from the water column, uptake=0
 
                 WC_Conc = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-                HalfSat = PR.KN;
-                HalfSatInternal = PR.NHalfSatInternal;
+                HalfSat = PR.KN.Val;
+                HalfSatInternal = PR.NHalfSatInternal.Val;
                 Ratio = CPlant.N_2_Org();
-                MinRatio = PR.Min_N_Ratio;
-                MaxUptake = PR.MaxNUptake;
+                MinRatio = PR.Min_N_Ratio.Val;
+                MaxUptake = PR.MaxNUptake.Val;
             }
             else
             {
                 // SVType = PInternl
                 WC_Conc = AQTSeg.GetState(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-                HalfSat = PR.KPO4;
-                HalfSatInternal = PR.PHalfSatInternal;
+                HalfSat = PR.KPO4.Val;
+                HalfSatInternal = PR.PHalfSatInternal.Val;
                 Ratio = CPlant.P_2_Org();
-                MinRatio = PR.Min_P_Ratio;
-                MaxUptake = PR.MaxPUptake;
+                MinRatio = PR.Min_P_Ratio.Val;
+                MaxUptake = PR.MaxPUptake.Val;
             }
 
             return MaxUptake * (WC_Conc / (HalfSat + WC_Conc)) * (HalfSatInternal / (HalfSatInternal + (Ratio - MinRatio))) * CPlant.State * 1e3;
-       //  {ug/L d}    {g/g d}    {       unitless            }    {                        unitless                        }   {   mg / L  }  {ug/mg}
+            //  {ug/L d}    {g/g d}    {       unitless            }    {                        unitless                        }   {   mg / L  }  {ug/mg}
 
         }
 
@@ -1983,9 +2037,9 @@ namespace AQUATOX.Plants
             double ToxD = 0;
             double Entr = 0;
             double Flt = 0;
-//          double TD = 0;
-//          double DiffUp = 0;
-//          double DiffDown = 0;
+            //          double TD = 0;
+            //          double DiffUp = 0;
+            //          double DiffDown = 0;
             double N2O = 0;
             double WashO = 0;
             double WashI = 0;
@@ -1998,18 +2052,18 @@ namespace AQUATOX.Plants
             double Exc2 = 0;
             double Rsp = 0;
             double FixN = 0;
-//          double SegVolSave = 0;
+            //          double SegVolSave = 0;
             double Sed2Me = 0;
             double MacBrk = 0;
             double Slgh = 0;
             double Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-//          double LoadInKg = 0;
+            //          double LoadInKg = 0;
             bool SurfaceFloater;
 
             // ----------------------------------------------------------------
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
+                if ((AQTSeg.PSetup.SaveBRates.Val) && (SaveRates))
                 {
                     ClearRate();
                     SaveRate("Loading", Lo);
@@ -2059,7 +2113,7 @@ namespace AQUATOX.Plants
             }
             // ----------------------------------------------------------------
 
-            SurfaceFloater = CP.PAlgalRec.SurfaceFloating;
+            SurfaceFloater = CP.PAlgalRec.SurfaceFloating.Val;
             if ((CP.State < Consts.Tiny))
             {
                 DB = 0.0;
@@ -2068,12 +2122,12 @@ namespace AQUATOX.Plants
             else if (NState >= Consts.FirstMacro && NState <= Consts.LastMacro)
             {
                 N2O = CP.Nutr_2_Org(SVType) * 1e3;
-         // (ug N / mg OM) (g N / g OM)      (ug/g)
+                // (ug N / mg OM) (g N / g OM)      (ug/g)
                 Lo = CP.Loading * N2O;
-          // (ug N/L d) (mg OM/L d) (ug N/mg OM)
+                // (ug N/L d) (mg OM/L d) (ug N/mg OM)
                 WashO = CP.Washout() * N2O;
-//              WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-//              WashI = NutInCarrierWashin();
+                //              WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
+                //              WashI = NutInCarrierWashin();
                 Uptk = Uptake();
                 Mort = CP.Mortality() * N2O;
                 Predt = CP.Predation() * N2O;
@@ -2090,14 +2144,14 @@ namespace AQUATOX.Plants
             else if (NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae)
             {
                 N2O = CP.Nutr_2_Org(SVType) * 1e3;
-         // (ug N / mg OM) (g N / g OM)      (ug/g)
-                Lo  =     CP.Loading * N2O;
-         // (ug N/L d) (mg OM/L d) (ug N/mg OM)
+                // (ug N / mg OM) (g N / g OM)      (ug/g)
+                Lo = CP.Loading * N2O;
+                // (ug N/L d) (mg OM/L d) (ug N/mg OM)
                 WashO = CP.Washout() * N2O;
-//              WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
-//              HMS EstuarySegment code omitted
+                //              WashoutStep[AQTSeg.DerivStep] = WashO * AQTSeg.SegVol();
+                //              HMS EstuarySegment code omitted
 
-//              WashI = NutInCarrierWashin();
+                //              WashI = NutInCarrierWashin();
                 STH = CP.SinkToHypo * N2O;
 
                 //if (VSeg == VerticalSegments.Hypolimnion)
@@ -2129,23 +2183,23 @@ namespace AQUATOX.Plants
 
                 if ((CP.IsFixingN()) && (SVType == T_SVType.NIntrnl))
                 {
-                //    //MBLoadRecord MBLR = 5.MBLoadArray[AllVariables.Nitrate];
-                    FixN = CP.PAlgalRec.MaxNUptake * CP.State * 1e3;
-                //    // ug/L d          // g/g d     // mg / L // ug/mg
-                //    SegVolSave = AQTSeg.SegVol();
+                    //    //MBLoadRecord MBLR = 5.MBLoadArray[AllVariables.Nitrate];
+                    FixN = CP.PAlgalRec.MaxNUptake.Val * CP.State * 1e3;
+                    //    // ug/L d          // g/g d     // mg / L // ug/mg
+                    //    SegVolSave = AQTSeg.SegVol();
 
-                //    LoadInKg = FixN * SegVolSave * 1000.0 * 1e-9;   // save for nutrient MB & categorization
-                //    // kg nutr   // ug/L   // m3    // L/m3 // kg/ug
+                    //    LoadInKg = FixN * SegVolSave * 1000.0 * 1e-9;   // save for nutrient MB & categorization
+                    //    // kg nutr   // ug/L   // m3    // L/m3 // kg/ug
 
-                //    //MBLR.TotOOSLoad[5.DerivStep] = MBLR.TotOOSLoad[5.DerivStep] + LoadInKg;
-                //    //MBLR.LoadFixation[5.DerivStep] = MBLR.LoadFixation[5.DerivStep] + LoadInKg;
+                    //    //MBLR.TotOOSLoad[5.DerivStep] = MBLR.TotOOSLoad[5.DerivStep] + LoadInKg;
+                    //    //MBLR.LoadFixation[5.DerivStep] = MBLR.LoadFixation[5.DerivStep] + LoadInKg;
                 }
 
                 ToxD = CP.ToxicDislodge() * N2O;
                 Sed = CP.Sedimentation() * N2O;   // plant sedimentation
                 Sed2Me = Derivative_NSed2Me();
-                if ((CP.IsPeriphyton()))  Slgh = CP.Sloughing * N2O;
-                     else Slgh = -Derivative_NToPhytoFromSlough();
+                if ((CP.IsPeriphyton())) Slgh = CP.Sloughing * N2O;
+                else Slgh = -Derivative_NToPhytoFromSlough();
                 Uptk = Uptake();
                 // algae
                 DB = Lo + Uptk + WashI - (WashO + Predt + Mort + Sed + Exc + Exc2 + Rsp + ToxD + Slgh) - STH + SFE + Flt + Sed2Me + Entr + FixN;
@@ -2154,7 +2208,7 @@ namespace AQUATOX.Plants
             // Phytoplankton are subject to currents , diffusion & TD
             // HMS eliminated turbulent diffusion and linked-segment diffusion as irrelevant to 0D Model
 
-            Derivative_WriteRates();    
+            Derivative_WriteRates();
         }
 
 

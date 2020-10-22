@@ -239,7 +239,7 @@ public class TDetritus : TRemineralize
             if ((Ns >= Consts.FirstMacro) && (Ns <= Consts.LastMacro))
             {
                 PPl = AQTSeg.GetStatePointer(Ns, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
-                if (PPl.PAlgalRec.PlantType == "Bryophytes")
+                if (PPl.PAlgalRec.PlantType.Val == "Bryophytes")
                 {
                     if (NState == AllVariables.DissLabDetr) return 0.00;
                     if (NState == AllVariables.DissRefrDetr) return 0.25;
@@ -439,7 +439,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                 //}
                 //else
                 //{
-            result = (State - (InitialCond * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step));
+            result = (State - (InitialCond * Location.Locale.SurfArea.Val / AQTSeg.Volume_Last_Step));
         // g/m3 d  // g/m3      // g/m2            // m2 entire system        // m3 entire sys.
             
             if ((result < 0)) result = 0;

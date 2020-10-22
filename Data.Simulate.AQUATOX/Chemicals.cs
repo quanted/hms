@@ -16,78 +16,58 @@ namespace AQUATOX.Chemicals
 
     public class ChemicalRecord
     {
-        public string ChemName;
-        public string CASRegNo;
-        public double MolWt;
-        //public double Solubility;
-        //public string XSolubility;
-        public double Henry;
-        public string XHenry;
-        public double pka;
-        public string Xpka;
-        //public double VPress;
-        //public string XVPress;
-        public double LogKow;    // Log KOW, log octanol water part. coeff.
-        public string XLogKow;
-        public double En;        // Activation Energy for Temperature
-        public string XEn;
-        public double KMDegrdn;
-        public string XKMDegrdn;
-        public double KMDegrAnaerobic;
-        public string XKMDegrAnaerobic;
-        public double KUnCat;
-        public string XKUncat;
-        public double KAcid;
-        public string XKAcid;
-        public double KBase;
-        public string XKBase;
-        public double PhotolysisRate;
-        public string XPhotoLysisRate;
-        //public double OxRateConst;
-        //public string XOxRateConst;
-        public double KPSed;
-        public string XKPSed;
-        public double Weibull_Shape;
-        public string XWeibull_Shape;
-        public bool ChemIsBase;
-        public bool CalcKPSed;
-        //public double CohesivesK1;
-        //public double CohesivesK2;
-        //public double CohesivesKp;
-        //public string CohesivesRef;
-        //public double NonCohK1;
-        //public double NonCohK2;
-        //public double NonCohKp;
-        //public string NonCohRef;
-        //public double NonCoh2K1;
-        //public double NonCoh2K2;
-        //public double NonCoh2Kp;
-        //public string NonCoh2Ref;
+        public TStringParam ChemName = new TStringParam();
+        public TStringParam CASRegNo = new TStringParam();
+        public TParameter MolWt = new TParameter();
+        public TParameter pka = new TParameter();
+        public TParameter Henry = new TParameter();
+        public TParameter LogKow = new TParameter();
+        public TBoolParam CalcKPSed = new TBoolParam();
+        public TParameter KPSed = new TParameter();
+        public TBoolParam CalcKOMRefrDOM = new TBoolParam();
+        public TParameter KOMRefrDOM = new TParameter();
+        public TParameter K1Detritus = new TParameter();
+        public TParameter ActEn = new TParameter();
+        public TParameter KMDegrAnaerobic = new TParameter();
+        public TParameter KMDegrdn = new TParameter();
+        public TParameter KUnCat = new TParameter();
+        public TParameter KAcid = new TParameter();
+        public TParameter KBase = new TParameter();
+        public TParameter PhotolysisRate = new TParameter();
+        public TParameter Weibull_Shape = new TParameter();
+        public TParameter WeibullSlopeFactor = new TParameter();
+        public TBoolParam ChemIsBase = new TBoolParam();
+        public TBoolParam BCFUptake = new TBoolParam();
 
-        // PFA Parameters
-        //public bool IsPFA;
-        //public string PFAType;
-        //public double PFAChainLength;
-        //public string XPFAChainLength;
-        //public double PFASedKom;
-        //public string XPFASedKom;
-        //public double PFAAlgBCF;
-        //public string XPFAAlgBCF;
-        //public double PFAMacroBCF;
-        //public string XPFAMacroBCF;
+        public void Setup()
+        {
+            ChemName.Symbol = "ChemName"; ChemName.Name = "Chemical Name";
+            CASRegNo.Symbol = "CASRegNo"; CASRegNo.Name = "CAS Registry No.";
+            MolWt.Symbol = "Molecular Weight"; MolWt.Name = "Molecular weight of pollutant"; MolWt.Units = "g/mol";
+            pka.Symbol = "Dissociation Constant"; pka.Name = " Acid dissociation constant"; pka.Units = "negative log";
+            Henry.Symbol = "Henry's Law Constant"; Henry.Name = "Henry's law constant"; Henry.Units = "atm m3 mol-1";
+            LogKow.Symbol = "Octanol-water partition coefficient"; LogKow.Name = "Log octanol-water partition coefficient"; LogKow.Units = "unitless";
+            KPSed.Symbol = "KPSed"; KPSed.Name = "Detritus-water partition coefficient"; KPSed.Units = "L/kg OC";
+            KOMRefrDOM.Symbol = "KOMRefrDOM"; KOMRefrDOM.Name = "Reftractory DOM to Water Partition Coefficient"; KOMRefrDOM.Units = "L/kg OM";
+            K1Detritus.Symbol = "Uptake Rate (K1) Detritus"; K1Detritus.Name = "Uptake rate constant for organic matter, default of 1.39"; K1Detritus.Units = "L/kg dry day";
+            ActEn.Symbol = "Activation Energy for Temperature"; ActEn.Name = "Arrhenius activation energy"; ActEn.Units = "cal/mol";
+            KMDegrAnaerobic.Symbol = "Rate of Anaerobic Microbial Degradation"; KMDegrAnaerobic.Name = "Decomposition rate at 0 g/m3 oxygen"; KMDegrAnaerobic.Units = "1/d";
+            KMDegrdn.Symbol = "Max. Rate of Aerobic Microbial Degradation"; KMDegrdn.Name = "Maximum (microbial) degradation rate"; KMDegrdn.Units = "1/d";
+            KUnCat.Symbol = "Uncatalyzed hydrolysis constant"; KUnCat.Name = "The measured first-order reaction rate at ph 7"; KUnCat.Units = "1/d";
+            KAcid.Symbol = "Acid catalyzed hydrolysis constant"; KAcid.Name = "Pseudo-first-order acid-catalyzed rate constant for a given ph"; KAcid.Units = "L/mol ∙ d";
+            KBase.Symbol = "Base catalyzed hydrolysis constant"; KBase.Name = "Pseudo-first-order rate constant for a given ph"; KBase.Units = "L/mol ∙ d";
+            PhotolysisRate.Symbol = "Photolysis Rate"; PhotolysisRate.Name = "Direct photolysis first-order rate constant"; PhotolysisRate.Units = "1/d";
+            Weibull_Shape.Symbol = "Weibull Shape Parameter"; Weibull_Shape.Name = "Parameter expressing variability in toxic response; default is 0.33"; Weibull_Shape.Units = "unitless";
+            WeibullSlopeFactor.Symbol = "Weibull Slope Factor"; WeibullSlopeFactor.Name = "Slope at EC50 multiplied by EC50 "; WeibullSlopeFactor.Units = "slope  ∙ ug/L";
+            ChemIsBase.Name = "Chemical is a Base";
+            BCFUptake.Name = "Use BCF to Estimate Uptake";
+            CalcKOMRefrDOM.Name = "Calculate Refractory DOM to Water Partition Coefficient";
+            CalcKPSed.Name = "Calculate KPSed using pH, pKA, LogKow";
+        }
 
-        public double WeibullSlopeFactor;
-        public string XWeibullSlopeFactor;
-
-        public bool CalcKOMRefrDOM;
-        public double KOMRefrDOM;
-        public string XKOMRefrDOM;
-        public double K1Detritus;
-        public string XK1Detritus;
-        public bool BCFUptake;
     } // end ChemicalRecord
 
-    public enum BioTransType
+        public enum BioTransType
     {
         BTAerobicMicrobial,
         BTAnaerobicMicrobial,
@@ -206,13 +186,13 @@ namespace AQUATOX.Chemicals
             double Intermed1;
             double Intermed2;
             // to use in exp
-            if (ChemRec.En <= 0.0)
+            if (ChemRec.ActEn.Val <= 0.0)
             {
-                ChemRec.En = 18000.0;  // average value as default
+                ChemRec.ActEn.Val = 18000.0;  // average value as default
                 // cal/mol
             }
-            Intermed1 = ChemRec.En / (R * (Temperature + Kelvin0));
-            Intermed2 = ChemRec.En / (R * (TObs + Kelvin0));
+            Intermed1 = ChemRec.ActEn.Val / (R * (Temperature + Kelvin0));
+            Intermed2 = ChemRec.ActEn.Val / (R * (TObs + Kelvin0));
             return Math.Exp(-(Intermed1 - Intermed2));
         }
 
@@ -227,10 +207,10 @@ namespace AQUATOX.Chemicals
             double Hydrol;
             double KBaseExp;
             //double HydrolInKg;
-            KAcidExp = ChemRec.KAcid * Math.Pow(10.0, -AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol));       // acid catalyzed
-            KBaseExp = ChemRec.KBase * Math.Pow(10.0, AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) - 14.0); // base catalyzed
+            KAcidExp = ChemRec.KAcid.Val * Math.Pow(10.0, -AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol));       // acid catalyzed
+            KBaseExp = ChemRec.KBase.Val * Math.Pow(10.0, AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol) - 14.0); // base catalyzed
 
-            KHyd = (KAcidExp + KBaseExp + ChemRec.KUnCat) * Arrhen(AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol));
+            KHyd = (KAcidExp + KBaseExp + ChemRec.KUnCat.Val) * Arrhen(AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol));
             Hydrol = KHyd * State;
             return Hydrol;
 
@@ -291,7 +271,7 @@ namespace AQUATOX.Chemicals
             Alpha = AQTSeg.Extinct(false, true, true, false, 0);
             // don't include periphyton, but include all other plants
 
-            if (ChemRec.PhotolysisRate > 0.0)
+            if (ChemRec.PhotolysisRate.Val > 0.0)
             {
             //    if (_wvar1.VSeg == VerticalSegments.Epilimnion)
             //    {
@@ -308,7 +288,7 @@ namespace AQUATOX.Chemicals
 
              
             Thick = AQTSeg.Location.MeanThick;
-            PhotRate = ChemRec.PhotolysisRate;
+            PhotRate = ChemRec.PhotolysisRate.Val;
             LightFactor = Solar0 / AveSolar;
             ScreeningFactor = (RadDistr / RadDistr0) * ((1.0 - Math.Exp(-Alpha * Thick)) / (Alpha * Thick));
             KPhot = PhotRate * ScreeningFactor * LightFactor;
@@ -355,7 +335,7 @@ namespace AQUATOX.Chemicals
             if ((State < Consts.Tiny)) return 0;
 
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            if ((ChemRec.Henry > 0.0) && (Temp > AQTSeg.Ice_Cover_Temp()) && (NonDissoc() > Consts.VSmall))  // && (AQTSeg.VSeg == VerticalSegments.Epilimnion)
+            if ((ChemRec.Henry.Val > 0.0) && (Temp > AQTSeg.Ice_Cover_Temp()) && (NonDissoc() > Consts.VSmall))  // && (AQTSeg.VSeg == VerticalSegments.Epilimnion)
             {
                 T = Kelvin0 + AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
                 // to correct for T of obs.
@@ -364,7 +344,7 @@ namespace AQUATOX.Chemicals
                 if (Sal != null) HLCSaltFactor = 1 + 0.01143 * Sal.State;
                 else HLCSaltFactor = 1;
 
-                HenryLaw = (ChemRec.Henry * HLCSaltFactor) / (Gas * T);
+                HenryLaw = (ChemRec.Henry.Val * HLCSaltFactor) / (Gas * T);
                 // unitless =(atm cu m/mol)   unitless     / ((atm cu m/mol K) * K)
 
                 TWind = AQTSeg.GetStatePointer(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
@@ -373,7 +353,7 @@ namespace AQUATOX.Chemicals
                 // m/s at 10 m to m/s at 10 cm based on Banks, 1975
                 if (WindLd < 0.1) WindLd = 0.1;
 
-                KGas = 168.0 * WindLd * Math.Pow((18.0 / ChemRec.MolWt), 0.25);
+                KGas = 168.0 * WindLd * Math.Pow((18.0 / ChemRec.MolWt.Val), 0.25);
                 // Thomann & Muller,'87
                 // m/d              m/s
                 // KGas := (0.3 + 0.2 * WindLd) * POWER((18.0/MolWt), 1.17) * cmpsec2mpd * HenryLaw;
@@ -382,7 +362,7 @@ namespace AQUATOX.Chemicals
                 if (NonDissoc() < Consts.Small) KOVol = 0.0;
                 else
                 {
-                    KLiq = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj).KReaer() * AQTSeg.Location.MeanThick * Math.Pow((32.0 / ChemRec.MolWt), 0.25) * 1.0 / NonDissoc();
+                    KLiq = ((AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol)) as TO2Obj).KReaer() * AQTSeg.Location.MeanThick * Math.Pow((32.0 / ChemRec.MolWt.Val), 0.25) * 1.0 / NonDissoc();
                     // m/d                                          /d                        m           unitless      unitless fraction
                     if (KLiq == 0)
                     { KOVol = 0; }
@@ -426,9 +406,9 @@ namespace AQUATOX.Chemicals
             //double PWVolumeInL;
             //TPorewater PPore;
             FracAerobic = 0;
-            if (ChemRec.KMDegrdn > 0.0)
+            if (ChemRec.KMDegrdn.Val > 0.0)
             {
-                KM = ChemRec.KMDegrdn;
+                KM = ChemRec.KMDegrdn.Val;
                 // KM usually is determined for water  12-10-1997
                 
                 if (NState != AllVariables.H2OTox)    // if the toxicant is not in the water phase
@@ -436,7 +416,7 @@ namespace AQUATOX.Chemicals
                 // increased activity in detritus as opposed to water, see Gunnison '85
                 // based on AECos experiments, Athens EPA Lab
 
-                Microbial = Decomposition(KM, ChemRec.KMDegrAnaerobic, ref FracAerobic);
+                Microbial = Decomposition(KM, ChemRec.KMDegrAnaerobic.Val, ref FracAerobic);
             }
             else
             {   Microbial = 0.0;    }
@@ -594,7 +574,7 @@ namespace AQUATOX.Chemicals
                                 break;
                             default:
                                 AnimPtr = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                                if ((AnimPtr.PAnimalData.Animal_Type == "Benthic Insect"))
+                                if ((AnimPtr.PAnimalData.Animal_Type.Val == "Benthic Insect"))
                                     BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTBenthInsect, AllVariables.NullStateVar);
                                 else
                                     BTRec = WaterTox.Get_BioTrans_Record(BioTransType.BTOtherInvert, AllVariables.NullStateVar);
@@ -795,7 +775,7 @@ namespace AQUATOX.Chemicals
                             AddLoad = CPtr.LoadsRec.Alt_Loadings[Loop].ReturnLoad(TimeIndex) / SegVolume;
                             if (Loop == 1)
                             {
-                                AddLoad = AddLoad * Location.Locale.SurfArea;
+                                AddLoad = AddLoad * Location.Locale.SurfArea.Val;
                             } // mg/L d // mg/sq m. L d              // sq m.
                             
                             if (AddLoad < 0)  // fish stocking is assumed clean, but need to track tox loss due to fishing/removal
@@ -839,7 +819,7 @@ namespace AQUATOX.Chemicals
                         // (mg/m3)=(ug/L)
                         if (Loop == 1 )  //  1 = Alt_LoadingsType.DirectPrecip)
                         {
-                            AddLoad = AddLoad * Location.Locale.SurfArea;
+                            AddLoad = AddLoad * Location.Locale.SurfArea.Val;
                         }  // ug/L d  // ug/(sq m.)(L)(d)       // sq m.
 
                         Loading = Loading + AddLoad;
@@ -879,12 +859,12 @@ namespace AQUATOX.Chemicals
             }
 
             pH_Val = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            if (ChemRec.pka == 0)
+            if (ChemRec.pka.Val == 0)
             {  return 1.0;                                                              }
-            else if (ChemRec.ChemIsBase)
-            {  return 1.0 / (1.0 + Math.Pow(10.0, ChemRec.pka - pH_Val));                 }
+            else if (ChemRec.ChemIsBase.Val)
+            {  return 1.0 / (1.0 + Math.Pow(10.0, ChemRec.pka.Val - pH_Val));                 }
             else
-            {  return 1.0 / (1.0 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka)));     }
+            {  return 1.0 / (1.0 + Math.Pow(10.0, (pH_Val + Charged - ChemRec.pka.Val)));     }
         }
 
         // (************************************)
@@ -912,30 +892,30 @@ namespace AQUATOX.Chemicals
             {
                 throw new Exception("Programming Error, CalculateKOM must be passed a detrital toxicant");
             }
-            KOW = Math.Pow(10, ChemRec.LogKow);
+            KOW = Math.Pow(10, ChemRec.LogKow.Val);
 
-            if (ChemRec.ChemIsBase)
+            if (ChemRec.ChemIsBase.Val)
             {   IonCorr = 0.01;     }
             else
             {   IonCorr = 0.1;      }
 
-            //if (ChemRec.IsPFA)
-            //    return ChemRec.PFASedKom;
+            //if (ChemRec.IsPFA.Val)
+            //    return ChemRec.PFASedKom.Val;
 
             NonDiss = NonDissoc();
             // prevent multiple calculations
             KOM = -9999;
 
-            if ((NState == AllVariables.SedmRefrDetr) && (!ChemRec.CalcKPSed))
+            if ((NState == AllVariables.SedmRefrDetr) && (!ChemRec.CalcKPSed.Val))
             {
-                KOM = ChemRec.KPSed * 0.526;
+                KOM = ChemRec.KPSed.Val * 0.526;
                 // L/kg OM = L/kg OC * g OC / g OM
             }
 
             // translate user entered value to proper units
-            if (((NState == AllVariables.DissRefrDetr)||(NState == AllVariables.ReDOMPore )) && (!ChemRec.CalcKOMRefrDOM))
+            if (((NState == AllVariables.DissRefrDetr)||(NState == AllVariables.ReDOMPore )) && (!ChemRec.CalcKOMRefrDOM.Val))
             {
-                KOM = ChemRec.KOMRefrDOM;
+                KOM = ChemRec.KOMRefrDOM.Val;
             }
             if ((KOM < 0))
             {
@@ -986,7 +966,7 @@ namespace AQUATOX.Chemicals
                 throw new Exception("Programming Error: Sorption was passed a non sediment/detritus");
 
             // K1  inorganic sorption not included as multi-seg model not included
-            K1 = ChemRec.K1Detritus;  // calibrated to 1.39  
+            K1 = ChemRec.K1Detritus.Val;  // calibrated to 1.39
 
             if (K1 == 0) return 0;
 
@@ -1069,7 +1049,7 @@ namespace AQUATOX.Chemicals
                     if (KOM == 0)
                     {  K2 = 0; }
                     else
-                    {  K2 = ChemRec.K1Detritus / KOM;   }
+                    {  K2 = ChemRec.K1Detritus.Val / KOM;   }
                     // (1/(0.72 * KPSed))
                     // 9/25/2011 was hard-wired to 1.39
                     // Karickoff's obs.
@@ -1128,7 +1108,7 @@ namespace AQUATOX.Chemicals
                 if (K2 > 96) K2 = K2 * (96 / K2); // scaling factor 10-02-03
                 
                 AnimalRecord AR = AnimP.PAnimalData;
-                TCR = AQTSeg.TCorr(AR.Q10, AR.TRef, AR.TOpt, AR.TMax);   // TCorrect, temperature correction
+                TCR = AQTSeg.TCorr(AR.Q10.Val, AR.TRef.Val, AR.TOpt.Val, AR.TMax.Val);   // TCorrect, temperature correction
                 if (ChemOption != UptakeCalcMethodType.Default_Meth)TCR = 1.0;
 
                 Clear = K2 * TCR * State;
@@ -1350,7 +1330,7 @@ namespace AQUATOX.Chemicals
                     }
                 }
 
-                if (!ChemRec.BCFUptake)
+                if (!ChemRec.BCFUptake.Val)
                 {  //   Animal and plant sorption / desorption
                     Decomp = 0;
                     for (DecompLoop = AllVariables.SedmRefrDetr; DecompLoop <= Consts.LastDetr; DecompLoop++)
@@ -1396,7 +1376,7 @@ namespace AQUATOX.Chemicals
                     {
                         for (NsLoop = AllVariables.POC_G1; NsLoop <= AllVariables.POC_G3; NsLoop++)
                         {
-                            UnitFix = Location.Locale.SurfArea / (AQTSeg.SegVol() * 1000.0);
+                            UnitFix = Location.Locale.SurfArea.Val / (AQTSeg.SegVol() * 1000.0);
                             // m2/L                   // m2            // m3     // L/m3
                             TPOCT = AQTSeg.GetStatePointer(NsLoop, SVType, T_SVLayer.SedLayer2) as TPOCTox;
                             if ((TPOCT != null))
@@ -1457,7 +1437,7 @@ namespace AQUATOX.Chemicals
 
         public double WEffTox(double nondissoc)
         {
-            double LogKow = ChemRec.LogKow;
+            double LogKow = ChemRec.LogKow.Val;
 
             if (LogKow < 1.5) return 0.1;
 

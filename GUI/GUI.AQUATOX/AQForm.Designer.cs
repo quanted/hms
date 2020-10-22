@@ -40,6 +40,10 @@ namespace GUI.AQUATOX
             this.graphbutton = new System.Windows.Forms.Button();
             this.ParamsButton = new System.Windows.Forms.Button();
             this.Diagenesis = new System.Windows.Forms.Button();
+            this.PlantsButton = new System.Windows.Forms.Button();
+            this.AnimButton = new System.Windows.Forms.Button();
+            this.ChemButton = new System.Windows.Forms.Button();
+            this.SiteButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadJSON
@@ -88,9 +92,9 @@ namespace GUI.AQUATOX
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(441, 21);
+            this.progressBar1.Location = new System.Drawing.Point(568, 57);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(411, 23);
+            this.progressBar1.Size = new System.Drawing.Size(284, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -119,7 +123,7 @@ namespace GUI.AQUATOX
             // 
             // Diagenesis
             // 
-            this.Diagenesis.Location = new System.Drawing.Point(237, 57);
+            this.Diagenesis.Location = new System.Drawing.Point(451, 21);
             this.Diagenesis.Name = "Diagenesis";
             this.Diagenesis.Size = new System.Drawing.Size(91, 25);
             this.Diagenesis.TabIndex = 0;
@@ -128,9 +132,57 @@ namespace GUI.AQUATOX
             this.Diagenesis.Visible = false;
             this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
             // 
+            // PlantsButton
+            // 
+            this.PlantsButton.Location = new System.Drawing.Point(344, 21);
+            this.PlantsButton.Name = "PlantsButton";
+            this.PlantsButton.Size = new System.Drawing.Size(92, 25);
+            this.PlantsButton.TabIndex = 0;
+            this.PlantsButton.Text = "Plants";
+            this.PlantsButton.UseVisualStyleBackColor = true;
+            this.PlantsButton.Visible = false;
+            this.PlantsButton.Click += new System.EventHandler(this.Plants);
+            // 
+            // AnimButton
+            // 
+            this.AnimButton.Location = new System.Drawing.Point(344, 57);
+            this.AnimButton.Name = "AnimButton";
+            this.AnimButton.Size = new System.Drawing.Size(92, 25);
+            this.AnimButton.TabIndex = 0;
+            this.AnimButton.Text = "Animals";
+            this.AnimButton.UseVisualStyleBackColor = true;
+            this.AnimButton.Visible = false;
+            this.AnimButton.Click += new System.EventHandler(this.AnimButton_Click);
+            // 
+            // ChemButton
+            // 
+            this.ChemButton.Location = new System.Drawing.Point(451, 57);
+            this.ChemButton.Name = "ChemButton";
+            this.ChemButton.Size = new System.Drawing.Size(92, 25);
+            this.ChemButton.TabIndex = 0;
+            this.ChemButton.Text = "Chemicals";
+            this.ChemButton.UseVisualStyleBackColor = true;
+            this.ChemButton.Visible = false;
+            this.ChemButton.Click += new System.EventHandler(this.Chems);
+            // 
+            // SiteButton
+            // 
+            this.SiteButton.Location = new System.Drawing.Point(236, 57);
+            this.SiteButton.Name = "SiteButton";
+            this.SiteButton.Size = new System.Drawing.Size(92, 25);
+            this.SiteButton.TabIndex = 0;
+            this.SiteButton.Text = "Site";
+            this.SiteButton.UseVisualStyleBackColor = true;
+            this.SiteButton.Visible = false;
+            this.SiteButton.Click += new System.EventHandler(this.Sites);
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(871, 577);
+            this.Controls.Add(this.SiteButton);
+            this.Controls.Add(this.ChemButton);
+            this.Controls.Add(this.AnimButton);
+            this.Controls.Add(this.PlantsButton);
             this.Controls.Add(this.Diagenesis);
             this.Controls.Add(this.ParamsButton);
             this.Controls.Add(this.graphbutton);
@@ -156,6 +208,10 @@ namespace GUI.AQUATOX
         private Button graphbutton;
         private Button ParamsButton;
         private Button Diagenesis;
+        private Button PlantsButton;
+        private Button AnimButton;
+        private Button ChemButton;
+        private Button SiteButton;
     }
 
 

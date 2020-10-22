@@ -231,8 +231,8 @@ namespace Globals
         public TBoolParam StepSizeInDays = new TBoolParam();
         public TBoolParam ModelTSDays = new TBoolParam();
         // public TBoolParam Spinup_Mode;  Not yet part ofAQUATOX 4.0
-        public TBoolParam NFix_UseRatio= new TBoolParam();   // 3/16/2010, option to use NFix Ratio
-        public TParameter NtoPRatio= new TParameter();     // 3/18/2010, capability to specify NFix Ratio
+        public TBoolParam NFix_UseRatio = new TBoolParam();   // 3/16/2010, option to use NFix Ratio
+        public TParameter NtoPRatio = new TParameter();     // 3/18/2010, capability to specify NFix Ratio
         // public TBoolParam Spin_Nutrients;  Not yet part ofAQUATOX 4.0
         public TParameter FixStepSize = new TParameter();
         public TBoolParam UseFixStepSize = new TBoolParam();
@@ -404,7 +404,7 @@ namespace Globals
     public class TParameter
     {
         public double Val;
-        [JsonIgnore] public string Symbol ="";   // not user editable;  
+        [JsonIgnore] public string Symbol = "";   // not user editable;  
         [JsonIgnore] public string Name;     // not user editable
         public string Comment = "";
         [JsonIgnore] public string Units = "";    // not user editable
@@ -414,6 +414,11 @@ namespace Globals
     {
         new public bool Val;
     }
+
+    public class TStringParam : TParameter
+    {
+      new public string Val;
+    } 
 
     public class TDropDownParam : TParameter
     {

@@ -357,7 +357,7 @@ namespace AQUATOX.Bioaccumulation
                 SuspDetrVar = AllVariables.SuspRefrDetr;
             }
   
-            if (ChemRec.BCFUptake)
+            if (ChemRec.BCFUptake.Val)
             {
                 DB = 0.0;
             }
@@ -563,7 +563,7 @@ namespace AQUATOX.Bioaccumulation
                 Derivative_WriteRates();
                 return;
             }
-            if (ChemRec.BCFUptake || (CP.State == 0)) db = 0.0;
+            if (ChemRec.BCFUptake.Val || (CP.State == 0)) db = 0.0;
             else
             {
                 So = Sorption();      // ug/m2 d
@@ -578,7 +578,7 @@ namespace AQUATOX.Bioaccumulation
              // ug/m2 d  (g /m3 d)(ug/kg) (m) (kg/g)
 
                 MorphRecord MR = Location.Morph;
-                Pred = CP.Predn() * PP *   MR.SegVolum / Location.Locale.SurfArea * 1e-3;
+                Pred = CP.Predn() * PP *   MR.SegVolum / Location.Locale.SurfArea.Val * 1e-3;
           // (ug/m2 d) (g OC/m3 w)(ug tox/kg OC) (m3)                     (m2)      (kg/g)
 
                 MM = MicrobialMetabolism(ref FA);
@@ -624,7 +624,7 @@ namespace AQUATOX.Bioaccumulation
                 else
                     DissocFactor = NonDissoc();
 
-                K1 = 1.0 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow) * DissocFactor)));
+                K1 = 1.0 / (0.0020 + (500.0 / (Math.Pow(10, ChemRec.LogKow.Val) * DissocFactor)));
 
                 // K1 function is mirrored in CHEMTOX.PAS, any change here needs to be made there
                 double K2 = AlgalPtr.Plant_Tox[ToxInt(SVType)].K2;
@@ -667,7 +667,7 @@ namespace AQUATOX.Bioaccumulation
                 else
                     DissocFactor = NonDissoc();
 
-                double Kow = Math.Pow(10, ChemRec.LogKow);
+                double Kow = Math.Pow(10, ChemRec.LogKow.Val);
                 Local_K1 = 1.0 / (1.8e-6 + 1.0 / (Kow * DissocFactor));
                 // fit to Sijm et al.1998 data for PCBs
 
@@ -808,7 +808,7 @@ namespace AQUATOX.Bioaccumulation
             }
             // ----------------------------------------------------------------
             CP = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
-            SurfaceFloater = CP.PAlgalRec.SurfaceFloating;
+            SurfaceFloater = CP.PAlgalRec.SurfaceFloating.Val;
             WashO = 0;
             if (IsAGGR)
             {  DB = 0.0;
@@ -819,7 +819,7 @@ namespace AQUATOX.Bioaccumulation
             {
                 throw new Exception("TAlgaeTox must be associated with a plant state variable.");
             }
-            else if ((ChemRec.BCFUptake) || (CP.State == 0))
+            else if ((ChemRec.BCFUptake.Val) || (CP.State == 0))
             {
                 DB = 0.0;
             }
@@ -967,7 +967,7 @@ namespace AQUATOX.Bioaccumulation
 
             // AnimalDeriv
             CP = ((AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
-            if (ChemRec.BCFUptake)
+            if (ChemRec.BCFUptake.Val)
             {
                 DB = 0;
                 RecrSaveTox = 0;
@@ -998,7 +998,7 @@ namespace AQUATOX.Bioaccumulation
                 Dep = Depuration();
                 Predt = CP.Predation() * pp * 1e-6;
                 Mort = CP.Mortality() * pp * 1e-6;
-                Fi = CP.PAnimalData.Fishing_Frac * CP.State * pp * 1e-6;
+                Fi = CP.PAnimalData.Fishing_Frac.Val * CP.State * pp * 1e-6;
 
                 if (CP.PSameSpecies != AllVariables.NullStateVar)
                 {

@@ -63,6 +63,7 @@
             this.Controls.Add(this.CancelButt);
             this.Name = "Param_Form";
             this.Text = "Param_Form";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Param_Form_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Param_Form_FormClosed);
             this.ResumeLayout(false);
 

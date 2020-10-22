@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
@@ -15,147 +15,179 @@ namespace AQUATOX.Animals
 {
     public class AnimalRecord 
     {
-        public string AnimalName;
-        public string Animal_Type;
-        public string ToxicityRecord;
-        public double FHalfSat;
-        public string XFHalfSat;
-        public double CMax;    // max consumption
-        public string XCMax;
-        public double BMin;
-        public string XBMin;
-        public double Q10;
-        public string XQ10;
-        public double TOpt;
-        public string XTOpt;
-        public double TMax;
-        public string XTMax;
-        public double TRef;
-        public string XTRef;
-        public double EndogResp;
-        public string XEndogResp;
-        public double KResp;
-        public string XKResp;
-        public double KExcr;
-        public string XKExcr;
-        public double PctGamete;
-        public string XPctGamete;
-        public double GMort;
-        public string XGMort;
-        public double KMort;     // Mortality Coefficient
-        public string XKMort;
-        public double KCap;
-        public string XKCap;
-        public double MeanWeight;
-        public string XMeanWeight;
-        public double FishFracLipid;
-        public string XFishFracLipid;
-        public double LifeSpan;       // Mean Lifespan in days
-        public string XLifeSpan;
-        public double AveDrift;
-        public string XAveDrift;    // Background Drift
-        public bool AutoSpawn;        // Calc Spawn Automatically based on Temps?
-        public DateTime SpawnDate1;
-        public DateTime SpawnDate2;
-        public DateTime SpawnDate3;
-        public string XSpawnDate;
-        public bool UnlimitedSpawning;
-        public int SpawnLimit;
-        public bool UseAllom_C;  // use allometric equations to calculate consumption
-        public double CA;        // intercept for weight dependence
-        public double CB;        // slope for weight dependence
-        public bool UseAllom_R;  // use allometric equations to calculate respiration
-        public double RA;        // intercept for spec. standard metabolism
-        public double RB;        // weight dependence coeff.
-        public bool UseSet1;
-        // Use "set 1" of resp. eqns.
-        public double RQ;          // allometric respiration parameters
-        public double RTO;
-        public double RTM;
-        public double RTL;
-        public double RK1;
-        public double RK4;
-        public double ACT;
-        public double BACT;
+        public TStringParam AnimalName = new TStringParam();
+        public TStringParam ScientificName = new TStringParam();
 
-        public double FracInWaterCol;
-        public string XFracInWaterCol;
-        public string Guild_Taxa;
-        public double PrefRiffle;
-        public string XPrefRiffle;
-        public double PrefPool;
-        public string XPrefPool;
-        public double VelMax;
-        public string XVelMax;
-        public string XAllomConsumpt;
-        public string XAllomResp;
+        public TDropDownParam Animal_Type = new TDropDownParam();
+        public TDropDownParam Guild_Taxa = new TDropDownParam();
+        public TDropDownParam ToxicityRecord = new TDropDownParam();
+        public TDropDownParam BenthicDesignation = new TDropDownParam();
 
-        // Salinity & Ingestion
-        public double Salmin_Ing; // minimum salinity tolerance 0/00
-        public double SalMax_Ing; // max salinity tolerance 0/00
-        public double Salcoeff1_Ing;
-        public double Salcoeff2_Ing;  // unitless
-        public string XSalinity_Ing;
-        // Salinity & Gameteloss
-        public double Salmin_Gam; // minimum salinity tolerance 0/00
-        public double SalMax_Gam; // max salinity tolerance 0/00
-        public double Salcoeff1_Gam;
-        public double Salcoeff2_Gam;        // unitless
-        public string XSalinity_Gam;
-        // Salinity & Respiration
-        public double Salmin_Rsp; // minimum salinity tolerance 0/00
-        public double SalMax_Rsp; // max salinity tolerance 0/00
-        public double Salcoeff1_Rsp;
-        public double Salcoeff2_Rsp;        // unitless
-        public string XSalinity_Rsp;        
-        // Salinity & Mortality
-        public double Salmin_Mort; // minimum salinity tolerance 0/00
-        public double SalMax_Mort; // max salinity tolerance 0/00
-        public double Salcoeff1_Mort;
-        public double Salcoeff2_Mort;        // unitless
-        public string XSalinity_Mort;
-        public double Fishing_Frac;        // fraction / day
-        public string XFishing_Frac;
-        public double P2Org;
-        public string XP2Org;
-        public double N2Org;
-        public string XN2Org;
-        public double Wet2Dry;
-        public string XWet2Dry;
-        public double O2_LethalConc;
-        public double O2_LethalPct;
-        public string O2_LCRef;
-        public double O2_EC50growth;
-        public string XO2_EC50growth;
-        public double O2_EC50repro;
-        public string XO2_EC50repro;
-        public double Ammonia_LC50;
-        public string XAmmonia_LC50;
-        public double Sorting;       // 3.46, SABS
-        public string XSorting;
-        public bool SuspSedFeeding;
-        public string XSuspSedFeeding;
-        public double SlopeSSFeed;
-        public string XSlopeSSFeed;
-        public double InterceptSSFeed;
-        public string XInterceptSSFeed;
-        public string SenstoSediment = "";
-        public string XSensToSediment;
-        public double Trigger;
-        public string XTrigger;
-        public bool SenstoPctEmbed;
-        public double PctEmbedThreshold;
-        public string XPctEmbedThreshold;
-        public string BenthicDesignation;
-        public bool CanSeekRefuge;
-        public bool Visual_Feeder;
-        public bool PlaceholderB2;
-        public float PlaceholderS1;
-        public double PlaceHolderD1;
-        // --------------------------------------------------------------------------------
-        public double Burrow_Index;
-        public string ScientificName;
-        public string XBurrow_Index;
+        public TParameter FHalfSat = new TParameter();
+        public TParameter CMax = new TParameter();
+        public TParameter BMin = new TParameter();
+        public TParameter Sorting = new TParameter();
+        public TParameter Burrow_Index = new TParameter();
+        public TBoolParam CanSeekRefuge = new TBoolParam();
+        public TBoolParam Visual_Feeder = new TBoolParam();
+        public TBoolParam SuspSedFeeding = new TBoolParam();
+        public TParameter SlopeSSFeed = new TParameter();
+        public TParameter InterceptSSFeed = new TParameter();
+        public TParameter Q10 = new TParameter();
+        public TParameter TOpt = new TParameter();
+        public TParameter TMax = new TParameter();
+        public TParameter TRef = new TParameter();
+        public TParameter EndogResp = new TParameter();
+        public TParameter KResp = new TParameter();
+        public TParameter KExcr = new TParameter();
+        public TParameter N2Org = new TParameter();
+        public TParameter P2Org = new TParameter();
+        public TParameter Wet2Dry = new TParameter();
+        public TParameter PctGamete = new TParameter();
+        public TParameter GMort = new TParameter();
+        public TParameter KMort = new TParameter();
+        public TDropDownParam SensToSediment = new TDropDownParam();
+        public TBoolParam SenstoPctEmbed = new TBoolParam();
+        public TParameter PctEmbedThreshold = new TParameter();
+        public TParameter KCap = new TParameter();
+        public TParameter AveDrift = new TParameter();
+        public TParameter Trigger = new TParameter();
+        public TParameter FracInWaterCol = new TParameter();
+        public TParameter VelMax = new TParameter();
+        public TParameter Fishing_Frac = new TParameter();
+        public TParameter LifeSpan = new TParameter();
+        public TParameter FishFracLipid = new TParameter();
+        public TParameter MeanWeight = new TParameter();
+        public TParameter O2_LethalConc = new TParameter();
+        public TParameter O2_LethalPct = new TParameter();
+        public TParameter O2_EC50growth = new TParameter();
+        public TParameter O2_EC50repro = new TParameter();
+        public TParameter Ammonia_LC50 = new TParameter();
+        public TParameter SalMin_Ing, SalMax_Ing, SalCoeff1_Ing, SalCoeff2_Ing = new TParameter();
+        public TParameter SalMin_Gam, SalMax_Gam, SalCoeff1_Gam, SalCoeff2_Gam = new TParameter();
+        public TParameter SalMin_Rsp, SalMax_Rsp, SalCoeff1_Rsp, SalCoeff2_Rsp = new TParameter();
+        public TParameter SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort = new TParameter();
+        public TParameter PrefRiffle = new TParameter();
+        public TParameter PrefPool = new TParameter();
+
+        public TBoolParam AutoSpawn = new TBoolParam();
+
+        public TDateParam SpawnDate1 = new TDateParam();
+        public TDateParam SpawnDate2 = new TDateParam();
+        public TDateParam SpawnDate3 = new TDateParam();
+
+        public TBoolParam UnlimitedSpawning = new TBoolParam();
+        public TParameter SpawnLimit = new TParameter();
+
+        public TBoolParam UseAllom_C = new TBoolParam();
+        public TParameter CA = new TParameter();
+        public TParameter CB = new TParameter();
+        public TBoolParam UseAllom_R = new TBoolParam();
+        public TParameter RA = new TParameter();
+        public TParameter RB = new TParameter();
+        public TBoolParam UseSet1 = new TBoolParam();
+        public TParameter RQ = new TParameter();
+        public TParameter RTL = new TParameter();
+        public TParameter ACT = new TParameter();
+        public TParameter RTO = new TParameter();
+        public TParameter RK1 = new TParameter();
+        public TParameter BACT = new TParameter();
+
+
+        public TParameter RTM = new TParameter();
+        public TParameter RK4 = new TParameter();
+
+        public void Setup()
+        {
+            AnimalName.Symbol = "Animal Name"; AnimalName.Name = "Common Name";
+            ScientificName.Symbol = "Scientific Name"; ScientificName.Name = "Scientific Name";
+            Animal_Type.Name = "Animal Type"; Animal_Type.ValList = new string[] { "Fish", "Plankton Invert.", "Nekton Invert.", "Benthic Invert.","Benthic Insect"};
+            Guild_Taxa.Name = "Taxonomic Type or Guild"; Guild_Taxa.ValList = new string[] { "Shredder", "Sed Feeder", "Susp Feeder", "Clam", "Grazer", "Snail", "Pred Invert", "Forage Fish", "Bottom Fish", "Game Fish" };
+            BenthicDesignation.Name = "Benthic Metric Designation"; BenthicDesignation.ValList = new string[] { "Oligochaete", "Chironomid", "Mayfly", "Stonefly", "Caddisfly", "Beetle", "Mussel", "Other Bivalve", "Amphipod", "Gastropod", "Other" };
+            ToxicityRecord.Name = "Toxicity Record"; ToxicityRecord.ValList = new string[] { "Trout", "Bluegill", "Bass", "Catfish", "Minnow", "Carp", "Walleye", "White sucker", "Yellow perch", "Daphnia", "Chironomid", "Stonefly", "Amphipod", "Copepod", "Crayfish", "Snail", "Clam", "Oligochaete", "Mysid" };
+            FHalfSat.Symbol = "Half Saturation Feeding"; FHalfSat.Name = "Half-saturation const. for feeding"; FHalfSat.Units = "g/m3";
+            CMax.Symbol = "Maximum Consumption"; CMax.Name = "Max. feeding rate for predator"; CMax.Units = "g/g∙d";
+            BMin.Symbol = "Min Prey for Feeding"; BMin.Name = "Biomass needed to begin feeding"; BMin.Units = "g/m3 or g/m2";
+            Sorting.Symbol = "Sorting"; Sorting.Name = "Fractional degree to which there is selective feeding"; Sorting.Units = "Unitless";
+            Burrow_Index.Symbol = "BurrowIndex"; Burrow_Index.Name = "specie-specific with 0 representing no burrowing refuge;"; Burrow_Index.Units = "Unitless";
+            CanSeekRefuge.Symbol = "CanSeekRefuge"; CanSeekRefuge.Name = "Can Seek Refuge?  (can this animal, as prey, seek refuge in macrophytes, seagrass, or oyster bed?)";
+            Visual_Feeder.Symbol = "Is a Visual Feeder"; Visual_Feeder.Name = "Visual Feeder?  (Does this animal feed based on vision, thereby being impeded by animals seeking refuge in macrophytes, etc.?) ";
+            SuspSedFeeding.Symbol = "Susp. Sed. Affect Feeding"; SuspSedFeeding.Name = "Does suspended sediment affect feeding?";
+            SlopeSSFeed.Symbol = "Slope for Sed. Response"; SlopeSSFeed.Name = "Slope for sediment response "; SlopeSSFeed.Units = "Unitless";
+            InterceptSSFeed.Symbol = "Intercept for Sed. Resp."; InterceptSSFeed.Name = "Intercept for sediment response "; InterceptSSFeed.Units = "Unitless";
+            Q10.Symbol = "Temp Response Slope"; Q10.Name = "Slope or rate of change in process per 10°C temperature change "; Q10.Units = "Unitless";
+            TOpt.Symbol = "Optimum Temperature"; TOpt.Name = "Optimum temperature for given process"; TOpt.Units = "°C";
+            TMax.Symbol = "Maximum Temperature"; TMax.Name = "Maximum temperature tolerated"; TMax.Units = "°C";
+            TRef.Symbol = "Min Adaptation Temp"; TRef.Name = "Adaptation temperature below which there is no acclimation"; TRef.Units = "°C";
+            EndogResp.Symbol = "Endogenous Respiration"; EndogResp.Name = "Basal respiration rate at 0° C for given predator"; EndogResp.Units = "day-1";
+            KResp.Symbol = "Specific Dynamic Action"; KResp.Name = "Proportion assimilated energy lost to SDA"; KResp.Units = "Unitless";
+            KExcr.Symbol = "Excretion:Respiration"; KExcr.Name = "Proportionality constant for excretion:respiration"; KExcr.Units = "Unitless";
+            N2Org.Symbol = "N to Organics"; N2Org.Name = "Fixed ratio of nitrate to organic matter for given species"; N2Org.Units = "fraction dry weight";
+            P2Org.Symbol = "P to Organics"; P2Org.Name = "Fixed ratio of phosphate to organic matter for given species"; P2Org.Units = "fraction dry weight";
+            Wet2Dry.Symbol = "Wet to Dry"; Wet2Dry.Name = "Ratio of wet weight to dry weight for given species"; Wet2Dry.Units = "Ratio";
+            PctGamete.Symbol = "Gamete : Biomass"; PctGamete.Name = "Fraction of adult predator biomass that is in gametes"; PctGamete.Units = "Unitless";
+            GMort.Symbol = "Gamete Mortality"; GMort.Name = "Gamete mortality"; GMort.Units = "1/d";
+            KMort.Symbol = "Mortality Coefficient"; KMort.Name = "Intrinsic mortality rate"; KMort.Units = "1/d";
+            SensToSediment.Symbol = "Sensitivity to Sediment"; SensToSediment.Name = "Which equation to use for mortality due to sediment"; SensToSediment.ValList = new string[] { "Zero Sensitivity", "Tolerant", "Sensitive", "Highly Sensitive" };
+            SenstoPctEmbed.Name = "Organism is Sensitive to Percent Embeddedness"; 
+            PctEmbedThreshold.Symbol = "Percent Embeddedness Threshold"; PctEmbedThreshold.Name = "If the site’s calculated embeddedness exceeds this value, mortality for the organism is set to 100%"; PctEmbedThreshold.Units = "percent (0-100)";
+            KCap.Symbol = "Carrying Capacity"; KCap.Name = "Carrying capacity"; KCap.Units = "g/m2 ";
+            AveDrift.Symbol = "Average Drift"; AveDrift.Name = "Fraction of biomass subject to drift per day"; AveDrift.Units = "fraction / day";
+            Trigger.Symbol = "Trigger: Deposition Rate "; Trigger.Name = "deposition rate at which drift is accelerated  "; Trigger.Units = "kg/m2 day";
+            FracInWaterCol.Symbol = "Frac. in Water Column"; FracInWaterCol.Name = "Fraction of organism in water column, differentiates from pore-water uptake if the multi-layer sediment model is included"; FracInWaterCol.Units = "Fraction";
+            VelMax.Symbol = "VelMax"; VelMax.Name = "Maximum water velocity tolerated"; VelMax.Units = "cm/s";
+            Fishing_Frac.Symbol = "Removal due to Fishing"; Fishing_Frac.Name = "Daily loss of organism due to fishing Pressure "; Fishing_Frac.Units = "Fraction";
+            LifeSpan.Symbol = "Mean lifespan"; LifeSpan.Name = "Mean lifespan in days"; LifeSpan.Units = "Days";
+            FishFracLipid.Symbol = "Fraction that is lipid"; FishFracLipid.Name = "Fraction of lipid in organism"; FishFracLipid.Units = "g lipid/g org. Wet";
+            MeanWeight.Symbol = "Mean Wet Weight"; MeanWeight.Name = "Mean wet weight of organism"; MeanWeight.Units = "g wet";
+            O2_LethalConc.Symbol = "Low O2: Lethal Conc"; O2_LethalConc.Name = "Concentration where there is a known mortality over 24 hours"; O2_LethalConc.Units = "mg/L (24 hour)";
+            O2_LethalPct.Symbol = "Low O2: Pct. Killed"; O2_LethalPct.Name = "The percentage of the organisms killed at the lcknown level above."; O2_LethalPct.Units = "Percentage";
+            O2_EC50growth.Symbol = "Low O2: EC50 Growth"; O2_EC50growth.Name = "Concentration where there is 50% reduction in growth over 24 hours"; O2_EC50growth.Units = "mg/L (24 hour)";
+            O2_EC50repro.Symbol = "Low O2: EC50 Reproduction"; O2_EC50repro.Name = "Concentration where there is 50% reduction in reproduction over 24 hours"; O2_EC50repro.Units = "mg/L (24 hour)";
+            Ammonia_LC50.Symbol = "Ammonia Toxicity: LC50, Total Ammonia (pH=8)"; Ammonia_LC50.Name = "LC50total ammonia at 20 degrees centigrade and ph of 8"; Ammonia_LC50.Units = "mg/L (ph=8)";
+            SalMin_Ing.Symbol = "SalMin_Ing"; SalMin_Ing.Name = "Minimum Salinity for Ingestion"; SalMin_Ing.Units = "‰";
+            SalMax_Ing.Symbol = "SalMax_Ing"; SalMax_Ing.Name = "Maximum Salinity for Ingestion"; SalMax_Ing.Units = "‰";
+            SalCoeff1_Ing.Symbol = "SalCoeff1_Ing"; SalCoeff1_Ing.Name = "Salinity Coefficient 1 for Ingestion"; SalCoeff1_Ing.Units = "unitless";
+            SalCoeff2_Ing.Symbol = "SalCoeff2_Ing"; SalCoeff2_Ing.Name = "Salinity Coefficient 2 for Ingestion"; SalCoeff2_Ing.Units = "unitless";
+            SalMin_Gam.Symbol = "SalMin_Gam"; SalMin_Gam.Name = "Minimum Salinity for Gamete Loss"; SalMin_Gam.Units = "‰";
+            SalMax_Gam.Symbol = "SalMax_Gam"; SalMax_Gam.Name = "Maximum Salinity for Gamete Loss"; SalMax_Gam.Units = "‰";
+            SalCoeff1_Gam.Symbol = "SalCoeff1_Gam"; SalCoeff1_Gam.Name = "Salinity Coefficient 1 for Gamete Loss"; SalCoeff1_Gam.Units = "unitless";
+            SalCoeff2_Gam.Symbol = "SalCoeff2_Gam"; SalCoeff2_Gam.Name = "Salinity Coefficient 2 for Gamete Loss"; SalCoeff2_Gam.Units = "unitless";
+            SalMin_Rsp.Symbol = "SalMin_Rsp"; SalMin_Rsp.Name = "Minimum Salinity for Respiration"; SalMin_Rsp.Units = "‰";
+            SalMax_Rsp.Symbol = "SalMax_Rsp"; SalMax_Rsp.Name = "Maximum Salinity for Respiration"; SalMax_Rsp.Units = "‰";
+            SalCoeff1_Rsp.Symbol = "SalCoeff1_Rsp"; SalCoeff1_Rsp.Name = "Salinity Coefficient 1 for Respiration"; SalCoeff1_Rsp.Units = "unitless";
+            SalCoeff2_Rsp.Symbol = "SalCoeff2_Rsp"; SalCoeff2_Rsp.Name = "Salinity Coefficient 2 for Respiration"; SalCoeff2_Rsp.Units = "unitless";
+            SalMin_Mort.Symbol = "SalMin_Mort"; SalMin_Mort.Name = "Minimum Salinity for Mortality"; SalMin_Mort.Units = "‰";
+            SalMax_Mort.Symbol = "SalMax_Mort"; SalMax_Mort.Name = "Maximum Salinity for Mortality"; SalMax_Mort.Units = "‰";
+            SalCoeff1_Mort.Symbol = "SalCoeff1_Mort"; SalCoeff1_Mort.Name = "Salinity Coefficient 1 for Mortality"; SalCoeff1_Mort.Units = "unitless";
+            SalCoeff2_Mort.Symbol = "SalCoeff2_Mort"; SalCoeff2_Mort.Name = "Salinity Coefficient 2 for Mortality"; SalCoeff2_Mort.Units = "unitless";
+            PrefRiffle.Symbol = "Percent in Riffle"; PrefRiffle.Name = "Percentage of biomass of animal that is in riffle, as opposed to run or pool"; PrefRiffle.Units = "%";
+            PrefPool.Symbol = "Percent in Pool"; PrefPool.Name = "Percentage of biomass of animal that is in pool, as opposed to run or riffle"; PrefPool.Units = "%";
+            AutoSpawn.Name = "Does AQUATOX calculate Spawn Dates? (otherwise enter dates)"; 
+            SpawnDate1.Name="User entered spawn date1 (year irrelevant)"; 
+            SpawnDate2.Name = "User entered spawn date2 (year irrelevant)"; 
+            SpawnDate3.Name = "User entered spawn date3 (year irrelevant)"; 
+            UnlimitedSpawning.Symbol = "Fish can spawn an unlimited number of times..."; UnlimitedSpawning.Name = "Allow fish to spawn unlimited times each year"; UnlimitedSpawning.Units = "true/false";
+            SpawnLimit.Symbol = "SpawnLimit"; SpawnLimit.Name = "Maximum Spawnings Per Year"; SpawnLimit.Units = "integer";
+
+            UseAllom_C.Symbol = "Use Allometric Equation to Calculate Maximum Consumption"; UseAllom_C.Name = "Use allometric consumption equation"; 
+            CA.Symbol = "Intercept for weight dependence"; CA.Name = "Allometric consumption parameter"; CA.Units = "real number";
+            CB.Symbol = "Slope for weight dependence"; CB.Name = "Allometric consumption parameter"; CB.Units = "real number";
+            UseAllom_R.Symbol = "Use Allometric Equation to Calculate Respiration"; UseAllom_R.Name = "Use allometric consumption respiration"; 
+            RA.Symbol = "RA"; RA.Name = " Intercept for species specific metabolism"; RA.Units = "real number";
+            RB.Symbol = "RB"; RB.Name = " Weight dependence coefficient"; RB.Units = "real number";
+            UseSet1.Symbol = "Use 'Set 1' of Respiration Equations"; 	UseSet1.Name="Use 'Set 1' of Allometric Respiration Parameters"; 
+            RQ.Symbol = "RQ"; RQ.Name = "Allometric respiration parameter"; RQ.Units = "real number";
+            RTL.Symbol = "RTL"; RTL.Name = "Temperature below which swimming activity is an exponential function of temperature"; RTL.Units = "°C";
+            ACT.Symbol = "ACT"; ACT.Name = "Intercept for swimming speed for a 1g fish "; ACT.Units = "cm/s";
+            RTO.Symbol = "RTO"; RTO.Name = "Coefficient for swimming speed dependence on metabolism "; RTO.Units = "s/cm";
+            RK1.Symbol = "RK1"; RK1.Name = "Intercept for swimming speed above the threshold temperature"; RK1.Units = "cm/s";
+            BACT.Symbol = "BACT"; BACT.Name = "Coefficient for swimming at low temperatures"; BACT.Units = " 1/ °C";
+            RTM.Symbol = "RTM"; RTM.Name = "Not currently used as a parameter by the code"; RTM.Units = "";
+            RK4.Symbol = "RK4"; RK4.Name = "Weight-dependent coefficient for swimming speed"; RK4.Units = "real number";
+            ACT.Symbol = "ACT"; ACT.Name = "Intercept of swimming speed vs. Temperature and weight"; ACT.Units = "real number";
+        }
+
 
     } // end AnimalRecord
 
@@ -272,8 +304,8 @@ namespace AQUATOX.Animals
             PromoteGain = 0;
             EmergeInsect = 0;
             Recruit = 0;
-            if ((PAnimalData.Animal_Type == "Fish") || (IsPlanktonInvert()))
-                PAnimalData.AveDrift = 0;
+            if ((PAnimalData.Animal_Type.Val == "Fish") || (IsPlanktonInvert()))
+                PAnimalData.AveDrift.Val = 0;
 
             CalcRiskConc(true);    // Using ToxicityRecord Initialize Organisms with
                                    // the appropriate RISKCONC, LCINFINITE, and K2
@@ -287,26 +319,26 @@ namespace AQUATOX.Animals
         // ------------------------------------------------------------------------
         public bool IsBenthos()
         {
-            return (PAnimalData.Animal_Type == "Benthic Invert.") || (PAnimalData.Animal_Type == "Benthic Insect");
+            return (PAnimalData.Animal_Type.Val == "Benthic Invert.") || (PAnimalData.Animal_Type.Val == "Benthic Insect");
         }
 
         // ------------------------------------------------------------------------
         public bool IsPlanktonInvert()
         {
-            return PAnimalData.Animal_Type == "Plankton Invert";
+            return PAnimalData.Animal_Type.Val == "Plankton Invert";
         }
 
         // includes benthic invert and benthic insect
         // ------------------------------------------------------------------------
         public bool IsNektonInvert()
         {
-            return PAnimalData.Animal_Type == "Nekton Invert.";
+            return PAnimalData.Animal_Type.Val == "Nekton Invert.";
         }
 
         // ------------------------------------------------------------------------
         public override double WetToDry()
         {
-            return PAnimalData.Wet2Dry;
+            return PAnimalData.Wet2Dry.Val;
         }
 
         // ------------------------------------------------------------------------
@@ -330,16 +362,16 @@ namespace AQUATOX.Animals
 
             BurrowRefuge = 1.0;
             AnimalRecord ZR = PPrey.PAnimalData;
-            if (ZR.Burrow_Index > Consts.Tiny)
+            if (ZR.Burrow_Index.Val > Consts.Tiny)
             {
-                BurrowRefuge = 1.0 - (ZR.Burrow_Index / (ZR.Burrow_Index + 3.2));
+                BurrowRefuge = 1.0 - (ZR.Burrow_Index.Val / (ZR.Burrow_Index.Val + 3.2));
             }
             // 6-27-2014
             result = BurrowRefuge;
-            if (!PAnimalData.Visual_Feeder) return result;
+            if (!PAnimalData.Visual_Feeder.Val) return result;
             // prey is not subject to visual refuge from this predator
 
-            if (!PPrey.PAnimalData.CanSeekRefuge) return result;
+            if (!PPrey.PAnimalData.CanSeekRefuge.Val) return result;
 
             // This prey type cannot seek visual refuge, burrow refuge only
             MacroState = 0;
@@ -371,13 +403,13 @@ namespace AQUATOX.Animals
                 OysterBio = OysterBio * AQTSeg.SegVol() / AQTSeg.SurfaceArea();
                 // g/m2                // g/m3                // m3|       
 
-                OysterRefuge = 1.0 - (OysterBio / (OysterBio + LL.HalfSatOysterRefuge));                  // g/m2
+                OysterRefuge = 1.0 - (OysterBio / (OysterBio + LL.HalfSatOysterRefuge.Val));                  // g/m2
             }
             
             MarshRefuge = 1;
-            if (LL.FractalD > Consts.Tiny)
+            if (LL.FractalD.Val > Consts.Tiny)
             {
-                MarshRefuge = (1.0 + LL.FD_Refuge_Coeff) / (LL.FractalD + LL.FD_Refuge_Coeff);
+                MarshRefuge = (1.0 + LL.FD_Refuge_Coeff.Val) / (LL.FractalD.Val + LL.FD_Refuge_Coeff.Val);
             }
             result = MacroRefuge * OysterRefuge * MarshRefuge * BurrowRefuge;
             return result;
@@ -455,7 +487,7 @@ namespace AQUATOX.Animals
             TToxics TT;
             int ToxLoop;
             string DataName;
-            DataName = PAnimalData.ToxicityRecord.ToLower();
+            DataName = PAnimalData.ToxicityRecord.Val.ToLower();
 
             for (ToxLoop = 0; ToxLoop < Consts.NToxs; ToxLoop++)
             {
@@ -473,7 +505,7 @@ namespace AQUATOX.Animals
                         }
                     }
                     if (FoundToxIndx == -1)
-                        throw new Exception("Error!  " + PAnimalData.AnimalName + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Anim toxicity data.  Study cannot be executed.");
+                        throw new Exception("Error!  " + PAnimalData.AnimalName.Val + " uses the toxicity record \"" + DataName + "\" which is not found in chemical " + TT.ChemRec.ChemName + "\'s Anim toxicity data.  Study cannot be executed.");
 
                     ATR = TT.Chem_Anim_Tox[FoundToxIndx];
                     Anim_Tox[ToxLoop] = ATR;
@@ -490,7 +522,7 @@ namespace AQUATOX.Animals
             // FIX THE UNITS WHICH CHANGE WITH INVERTEBRATE TYPE
             if ((NState >= Consts.FirstInvert && NState <= Consts.LastInvert))
             {
-                if ((PAnimalData.Animal_Type == "Benthic Invert.") || (PAnimalData.Animal_Type == "Benthic Insect") || (PAnimalData.Animal_Type == "Fish"))
+                if ((PAnimalData.Animal_Type.Val == "Benthic Invert.") || (PAnimalData.Animal_Type.Val == "Benthic Insect") || (PAnimalData.Animal_Type.Val == "Fish"))
                 {
                     StateUnit = "g/m2 dry";
                     LoadingUnit = "g/m2 dry";
@@ -607,13 +639,13 @@ namespace AQUATOX.Animals
 
             if (Location.SiteType != SiteTypes.Stream) return 1.0;
 
-            PctRun = 100 - AQTSeg.Location.Locale.PctRiffle - AQTSeg.Location.Locale.PctPool;
-            PrefRun = 100 - PAnimalData.PrefRiffle - PAnimalData.PrefPool;
+            PctRun = 100 - AQTSeg.Location.Locale.PctRiffle.Val - AQTSeg.Location.Locale.PctPool.Val;
+            PrefRun = 100 - PAnimalData.PrefRiffle.Val - PAnimalData.PrefPool.Val;
             HabitatAvail = 0;
 
-            if (PAnimalData.PrefRiffle > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle / 100.0;
+            if (PAnimalData.PrefRiffle.Val > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctRiffle.Val / 100.0;
 
-            if (PAnimalData.PrefPool > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool / 100.0;
+            if (PAnimalData.PrefPool.Val > 0) HabitatAvail = HabitatAvail + AQTSeg.Location.Locale.PctPool.Val / 100.0;
 
             if (PrefRun > 0) HabitatAvail = HabitatAvail + PctRun / 100.0;
 
@@ -624,10 +656,10 @@ namespace AQUATOX.Animals
     {
         if (!IsPlanktonInvert())  
         {
-            return PAnimalData.BMin / AQTSeg.Volume_Last_Step * Location.Locale.SurfArea;
+            return PAnimalData.BMin.Val / AQTSeg.Volume_Last_Step * Location.Locale.SurfArea.Val;
           // mg/L          // g/m2                // m3                   // m2
         }
-            else return PAnimalData.BMin;      // plankton invert already in mg/L
+            else return PAnimalData.BMin.Val;      // plankton invert already in mg/L
      }
 
     public double AggregateRedGrowth()
@@ -706,7 +738,7 @@ namespace AQUATOX.Animals
                 FdSub = Food;
                 // mg/L
                 Sed = 0;
-                if ((PAnimalData.Guild_Taxa == "Susp Feeder") || (PAnimalData.Guild_Taxa == "Clam"))
+                if ((PAnimalData.Guild_Taxa.Val == "Susp Feeder") || (PAnimalData.Guild_Taxa.Val == "Clam"))
                 {
                     Sed = AQTSeg.InorgSedConc();  
                     SandC = AQTSeg.GetStateVal(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) + AQTSeg.GetStateVal(AllVariables.NonCohesives2, T_SVType.StV, T_SVLayer.WaterCol);
@@ -715,14 +747,14 @@ namespace AQUATOX.Animals
 
                 }
 
-                if ((PAnimalData.Guild_Taxa == "Sed Feeder") || (PAnimalData.Guild_Taxa == "Snail") || (PAnimalData.Guild_Taxa == "Grazer"))
+                if ((PAnimalData.Guild_Taxa.Val == "Sed Feeder") || (PAnimalData.Guild_Taxa.Val == "Snail") || (PAnimalData.Guild_Taxa.Val == "Grazer"))
                 {
-                    if ((PAnimalData.Guild_Taxa == "Sed Feeder"))   PConstant = 0.001;  // RAP 5/6/2009
+                    if ((PAnimalData.Guild_Taxa.Val == "Sed Feeder"))   PConstant = 0.001;  // RAP 5/6/2009
                        else  PConstant = 0.01;
                     // account for the fact that snails & grazers feed
                     // periphyton above the depositional surface
 
-                    SurfArea = Location.Locale.SurfArea;
+                    SurfArea = Location.Locale.SurfArea.Val;
                     // m2                    // m2
                     Sed = AQTSeg.InorgSedDep() * 1000 * PConstant;  
                     // g/m2     // kg/m2      // g/kg  // Proportionality Constant
@@ -730,7 +762,7 @@ namespace AQUATOX.Animals
                     // g/m2  // g/m3          // m3           // m2
                 }
 
-                if (Sed > 0)  return FdSub / (FdSub + Sed * (1.0 - PAnimalData.Sorting));
+                if (Sed > 0)  return FdSub / (FdSub + Sed * (1.0 - PAnimalData.Sorting.Val));
                 else          return 1.0;
 
             }
@@ -769,18 +801,18 @@ namespace AQUATOX.Animals
 
         if ((Pref > 0.0) && (Food > 0.0))
         {
-            IngestS = MaxConsumption() * AQTSeg.TCorr(PAnimalData.Q10, PAnimalData.TRef, PAnimalData.TOpt, PAnimalData.TMax) * Pref * Food / (SumPrey + PAnimalData.FHalfSat) * (1.0 - RedGrow) * State * HabitatLimit;
+            IngestS = MaxConsumption() * AQTSeg.TCorr(PAnimalData.Q10.Val, PAnimalData.TRef.Val, PAnimalData.TOpt.Val, PAnimalData.TMax.Val) * Pref * Food / (SumPrey + PAnimalData.FHalfSat.Val) * (1.0 - RedGrow) * State * HabitatLimit;
             if (IngestS > Food) IngestS = Food;
             if (IngestS < 0)    IngestS = 0;
         }
 
-        SaltEffect = AQTSeg.SalEffect(PAnimalData.Salmin_Ing, PAnimalData.SalMax_Ing, PAnimalData.Salcoeff1_Ing, PAnimalData.Salcoeff2_Ing);
+        SaltEffect = AQTSeg.SalEffect(PAnimalData.SalMin_Ing.Val, PAnimalData.SalMax_Ing.Val, PAnimalData.SalCoeff1_Ing.Val, PAnimalData.SalCoeff2_Ing.Val);
         SSedEffect = 1;
-        if (PAnimalData.SuspSedFeeding)
+        if (PAnimalData.SuspSedFeeding.Val)
         {
             InorgSed = AQTSeg.InorgSedConc(); 
             if (InorgSed > Consts.Tiny)
-                 SSedEffect = PAnimalData.SlopeSSFeed * Math.Log(InorgSed) + PAnimalData.InterceptSSFeed;
+                 SSedEffect = PAnimalData.SlopeSSFeed.Val * Math.Log(InorgSed) + PAnimalData.InterceptSSFeed.Val;
             else SSedEffect = 1.0;
 
             if (SSedEffect > 1) SSedEffect = 1;
@@ -794,9 +826,9 @@ namespace AQUATOX.Animals
 
     public double MaxConsumption()
     {
-        if (PAnimalData.UseAllom_C)
-              return PAnimalData.CA * Math.Pow(PAnimalData.MeanWeight, PAnimalData.CB);
-        else  return PAnimalData.CMax;
+        if (PAnimalData.UseAllom_C.Val)
+              return PAnimalData.CA.Val * Math.Pow(PAnimalData.MeanWeight.Val, PAnimalData.CB.Val);
+        else  return PAnimalData.CMax.Val;
     }
 
     // -------------------------------------------------------------------------------
@@ -929,10 +961,10 @@ namespace AQUATOX.Animals
         }
         else
         {
-            TCorr = AQTSeg.TCorr(PAnimalData.Q10, PAnimalData.TRef, PAnimalData.TOpt, PAnimalData.TMax);
+            TCorr = AQTSeg.TCorr(PAnimalData.Q10.Val, PAnimalData.TRef.Val, PAnimalData.TOpt.Val, PAnimalData.TMax.Val);
             // Stroganov
-            RoutineResp = PAnimalData.EndogResp;  // legacy name elsewhere in code
-            SpecDynAction = PAnimalData.KResp * (Consumption() - Defecation());    // Hewett & Johnson '92
+            RoutineResp = PAnimalData.EndogResp.Val;  // legacy name elsewhere in code
+            SpecDynAction = PAnimalData.KResp.Val * (Consumption() - Defecation());    // Hewett & Johnson '92
 
             if ((IsFish() || IsPlanktonInvert())) // 10-24-12 include inverts
                 {
@@ -943,25 +975,25 @@ namespace AQUATOX.Animals
                 DensityDep = 1.0;
             }
             // allometric resp currently implemented for inverts 10/18/2013
-            if (PAnimalData.UseAllom_R)
+            if (PAnimalData.UseAllom_R.Val)
             {
-                if (PAnimalData.UseSet1)
+                if (PAnimalData.UseSet1.Val)
                 {
                     Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-                    TFn = Math.Exp(PAnimalData.RQ * Temp);
-                    if (Temp > PAnimalData.RTL)
-                        Vel = PAnimalData.RK1 * Math.Pow(PAnimalData.MeanWeight, PAnimalData.RK4);
+                    TFn = Math.Exp(PAnimalData.RQ.Val * Temp);
+                    if (Temp > PAnimalData.RTL.Val)
+                        Vel = PAnimalData.RK1.Val * Math.Pow(PAnimalData.MeanWeight.Val, PAnimalData.RK4.Val);
                     else
-                        Vel = PAnimalData.ACT * Math.Exp(PAnimalData.BACT * Temp) * Math.Pow(PAnimalData.MeanWeight, PAnimalData.RK4);
-                    Activity = Math.Exp(PAnimalData.RTO * Vel);
+                        Vel = PAnimalData.ACT.Val * Math.Exp(PAnimalData.BACT.Val * Temp) * Math.Pow(PAnimalData.MeanWeight.Val, PAnimalData.RK4.Val);
+                    Activity = Math.Exp(PAnimalData.RTO.Val * Vel);
                 }
                 else
                 {
-                    Activity = PAnimalData.ACT;  // Set 2
+                    Activity = PAnimalData.ACT.Val;  // Set 2
                     TFn = TCorr;
                 }
-                BasalResp = PAnimalData.RA * 1.5;   // conversion from O2 to organic matter
-                StdResp = State * BasalResp * Math.Pow(PAnimalData.MeanWeight, PAnimalData.RB) * TFn * DensityDep * Activity;
+                BasalResp = PAnimalData.RA.Val * 1.5;   // conversion from O2 to organic matter
+                StdResp = State * BasalResp * Math.Pow(PAnimalData.MeanWeight.Val, PAnimalData.RB.Val) * TFn * DensityDep * Activity;
                 // <-------------------- STDRESP_PRED -------------------- > < ActiveResp_PRED >
             }
             else
@@ -972,19 +1004,19 @@ namespace AQUATOX.Animals
             Respire = SpecDynAction + StdResp;
         }
         // with animaldata
-        SaltEffect = AQTSeg.SalEffect(PAnimalData.Salmin_Rsp, PAnimalData.SalMax_Rsp, PAnimalData.Salcoeff1_Rsp, PAnimalData.Salcoeff2_Rsp);
+        SaltEffect = AQTSeg.SalEffect(PAnimalData.SalMin_Rsp.Val, PAnimalData.SalMax_Rsp.Val, PAnimalData.SalCoeff1_Rsp.Val, PAnimalData.SalCoeff2_Rsp.Val);
         return Respire * SaltEffect;
     }
 
     // KCAP In proper Consts... 10-30-01, jsc
     public double KCAP_in_g_m3()
     {
-        if (IsPlanktonInvert())  return PAnimalData.KCap;   // pelagic KCAP already in g/m3
+        if (IsPlanktonInvert())  return PAnimalData.KCap.Val;   // pelagic KCAP already in g/m3
 
         AQUATOXSegment TS = AQTSeg;
         // note, deeper sites have lower g/m3 KCAP
         // 11/3/2014 replaced static zmean with more consistent conversion
-        return PAnimalData.KCap * TS.Location.Locale.SurfArea / TS.Volume_Last_Step;
+        return PAnimalData.KCap.Val * TS.Location.Locale.SurfArea.Val / TS.Volume_Last_Step;
        // g/m3           // g/m2                    // m2               // m3
 
        // removed vertical stratification code in which carrying capacity was split up based on epi benthic area, like the vars are
@@ -996,7 +1028,7 @@ namespace AQUATOX.Animals
     public virtual double AnimExcretion()
     {
         if ((State < Consts.Tiny) || IsLeavingSeg) return 0;
-        else return PAnimalData.KExcr * Respiration();
+        else return PAnimalData.KExcr.Val * Respiration();
     }
 
     public double AmmoniaMortality_External_Mort(double LC50, double Conc)
@@ -1040,7 +1072,7 @@ namespace AQUATOX.Animals
         double FracKill;
         // AmmoniaMortality
 
-        AmmoniaLC50 = PAnimalData.Ammonia_LC50;
+        AmmoniaLC50 = PAnimalData.Ammonia_LC50.Val;
         if (AmmoniaLC50 < Consts.Tiny) return 0;
         pHval = AQTSeg.GetState(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
         if (ionized)
@@ -1113,14 +1145,14 @@ namespace AQUATOX.Animals
         }
             var O2EffectConc = O2Eff switch
             {
-                0 => PAnimalData.O2_LethalConc,
-                1 => PAnimalData.O2_EC50growth,
-                _ => PAnimalData.O2_EC50repro,
+                0 => PAnimalData.O2_LethalConc.Val,
+                1 => PAnimalData.O2_EC50growth.Val,
+                _ => PAnimalData.O2_EC50repro.Val,
             };
             // case
             O2EffectPct = 50;
         if (O2Eff == 0)   //(0=O2Mortality)
-            O2EffectPct = PAnimalData.O2_LethalPct;
+            O2EffectPct = PAnimalData.O2_LethalPct.Val;
  
         EffectFrac = 0;
         if ((O2EffectConc == 0) || (O2EffectPct > 99.9) || (O2EffectPct < 0.1))
@@ -1206,14 +1238,14 @@ namespace AQUATOX.Animals
                 result = LastSedCalc;
                 return result;
             }
-            if (IsFish() && (PAnimalData.SenstoSediment != "Zero Sensitivity") && (PAnimalData.SenstoSediment != ""))
+            if (IsFish() && (PAnimalData.SensToSediment.Val != "Zero Sensitivity") && (PAnimalData.SensToSediment.Val != ""))
             {
                 CStop = CALCSTOPTOL;
                 SlopeSS = 1.62;
                 InterceptSS = -14.2;
                 SlopeTime = 3.5;
                 // 'Tolerant'
-                if (PAnimalData.SenstoSediment == "Sensitive")
+                if (PAnimalData.SensToSediment.Val == "Sensitive")
                 {
                     // 'Sensitive'
                     SlopeSS = 0.34;
@@ -1221,7 +1253,7 @@ namespace AQUATOX.Animals
                     SlopeTime = 0.1;
                     CStop = CALCSTOP;
                 }
-                if (PAnimalData.SenstoSediment == "Highly Sensitive")
+                if (PAnimalData.SensToSediment.Val == "Highly Sensitive")
                 {
                     // 'Highly Sensitive'
                     SlopeSS = 0.328;
@@ -1315,13 +1347,13 @@ namespace AQUATOX.Animals
         }
         else
         {
-            Dead = PAnimalData.KMort * State;
+            Dead = PAnimalData.KMort.Val * State;
             // mg/L-d   g/g-d    mg/L
-            if (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) > PAnimalData.TMax)
+            if (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) > PAnimalData.TMax.Val)
             {
-                Dead = (PAnimalData.KMort + Math.Exp(AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) - PAnimalData.TMax) / 2.0) * State;
+                Dead = (PAnimalData.KMort.Val + Math.Exp(AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) - PAnimalData.TMax.Val) / 2.0) * State;
             }
-                if (PAnimalData.SenstoPctEmbed && (AQTSeg.PercentEmbedded > PAnimalData.PctEmbedThreshold))   
+                if (PAnimalData.SenstoPctEmbed.Val && (AQTSeg.PercentEmbedded > PAnimalData.PctEmbedThreshold.Val))
             {
                     Dead = State;  // If site's percent embeddedness exceeds the threshold then assume 100% mortality
             }
@@ -1336,7 +1368,7 @@ namespace AQUATOX.Animals
             // mg/L-d         mg/L-d
             Dead = Dead + MortRates.O2Mort + MortRates.NH4Mort + MortRates.NH3Mort;
             // mg/L-d             // mg/L-d
-            MortRates.SaltMort = State * SalMort(PAnimalData.Salmin_Mort, PAnimalData.SalMax_Mort, PAnimalData.Salcoeff1_Mort, PAnimalData.Salcoeff2_Mort);
+            MortRates.SaltMort = State * SalMort(PAnimalData.SalMin_Mort.Val, PAnimalData.SalMax_Mort.Val, PAnimalData.SalCoeff1_Mort.Val, PAnimalData.SalCoeff2_Mort.Val);
             Dead = Dead + MortRates.SaltMort;
             // mg/L-d            // mg/L-d
 
@@ -1399,24 +1431,24 @@ namespace AQUATOX.Animals
                 bool UseDate3;
                 int JulianNow = InDate.DayOfYear;
 
-                UseDate1 = ((PAnimalData.UnlimitedSpawning) || (PAnimalData.SpawnLimit > 0)) && (PAnimalData.SpawnDate1 != DateTime.MinValue);
-                UseDate2 = ((PAnimalData.UnlimitedSpawning) || (PAnimalData.SpawnLimit > 1)) && (PAnimalData.SpawnDate2 != DateTime.MinValue);
-                UseDate3 = ((PAnimalData.UnlimitedSpawning) || (PAnimalData.SpawnLimit > 2)) && (PAnimalData.SpawnDate3 != DateTime.MinValue);
-                return ((JulianNow == PAnimalData.SpawnDate1.DayOfYear) && UseDate1) || ((JulianNow == PAnimalData.SpawnDate2.DayOfYear) && UseDate2) || ((JulianNow == PAnimalData.SpawnDate3.DayOfYear) && UseDate3);
+                UseDate1 = ((PAnimalData.UnlimitedSpawning.Val) || (PAnimalData.SpawnLimit.Val > 0)) && (PAnimalData.SpawnDate1.Val != DateTime.MinValue);
+                UseDate2 = ((PAnimalData.UnlimitedSpawning.Val) || (PAnimalData.SpawnLimit.Val > 1)) && (PAnimalData.SpawnDate2.Val != DateTime.MinValue);
+                UseDate3 = ((PAnimalData.UnlimitedSpawning.Val) || (PAnimalData.SpawnLimit.Val > 2)) && (PAnimalData.SpawnDate3.Val != DateTime.MinValue);
+                return ((JulianNow == PAnimalData.SpawnDate1.Val.DayOfYear) && UseDate1) || ((JulianNow == PAnimalData.SpawnDate2.Val.DayOfYear) && UseDate2) || ((JulianNow == PAnimalData.SpawnDate3.Val.DayOfYear) && UseDate3);
             }
             // --------------------------------------------------------------------
             Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
 
-        if (NState != AllVariables.Fish1) TOptSpawn = PAnimalData.TOpt;
-        else TOptSpawn = ((AQTSeg.GetStatePointer(AllVariables.Fish2, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).PAnimalData.TOpt;
+        if (NState != AllVariables.Fish1) TOptSpawn = PAnimalData.TOpt.Val;
+        else TOptSpawn = ((AQTSeg.GetStatePointer(AllVariables.Fish2, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal).PAnimalData.TOpt.Val;
         // for calculating prom/recr, FISH1 must use same TOPTSpawn as all other age classes
 
-        if (PAnimalData.AutoSpawn)
+        if (PAnimalData.AutoSpawn.Val)
              result = SpawnNow_InTempRange();
         else result = SpawnNow_ThisIsSpawningDate();   // spawning should occur due to temperature or user specification
 
 
-        result = result && (PAnimalData.UnlimitedSpawning || (SpawnTimes < PAnimalData.SpawnLimit));
+        result = result && (PAnimalData.UnlimitedSpawning.Val || (SpawnTimes < PAnimalData.SpawnLimit.Val));
         // and they can still spawn this year
 
         return result;
@@ -1445,7 +1477,7 @@ namespace AQUATOX.Animals
         // gameteloss only relevant for sack
         if (OysterCategory == 4)
         { // POlder points to veliger in this case and these variables track viable spawning/recruitment
-             result = (((POlder) as TAnimal).PromoteLoss / (1.0 - PAnimalData.GMort)) * PAnimalData.GMort;
+             result = (((POlder) as TAnimal).PromoteLoss / (1.0 - PAnimalData.GMort.Val)) * PAnimalData.GMort.Val;
                 // living spawn            // conv total spawn            // conv mort spawn
              return result;
         }
@@ -1461,14 +1493,14 @@ namespace AQUATOX.Animals
                 else                  Capacity = KCapConv - State;
 
                 FracAdults = 1.0 - Capacity / KCapConv;
-                IncrMort = (1.0 - PAnimalData.GMort) * AggregateRedRepro();
-                SaltEffect = 1 + SalMort(PAnimalData.Salmin_Gam, PAnimalData.SalMax_Gam, PAnimalData.Salcoeff1_Gam, PAnimalData.Salcoeff2_Gam);
+                IncrMort = (1.0 - PAnimalData.GMort.Val) * AggregateRedRepro();
+                SaltEffect = 1 + SalMort(PAnimalData.SalMin_Gam.Val, PAnimalData.SalMax_Gam.Val, PAnimalData.SalCoeff1_Gam.Val, PAnimalData.SalCoeff2_Gam.Val);
                 // Gameteloss is increased by salinity therefore the mortality equation is used
-                Gametes = FracAdults * PAnimalData.PctGamete * State;
-                result = (PAnimalData.GMort + IncrMort) * FracAdults * PAnimalData.PctGamete * SaltEffect * State;
+                Gametes = FracAdults * PAnimalData.PctGamete.Val * State;
+                result = (PAnimalData.GMort.Val + IncrMort) * FracAdults * PAnimalData.PctGamete.Val * SaltEffect * State;
 
-                if (result > FracAdults * PAnimalData.PctGamete * State)
-                    result = FracAdults * PAnimalData.PctGamete * State;
+                if (result > FracAdults * PAnimalData.PctGamete.Val * State)
+                    result = FracAdults * PAnimalData.PctGamete.Val * State;
                 // JSC 10/17/2012 added fracadults and percentgamete
             }
             return result;
@@ -1529,10 +1561,10 @@ namespace AQUATOX.Animals
                     }
                     
                 }
-                IncrMort = (1.0 - PAnimalData.GMort) * AggregateRedRepro();
-                Gametes = FracAdults * PAnimalData.PctGamete * State;
-                GamLoss = (PAnimalData.GMort + IncrMort) * FracAdults * PAnimalData.PctGamete * State;
-                if ((FracAdults * PAnimalData.PctGamete) > 0)
+                IncrMort = (1.0 - PAnimalData.GMort.Val) * AggregateRedRepro();
+                Gametes = FracAdults * PAnimalData.PctGamete.Val * State;
+                GamLoss = (PAnimalData.GMort.Val + IncrMort) * FracAdults * PAnimalData.PctGamete.Val * State;
+                if ((FracAdults * PAnimalData.PctGamete.Val) > 0)
                 {
                     // fish is spawning
                     if ((!(NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15)) && (PSameSpecies == AllVariables.NullStateVar))
@@ -1542,7 +1574,7 @@ namespace AQUATOX.Animals
                     }
                     else
                     {
-                        Recruit = -(1.0 - (PAnimalData.GMort + IncrMort)) * FracAdults * PAnimalData.PctGamete * State;
+                        Recruit = -(1.0 - (PAnimalData.GMort.Val + IncrMort)) * FracAdults * PAnimalData.PctGamete.Val * State;
                         if (Recruit > 0)
                         {
                             Recruit = 0;
@@ -1557,12 +1589,12 @@ namespace AQUATOX.Animals
                 }
             }
             // if spawnnow and not spawned
-            SaltEffect = SalMort(PAnimalData.Salmin_Gam, PAnimalData.SalMax_Gam, PAnimalData.Salcoeff1_Gam, PAnimalData.Salcoeff2_Gam);
+            SaltEffect = SalMort(PAnimalData.SalMin_Gam.Val, PAnimalData.SalMax_Gam.Val, PAnimalData.SalCoeff1_Gam.Val, PAnimalData.SalCoeff2_Gam.Val);
             // Gameteloss is increased by salinity therefore the mortality equation is used
             result = Math.Abs(GamLoss) * SaltEffect;
-            if ((result > State * FracAdults * PAnimalData.PctGamete))
+            if ((result > State * FracAdults * PAnimalData.PctGamete.Val))
             {
-                result = FracAdults * State * PAnimalData.PctGamete;
+                result = FracAdults * State * PAnimalData.PctGamete.Val;
             }
             // 6/5/08, limit losses to frac.gametes
         }
@@ -1580,12 +1612,12 @@ namespace AQUATOX.Animals
         const int MaxRate = 1;   // /d
         double Vel;
 
-        Vel = AQTSeg.Velocity(PAnimalData.PrefRiffle, PAnimalData.PrefPool, false);
+        Vel = AQTSeg.Velocity(PAnimalData.PrefRiffle.Val, PAnimalData.PrefPool.Val, false);
         // 11/9/2001 constrain so does not exceed "state"
-        if (Vel >= PAnimalData.VelMax)
+        if (Vel >= PAnimalData.VelMax.Val)
             return MaxRate * State;
         else
-            return State * MaxRate * (Math.Exp((Vel - PAnimalData.VelMax) / Gradual));
+            return State * MaxRate * (Math.Exp((Vel - PAnimalData.VelMax.Val) / Gradual));
         // mg/L d   // mg/L  // /d             // cm/s            // cm/s      // cm/s
     }
 
@@ -1613,7 +1645,7 @@ namespace AQUATOX.Animals
             if (IsBenthos() || IsNektonInvert())
             {
                 // benthic
-                if (PAnimalData.AveDrift <= 0)
+                if (PAnimalData.AveDrift.Val <= 0)
                 {
                     return 0;
                 }
@@ -1622,11 +1654,11 @@ namespace AQUATOX.Animals
                 if (IsBenthos())  // NOT FOR NEKTON INVERTS
                     {
                     InorgSdDep = AQTSeg.InorgSedDep();
-                    if ((InorgSdDep > PAnimalData.Trigger))
-                        AccelDrift = Math.Exp(InorgSdDep - PAnimalData.Trigger);
+                    if ((InorgSdDep > PAnimalData.Trigger.Val))
+                        AccelDrift = Math.Exp(InorgSdDep - PAnimalData.Trigger.Val);
                                                 // kg/m2           // kg/m2
                     }
-                Dislodge = PAnimalData.AveDrift * AccelDrift;
+                Dislodge = PAnimalData.AveDrift.Val * AccelDrift;
 
                 for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  
                 {
@@ -1807,7 +1839,7 @@ namespace AQUATOX.Animals
                     {
                         AnimalRecord ZR = ((PYounger) as TAnimal).PAnimalData;
                         if ((AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol) > 10) && (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) > 20))
-                            PromoteGain = ((PYounger) as TAnimal).State * ZR.PctGamete / 275.0 * (1.0 - ZR.GMort);
+                            PromoteGain = ((PYounger) as TAnimal).State * ZR.PctGamete.Val / 275.0 * (1.0 - ZR.GMort.Val);
                     }
                     // for veliger "PromoteTo"= Recruitment from sack, "PYounger" = Sack  {to 275 days 4/8/2015}
                     // assumed 300 days above 20 deg C                    {days}  {living frac}
@@ -1897,11 +1929,11 @@ namespace AQUATOX.Animals
         }
         // Fish1
         // Promotion of multi-age fish is found in TStates.DoThisEveryStep
-        if ((PAnimalData.Animal_Type == "Benthic Insect"))
+        if ((PAnimalData.Animal_Type.Val == "Benthic Insect"))
         {
                 // emergeinsect calculation
                 Temp = AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-                if ((Temp > 0.8 * PAnimalData.TOpt) && (Temp < (PAnimalData.TOpt - 1.0)))
+                if ((Temp > 0.8 * PAnimalData.TOpt.Val) && (Temp < (PAnimalData.TOpt.Val - 1.0)))
             {
                 EmergeInsect = 2.0 * Prom;
             }
@@ -1921,9 +1953,9 @@ namespace AQUATOX.Animals
         //    for (Typ = AllVariables.Nitrate; Typ <= AllVariables.Phosphate; Typ++)
         //    {
         //        if (Typ == AllVariables.Nitrate)
-        //            NutrFrac = PAnimalData.N2Org;
+        //            NutrFrac = PAnimalData.N2Org.Val;
         //        else
-        //            NutrFrac = PAnimalData.P2Org;
+        //            NutrFrac = PAnimalData.P2Org.Val;
         //        // MBLoadRecord MB = AQTSeg.MBLoadArray[Typ];
         //        // save for tox loss output & categorization
         //        LoadInKg = Lo * AQTSeg.SegVol() * 1000.0 * 1e-6 * NutrFrac;
@@ -2078,7 +2110,7 @@ namespace AQUATOX.Animals
                     }
 
                     if (NState >= AllVariables.Fish1 && NState <= AllVariables.Fish15) SaveRate("Recruit", Recr);
-                    if ((PAnimalData.Animal_Type == "Benthic Insect")) SaveRate("EmergeI", Emrg);
+                    if ((PAnimalData.Animal_Type.Val == "Benthic Insect")) SaveRate("EmergeI", Emrg);
 
                     SaveRate("GrowthRate", Co - De - Re - Ex);
                     SaveRate("GrowthRate2", Co - De - Re - Ex);
@@ -2131,7 +2163,7 @@ namespace AQUATOX.Animals
                 Pgn = PromoteGain;  
                 PLs = PromoteLoss;
             }
-            Fi = PAnimalData.Fishing_Frac * State;
+            Fi = PAnimalData.Fishing_Frac.Val * State;
             //if (AQTSeg.LinkedMode)   DrI = Washin();
             Recr = Recruit;   // Recr value is used in DoThisEveryStep
             Emrg = EmergeInsect;

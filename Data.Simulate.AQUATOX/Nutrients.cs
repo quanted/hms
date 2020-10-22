@@ -70,11 +70,11 @@ namespace AQUATOX.Nutrients
                             {
                                 if (NState == AllVariables.Nitrate)
                                 {
-                                    Nut2Org = PPl.PAlgalRec.N2OrgInit;
+                                    Nut2Org = PPl.PAlgalRec.N2OrgInit.Val;
                                 }
                                 else
                                 {
-                                    Nut2Org = PPl.PAlgalRec.P2OrgInit;
+                                    Nut2Org = PPl.PAlgalRec.P2OrgInit.Val;
                                 }
                                 CNutrient = CNutrient - PPl.State * Nut2Org;
                                 // mg/L     // mg/L     // mg/L    // N2Org
@@ -317,7 +317,7 @@ namespace AQUATOX.Nutrients
                             AddLoad = AddLoad / SegVolume;
                             // mg/L d  // g/d     // cu m      // note if direct precip result is mg/(sq m.*L*d)
 
-                            if (Loop == 1) AddLoad = AddLoad * Location.Locale.SurfArea;  // Loop = 1 is DirectPrecip loadings type
+                            if (Loop == 1) AddLoad = AddLoad * Location.Locale.SurfArea.Val;  // Loop = 1 is DirectPrecip loadings type
                                                                                           // mg/L d // mg/(sq m.*L*d)            // sq m.
 
                             if (NState == AllVariables.Phosphate)
@@ -445,8 +445,8 @@ namespace AQUATOX.Nutrients
                 {
                     TAnimal PA = (TAnimal)P;
                     if (NState == AllVariables.Phosphate) 
-                         PredNutr2Org = PA.PAnimalData.P2Org;
-                    else PredNutr2Org = PA.PAnimalData.N2Org;
+                         PredNutr2Org = PA.PAnimalData.P2Org.Val;
+                    else PredNutr2Org = PA.PAnimalData.N2Org.Val;
  
                     PreyNutr2Org = 0;
                     Cons = PA.EatEgest(false);
@@ -533,8 +533,8 @@ namespace AQUATOX.Nutrients
                     ReminRecord RR = Location.Remin;
 
                     if (NState == AllVariables.Ammonia)
-                          DiffNFrac = PAn.PAnimalData.N2Org - RR.N2OrgLab;
-                    else  DiffNFrac = PAn.PAnimalData.P2Org - RR.P2OrgLab;
+                          DiffNFrac = PAn.PAnimalData.N2Org.Val - RR.N2OrgLab;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org.Val - RR.P2OrgLab;
 
                     NGL = NGL + PAn.GameteLoss() * DiffNFrac;
                 }
@@ -832,8 +832,8 @@ namespace AQUATOX.Nutrients
                     }
                     // 6/6/2008, diagenesis defecation has same nutrients as labile detritus
                     if (NState == AllVariables.Ammonia)
-                          DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
-                    else  DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
+                          DiffNFrac = PAn.PAnimalData.N2Org.Val - DetrNFrac;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org.Val - DetrNFrac;
 
                     NDef = NDef + PAn.Defecation() * DiffNFrac;
                 }
@@ -876,11 +876,11 @@ namespace AQUATOX.Nutrients
                     DetrNFrac = PDRD.Excr_To_Diss_Detr(ns) * Nut2Org_DissRefr + PDLD.Excr_To_Diss_Detr(ns) * Nut2Org_DissLab;
                     if (NState == AllVariables.Ammonia)
                     {
-                        DiffNFrac = PAn.PAnimalData.N2Org - DetrNFrac;
+                        DiffNFrac = PAn.PAnimalData.N2Org.Val - DetrNFrac;
                     }
                     else
                     {
-                        DiffNFrac = PAn.PAnimalData.P2Org - DetrNFrac;
+                        DiffNFrac = PAn.PAnimalData.P2Org.Val - DetrNFrac;
                     }
                     // was AnimExcretion
                     Excret = Excret + PAn.Respiration() * DiffNFrac;
@@ -990,7 +990,7 @@ namespace AQUATOX.Nutrients
                     PlantRecord PAR = PP.PAlgalRec;
                     // JSC 9-25-2002, bryophytes assimilate nutrients
                     // JSC 10-21-2007, Free-floating macro. assimilate nutrients
-                    if ((P.IsAlgae()) || (PAR.PlantType == "Bryophytes") || ((PAR.PlantType == "Macrophytes") && (PP.MacroType == TMacroType.Freefloat)))
+                    if ((P.IsAlgae()) || (PAR.PlantType.Val == "Bryophytes") || ((PAR.PlantType.Val == "Macrophytes") && (PP.MacroType == TMacroType.Freefloat)))
                     {
                         if (NState != AllVariables.CO2)
                         {
@@ -1013,8 +1013,8 @@ namespace AQUATOX.Nutrients
 
                             if ((NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate))
                                 {
-                                    if (((PAR.KN + SVA) * (PAR.KN + SVN)) != 0)
-                                        NH4Pref = SVA * SVN / ((PAR.KN + SVA) * (PAR.KN + SVN)) + SVA * PAR.KN / ((SVA + SVN) * (PAR.KN + SVN));
+                                    if (((PAR.KN.Val + SVA) * (PAR.KN.Val + SVN)) != 0)
+                                        NH4Pref = SVA * SVN / ((PAR.KN.Val + SVA) * (PAR.KN.Val + SVN)) + SVA * PAR.KN.Val / ((SVA + SVN) * (PAR.KN.Val + SVN));
                                     else
                                         NH4Pref = 0;  // Protect Against Div by 0
                                 }
@@ -1927,7 +1927,7 @@ namespace AQUATOX.Nutrients
         //    double Velocity;
         //    double Wind;
 
-        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) / 100.0;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
+        //    Velocity = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle.Val, AQTSeg.Location.Locale.PctPool.Val, false) / 100.0;         // For Estuary Velocity, Riffle, Pool parameters irrelevant
         //    // m/s          // cm/s                                             // m/s
         //    Wind = GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
         //    Thick = Location.MeanThick[VerticalSegments.Epilimnion];
@@ -1953,7 +1953,7 @@ namespace AQUATOX.Nutrients
             double Temp = (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol));
             if ( Temp < AQTSeg.Ice_Cover_Temp())  // (AQTSeg.VSeg == VerticalSegments.Hypolimnion) || 
                 result = 0.0;
-            else if (!Location.Locale.UseCovar)  result = Location.Locale.EnteredKReaer;
+            else if (!Location.Locale.UseCovar.Val)  result = Location.Locale.EnteredKReaer.Val;
             else
             {
                 // (* or (Location.SiteType in [Lake,Reservr1D])  {JSC Test on Reserv, Lake 8/18/08} *)
@@ -1963,7 +1963,7 @@ namespace AQUATOX.Nutrients
                 //    return result;
                 //}
                 ZDepth = Location.MeanThick;  // [VerticalSegments.Epilimnion]
-                Vel = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle, AQTSeg.Location.Locale.PctPool, false) * 0.01;
+                Vel = AQTSeg.Velocity(AQTSeg.Location.Locale.PctRiffle.Val, AQTSeg.Location.Locale.PctPool.Val, false) * 0.01;
                 // m/s         // cm/s                                                                        // m/cm
                 if ((!(Location.SiteType == SiteTypes.Stream)))  { Vel = 0.0; }           // no velocity reaeration for nonstreams
 
@@ -1981,7 +1981,7 @@ namespace AQUATOX.Nutrients
                     // m/s -> fps
                     H = ZDepth * 3.2808;
                     // m -> ft
-                    KReaer2 = (Math.Pow((U * Location.Locale.Channel_Slope), 0.408)) / Math.Pow(H, 0.66);
+                    KReaer2 = (Math.Pow((U * Location.Locale.Channel_Slope.Val), 0.408)) / Math.Pow(H, 0.66);
                 }
                 else
                 {
@@ -2043,7 +2043,7 @@ namespace AQUATOX.Nutrients
             {
                 lnCss = lnCsf;
             }
-            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude)) / 100.0;
+            AltEffect = (100 - (0.0035 * 3.28083 * Location.Locale.Altitude.Val)) / 100.0;
             // Fractional effect due to altitude from Zison et al. 1978
             // m
             return Math.Exp(lnCss) * AltEffect;
@@ -2242,7 +2242,7 @@ namespace AQUATOX.Nutrients
 
             if (Nitrification_Link != null) Nitr = Nitrification_Link.ReturnLoad(AQTSeg.TPresent);
 
-    //      AQTSeg.TOTResp[AQTSeg.DerivStep] = (Resp + BOD + SOD2 + Nitr) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;
+    //      AQTSeg.TOTResp[AQTSeg.DerivStep] = (Resp + BOD + SOD2 + Nitr) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val;
             // g O2/m2 d                              // g/m3 d                    // m3                              // m2
 
             Lo = Loading;
@@ -2251,10 +2251,10 @@ namespace AQUATOX.Nutrients
             // mg O2/L =  o2/photo bio. * mg biomass / L
             if (Photosynthesis_Link != null) Pho = Photosynthesis_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;    // FIXME calculation of GPP and NPP disabled for now
+            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val;    // FIXME calculation of GPP and NPP disabled for now
             // g O2/m2 d            // g/m3 d            // m3            // m2
             // DarkResp = .O2Biomass * SumRespiration(true);  
-            // AQTSeg.NPP[.DerivStep] = (Pho - DarkResp) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea;
+            // AQTSeg.NPP[.DerivStep] = (Pho - DarkResp) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val.Val;
             // g O2/m2 d            // g/m3 d  // m3           // m2
 
             Reae = Reaeration();

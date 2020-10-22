@@ -303,7 +303,7 @@ namespace AQUATOX.AQTSegment
 
             // Fish, Sedimented Detritus, Periphyton, Macrophytes, Zoobenthos must undergo unit conversion
             if (AQTSeg.Convert_g_m2_to_mg_L(NState, SVType, Layer))
-                State = InitialCond * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;
+                State = InitialCond * Location.Locale.SurfArea.Val / AQTSeg.Volume_Last_Step;
               // g/m3      // g/m2                     // m2                   // m3
 
             yhold = 0;
@@ -479,6 +479,7 @@ namespace AQUATOX.AQTSegment
 
 
         // TSTATEVARIABLE IDENTIFICATION METHODS 9/13/98 jsc
+
         public bool IsPlant()
         {
            return (NState >= Consts.FirstPlant && NState <= Consts.LastPlant) && (SVType == T_SVType.StV);
@@ -584,7 +585,7 @@ namespace AQUATOX.AQTSegment
                 if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
                 {
                     PA = this as TAnimal;
-                    return PA.PAnimalData.N2Org;
+                    return PA.PAnimalData.N2Org.Val;
                 }
 
                 PP = this as TPlant;  // must be a plant
@@ -600,7 +601,7 @@ namespace AQUATOX.AQTSegment
                 if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
                 {
                     PA = this as TAnimal;
-                    return PA.PAnimalData.P2Org;
+                    return PA.PAnimalData.P2Org.Val;
                 }
 
                 PP = this as TPlant;  // must be a plant
@@ -1021,7 +1022,7 @@ namespace AQUATOX.AQTSegment
 
             if (P.IsPlant())  ((P) as TPlant).NutrLim_Step = ((P) as TPlant).NutrLimit();
 
-            if (Location.Locale.Latitude < 0.0) MidWinterJulianDate = 182;
+            if (Location.Locale.Latitude.Val < 0.0) MidWinterJulianDate = 182;
                                            else MidWinterJulianDate = 1;
 
             if (P.IsPlantOrAnimal())
@@ -1576,7 +1577,7 @@ namespace AQUATOX.AQTSegment
             NewVolume = TV.State;
 
             //// Check for Water Volume Zero and Move On
-            //if (NewVolume <= VolInitCond * Location.Locale.Min_Vol_Frac)
+            //if (NewVolume <= VolInitCond * Location.Locale.Min_Vol_Frac.Val)
             //    {
             //        WaterVolZero = true;
             //        Water_Was_Zero = true;
@@ -1814,7 +1815,7 @@ namespace AQUATOX.AQTSegment
 
                 // Periphyton & Macrophytes must be converted from mg/L to g/sq.m  
                 if ((T == T_SVType.StV) && (P.IsPlant())) 
-                {  if ((((P) as TPlant).PAlgalRec.PlantType != "Phytoplankton")) Convert = true; }
+                {  if ((((P) as TPlant).PAlgalRec.PlantType.Val != "Phytoplankton")) Convert = true; }
 
                 // ZooBenthos and nekton must be converted from mg/L to g/sq.m  
                 if ((T == T_SVType.StV) && (P.IsAnimal()))
@@ -1834,11 +1835,11 @@ namespace AQUATOX.AQTSegment
         {
               // Surface area of segment or individual layer if stratified
 
-            return Location.Locale.SurfArea;
+            return Location.Locale.SurfArea.Val;
 
-            //if (!LinkedMode && Stratified && (Location.Locale.UseBathymetry))
+            //if (!LinkedMode && Stratified && (Location.Locale.UseBathymetry.Val))
             //{
-            //    SiteRecord LL = Location.Locale;
+            //    SiteRecord LL = Location.Locale.Val;
             //    double EpiFrac = LL.AreaFrac(Location.MeanThick[VerticalSegments.Epilimnion], LL.ZMax);
             //    if (VSeg == VerticalSegments.Epilimnion)
             //    {
@@ -2161,19 +2162,19 @@ namespace AQUATOX.AQTSegment
                     TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
                     if (PP != null)
                     {
-                        if (PP.PAlgalRec.EnteredLightSat >= MaxDailyLight) 
+                        if (PP.PAlgalRec.EnteredLightSat.Val >= MaxDailyLight) 
                         {
                             PP.ZOpt = 0.1;  //  towards top of water column due to low light conditions
                         }
                         else
                         {
-                            PP.ZOpt = Math.Log(PP.PAlgalRec.EnteredLightSat / MaxDailyLight) / -Extinct(PP.IsPeriphyton(), true, true, false, 0);
+                            PP.ZOpt = Math.Log(PP.PAlgalRec.EnteredLightSat.Val / MaxDailyLight) / -Extinct(PP.IsPeriphyton(), true, true, false, 0);
                         }                                  //   (Ly/d)            (Ly/d)         (1/m)
                     }
                 }
             }
 
-            PercentEmbedded = Location.Locale.BasePercentEmbed;
+            PercentEmbedded = Location.Locale.BasePercentEmbed.Val;
             LastPctEmbedCalc = PSetup.FirstDay.Val;
 
             SOD = -99;
@@ -2184,15 +2185,15 @@ namespace AQUATOX.AQTSegment
         public double DynamicZMean()
         {
             // Variable ZMean of segment or both segments if dynamic stratification
-            if (!Location.Locale.UseBathymetry)
-                return Volume_Last_Step / Location.Locale.SurfArea;
+            if (!Location.Locale.UseBathymetry.Val)
+                return Volume_Last_Step / Location.Locale.SurfArea.Val;
 
             if (UseConstZMean)
-                return Location.Locale.ICZMean;
+                return Location.Locale.ICZMean.Val;
 
             if (DynZMean != null) return DynZMean.ReturnTSLoad(TPresent);  // time series only
 
-            return Location.Locale.ICZMean;  // DynZMean is null
+            return Location.Locale.ICZMean.Val;  // DynZMean is null
         }
 
         // variable zmean of seg. or entire system if stratified
@@ -2200,15 +2201,15 @@ namespace AQUATOX.AQTSegment
         {
          
             TVolume PVol;
-            if (Location.Locale.UseBathymetry)
+            if (Location.Locale.UseBathymetry.Val)
             {
                 // zmean does not vary in this case
-                return Location.Locale.ICZMean;
+                return Location.Locale.ICZMean.Val;
             }
             else
             {
                 PVol = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-                return PVol.InitialCond / Location.Locale.SurfArea;    // Initial zmean based on const surf area over vertical profile
+                return PVol.InitialCond / Location.Locale.SurfArea.Val;    // Initial zmean based on const surf area over vertical profile
                 // m         // m3                         // m2
             }
         }
@@ -2484,16 +2485,16 @@ namespace AQUATOX.AQTSegment
                 if (Avg_Disch<=0) Avg_Disch = Location.Discharge_Using_QBase() / 86400.0;
                 //                { m3 / s}             { m3 / d}               {s / d}
 
-                width = Location.Locale.SurfArea / (Location.Locale.SiteLength * 1000.0);
+                width = Location.Locale.SurfArea.Val / (Location.Locale.SiteLength.Val * 1000.0);
                 //{ m}                  { sq.m}                { km}            { m / km}
 
-                double slope = Math.Max(Location.Locale.Channel_Slope, 0.00001);
+                double slope = Math.Max(Location.Locale.Channel_Slope.Val, 0.00001);
                 channel_depth = Math.Pow(Avg_Disch * Location.ManningCoeff() / (Math.Sqrt(slope) * width), 0.6);
 
                 xsecarea =  width * channel_depth;
                 // m2       // m         // m
             }
-            else xsecarea = vol / (Location.Locale.SiteLength * 1000);
+            else xsecarea = vol / (Location.Locale.SiteLength.Val * 1000);
                           // m3                    // km      // m/km
             
             pctrun = 100.0 - pctriffle - pctpool;
@@ -2599,9 +2600,9 @@ namespace AQUATOX.AQTSegment
             double result;
             // Sed Volume Diagensis
             if (Layer == 1)
-                result = Location.Locale.SurfArea * Diagenesis_Params.H1.Val;
+                result = Location.Locale.SurfArea.Val * Diagenesis_Params.H1.Val;
             else
-                result = Location.Locale.SurfArea * Diagenesis_Params.H2.Val;
+                result = Location.Locale.SurfArea.Val * Diagenesis_Params.H2.Val;
             // m3                // m2                     // m
 
 
@@ -2609,7 +2610,7 @@ namespace AQUATOX.AQTSegment
             //if (Stratified)
             //{
             //    MorphRecord RR = Location.Morph;
-            //    EpiFrac = Location.AreaFrac(Location.MeanThick[VerticalSegments.Epilimnion], Location.Locale.ZMax);
+            //    EpiFrac = Location.AreaFrac(Location.MeanThick[VerticalSegments.Epilimnion], Location.Locale.ZMax.Val);
             //    // 10-14-2010 Note that ZMax parameter pertains to both segments in event of stratification
             //    if (VSeg == VerticalSegments.Epilimnion)
             //    {
@@ -2944,7 +2945,7 @@ namespace AQUATOX.AQTSegment
             //    TInv = GetStatePointer(IV, T_SVType.StV, T_SVLayer.WaterCol);
             //    if (TInv != null)
             //    {
-            //        LL = Location.Locale;
+            //        LL = Location.Locale.Val;
             //        if (TInv.IsBenthos())
             //        {
             //            BenthicBiomass = BenthicBiomass + TInv.State * Volume_Last_Step / LL.SurfArea;
@@ -3211,23 +3212,23 @@ namespace AQUATOX.AQTSegment
                     {
                         PlantRecord PR = Pphyto.PAlgalRec;
 
-                        IncludePlant = (PR.PlantType == "Phytoplankton");  // All Phytoplankton gets included
-                        IncludePlant = IncludePlant || (((PR.PlantType == "Periphyton") || (PR.PlantType == "Bryophytes")) && Incl_Periphyton); // Periphyton & Bryophytes get included if requested
-                        IncludePlant = IncludePlant || ((PR.PlantType == "Macrophytes") && (Pphyto.MacroType == TMacroType.Benthic) && Incl_BenthicMacro); // Benthic Macrophytes get included if requested
-                        IncludePlant = IncludePlant || ((PR.PlantType == "Macrophytes") && (Pphyto.MacroType != TMacroType.Benthic) && Incl_FloatingMacro); // Floating Macrophytes get included if requested
+                        IncludePlant = (PR.PlantType.Val == "Phytoplankton");  // All Phytoplankton gets included
+                        IncludePlant = IncludePlant || (((PR.PlantType.Val == "Periphyton") || (PR.PlantType.Val == "Bryophytes")) && Incl_Periphyton); // Periphyton & Bryophytes get included if requested
+                        IncludePlant = IncludePlant || ((PR.PlantType.Val == "Macrophytes") && (Pphyto.MacroType == TMacroType.Benthic) && Incl_BenthicMacro); // Benthic Macrophytes get included if requested
+                        IncludePlant = IncludePlant || ((PR.PlantType.Val == "Macrophytes") && (Pphyto.MacroType != TMacroType.Benthic) && Incl_FloatingMacro); // Floating Macrophytes get included if requested
 
                         if (IncludePlant)
                         {
                             // 3/9/2012 move from "blue-green" to surface floater designation
                             // 3-8-06 account for more intense self shading in upper layer of water column due to concentration of cyanobacteria there
-                            if (IsSurfaceFloater && (Pphyto.PAlgalRec.SurfaceFloating))
+                            if (IsSurfaceFloater && (Pphyto.PAlgalRec.SurfaceFloating.Val))
                             {
                                 // 1/m               // 1/m             // 1/(m g/m3)               // g/m3 volume                          // layer, m                                 // thick of algae, m
-                                PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto * GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol) * Location.MeanThick / Pphyto.DepthBottom();
+                                PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto.Val * GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol) * Location.MeanThick / Pphyto.DepthBottom();
                             }
                             else
                             {
-                                PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto * GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
+                                PhytoExtinction = PhytoExtinction + PR.ECoeffPhyto.Val * GetState(Phyto, T_SVType.StV, T_SVLayer.WaterCol);
                             }
                             // 1/m                 // 1/m              // 1/(m g/m3)                // g/m3                    }
                         }
@@ -3239,7 +3240,7 @@ namespace AQUATOX.AQTSegment
 
             if ((OrgFlag == 0))
             {
-                TempExt = PhytoExtinction + Location.Locale.ECoeffWater;
+                TempExt = PhytoExtinction + Location.Locale.ECoeffWater.Val;
             }
             // ---------------------------------------------------------------------------
             // Organic Suspended Sediment Extinction
@@ -3251,9 +3252,9 @@ namespace AQUATOX.AQTSegment
                     if (DetrState > 0)
                     {
                         if ((DetrLoop == AllVariables.DissRefrDetr)||(DetrLoop == AllVariables.DissLabDetr))
-                            TempExt = TempExt + Location.Locale.ECoeffDOM * DetrState;
+                            TempExt = TempExt + Location.Locale.ECoeffDOM.Val * DetrState;
                         else
-                            TempExt = TempExt + Location.Locale.ECoeffPOM * DetrState;
+                            TempExt = TempExt + Location.Locale.ECoeffPOM.Val * DetrState;
                     }
                 }
             }
@@ -3261,7 +3262,7 @@ namespace AQUATOX.AQTSegment
             // Inorganic Suspended Sediment EXTINCTION
             if ((OrgFlag == 0) || (OrgFlag == 2))
             {
-                TempExt = TempExt + InorgSedConc() * Location.Locale.ECoeffSed;  
+                TempExt = TempExt + InorgSedConc() * Location.Locale.ECoeffSed.Val;
             }
             // ---------------------------------------------------------------------------
             if (TempExt < Consts.Tiny)  TempExt = Consts.Tiny;
@@ -3288,10 +3289,10 @@ namespace AQUATOX.AQTSegment
             PL = (TLight) GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
             if (PL.CalculatePhotoperiod)
             {
-                if (Location.Locale.Latitude < 0.0) Sign = -1.0;
+                if (Location.Locale.Latitude.Val < 0.0) Sign = -1.0;
                                                else Sign = 1.0;
                 X = TPresent.DayOfYear; 
-                A = 0.1414 * Location.Locale.Latitude - Sign * 2.413;
+                A = 0.1414 * Location.Locale.Latitude.Val - Sign * 2.413;
                 P = (12.0 + A * Math.Cos(380.0 * Photoperiod_Radians(X) / 365.0 + 248)) / 24.0;
                 return P;
             }
@@ -3326,17 +3327,17 @@ namespace AQUATOX.AQTSegment
             if (RExt <= 0.0)
             {   // 4.605 is ln 1% of surface light
                 // m                            // 1/m
-                ZEup = 4.605 / Location.Locale.ECoeffWater;
+                ZEup = 4.605 / Location.Locale.ECoeffWater.Val;
             }
             else
             {
                 ZEup = 4.605 / RExt;
             }
-            if (Location.Locale.UseBathymetry)
+            if (Location.Locale.UseBathymetry.Val)
             {
-                if ((ZEup > Location.Locale.ZMax))
+                if ((ZEup > Location.Locale.ZMax.Val))
                 {
-                    ZEup = Location.Locale.ZMax;
+                    ZEup = Location.Locale.ZMax.Val;
                 }
             }
             // else if (ZEup > DynamicZMean) then ZEup := DynamicZMean;
@@ -3388,7 +3389,7 @@ namespace AQUATOX.AQTSegment
                 if (TSV.IsPlant()) ((TSV) as TPlant).ChangeData();
             }
 
-            Location.ChangeData(Location.Locale.ICZMean);
+            Location.ChangeData(Location.Locale.ICZMean.Val);
 
         }
 
@@ -3739,14 +3740,14 @@ namespace AQUATOX.AQTSegment
             {
                 // NoUserLoad for both Epi and Hypo Temp Loadings
                 AdjustedJulian = TimeIndex.DayOfYear;
-                if (Location.Locale.Latitude < 0.0) AdjustedJulian = AdjustedJulian + 182.0;
-                MeanTemp = Location.Locale.TempMean;  // AQTSeg.VSeg
-                TempRange = Location.Locale.TempRange; // AQTSeg.VSeg
+                if (Location.Locale.Latitude.Val < 0.0) AdjustedJulian = AdjustedJulian + 182.0;
+                MeanTemp = Location.Locale.TempMean.Val;  // AQTSeg.VSeg
+                TempRange = Location.Locale.TempRange.Val; // AQTSeg.VSeg
                                                        //if (AQTSeg.LinkedMode)
                                                        //{
                                                        //    // MeanTemp and Range are stored in "Epilimnion" for each linked segment regardless of stratification
-                                                       //    MeanTemp = Location.Locale.TempMean[VerticalSegments.Epilimnion];
-                                                       //    TempRange = Location.Locale.TempRange[VerticalSegments.Epilimnion];
+                                                       //    MeanTemp = Location.Locale.TempMean.Val[VerticalSegments.Epilimnion];
+                                                       //    TempRange = Location.Locale.TempRange.Val[VerticalSegments.Epilimnion];
                                                        //}
 
                 Temperature = MeanTemp + (-1.0 * TempRange / 2.0 * (Math.Sin(0.0174533 * (0.987 * (AdjustedJulian + PhaseShift) - 30.0))));
@@ -3793,9 +3794,9 @@ namespace AQUATOX.AQTSegment
             else
             {   // NoUserLoad, calculate based on date
                 adjustedjulian = TimeIndex.DayOfYear;
-                if (Location.Locale.Latitude < 0.0) adjustedjulian = adjustedjulian + 182;
+                if (Location.Locale.Latitude.Val < 0.0) adjustedjulian = adjustedjulian + 182;
 
-                solar = Location.Locale.LightMean + Location.Locale.LightRange / 2.0 * Math.Sin(0.0174533 * adjustedjulian - 1.76);
+                solar = Location.Locale.LightMean.Val + Location.Locale.LightRange.Val / 2.0 * Math.Sin(0.0174533 * adjustedjulian - 1.76);
 
                 light = solar;
                 if (light < 0.0)  light = 0.0;
@@ -3968,7 +3969,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
                                           typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
                                           typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant),
-                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam)}; 
+                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam), typeof (TStringParam)}; 
     }
 }
 

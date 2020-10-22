@@ -17,118 +17,90 @@ namespace AQUATOX.AQSite
 
     public class SiteRecord
     {
-        public string SiteName;
-        public double ECoeffWater;
-        public double SiteLength;        // units are KM
-        public string XLength;
-        public double StaticVolume;
-        public string XVolume;
-        public double SurfArea;
-        public string XSurfArea;
-        public double ICZMean;
-        public string XZMean;
-        public double ZMax;
-        public string XZMax;
-        public double TempMean;
-        public string XTempMean;
-        public double TempRange;
-        public string XTempRange;
-        public double Latitude;
-        public string XLatitude;
-        public double LightMean;
-        public string XLightMean;
-        public double LightRange;
-        public string XLightRange;
-        public string SiteComment;
-        public StreamTypes StreamType;
-        public double Channel_Slope;
-        public string XChannel_Slope;
-        public double Max_Chan_Depth;
-        public string XMax_Chan_Depth;
-        public double SedDepth;
-        public string XSedDepth;
-        public double EnclWallArea;
-        public string XEnclWallArea;
-        public double MeanEvap;         // inches / year
-        public string XMeanEvap;
-        public bool UseEnteredManning;
-        public double EnteredManning;
-        public string XECoeffWater;
-        public double PctRiffle;
-        public string XPctRiffle;
-        public double PctPool;
-        public string XPctPool;
-        public bool UseBathymetry;
-        public double ts_clay;         // clay critical shear stress for scour [kg/m2]
-        public string Xts_clay;
-        public double ts_silt;        // silt critical shear stress for scour [kg/m2]
-        public string Xts_silt;
-        public double tdep_clay;        // clay critical shear stress for deposition [kg/m2]
-        public string Xtdep_clay;
-        public double tdep_silt;        // silt critical shear stress for deposition [kg/m2]
-        public string Xtdep_silt;
-        public double FallVel_clay;        // clay fall velocity, m/s
-        public string XFallVel_clay;
-        public double FallVel_silt;        // silt fall velocity, m/s
-        public string XFallVel_silt;
-        // ESTUARY ADDITIONS BELOW
-        //public double SiteWidth;
-        //public string XSiteWidth;         // m2
-        //public double amplitude1;
-        //public double k1;
-        //public string ConstRef1;        // s2
-        //public double amplitude2;
-        //public double k2;
-        //public string ConstRef2;        // n2
-        //public double amplitude3;
-        //public double k3;
-        //public string ConstRef3;        // k1
-        //public double amplitude4;
-        //public double k4;
-        //public string ConstRef4;        // o1
-        //public double amplitude5;
-        //public double k5;
-        //public string ConstRef5;        // SSA
-        //public double amplitude6;
-        //public double k6;
-        //public string ConstRef6;        // SA
-        //public double amplitude7;
-        //public double k7;
-        //public string ConstRef7;        // P1
-        //public double amplitude8;
-        //public double k8;
-        public string ConstRef8;
-        public double Min_Vol_Frac;
-        public string XMin_Vol_Frac;
-        public double WaterShedArea;
-        public string XWaterShedArea;
-        public bool EnterTotalLength;
-        public double TotalLength;
-        public string XTotalLength;
-        public double ECoeffSed;
-        public string XECoeffSed;
-        public double ECoeffDOM;
-        public string XECoeffDOM;
-        public double ECoeffPOM;
-        public string XECoeffPOM;
-        public bool UseCovar;
-        public double EnteredKReaer;
-        public string XEnteredKReaer;
-        public bool UsePhytoRetention;
-        public double BasePercentEmbed;
-        public string XBasePercentEmbed;
-        public double Altitude;
-        public string XAltitude;
-        public double FractalD;
-        public string XFractalD;
-        public double FD_Refuge_Coeff;
-        public string XFD_Refuge_Coeff;
-        public double HalfSatOysterRefuge;
-        public string XHalfSatOysterRefuge;
+        public TStringParam SiteName = new TStringParam();
+        public TParameter SiteLength = new TParameter();
+        public TParameter Volume = new TParameter();
+        public TParameter SurfArea = new TParameter();
+        public TParameter ICZMean = new TParameter();
+        public TParameter ZMax = new TParameter();
+        public TParameter TempMean = new TParameter();
+        public TParameter TempRange = new TParameter();
+        public TParameter Latitude = new TParameter();
+        public TParameter Altitude = new TParameter();
+        public TParameter LightMean = new TParameter();
+        public TParameter LightRange = new TParameter();
+        public TParameter EnclWallArea = new TParameter();
+        public TParameter MeanEvap = new TParameter();
+        public TParameter ECoeffWater = new TParameter();
+        public TParameter ECoeffSed = new TParameter();
+        public TParameter ECoeffDOM = new TParameter();
+        public TParameter ECoeffPOM = new TParameter();
+        public TParameter BasePercentEmbed = new TParameter();
+        public TParameter Min_Vol_Frac = new TParameter();
+        public TBoolParam UseCovar = new TBoolParam();
+        public TParameter EnteredKReaer = new TParameter();
+
+        public TBoolParam EnterTotalLength = new TBoolParam();
+        public TParameter TotalLength = new TParameter();
+        public TParameter WaterShedArea = new TParameter();
+        public TParameter FractalD = new TParameter();
+        public TParameter FD_Refuge_Coeff = new TParameter();
+        public TParameter HalfSatOysterRefuge = new TParameter();
+
+        public TParameter Channel_Slope = new TParameter();
+        public TBoolParam UseBathymetry = new TBoolParam();
+        public TDropDownParam StreamType = new TDropDownParam();
+        public TBoolParam UseEnteredManning = new TBoolParam();
+        public TParameter EnteredManning = new TParameter();
+        public TParameter PctRiffle = new TParameter();
+        public TParameter PctPool = new TParameter();
+        public TBoolParam UsePhytoRetention = new TBoolParam();
+
+        public void Setup()
+        {
+            SiteName.Symbol = "Site Name"; SiteName.Name = "Site Name";
+            SiteLength.Symbol = "SiteLength"; SiteLength.Name = "Max Length (or reach)"; SiteLength.Units = "km";
+            Volume.Symbol = "Vol."; Volume.Name = "Volume (reference only)"; SiteLength.Units = "m3";
+            SurfArea.Symbol = "Surface Area"; SurfArea.Name = "Initial Condition Surface Area"; SurfArea.Units = "m2"; 
+            ICZMean.Symbol = "Mean Depth"; ICZMean.Name = "Mean depth, (initial condition if dynamic mean depth is selected)"; ICZMean.Units = "M";
+            ZMax.Symbol = "Maximum Depth"; ZMax.Name = "Maximum depth"; ZMax.Units = "M";
+            TempMean.Symbol = "Ave. Temp. (epilimnetic or hypolimnetic) "; TempMean.Name = "Mean annual temperature of epilimnion (or hypolimnion) "; TempMean.Units = "°C";
+            TempRange.Symbol = "Epilimnetic Temp. Range (or hypolimnetic)"; TempRange.Name = "Annual temperature range of epilimnion (or hypolimnion)"; TempRange.Units = "°C";
+            Latitude.Symbol = "Latitude"; Latitude.Name = "Latitude"; Latitude.Units = "Deg, decimal";
+            Altitude.Symbol = "Altitude (affects oxygen sat.)"; Altitude.Name = "Site specific altitude "; Altitude.Units = "m";
+            LightMean.Symbol = "Average Light"; LightMean.Name = "Mean annual light intensity"; LightMean.Units = "Langleys/d";
+            LightRange.Symbol = "Annual Light Range"; LightRange.Name = "Annual range in light intensity"; LightRange.Units = "Langleys/d";
+            EnclWallArea.Symbol = "Enclosure Wall Area"; EnclWallArea.Name = "Area of experimental enclosures walls; only relevant to enclosure"; EnclWallArea.Units = "m2";
+            MeanEvap.Symbol = "Mean Evaporation"; MeanEvap.Name = "Mean annual evaporation"; MeanEvap.Units = "inches / year";
+            ECoeffWater.Symbol = "Extinct. Coeff Water"; ECoeffWater.Name = "Light extinction of wavelength 312.5 nm in pure water"; ECoeffWater.Units = "1/m";
+            ECoeffSed.Symbol = "Extinct. Coeff Sediment"; ECoeffSed.Name = "Light extinction due to inorganic sediment in water"; ECoeffSed.Units = "1/\n(m·g/m3)";
+            ECoeffDOM.Symbol = "Extinct. Coeff DOM"; ECoeffDOM.Name = "Light extinction due to dissolved organic matter in water"; ECoeffDOM.Units = "1/\n(m·g/m3)";
+            ECoeffPOM.Symbol = "Extinct. Coeff POM"; ECoeffPOM.Name = "Light extinction due to particulate organic matter in water"; ECoeffPOM.Units = "1/\n(m·g/m3)";
+            BasePercentEmbed.Symbol = "Baseline Percent Embeddedness"; BasePercentEmbed.Name = "Observed embeddedness that is used as an initial condition"; BasePercentEmbed.Units = "percent (0-100)";
+            Min_Vol_Frac.Symbol = "Minimum Volume Frac."; Min_Vol_Frac.Name = "Fraction of initial condition that is the minimum volume of a site "; Min_Vol_Frac.Units = "frac. of Initial Condition";
+            UseCovar.Name = "Auto Select Eqn. for reaeration";
+            EnteredKReaer.Symbol = "Enter KReaer"; EnteredKReaer.Name = "Depth-averaged reaeration coefficient"; EnteredKReaer.Units = "1/d";
+            TotalLength.Symbol = "Total Length"; TotalLength.Name = "Total river length for calculating phytoplankton retention"; TotalLength.Units = "km";
+            WaterShedArea.Symbol = "Watershed Area"; WaterShedArea.Name = "Watershed area for estimating total river length (above)"; WaterShedArea.Units = "km2";
+            FractalD.Symbol = "Fractal Dimension"; FractalD.Name = "Fractal dimension of marsh-water interface for the site."; FractalD.Units = "unitless";
+            FD_Refuge_Coeff.Symbol = "Fractal D. Refuge Coefficient"; FD_Refuge_Coeff.Name = "Fractal dimension Refuge coefficient (-0.5 to 100 with the lowest values providing the strongest Refuge effect)."; FD_Refuge_Coeff.Units = "unitless";
+            HalfSatOysterRefuge.Symbol = "Half Sat Oyster Refuge"; HalfSatOysterRefuge.Name = "Half-saturation constant for oysters in terms of providing refuge from feeding"; HalfSatOysterRefuge.Units = "g/m2";
+            Channel_Slope.Symbol = "Channel Slope"; Channel_Slope.Name = "Slope of channel"; Channel_Slope.Units = "m/m";
+            UseBathymetry.Name = "Use Bathymetry (instead of 'vertical' walls)";
+            StreamType.Symbol = "Stream Type"; StreamType.Name = "Stream Type";  StreamType.ValList = new string[] { "Concrete Channel", "Dredged Channel", "Natural Channel", "N/A"}; 
+            UseEnteredManning.Name = "Use Entered Manning Coefficient";
+            EnteredManning.Symbol = "Mannings Coefficient"; EnteredManning.Name = "Manually entered Manning coefficient."; EnteredManning.Units = "s / m1/3";
+            PctRiffle.Symbol = "Percent Riffle"; PctRiffle.Name = "Percent riffle in stream reach "; PctRiffle.Units = "%";
+            PctPool.Symbol = "Percent Pool"; PctPool.Name = "Percent pool in stream reach"; PctPool.Units = "%";
+            UsePhytoRetention.Symbol = "UsePhytoRetention"; UsePhytoRetention.Name = "Use phytoplankton / zooplankton retention?";
+            EnterTotalLength.Symbol = "EnterTotalLength"; EnterTotalLength.Name = "If so, enter total length?";
+
+    }
+
     } // end SiteRecord
 
 
-    public class ReminRecord
+        public class ReminRecord
     {
     public string RemRecName;
     public double DecayMax_Lab;
@@ -270,19 +242,19 @@ namespace AQUATOX.AQSite
             // Fraction of Tot Area Available for PhotoSynth
             double FracLit;
             double LocalZMean;
-            if (Locale.UseBathymetry)
+            if (Locale.UseBathymetry.Val)
             {
-                FracLit = AreaFrac(ZEuphotic, Locale.ZMax);
+                FracLit = AreaFrac(ZEuphotic, Locale.ZMax.Val);
                 // 10-14-2010 Note that ZMax parameter pertains to both segments in event of stratification
                 if (SiteType == SiteTypes.Enclosure)
                 {
-                    FracLit = FracLit * (Locale.SurfArea + Locale.EnclWallArea) / Locale.SurfArea;
+                    FracLit = FracLit * (Locale.SurfArea.Val + Locale.EnclWallArea.Val) / Locale.SurfArea.Val;
                 }
             }
             else
             {
                 // don't use bathymetry, it is less relevant for rivers
-                LocalZMean = Volume / Locale.SurfArea;
+                LocalZMean = Volume / Locale.SurfArea.Val;
                 // m
                 FracLit = ZEuphotic / LocalZMean;
             // frac
@@ -315,21 +287,21 @@ namespace AQUATOX.AQSite
         {
 
             // mannings coefficient
-            if (Locale.UseEnteredManning)
+            if (Locale.UseEnteredManning.Val)
             {
-                return Locale.EnteredManning;
+                return Locale.EnteredManning.Val;
             }
-            else if (Locale.StreamType == StreamTypes.concrete_channel)
+            else if (Locale.StreamType.Val == "Concrete Channel")
             {
                 return 0.020;
             }
-            else if (Locale.StreamType == StreamTypes.dredged_channel)
+            else if (Locale.StreamType.Val == "Dredged Channel")
             {
                 return 0.030;
             }
             else
             {
-                return 0.040; // natural stream
+                return 0.040; // "Natural Stream"
             }
 
         }
@@ -338,9 +310,9 @@ namespace AQUATOX.AQSite
         public void ChangeData(double ZM)
         {
             // RAP, 9/5/95 made P calculation universal - no reason to override for site type
-            if (Locale.UseBathymetry)
+            if (Locale.UseBathymetry.Val)
             {
-                P_Shape = 6.0 * ZM / Locale.ZMax - 3.0;
+                P_Shape = 6.0 * ZM / Locale.ZMax.Val - 3.0;
             }
             // Junge in Hrbacek '66
             // unitless                  m   m
@@ -367,14 +339,14 @@ namespace AQUATOX.AQSite
             double Slope;
             double Width;
             // This function is used for streams when Tot_discharge = 0
-            IDepth = Locale.ICZMean;
-            Slope = Locale.Channel_Slope;
+            IDepth = Locale.ICZMean.Val;
+            Slope = Locale.Channel_Slope.Val;
             if (Slope <= 0)
             {
                 Slope = 0.0001;
             }
             // site is not a stream
-            Width = Locale.SurfArea / (Locale.SiteLength * 1000.0);
+            Width = Locale.SurfArea.Val / (Locale.SiteLength.Val * 1000.0);
             // m           // m2             // km         // m/km
 
             // -------------------------------------------------------------

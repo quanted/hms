@@ -104,27 +104,27 @@ namespace AQUATOX.Organisms
             double Area_Mi2;
             result = 1.0;
             SiteRecord LL = Location.Locale;
-            if (!LL.UsePhytoRetention || ((LL.EnterTotalLength && (LL.TotalLength == 0)) || ((!LL.EnterTotalLength) && (LL.WaterShedArea == 0))))
+            if (!LL.UsePhytoRetention.Val || ((LL.EnterTotalLength.Val && (LL.TotalLength.Val == 0)) || ((!LL.EnterTotalLength.Val) && (LL.WaterShedArea.Val == 0))))
             {
                 return result;
             }
             else
             {
                 LL = Location.Locale;
-                if (LL.EnterTotalLength)
+                if (LL.EnterTotalLength.Val)
                 {
-                    TotLen = LL.TotalLength;
+                    TotLen = LL.TotalLength.Val;
                 }
                 else
                 {
-                    Area_Mi2 = LL.WaterShedArea * 0.386;
+                    Area_Mi2 = LL.WaterShedArea.Val * 0.386;
                     // mi2         // km2
                     TotLen = 1.4 * Math.Pow(Area_Mi2, 0.6);                     // Leopold et al. 1964, p. 145
                     // mi   // mi2
                     TotLen = TotLen * 1.609;
                     // km     // mi
                 }
-                result = TotLen / LL.SiteLength;
+                result = TotLen / LL.SiteLength.Val;
                 if (result < 1.0)
                 {
                     throw new Exception("Phytoplankton Retention Parameterization Error.  Total site length is less than segment length.");
@@ -160,7 +160,7 @@ namespace AQUATOX.Organisms
 
             if (AQTSeg.Convert_g_m2_to_mg_L(NState, SVType, Layer))
             {
-                Loading = Loading * Location.Locale.SurfArea / AQTSeg.Volume_Last_Step;  // Convert loading from g/m2 to g/m3 --  Seed loadings only
+                Loading = Loading * Location.Locale.SurfArea.Val / AQTSeg.Volume_Last_Step;  // Convert loading from g/m2 to g/m3 --  Seed loadings only
             }
                         
             if (IsPlant())
@@ -202,7 +202,7 @@ namespace AQUATOX.Organisms
 
                     if (Loop == 1)  // DirectPrecip
                     {
-                        AddLoad = AddLoad * LoadsRec.Alt_Loadings[Loop].MultLdg / SegVolume * Location.Locale.SurfArea;
+                        AddLoad = AddLoad * LoadsRec.Alt_Loadings[Loop].MultLdg / SegVolume * Location.Locale.SurfArea.Val;
                         // mg/L d   // g/m2 d                // unitless            // cu m                // sq 
                     }
                     else
@@ -242,10 +242,10 @@ namespace AQUATOX.Organisms
 
                 else if (POy.NState >= AllVariables.Clams1 && POy.NState <= AllVariables.Clams4)
                 {
-                    if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("sack") > 0)
+                    if (POy.PAnimalData.Guild_Taxa.Val.ToLower().IndexOf("sack") > 0)
                         POy.OysterCategory = 4;
 
-                    else if (POy.PAnimalData.Guild_Taxa.ToLower().IndexOf("seed") > 0)
+                    else if (POy.PAnimalData.Guild_Taxa.Val.ToLower().IndexOf("seed") > 0)
                         POy.OysterCategory = 3;
 
                     else if (POy.PSameSpecies == AllVariables.NullStateVar)
@@ -568,7 +568,7 @@ namespace AQUATOX.Organisms
                         if (Local_K2 > 96)
                             Local_K2 = Local_K2 * (96.0 / Local_K2);  // scaling factor 10-02-03
 
-                        MeanAge = TA.PAnimalData.LifeSpan;
+                        MeanAge = TA.PAnimalData.LifeSpan.Val;
                         if (MeanAge < Consts.Tiny) throw new Exception("lifespan for " + TA.PName + " is set to zero.  This parameter must be set for bioaccumulation calculations.");
 
                         if (Local_K2 < 0.693 / MeanAge)
@@ -606,7 +606,7 @@ namespace AQUATOX.Organisms
                     TPlant TPl = this as TPlant;
                     PTR = TPl.Plant_Tox[ToxLoop];
 
-                    TPl.IsEunotia = TPl.PAlgalRec.ScientificName.ToLower().IndexOf("eunotia") > 0;
+                    TPl.IsEunotia = TPl.PAlgalRec.ScientificName.Val.ToLower().IndexOf("eunotia") > 0;
 
                     TPl.HabitatLimit = TPl.PHabitat_Limit();
 
@@ -700,13 +700,13 @@ namespace AQUATOX.Organisms
             
             // Default BCF Calculation Below
             NondissocVal = PT.NonDissoc();
-            double Kow = Math.Pow(10, PT.ChemRec.LogKow);
+            double Kow = Math.Pow(10, PT.ChemRec.LogKow.Val);
             if (IsAnimal())
             {
                 TAnimal PA = ((this) as TAnimal);
                 if (IsFish())
                 {
-                    Lipid = PA.PAnimalData.FishFracLipid;
+                    Lipid = PA.PAnimalData.FishFracLipid.Val;
                     KB = Lipid * WetToDry() * Kow * (NondissocVal + 0.01);
                     // BCF Test 9/8/2010
                     K2 = PA.Anim_Tox[ToxInt(ToxTyp)].Entered_K2;
@@ -720,7 +720,7 @@ namespace AQUATOX.Organisms
                 {
                     PT = AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, ToxTyp, T_SVLayer.WaterCol) as TToxics;
                     KPSed = PT.CalculateKOM();  // Use Schwarzenbach Eqn. for KPSED
-                    return PA.PAnimalData.FishFracLipid / DetrOCFrac * KPSed; // based on Gobas 1993
+                    return PA.PAnimalData.FishFracLipid.Val / DetrOCFrac * KPSed; // based on Gobas 1993
                 }
                 else
                 {   // Southworth et al. 1978
@@ -780,7 +780,7 @@ namespace AQUATOX.Organisms
 
                 if ((LC50_Local < Consts.Tiny)) return;  // 3/23/2012  if LC50 is zero, no effects, application factors are incalculable so no effects on repro, growth, photosynthesis either
 
-                Shape = WaterTox.ChemRec.Weibull_Shape;
+                Shape = WaterTox.ChemRec.Weibull_Shape.Val;
                 if (Shape <= 0)
                 {
                     throw new Exception(WaterTox.ChemRec.ChemName + " Shape Parameter must be greater than zero.");
@@ -851,7 +851,7 @@ namespace AQUATOX.Organisms
                 RedRepro[TInt] = 0;
                 FracPhoto[TInt] = 1;
 
-                SlopeFactor = WaterTox.ChemRec.WeibullSlopeFactor;
+                SlopeFactor = WaterTox.ChemRec.WeibullSlopeFactor.Val;
                 if (IsAnimal())
                     if ((ATR.LC50_Slope > Consts.Tiny))
                         SlopeFactor = ATR.LC50_Slope;  // JSC 12/14/2016 allow for animal-chemical-specific slope factor
@@ -1007,7 +1007,7 @@ namespace AQUATOX.Organisms
                 LC50_Local = ATR.LC50;
                 K2_Local = ATR.Entered_K2;
                 K2_Local = K2_Local + ATR.Bio_rate_const;  // 5/11/2015  Add metabolism to k2 for calculations
-                LifeSpan = ((TAnimal)this).PAnimalData.LifeSpan;
+                LifeSpan = ((TAnimal)this).PAnimalData.LifeSpan.Val;
             }
             else // is plant
             {

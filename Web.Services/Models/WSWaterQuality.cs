@@ -806,8 +806,8 @@ namespace Web.Services.Models
         {
             AQTNutrientsModel input = this.LoadAquatoxInputFile();
             
-            input.AQSim.AQTSeg.Location.Locale.SiteName = catchment.COMID.ToString();
-            input.AQSim.AQTSeg.Location.Locale.SiteLength = catchment.Length;
+            input.AQSim.AQTSeg.Location.Locale.SiteName.Val = catchment.COMID.ToString();
+            input.AQSim.AQTSeg.Location.Locale.SiteLength.Val = catchment.Length;
             input.AQSim.AQTSeg.PSetup.FirstDay.Val = this.startDate;
             input.AQSim.AQTSeg.PSetup.LastDay.Val = this.endDate;
 
