@@ -41,7 +41,7 @@ namespace AQUATOXNutrientModel
                     if (errmsg == "")
                     {
                         errmsg = AQSim.SaveJSON(ref json);
-                        this.outputString = AQSim.ExportJSON(ref json);
+                        this.outputString = AQSim.SaveJSON(ref json);
                     }
                 }
             }

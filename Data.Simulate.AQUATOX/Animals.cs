@@ -188,6 +188,23 @@ namespace AQUATOX.Animals
             ACT.Symbol = "ACT"; ACT.Name = "Intercept of swimming speed vs. Temperature and weight"; ACT.Units = "real number";
         }
 
+        public TParameter[] InputArray() {
+            return new TParameter[] {new TSubheading("Animal Parameters for "+AnimalName.Val),
+                            AnimalName, ScientificName, Animal_Type,Guild_Taxa,ToxicityRecord,BenthicDesignation,
+                            new TSubheading("Feeding"),FHalfSat,CMax,BMin,Sorting,Burrow_Index,CanSeekRefuge,Visual_Feeder,SuspSedFeeding,SlopeSSFeed,InterceptSSFeed,
+                            new TSubheading("Temperature, Simple Bioenergetics, Stoichiometry "),Q10,TOpt,TMax,TRef,MeanWeight,EndogResp,KResp,KExcr,N2Org,
+                            P2Org,Wet2Dry,PctGamete,GMort,KMort,
+                            new TSubheading("Life History Parameters"),SensToSediment,SenstoPctEmbed,PctEmbedThreshold,KCap,AveDrift,Trigger,FracInWaterCol,VelMax,
+                            Fishing_Frac,LifeSpan,FishFracLipid,
+                            new TSubheading("Ammonia/Low-Oxygen Effects"),O2_LethalConc,O2_LethalPct,O2_EC50growth,O2_EC50repro,Ammonia_LC50,
+                            new TSubheading("Salinity Effects Effects"),SalMin_Ing,SalMax_Ing ,SalCoeff1_Ing,SalCoeff2_Ing,SalMin_Gam,SalMax_Gam ,SalCoeff1_Gam,SalCoeff2_Gam,
+                            SalMin_Rsp,SalMax_Rsp ,SalCoeff1_Rsp,SalCoeff2_Rsp,SalMin_Mort,SalMax_Mort ,SalCoeff1_Mort,SalCoeff2_Mort,
+                            new TSubheading("Stream Habitat Parameters"),PrefRiffle,PrefPool,
+                            new TSubheading("Spawning"),AutoSpawn,SpawnDate1,SpawnDate2,SpawnDate3,UnlimitedSpawning,SpawnLimit,
+                            new TSubheading("Allometric Consumption and Respiration"),UseAllom_C,CA,CB,UseAllom_R,RA,RB,UseSet1,RQ,RTL,ACT,RTO,RK1,BACT,
+                            RTM,RK4};
+                            }
+
 
     } // end AnimalRecord
 
@@ -871,15 +888,15 @@ namespace AQUATOX.Animals
 
                     if (PSV != null) Nutr2Org = PSV.NutrToOrg(AllVariables.Nitrate);
                     else if (P.nState == AllVariables.SedmRefrDetr)
-                          Nutr2Org = RR.N2Org_Refr; // diagenesis model special code
-                    else  Nutr2Org = RR.N2OrgLab; // SedmLabDetr
+                          Nutr2Org = RR.N2OrgRefr.Val; // diagenesis model special code
+                    else  Nutr2Org = RR.N2OrgLab.Val; // SedmLabDetr
 
                     NitrCons = NitrCons + Ingestion * Nutr2Org;
 
                     if (PSV != null)  Nutr2Org = PSV.NutrToOrg(AllVariables.Phosphate);
                     else if (P.nState == AllVariables.SedmRefrDetr)
-                          Nutr2Org = RR.P2Org_Refr;  // diagenesis model special code
-                    else  Nutr2Org = RR.P2OrgLab;    // SedmLabDetr
+                          Nutr2Org = RR.P2OrgRefr.Val;  // diagenesis model special code
+                    else  Nutr2Org = RR.P2OrgLab.Val;    // SedmLabDetr
 
                     PhosCons = PhosCons + Ingestion * Nutr2Org;
                 }
@@ -1731,7 +1748,7 @@ namespace AQUATOX.Animals
 
             if (PT.Anim_Method == UptakeCalcMethodType.Default_Meth)
             {
-                O2Bio = Location.Remin.O2Biomass;
+                O2Bio = Location.Remin.O2Biomass.Val;
                 OxygenConc = AQTSeg.GetState(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
                 WEffTox = PT.WEffTox(PT.NonDissoc());
                 if (OxygenConc > 0.0)

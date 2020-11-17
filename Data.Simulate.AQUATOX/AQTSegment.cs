@@ -20,6 +20,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Data;
 using System.ComponentModel;
+using System.IO;
 
 namespace AQUATOX.AQTSegment
 
@@ -27,6 +28,9 @@ namespace AQUATOX.AQTSegment
     public class AQTSim
     {
         public AQUATOXSegment AQTSeg = null;
+        public string RunID = "";
+
+        public Dictionary<string, AQUATOXSegment> SavedRuns = null;
 
         public string SaveJSON(ref string json)
         {
@@ -57,35 +61,35 @@ namespace AQUATOX.AQTSegment
 
         }
 
-        public string ExportJSON(ref string json)
-        {
+        //public string ExportJSON(ref string json)
+        //{
 
-            try
-            {
-                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
-                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
-                {
-                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-                    TypeNameHandling = TypeNameHandling.Objects,
-                    SerializationBinder = AQTBinder
-                };
-                json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
-                return json;
-            }
-            catch (Newtonsoft.Json.JsonWriterException e)
-            {
-                return e.Message;
-            }
-            catch (Exception e)
-            {
-                return e.Message;
-            }
+        //    try
+        //    {
+        //        AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
+        //        JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
+        //        {
+        //            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+        //            TypeNameHandling = TypeNameHandling.Objects,
+        //            SerializationBinder = AQTBinder
+        //        };
+        //        json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
+        //        return json;
+        //    }
+        //    catch (Newtonsoft.Json.JsonWriterException e)
+        //    {
+        //        return e.Message;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return e.Message;
+        //    }
 
-            finally
-            {
-            }
+        //    finally
+        //    {
+        //    }
 
-        }
+        //}
 
 
         public string Instantiate(string json)
@@ -116,6 +120,20 @@ namespace AQUATOX.AQTSegment
             finally
             {
             }
+        }
+
+        public bool ArchiveSimulation()
+        {
+            if (SavedRuns == null) SavedRuns = new Dictionary<string, AQUATOXSegment>(); 
+            if (SavedRuns.TryGetValue(RunID, out AQUATOXSegment savedRun)) return false;
+
+            string JSONToArchive="";
+            SaveJSON(ref JSONToArchive);
+            AQTSim SimToArchive = new AQTSim();
+            SimToArchive.Instantiate(JSONToArchive);
+            SavedRuns.Add(RunID, SimToArchive.AQTSeg);
+
+            return true;
         }
 
         public string Integrate()
@@ -152,6 +170,14 @@ namespace AQUATOX.AQTSegment
             return Integrate();
         }
 
+        public bool Has_Chemicals()
+        {
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
+            {
+                if (AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null) return true;
+            }
+            return false;
+        }
     }
 
     
@@ -405,9 +431,9 @@ namespace AQUATOX.AQTSegment
             if (Temp >= 19)  Theta = Theta20;
             else             Theta = 1.185 - 0.00729 * Temp;
 
-            result = Math.Pow(Theta, (Temp - Location.Remin.TOpt));
+            result = Math.Pow(Theta, (Temp - Location.Remin.TOpt.Val));
 
-            if (Temp > Location.Remin.TMax)
+            if (Temp > Location.Remin.TMax.Val)
                 result = 0;
 
             return result;
@@ -458,7 +484,7 @@ namespace AQUATOX.AQTSegment
                 ReminRecord RR = Location.Remin;
                 // T := AllStates.TCorr(Q10, TRef, TOpt, TMax);
                 T = Decomposition_DecTCorr();
-                p = AQTSeg.pHCorr(RR.pHMin, RR.pHMax);
+                p = AQTSeg.pHCorr(RR.pHMin.Val, RR.pHMax.Val);
 
                 if (O2Conc == 0) Factor = 0;
                 else Factor = O2Conc / (HalfSatO + O2Conc);
@@ -547,13 +573,13 @@ namespace AQUATOX.AQTSegment
             switch (NState)
             {
                 case AllVariables.SedmRefrDetr:
-                    return RR.Wet2DrySRefr;
+                    return RR.Wet2DrySRefr.Val;
                 case AllVariables.SedmLabDetr:
-                    return RR.Wet2DrySLab;
+                    return RR.Wet2DrySLab.Val;
                 case AllVariables.SuspRefrDetr:
-                    return RR.Wet2DryPRefr;
+                    return RR.Wet2DryPRefr.Val;
                 case AllVariables.SuspLabDetr:
-                    return RR.Wet2DryPLab;
+                    return RR.Wet2DryPLab.Val;
                 case AllVariables.DissRefrDetr:
                 case AllVariables.DissLabDetr:
                     return 1.0;
@@ -577,10 +603,10 @@ namespace AQUATOX.AQTSegment
             bool Nitr = ((S == AllVariables.Nitrate) || (S == AllVariables.Ammonia));
             if (Nitr)
             {
-                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.N2Org_Refr;
-                if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.N2OrgLab;
-                if (NState == AllVariables.DissRefrDetr) return LR.N2OrgDissRefr;
-                if (NState == AllVariables.DissLabDetr) return LR.N2OrgDissLab;
+                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.N2OrgRefr.Val;
+                if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.N2OrgLab.Val;
+                if (NState == AllVariables.DissRefrDetr) return LR.N2OrgDissRefr.Val;
+                if (NState == AllVariables.DissLabDetr) return LR.N2OrgDissLab.Val;
 
                 if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
                 {
@@ -593,10 +619,10 @@ namespace AQUATOX.AQTSegment
             }
             else
             {
-                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.P2Org_Refr;
-                if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.P2OrgLab;
-                if (NState == AllVariables.DissRefrDetr) return LR.P2OrgDissRefr;
-                if (NState == AllVariables.DissLabDetr) return LR.P2OrgDissLab;
+                if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SuspRefrDetr)) return LR.P2OrgRefr.Val;
+                if ((NState == AllVariables.SedmLabDetr) || (NState == AllVariables.SuspLabDetr)) return LR.P2OrgLab.Val;
+                if (NState == AllVariables.DissRefrDetr) return LR.P2OrgDissRefr.Val;
+                if (NState == AllVariables.DissLabDetr) return LR.P2OrgDissLab.Val;
 
                 if ((NState >= Consts.FirstAnimal) && (NState <= Consts.LastAnimal))  
                 {
@@ -704,7 +730,7 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
 
-        [JsonIgnore] public DateTime SimulationDate;  // time integration started
+        [JsonIgnore] public DateTime SimulationDate = DateTime.MinValue;  // time integration started
         [JsonIgnore] public DateTime VolumeUpdated;  // 
         [JsonIgnore] public double MeanVolume;       // 
         [JsonIgnore] public double Volume_Last_Step;   // Volume in the previous step, used for calculating dilute/conc,  if stratified, volume of whole system(nosave)}  
@@ -2685,8 +2711,8 @@ namespace AQUATOX.AQTSegment
                 }
                 var NFrac = NS switch
                 {
-                    AllVariables.PON_G1 => Location.Remin.N2OrgLab,    // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
-                    AllVariables.POP_G1 => Location.Remin.P2OrgLab,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
+                    AllVariables.PON_G1 => Location.Remin.N2OrgLab.Val,    // Was PA.PAnimalData.N2Org, 6/6/2008, defecation has same nutrients as labile detritus
+                    AllVariables.POP_G1 => Location.Remin.P2OrgLab.Val,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
                     _ => 1.0 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 };
                 // Case
@@ -2786,10 +2812,10 @@ namespace AQUATOX.AQTSegment
                     ReminRecord RR = Location.Remin;
                     NFrac = NS switch
                     {
-                        (AllVariables.PON_G1) => RR.N2OrgLab,
-                        (AllVariables.PON_G2) => RR.N2Org_Refr,
-                        (AllVariables.POP_G1) => RR.P2OrgLab,
-                        (AllVariables.POP_G2) => RR.P2Org_Refr,
+                        (AllVariables.PON_G1) => RR.N2OrgLab.Val,
+                        (AllVariables.PON_G2) => RR.N2OrgRefr.Val,
+                        (AllVariables.POP_G1) => RR.P2OrgLab.Val,
+                        (AllVariables.POP_G2) => RR.P2OrgRefr.Val,
                         (AllVariables.POC_G3) => 1.0 / Consts.Detr_OM_2_OC * Diagenesis_Params.LigninDetr.Val,
                         (AllVariables.POC_G2) => 1.0 / Consts.Detr_OM_2_OC * (1.0 - Diagenesis_Params.LigninDetr.Val),
                         _ => NFrac = 1.0 / Consts.Detr_OM_2_OC,  // POCG1: 
@@ -3160,8 +3186,8 @@ namespace AQUATOX.AQTSegment
             ReminRecord RR = Location.Remin;
             if (NS == AllVariables.SedmRefrDetr)
             {
-                SedN_OM = GetState(AllVariables.PON_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2Org_Refr;
-                SedP_OM = GetState(AllVariables.POP_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2Org_Refr;
+                SedN_OM = GetState(AllVariables.PON_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2OrgRefr.Val;
+                SedP_OM = GetState(AllVariables.POP_G2, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2OrgRefr.Val;
                 // g OM/m3 s               // g P or N / m3                                // g P or N / g OM
                 SedC_OM = GetState(AllVariables.POC_G2, T_SVType.StV, T_SVLayer.SedLayer2) * Consts.Detr_OM_2_OC;
                 // g OM/m3 s                 // g OC/m3                                   // g OM / g OC
@@ -3169,8 +3195,8 @@ namespace AQUATOX.AQTSegment
             else
             {
                 // SedmLabDetr
-                SedN_OM = GetState(AllVariables.PON_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2OrgLab;
-                SedP_OM = GetState(AllVariables.POP_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2OrgLab;
+                SedN_OM = GetState(AllVariables.PON_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.N2OrgLab.Val;
+                SedP_OM = GetState(AllVariables.POP_G1, T_SVType.StV, T_SVLayer.SedLayer2) / RR.P2OrgLab.Val;
                 // g OM/m3                // g P or N / m3                          // g P or N / g OM
                 SedC_OM = GetState(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2) * Consts.Detr_OM_2_OC;
                 // g OM/m3                // g OC/m3                                // g OM / g OC

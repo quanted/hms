@@ -37,10 +37,10 @@ namespace AQUATOX.Nutrients
                             {
                             Nut2Org = NSLoop switch
                             {
-                                AllVariables.SuspRefrDetr => Location.Remin.N2Org_Refr,
-                                AllVariables.SuspLabDetr => Location.Remin.N2OrgLab,
-                                AllVariables.DissRefrDetr => Location.Remin.N2OrgDissRefr,
-                                _ => Location.Remin.N2OrgDissLab,
+                                AllVariables.SuspRefrDetr => Location.Remin.N2OrgRefr.Val,
+                                AllVariables.SuspLabDetr => Location.Remin.N2OrgLab.Val,
+                                AllVariables.DissRefrDetr => Location.Remin.N2OrgDissRefr.Val,
+                                _ => Location.Remin.N2OrgDissLab.Val,
                             };
                             // Case
                         }
@@ -48,10 +48,10 @@ namespace AQUATOX.Nutrients
                             {
                             Nut2Org = NSLoop switch
                             {
-                                AllVariables.SuspRefrDetr => Location.Remin.P2Org_Refr,
-                                AllVariables.SuspLabDetr => Location.Remin.P2OrgLab,
-                                AllVariables.DissRefrDetr => Location.Remin.P2OrgDissRefr,
-                                _ => Location.Remin.P2OrgDissLab,
+                                AllVariables.SuspRefrDetr => Location.Remin.P2OrgRefr.Val,
+                                AllVariables.SuspLabDetr => Location.Remin.P2OrgLab.Val,
+                                AllVariables.DissRefrDetr => Location.Remin.P2OrgDissRefr.Val,
+                                _ => Location.Remin.P2OrgDissLab.Val,
                             };
                         }
                             // Case
@@ -107,29 +107,29 @@ namespace AQUATOX.Nutrients
                 case AllVariables.SedmRefrDetr:
                 case AllVariables.SuspRefrDetr:
                     if (NState == AllVariables.Phosphate)
-                        return Location.Remin.P2Org_Refr;
+                        return Location.Remin.P2OrgRefr.Val;
                     else
-                        return Location.Remin.N2Org_Refr;  
+                        return Location.Remin.N2OrgRefr.Val;
 
                 case AllVariables.SedmLabDetr:
                 case AllVariables.SuspLabDetr:
                     if (NState == AllVariables.Phosphate)
-                        return Location.Remin.P2OrgLab;
+                        return Location.Remin.P2OrgLab.Val;
                     else
-                        return Location.Remin.N2OrgLab;
+                        return Location.Remin.N2OrgLab.Val;
 
                 case AllVariables.DissRefrDetr:
                     if (NState == AllVariables.Phosphate)
-                        return Location.Remin.P2OrgDissRefr;
+                        return Location.Remin.P2OrgDissRefr.Val;
                     else
-                        return Location.Remin.N2OrgDissRefr;
+                        return Location.Remin.N2OrgDissRefr.Val;
 
                 default:
                     // DissLabDetr
                     if (NState == AllVariables.Phosphate)
-                        return Location.Remin.P2OrgDissLab;
+                        return Location.Remin.P2OrgDissLab.Val;
                     else
-                        return Location.Remin.N2OrgDissLab;
+                        return Location.Remin.N2OrgDissLab.Val;
             }
         }
 
@@ -394,29 +394,29 @@ namespace AQUATOX.Nutrients
                 }
                 else
                 {
-                    Decomp = RP.Decomposition(RR.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                    Decomp = RP.Decomposition(RR.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
                 }
 
                 if (OType == T_SVType.NTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * RR.N2OrgDissLab;
+                        Decomp = Decomp * RR.N2OrgDissLab.Val;
                     }
                     else
                     {
-                        Decomp = Decomp * RR.N2OrgLab;
+                        Decomp = Decomp * RR.N2OrgLab.Val;
                     }
                 }
                 if (OType == T_SVType.PTrack)
                 {
                     if (Loop == AllVariables.DissLabDetr)
                     {
-                        Decomp = Decomp * RR.P2OrgDissLab;
+                        Decomp = Decomp * RR.P2OrgDissLab.Val;
                     }
                     else
                     {
-                        Decomp = Decomp * RR.P2OrgLab;
+                        Decomp = Decomp * RR.P2OrgLab.Val;
                     }
                 }
                 SumDecomp = SumDecomp + Decomp;
@@ -533,8 +533,8 @@ namespace AQUATOX.Nutrients
                     ReminRecord RR = Location.Remin;
 
                     if (NState == AllVariables.Ammonia)
-                          DiffNFrac = PAn.PAnimalData.N2Org.Val - RR.N2OrgLab;
-                    else  DiffNFrac = PAn.PAnimalData.P2Org.Val - RR.P2OrgLab;
+                          DiffNFrac = PAn.PAnimalData.N2Org.Val - RR.N2OrgLab.Val;
+                    else  DiffNFrac = PAn.PAnimalData.P2Org.Val - RR.P2OrgLab.Val;
 
                     NGL = NGL + PAn.GameteLoss() * DiffNFrac;
                 }
@@ -572,17 +572,17 @@ namespace AQUATOX.Nutrients
             ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = RR.N2Org_Refr;
-                Nut2Org_Lab = RR.N2OrgLab;
-                Nut2Org_DissRefr = RR.N2OrgDissRefr;
-                Nut2Org_DissLab = RR.N2OrgDissLab;
+                Nut2Org_Refr = RR.N2OrgRefr.Val;
+                Nut2Org_Lab = RR.N2OrgLab.Val;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.N2OrgDissLab.Val;
             }
             else
             {
-                Nut2Org_Refr = RR.P2Org_Refr;
-                Nut2Org_Lab = RR.P2OrgLab;
-                Nut2Org_DissRefr = RR.P2OrgDissRefr;
-                Nut2Org_DissLab = RR.P2OrgDissLab;
+                Nut2Org_Refr = RR.P2OrgRefr.Val;
+                Nut2Org_Lab = RR.P2OrgLab.Val;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.P2OrgDissLab.Val;
             }
             NMort = 0;
             for (ns = Consts.FirstBiota; ns <= Consts.LastBiota; ns++)
@@ -662,13 +662,13 @@ namespace AQUATOX.Nutrients
             ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = RR.N2Org_Refr;
-                Nut2Org_Lab = RR.N2OrgLab;
+                Nut2Org_Refr = RR.N2OrgRefr.Val;
+                Nut2Org_Lab = RR.N2OrgLab.Val;
             }
             else
             {
-                Nut2Org_Refr = RR.P2Org_Refr;
-                Nut2Org_Lab = RR.P2OrgLab;
+                Nut2Org_Refr = RR.P2OrgRefr.Val;
+                Nut2Org_Lab = RR.P2OrgLab.Val;
             }
             NSink = 0;
             for (ns = Consts.FirstAlgae; ns <= Consts.LastAlgae; ns++)
@@ -768,15 +768,15 @@ namespace AQUATOX.Nutrients
         ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = RR.N2Org_Refr;
-                Nut2Org_Lab = RR.N2OrgLab;
-                Nut2Org_DissRefr = RR.N2OrgDissRefr;
+                Nut2Org_Refr = RR.N2OrgRefr.Val;
+                Nut2Org_Lab = RR.N2OrgLab.Val;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr.Val;
             }
             else
             {
-                Nut2Org_Refr = RR.P2Org_Refr;
-                Nut2Org_Lab = RR.P2OrgLab;
-                Nut2Org_DissRefr = RR.P2OrgDissRefr;
+                Nut2Org_Refr = RR.P2OrgRefr.Val;
+                Nut2Org_Lab = RR.P2OrgLab.Val;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr.Val;
             }
             SumColonize = 0;
             for (ns = AllVariables.SedmRefrDetr; ns <= AllVariables.SuspLabDetr; ns++)
@@ -811,13 +811,13 @@ namespace AQUATOX.Nutrients
             ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_Refr = RR.N2Org_Refr;
-                Nut2Org_Lab = RR.N2OrgLab;
+                Nut2Org_Refr = RR.N2OrgRefr.Val;
+                Nut2Org_Lab = RR.N2OrgLab.Val;
             }
             else
             {
-                Nut2Org_Refr = RR.P2Org_Refr;
-                Nut2Org_Lab = RR.P2OrgLab;
+                Nut2Org_Refr = RR.P2OrgRefr.Val;
+                Nut2Org_Lab = RR.P2OrgLab.Val;
             }
             NDef = 0;
             for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
@@ -859,13 +859,13 @@ namespace AQUATOX.Nutrients
             ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_DissRefr = RR.N2OrgDissRefr;
-                Nut2Org_DissLab = RR.N2OrgDissLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.N2OrgDissLab.Val;
             }
             else
             {
-                Nut2Org_DissRefr = RR.P2OrgDissRefr;
-                Nut2Org_DissLab = RR.P2OrgDissLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.P2OrgDissLab.Val;
             }
             Excret = 0;
             for (ns = Consts.FirstAnimal; ns <= Consts.LastAnimal; ns++)
@@ -910,13 +910,13 @@ namespace AQUATOX.Nutrients
             ReminRecord RR = Location.Remin;
             if (NState == AllVariables.Ammonia)
             {
-                Nut2Org_DissRefr = RR.N2OrgDissRefr;
-                Nut2Org_DissLab = RR.N2OrgDissLab;
+                Nut2Org_DissRefr = RR.N2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.N2OrgDissLab.Val;
             }
             else
             {
-                Nut2Org_DissRefr = RR.P2OrgDissRefr;
-                Nut2Org_DissLab = RR.P2OrgDissLab;
+                Nut2Org_DissRefr = RR.P2OrgDissRefr.Val;
+                Nut2Org_DissLab = RR.P2OrgDissLab.Val;
             }
             PhotoRsp = 0;
             for (ns = Consts.FirstPlant; ns <= Consts.LastPlant; ns++)
@@ -1251,8 +1251,8 @@ namespace AQUATOX.Nutrients
             }
 
             ReminRecord RR = AQTSeg.Location.Remin;   
-            CaCO3srb = RR.KD_P_Calcite * State * AQTSeg.CalcitePcpt() * 1e-6;
-          // mg P/L d     // L/Kg       // mg/L  // mg Calcite/L d     // kg/mg
+            CaCO3srb = RR.KD_P_Calcite.Val * State * AQTSeg.CalcitePcpt() * 1e-6;
+          // mg P/L d     // L/Kg          // mg/L  // mg Calcite/L d     // kg/mg
 
             if (CalcitePcpt_Link != null) CaCO3srb = CalcitePcpt_Link.ReturnLoad(AQTSeg.TPresent);  // JSON linkage
 
@@ -1314,7 +1314,7 @@ namespace AQUATOX.Nutrients
                     }
                     EnvironLim = DOCorr * T * p;
                     // * Sed_Surf_Corr
-                    Nitrify = RR.KNitri * EnvironLim * State;
+                    Nitrify = RR.KNitri.Val * EnvironLim * State;
                     // 3/12/09 Removed Sed_Surf_Corr
                     // Note KNitri may need to be calibrated to a lower value when Sed. Diagenesis enabled
                     // with
@@ -1551,7 +1551,7 @@ namespace AQUATOX.Nutrients
                 double EnvironLim;
                 if (State > Consts.VSmall)
                 {
-                    ReminRecord _1 = Location.Remin;
+                    ReminRecord RR = Location.Remin;
                     T = AQTSeg.TCorr(2.0, 10.0, 30.0, 60.0);
                     p = AQTSeg.pHCorr(5.0, 9.0);
                     if (Location.SiteType == SiteTypes.Marine)
@@ -1565,7 +1565,7 @@ namespace AQUATOX.Nutrients
                     DOCorr =  O2 / (0.5 + O2);
                     }
                     EnvironLim = (1.0 - DOCorr) * T * p;
-                    Denitrify = (_1.KDenitri_Wat * EnvironLim) * State;
+                    Denitrify = (RR.KDenitri_Wat.Val * EnvironLim) * State;
                     // 3/13/09 Reformulated
 
                     // (*     With AQTSeg do
@@ -2220,7 +2220,7 @@ namespace AQUATOX.Nutrients
             // TO2Obj.Deriv
 
             ReminRecord RR = Location.Remin;
-            BOD = RR.O2Biomass * SumDetrDecomp(T_SVType.StV, false);
+            BOD = RR.O2Biomass.Val * SumDetrDecomp(T_SVType.StV, false);
             if (CBOD_Link != null) BOD = CBOD_Link.ReturnLoad(AQTSeg.TPresent);
 
             // if diagenesis model attached
@@ -2233,11 +2233,11 @@ namespace AQUATOX.Nutrients
 
             if (SOD_Link != null) SOD2 = SOD_Link.ReturnLoad(AQTSeg.TPresent);  // linkage if no diagenesis attached
 
-            Resp = RR.O2Biomass * SumRespiration(false);            
+            Resp = RR.O2Biomass.Val * SumRespiration(false);            
             if (Respiration_Link != null) Resp = Respiration_Link.ReturnLoad(AQTSeg.TPresent);
 
             TNH4Obj PNH4  = (TNH4Obj)(AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol));
-            if (PNH4 != null) Nitr = RR.O2N * PNH4.Nitrification();
+            if (PNH4 != null) Nitr = RR.O2N.Val * PNH4.Nitrification();
                else Nitr = 0;
 
             if (Nitrification_Link != null) Nitr = Nitrification_Link.ReturnLoad(AQTSeg.TPresent);

@@ -1189,10 +1189,10 @@ namespace AQUATOX.Diagenesis
 
             Pred = 0;
             if (NState == AllVariables.PON_G1)   
-                Pred = Predation() * Location.Remin.N2OrgLab;
+                Pred = Predation() * Location.Remin.N2OrgLab.Val;
 
             if (NState == AllVariables.PON_G2)
-                Pred = Predation() * Location.Remin.N2Org_Refr;
+                Pred = Predation() * Location.Remin.N2OrgRefr.Val;
              // g N/m3 w     // g OM /m3             // g N / g OM
 
             MorphRecord MR = AQTSeg.Location.Morph;
@@ -1302,10 +1302,10 @@ namespace AQUATOX.Diagenesis
             //                          (g/m3 d sediment) = (g/d) / (m3 sediment)
 
             if (NState == AllVariables.POP_G1)   
-                Pred = Predation() * Location.Remin.P2OrgLab;
+                Pred = Predation() * Location.Remin.P2OrgLab.Val;
 
             if (NState == AllVariables.POP_G2)
-                Pred = Predation() * Location.Remin.P2Org_Refr;
+                Pred = Predation() * Location.Remin.P2OrgRefr.Val;
             //g P/m3 w  // g P /m3             // g P / g OM
 
             MorphRecord MR = AQTSeg.Location.Morph;

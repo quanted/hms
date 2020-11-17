@@ -40,7 +40,7 @@ namespace AQUATOX.Bioaccumulation
         {
             // Labile Compartments only
             double FracAerobic=0.0;
-            return  ((AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol)) as TRemineralize).Decomposition(AQTSeg.Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+            return  ((AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol)) as TRemineralize).Decomposition(AQTSeg.Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
         }
 
         // ----------------------------------------------------------

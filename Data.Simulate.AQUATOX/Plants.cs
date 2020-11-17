@@ -48,7 +48,7 @@ namespace AQUATOX.Plants
         public TParameter Min_N_Ratio = new TParameter();
         public TParameter Min_P_Ratio = new TParameter();
         public TParameter Plant_to_Chla = new TParameter();
-        public TParameter KSed1 = new TParameter();
+        public TParameter KSed = new TParameter();
         public TParameter KSedTemp = new TParameter();
         public TParameter KSedSalinity = new TParameter();
         public TParameter ESed = new TParameter();
@@ -99,7 +99,7 @@ namespace AQUATOX.Plants
             Min_N_Ratio.Symbol = "Min N Ratio"; Min_N_Ratio.Name = "the ratio of intracellular nitrogen at which growth ceases  "; Min_N_Ratio.Units = "gN / gAFDW";
             Min_P_Ratio.Symbol = "Min P Ratio"; Min_P_Ratio.Name = "the ratio of intracellular phosphorus at which growth ceases  "; Min_P_Ratio.Units = "gP / gAFDW";
             Plant_to_Chla.Symbol = "Phytoplankton: C:Chlorophyll a"; Plant_to_Chla.Name = "ratio of carbon to chlorophyll a"; Plant_to_Chla.Units = "g carbon/g chl. a";
-            KSed1.Symbol = "Phytoplankton: Sedimentation Rate (KSed)"; KSed1.Name = "Intrinsic settling rate"; KSed1.Units = "m/d";
+            KSed.Symbol = "Phytoplankton: Sedimentation Rate (KSed)"; KSed.Name = "Intrinsic settling rate"; KSed.Units = "m/d";
             KSedTemp.Symbol = "Phytoplankton: Temperature of Obs. KSed"; KSedTemp.Name = "Reference temperature of water for calculating Nhytoplankton sinking rate"; KSedTemp.Units = "deg. C";
             KSedSalinity.Symbol = "Phytoplankton: Salinity of Obs. KSed"; KSedSalinity.Name = "Reference salinity of water for calculating Nhytoplankton sinking rate"; KSedSalinity.Units = "‰";
             ESed.Symbol = "Phytoplankton: Exp. Sedimentation Coeff"; ESed.Name = "Exponential settling coefficient"; ESed.Units = "Unitless";
@@ -120,61 +120,26 @@ namespace AQUATOX.Plants
             SalCoeff2_Mort.Symbol = "SalCoeff2 Mort."; SalCoeff2_Mort.Name = "Salinity Coefficient 2 for Mortality"; SalCoeff2_Mort.Units = "unitless";
         }
 
-        //public void ConvertPR(PlantRecord PR)
-        //{
-        //    PlantName.Val = PR.PlantName;
-        //    PlantType.Val = PR.PlantType;
-        //    PlantType.Val = "Test";
-        //    SurfaceFloating.Val = PR.SurfaceFloating;
-        //    Macrophyte_Type.Val = PR.Macrophyte_Type;
-        //    Taxonomic_Type.Val = PR.Taxonomic_Type;
-        //    ToxicityRecord.Val = PR.ToxicityRecord;
-        //    LightSat.Val = PR.EnteredLightSat; LightSat.Comment = PR.XLightSat;
-        //    UseAdaptiveLight.Val = PR.UseAdaptiveLight;
-        //    MaxLightSat.Val = PR.MaxLightSat; MaxLightSat.Comment = PR.XMaxLightSat;
-        //    MinLightSat.Val = PR.MinLightSat; MinLightSat.Comment = PR.XMinLightSat;
-        //    KPO4.Val = PR.KPO4; KPO4.Comment = PR.XKPO4;
-        //    KN.Val = PR.KN; KN.Comment = PR.XKN;
-        //    KCarbon.Val = PR.KCarbon; KCarbon.Comment = PR.XKCarbon;
-        //    Q10.Val = PR.Q10; Q10.Comment = PR.XQ10;
-        //    TOpt.Val = PR.TOpt; TOpt.Comment = PR.XTOpt;
-        //    TMax.Val = PR.TMax; TMax.Comment = PR.XTMax;
-        //    TRef.Val = PR.TRef; TRef.Comment = PR.XTRef;
-        //    PMax.Val = PR.PMax; PMax.Comment = PR.XPMax;
-        //    KResp.Val = PR.KResp; KResp.Comment = PR.XKResp;
-        //    Resp20.Val = PR.Resp20; Resp20.Comment = PR.XResp20;
-        //    KMort.Val = PR.KMort; KMort.Comment = PR.XKMort;
-        //    EMort.Val = PR.EMort; EMort.Comment = PR.XEMort;
-        //    P2OrgInit.Val = PR.P2OrgInit; P2OrgInit.Comment = PR.XP2Org;
-        //    N2OrgInit.Val = PR.N2OrgInit; N2OrgInit.Comment = PR.XN2Org;
-        //    ECoeffPhyto.Val = PR.ECoeffPhyto; ECoeffPhyto.Comment = PR.XECoeffPhyto;
-        //    Wet2Dry.Val = PR.Wet2Dry; Wet2Dry.Comment = PR.XWet2Dry;
-        //    PlantFracLipid.Val = PR.PlantFracLipid; PlantFracLipid.Comment = PR.XPlantFracLipid;
-        //    NHalfSatInternal.Val = PR.NHalfSatInternal; NHalfSatInternal.Comment = PR.XNHalfSatInternal;
-        //    PHalfSatInternal.Val = PR.PHalfSatInternal; PHalfSatInternal.Comment = PR.XPHalfSatInternal;
-        //    MaxNUptake.Val = PR.MaxNUptake; MaxNUptake.Comment = PR.XMaxNUptake;
-        //    MaxPUptake.Val = PR.MaxPUptake; MaxPUptake.Comment = PR.XMaxPUptake;
-        //    Min_N_Ratio.Val = PR.Min_N_Ratio; Min_N_Ratio.Comment = PR.XMin_N_Ratio;
-        //    Min_P_Ratio.Val = PR.Min_P_Ratio; Min_P_Ratio.Comment = PR.XMin_P_Ratio;
-        //    Plant_to_Chla.Val = PR.Plant_to_Chla; Plant_to_Chla.Comment = PR.XPlant_to_Chla;
-        //    KSed.Val = PR.KSed; KSed.Comment = PR.XKSed;
-        //    KSedTemp.Val = PR.KSedTemp; KSedTemp.Comment = PR.XKSedTemp;
-        //    KSedSalinity.Val = PR.KSedSalinity; KSedSalinity.Comment = PR.XKSedSalinity;
-        //    ESed.Val = PR.ESed; ESed.Comment = PR.XESed;
-        //    Carry_Capac.Val = PR.CarryCapac; Carry_Capac.Comment = PR.XCarryCapac;
-        //    Macro_VelMax.Val = PR.Macro_VelMax; Macro_VelMax.Comment = PR.XVelMax;
-        //    Red_Still_Water.Val = PR.Red_Still_Water; Red_Still_Water.Comment = PR.XRed_Still_Water;
-        //    FCrit.Val = PR.FCrit; FCrit.Comment = PR.XFCrit;
-        //    PctSloughed.Val = PR.PctSloughed; PctSloughed.Comment = PR.XPctSloughed;
-        //    PrefRiffle.Val = PR.PrefRiffle; PrefRiffle.Comment = PR.XPrefRiffle;
-        //    PrefPool.Val = PR.PrefPool; PrefPool.Comment = PR.XPrefPool;
-
-        //}
+        public TParameter[] InputArray()
+        {
+            return new TParameter[] {new TSubheading("Plant Parameters for "+PlantName.Val), PlantName,
+                ScientificName, PlantType,SurfaceFloating,
+                Taxonomic_Type, ToxicityRecord, EnteredLightSat,
+                UseAdaptiveLight, MaxLightSat, MinLightSat, KPO4, KN,
+                KCarbon, Q10, TOpt, TMax, TRef, PMax, KResp, Resp20, KMort, EMort,
+                P2OrgInit, N2OrgInit, ECoeffPhyto, Wet2Dry, PlantFracLipid,
+                new TSubheading("Internal Nutrients Parameters:"), NHalfSatInternal, PHalfSatInternal, MaxNUptake,
+                MaxPUptake,  Min_N_Ratio, Min_P_Ratio,
+                new TSubheading("Phytoplankton Only:"), Plant_to_Chla, KSed, KSedTemp, KSedSalinity, ESed,
+                new TSubheading("Periphyton and Macrophytes Only:"),  Macrophyte_Type, CarryCapac, Macro_VelMax, Red_Still_Water, FCrit,
+                new TSubheading("If in Stream:"),   PctSloughed, PrefRiffle, PrefPool,
+                new TSubheading("Salinity Effects:"),  SalMin_Phot, SalMax_Phot, SalCoeff1_Phot, SalCoeff2_Phot, SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort };
+        }
     }
 
 
 
-    public class TPlantToxRecord
+        public class TPlantToxRecord
     {
         public string Plant_name = String.Empty;
         public double EC50_photo = 0;
@@ -617,7 +582,7 @@ namespace AQUATOX.Plants
                 if (AQTSeg.MeanDischarge < Consts.Tiny)
                 {
                     // g/cu m-d   m/d    m      unitless   g/cu m    unitless
-                    Sink = PAlgalRec.KSed1.Val / Thick * SedAccel * State * DensFactor;
+                    Sink = PAlgalRec.KSed.Val / Thick * SedAccel * State * DensFactor;
                 }
                 else
                 {
@@ -641,7 +606,7 @@ namespace AQUATOX.Plants
                         else
                             Decel = 1;
                     }
-                    Sink = PAlgalRec.KSed1.Val / Thick * SedAccel * State * Decel * DensFactor;
+                    Sink = PAlgalRec.KSed.Val / Thick * SedAccel * State * Decel * DensFactor;
                 }
                 // MeanDisch > Tiny
 

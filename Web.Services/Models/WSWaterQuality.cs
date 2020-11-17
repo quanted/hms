@@ -382,7 +382,7 @@ namespace Web.Services.Models
             this.SetAquatoxOutputToObject(catchment.COMID, aquatoxSim);
             Utilities.Logger.WriteToFile(this.taskID, "Dumping aquatox data for catchment: " + catchment.COMID);
             string aqtOutput = "";
-            aqtOutput = aquatoxSim.AQSim.ExportJSON(ref aqtOutput);
+            aqtOutput = aquatoxSim.AQSim.SaveJSON(ref aqtOutput);
             Utilities.MongoDB.DumpData(aquaTaskID, aqtOutput);
             //Utilities.Logger.WriteToFile(catchment.COMID + "-aquatox", aquatoxOutput);
             Utilities.Logger.WriteToFile(this.taskID, "Aquatox data dumped into mongodb with taskID: " + aquaTaskID);

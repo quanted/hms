@@ -65,6 +65,17 @@ namespace AQUATOX.Chemicals
             CalcKPSed.Name = "Calculate KPSed using pH, pKA, LogKow";
         }
 
+        public TParameter[] InputArray()
+        {
+            return new TParameter[] {new TSubheading("Chemical Parameters for "+ChemName.Val),
+                        ChemName, CASRegNo, BCFUptake, MolWt, pka, Henry, LogKow, ChemIsBase,
+                        new TSubheading("Partitioning to Sediment/Organic Matter"),
+                        CalcKPSed,KPSed, CalcKOMRefrDOM, KOMRefrDOM, K1Detritus,
+                        new TSubheading("Chemical Fate Parameters"),ActEn, KMDegrAnaerobic, KMDegrdn, KUnCat,
+                        KAcid, KBase, PhotolysisRate, 
+                        new TSubheading("Chemical Toxicity Parameters"), Weibull_Shape, WeibullSlopeFactor};
+        }
+
     } // end ChemicalRecord
 
         public enum BioTransType
@@ -1338,7 +1349,7 @@ namespace AQUATOX.Chemicals
                         PD = (TDetritus)AQTSeg.GetStatePointer(DecompLoop, T_SVType.StV, T_SVLayer.WaterCol);
                         if ((PD != null))
                         {
-                            Dec = PD.Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                            Dec = PD.Decomposition(Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
                             ThisPPB = GetPPB(DecompLoop, SVType, T_SVLayer.WaterCol);
                             Decomp = Decomp + (Dec * ThisPPB * 1e-6);
                         }

@@ -165,8 +165,8 @@ public class TDetritus : TRemineralize
             {
                 Theta = 1.185 - 0.00729 * Temp;
             }
-            result = Math.Pow(Theta, (Temp - Location.Remin.TOpt));
-            if (Temp > Location.Remin.TMax)
+            result = Math.Pow(Theta, (Temp - Location.Remin.TOpt.Val));
+            if (Temp > Location.Remin.TMax.Val)
             {
                 result = 0;
             }
@@ -193,11 +193,11 @@ public class TDetritus : TRemineralize
             // If N > MinN then  NLimit := (N - MinN)/(N - MinN + HalfSatN)
             // else
             NLimit = 1.0;
-            ColonizeMax = Location.Remin.DecayMax_Refr;
+            ColonizeMax = Location.Remin.DecayMax_Refr.Val;
             ReminRecord w1 = Location.Remin;
             // T := AQTSeg.TCorr(Q10, TRef, TOpt, TMax);
             T = Colonization_DecTCorr();
-            p = AQTSeg.pHCorr(w1.pHMin, w1.pHMax);
+            p = AQTSeg.pHCorr(w1.pHMin.Val, w1.pHMax.Val);
             // anoxic
             if ((NState == AllVariables.SedmRefrDetr) && (State > 50))
                   DOCorr = 0.001;
@@ -609,7 +609,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //else                                     DOMState = AllVariables.LaDOMPore; // NState = DissLabDetr
 
             Lo = Loading;
-            if (NState == AllVariables.DissLabDetr)  DE = Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+            if (NState == AllVariables.DissLabDetr)  DE = Decomposition(Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
 
             DF = DetritalFormation(ref DFM, ref DFE, ref DFS, ref DFG);
 
@@ -761,7 +761,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
 
             Thick = Location.MeanThick;   // [AQTSeg.VSeg];
             ReminRecord RR = Location.Remin;
-            DensFactor = AQTSeg.DensityFactor(RR.KSedTemp, RR.KSedSalinity);
+            DensFactor = AQTSeg.DensityFactor(RR.KSedTemp.Val, RR.KSedSalinity.Val);
 
             //if (AQTSeg.EstuarySegment)
             //{
@@ -805,8 +805,8 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                         Decel = AQTSeg.MeanDischarge / (Location.TotDischarge);
                   else  Decel = 1;
 
-                if (AQTSeg.MeanDischarge < Consts.Small)  Sedimented = RR.KSed / Thick * State * DensFactor;
-                else                                      Sedimented = RR.KSed / Thick * State * Decel * DensFactor;
+                if (AQTSeg.MeanDischarge < Consts.Small)  Sedimented = RR.KSed.Val / Thick * State * DensFactor;
+                else                                      Sedimented = RR.KSed.Val / Thick * State * Decel * DensFactor;
 
                 if ((AQTSeg.GetStateVal(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol) >= 5.5) && (Thick <= 1.0))  
                     Sedimented = -Sedimented;        // should be a power fn. of depth
@@ -1065,7 +1065,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             // Re = Resuspension(); currently only relevant to multi-layer sediment model
 
             if (NState == AllVariables.SuspLabDetr)
-                De = Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);
+                De = Decomposition(Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
 
             // STH = DetrSinkToHypo;
             // SinkToHypo=0 if vseg=hypo
@@ -1278,7 +1278,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //}
 
             if (NState != AllVariables.SedmRefrDetr)
-            {  De = Decomposition(Location.Remin.DecayMax_Lab, Consts.KAnaerobic, ref FracAerobic);  }
+            {  De = Decomposition(Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);  }
 
             Se = SuspP.Sedimentation();
 

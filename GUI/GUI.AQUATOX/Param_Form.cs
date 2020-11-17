@@ -234,7 +234,7 @@ namespace GUI.AQUATOX
             this.Height = Spacing * nparam + 75;
             int wah = Screen.GetWorkingArea(this).Height;
             if (this.Height > wah) this.Height = wah;
-            if (SuppressComment) this.Width = 415;
+            if (SuppressComment) this.Width = 435;
 
             Show();
             return true;

@@ -65,10 +65,10 @@ namespace Stream.Hydrology.AQUATOX
             if (TVol == null) return "A Volume State Variable must be included in the simulation. ";
             if (AQSim.AQTSeg.Location == null) return "The 'Location' object must be populated with site data. ";
             if (AQSim.AQTSeg.Location.Locale == null) return "The 'Location.Locale' object must be populated with site data. ";
-            if (AQSim.AQTSeg.Location.Locale.SiteLength < Consts.Tiny) return "SiteLength must be greater than zero.";
+            if (AQSim.AQTSeg.Location.Locale.SiteLength.Val < Consts.Tiny) return "SiteLength must be greater than zero.";
             if (AQSim.AQTSeg.Location.SiteType ==  SiteTypes.Stream)
             {
-                if (AQSim.AQTSeg.Location.Locale.Channel_Slope < Consts.Tiny) return "Channel_Slope must be greater than zero to use Mannings Equation.";
+                if (AQSim.AQTSeg.Location.Locale.Channel_Slope.Val < Consts.Tiny) return "Channel_Slope must be greater than zero to use Mannings Equation.";
             }
 
             return "";

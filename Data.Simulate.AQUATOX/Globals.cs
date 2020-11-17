@@ -408,6 +408,11 @@ namespace Globals
         [JsonIgnore] public string Name;     // not user editable
         public string Comment = "";
         [JsonIgnore] public string Units = "";    // not user editable
+        [JsonIgnore] public bool Primary;
+
+//      [JsonIgnore] public bool Contextsensitive    // not yet  -- document 
+                
+
     } // end TParameter
 
     public class TBoolParam : TParameter
@@ -441,7 +446,6 @@ namespace Globals
             Val = Title;
         }
     }
-
 
 }
 

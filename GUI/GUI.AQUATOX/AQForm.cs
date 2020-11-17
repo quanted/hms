@@ -14,9 +14,13 @@ using AQUATOX.Plants;
 using AQUATOX.Animals;
 using AQUATOX.Chemicals;
 using AQUATOX.AQSite;
+using Newtonsoft.Json;
+using System.Data;
 
 namespace GUI.AQUATOX
 {
+
+
     public partial class AQTTestForm : Form
     {
         private Chart chart1 = new Chart();
@@ -28,6 +32,7 @@ namespace GUI.AQUATOX
         Series series1 = new Series();
 
         public AQTSim aQTS = null;
+        public AQUATOXSegment outSeg = null;
 
         public AQTTestForm()
         {
@@ -85,7 +90,7 @@ namespace GUI.AQUATOX
             bool SuppressText = true;
 
             //outtxt = outtxt + "Times: ";
-            //foreach (DateTime Times in aQTS.AQTSeg.SV.restimes)
+            //foreach (DateTime Times in OutSeg.SV.restimes)
             //    outtxt = outtxt + Times + ", ";
             //outtxt = outtxt + Environment.NewLine;
 
@@ -93,7 +98,7 @@ namespace GUI.AQUATOX
             int sercnt = 0;
             string outtxt = "";
 
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.SVoutput != null)
+            foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
                 {
                     TSV1 = TSV; // identify TSV1 with an output that is not null
                     int cnt = 0;
@@ -134,7 +139,7 @@ namespace GUI.AQUATOX
                 for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
                 {
                     bool writedate = true;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV) if (TSV.SVoutput != null)
+                    foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
                         {
                             ITimeSeriesOutput ito = TSV.SVoutput;
                             if (writedate)
@@ -172,9 +177,10 @@ namespace GUI.AQUATOX
                 ParamsButton.Visible = true;
                 Diagenesis.Visible = aQTS.AQTSeg.Diagenesis_Included();
                 PlantsButton.Visible = true;
-                AnimButton.Visible = true;  
-                ChemButton.Visible = true;
+                AnimButton.Visible = true;
+                ChemButton.Visible = aQTS.Has_Chemicals();
                 SiteButton.Visible = true;
+                ReminButton.Visible = true;
 
                 if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
                 else textBox1.Text = err;
@@ -198,9 +204,59 @@ namespace GUI.AQUATOX
             }
         }
 
+        private static DialogResult ShowInputDialog(ref string input)
+        {
+            System.Drawing.Size size = new System.Drawing.Size(400, 70);
+            Form inputBox = new Form();
+
+            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            inputBox.ClientSize = size;
+            inputBox.Text = "Enter an ID for this simulation (optional)";
+
+            System.Windows.Forms.TextBox textBox = new TextBox();
+            textBox.Size = new System.Drawing.Size(size.Width - 40, 23);
+            textBox.Location = new System.Drawing.Point(25, 5);
+            textBox.Text = input;
+            inputBox.Controls.Add(textBox);
+
+            Button okButton = new Button();
+            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            okButton.Name = "okButton";
+            okButton.Size = new System.Drawing.Size(75, 23);
+            okButton.Text = "&OK";
+            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, 39);
+            inputBox.Controls.Add(okButton);
+
+            Button cancelButton = new Button();
+            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(75, 23);
+            cancelButton.Text = "&Cancel";
+            cancelButton.Location = new System.Drawing.Point(size.Width - 80, 39);
+            inputBox.Controls.Add(cancelButton);
+
+            inputBox.AcceptButton = okButton;
+            inputBox.CancelButton = cancelButton;
+
+            DialogResult result = inputBox.ShowDialog();
+            input = textBox.Text;
+            return result;
+        }
+
         private void integrate_Click(object sender, EventArgs e)
         {
+            string SimName = "";
 
+            if (aQTS == null) textBox1.Text = "No Simulation Loaded";
+            else
+            {
+                if (ShowInputDialog(ref SimName) == DialogResult.Cancel) return;
+                if (SimName != "") SimName = SimName + ": ";
+                aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+
+                progressBar1.Visible = true;
+                Worker.RunWorkerAsync();
+            }
         }
 
 
@@ -222,9 +278,10 @@ namespace GUI.AQUATOX
             if (e.Error != null) textBox1.Text = "Error Raised: " + e.Error.Message;
             else if (errmessage == "")
             {
-                textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
+                textBox1.Text = "Run Completed.";
                 Application.DoEvents();
-                DisplaySVs();
+                graph_Click(null, null);
+                // DisplaySVs();
                 progressBar1.Visible = false;
             }
             else textBox1.Text = errmessage;
@@ -296,10 +353,21 @@ namespace GUI.AQUATOX
         private void graph_Click(object sender, EventArgs e)
         {
             if (aQTS == null) return;
+            if (aQTS.AQTSeg.SimulationDate > DateTime.MinValue)
+                aQTS.ArchiveSimulation();
 
-            textBox1.Text = "Run Completed.  Please wait one moment -- writing and plotting results";
+            textBox1.Text = "Please wait one moment -- writing and plotting results";
             Application.DoEvents();
-            DisplaySVs();
+
+            OutputBox.Items.Clear();
+            foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.SavedRuns)
+            {
+                OutputBox.Items.Add(entry.Key);
+            }
+
+            OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
+            Application.DoEvents();
+            OutputBox.Visible = true;
         }
 
 
@@ -332,8 +400,8 @@ namespace GUI.AQUATOX
             TParameter[] PA3 = new TParameter[] { new TSubheading("Diagenesis Parameters"), DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
                 DR.KappaCH4,DR.KM_NH3,DR.KM_O2_NH3,DR.KdNH3,DR.KdPO42,DR.dKDPO41f,DR.dKDPO41s,DR.O2critPO4,
                 DR.ThtaDd,DR.ThtaNH3,DR.ThtaNO3,DR.ThtaCH4,DR.SALTSW,DR.SALTND,DR.KappaH2Sd1,DR.KappaH2Sp1,DR.ThtaH2S,DR.KMHSO2,DR.KdH2S1,
-                DR.KdH2S2,DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
-                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,DR.ksi,DR.ThtaSi,DR.KMPSi,
+                DR.KdH2S2,new TSubheading("Mineralization"),DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
+                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,new TSubheading("Silica Parameters"),DR.ksi,DR.ThtaSi,DR.KMPSi,
                 DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
 
             Param_Form PF3 = new Param_Form();
@@ -358,63 +426,12 @@ namespace GUI.AQUATOX
 
                     PlantRecord PIR = TP.PAlgalRec;
                     PIR.Setup();
-
-                    TParameter[] PPS = new TParameter[] {new TSubheading("Plant Parameters for "+PIR.PlantName.Val), PIR.PlantName,
-                        PIR.ScientificName, PIR.PlantType,PIR.SurfaceFloating,
-                        PIR.Taxonomic_Type, PIR.ToxicityRecord, PIR.EnteredLightSat,
-                        PIR.UseAdaptiveLight, PIR.MaxLightSat, PIR.MinLightSat, PIR.KPO4, PIR.KN,
-                        PIR.KCarbon, PIR.Q10, PIR.TOpt, PIR.TMax, PIR.TRef, PIR.PMax, PIR.KResp, PIR.Resp20, PIR.KMort, PIR.EMort,
-                        PIR.P2OrgInit, PIR.N2OrgInit, PIR.ECoeffPhyto, PIR.Wet2Dry, PIR.PlantFracLipid,
-                        new TSubheading("Internal Nutrients Parameters:"), PIR.NHalfSatInternal, PIR.PHalfSatInternal, PIR.MaxNUptake,
-                        PIR.MaxPUptake,  PIR.Min_N_Ratio, PIR.Min_P_Ratio,
-                        new TSubheading("Phytoplankton Only:"), PIR.Plant_to_Chla, PIR.KSed1, PIR.KSedTemp, PIR.KSedSalinity, PIR.ESed,
-                        new TSubheading("Periphyton and Macrophytes Only:"),  PIR.Macrophyte_Type, PIR.CarryCapac, PIR.Macro_VelMax, PIR.Red_Still_Water, PIR.FCrit,
-                        new TSubheading("If in Stream:"),   PIR.PctSloughed, PIR.PrefRiffle, PIR.PrefPool,
-                        new TSubheading("Salinity Effects:"),  PIR.SalMin_Phot, PIR.SalMax_Phot, PIR.SalCoeff1_Phot, PIR.SalCoeff2_Phot, PIR.SalMin_Mort, PIR.SalMax_Mort, PIR.SalCoeff1_Mort, PIR.SalCoeff2_Mort };
+                    TParameter[] PPS = PIR.InputArray();
 
                     plantforms[nplt].EditParams(ref PPS, "Plant Parameters", false);
                     nplt++;
                 }
         }
-
-            private void AnimButton_Click(object sender, EventArgs e)
-        {
-            string[] animnames = new string[20];
-            int[] aindices = new int[20];
-            Param_Form[] animforms = new Param_Form[20];
-
-            if (aQTS == null) return;
-
-            int nanm = 0;
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
-                if (TSV.IsAnimal())
-                {
-                    TAnimal TA = TSV as TAnimal;
-                    animforms[nanm] = new Param_Form();
-
-                    AnimalRecord AIR = TA.PAnimalData;
-                    AIR.Setup();
-
-                    TParameter[] PPS = new TParameter[] {new TSubheading("Animal Parameters for "+AIR.AnimalName.Val),
-                                AIR.AnimalName, AIR.ScientificName, AIR.Animal_Type,AIR.Guild_Taxa,AIR.ToxicityRecord,AIR.BenthicDesignation,
-                                new TSubheading("Feeding"),AIR.FHalfSat,AIR.CMax,AIR.BMin,AIR.Sorting,AIR.Burrow_Index,AIR.CanSeekRefuge,AIR.Visual_Feeder,AIR.SuspSedFeeding,AIR.SlopeSSFeed,AIR.InterceptSSFeed,
-                                new TSubheading("Temperature, Simple Bioenergetics, Stoichiometry "),AIR.Q10,AIR.TOpt,AIR.TMax,AIR.TRef,AIR.MeanWeight,AIR.EndogResp,AIR.KResp,AIR.KExcr,AIR.N2Org,
-                                AIR.P2Org,AIR.Wet2Dry,AIR.PctGamete,AIR.GMort,AIR.KMort,
-                                new TSubheading("Life History Parameters"),AIR.SensToSediment,AIR.SenstoPctEmbed,AIR.PctEmbedThreshold,AIR.KCap,AIR.AveDrift,AIR.Trigger,AIR.FracInWaterCol,AIR.VelMax,
-                                AIR.Fishing_Frac,AIR.LifeSpan,AIR.FishFracLipid,
-                                new TSubheading("Ammonia/Low-Oxygen Effects"),AIR.O2_LethalConc,AIR.O2_LethalPct,AIR.O2_EC50growth,AIR.O2_EC50repro,AIR.Ammonia_LC50,
-                                new TSubheading("Salinity Effects Effects"),AIR.SalMin_Ing,AIR.SalMax_Ing ,AIR.SalCoeff1_Ing,AIR.SalCoeff2_Ing,AIR.SalMin_Gam,AIR.SalMax_Gam ,AIR.SalCoeff1_Gam,AIR.SalCoeff2_Gam,
-                                AIR.SalMin_Rsp,AIR.SalMax_Rsp ,AIR.SalCoeff1_Rsp,AIR.SalCoeff2_Rsp,AIR.SalMin_Mort,AIR.SalMax_Mort ,AIR.SalCoeff1_Mort,AIR.SalCoeff2_Mort,
-                                new TSubheading("Stream Habitat Parameters"),AIR.PrefRiffle,AIR.PrefPool,
-                                new TSubheading("Spawning"),AIR.AutoSpawn,AIR.SpawnDate1,AIR.SpawnDate2,AIR.SpawnDate3,AIR.UnlimitedSpawning,AIR.SpawnLimit,
-                                new TSubheading("Allometric Consumption and Respiration"),AIR.UseAllom_C,AIR.CA,AIR.CB,AIR.UseAllom_R,AIR.RA,AIR.RB,AIR.UseSet1,AIR.RQ,AIR.RTL,AIR.ACT,AIR.RTO,AIR.RK1,AIR.BACT,
-                                AIR.RTM,AIR.RK4,AIR.ACT,
-                    };
-
-                    animforms[nanm].EditParams(ref PPS, "Animal Parameters", false);
-                    nanm++;
-                }
-         }
 
         private void Chems(object sender, EventArgs e)
         {
@@ -431,15 +448,8 @@ namespace GUI.AQUATOX
                     TToxics TC = TSV as TToxics;
                     Chemforms[nchm] = new Param_Form();
 
-                    ChemicalRecord CR = TC.ChemRec;
-                    CR.Setup();
-
-                    TParameter[] PPS = new TParameter[] {new TSubheading("Chemical Parameters for "+CR.ChemName.Val),
-                        CR.ChemName, CR.CASRegNo, CR.BCFUptake, CR.MolWt, CR.pka, CR.Henry, CR.LogKow, CR.ChemIsBase,
-                        new TSubheading("Partitioning to Sediment/Organic Matter"),
-                        CR.CalcKPSed,CR.KPSed, CR.CalcKOMRefrDOM, CR.KOMRefrDOM, CR.K1Detritus,
-                        new TSubheading("Chemical Fate Parameters"),CR.ActEn, CR.KMDegrAnaerobic, CR.KMDegrdn, CR.KUnCat,
-                        CR.KAcid, CR.KBase, CR.PhotolysisRate, new TSubheading("Chemical Toxicity Parameters"), CR.Weibull_Shape, CR.WeibullSlopeFactor};
+                    ChemicalRecord CR = TC.ChemRec;  CR.Setup();
+                    TParameter[] PPS = CR.InputArray();
 
                     Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false);
                     nchm++;
@@ -454,51 +464,225 @@ namespace GUI.AQUATOX
 
             SiteRecord SR = aQTS.AQTSeg.Location.Locale;
             SR.Setup();
-
-            TParameter[] PPS = new TParameter[] {new TSubheading("Site Parameters"),
-                            SR.SiteName,
-                            SR.SiteLength,
-                            SR.Volume,
-                            SR.Min_Vol_Frac,
-                            new TSubheading("Shape, Temperature, Light, Reaeration"),
-                            SR.UseBathymetry,
-                            SR.ICZMean,
-                            SR.ZMax,
-                            SR.TempMean,
-                            SR.TempRange,
-                            SR.Latitude,
-                            SR.Altitude,
-                            SR.LightMean,
-                            SR.LightRange,
-                            SR.EnclWallArea,
-                            SR.MeanEvap,
-                            SR.UseCovar,
-                            SR.EnteredKReaer,
-                            new TSubheading("Water Clarify Parameters"),
-                            SR.ECoeffWater,
-                            SR.ECoeffSed,
-                            SR.ECoeffDOM,
-                            SR.ECoeffPOM,
-                            SR.BasePercentEmbed,
-                            new TSubheading("Phytoplankton/Zooplankton Retention"),
-                            SR.UsePhytoRetention,
-                            SR.EnterTotalLength,
-                            SR.TotalLength,
-                            SR.WaterShedArea,
-                            new TSubheading("Refuge"),
-                            SR.FractalD,
-                            SR.FD_Refuge_Coeff,
-                            SR.HalfSatOysterRefuge,
-                            new TSubheading("Stream Parameters"),
-                            SR.Channel_Slope,
-                            SR.UseEnteredManning,
-                            SR.EnteredManning,
-                            SR.StreamType,
-                            SR.PctRiffle,
-                            SR.PctPool
-                };
+            TParameter[] PPS = SR.InputArray(); 
 
             Siteform.EditParams(ref PPS, "Site Parameters", false);
+        }
+
+        private void Remin(object sender, EventArgs e)
+        {
+            Param_Form Reminform = new Param_Form();
+
+            if (aQTS == null) return;
+
+            ReminRecord RR = aQTS.AQTSeg.Location.Remin;
+            RR.Setup(); 
+            TParameter[] PPS = RR.InputArray();
+
+            Reminform.EditParams(ref PPS, "Remineralization Parameters", false);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Application.DoEvents();
+            aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
+            DisplaySVs();
+        }
+
+
+        private void AddColumn(ref TParameter Param, DataTable table)
+        {
+            DataColumn column;
+
+            if (Param is TSubheading) return;
+
+            column = new DataColumn();
+            column.ColumnName = Param.Symbol;
+            if (table.Columns.Count==0) column.Unique = true;
+            if (Param.Symbol == "") column.ColumnName = Param.Name;
+
+            if (Param.GetType() == typeof(TParameter))
+            {
+                column.DataType = System.Type.GetType("System.Double"); table.Columns.Add(column);
+                column = new DataColumn();
+                column.ColumnName = Param.Symbol + " Reference";
+                column.DataType = System.Type.GetType("System.String");
+            }
+            else if ((Param is TStringParam) || (Param is TDropDownParam))
+                column.DataType = System.Type.GetType("System.String");
+            else if (Param is TBoolParam)
+                column.DataType = System.Type.GetType("System.Boolean");
+            else if (Param is TDateParam)
+                column.DataType = System.Type.GetType("System.DateTime");
+
+            table.Columns.Add(column);
+
+        }
+
+        int ColNum;
+
+        private void AddCell(ref TParameter Param, DataRow row)
+        {
+            if (Param is TSubheading) return;
+
+            if (Param.GetType() == typeof(TParameter))
+            {   row[ColNum] = Param.Val;
+                row[ColNum + 1] = Param.Comment;
+                ColNum++;
+            }
+            else if (Param is TStringParam)
+                row[ColNum] = (Param as TStringParam).Val;
+            else if (Param is TDropDownParam)
+                row[ColNum] = (Param as TDropDownParam).Val;
+            else if (Param is TBoolParam)
+                row[ColNum] = (Param as TBoolParam).Val;
+            else if (Param is TDateParam)
+                row[ColNum] = (Param as TDateParam).Val;
+
+            ColNum++;
+        }
+
+        private DataTable ParmArray_to_Table(string TableName, TParameter[] arr)
+        {
+            DataTable table = new DataTable(TableName);
+            for (int i = 0; i < arr.Length; i++)
+            {
+                AddColumn(ref arr[i], table);
+            }
+
+            return table;
+        }
+
+        private bool ParmArray_to_Table_Row(ref DataTable table, TParameter[] arr)
+        {
+            ColNum = 0;
+            DataRow row = table.NewRow();
+            for (int i = 0; i < arr.Length; i++)
+                  AddCell(ref arr[i], row);
+            table.Rows.Add(row);
+            return true;
+        }
+
+        private void AnimDB_Click(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText("..\\..\\..\\DB\\AnimalLib.JSON");
+            List<AnimalRecord> AnimDB = JsonConvert.DeserializeObject<List<AnimalRecord>>(json);
+
+            AnimalRecord AIR = AnimDB[0];  AIR.Setup();
+            TParameter[] PPS = AIR.InputArray();
+            
+            DataTable table = ParmArray_to_Table("AnimalGrid", PPS);
+
+            for (int r = 0; r < AnimDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table); 
+
+        }
+
+        private void AnimButton_Click(object sender, EventArgs e)
+        {
+            string[] animnames = new string[20];
+            int[] aindices = new int[20];
+            Param_Form[] animforms = new Param_Form[20];
+
+            if (aQTS == null) return;
+
+            int nanm = 0;
+            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+              if (TSV.IsAnimal())
+                {
+                    TAnimal TA = TSV as TAnimal;
+                    animforms[nanm] = new Param_Form();
+
+                    AnimalRecord AIR = TA.PAnimalData;
+                    AIR.Setup();
+                    TParameter[] PPS = AIR.InputArray();
+
+                    animforms[nanm].EditParams(ref PPS, "Animal Parameters", false);
+                    nanm++;
+                }
+        }
+
+        private void ReminDB_Click(object sender, EventArgs e)
+        {
+                string json = File.ReadAllText("..\\..\\..\\DB\\ReminLib.JSON");
+                List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
+
+                ReminRecord RR = ReminDB[0]; RR.Setup();
+                TParameter[] PPS = RR.InputArray();
+
+                DataTable table = ParmArray_to_Table("ReminGrid", PPS);
+
+                for (int r = 0; r < ReminDB.Count; r++)
+                {
+                    ParmArray_to_Table_Row(ref table, ReminDB[r].InputArray());
+                }
+
+                GridForm gf = new GridForm();
+                gf.ShowGrid(table);
+
+        }
+
+        private void ChemDB_Click(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText("..\\..\\..\\DB\\ChemLib.JSON");
+            List<ChemicalRecord> ChemDB = JsonConvert.DeserializeObject<List<ChemicalRecord>>(json);
+
+            ChemicalRecord CR = ChemDB[0]; CR.Setup();
+            TParameter[] PPS = CR.InputArray();
+
+            DataTable table = ParmArray_to_Table("ChemGrid", PPS);
+
+            for (int r = 0; r < ChemDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, ChemDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table);
+
+        }
+
+        private void SiteDB_Click(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText("..\\..\\..\\DB\\SiteLib.JSON");
+            List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
+
+            SiteRecord SR = SiteDB[0]; SR.Setup();
+            TParameter[] PPS = SR.InputArray();
+
+            DataTable table = ParmArray_to_Table("SiteGrid", PPS);
+            for (int r = 0; r < SiteDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, SiteDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table);
+
+        }
+
+        private void PlantsDB_Click(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText("..\\..\\..\\DB\\PlantLib.JSON");
+            List<PlantRecord> PlantDB = JsonConvert.DeserializeObject<List<PlantRecord>>(json);
+
+            PlantRecord PR = PlantDB[0]; PR.Setup();
+            TParameter[] PPS = PR.InputArray();
+
+            DataTable table = ParmArray_to_Table("PlantGrid", PPS);
+            for (int r = 0; r < PlantDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, PlantDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table);
+
         }
     }
 }
