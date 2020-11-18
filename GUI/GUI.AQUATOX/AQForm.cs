@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Windows.Forms.DataVisualization.Charting;
 using AQUATOX.AQTSegment;
 using Globals;
 using Data;
@@ -23,16 +22,13 @@ namespace GUI.AQUATOX
 
     public partial class AQTTestForm : Form
     {
-        private Chart chart1 = new Chart();
         private BackgroundWorker Worker = new BackgroundWorker();
         private string errmessage;
 
-        ChartArea chartArea1 = new ChartArea();
-        Legend legend1 = new Legend();
-        Series series1 = new Series();
-
         public AQTSim aQTS = null;
         public AQUATOXSegment outSeg = null;
+        private List<string> SVList = null;
+        private List<TStateVariable> TSVList = null;
 
         public AQTTestForm()
         {
@@ -41,40 +37,6 @@ namespace GUI.AQUATOX
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
-
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
-            SuspendLayout();
-
-            // 
-            // chart1
-            // 
-            this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.chart1.BorderlineColor = System.Drawing.Color.Black;
-            this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea1.Name = "ChartArea1";
-            chart1.ChartAreas.Add(chartArea1);
-
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(31, 250);
-            chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(809, 233);
-            chart1.TabIndex = 3;
-            this.chart1.Text = "chart1";
-            chart1.Series.Clear();
-            this.chart1.CustomizeLegend += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.CustomizeLegendEventArgs>(this.chart1_CustomizeLegend_1);
-            this.chart1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.chart1_MouseDown);
-
-            Controls.Add(chart1);
-
-            chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-            chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -89,12 +51,6 @@ namespace GUI.AQUATOX
             TStateVariable TSV1 = null;
             bool SuppressText = true;
 
-            //outtxt = outtxt + "Times: ";
-            //foreach (DateTime Times in OutSeg.SV.restimes)
-            //    outtxt = outtxt + Times + ", ";
-            //outtxt = outtxt + Environment.NewLine;
-
-            chart1.Series.Clear();
             int sercnt = 0;
             string outtxt = "";
 
@@ -110,14 +66,9 @@ namespace GUI.AQUATOX
                         string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
                              TSV.SVoutput.Metadata["Name_" + col.ToString()] +
                              " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
-                        Series ser = chart1.Series.Add(sertxt);
 
                         if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
 
-                        ser.ChartType = SeriesChartType.Line;
-                        ser.BorderWidth = 2;
-                        ser.MarkerStyle = MarkerStyle.Diamond;
-                        ser.Enabled = false;
                         sercnt++;
 
                         SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
@@ -126,7 +77,6 @@ namespace GUI.AQUATOX
                             ITimeSeriesOutput ito = TSV.SVoutput;
                             string datestr = ito.Data.Keys.ElementAt(i).ToString();
                             Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
-                            ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
                             cnt++;
                         }
                     }
@@ -181,6 +131,7 @@ namespace GUI.AQUATOX
                 ChemButton.Visible = aQTS.Has_Chemicals();
                 SiteButton.Visible = true;
                 ReminButton.Visible = true;
+                ShowStudyInfo();
 
                 if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
                 else textBox1.Text = err;
@@ -281,7 +232,8 @@ namespace GUI.AQUATOX
                 textBox1.Text = "Run Completed.";
                 Application.DoEvents();
                 graph_Click(null, null);
-                // DisplaySVs();
+                outSeg = aQTS.AQTSeg;
+                DisplaySVs();
                 progressBar1.Visible = false;
             }
             else textBox1.Text = errmessage;
@@ -296,60 +248,6 @@ namespace GUI.AQUATOX
         }
 
 
-        private void chart1_MouseDown(object sender, MouseEventArgs e)
-        {
-            HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
-            if (resultExplode.Series != null)
-
-            {
-                if (resultExplode.Object is LegendItem)
-                {
-                    LegendItem legendItem = (LegendItem)resultExplode.Object;
-                    Series selectedSeries = (Series)legendItem.Tag;
-                    if (selectedSeries != null)
-                        selectedSeries.Enabled = !selectedSeries.Enabled;
-                    chart1.ChartAreas[0].RecalculateAxesScale();
-                }
-
-                string msgstr = resultExplode.Series.Name;
-                if (resultExplode.PointIndex > 0)
-                {
-                    msgstr = msgstr + ": " +
-                    resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
-                    System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
-                    System.Windows.Forms.MessageBox.Show(msgstr);
-                }
-
-            }
-
-        }
-
-        private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e)
-        {
-
-            e.LegendItems.Clear();
-            foreach (var series in this.chart1.Series)
-            {
-                var legendItem = new LegendItem();
-                legendItem.SeriesName = series.Name;
-                legendItem.ImageStyle = LegendImageStyle.Rectangle;
-                legendItem.BorderColor = Color.Transparent;
-                legendItem.Name = series.Name + "_legend_item";
-
-                int i = legendItem.Cells.Add(LegendCellType.SeriesSymbol, "", ContentAlignment.MiddleCenter);
-                legendItem.Cells.Add(LegendCellType.Text, series.Name, ContentAlignment.MiddleCenter);
-
-                if (series.Enabled)
-                { legendItem.Color = series.Color; legendItem.BorderColor = Color.Black; }
-                else
-                { legendItem.Color = Color.FromArgb(100, series.Color); legendItem.BorderColor = Color.White; }
-
-                legendItem.Tag = series;
-                e.LegendItems.Add(legendItem);
-            }
-
-        }
-
         private void graph_Click(object sender, EventArgs e)
         {
             if (aQTS == null) return;
@@ -359,15 +257,15 @@ namespace GUI.AQUATOX
             textBox1.Text = "Please wait one moment -- writing and plotting results";
             Application.DoEvents();
 
-            OutputBox.Items.Clear();
-            foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.SavedRuns)
-            {
-                OutputBox.Items.Add(entry.Key);
-            }
+            //OutputBox.Items.Clear();
+            //foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.SavedRuns)
+            //{
+            //    OutputBox.Items.Add(entry.Key);
+            //}
 
-            OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
-            Application.DoEvents();
-            OutputBox.Visible = true;
+            //OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
+            //Application.DoEvents();
+            //OutputBox.Visible = true;
         }
 
 
@@ -411,26 +309,46 @@ namespace GUI.AQUATOX
 
         private void Plants(object sender, EventArgs e)
         {
-            string[] plantnames = new string[20];
-            int[] pindices = new int[20];
-            Param_Form[] plantforms = new Param_Form[20];
-
             if (aQTS == null) return;
+
+            List<PlantRecord> PlantDB = new List<PlantRecord>();
 
             int nplt = 0;
             foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
                 if (TSV.IsPlant())
                 {
                     TPlant TP = TSV as TPlant;
-                    plantforms[nplt] = new Param_Form();
-
-                    PlantRecord PIR = TP.PAlgalRec;
-                    PIR.Setup();
-                    TParameter[] PPS = PIR.InputArray();
-
-                    plantforms[nplt].EditParams(ref PPS, "Plant Parameters", false);
+                    PlantDB.Add(TP.PAlgalRec);
                     nplt++;
                 }
+
+            if (nplt == 0) return;
+
+            PlantRecord PR = PlantDB[0]; PR.Setup();
+            TParameter[] PPS = PR.InputArray();
+
+            DataTable table = ParmArray_to_Table("PlantGrid", PPS);
+            for (int r = 0; r < PlantDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, PlantDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table);
+
+        }
+
+        private void ShowStudyInfo()
+        {
+            if (aQTS == null) return;
+
+            StudyNameBox.Text = aQTS.AQTSeg.StudyName;
+
+            aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
+            SVListBox.DataSource = null;
+            SVListBox.DataSource = SVList;
+
+            Application.DoEvents();
         }
 
         private void Chems(object sender, EventArgs e)
@@ -480,13 +398,6 @@ namespace GUI.AQUATOX
             TParameter[] PPS = RR.InputArray();
 
             Reminform.EditParams(ref PPS, "Remineralization Parameters", false);
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Application.DoEvents();
-            aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
-            DisplaySVs();
         }
 
 
@@ -585,26 +496,32 @@ namespace GUI.AQUATOX
 
         private void AnimButton_Click(object sender, EventArgs e)
         {
-            string[] animnames = new string[20];
-            int[] aindices = new int[20];
-            Param_Form[] animforms = new Param_Form[20];
-
             if (aQTS == null) return;
+
+            List<AnimalRecord> AnimDB = new List<AnimalRecord>();
 
             int nanm = 0;
             foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
               if (TSV.IsAnimal())
                 {
                     TAnimal TA = TSV as TAnimal;
-                    animforms[nanm] = new Param_Form();
-
-                    AnimalRecord AIR = TA.PAnimalData;
-                    AIR.Setup();
-                    TParameter[] PPS = AIR.InputArray();
-
-                    animforms[nanm].EditParams(ref PPS, "Animal Parameters", false);
+                    AnimDB.Add(TA.PAnimalData);
                     nanm++;
                 }
+
+            if (nanm == 0) return;
+
+            AnimalRecord AIR = AnimDB[0]; AIR.Setup();
+            TParameter[] PPS = AIR.InputArray();
+
+            DataTable table = ParmArray_to_Table("AnimalGrid", PPS);
+                        for (int r = 0; r < AnimDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            gf.ShowGrid(table);
         }
 
         private void ReminDB_Click(object sender, EventArgs e)
@@ -682,6 +599,51 @@ namespace GUI.AQUATOX
 
             GridForm gf = new GridForm();
             gf.ShowGrid(table);
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            aQTS.AQTSeg.StudyName = textBox1.Text;
+        }
+
+        private void SVListBox_DoubleClick(object sender, EventArgs e)
+        {
+            TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
+
+            if (TSV.IsPlant())
+            {
+                TPlant TP = TSV as TPlant;
+                Param_Form plantform = new Param_Form();
+                PlantRecord PIR = TP.PAlgalRec;
+                PIR.Setup();
+                TParameter[] PPS = PIR.InputArray();
+                plantform.EditParams(ref PPS, "Plant Parameters", false);
+            }
+
+            if (TSV.IsAnimal())
+            {
+                TAnimal TA = TSV as TAnimal;
+                Param_Form animform = new Param_Form();
+                AnimalRecord AIR = TA.PAnimalData;
+                AIR.Setup();
+                TParameter[] PPS = AIR.InputArray();
+                animform.EditParams(ref PPS, "Animal Parameters", false);
+            }
+
+            if (TSV.NState == AllVariables.H2OTox)
+            {
+                TToxics TC = TSV as TToxics;
+                Param_Form chemform = new Param_Form();
+                ChemicalRecord CR = TC.ChemRec; CR.Setup();
+                TParameter[] PPS = CR.InputArray();
+                chemform.EditParams(ref PPS, "Chem Parameters", false);
+            }
+
+        }
+
+        private void SVListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
         }
     }

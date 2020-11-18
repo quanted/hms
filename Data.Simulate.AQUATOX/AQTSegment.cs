@@ -705,6 +705,7 @@ namespace AQUATOX.AQTSegment
 
         public TStates SV = new TStates();    // State Variables
         public DateTime TPresent;
+        public string StudyName;
         public Setup_Record PSetup;
 
         public bool UseConstEvap = true;
@@ -777,6 +778,35 @@ namespace AQUATOX.AQTSegment
 
         }
 
+
+        // Load Blank Study
+        public void DisplayNames(ref List<string> List, ref List<TStateVariable> TSVList)
+        {
+            // Puts all statevariables from collection into TStrings item for screen
+            // display:   Ordered by enumerated list position. JonC
+            TStateVariable TSV;
+            AllVariables SVLoop;
+            string Name;
+
+            if (List == null) List = new List<string>();
+            List.Clear();
+            if (TSVList == null) TSVList = new List<TStateVariable>();
+            TSVList.Clear();
+
+            for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++)
+            {
+                TSV = GetStatePointer(SVLoop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TSV != null)
+                {
+                    Name = TSV.PName;
+                    if (Name != "Undisplayed")
+                    {
+                        List.Add(Name);
+                        TSVList.Add(TSV);
+                    }
+                }
+            }
+        }
 
         public void Derivs_ZeroDerivative(TStateVariable P)
         {

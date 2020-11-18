@@ -373,6 +373,9 @@ namespace Globals
         public const AllVariables LastDetrInv = AllVariables.DepFeeder3;
         public const AllVariables FirstFish = AllVariables.SmForageFish1;
         public const AllVariables LastFish = AllVariables.Fish15;
+        public const AllVariables FirstState = AllVariables.H2OTox;
+        public const AllVariables LastState = AllVariables.NullStateVar;
+
         public const AllVariables FirstBiota = AllVariables.Diatoms1;
         public const AllVariables LastBiota = AllVariables.Fish15;
 
