@@ -198,9 +198,9 @@ namespace GUI.AQUATOX
         {
             string SimName = "";
 
-            if (aQTS == null) textBox1.Text = "No Simulation Loaded";
-            else
-            {
+            if (aQTS == null) { textBox1.Text = "No Simulation Loaded"; return; }
+                else
+                {
                 if (ShowInputDialog(ref SimName) == DialogResult.Cancel) return;
                 if (SimName != "") SimName = SimName + ": ";
                 aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
@@ -250,22 +250,15 @@ namespace GUI.AQUATOX
 
         private void graph_Click(object sender, EventArgs e)
         {
-            if (aQTS == null) return;
+            if (aQTS == null) { textBox1.Text = "No Simulation Loaded"; return; }
             if (aQTS.AQTSeg.SimulationDate > DateTime.MinValue)
                 aQTS.ArchiveSimulation();
 
             textBox1.Text = "Please wait one moment -- writing and plotting results";
             Application.DoEvents();
 
-            //OutputBox.Items.Clear();
-            //foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.SavedRuns)
-            //{
-            //    OutputBox.Items.Add(entry.Key);
-            //}
-
-            //OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
-            //Application.DoEvents();
-            //OutputBox.Visible = true;
+            OutputForm OutForm = new OutputForm();
+            OutForm.ShowOutput(aQTS);
         }
 
 
@@ -604,6 +597,7 @@ namespace GUI.AQUATOX
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            if (aQTS == null) {; return; }
             aQTS.AQTSeg.StudyName = textBox1.Text;
         }
 

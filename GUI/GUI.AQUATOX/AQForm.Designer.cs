@@ -77,7 +77,7 @@ namespace GUI.AQUATOX
             // integrate
             // 
             this.integrate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.integrate.Location = new System.Drawing.Point(22, 235);
+            this.integrate.Location = new System.Drawing.Point(22, 263);
             this.integrate.Name = "integrate";
             this.integrate.Size = new System.Drawing.Size(91, 25);
             this.integrate.TabIndex = 1;
@@ -115,7 +115,7 @@ namespace GUI.AQUATOX
             // outputbutton
             // 
             this.outputbutton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.outputbutton.Location = new System.Drawing.Point(22, 270);
+            this.outputbutton.Location = new System.Drawing.Point(22, 325);
             this.outputbutton.Name = "outputbutton";
             this.outputbutton.Size = new System.Drawing.Size(91, 25);
             this.outputbutton.TabIndex = 1;

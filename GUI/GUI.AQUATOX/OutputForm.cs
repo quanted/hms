@@ -14,16 +14,17 @@ using System.Linq;
 
 namespace GUI.AQUATOX
 {
-    public partial class Output : Form
+    public partial class OutputForm : Form
     {
         private Chart chart1 = new Chart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         Series series1 = new Series();
 
+        public AQTSim aQTS = null;
         public AQUATOXSegment outSeg = null;
 
-        public Output()
+        public OutputForm()
         {
             InitializeComponent();
 
@@ -43,9 +44,9 @@ namespace GUI.AQUATOX
 
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(31, 250);
+            chart1.Location = new System.Drawing.Point(30, 70);
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(809, 233);
+            this.chart1.Size = new System.Drawing.Size(720, 410);
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
@@ -61,6 +62,25 @@ namespace GUI.AQUATOX
             this.ResumeLayout(false);
             this.PerformLayout();
 
+        }
+
+        public void ShowOutput(AQTSim aQ)
+        {
+            aQTS = aQ;
+            OutputBox.Items.Clear();
+            if (aQTS.SavedRuns == null) { System.Windows.Forms.MessageBox.Show("No Runs are Saved."); return; }
+
+            foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.SavedRuns)
+            {
+                OutputBox.Items.Add(entry.Key);
+            }
+
+            OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
+            Application.DoEvents();
+            OutputBox.Visible = true;
+
+            Show();
+        
         }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)
@@ -95,7 +115,7 @@ namespace GUI.AQUATOX
         {
             Application.DoEvents();
 
-            // aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
+            aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
 
             DisplayGraph();
         }

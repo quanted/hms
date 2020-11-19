@@ -1,7 +1,7 @@
 ﻿
 namespace GUI.AQUATOX
 {
-    partial class Output
+    partial class OutputForm
     {
         /// <summary>
         /// Required designer variable.
@@ -47,6 +47,7 @@ namespace GUI.AQUATOX
             this.OutputBox.Size = new System.Drawing.Size(233, 23);
             this.OutputBox.TabIndex = 5;
             this.OutputBox.Visible = false;
+            this.OutputBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // comboBox1
             // 
@@ -55,7 +56,6 @@ namespace GUI.AQUATOX
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(236, 23);
             this.comboBox1.TabIndex = 6;
-            this.comboBox1.Visible = false;
             // 
             // DelRunButton
             // 
@@ -115,7 +115,7 @@ namespace GUI.AQUATOX
             this.label2.TabIndex = 13;
             this.label2.Text = "Saved Graphs";
             // 
-            // Output
+            // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -128,7 +128,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.DelRunButton);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.OutputBox);
-            this.Name = "Output";
+            this.Name = "OutputForm";
             this.Text = "Output";
             this.ResumeLayout(false);
             this.PerformLayout();
