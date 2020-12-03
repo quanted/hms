@@ -80,7 +80,7 @@ namespace GUI.AQUATOX
             OutputBox.Visible = true;
 
             Show();
-        
+
         }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)
@@ -111,12 +111,28 @@ namespace GUI.AQUATOX
 
         }
 
+        private void UpdateGraphBox()
+        {
+            int i = graphBox.SelectedIndex;
+            graphBox.Items.Clear();
+
+            foreach (TGraphSetup TGS in outSeg.Graphs.GList)
+            {
+                graphBox.Items.Add(TGS.GraphName);
+            }
+
+            if (i>-1) graphBox.SelectedIndex = i;
+            if ((graphBox.SelectedIndex <0) && (graphBox.Items.Count>0)) graphBox.SelectedIndex = 0;
+
+        }
+
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             Application.DoEvents();
 
             aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
-
+ 
+            UpdateGraphBox();
             DisplayGraph();
         }
 
@@ -148,49 +164,62 @@ namespace GUI.AQUATOX
 
 
 
+
         public void DisplayGraph()
 
         {
-            TStateVariable TSV1 = null;
 
             chart1.Series.Clear();
             int sercnt = 0;
-            string outtxt = "";
 
-            foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
+            if (graphBox.SelectedIndex < 0) return;
+
+            outSeg.SetMemLocRec();
+            TGraphSetup Graph = outSeg.Graphs.GList[graphBox.SelectedIndex];
+
+            foreach (SeriesID SID in Graph.YItems)
+            {
+                TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
+                if (TSV != null)
                 {
-                    TSV1 = TSV; // identify TSV1 with an output that is not null
-                    int cnt = 0;
-                    if (sercnt == 0) outtxt = "Date, ";
-
                     List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
-                    for (int col = 1; col <= vallist.Count(); col++)
+                    Series ser = chart1.Series.Add(SID.nm);
+
+                    ser.ChartType = SeriesChartType.Line;
+                    ser.BorderWidth = 2;
+                    ser.MarkerStyle = MarkerStyle.Diamond;
+                    ser.Enabled = true;
+                    sercnt++;
+
+                    for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
                     {
-                        string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
-                             TSV.SVoutput.Metadata["Name_" + col.ToString()] +
-                             " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
-                        Series ser = chart1.Series.Add(sertxt);
-
-                        if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
-
-                        ser.ChartType = SeriesChartType.Line;
-                        ser.BorderWidth = 2;
-                        ser.MarkerStyle = MarkerStyle.Diamond;
-                        ser.Enabled = false;
-                        sercnt++;
-
-                        for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
-                        {
-                            ITimeSeriesOutput ito = TSV.SVoutput;
-                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
-                            ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
-                            cnt++;
-                        }
-
+                        ITimeSeriesOutput ito = TSV.SVoutput;
+                        string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                        Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx-1]);
+                        ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
                     }
 
                 }
+            }
+        }
+
+        private void NewGraphButton_Click(object sender, EventArgs e)
+        {
+            GraphSetupForm GSForm = new GraphSetupForm();
+            if (GSForm.EditGraph(outSeg,-1)) UpdateGraphBox();
+            graphBox.SelectedIndex = graphBox.Items.Count - 1;
+
+        }
+
+        private void graphBox_selectedIndexChange(object sender, EventArgs e)
+        {
+            DisplayGraph();
+        }
+
+        private void EditGraphButton_Click(object sender, EventArgs e)
+        {
+            GraphSetupForm GSForm = new GraphSetupForm();
+            if (GSForm.EditGraph(outSeg, graphBox.SelectedIndex)) UpdateGraphBox();
         }
     }
 }

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using System.Drawing;
 using AQUATOX.AQTSegment;
 using Globals;
-using Data;
 using System.ComponentModel;
 using System.Collections.Generic;
 using AQUATOX.Diagenesis;
@@ -15,10 +12,11 @@ using AQUATOX.Chemicals;
 using AQUATOX.AQSite;
 using Newtonsoft.Json;
 using System.Data;
+using sds = Microsoft.Research.Science.Data;
+using Microsoft.Research.Science.Data.Imperative;
 
 namespace GUI.AQUATOX
 {
-
 
     public partial class AQTTestForm : Form
     {
@@ -26,7 +24,6 @@ namespace GUI.AQUATOX
         private string errmessage;
 
         public AQTSim aQTS = null;
-        public AQUATOXSegment outSeg = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
 
@@ -45,68 +42,68 @@ namespace GUI.AQUATOX
 
         }
 
-        public void DisplaySVs()
+        //public void DisplaySVs()
 
-        {
-            TStateVariable TSV1 = null;
-            bool SuppressText = true;
+        //{
+        //    TStateVariable TSV1 = null;
+        //    bool SuppressText = true;
 
-            int sercnt = 0;
-            string outtxt = "";
+        //    int sercnt = 0;
+        //    string outtxt = "";
 
-            foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
-                {
-                    TSV1 = TSV; // identify TSV1 with an output that is not null
-                    int cnt = 0;
-                    if (sercnt == 0) outtxt = "Date, ";
+        //    foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
+        //        {
+        //            TSV1 = TSV; // identify TSV1 with an output that is not null
+        //            int cnt = 0;
+        //            if (sercnt == 0) outtxt = "Date, ";
 
-                    List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
-                    for (int col = 1; col <= vallist.Count(); col++)
-                    {
-                        string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
-                             TSV.SVoutput.Metadata["Name_" + col.ToString()] +
-                             " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+        //            List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
+        //            for (int col = 1; col <= vallist.Count(); col++)
+        //            {
+        //                string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
+        //                     TSV.SVoutput.Metadata["Name_" + col.ToString()] +
+        //                     " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
 
-                        if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+        //                if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
 
-                        sercnt++;
+        //                sercnt++;
 
-                        SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
-                        for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
-                        {
-                            ITimeSeriesOutput ito = TSV.SVoutput;
-                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
-                            cnt++;
-                        }
-                    }
-                }
+        //                SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
+        //                for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
+        //                {
+        //                    ITimeSeriesOutput ito = TSV.SVoutput;
+        //                    string datestr = ito.Data.Keys.ElementAt(i).ToString();
+        //                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
+        //                    cnt++;
+        //                }
+        //            }
+        //        }
 
-            outtxt = outtxt + Environment.NewLine;
+        //    outtxt = outtxt + Environment.NewLine;
 
-            if (!SuppressText)
-            {
-                for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
-                {
-                    bool writedate = true;
-                    foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
-                        {
-                            ITimeSeriesOutput ito = TSV.SVoutput;
-                            if (writedate)
-                            {
-                                string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                                outtxt = outtxt + datestr + ", ";
-                                writedate = false;
-                            }
-                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                            outtxt = outtxt + Val.ToString() + ", ";
-                        }
-                    outtxt = outtxt + Environment.NewLine;
-                }
-            }
+        //    if (!SuppressText)
+        //    {
+        //        for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
+        //        {
+        //            bool writedate = true;
+        //            foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
+        //                {
+        //                    ITimeSeriesOutput ito = TSV.SVoutput;
+        //                    if (writedate)
+        //                    {
+        //                        string datestr = ito.Data.Keys.ElementAt(i).ToString();
+        //                        outtxt = outtxt + datestr + ", ";
+        //                        writedate = false;
+        //                    }
+        //                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
+        //                    outtxt = outtxt + Val.ToString() + ", ";
+        //                }
+        //            outtxt = outtxt + Environment.NewLine;
+        //        }
+        //    }
 
-            textBox1.Text = outtxt;
-        }
+        //    textBox1.Text = outtxt;
+        //}
 
 
         private void loadJSON_Click(object sender, EventArgs e)
@@ -122,9 +119,13 @@ namespace GUI.AQUATOX
                 string json = File.ReadAllText(openFileDialog1.FileName);
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
+                if (err != "") { textBox1.Text = err; return; }
+
                 aQTS = Sim;
                 aQTS.AQTSeg.SetMemLocRec();
                 ParamsButton.Visible = true;
+                integrate.Visible = true;
+                outputbutton.Visible = true;
                 Diagenesis.Visible = aQTS.AQTSeg.Diagenesis_Included();
                 PlantsButton.Visible = true;
                 AnimButton.Visible = true;
@@ -132,16 +133,15 @@ namespace GUI.AQUATOX
                 SiteButton.Visible = true;
                 ReminButton.Visible = true;
                 ShowStudyInfo();
+                aQTS.ArchiveSimulation();
 
-                if (err == "") textBox1.Text = "Read File " + openFileDialog1.FileName;
-                else textBox1.Text = err;
             }
         }
 
         private void saveJSON_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Test File|*.txt";
+            saveFileDialog1.Filter = "Test File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
             saveFileDialog1.ShowDialog();
 
@@ -201,6 +201,13 @@ namespace GUI.AQUATOX
             if (aQTS == null) { textBox1.Text = "No Simulation Loaded"; return; }
                 else
                 {
+                //if (aQTS.Has_Chemicals())
+                //{
+                //    AQTCM = new(AQTChemicalModel(aQTS));
+                //    string errmsg = AQTCM CheckDataRequirements();
+                //    if (errmsg != "") textBox1.Text = errmsg;
+                //}
+
                 if (ShowInputDialog(ref SimName) == DialogResult.Cancel) return;
                 if (SimName != "") SimName = SimName + ": ";
                 aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
@@ -229,11 +236,10 @@ namespace GUI.AQUATOX
             if (e.Error != null) textBox1.Text = "Error Raised: " + e.Error.Message;
             else if (errmessage == "")
             {
-                textBox1.Text = "Run Completed.";
+                // textBox1.Text = "Run Completed.";
                 Application.DoEvents();
                 graph_Click(null, null);
-                outSeg = aQTS.AQTSeg;
-                DisplaySVs();
+                // DisplaySVs();
                 progressBar1.Visible = false;
             }
             else textBox1.Text = errmessage;
@@ -254,7 +260,7 @@ namespace GUI.AQUATOX
             if (aQTS.AQTSeg.SimulationDate > DateTime.MinValue)
                 aQTS.ArchiveSimulation();
 
-            textBox1.Text = "Please wait one moment -- writing and plotting results";
+            //textBox1.Text = "Please wait one moment -- writing and plotting results";
             Application.DoEvents();
 
             OutputForm OutForm = new OutputForm();
@@ -338,6 +344,7 @@ namespace GUI.AQUATOX
             StudyNameBox.Text = aQTS.AQTSeg.StudyName;
 
             aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
+            SVListBox.Visible = true;
             SVListBox.DataSource = null;
             SVListBox.DataSource = SVList;
 
@@ -595,10 +602,10 @@ namespace GUI.AQUATOX
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void StudyNameBox_TextChanged(object sender, EventArgs e)
         {
             if (aQTS == null) {; return; }
-            aQTS.AQTSeg.StudyName = textBox1.Text;
+            aQTS.AQTSeg.StudyName = StudyNameBox.Text;
         }
 
         private void SVListBox_DoubleClick(object sender, EventArgs e)
@@ -639,6 +646,26 @@ namespace GUI.AQUATOX
         private void SVListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void NetCDF_Click(object sender, EventArgs e)
+        {
+            /// Gets the path to the NetCDF file to be used as a data source.
+            var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
+            sds.MetadataDictionary dt = dataset.Metadata;
+
+            double[,,] dataValues = dataset.GetData<double[,,]>("NO3Lkg_ha");
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            textBox1.Visible = true;
         }
     }
 }

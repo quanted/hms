@@ -24,6 +24,7 @@ using System.IO;
 
 namespace AQUATOX.AQTSegment
 
+
 {
     public class AQTSim
     {
@@ -44,6 +45,7 @@ namespace AQUATOX.AQTSegment
                     SerializationBinder = AQTBinder
                 };
                 json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
+                // json = json + Newtonsoft.Json.JsonConvert.SerializeObject(SavedRuns, AQTJsonSerializerSettings);
                 return "";
             }
             catch (Newtonsoft.Json.JsonWriterException e)
@@ -105,6 +107,7 @@ namespace AQUATOX.AQTSegment
                     SerializationBinder = AQTBinder
                 };
                 AQTSeg = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(json, AQTJsonSerializerSettings);
+                //SavedRuns = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, AQUATOXSegment>>(json, AQTJsonSerializerSettings);
                 AQTSeg.SetupLinks();
                 return "";
             }
@@ -698,6 +701,65 @@ namespace AQUATOX.AQTSegment
            [JsonIgnore] public List<DateTime> restimes = new List<DateTime>();
     }
 
+    public class SeriesID
+    {
+        public AllVariables ns;
+        public T_SVType typ;
+        public T_SVLayer lyr;
+        public int indx; //column number in TimeSeriesOutput
+        public string nm;
+    }
+
+    public class TGraphSetup
+    {
+        public string GraphName = "New Graph";
+        public List<SeriesID> YItems = new List<SeriesID>();
+        public string Y1Label;
+
+        // public Color[,] Colors;
+        // public TSeriesPointerStyle[,] Shapes;
+        //public ushort[,] LineThick;
+        // public ushort[,] Size;
+        // public string XLabel;
+        //public string Y2Label;
+        //public bool Y1AutoScale;
+        //public bool Y2AutoScale;
+        //public bool AutoScaleAll;
+        //public double Y1Min;
+        //public double Y1Max;
+        //public double Y2Min;
+        //public double Y2Max;
+        //public bool Use2Scales;
+        //public double XMin;
+        //public double XMax;
+    }
+
+
+
+    public class TGraphs
+    {
+        public int SelectedGraph = 0;
+        public List<TGraphSetup> GList;
+
+        public void AddGraph(TGraphSetup G)
+        {
+            GList.Add(G);
+        }
+
+        public void DeleteGraph(int Index)
+        {
+            GList.Remove(GList[Index]);
+        }
+
+        //Constructor  Create()
+        public TGraphs()
+        {
+            GList = new List<TGraphSetup>();
+            SelectedGraph = 0;
+        }
+    } // end TGraphs
+
+
 
     public class AQUATOXSegment
     {
@@ -713,6 +775,7 @@ namespace AQUATOX.AQTSegment
         public bool UseConstZMean = true;
         public TLoadings DynZMean;
         public LoadingsRecord Shade;
+        public TGraphs Graphs = new TGraphs();
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
@@ -4025,7 +4088,7 @@ namespace AQUATOX.AQTSegment
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
                                           typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
                                           typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant),
-                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam), typeof (TStringParam)}; 
+                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam), typeof (TStringParam),typeof(TGraphSetup) , typeof(TGraphs), typeof(SeriesID)}; 
     }
 }
 

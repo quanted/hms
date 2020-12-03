@@ -30,7 +30,7 @@ namespace GUI.AQUATOX
         private void InitializeComponent()
         {
             this.OutputBox = new System.Windows.Forms.ComboBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.graphBox = new System.Windows.Forms.ComboBox();
             this.DelRunButton = new System.Windows.Forms.Button();
             this.EditGraphButton = new System.Windows.Forms.Button();
             this.DeleteGraphButton = new System.Windows.Forms.Button();
@@ -49,13 +49,14 @@ namespace GUI.AQUATOX
             this.OutputBox.Visible = false;
             this.OutputBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // comboBox1
+            // graphBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(339, 33);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(236, 23);
-            this.comboBox1.TabIndex = 6;
+            this.graphBox.FormattingEnabled = true;
+            this.graphBox.Location = new System.Drawing.Point(339, 33);
+            this.graphBox.Name = "graphBox";
+            this.graphBox.Size = new System.Drawing.Size(236, 23);
+            this.graphBox.TabIndex = 6;
+            this.graphBox.SelectedIndexChanged += new System.EventHandler(this.graphBox_selectedIndexChange);
             // 
             // DelRunButton
             // 
@@ -76,6 +77,7 @@ namespace GUI.AQUATOX
             this.EditGraphButton.TabIndex = 9;
             this.EditGraphButton.Text = "Edit";
             this.EditGraphButton.UseVisualStyleBackColor = true;
+            this.EditGraphButton.Click += new System.EventHandler(this.EditGraphButton_Click);
             // 
             // DeleteGraphButton
             // 
@@ -96,6 +98,7 @@ namespace GUI.AQUATOX
             this.NewGraphButton.TabIndex = 11;
             this.NewGraphButton.Text = "New Graph";
             this.NewGraphButton.UseVisualStyleBackColor = true;
+            this.NewGraphButton.Click += new System.EventHandler(this.NewGraphButton_Click);
             // 
             // label1
             // 
@@ -126,7 +129,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.DeleteGraphButton);
             this.Controls.Add(this.EditGraphButton);
             this.Controls.Add(this.DelRunButton);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.graphBox);
             this.Controls.Add(this.OutputBox);
             this.Name = "OutputForm";
             this.Text = "Output";
@@ -138,7 +141,7 @@ namespace GUI.AQUATOX
         #endregion
 
         private System.Windows.Forms.ComboBox OutputBox;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox graphBox;
         private System.Windows.Forms.Button DelRunButton;
         private System.Windows.Forms.Button EditGraphButton;
         private System.Windows.Forms.Button DeleteGraphButton;
