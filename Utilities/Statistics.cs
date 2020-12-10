@@ -11,6 +11,16 @@ namespace Utilities
     public class Statistics
     {
 
+        //public static ITimeSeriesOutput<List<double>> GetStatistics(out string errorMsg, ITimeSeriesInput input,
+        //    ITimeSeriesOutput<List<double>> data)
+        //{
+        //    errorMsg = "";
+        //    int missingDays = 0;
+        //    int decimals = 3;
+        //    Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
+        //    return CalculateStatistics(out errorMsg, input, data, matrix, missingDays, decimals);
+        //}
+
         /// <summary>
         /// Generic statistics calculation, dataset/source independent
         /// </summary>
@@ -18,13 +28,26 @@ namespace Utilities
         /// <param name="input"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data)
+        public static ITimeSeriesOutput GetStatistics(out string errorMsg, ITimeSeriesInput input,
+            ITimeSeriesOutput data)
         {
             errorMsg = "";
             int missingDays = 0;
             int decimals = 3;
-
             Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
+            return CalculateStatistics(out errorMsg, input, data, matrix, missingDays, decimals);
+        }
+
+        /// <summary>
+        /// Generic statistics calculation, dataset/source independent
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="input"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static ITimeSeriesOutput CalculateStatistics(out string errorMsg, ITimeSeriesInput input, ITimeSeriesOutput data, Matrix<double> matrix, int missingDays, int decimals)
+        {
+            errorMsg = "";
             Vector<double> mSum = matrix.ColumnSums();
             double[] mMean = new double[matrix.ColumnCount];
             double[] mMax = new double[matrix.ColumnCount];
@@ -370,6 +393,66 @@ namespace Utilities
             for (int i=0; i<rows; i++)            
                 arrayTable[i] = lstTable[i].ToArray();
             
+
+            var M = Matrix<double>.Build;
+            var matrix = M.DenseOfRowArrays(arrayTable);
+            return matrix;
+        }
+
+        /// <summary>
+        /// Build a MathNet.Numerics Matrix from timeseries from multiple sources
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="excludeAcrossSources">Exclude data if missing from any source</param>
+        /// <returns></returns>
+        private static Matrix<double> BuildMatrix(Dictionary<string, List<double>> data, bool excludeAcrossSources, out int missingDays)
+        {
+            missingDays = 0;
+
+            // calculate daily values to get sums
+            if (data == null || data.Count < 1)
+                return null;
+
+            int rows = data.Count;
+            int cols = data.First().Value.Count;
+
+            List<List<double>> lstTable = new List<List<double>>();
+
+            foreach (var timeseries in data)
+            {
+                bool missingData = false;
+                List<double> row = new List<double>();
+                if (timeseries.Key.Contains("Total"))
+                {
+                    break;
+                }
+                for (int i = 0; i < cols; i++)
+                {
+                    double dval;
+                    if (i >= timeseries.Value.Count)
+                    {
+                        missingData = true;
+                        row.Add(-9999);
+                        continue;
+                    }
+                    row.Add(timeseries.Value.ElementAt(i));
+                }
+
+                //If there are missing data and we want to exclude missing data
+                if (missingData && excludeAcrossSources)
+                    continue;
+                else
+                    lstTable.Add(row);
+            }
+
+            missingDays = rows - lstTable.Count;
+            rows = lstTable.Count;
+
+
+            double[][] arrayTable = new double[rows][];
+            for (int i = 0; i < rows; i++)
+                arrayTable[i] = lstTable[i].ToArray();
+
 
             var M = Matrix<double>.Build;
             var matrix = M.DenseOfRowArrays(arrayTable);

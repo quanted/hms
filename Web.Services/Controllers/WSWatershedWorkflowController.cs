@@ -53,6 +53,26 @@ namespace Web.Services.Controllers
         {
             return this;
         }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDaily(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
+
+        ITimeSeriesOutput ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDefault(string valueFormat)
+        {
+            throw new NotImplementedException();
+        }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToHourly(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToMonthly(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // --------------- Swashbuckle Examples --------------- //

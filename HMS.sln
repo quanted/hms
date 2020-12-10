@@ -91,6 +91,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX", "Ec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX.UnitTests", "Ecotoxicology\Ecotoxicology.AQUATOX.UnitTests\Ecotoxicology.AQUATOX.UnitTests.csproj", "{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamflow", "Streamflow\Streamflow.csproj", "{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -451,6 +453,14 @@ Global
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.ActiveCfg = Release|Any CPU
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.Build.0 = Release|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|x64.Build.0 = Debug|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|x64.ActiveCfg = Release|Any CPU
+		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

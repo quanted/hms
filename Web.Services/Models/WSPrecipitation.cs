@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Web.Services.Models
 {
     /// <summary>
-    /// HMS Web Service Precipitation Model
+    /// HMS Web Service S Model
     /// </summary>
     public class WSPrecipitation
     {

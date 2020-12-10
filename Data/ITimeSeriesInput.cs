@@ -469,6 +469,7 @@ namespace Data
         /// Timezone information for the input geometry.
         /// </summary>
         public Timezone Timezone { get; set; }
+
     }
 
 
