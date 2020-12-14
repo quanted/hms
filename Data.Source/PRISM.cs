@@ -56,6 +56,13 @@ namespace Data.Source
     public class PRISM
     {
 
+        private DateTime temporalStart = new DateTime(1981, 1, 1);          // PRISM temporal coverage start date.
+        private DateTime temporalEnd = new DateTime(DateTime.UtcNow.Year, 12, 31).AddYears(-1);          // PRISM temporal coverage end date (approximate)
+        private double maxLat = 53.0;                                       // PRISM spatial coverage max latitude
+        private double minLat = 25.0;                                       // PRISM spatial coverage min latitude
+        private double maxLng = -63.0;                                      // PRISM spatial coverage max longitude
+        private double minLng = -125.0;                                     // PRISM spatial coverage min longitude
+
         /// <summary>
         /// Get PRISM data string, specifying dataset
         /// </summary>
@@ -66,6 +73,11 @@ namespace Data.Source
         public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
+            if (!this.ValidateInput(out errorMsg, componentInput))
+            {
+                return null;
+            }
+
             string url = componentInput.BaseURL[0];
             string parameters = ConstructParameterString(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
@@ -74,6 +86,41 @@ namespace Data.Source
             if (data.Contains("ERROR")) { errorMsg = data; return null; }
 
             return data;
+        }
+
+        private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            StringBuilder errors = new StringBuilder();
+            bool valid = true;
+            // Temporal validation
+            if (input.DateTimeSpan.StartDate < this.temporalStart)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid start date, PRISM temporal coverage starts at " + this.temporalStart.ToString("yyyy-MM-dd") + ", entered start date is " + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            if (input.DateTimeSpan.EndDate > this.temporalEnd)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid end date, PRISM temporal coverage ends at " + this.temporalEnd.ToString("yyyy-MM-dd") + ", entered end date is " + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            // Spatial calidation
+            if (input.Geometry.Point.Latitude < this.minLat || input.Geometry.Point.Latitude > this.maxLat)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid latitude, PRISM spatial coverage is between latitudes " + this.minLat.ToString() + " and " + this.maxLat.ToString() + ", entered latitude is " + input.Geometry.Point.Latitude.ToString() + ", ");
+            }
+            if (input.Geometry.Point.Longitude < this.minLng || input.Geometry.Point.Longitude > this.maxLng)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid longitude, PRISM spatial coverage is between longitude " + this.minLng.ToString() + " and " + this.maxLng.ToString() + ", entered longitude is " + input.Geometry.Point.Longitude.ToString() + ", ");
+            }
+
+            if (!valid)
+            {
+                errorMsg = errors.ToString();
+            }
+            return valid;
         }
 
         /// <summary>

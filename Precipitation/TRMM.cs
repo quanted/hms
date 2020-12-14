@@ -34,13 +34,7 @@ namespace Precipitation
             string data = trmm.GetData(out errorMsg, "PRECIP", input, retries);
 
             ITimeSeriesOutput trmmOutput = output;
-            if (errorMsg.Contains("ERROR"))
-            {
-                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                output = err.ReturnError("Precipitation", "trmm", errorMsg);
-                errorMsg = "";
-                return output;
-            }
+            if (errorMsg.Contains("ERROR")) { return null; }
             else
             {
                 trmmOutput = trmm.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);

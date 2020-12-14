@@ -6,6 +6,7 @@ using System.Threading;
 using Serilog;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace Data.Source
 {
@@ -14,6 +15,14 @@ namespace Data.Source
     /// </summary>
     public class GLDAS
     {
+
+        private DateTime temporalStart = new DateTime(2000, 1, 1);          // GLDAS temporal coverage start date.
+        private DateTime temporalEnd = DateTime.UtcNow.AddMonths(-4);       // GLDAS temporal coverage end date (approximate)
+        private double maxLat = 90.0;                                       // GLDAS spatial coverage max latitude
+        private double minLat = -60.0;                                      // GLDAS spatial coverage min latitude
+        private double maxLng = 180.0;                                      // GLDAS spatial coverage max longitude
+        private double minLng = -180.0;                                     // GLDAS spatial coverage min longitude
+
         /// <summary>
         /// Get data function for gldas.
         /// </summary>
@@ -24,6 +33,11 @@ namespace Data.Source
         public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
+
+            if (!this.ValidateInput(out errorMsg, componentInput))
+            {
+                return null;
+            }
 
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = NLDAS.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
@@ -44,6 +58,41 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
+        }
+
+        private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            StringBuilder errors = new StringBuilder();
+            bool valid = true;
+            // Temporal validation
+            if (input.DateTimeSpan.StartDate < this.temporalStart)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid start date, GLDAS temporal coverage starts at " + this.temporalStart.ToString("yyyy-MM-dd") + ", entered start date is " + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            if (input.DateTimeSpan.EndDate > this.temporalEnd)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid end date, GLDAS temporal coverage ends at " + this.temporalEnd.ToString("yyyy-MM-dd") + ", entered end date is " + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            // Spatial calidation
+            if (input.Geometry.Point.Latitude < this.minLat || input.Geometry.Point.Latitude > this.maxLat)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid latitude, GLDAS spatial coverage is between latitudes " + this.minLat.ToString() + " and " + this.maxLat.ToString() + ", entered latitude is " + input.Geometry.Point.Latitude.ToString() + ", ");
+            }
+            if (input.Geometry.Point.Longitude < this.minLng || input.Geometry.Point.Longitude > this.maxLng)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid longitude, GLDAS spatial coverage is between longitude " + this.minLng.ToString() + " and " + this.maxLng.ToString() + ", entered longitude is " + input.Geometry.Point.Longitude.ToString() + ", ");
+            }
+
+            if (!valid)
+            {
+                errorMsg = errors.ToString();
+            }
+            return valid;
         }
 
         /// <summary>

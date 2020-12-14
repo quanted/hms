@@ -28,14 +28,9 @@ namespace Precipitation
             //if (errorMsg.Contains("ERROR")) { return null; }
             string data = nldas.GetData(out errorMsg, "PRECIP", input, retries);
             
+
             ITimeSeriesOutput nldasOutput = output;
-            if (errorMsg.Contains("ERROR"))
-            {
-                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                output = err.ReturnError("Precipitation", "nldas", errorMsg);
-                errorMsg = "";
-                return output;
-            }
+            if (errorMsg.Contains("ERROR")) { return null; }
             else
             {
                 nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);

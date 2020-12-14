@@ -22,13 +22,7 @@ namespace Precipitation
             string data = prism.GetData(out errorMsg, "ppt", input, retries);
 
             ITimeSeriesOutput prismOutput = output;
-            if (errorMsg.Contains("ERROR"))
-            {
-                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                output = err.ReturnError("Precipitation", "PRISM", errorMsg);
-                errorMsg = "";
-                return output;
-            }
+            if (errorMsg.Contains("ERROR")) { return null; }
             else
             {
                 prismOutput = prism.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
