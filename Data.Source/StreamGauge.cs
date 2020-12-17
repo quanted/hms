@@ -12,6 +12,36 @@ namespace Data.Source
 {
     public class StreamGauge
     {
+
+        public Dictionary<string, Dictionary<string, string>> FindStation(Dictionary<string, double> bounds, bool search=false, double increase=0.0, double delta=0.1, double max=1.0)
+        {
+            if(increase >= max)
+            {
+                return null;
+            }
+
+            // Step 1: update bounds, bounds +- increase
+            // Step 2: build url
+            // Step 3: evaluate response
+            // Step 4a: parse response for stations metadata
+            // Step 4b: retry FindStation, search=true, increase = increase + delta
+            if (increase > 0.0)
+            {
+                bounds["max_latitude"] += delta;
+                bounds["min_latitude"] -= delta;
+                bounds["max_longitude"] += delta;
+                bounds["min_longitude"] -= delta;
+            }
+            string url = ConstructSearchURL(bounds);
+            string data = DownloadData(url, 0).Result;
+            Dictionary<string, Dictionary<string, string>> stations = ParseStations(data);
+            if(stations is null)
+            {
+                return FindStation(bounds, search, increase+delta);
+            }
+            return stations;
+        }
+
         /// <summary>
         /// Get data function for stream gauge.
         /// </summary>
@@ -31,6 +61,41 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return new List<string>() {data, url};
+        }
+
+        /// <summary>
+        /// Constructs the url for searching for a nwis gauge station
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="componentInput"></param>
+        /// <returns></returns>
+        private static string ConstructSearchURL(Dictionary<string, double> bounds)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(@"https://waterdata.usgs.gov/nwis/uv?");
+            sb.Append(@"nw_longitude_va=" + bounds["min_longitude"].ToString() + "&");
+            sb.Append(@"nw_latitude_va=" + bounds["max_latitude"].ToString() + "&");
+            sb.Append(@"se_longitude_va=" + bounds["max_longitude"].ToString() + "&");
+            sb.Append(@"se_latitude_va=" + bounds["min_latitude"].ToString() + "&");
+            sb.Append(@"coordinate_format=decimal_degrees&");
+            sb.Append(@"group_key=NONE&");
+            sb.Append(@"format=sitefile_output&");
+            sb.Append(@"sitefile_output_format=rdb&");
+            sb.Append(@"column_name=agency_cd&");
+            sb.Append(@"column_name=site_no&");
+            sb.Append(@"column_name=station_nm&");
+            sb.Append(@"column_name=site_tp_cd&");
+            sb.Append(@"column_name=dec_lat_va&");
+            sb.Append(@"column_name=dec_long_va&");
+            sb.Append(@"range_selection=days&");
+            sb.Append(@"period=7&");
+            sb.Append(@"begin_date=2020-12-09&");
+            sb.Append(@"end_date=2020-12-16&");
+            sb.Append(@"date_format=YYYY-MM-DD&");
+            sb.Append(@"rdb_compression=file&");
+            sb.Append(@"list_of_search_criteria=lat_long_bounding_box%2Crealtime_parameter_selection");
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -119,6 +184,45 @@ namespace Data.Source
             hc.Dispose();
             return data;
         }
+
+        /// <summary>
+        /// Parse the data returned for searching for the gauge stations
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Dictionary<string, Dictionary<string, string>> ParseStations(string data)
+        {
+            if (data[0].Equals('<')){
+                return null;
+            }
+            string[] dataLines = data.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            List<string> keys = null;
+            List<string> values = null;
+            Dictionary<string, Dictionary<string, string>> stations = new Dictionary<string, Dictionary<string, string>>();
+            for(int i = 0; i < dataLines.Length - 1; i++)
+            {
+                string[] s = dataLines[i].Split(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                if (s[0].Contains("#"))
+                {
+                    continue;       // Comment
+                }
+                if(keys is null)
+                {
+                    keys = s.ToList();
+                    i += 1;
+                    continue;
+                }
+                values = s.ToList();
+                string id = values[1];
+                stations[id] = new Dictionary<string, string>();
+                for(int j = 0; j < keys.Count; j++)
+                {
+                    stations[id].Add(keys[j], values[j]);
+                }
+            }
+            return stations;
+        }
         
         /// <summary>
         /// Takes the data recieved from usgs stream gauge and sets the ITimeSeries object values.
@@ -148,7 +252,7 @@ namespace Data.Source
         /// <param name="data"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public Dictionary<string, string> SetMetadata(out string errorMsg, ITimeSeriesInput input)
+        public Dictionary<string, string> SetMetadata(out string errorMsg, ITimeSeriesInput input, Dictionary<string, string> current)
         {
             errorMsg = "";
 
@@ -165,7 +269,15 @@ namespace Data.Source
             sb.Append(@"&20&search_site_no_match_type=exact&group_key=NONE&format=sitefile_output&sitefile_output_format=rdb&column_name=agency_cd&column_name=site_no&column_name=station_nm&column_name=dec_lat_va&column_name=dec_long_va&column_name=huc_cd&range_selection=date_range&begin_date=2000-01-01&end_date=2010-12-31&date_format=YYYY-MM-DD&rdb_compression=value&list_of_search_criteria=search_site_no%2Crealtime_parameter_selection");
             string metadata = DownloadData(sb.ToString(), 0).Result;
 
-            Dictionary<string, string> meta = new Dictionary<string, string>();
+            Dictionary<string, string> meta;
+            if (current is null)
+            {
+                meta = new Dictionary<string, string>();
+            }
+            else
+            {
+                meta = current;
+            }
             string[] metaDataLines = metadata.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             List<string> keys = null;
             List<string> values = null;
