@@ -44,12 +44,6 @@ namespace Diagenesis.AQUATOX
             }
         }
 
-        string CheckForVar(AllVariables ns, T_SVType typ, T_SVLayer wc, string name)
-        {
-            TStateVariable TSV = AQSim.AQTSeg.GetStatePointer(ns, typ, wc);
-            if (TSV == null) return "Simulation is missing a required " + name + " state variable.";
-            return "";
-        }
 
         /// <summary>
         /// Checks for data requirements for an AQTDiagenesisModel including state variable requirements and parameter values.
@@ -63,44 +57,7 @@ namespace Diagenesis.AQUATOX
             string checknutrients = AQTNM.CheckDataRequirements();
             if (checknutrients != "") return checknutrients;
 
-            string rstr = "";
-
-            rstr = CheckForVar(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G1");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.POC_G2, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G2");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.POC_G3, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G3");
-            if (rstr != "") return rstr;
-
-            rstr = CheckForVar(AllVariables.PON_G1, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G1");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.PON_G2, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G2");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.PON_G3, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G3");
-            if (rstr != "") return rstr;
-
-            rstr = CheckForVar(AllVariables.POP_G1, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G1");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.POP_G2, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G2");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.POP_G3, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G3");
-            if (rstr != "") return rstr;
-
-            rstr = CheckForVar(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1, "Phosphate in Sed Layer 1");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1, "Ammonia in Sed Layer 1");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1, "Nitrate in Sed Layer 1");
-            if (rstr != "") return rstr;
-
-            rstr = CheckForVar(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2, "Phosphate in Sed Layer 2");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer2, "Ammonia in Sed Layer 2");
-            if (rstr != "") return rstr;
-            rstr = CheckForVar(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2, "Nitrate in Sed Layer 2");
-            if (rstr != "") return rstr;
-
-            return "";
+            return AQSim.AQTSeg.AQTDiagenesisModel_CheckDataRequirements();
         }
     }
 

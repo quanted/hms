@@ -121,7 +121,7 @@ namespace GUI.AQUATOX
                 graphBox.Items.Add(TGS.GraphName);
             }
 
-            if (i>-1) graphBox.SelectedIndex = i;
+            if ((i>-1) && (graphBox.Items.Count > i)) graphBox.SelectedIndex = i;
             if ((graphBox.SelectedIndex <0) && (graphBox.Items.Count>0)) graphBox.SelectedIndex = 0;
 
         }

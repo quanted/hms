@@ -21,7 +21,7 @@ namespace Nutrients.AQUATOX.UnitTests
         public void AQTNutrients_ValidJSON()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid.JSON";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -35,7 +35,7 @@ namespace Nutrients.AQUATOX.UnitTests
         public void AQTNutrients_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_Valid.JSON";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -44,42 +44,42 @@ namespace Nutrients.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoNutrients.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoNutrients.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_pH_NoCO2.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_pH_NoCO2.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoVolume.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoVolume.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NH4_no_Nitrate.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NH4_no_Nitrate.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoOxygen.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoOxygen.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Nutrient_Model_NoOxygen.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoOxygen.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);

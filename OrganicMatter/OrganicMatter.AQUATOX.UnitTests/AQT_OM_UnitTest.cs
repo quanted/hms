@@ -20,7 +20,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
         [TestMethod]
         public void AQT_OM_ValidJSON()
         {
-            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid.JSON";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -34,7 +34,7 @@ namespace OrganicMatter.AQUATOX.UnitTests
         public void AQT_OM_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Valid.JSON";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -43,28 +43,28 @@ namespace OrganicMatter.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_NoVolume.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_OM_Model_NoVolume.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_MissingSV.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_OM_Model_MissingSV.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_pH.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_OM_Model_Missing_pH.txt";
             json = json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
             Assert.AreNotEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\AQUATOX_OM_Model_Missing_O2.txt";
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_OM_Model_Missing_O2.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTOrganicMatter(ref json, out errmsg, false);

@@ -35,16 +35,8 @@ namespace GUI.AQUATOX
             this.loadJSON = new System.Windows.Forms.Button();
             this.saveJSON = new System.Windows.Forms.Button();
             this.integrate = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.outputbutton = new System.Windows.Forms.Button();
-            this.ParamsButton = new System.Windows.Forms.Button();
-            this.Diagenesis = new System.Windows.Forms.Button();
-            this.PlantsButton = new System.Windows.Forms.Button();
-            this.AnimButton = new System.Windows.Forms.Button();
-            this.ChemButton = new System.Windows.Forms.Button();
-            this.SiteButton = new System.Windows.Forms.Button();
-            this.ReminButton = new System.Windows.Forms.Button();
             this.AnimalDB = new System.Windows.Forms.Button();
             this.ReminDB = new System.Windows.Forms.Button();
             this.ChemDB = new System.Windows.Forms.Button();
@@ -56,14 +48,24 @@ namespace GUI.AQUATOX
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.ButtonPanel = new System.Windows.Forms.Panel();
+            this.ReminButton = new System.Windows.Forms.Button();
+            this.SiteButton = new System.Windows.Forms.Button();
+            this.ChemButton = new System.Windows.Forms.Button();
+            this.AnimButton = new System.Windows.Forms.Button();
+            this.PlantsButton = new System.Windows.Forms.Button();
+            this.Diagenesis = new System.Windows.Forms.Button();
+            this.ParamsButton = new System.Windows.Forms.Button();
+            this.RunStatusLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
+            this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // loadJSON
             // 
             this.loadJSON.Location = new System.Drawing.Point(26, 13);
             this.loadJSON.Name = "loadJSON";
-            this.loadJSON.Size = new System.Drawing.Size(91, 24);
+            this.loadJSON.Size = new System.Drawing.Size(87, 24);
             this.loadJSON.TabIndex = 0;
             this.loadJSON.Text = "Load ";
             this.loadJSON.UseVisualStyleBackColor = true;
@@ -81,38 +83,23 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(25, 181);
+            this.integrate.Location = new System.Drawing.Point(26, 91);
             this.integrate.Name = "integrate";
-            this.integrate.Size = new System.Drawing.Size(91, 25);
+            this.integrate.Size = new System.Drawing.Size(87, 25);
             this.integrate.TabIndex = 1;
             this.integrate.Text = "Integrate";
             this.integrate.UseVisualStyleBackColor = true;
             this.integrate.Visible = false;
             this.integrate.Click += new System.EventHandler(this.integrate_Click);
             // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(25, 295);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(395, 156);
-            this.textBox1.TabIndex = 2;
-            this.textBox1.Visible = false;
-            this.textBox1.WordWrap = false;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            // 
             // progressBar1
             // 
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(142, 71);
+            this.progressBar1.Location = new System.Drawing.Point(146, 72);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(655, 23);
+            this.progressBar1.Size = new System.Drawing.Size(663, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -120,91 +107,14 @@ namespace GUI.AQUATOX
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 229);
+            this.outputbutton.Location = new System.Drawing.Point(26, 253);
             this.outputbutton.Name = "outputbutton";
-            this.outputbutton.Size = new System.Drawing.Size(91, 25);
+            this.outputbutton.Size = new System.Drawing.Size(87, 25);
             this.outputbutton.TabIndex = 1;
             this.outputbutton.Text = "Output";
             this.outputbutton.UseVisualStyleBackColor = true;
             this.outputbutton.Visible = false;
             this.outputbutton.Click += new System.EventHandler(this.graph_Click);
-            // 
-            // ParamsButton
-            // 
-            this.ParamsButton.Location = new System.Drawing.Point(190, 121);
-            this.ParamsButton.Name = "ParamsButton";
-            this.ParamsButton.Size = new System.Drawing.Size(91, 25);
-            this.ParamsButton.TabIndex = 0;
-            this.ParamsButton.Text = "Edit Setup";
-            this.ParamsButton.UseVisualStyleBackColor = true;
-            this.ParamsButton.Visible = false;
-            this.ParamsButton.Click += new System.EventHandler(this.SaveParams);
-            // 
-            // Diagenesis
-            // 
-            this.Diagenesis.Location = new System.Drawing.Point(297, 229);
-            this.Diagenesis.Name = "Diagenesis";
-            this.Diagenesis.Size = new System.Drawing.Size(91, 25);
-            this.Diagenesis.TabIndex = 0;
-            this.Diagenesis.Text = "Diagenesis";
-            this.Diagenesis.UseVisualStyleBackColor = true;
-            this.Diagenesis.Visible = false;
-            this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
-            // 
-            // PlantsButton
-            // 
-            this.PlantsButton.Location = new System.Drawing.Point(189, 193);
-            this.PlantsButton.Name = "PlantsButton";
-            this.PlantsButton.Size = new System.Drawing.Size(92, 25);
-            this.PlantsButton.TabIndex = 0;
-            this.PlantsButton.Text = "Plants";
-            this.PlantsButton.UseVisualStyleBackColor = true;
-            this.PlantsButton.Visible = false;
-            this.PlantsButton.Click += new System.EventHandler(this.Plants);
-            // 
-            // AnimButton
-            // 
-            this.AnimButton.Location = new System.Drawing.Point(189, 229);
-            this.AnimButton.Name = "AnimButton";
-            this.AnimButton.Size = new System.Drawing.Size(92, 25);
-            this.AnimButton.TabIndex = 0;
-            this.AnimButton.Text = "Animals";
-            this.AnimButton.UseVisualStyleBackColor = true;
-            this.AnimButton.Visible = false;
-            this.AnimButton.Click += new System.EventHandler(this.AnimButton_Click);
-            // 
-            // ChemButton
-            // 
-            this.ChemButton.Location = new System.Drawing.Point(296, 193);
-            this.ChemButton.Name = "ChemButton";
-            this.ChemButton.Size = new System.Drawing.Size(92, 25);
-            this.ChemButton.TabIndex = 0;
-            this.ChemButton.Text = "Chemicals";
-            this.ChemButton.UseVisualStyleBackColor = true;
-            this.ChemButton.Visible = false;
-            this.ChemButton.Click += new System.EventHandler(this.Chems);
-            // 
-            // SiteButton
-            // 
-            this.SiteButton.Location = new System.Drawing.Point(189, 157);
-            this.SiteButton.Name = "SiteButton";
-            this.SiteButton.Size = new System.Drawing.Size(92, 25);
-            this.SiteButton.TabIndex = 0;
-            this.SiteButton.Text = "Site";
-            this.SiteButton.UseVisualStyleBackColor = true;
-            this.SiteButton.Visible = false;
-            this.SiteButton.Click += new System.EventHandler(this.Sites);
-            // 
-            // ReminButton
-            // 
-            this.ReminButton.Location = new System.Drawing.Point(297, 157);
-            this.ReminButton.Name = "ReminButton";
-            this.ReminButton.Size = new System.Drawing.Size(92, 25);
-            this.ReminButton.TabIndex = 0;
-            this.ReminButton.Text = "Org. Matter";
-            this.ReminButton.UseVisualStyleBackColor = true;
-            this.ReminButton.Visible = false;
-            this.ReminButton.Click += new System.EventHandler(this.Remin);
             // 
             // AnimalDB
             // 
@@ -263,13 +173,14 @@ namespace GUI.AQUATOX
             // 
             // SVListBox
             // 
-            this.SVListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.SVListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SVListBox.FormattingEnabled = true;
             this.SVListBox.ItemHeight = 15;
-            this.SVListBox.Location = new System.Drawing.Point(451, 103);
+            this.SVListBox.Location = new System.Drawing.Point(459, 110);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(346, 349);
+            this.SVListBox.Size = new System.Drawing.Size(350, 364);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -277,15 +188,15 @@ namespace GUI.AQUATOX
             // 
             // StudyNameBox
             // 
-            this.StudyNameBox.Location = new System.Drawing.Point(142, 30);
+            this.StudyNameBox.Location = new System.Drawing.Point(146, 30);
             this.StudyNameBox.Name = "StudyNameBox";
-            this.StudyNameBox.Size = new System.Drawing.Size(278, 23);
+            this.StudyNameBox.Size = new System.Drawing.Size(287, 23);
             this.StudyNameBox.TabIndex = 10;
             this.StudyNameBox.TextChanged += new System.EventHandler(this.StudyNameBox_TextChanged);
             // 
             // NetCDF
             // 
-            this.NetCDF.Location = new System.Drawing.Point(463, 427);
+            this.NetCDF.Location = new System.Drawing.Point(474, 430);
             this.NetCDF.Name = "NetCDF";
             this.NetCDF.Size = new System.Drawing.Size(58, 25);
             this.NetCDF.TabIndex = 11;
@@ -302,7 +213,6 @@ namespace GUI.AQUATOX
             this.label1.Size = new System.Drawing.Size(113, 15);
             this.label1.TabIndex = 13;
             this.label1.Text = "Name of Simulation";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // label3
             // 
@@ -327,24 +237,114 @@ namespace GUI.AQUATOX
             this.panel1.Size = new System.Drawing.Size(343, 55);
             this.panel1.TabIndex = 16;
             // 
+            // ButtonPanel
+            // 
+            this.ButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ButtonPanel.Controls.Add(this.ReminButton);
+            this.ButtonPanel.Controls.Add(this.SiteButton);
+            this.ButtonPanel.Controls.Add(this.ChemButton);
+            this.ButtonPanel.Controls.Add(this.AnimButton);
+            this.ButtonPanel.Controls.Add(this.PlantsButton);
+            this.ButtonPanel.Controls.Add(this.Diagenesis);
+            this.ButtonPanel.Controls.Add(this.ParamsButton);
+            this.ButtonPanel.Location = new System.Drawing.Point(191, 110);
+            this.ButtonPanel.Name = "ButtonPanel";
+            this.ButtonPanel.Size = new System.Drawing.Size(244, 191);
+            this.ButtonPanel.TabIndex = 17;
+            this.ButtonPanel.Visible = false;
+            // 
+            // ReminButton
+            // 
+            this.ReminButton.Location = new System.Drawing.Point(130, 70);
+            this.ReminButton.Name = "ReminButton";
+            this.ReminButton.Size = new System.Drawing.Size(92, 25);
+            this.ReminButton.TabIndex = 2;
+            this.ReminButton.Text = "Org. Matter";
+            this.ReminButton.UseVisualStyleBackColor = true;
+            this.ReminButton.Click += new System.EventHandler(this.Remin);
+            // 
+            // SiteButton
+            // 
+            this.SiteButton.Location = new System.Drawing.Point(22, 70);
+            this.SiteButton.Name = "SiteButton";
+            this.SiteButton.Size = new System.Drawing.Size(92, 25);
+            this.SiteButton.TabIndex = 3;
+            this.SiteButton.Text = "Site";
+            this.SiteButton.UseVisualStyleBackColor = true;
+            this.SiteButton.Click += new System.EventHandler(this.Sites);
+            // 
+            // ChemButton
+            // 
+            this.ChemButton.Location = new System.Drawing.Point(129, 106);
+            this.ChemButton.Name = "ChemButton";
+            this.ChemButton.Size = new System.Drawing.Size(92, 25);
+            this.ChemButton.TabIndex = 4;
+            this.ChemButton.Text = "Chemicals";
+            this.ChemButton.UseVisualStyleBackColor = true;
+            this.ChemButton.Click += new System.EventHandler(this.Chems);
+            // 
+            // AnimButton
+            // 
+            this.AnimButton.Location = new System.Drawing.Point(22, 142);
+            this.AnimButton.Name = "AnimButton";
+            this.AnimButton.Size = new System.Drawing.Size(92, 25);
+            this.AnimButton.TabIndex = 5;
+            this.AnimButton.Text = "Animals";
+            this.AnimButton.UseVisualStyleBackColor = true;
+            this.AnimButton.Click += new System.EventHandler(this.AnimButton_Click);
+            // 
+            // PlantsButton
+            // 
+            this.PlantsButton.Location = new System.Drawing.Point(22, 106);
+            this.PlantsButton.Name = "PlantsButton";
+            this.PlantsButton.Size = new System.Drawing.Size(92, 25);
+            this.PlantsButton.TabIndex = 6;
+            this.PlantsButton.Text = "Plants";
+            this.PlantsButton.UseVisualStyleBackColor = true;
+            this.PlantsButton.Click += new System.EventHandler(this.Plants);
+            // 
+            // Diagenesis
+            // 
+            this.Diagenesis.Location = new System.Drawing.Point(130, 142);
+            this.Diagenesis.Name = "Diagenesis";
+            this.Diagenesis.Size = new System.Drawing.Size(91, 25);
+            this.Diagenesis.TabIndex = 7;
+            this.Diagenesis.Text = "Diagenesis";
+            this.Diagenesis.UseVisualStyleBackColor = true;
+            this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
+            // 
+            // ParamsButton
+            // 
+            this.ParamsButton.Location = new System.Drawing.Point(22, 20);
+            this.ParamsButton.Name = "ParamsButton";
+            this.ParamsButton.Size = new System.Drawing.Size(91, 25);
+            this.ParamsButton.TabIndex = 1;
+            this.ParamsButton.Text = "Edit Setup";
+            this.ParamsButton.UseVisualStyleBackColor = true;
+            this.ParamsButton.Click += new System.EventHandler(this.Setup_Click);
+            // 
+            // RunStatusLabel
+            // 
+            this.RunStatusLabel.AutoSize = true;
+            this.RunStatusLabel.Location = new System.Drawing.Point(26, 141);
+            this.RunStatusLabel.Name = "RunStatusLabel";
+            this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
+            this.RunStatusLabel.TabIndex = 18;
+            this.RunStatusLabel.Text = "Run Status";
+            this.RunStatusLabel.Click += new System.EventHandler(this.RunStatusLabel_Click);
+            // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(812, 479);
+            this.ClientSize = new System.Drawing.Size(826, 494);
+            this.Controls.Add(this.RunStatusLabel);
+            this.Controls.Add(this.ButtonPanel);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.NetCDF);
             this.Controls.Add(this.StudyNameBox);
             this.Controls.Add(this.SVListBox);
-            this.Controls.Add(this.ReminButton);
-            this.Controls.Add(this.SiteButton);
-            this.Controls.Add(this.ChemButton);
-            this.Controls.Add(this.AnimButton);
-            this.Controls.Add(this.PlantsButton);
-            this.Controls.Add(this.Diagenesis);
-            this.Controls.Add(this.ParamsButton);
             this.Controls.Add(this.outputbutton);
             this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.integrate);
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
@@ -353,6 +353,7 @@ namespace GUI.AQUATOX
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.ButtonPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -363,16 +364,8 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button loadJSON;
         private System.Windows.Forms.Button saveJSON;
         private System.Windows.Forms.Button integrate;
-        private System.Windows.Forms.TextBox textBox1;
         private ProgressBar progressBar1;
         private Button outputbutton;
-        private Button ParamsButton;
-        private Button Diagenesis;
-        private Button PlantsButton;
-        private Button AnimButton;
-        private Button ChemButton;
-        private Button SiteButton;
-        private Button ReminButton;
         private Button AnimalDB;
         private Button ReminDB;
         private Button ChemDB;
@@ -384,6 +377,15 @@ namespace GUI.AQUATOX
         private Label label1;
         private Label label3;
         private Panel panel1;
+        private Panel ButtonPanel;
+        private Button ReminButton;
+        private Button SiteButton;
+        private Button ChemButton;
+        private Button AnimButton;
+        private Button PlantsButton;
+        private Button Diagenesis;
+        private Button ParamsButton;
+        private Label RunStatusLabel;
     }
 
 

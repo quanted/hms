@@ -61,34 +61,11 @@ namespace AQUATOXEcotoxicology
         {
             AQSim.AQTSeg.SetMemLocRec();
 
-            bool FoundTox = false;
-            for (T_SVType Typ = T_SVType.OrgTox1; Typ <= T_SVType.OrgTox20; Typ++)
-                { TToxics TTx = (TToxics)AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, Typ, T_SVLayer.WaterCol);
-                  if (TTx != null) { FoundTox = true; break; }
-                }
-            if (!FoundTox) return "A TToxics (toxicant in the water column) state variable must be included in the simulation. ";
-
             AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
 
-            bool FoundBiota = false;
-            for (AllVariables ns = Consts.FirstBiota; ns <= Consts.LastBiota; ns++)
-            {
-                TStateVariable biota = AQSim.AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-                if (biota != null) { FoundBiota = true; break; }
-            }
-            if (!FoundBiota) return "To calculate ecotoxicological effects, an animal or plant state variable must be included in the model. ";
-
-            if (!AQSim.AQTSeg.PSetup.UseExternalConcs)  // To calculate effects of chemicals based on internal body burdens, a bioaccumulation model must be included.
-            {
-                AQTBioaccumulationModel AQTBM = new AQTBioaccumulationModel(AQSim);
-                string checkbio = AQTBM.CheckDataRequirements();
-                if (checkbio != "") return checkbio;
-            }
-
-           
-            return "";
+            return AQSim.AQTSeg.AQTEcotoxicologyModel_CheckDataRequirements();
         }
     }
 

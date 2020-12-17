@@ -60,32 +60,8 @@ namespace AQUATOXBioaccumulation
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
-            AQSim.AQTSeg.SetMemLocRec();
-
-            foreach (TToxics TT in AQSim.AQTSeg.SV.OfType<TToxics>())
-            {
-                if (TT.NState != AllVariables.H2OTox)  // if this is a bioaccumulation state variable and not a toxicant in water
-                {
-                    TToxics TTx = AQSim.AQTSeg.GetStatePointer(AllVariables.H2OTox, TT.SVType, T_SVLayer.WaterCol) as TToxics;
-                    if (TTx == null) return "The bioaccumulation state variable " + TT.PName + " is present, but the relevant chemical is not present as a state or a driving variable.";
-    
-                    TStateVariable Carry = AQSim.AQTSeg.GetStatePointer(TT.NState, T_SVType.StV, T_SVLayer.WaterCol);
-                    if (Carry == null) return "The bioaccumulation state variable " + TT.PName + " is present, but its carrying organism is not in the simulation.";
-                }
-
-                if (TT.NState == AllVariables.H2OTox) // chemical in water, so ensure it's in all biota and organic matter
-                for (AllVariables ns = Consts.FirstDetr; ns <= Consts.LastBiota; ns++)
-                {
-                    TStateVariable carrier = AQSim.AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
-                    if (carrier != null) 
-                    { 
-                        TStateVariable TTx = AQSim.AQTSeg.GetStatePointer(carrier.NState, TT.SVType, T_SVLayer.WaterCol);
-                        if (TTx == null) return "The chemical " + TT.PName + " is in the simulation but not the bioaccumulation state variable for " + carrier.PName;
-                    }
-                }
-
-            }
-            return "";
+            AQSim.AQTSeg.SetMemLocRec(); 
+            return AQSim.AQTSeg.AQTBioaccumulationModel_CheckDataRequirements();
         }
     }
 

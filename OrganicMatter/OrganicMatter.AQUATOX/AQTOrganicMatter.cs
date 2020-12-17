@@ -43,7 +43,6 @@ namespace AQUATOXOrganicMatter
             }
         }
 
-
         /// <summary>
         /// Checks for data requirements for an AQTOrganicMatter including state variable requirements and parameter values.
         /// </summary>
@@ -56,25 +55,8 @@ namespace AQUATOXOrganicMatter
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
 
-            TDissRefrDetr PDRD = (TDissRefrDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TDissLabDetr PDLD = (TDissLabDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSuspRefrDetr PSRD = (TSuspRefrDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSuspLabDetr PSLD = (TSuspLabDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSedRefrDetr PSdRD = (TSedRefrDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSedLabileDetr PSdLD = (TSedLabileDetr)AQSim.AQTSeg.GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            return AQSim.AQTSeg.AQTOrganicMatter_CheckDataRequirements();
 
-            if ((PDRD == null) || (PDLD == null) || (PSRD == null) || (PSLD == null) || (PSdRD == null) || (PSdLD == null))
-                return "All six organic matter state variables must be included in an organic-matter simulation.";
-
-            TpHObj PpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            if ((PpH == null)) return "A pH state variable (or driving variable) must be included in an organic-matter simulation.";
-
-            TO2Obj PO2 = (TO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if ((PO2 == null)) return "An oxygen state variable (or driving variable) must be included in an organic-matter simulation.";
-
-            
-
-            return "";
         }
     }
 }

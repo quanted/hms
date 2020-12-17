@@ -67,27 +67,7 @@ namespace AQUATOXNutrientModel
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
 
-            TO2Obj TO2 = (TO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TO2 == null) return "An Oxygen state variable or driving variable must be included in the simulation. ";
-
-            TNH4Obj PNH4 = (TNH4Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
-            TNO3Obj PNO3 = (TNO3Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-            TPO4Obj PPO4 = (TPO4Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-
-            if ((PNH4 == null) && (PPO4 == null)&& (TO2==null)) return "Either phosphorus (TPO4Obj) or nitrogen (TNH4Obj and TNO3Obj) or Oxygen (TO2Obj) must be included in a nutrients simulation.";
-            if (((PNH4 != null) && (PNO3 == null)) || ((PNH4 == null) && (PNO3 != null))) return "To model nitrogen both ammonia and nitrate (TNH4Obj and TNO3Obj) must be included.";
-
-            TTemperature TTemp = (TTemperature)AQSim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
-
-            TpHObj TpH = (TpHObj)AQSim.AQTSeg.GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
-            if (TpH == null) return "A pH loading variable or state variable must be included in a nutrients simulation.";
-            if ((!TpH.UseLoadsRecAsDriver)&&(TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
-            { TCO2Obj TCO2 = (TCO2Obj)AQSim.AQTSeg.GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
-              if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";
-            }
-
-            return "";
+            return AQSim.AQTSeg.AQTNutrientModel_CheckDataRequirements();
         }
     }
 

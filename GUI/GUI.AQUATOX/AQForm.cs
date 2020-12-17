@@ -1,19 +1,19 @@
-﻿using System;
-using System.IO;
-using System.Windows.Forms;
+﻿using AQUATOX.Animals;
+using AQUATOX.AQSite;
 using AQUATOX.AQTSegment;
-using Globals;
-using System.ComponentModel;
-using System.Collections.Generic;
+using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
-using AQUATOX.Animals;
-using AQUATOX.Chemicals;
-using AQUATOX.AQSite;
-using Newtonsoft.Json;
-using System.Data;
-using sds = Microsoft.Research.Science.Data;
+using Globals;
 using Microsoft.Research.Science.Data.Imperative;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.IO;
+using System.Windows.Forms;
+using sds = Microsoft.Research.Science.Data;
 
 namespace GUI.AQUATOX
 {
@@ -34,7 +34,6 @@ namespace GUI.AQUATOX
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
-
         }
 
         private void AQTTestForm_Load(object sender, EventArgs e)
@@ -115,23 +114,16 @@ namespace GUI.AQUATOX
 
             if (openFileDialog1.FileName != "")
             {
-                // FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open);
                 string json = File.ReadAllText(openFileDialog1.FileName);
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
-                if (err != "") { textBox1.Text = err; return; }
+                if (err != "") {MessageBox.Show(err); return; }
 
                 aQTS = Sim;
                 aQTS.AQTSeg.SetMemLocRec();
-                ParamsButton.Visible = true;
+                aQTS.AQTSeg.FileName = openFileDialog1.FileName;
+                ButtonPanel.Visible = true;
                 integrate.Visible = true;
-                outputbutton.Visible = true;
-                Diagenesis.Visible = aQTS.AQTSeg.Diagenesis_Included();
-                PlantsButton.Visible = true;
-                AnimButton.Visible = true;
-                ChemButton.Visible = aQTS.Has_Chemicals();
-                SiteButton.Visible = true;
-                ReminButton.Visible = true;
                 ShowStudyInfo();
                 aQTS.ArchiveSimulation();
 
@@ -145,13 +137,17 @@ namespace GUI.AQUATOX
             saveFileDialog1.Title = "Save to JSON File";
             saveFileDialog1.ShowDialog();
 
-
             if (saveFileDialog1.FileName != "")
             {
                 string jsondata = "";
                 string errmessage = aQTS.SaveJSON(ref jsondata);
-                if (errmessage == "") File.WriteAllText(saveFileDialog1.FileName, jsondata);
-                else textBox1.Text = errmessage;
+                if (errmessage == "")
+                {
+                    aQTS.AQTSeg.FileName = saveFileDialog1.FileName;
+                    File.WriteAllText(saveFileDialog1.FileName, jsondata);
+                    ShowStudyInfo();
+                }
+                else MessageBox.Show(errmessage);
             }
         }
 
@@ -198,7 +194,7 @@ namespace GUI.AQUATOX
         {
             string SimName = "";
 
-            if (aQTS == null) { textBox1.Text = "No Simulation Loaded"; return; }
+            if (aQTS == null) { MessageBox.Show("No Simulation Loaded");  return; }
                 else
                 {
                 //if (aQTS.Has_Chemicals())
@@ -210,7 +206,7 @@ namespace GUI.AQUATOX
 
                 if (ShowInputDialog(ref SimName) == DialogResult.Cancel) return;
                 if (SimName != "") SimName = SimName + ": ";
-                aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.AQTSeg.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
                 progressBar1.Visible = true;
                 Worker.RunWorkerAsync();
@@ -233,16 +229,16 @@ namespace GUI.AQUATOX
             // progressBar1.Visible = false;
 
             progressBar1.Update();
-            if (e.Error != null) textBox1.Text = "Error Raised: " + e.Error.Message;
+            if (e.Error != null) MessageBox.Show("Error Raised: " + e.Error.Message);
             else if (errmessage == "")
             {
                 // textBox1.Text = "Run Completed.";
                 Application.DoEvents();
                 graph_Click(null, null);
-                // DisplaySVs();
+                ShowStudyInfo();
                 progressBar1.Visible = false;
             }
-            else textBox1.Text = errmessage;
+            else MessageBox.Show(errmessage);
         }
 
 
@@ -256,9 +252,10 @@ namespace GUI.AQUATOX
 
         private void graph_Click(object sender, EventArgs e)
         {
-            if (aQTS == null) { textBox1.Text = "No Simulation Loaded"; return; }
+            if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
             if (aQTS.AQTSeg.SimulationDate > DateTime.MinValue)
                 aQTS.ArchiveSimulation();
+            else { if (!aQTS.HasResults()) { MessageBox.Show("No Results Available"); return; } }
 
             //textBox1.Text = "Please wait one moment -- writing and plotting results";
             Application.DoEvents();
@@ -269,7 +266,7 @@ namespace GUI.AQUATOX
 
 
 
-        private void SaveParams(object sender, EventArgs e)
+        private void Setup_Click(object sender, EventArgs e)
         {
             if (aQTS == null) return;
 
@@ -303,7 +300,6 @@ namespace GUI.AQUATOX
 
             Param_Form PF3 = new Param_Form();
             PF3.EditParams(ref PA3, "Diagenesis Parameters", false);
-
         }
 
         private void Plants(object sender, EventArgs e)
@@ -334,14 +330,20 @@ namespace GUI.AQUATOX
 
             GridForm gf = new GridForm();
             gf.ShowGrid(table);
-
         }
 
         private void ShowStudyInfo()
         {
             if (aQTS == null) return;
 
+            this.Text = aQTS.AQTSeg.FileName;
             StudyNameBox.Text = aQTS.AQTSeg.StudyName;
+            outputbutton.Visible = aQTS.HasResults();
+            Diagenesis.Enabled = aQTS.AQTSeg.Diagenesis_Included();
+            ChemButton.Enabled = aQTS.AQTSeg.Has_Chemicals();
+
+            if (!aQTS.HasResults()) RunStatusLabel.Text = "No Saved Runs";
+                else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
 
             aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
             SVListBox.Visible = true;
@@ -658,14 +660,9 @@ namespace GUI.AQUATOX
 
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void RunStatusLabel_Click(object sender, EventArgs e)
         {
 
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            textBox1.Visible = true;
         }
     }
 }

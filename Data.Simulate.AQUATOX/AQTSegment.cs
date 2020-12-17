@@ -29,28 +29,22 @@ namespace AQUATOX.AQTSegment
     public class AQTSim
     {
         public AQUATOXSegment AQTSeg = null;
-        public string RunID = "";
-
         public Dictionary<string, AQUATOXSegment> SavedRuns = null;
+
+        public bool HasResults()
+        {
+            if (SavedRuns == null) return false;
+            else if (SavedRuns.Count == 0) return false;
+            else return true;
+        }
 
         public string SaveJSON(ref string json)
         {
             try
             {
-                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
-                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
-                {
-                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-                    TypeNameHandling = TypeNameHandling.Objects,
-                    SerializationBinder = AQTBinder
-                };
-                json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(this, AQTJSONSettings());
                 // json = json + Newtonsoft.Json.JsonConvert.SerializeObject(SavedRuns, AQTJsonSerializerSettings);
                 return "";
-            }
-            catch (Newtonsoft.Json.JsonWriterException e)
-            {
-                return e.Message;
             }
             catch (Exception e)
             {
@@ -63,57 +57,65 @@ namespace AQUATOX.AQTSegment
 
         }
 
-        //public string ExportJSON(ref string json)
-        //{
-
-        //    try
-        //    {
-        //        AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
-        //        JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
-        //        {
-        //            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-        //            TypeNameHandling = TypeNameHandling.Objects,
-        //            SerializationBinder = AQTBinder
-        //        };
-        //        json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJsonSerializerSettings);
-        //        return json;
-        //    }
-        //    catch (Newtonsoft.Json.JsonWriterException e)
-        //    {
-        //        return e.Message;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return e.Message;
-        //    }
-
-        //    finally
-        //    {
-        //    }
-
-        //}
+        public JsonSerializerSettings AQTJSONSettings()
+        {
+            AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
+            return new JsonSerializerSettings()
+            {
+                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                TypeNameHandling = TypeNameHandling.Objects,
+                SerializationBinder = AQTBinder
+            };
+        }
 
 
-        public string Instantiate(string json)
+    public string Instantiate(string json)
         {
 
             try
             {
-                AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
-                JsonSerializerSettings AQTJsonSerializerSettings = new JsonSerializerSettings()
-                {
-                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-                    TypeNameHandling = TypeNameHandling.Objects,
-                    SerializationBinder = AQTBinder
-                };
-                AQTSeg = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(json, AQTJsonSerializerSettings);
-                //SavedRuns = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, AQUATOXSegment>>(json, AQTJsonSerializerSettings);
+                AQTSim tempsim = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(json, AQTJSONSettings());
+                AQTSeg = tempsim.AQTSeg; SavedRuns = tempsim.SavedRuns;
                 AQTSeg.SetupLinks();
                 return "";
             }
-            catch (Newtonsoft.Json.JsonReaderException e)
+            catch (Exception e)
             {
                 return e.Message;
+            }
+
+            finally
+            {
+            }
+        }
+
+        public string SaveSegJSON(ref string json)
+        {
+            try
+            {
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(AQTSeg, AQTJSONSettings());
+                // json = json + Newtonsoft.Json.JsonConvert.SerializeObject(SavedRuns, AQTJsonSerializerSettings);
+                return "";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+
+            finally
+            {
+            }
+
+        }
+
+        public string InstantiateSeg(string json)
+        {
+
+            try
+            {
+                AQTSeg = Newtonsoft.Json.JsonConvert.DeserializeObject<AQUATOXSegment>(json, AQTJSONSettings());
+                AQTSeg.SetupLinks();
+                return "";
             }
             catch (Exception e)
             {
@@ -127,14 +129,15 @@ namespace AQUATOX.AQTSegment
 
         public bool ArchiveSimulation()
         {
-            if (SavedRuns == null) SavedRuns = new Dictionary<string, AQUATOXSegment>(); 
-            if (SavedRuns.TryGetValue(RunID, out AQUATOXSegment savedRun)) return false;
+            if (SavedRuns == null) SavedRuns = new Dictionary<string, AQUATOXSegment>();
+            if (AQTSeg.RunID == "") return false;
+            if (SavedRuns.TryGetValue(AQTSeg.RunID, out AQUATOXSegment savedRun)) return false;
 
             string JSONToArchive="";
-            SaveJSON(ref JSONToArchive);
+            SaveSegJSON(ref JSONToArchive);
             AQTSim SimToArchive = new AQTSim();
-            SimToArchive.Instantiate(JSONToArchive);
-            SavedRuns.Add(RunID, SimToArchive.AQTSeg);
+            SimToArchive.InstantiateSeg(JSONToArchive);
+            SavedRuns.Add(AQTSeg.RunID, SimToArchive.AQTSeg);
 
             return true;
         }
@@ -173,14 +176,7 @@ namespace AQUATOX.AQTSegment
             return Integrate();
         }
 
-        public bool Has_Chemicals()
-        {
-            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
-            {
-                if (AQTSeg.GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null) return true;
-            }
-            return false;
-        }
+
     }
 
     
@@ -768,6 +764,9 @@ namespace AQUATOX.AQTSegment
         public TStates SV = new TStates();    // State Variables
         public DateTime TPresent;
         public string StudyName;
+        public string RunID = "";
+        public string FileName = "";
+
         public Setup_Record PSetup;
 
         public bool UseConstEvap = true;
@@ -820,12 +819,337 @@ namespace AQUATOX.AQTSegment
 
         }
 
+        public bool Has_Nutrient_Model()
+        {
+            TNH4Obj PNH4 = (TNH4Obj)GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+            TNO3Obj PNO3 = (TNO3Obj)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            TPO4Obj PPO4 = (TPO4Obj)GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+
+            bool NH4model = (PNH4 != null);
+            bool NO3model = (PNO3 != null);
+            bool PO4model = (PPO4 != null);
+
+            if (NH4model) NH4model = !(PNH4.UseLoadsRecAsDriver);
+            if (NO3model) NO3model = !(PNH4.UseLoadsRecAsDriver);
+            if (PO4model) PO4model = !(PNH4.UseLoadsRecAsDriver);
+
+            return (NH4model || NO3model || PO4model);
+        }
+
+        public bool Has_OM_Model()
+        {
+            TDissRefrDetr PDRD = (TDissRefrDetr)GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSuspRefrDetr PSRD = (TSuspRefrDetr)GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSedRefrDetr PSdRD = (TSedRefrDetr)GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+
+            bool PDRDmodel = (PDRD != null);
+            bool PSRDmodel = (PSRD != null);
+            bool PSdRDmodel = (PSdRD != null);
+
+            if (PDRDmodel) PDRDmodel = !(PDRD.UseLoadsRecAsDriver);
+            if (PSRDmodel) PSRDmodel = !(PSRD.UseLoadsRecAsDriver);
+            if (PSdRDmodel) PSdRDmodel = !(PSdRD.UseLoadsRecAsDriver);
+
+            return (PDRDmodel || PSRDmodel || PSdRDmodel);
+        }
+
+        public bool Has_Plant_Model()
+        {
+            for (AllVariables nS = Consts.FirstPlant; nS <= Consts.LastPlant; nS++)
+            {
+                TStateVariable TPl = GetStatePointer(nS, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TPl != null)
+                {
+                    if (!(TPl.UseLoadsRecAsDriver)) return true;
+                }
+            }
+            return false;
+        }
+
+
+public bool Has_Chemicals()
+        {
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
+            {
+                if (GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null) return true;
+            }
+            return false;
+        }
+
         public string Verify_Runnable()
         {
+            SetMemLocRec();
             if (SV.Count < 1) return "No State Variables Are Included in this Simulation.";
             if (Equals(PSetup, default(Setup_Record))) return "PSetup data structure must be initialized.";
             if (PSetup.StoreStepSize.Val < Consts.Tiny) return "PSetup.StoreStepSize must be greater than zero.";
             if (PSetup.FirstDay.Val >= PSetup.LastDay.Val) return "In PSetup Record, Last Day must be after First Day.";
+
+            string dr = AQTVolumeModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            dr = AQTBioaccumulationModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            if (Has_Chemicals()) dr = AQTChemicalModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            if (Diagenesis_Included()) dr = AQTDiagenesisModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            if (Has_Nutrient_Model()) dr = AQTNutrientModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            if (Has_OM_Model()) dr = AQTOrganicMatter_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            // FIXME add check for ecotoxicology model
+
+            if (Has_Plant_Model()) dr = AQTPlantModel_CheckDataRequirements();
+            if (dr != "") return dr;
+
+            return "";
+        }
+
+        public string AQTVolumeModel_CheckDataRequirements()
+        {
+
+            TVolume TVol = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TVol == null) return "A Volume State Variable must be included in the simulation. ";
+            if (Location == null) return "The 'Location' object must be populated with site data. ";
+            if (Location.Locale == null) return "The 'Location.Locale' object must be populated with site data. ";
+            if (Location.Locale.SiteLength.Val < Consts.Tiny) return "SiteLength must be greater than zero.";
+            if (Location.SiteType == SiteTypes.Stream)
+            {
+                if (Location.Locale.Channel_Slope.Val < Consts.Tiny) return "Channel_Slope must be greater than zero to use Mannings Equation.";
+            }
+
+            return "";
+        }
+
+        public string AQTBioaccumulationModel_CheckDataRequirements()
+        {
+            foreach (TToxics TT in SV.OfType<TToxics>())
+            {
+                if (TT.NState != AllVariables.H2OTox)  // if this is a bioaccumulation state variable and not a toxicant in water
+                {
+                    TToxics TTx = GetStatePointer(AllVariables.H2OTox, TT.SVType, T_SVLayer.WaterCol) as TToxics;
+                    if (TTx == null) return "The bioaccumulation state variable " + TT.PName + " is present, but the relevant chemical is not present as a state or a driving variable.";
+
+                    TStateVariable Carry = GetStatePointer(TT.NState, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (Carry == null) return "The bioaccumulation state variable " + TT.PName + " is present, but its carrying organism is not in the simulation.";
+                }
+
+                if (TT.NState == AllVariables.H2OTox) // chemical in water, so ensure it's in all biota and organic matter
+                    for (AllVariables ns = Consts.FirstDetr; ns <= Consts.LastBiota; ns++)
+                    {
+                        TStateVariable carrier = GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (carrier != null)
+                        {
+                            TStateVariable TTx = GetStatePointer(carrier.NState, TT.SVType, T_SVLayer.WaterCol);
+                            if (TTx == null) return "The chemical " + TT.PName + " is in the simulation but not the bioaccumulation state variable for " + carrier.PName;
+                        }
+                    }
+
+            }
+            return "";
+        }
+
+        public string AQTChemicalModel_CheckDataRequirements()
+        {
+            bool FoundTox = false;
+            for (T_SVType Typ = T_SVType.OrgTox1; Typ <= T_SVType.OrgTox20; Typ++)
+            {
+                TToxics TTx = (TToxics)GetStatePointer(AllVariables.H2OTox, Typ, T_SVLayer.WaterCol);
+                if (TTx != null) { FoundTox = true; break; }
+            }
+            if (!FoundTox) return "A TToxics (toxicant in the water column) state variable must be included in the simulation. ";
+
+            TO2Obj TO2 = (TO2Obj)GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TO2 == null) return "An Oxygen state variable or driving variable must be included in a chemical simulation. ";
+
+            TTemperature TTemp = (TTemperature)GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TTemp == null) return "A Temperature state variable or driving variable must be included in in a chemical simulation. ";
+
+            TpHObj TpH = (TpHObj)GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TpH == null) return "A pH loading variable or state variable must be included in a chemical simulation.";
+            if ((!TpH.UseLoadsRecAsDriver) && (TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
+            {
+                TCO2Obj TCO2 = (TCO2Obj)GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";
+            }
+
+            TLight TLt = (TLight)GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TLt == null) return "A Light state variable or driving variable must be included in the simulation. ";
+
+            return "";
+        }
+
+        public string AQTEcotoxicologyModel_CheckDataRequirements()
+        {
+            bool FoundTox = false;
+            for (T_SVType Typ = T_SVType.OrgTox1; Typ <= T_SVType.OrgTox20; Typ++)
+            {
+                TToxics TTx = (TToxics)GetStatePointer(AllVariables.H2OTox, Typ, T_SVLayer.WaterCol);
+                if (TTx != null) { FoundTox = true; break; }
+            }
+            if (!FoundTox) return "A TToxics (toxicant in the water column) state variable must be included in the simulation. ";
+
+            bool FoundBiota = false;
+            for (AllVariables ns = Consts.FirstBiota; ns <= Consts.LastBiota; ns++)
+            {
+                TStateVariable biota = GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol);
+                if (biota != null) { FoundBiota = true; break; }
+            }
+            if (!FoundBiota) return "To calculate ecotoxicological effects, an animal or plant state variable must be included in the model. ";
+
+            // if (!PSetup.UseExternalConcs.Val)  // To calculate effects of chemicals based on internal body burdens, a bioaccumulation model must be included.
+            // {
+            //     AQTBioaccumulationModel AQTBM = new AQTBioaccumulationModel(AQSim);
+            //     string checkbio = AQTBM.CheckDataRequirements();
+            //     if (checkbio != "") return checkbio;
+            // }
+
+            return "";
+        }
+
+        string CheckForVar(AllVariables ns, T_SVType typ, T_SVLayer wc, string name)
+        {
+            TStateVariable TSV = GetStatePointer(ns, typ, wc);
+            if (TSV == null) return "The Diagenesis simulation is missing a required " + name + " state variable.";
+            return "";
+        }
+
+        public string AQTOrganicMatter_CheckDataRequirements()
+        {
+            TDissRefrDetr PDRD = (TDissRefrDetr)GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TDissLabDetr PDLD = (TDissLabDetr)GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSuspRefrDetr PSRD = (TSuspRefrDetr)GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSuspLabDetr PSLD = (TSuspLabDetr)GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSedRefrDetr PSdRD = (TSedRefrDetr)GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TSedLabileDetr PSdLD = (TSedLabileDetr)GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+
+            if ((PDRD == null) || (PDLD == null) || (PSRD == null) || (PSLD == null) || (PSdRD == null) || (PSdLD == null))
+                return "All six organic matter state variables must be included in an organic-matter simulation.";
+
+            TpHObj PpH = (TpHObj)GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PpH == null)) return "A pH state variable (or driving variable) must be included in an organic-matter simulation.";
+
+            TO2Obj PO2 = (TO2Obj)GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PO2 == null)) return "An oxygen state variable (or driving variable) must be included in an organic-matter simulation.";
+
+            return "";
+        }
+
+        public string AQTDiagenesisModel_CheckDataRequirements()
+        {
+            string rstr = "";
+
+            rstr = CheckForVar(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G1");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.POC_G2, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G2");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.POC_G3, T_SVType.StV, T_SVLayer.SedLayer2, "POC_G3");
+            if (rstr != "") return rstr;
+
+            rstr = CheckForVar(AllVariables.PON_G1, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G1");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.PON_G2, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G2");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.PON_G3, T_SVType.StV, T_SVLayer.SedLayer2, "PON_G3");
+            if (rstr != "") return rstr;
+
+            rstr = CheckForVar(AllVariables.POP_G1, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G1");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.POP_G2, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G2");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.POP_G3, T_SVType.StV, T_SVLayer.SedLayer2, "POP_G3");
+            if (rstr != "") return rstr;
+
+            rstr = CheckForVar(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1, "Phosphate in Sed Layer 1");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1, "Ammonia in Sed Layer 1");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1, "Nitrate in Sed Layer 1");
+            if (rstr != "") return rstr;
+
+            rstr = CheckForVar(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer2, "Phosphate in Sed Layer 2");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer2, "Ammonia in Sed Layer 2");
+            if (rstr != "") return rstr;
+            rstr = CheckForVar(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer2, "Nitrate in Sed Layer 2");
+            if (rstr != "") return rstr;
+
+            return "";
+        }
+
+        public string AQTNutrientModel_CheckDataRequirements()
+        {
+
+            TO2Obj TO2 = (TO2Obj)GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TO2 == null) return "An Oxygen state variable or driving variable must be included in the simulation. ";
+
+            TNH4Obj PNH4 = (TNH4Obj)GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+            TNO3Obj PNO3 = (TNO3Obj)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            TPO4Obj PPO4 = (TPO4Obj)GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+
+            if ((PNH4 == null) && (PPO4 == null) && (TO2 == null)) return "Either phosphorus (TPO4Obj) or nitrogen (TNH4Obj and TNO3Obj) or Oxygen (TO2Obj) must be included in a nutrients simulation.";
+            if (((PNH4 != null) && (PNO3 == null)) || ((PNH4 == null) && (PNO3 != null))) return "To model nitrogen both ammonia and nitrate (TNH4Obj and TNO3Obj) must be included.";
+
+            TTemperature TTemp = (TTemperature)GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
+
+            TpHObj TpH = (TpHObj)GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TpH == null) return "A pH loading variable or state variable must be included in a nutrients simulation.";
+            if ((!TpH.UseLoadsRecAsDriver) && (TpH.LoadsRec.Loadings.NoUserLoad))  // pH calculation, not a driving variable, check pH model data requirements
+            {
+                TCO2Obj TCO2 = (TCO2Obj)GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TCO2 == null) return "A CO2 state variable or driving variable must be included in the simulation to calculate pH. ";
+            }
+
+            return "";
+        }
+
+        public string AQTPlantModel_CheckDataRequirements()
+        {
+            bool FoundPlant = false;
+            for (AllVariables nS = Consts.FirstPlant; nS <= Consts.LastPlant; nS++)
+            {
+                TStateVariable TPl = GetStatePointer(nS, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TPl != null)
+                {
+                    FoundPlant = true;
+                    if ((PSetup.Internal_Nutrients.Val) && (nS <= Consts.LastAlgae))  // Exclude Macrophytes
+                    {
+                        TStateVariable TIn = GetStatePointer(nS, T_SVType.NIntrnl, T_SVLayer.WaterCol);
+                        if (TIn == null) return "Internal Nutrients in plants have been selected but there is no internal nitrogen state variable for " + TPl.PName;
+
+                        TIn = GetStatePointer(nS, T_SVType.PIntrnl, T_SVLayer.WaterCol);
+                        if (TIn == null) return "Internal Nutrients in plants have been selected but there is no internal phosphorus state variable for " + TPl.PName;
+                    }
+                }
+            }
+            if (!FoundPlant) return "A TPlant state variable must be included in the simulation. ";
+
+            TpHObj PpH = (TpHObj)GetStatePointer(AllVariables.pH, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PpH == null)) return "A pH state variable (or driving variable) must be included in a plant simulation.";
+
+            TCO2Obj PCO2 = (TCO2Obj)GetStatePointer(AllVariables.CO2, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PCO2 == null)) return "A CO2 state variable (or driving variable) must be included in a plant simulation.";
+
+            TTemperature TTemp = (TTemperature)GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
+
+            TNH4Obj PNH4 = (TNH4Obj)GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PNH4 == null) return "An Ammonia (TNH4Obj) state variable or driving variable must be included in the simulation. ";
+
+            TNO3Obj PNO3 = (TNO3Obj)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PNO3 == null) return "A Nitrate (TNO3Obj) state variable or driving variable must be included in the simulation. ";
+
+            TPO4Obj PPO4 = (TPO4Obj)GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PPO4 == null) return "A Phosphate (TPO4Obj) state variable or driving variable must be included in the simulation. ";
+
+            TLight TLt = (TLight)GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TLt == null) return "A Light state variable or driving variable must be included in the simulation. ";
 
             return "";
         }
@@ -4077,7 +4401,7 @@ namespace AQUATOX.AQTSegment
 
     public AQTKnownTypesBinder()
     {
-            KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), 
+            KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(AQTSim), typeof(Dictionary<string, AQUATOXSegment>),
                                           typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
                                           typeof(SortedList<DateTime, double>), typeof(AQUATOXTSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
                                           typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj), typeof(DetritalInputRecordType),
