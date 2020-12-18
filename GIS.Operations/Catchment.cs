@@ -32,6 +32,12 @@ namespace GIS.Operations
         public List<Feature> features { get; set; }
     }
 
+    public class Streamcat
+    {
+        public Dictionary<string, object> output { get; set; }
+        public Dictionary<string, object> status { get; set; }
+    }
+
     public class Catchment
     {
 
@@ -168,6 +174,30 @@ namespace GIS.Operations
             return data;
         }
 
+
+        public Dictionary<string, object> GetStreamcatData()
+        {
+            string scURL = "https://ofmpub.epa.gov/waters10/nhdplus.jsonv25?pcomid=" + this.comid + "&pFilenameOverride=AUTO";
+            string data = this.DownloadData(scURL, 5).Result;
+            Streamcat sc = JsonSerializer.Deserialize<Streamcat>(data);
+            return sc.output;
+        }
+
+        public Dictionary<string, Dictionary<string, string>> GetNWISGauges(List<double> coord = null)
+        {
+            Data.Source.StreamGauge sg = new Data.Source.StreamGauge();
+            Dictionary<string, Dictionary<string, string>> stations = sg.FindStation(this.GetBounds(), true, 0.0, 0.1, 1.0);
+            if (coord != null)
+            {
+                foreach (KeyValuePair<string, Dictionary<string, string>> kv in stations)
+                {
+                    double distance = Operations.CalculateRadialDistance(coord[0], coord[1], Double.Parse(kv.Value["dec_lat_va"]), Double.Parse(kv.Value["dec_long_va"]), true);
+                    stations[kv.Key].Add("distance", distance.ToString());
+                    stations[kv.Key].Add("distance_units", "(km) from catchment centroid to gauge latitude/longitude");
+                }
+            }
+            return stations;
+        }
 
     }
 }
