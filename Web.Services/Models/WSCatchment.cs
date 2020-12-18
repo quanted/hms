@@ -54,6 +54,10 @@ namespace Web.Services.Models
             if(streamcat != null) { result.Add("streamcat", streamcat); }
             result.Add("metadata", metadata);
 
+            // Weather Station
+            // URLS to data sources (NLDAS, GLDAS), local or outside
+            // Flowlines TO/FROM comids from DB
+
             return result;
         }
 
