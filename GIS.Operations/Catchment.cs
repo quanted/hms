@@ -177,7 +177,7 @@ namespace GIS.Operations
 
         public Dictionary<string, object> GetStreamcatData()
         {
-            string scURL = "https://ofmpub.epa.gov/waters10/nhdplus.jsonv25?pcomid=" + this.comid + "&pFilenameOverride=AUTO";
+            string scURL = "https://ofmpub.epa.gov/waters10/nhdplus.jsonv25?pcomid=" + this.comid + "&pAreaOfInterest=Catchment%2FWatershed;Riparian%20Buffer%20(100m)&pLandscapeMetricType=Agriculture;Climate;Disturbance;Hydrology;Infrastructure;Land%20Cover;Lithology;Mines;Pollution;Riparian;Soils;Topography;Urban;Wetness&pLandscapeMetricClass=Disturbance;Natural&pFilenameOverride=AUTO";
             string data = this.DownloadData(scURL, 5).Result;
             Streamcat sc = JsonSerializer.Deserialize<Streamcat>(data);
             return sc.output;
