@@ -77,7 +77,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/radiation";
             RadiationInput input = JsonSerializer.Deserialize<RadiationInput>(inputString, options);
             Debug.WriteLine("Integration Test: Radiation controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

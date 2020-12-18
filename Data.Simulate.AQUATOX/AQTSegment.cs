@@ -1002,12 +1002,8 @@ public bool Has_Chemicals()
             }
             if (!FoundBiota) return "To calculate ecotoxicological effects, an animal or plant state variable must be included in the model. ";
 
-            // if (!PSetup.UseExternalConcs.Val)  // To calculate effects of chemicals based on internal body burdens, a bioaccumulation model must be included.
-            // {
-            //     AQTBioaccumulationModel AQTBM = new AQTBioaccumulationModel(AQSim);
-            //     string checkbio = AQTBM.CheckDataRequirements();
-            //     if (checkbio != "") return checkbio;
-            // }
+            if (!PSetup.UseExternalConcs.Val)
+               return AQTBioaccumulationModel_CheckDataRequirements(); // To calculate effects of chemicals based on internal body burdens, a bioaccumulation model must be included.
 
             return "";
         }

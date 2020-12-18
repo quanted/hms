@@ -56,6 +56,11 @@ namespace Radiation
 
             switch (input.TemporalResolution)
             {
+                case "monthly":
+                    output.Metadata.Add("column_2", "shortwave");
+                    output.Metadata.Add("column_2_units", "W/m^2");
+                    output.Data = MonthlyAverage(out errorMsg, output, input);
+                    return output;
                 case "daily":
                 default:
                     output.Metadata.Add("column_2", "shortwave");
@@ -242,6 +247,47 @@ namespace Radiation
             }
 
             return valid;
+        }
+
+        /// <summary>
+        /// Monthly average for radiation data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<string>> MonthlyAverage(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
+            ITimeSeriesOutput output1 = oFactory.Initialize();
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+            DateTime iDate;
+            DateTime newDate;
+            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+            DateTime.TryParse(dateString0, out newDate);
+            double ssum = 0.0;
+            int days = -1;
+            for (int i = 0; i < output.Data.Count; i++)
+            {
+                days += 1;
+                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
+                DateTime.TryParse(dateString, out iDate);
+                if (iDate.Month != newDate.Month || i == output.Data.Count - 1)
+                {
+                    ssum = ssum / days;
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { ssum.ToString(input.DataValueFormat)});
+                    newDate = iDate;
+                    ssum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    days = 0;
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+                else
+                {
+                    ssum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                }
+            }
+            return output1.Data;
         }
     }
 }

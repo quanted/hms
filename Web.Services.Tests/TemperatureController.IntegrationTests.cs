@@ -31,6 +31,16 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// NLDAS request json string for testing a valid request
+        /// </summary>
+        const string nldas2Request =
+            "{\"source\": \"nldas\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// GLDAS request json string for testing a valid request
         /// </summary>
         const string gldasRequest =
@@ -38,6 +48,24 @@ namespace Web.Services.Tests
             "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// NCEI daily request json string for testing a valid request
+        /// </summary>
+        const string nceiRequest =
+            "{\"source\": \"ncei\",\"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
+            "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"default\",\"timeLocalized\": true," +
+            "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+        /// NCEI monthly request json string for testing a valid request
+        /// </summary>
+        const string ncei2Request =
+            "{\"source\": \"ncei\",\"dateTimeSpan\": {\"startDate\": \"2010-01-01T00:00:00\",\"endDate\": \"2010-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\"," +
+            "\"geometryMetadata\": {\"stationID\": \"GHCND:USW00013874\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
@@ -51,6 +79,16 @@ namespace Web.Services.Tests
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
 
         /// <summary>
+        /// Daymet request json string for testing a valid request
+        /// </summary>
+        const string daymet2Request =
+            "{\"source\": \"daymet\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
+
+        /// <summary>
         /// PRISM request json string for testing a valid request
         /// </summary>
         const string prismRequest =
@@ -59,6 +97,17 @@ namespace Web.Services.Tests
             "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
             "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"daily\",\"timeLocalized\": true," +
             "\"units\": \"default\",\"outputFormat\": \"json\"}";
+
+
+        /// <summary>
+        /// PRISM request json string for testing a valid request
+        /// </summary>
+        const string prism2Request =
+            "{\"source\": \"prism\",\"dateTimeSpan\": {\"startDate\": \"2015-01-01T00:00:00\",\"endDate\": \"2015-12-31T00:00:00\"," +
+            "\"dateTimeFormat\": \"yyyy-MM-dd HH\"},\"geometry\": {\"description\": \"EPA Athens Office\",\"point\": " +
+            "{\"latitude\": 33.925673,\"longitude\": -83.355723},\"geometryMetadata\": {\"City\": \"Athens\",\"State\": \"Georgia\",\"Country\": \"United States\"}," +
+            "\"timezone\": {\"name\": \"EST\",\"offset\": -5,\"dls\": false}},\"dataValueFormat\": \"E3\",\"temporalResolution\": \"monthly\",\"timeLocalized\": true," +
+            "\"units\": \"imperial\",\"outputFormat\": \"json\"}";
 
         /// <summary>
         /// Integration test constructor creates test server and test client.
@@ -76,10 +125,15 @@ namespace Web.Services.Tests
         /// <returns></returns>
         [Trait("Priority", "1")]
         [Theory]
-        [InlineData(nldasRequest, 368)]
-        [InlineData(gldasRequest, 368)]
+        [InlineData(nldasRequest, 365)]
+        [InlineData(nldas2Request, 365)]
+        [InlineData(gldasRequest, 365)]
+        [InlineData(nceiRequest, 365)]
+        [InlineData(ncei2Request, 12)]
         [InlineData(daymetRequest, 365)]
+        [InlineData(daymet2Request, 12)]
         [InlineData(prismRequest, 365)]
+        [InlineData(prism2Request, 12)]
         public async Task ValidRequests(string inputString, int expected)
         {
             JsonSerializerOptions options = new JsonSerializerOptions()
@@ -87,7 +141,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/hydrology/temperature";
             TemperatureInput input = JsonSerializer.Deserialize<TemperatureInput>(inputString, options);
             Debug.WriteLine("Integration Test: Temperature controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

@@ -59,7 +59,7 @@ namespace SoilMoisture
 
             if (!CheckLayers(out errorMsg)) { return null; }
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS SoilMoisture Data call

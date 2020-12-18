@@ -14,6 +14,14 @@ namespace Data.Source
     /// </summary>
     public class NLDAS
     {
+
+        private DateTime temporalStart = new DateTime(1979, 1, 1);          // NLDAS temporal coverage start date.
+        private DateTime temporalEnd = DateTime.UtcNow.AddDays(-5.0);       // NLDAS temporal coverage end date (approximate)
+        private double maxLat = 53.0;                                       // NLDAS spatial coverage max latitude
+        private double minLat = 25.0;                                       // NLDAS spatial coverage min latitude
+        private double maxLng = -63.0;                                      // NLDAS spatial coverage max longitude
+        private double minLng = -125.0;                                     // NLDAS spatial coverage min longitude
+
         /// <summary>
         /// Get data function for nldas.
         /// </summary>
@@ -21,18 +29,23 @@ namespace Data.Source
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
         {
             errorMsg = "";
+
+            if(!this.ValidateInput(out errorMsg, componentInput))
+            {
+                return null;
+            }
 
             //Fix shallow copied StreamFlow DateTimeSpan
             if (componentInput.Geometry.GeometryMetadata.ContainsKey("StreamFlowEndDate"))
             {
-                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyyHH:mm", null);
-                DateTime sfsd = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowStartDate"], "MM/dd/yyyyHH:mm", null);
+                DateTime sfed = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowEndDate"], "MM/dd/yyyy HH:mm", null);
+                DateTime sfsd = DateTime.ParseExact(componentInput.Geometry.GeometryMetadata["StreamFlowStartDate"], "MM/dd/yyyy HH:mm", null);
 
                 //TimeSpan ts = new TimeSpan(06, 00, 0);
-                componentInput.DateTimeSpan.EndDate = sfed.Date;//sfed.Date.AddDays(1.0) + ts;
+                componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(7.0);
                 componentInput.DateTimeSpan.StartDate = sfsd.Date;
             }
 
@@ -44,10 +57,45 @@ namespace Data.Source
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(url, 0).Result;
+            string data = DownloadData(url, retries).Result;
             if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return data;
+        }
+
+        private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            StringBuilder errors = new StringBuilder();
+            bool valid = true;
+            // Temporal validation
+            if(input.DateTimeSpan.StartDate < this.temporalStart)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid start date, NLDAS temporal coverage starts at " + this.temporalStart.ToString("yyyy-MM-dd") + ", entered start date is " + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            if (input.DateTimeSpan.EndDate > this.temporalEnd)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid end date, NLDAS temporal coverage ends at " + this.temporalEnd.ToString("yyyy-MM-dd") + ", entered end date is " + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            // Spatial calidation
+            if(input.Geometry.Point.Latitude < this.minLat || input.Geometry.Point.Latitude > this.maxLat)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid latitude, NLDAS spatial coverage is between latitudes " + this.minLat.ToString() + " and " + this.maxLat.ToString() + ", entered latitude is " + input.Geometry.Point.Latitude.ToString() + ", ");
+            }
+            if (input.Geometry.Point.Longitude < this.minLng || input.Geometry.Point.Longitude > this.maxLng)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid longitude, NLDAS spatial coverage is between longitude " + this.minLng.ToString() + " and " + this.maxLng.ToString() + ", entered longitude is " + input.Geometry.Point.Longitude.ToString() + ", ");
+            }
+
+            if (!valid)
+            {
+                errorMsg = errors.ToString();
+            }
+            return valid;
         }
 
         /// <summary>
@@ -168,7 +216,7 @@ namespace Data.Source
                     data = await wm.Content.ReadAsStringAsync();
                     retries += 1;
                     if (!status.Contains("OK")) { 
-                        Thread.Sleep(1000 * retries); 
+                        Thread.Sleep(1000 * retries);
                     }
                 }
             }
@@ -177,7 +225,7 @@ namespace Data.Source
                 if (retries < maxRetries)
                 {
                     retries += 1;
-                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}", retries, maxRetries);
+                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
                     return this.DownloadData(url, retries).Result;

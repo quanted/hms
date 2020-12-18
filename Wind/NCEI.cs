@@ -48,7 +48,7 @@ namespace Wind
 
             // Data aggregation takes place within ncdc.GetData
             Dictionary<string, List<double>> data = new Dictionary<string, List<double>>();
-            if (input.Geometry.StationID.Contains("GHCND"))
+            if (input.Geometry.StationID.Contains("GHCND") || !input.Geometry.StationID.Contains(":"))
             {
                 Data.Source.NCEI<NCEIWind> ncei = new Data.Source.NCEI<NCEIWind>();
                 List<NCEIWind> preData = ncei.GetData(out errorMsg, "AWND", input);

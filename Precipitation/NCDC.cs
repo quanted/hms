@@ -27,7 +27,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
@@ -64,10 +64,10 @@ namespace Precipitation
 
             Dictionary<string, double> data = new Dictionary<string, double>();
 
-            if (input.Geometry.StationID.Contains("GHCND"))
+            if (input.Geometry.StationID.Contains("GHCND") || !input.Geometry.StationID.Contains(":"))
             {
                 NCEI<NCEIPrecipitation> ncei = new NCEI<NCEIPrecipitation>();
-                List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input);
+                List<NCEIPrecipitation> preData = ncei.GetData(out errorMsg, "PRCP", input, retries);
                 data = this.ParseData(out errorMsg, preData, input.DateTimeSpan.DateTimeFormat, input.TemporalResolution, input.DateTimeSpan.StartDate, input.DateTimeSpan.EndDate);
             }
             else
@@ -201,12 +201,7 @@ namespace Precipitation
             errorMsg = "";
             Dictionary<string, double> aggregatedValues = new Dictionary<string, double>();
             switch (aggregation)
-            {               
-                case "weekly":
-                    // Weekly aggregation of ncdc data requires daily summed values.
-                    aggregatedValues = SumWeeklyValues(out errorMsg, dateFormat, data);
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                    break;
+            {
                 case "monthly":
                     // Monthly aggregation of ncdc data requires daily summed values.
                     aggregatedValues = SumMonthlyValues(out errorMsg, dateFormat, data);
@@ -297,58 +292,5 @@ namespace Precipitation
             }
             return dict;
         }
-
-        /// <summary>
-        /// Sums the values for each recorded value to return a dictionary of weekly summed values.
-        /// Requires summing of daily values first.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        private Dictionary<string, double> SumWeeklyValues(out string errorMsg, string dateFormat, Dictionary<string, double> dailyData)
-        {
-            errorMsg = "";
-            Dictionary<string, double> dict = new Dictionary<string, double>();
-            DateTime iDate;
-            DateTime newDate;
-            DateTime.TryParseExact(dailyData.Keys.ElementAt(0), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
-            double sum = 0.0;
-            int week = 0;
-            for (int i = 0; i < dailyData.Count; i++)
-            {
-                DateTime.TryParseExact(dailyData.Keys.ElementAt(i), new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out iDate);
-                int dayDif = (int)(iDate - newDate).TotalDays;
-                if (dayDif >= 7)
-                {
-                    dict.Add(newDate.ToString(dateFormat), sum);
-                    newDate = iDate;
-                    sum = dailyData[dailyData.Keys.ElementAt(i)];
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-                else
-                {
-                    week++;
-                    double addition = dailyData[dailyData.Keys.ElementAt(i)];
-                    if (sum < 0)
-                    {
-                        sum = 0;
-                    }
-                    if (addition < 0)
-                    {
-                        sum = addition;
-                    }
-                    else
-                    {
-                        sum += addition;
-                    }
-
-                    sum += addition;
-                    if (errorMsg.Contains("ERROR")) { return null; }
-                }
-            }
-            return dict;
-        }
-
-
     }
 }

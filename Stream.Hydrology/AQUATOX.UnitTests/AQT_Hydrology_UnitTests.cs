@@ -24,7 +24,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             string path = System.Environment.CurrentDirectory;
             string path2 = path +"../../../../../AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
 
             new AQTVolumeModel(ref json, out errmsg, false);
@@ -37,7 +37,7 @@ namespace StreamHydrologyAQUATOXUnitTest
         {
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "../../../../../AQUATOX/TEST/INVALID/AQUATOX_Model_NoSV.JSON";
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
 
             AQTVolumeModel AQTM = new AQTVolumeModel(ref json, out errmsg, false);
@@ -46,7 +46,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             Assert.AreNotEqual("", errmsg);
 
             path2 = path + "../../../../../AQUATOX/TEST/INVALID/AQUATOX_Model_NoPSETUP.JSON";
-            json = File.ReadAllText(path2);
+            json = GetTestFile(path2);
             errmsg = "";
 
             AQTM = new AQTVolumeModel(ref json, out errmsg, false);
@@ -62,7 +62,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             string path = System.Environment.CurrentDirectory;
             string path2 = path + "../../../../../AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON";
 
-            string json = File.ReadAllText(path2);
+            string json = GetTestFile(path2);
             string errmsg = "";
 
             AQTVolumeModel AQTM = new AQTVolumeModel(ref json, out errmsg, false);
@@ -71,7 +71,7 @@ namespace StreamHydrologyAQUATOXUnitTest
             Assert.AreEqual("", errmsg);
 
             path2 = path + "../../../../../AQUATOX/TEST/INVALID/AQUATOX_NOSV_Volume.JSON";
-            json = File.ReadAllText(path2);
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTVolumeModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
@@ -79,13 +79,38 @@ namespace StreamHydrologyAQUATOXUnitTest
             Assert.AreNotEqual("", errmsg);
 
             path2 = path + "../../../../../AQUATOX/TEST/INVALID/AQUATOX_NoLocale.JSON";
-            json = File.ReadAllText(path2);
+            json = GetTestFile(path2);
             errmsg = "";
             AQTM = new AQTVolumeModel(ref json, out errmsg, false);
             errmsg = AQTM.CheckDataRequirements();
 
             Assert.AreNotEqual("", errmsg);
 
+        }
+
+        private string GetTestFile(string filePath)
+        {
+            string path = System.Environment.CurrentDirectory;
+            string path2 = Path.Combine(path, filePath);
+            string json;
+            try
+            {
+                json = File.ReadAllText(path2);
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                var fileName = filePath.Split("\\");
+                path2 = "/home/travis/build/quanted/hms/Stream.Hydrology/";
+                foreach (string p in fileName)
+                {
+                    if (!p.Equals(".."))
+                    {
+                        path2 = Path.Combine(path2, p);
+                    }
+                }
+                json = File.ReadAllText(path2);
+            }
+            return json;
         }
 
 

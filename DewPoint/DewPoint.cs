@@ -45,7 +45,7 @@ namespace DewPoint
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "prism":
                     // PRISM dew point temperature Data call

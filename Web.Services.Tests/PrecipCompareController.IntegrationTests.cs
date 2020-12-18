@@ -224,7 +224,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
             string endpoint = "api/workflow/precip_compare";
             PrecipitationCompareInput input = JsonSerializer.Deserialize<PrecipitationCompareInput>(precipInputString, options);
             Debug.WriteLine("Integration Test: Precipitation Compare controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

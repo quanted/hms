@@ -34,7 +34,7 @@ namespace Plants.AQUATOX.UnitTests
         public void AQT_Plants_Check_Data_Requirements()
         {
             string path = System.Environment.CurrentDirectory;
-            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_Valid_JSON.txt";
+            string filePath = "..\\..\\..\\..\\TEST\\AQUATOX_Plant_Model_Valid.JSON";
             string json = GetTestFile(filePath);
             string errmsg = "";
 
@@ -92,7 +92,18 @@ namespace Plants.AQUATOX.UnitTests
             catch (System.IO.FileNotFoundException)
             {
                 var fileName = filePath.Split("\\");
-                path2 = Path.Combine("/home/travis/build/quanted/hms/OrganicMatter/TEST/", fileName[fileName.Length - 1]);
+                path2 = "/home/travis/build/quanted/hms/Plants/";
+                foreach (string p in fileName)
+                {
+                    if (!p.Equals(".."))
+                    {
+                        path2 = Path.Combine(path2, p);
+                    }
+                }
+                if (!File.Exists(path2))
+                {
+                    path2 = Path.Combine("/home/travis/build/quanted/hms/Plants/", fileName[fileName.Length - 2], fileName[fileName.Length - 1]);
+                }
                 json = File.ReadAllText(path2);
             }
             return json;

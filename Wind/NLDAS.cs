@@ -41,11 +41,11 @@ namespace Wind
                 case "S/D":
                 case "SPEED/DIR":
                 case "SPEED/DIRECTION":
-                    CalculateWindspeedDir(false, output);
+                    CalculateWindspeedDir(false, output, input.DataValueFormat);
                     break;
                 case "ALL":
                 default:
-                    CalculateWindspeedDir(true, output);
+                    CalculateWindspeedDir(true, output, input.DataValueFormat);
                     break;
             }
             output.Dataset = "Wind";
@@ -56,9 +56,6 @@ namespace Wind
                 case "daily":
                     output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
                     break;
-                case "weekly":
-                    //output.Data = WeeklyAverage(out errorMsg, 23, 1.0, output, input);
-                    return output;
                 case "monthly":
                     output.Data = DailyAverage(out errorMsg, 23, 1.0, output, input);
                     output.Data = MonthlyAverage(out errorMsg, 23, 1.0, output, input);
@@ -137,7 +134,7 @@ namespace Wind
             if (errorMsg.Contains("ERROR")) { return; }
         }
 
-        private void CalculateWindspeedDir(bool all, ITimeSeriesOutput output)
+        private void CalculateWindspeedDir(bool all, ITimeSeriesOutput output, string format)
         {
 
             Dictionary<string, List<string>> timeseries = new Dictionary<string, List<string>>();
@@ -150,7 +147,7 @@ namespace Wind
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
                     //double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
                     //timeseries.Add(date, new List<string>() { vel.ToString("E3"), deg.ToString("N3") });
-                    timeseries.Add(date, new List<string>() { vel.ToString("E3") });
+                    timeseries.Add(date, new List<string>() { vel.ToString(format)});
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "speed";
@@ -167,7 +164,7 @@ namespace Wind
                     double vel = Math.Sqrt(Math.Pow(u, 2) + Math.Pow(v, 2));
                     //double deg = 180 + (180 / Math.PI) * Math.Atan2(u, v);
                     //timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), deg.ToString("N3") });
-                    timeseries.Add(date, new List<string>() { v.ToString("E3"), u.ToString("E3"), vel.ToString("E3"), });
+                    timeseries.Add(date, new List<string>() { v.ToString(format), u.ToString(format), vel.ToString(format), });
                 }
                 output.Metadata["column_1"] = "date";
                 output.Metadata["column_2"] = "meridional_wind";
@@ -276,7 +273,7 @@ namespace Wind
                     usum = usum / days;
                     vsum = vsum / days;
                     velsum = velsum / days;
-                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { usum.ToString(), vsum.ToString(), velsum.ToString() } );
+                    output1.Data.Add(newDate.ToString("yyyy-MM-dd HH"), new List<string>() { usum.ToString(input.DataValueFormat), vsum.ToString(input.DataValueFormat), velsum.ToString(input.DataValueFormat) } );
                     newDate = iDate;
                     usum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
                     vsum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1]);

@@ -122,8 +122,8 @@ namespace WatershedDelineation
             validList = lst;
 
             ITimeSeriesInputFactory inputFactory = new TimeSeriesInputFactory();
-            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyyHH:mm"));
-            input.Geometry.GeometryMetadata.Add("StreamFlowStartDate", input.DateTimeSpan.StartDate.ToString("MM/dd/yyyyHH:mm"));
+            input.Geometry.GeometryMetadata.Add("StreamFlowEndDate", input.DateTimeSpan.EndDate.ToString("MM/dd/yyyy HH:mm"));
+            input.Geometry.GeometryMetadata.Add("StreamFlowStartDate", input.DateTimeSpan.StartDate.ToString("MM/dd/yyyy HH:mm"));
 
             foreach (string com in validList)
             {
@@ -143,6 +143,7 @@ namespace WatershedDelineation
                 subIn.Geometry = tsGeometry;
                 subIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 subIn.Geometry.ComID = Convert.ToInt32(com);
+                subIn.TimeLocalized = false;
                 SubSurfaceFlow.SubSurfaceFlow sub = new SubSurfaceFlow.SubSurfaceFlow();
                 sub.Input = inputFactory.SetTimeSeriesInput(subIn, new List<string>() { "subsurfaceflow" }, out errorMsg);
                 subsurfaceFlow.Add(com, sub);
@@ -153,6 +154,7 @@ namespace WatershedDelineation
                 surfIn.Geometry = tsGeometry;
                 surfIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 surfIn.Geometry.ComID = Convert.ToInt32(com);
+                surfIn.TimeLocalized = false;
                 SurfaceRunoff.SurfaceRunoff runoff = new SurfaceRunoff.SurfaceRunoff();
                 runoff.Input = inputFactory.SetTimeSeriesInput(surfIn, new List<string>() { "surfacerunoff" }, out errorMsg);
                 surfaceFlow.Add(com, runoff);
@@ -163,29 +165,37 @@ namespace WatershedDelineation
                 preIn.Geometry.Point = Utilities.COMID.GetCentroid(Convert.ToInt32(com), out errorMsg);
                 preIn.Geometry.ComID = Convert.ToInt32(com);
                 preIn.Source = preIn.Geometry.GeometryMetadata["precipSource"];
+                preIn.TimeLocalized = false;
                 Precipitation.Precipitation precip = new Precipitation.Precipitation();
                 precip.Input = inputFactory.SetTimeSeriesInput(preIn, new List<string>() { "precipitation" }, out errorMsg);
                 precipitation.Add(com, precip);
             }
 
             object outputListLock = new object();
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
             List<string> precipError = new List<string>();
+            List<Task> precipTasks = new List<Task>();
             Parallel.ForEach(precipitation, options, (KeyValuePair<string, Precipitation.Precipitation> preF) =>
             {
-                string errorM = "";
-                int retries = 4;
-                while (retries > 0 && preF.Value.Output == null)
-                {
-                    preF.Value.GetData(out errorM);
-                    Interlocked.Decrement(ref retries);//retries -= 1;
-                }
-                lock (outputListLock)
-                {
-                    precipError.Add(errorM);
-                }
+                precipTasks.Add(GetPrecipitation(preF.Value));
             });
+            Task.WaitAll(precipTasks.ToArray());
+
+            //Parallel.ForEach(precipitation, options, (KeyValuePair<string, Precipitation.Precipitation> preF) =>
+            //{
+            //    string errorM = "";
+            //    int retries = 4;
+            //    while (retries > 0 && preF.Value.Output == null)
+            //    {
+            //        preF.Value.GetData(out errorM);
+            //        Interlocked.Decrement(ref retries);//retries -= 1;
+            //    }
+            //    lock (outputListLock)
+            //    {
+            //        precipError.Add(errorM);
+            //    }
+            //});
 
             string missingComs = "";
             foreach (string com in validList)
@@ -205,21 +215,28 @@ namespace WatershedDelineation
 
 
             List<string> surfaceError = new List<string>();
+            List<Task> surfaceTasks = new List<Task>();
             Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
             {
-                string errorM = "";
-                //surF.Value.GetData(out errorM);
-                int retries = 4;
-                while (retries > 0 && surF.Value.Output == null)
-                {
-                    surF.Value.GetData(out errorM);
-                    Interlocked.Decrement(ref retries); //retries -= 1;
-                }
-                lock (outputListLock)
-                {
-                    surfaceError.Add(errorM);
-                }
+                surfaceTasks.Add(GetRunoff(surF.Value));
             });
+            Task.WaitAll(surfaceTasks.ToArray());
+
+            //Parallel.ForEach(surfaceFlow, options, (KeyValuePair<string, SurfaceRunoff.SurfaceRunoff> surF) =>
+            //{
+            //    string errorM = "";
+            //    //surF.Value.GetData(out errorM);
+            //    int retries = 4;
+            //    while (retries > 0 && surF.Value.Output == null)
+            //    {
+            //        surF.Value.GetData(out errorM);
+            //        Interlocked.Decrement(ref retries); //retries -= 1;
+            //    }
+            //    lock (outputListLock)
+            //    {
+            //        surfaceError.Add(errorM);
+            //    }
+            //});
 
             foreach (string com in validList)
             {
@@ -235,21 +252,27 @@ namespace WatershedDelineation
             }
 
             List<string> subsurfaceError = new List<string>();
+            List<Task> subsurfaceTasks = new List<Task>();
             Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
             {
-                string errorM = "";
-                //subF.Value.GetData(out errorM);
-                int retries = 4;
-                while (retries > 0 && subF.Value.Output == null)
-                {                    
-                    subF.Value.GetData(out errorM);
-                    Interlocked.Decrement(ref retries);//retries -= 1;
-                }
-                lock (outputListLock)
-                {
-                    subsurfaceError.Add(errorM);
-                }
+                subsurfaceTasks.Add(GetBaseflow(subF.Value));
             });
+            Task.WaitAll(subsurfaceTasks.ToArray());
+            //Parallel.ForEach(subsurfaceFlow, options, (KeyValuePair<string, SubSurfaceFlow.SubSurfaceFlow> subF) =>
+            //{
+            //    string errorM = "";
+            //    //subF.Value.GetData(out errorM);
+            //    int retries = 4;
+            //    while (retries > 0 && subF.Value.Output == null)
+            //    {
+            //        subF.Value.GetData(out errorM);
+            //        Interlocked.Decrement(ref retries);//retries -= 1;
+            //    }
+            //    lock (outputListLock)
+            //    {
+            //        subsurfaceError.Add(errorM);
+            //    }
+            //});
 
             string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
             string baseURL = "";
@@ -492,7 +515,26 @@ namespace WatershedDelineation
             
             return ds;
         }
-        
+
+        public static Task GetPrecipitation(Precipitation.Precipitation p)
+        {
+            string errorMsg = "";
+            p.GetData(out errorMsg);
+            return Task.CompletedTask;
+        }
+
+        public static Task GetRunoff(SurfaceRunoff.SurfaceRunoff s)
+        {
+            string errorMsg = "";
+            s.GetData(out errorMsg);
+            return Task.CompletedTask;
+        }
+        public static Task GetBaseflow(SubSurfaceFlow.SubSurfaceFlow s)
+        {
+            string errorMsg = "";
+            s.GetData(out errorMsg);
+            return Task.CompletedTask;
+        }
         private static PointCoordinate GetCatchmentCentroid(out string errorMsg, int comid)
         {
             errorMsg = "";

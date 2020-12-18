@@ -17,14 +17,14 @@ namespace Precipitation
         /// <param name="input"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (!validInputs) { return null; }
 
             Data.Source.Daymet daymet = new Data.Source.Daymet();
-            string data = daymet.GetData(out errorMsg, "Precip", input);
+            string data = daymet.GetData(out errorMsg, "Precip", input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             ITimeSeriesOutput daymetOutput = output;
@@ -56,10 +56,6 @@ namespace Precipitation
                         
             switch (input.TemporalResolution)
             {
-                case "weekly":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 1.0, output, input);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 1.0, output, input);
                     output.Metadata.Add("column_2", "Monthly Total");

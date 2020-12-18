@@ -33,7 +33,6 @@ namespace Precipitation.Tests
         [Theory]
         [InlineData("hourly", "2015-01-01 01", 0.0)]
         [InlineData("daily", "2015-01-01 00", 0.5964)]
-        [InlineData("weekly", "2015-01-01 00", 43.1)]
         [InlineData("monthly", "2015-01-01 00", 76.34)]
         [InlineData("yearly", "2015-01-01 01", 1587)]
         public void TemporalAggregation(string aggregation, string date, double expected)
@@ -68,22 +67,6 @@ namespace Precipitation.Tests
             Assert.Equal(expected, Convert.ToDouble(dailyData[date][0]));
         }
 
-        [Trait("Priority", "1")]
-        [Theory]
-        [InlineData("2015-01-01 00", 43.1)]
-        [InlineData("2015-06-04 00", 19.4)]
-        [InlineData("2015-12-24 00", 136.6)]
-        public void WeeklyAggregatedSum(string date, double expected)
-        {
-            Precipitation precip = new Precipitation
-            {
-                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
-                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
-            };
-            string errorMsg = "";
-            Dictionary<string, List<string>> weeklyData = NLDAS.WeeklyAggregatedSum(out errorMsg, 1.0, precip.Output, precip.Input);
-            Assert.Equal(expected, Convert.ToDouble(weeklyData[date][0]));
-        }
 
         [Trait("Priority", "1")]
         [Theory]
@@ -138,23 +121,23 @@ namespace Precipitation.Tests
         const string invalidLonInput = "{\"Source\":\"nldas\",\"DateTimeSpan\":{\"StartDate\":\"2015-01-01T06:00:00\",\"EndDate\":\"2016-01-01T05:00:00\",\"DateTimeFormat\":\"yyyy-MM-dd HH\"},\"Geometry\":{\"Description\":\"EPA Athens Office\",\"Point\":{\"Latitude\":33.925673,\"Longitude\":70},\"GeometryMetadata\":{\"City\":\"Athens\",\"State\":\"Georgia\",\"Country\":\"United States\"},\"Timezone\":{\"Name\":\"EST\",\"Offset\":-5.0,\"DLS\":false}},\"DataValueFormat\":\"E3\",\"TemporalResolution\":\"default\",\"TimeLocalized\":true,\"Units\":\"default\",\"OutputFormat\":\"json\",\"BaseURL\":[\"http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_FORA0125_H.002:APCPsfc&location=NLDAS:\"],\"InputTimeSeries\":{}}";
         const string invalidLonError = "ERROR: Longitude is not valid.";
 
-        [Theory]
-        [InlineData(invalidStartDateInput, invalidStartDateError)]
-        [InlineData(invalidEndDateInput, invalidEndDateError)]
-        [InlineData(invalidLatInput, invalidLatError)]
-        [InlineData(invalidLonInput, invalidLonError)]
-        public void ValidateInput(string input, string errorMsg)
-        {
-            Precipitation precip = new Precipitation
-            {
-                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
-                Output = null
-            };
-            string error = "";
-            NLDAS nldas = new NLDAS();
-            precip.Output = nldas.GetData(out error, precip.Output, precip.Input);
-            Assert.Contains(errorMsg, error);
-        }
+        //[Theory]
+        //[InlineData(invalidStartDateInput, invalidStartDateError)]
+        //[InlineData(invalidEndDateInput, invalidEndDateError)]
+        //[InlineData(invalidLatInput, invalidLatError)]
+        //[InlineData(invalidLonInput, invalidLonError)]
+        //public void ValidateInput(string input, string errorMsg)
+        //{
+        //    Precipitation precip = new Precipitation
+        //    {
+        //        Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
+        //        Output = null
+        //    };
+        //    string error = "";
+        //    NLDAS nldas = new NLDAS();
+        //    precip.Output = nldas.GetData(out error, precip.Output, precip.Input);
+        //    Assert.Contains(errorMsg, error);
+        //}
 
         [Theory]
         [InlineData(8760)]

@@ -36,7 +36,7 @@ namespace Precipitation
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg)
+        public ITimeSeriesOutput GetData(out string errorMsg, int retries = 0)
         {
             errorMsg = "";
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
@@ -55,30 +55,30 @@ namespace Precipitation
                 if (errorMsg.Contains("ERROR")) { return null; }
             }
 
-            switch (this.Input.Source) {
+            switch (this.Input.Source.ToLower()) {
                 case "nldas":
                     // NLDAS Precipitation Data call
                     NLDAS nldas = new NLDAS();
-                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "gldas":
                     // GLDAS Precipitation Data call
                     GLDAS gldas = new GLDAS();
-                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "ncei":
                     // NCDC Precipitation Data call
                     NCDC ncdc = new NCDC();
-                    this.Output = ncdc.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = ncdc.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     this.Input.Source = "ncei";
                     break;
                 case "daymet":
                     // daymet Precipitation Data call
                     Daymet daymet = new Daymet();
-                    this.Output = daymet.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = daymet.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "wgen":
@@ -90,13 +90,13 @@ namespace Precipitation
                 case "prism":
                     // PRISM Precipitation Data call
                     PRISM prism = new PRISM();
-                    this.Output = prism.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = prism.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "trmm":
                     // TRMM Precipitation Data call
                     TRMM trmm = new TRMM();
-                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input);
+                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input, retries);
                     if(errorMsg.Contains("ERROR")) { return null; }
                     break;
 

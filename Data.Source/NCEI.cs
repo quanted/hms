@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace Data.Source
 {
@@ -22,11 +23,11 @@ namespace Data.Source
         /// <param name="dataTypeID"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public List<T> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
+        public List<T> GetData(out string errorMsg, string dataTypeID, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
 
-            List<T> data = DownLoadData(out errorMsg, dataTypeID, input);
+            List<T> data = DownLoadData(out errorMsg, dataTypeID, input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -39,7 +40,7 @@ namespace Data.Source
         /// <param name="dataset"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private List<T> DownLoadData(out string errorMsg, string dataTypeID, ITimeSeriesInput input)
+        private List<T> DownLoadData(out string errorMsg, string dataTypeID, ITimeSeriesInput input, int retries)
         {
             errorMsg = "";
 
@@ -59,7 +60,7 @@ namespace Data.Source
             string url = ConstructURL(out errorMsg, dataTypeID, stationID, input.BaseURL.First(), tempStartDate, tempEndDate);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string json = SendRequest(token, url, 0).Result;
+            string json = SendRequest(token, url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             List<T> data = new List<T>();
@@ -73,7 +74,7 @@ namespace Data.Source
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,                       
                         IgnoreNullValues = true
                     };
-                    options.Converters.Add(new Utilities.DoubleConverter());
+                    options.Converters.Add(new Utilities.JSON.DoubleConverter());
                     data = JsonSerializer.Deserialize<List<T>>(json, options);
                 }
                 catch (System.Text.Json.JsonException ex)
@@ -101,6 +102,12 @@ namespace Data.Source
             {
                 sb.Append(baseURL);
                 station = station.Remove(0, 6);
+                sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=json" + "&includeAttributes=true" + "&units=metric");
+            }
+            else if (!station.Contains(":"))
+            {
+                // Assuming that the station type is GHCND
+                sb.Append(baseURL);
                 sb.Append("dataset=daily-summaries" + "&dataTypes=" + dataTypeID + "&stations=" + station + "&startDate=" + startDate.ToString("yyyy-MM-dd") + "&endDate=" + endDate.ToString("yyyy-MM-dd") + "&format=json" + "&includeAttributes=true" + "&units=metric");
             }
             else
@@ -179,7 +186,10 @@ namespace Data.Source
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-
+            if (!stationID.Contains(":"))
+            {
+                stationID = "GHCND:" + stationID;
+            }
             url = url + stationID;
             if (String.IsNullOrWhiteSpace(token))
             {

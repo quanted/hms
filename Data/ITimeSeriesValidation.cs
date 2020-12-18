@@ -13,7 +13,7 @@ namespace Data
         static protected string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
-            "temperature", "wind", "dewpoint", "humidity"
+            "temperature", "wind", "dewpoint", "humidity", "streamflow"
         };
 
         static protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
@@ -31,16 +31,17 @@ namespace Data
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei" },
-            ["workflow"] = new List<string> { "nldas", "gldas", "ncei", "daymet" },
+            ["workflow"] = new List<string> { "streamflow" },
             ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
             ["dewpoint"] = new List<string> { "prism" },
             ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
-            ["surfacepressure"] = new List<string> { "gldas" }
+            ["surfacepressure"] = new List<string> { "gldas" },
+            ["streamflow"] = new List<string> {"nwis", "usgs", "streamgauge"},
         };
 
         static protected string[] validRemoteData =
         {
-            "nldas", "gldas", "trmm", "ncei", "daymet", "prism"
+            "nldas", "gldas", "trmm", "ncei", "daymet", "prism", "nwis"
         };
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace Data
 
             if (errors.Count == 0 && ValidateSource(out errorTemp, dataset, input.Source))
             {
-                validInput.Source = input.Source;
+                validInput.Source = input.Source.ToLower();
             }
             errors = errors.Concat(errorTemp).ToList();
             errorTemp = new List<string>();

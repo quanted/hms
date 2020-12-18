@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Web.Services.Models;
+using System.Text.Json;
 
 namespace Web.Services.Controllers
 {
@@ -75,6 +76,7 @@ namespace Web.Services.Controllers
             PrecipitationCompareInput example = new PrecipitationCompareInput()
             {
                 Dataset = "Precipitation",
+                Source = "compare",
                 SourceList = new List<String>() { "nldas", "gldas" },
                 Weighted = true,
                 DateTimeSpan = new DateTimeSpan()
@@ -85,7 +87,8 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = 1053791
+                    ComID = 1053791,
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
@@ -110,6 +113,7 @@ namespace Web.Services.Controllers
             PrecipitationExtractionInput example = new PrecipitationExtractionInput()
             {
                 Dataset = "Precipitation",
+                Source = "extraction",
                 SourceList = new List<String>() { "ncei", "nldas" },
                 DateTimeSpan = new DateTimeSpan()
                 {
@@ -119,7 +123,7 @@ namespace Web.Services.Controllers
                 },
                 Geometry = new TimeSeriesGeometry()
                 {
-                    ComID = 1053791
+                    StationID = "GHCND:USW00013874"
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
@@ -165,6 +169,12 @@ namespace Web.Services.Controllers
                 var exceptionLog = Log.ForContext("Type", "exception");
                 exceptionLog.Fatal(ex.Message);
                 exceptionLog.Fatal(ex.StackTrace);
+                JsonSerializerOptions options = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(precipCompareInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
@@ -197,6 +207,12 @@ namespace Web.Services.Controllers
                 var exceptionLog = Log.ForContext("Type", "exception");
                 exceptionLog.Fatal(ex.Message);
                 exceptionLog.Fatal(ex.StackTrace);
+                JsonSerializerOptions options = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(precipExtractInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

@@ -1,24 +1,19 @@
 language: csharp
-dotnet: 3.0
-dist: xenial
+dotnet: 3.1.202
 mono: latest
 solution: HMS.sln
+sudo: required
+before_install:
+  - sudo apt-get install nuget
+install:
+  - dotnet sln remove GUI/GUI.AQUATOX
+  - dotnet sln remove GUI/GUI.AQUATOX.Electron
+  - dotnet sln remove GUI/GUI.AQUATOX.Workflow
+  - dotnet restore HMS.sln
 before_depoly:
  - cd ~
 script:
- - "travis_wait 30 sleep 1800 &"
- - rm docker-compose.*
- - dotnet restore
- - dotnet build -c Release Data/
- - dotnet build -c Release Data.Simulate.AQUATOX/
  - dotnet build -c Release HMS.sln
- - dotnet build -c Release Web.Services/
  - sudo mkdir /app
  - sudo cp -r Web.Services/App_Data /app/App_Data
- - dotnet test Data.Tests/Data.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet test Precipitation.Tests/Precipitation.Tests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet test OrganicMatter/OrganicMatter.AQUATOX.UnitTests/OrganicMatter.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet test Stream.Hydrology/AQUATOX.UnitTests/Stream.Hydrology.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet test Nutrients/Nutrients.AQUATOX.UnitTests/Nutrients.AQUATOX.UnitTests.csproj -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
- - dotnet tool install coveralls.net --version 1.0.0 --tool-path ~/tools
- #- ~/tools/csmacnz.Coveralls --multiple -i "opencover=Precipitation.Tests/coverage.opencover.xml;opencover=Data.Tests/coverage.opencover.xml;opencover=OrganicMatter/OrganicMatter.AQUATOX.UnitTests/coverage.opencover.xml;opencover=Stream.Hydrology/AQUATOX.UnitTests/coverage.opencover.xml;opencover=Nutrients/Nutrients.AQUATOX.UnitTests/coverage.opencover.xml" --repoToken $COVERALLS_REPO_TOKEN --commitId $TRAVIS_COMMIT --commitBranch $TRAVIS_BRANCH --commitMessage "$REPO_COMMIT_MESSAGE" --jobId $TRAVIS_JOB_ID --serviceName "travis-ci"
+ - travis_wait 30 dotnet test HMS.sln -c Release --collect:"Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover

@@ -54,7 +54,7 @@ namespace Web.Services.Tests
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             string endpoint = "api/meteorology/dewpoint";
             DewPointInput input = JsonSerializer.Deserialize<DewPointInput>(inputString, options);
             Debug.WriteLine("Integration Test: Dew Point controller; Endpoint: " + endpoint + "; Data source: " + input.Source);

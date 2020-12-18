@@ -328,7 +328,8 @@ namespace Evapotranspiration
                 double tmin = Convert.ToDouble(timeseries.Value[1]);
                 double tmax = Convert.ToDouble(timeseries.Value[0]);
                 double tmean = Convert.ToDouble(timeseries.Value[2]);
-                double rad = ((Convert.ToDouble(timeseries.Value[3]) + Convert.ToDouble(timeseries.Value[4])) / 2) * 0.0864;
+                //double rad = ((Convert.ToDouble(timeseries.Value[3]) + Convert.ToDouble(timeseries.Value[4])) / 2) * 0.0864;
+                double rad = Convert.ToDouble(timeseries.Value[3]);
                 double petHargreaves = 0.0;
                 int jday = ++julianday;
 
@@ -340,7 +341,8 @@ namespace Evapotranspiration
                 timeseries.Value[1] = tmax.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[2] = tmean.ToString("F2", CultureInfo.InstalledUICulture);
                 timeseries.Value[3] = rad.ToString("F2", CultureInfo.InstalledUICulture);
-                timeseries.Value[4] = petHargreaves.ToString("F4", CultureInfo.InvariantCulture);//timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
+                //timeseries.Value[4] = petHargreaves.ToString("F4", CultureInfo.InvariantCulture);//
+                timeseries.Value.Add(petHargreaves.ToString("F4", CultureInfo.InvariantCulture));
             }
             gldasTempOutput.Dataset = "Evapotranspiration";
             gldasTempOutput.DataSource = "hargreaves";

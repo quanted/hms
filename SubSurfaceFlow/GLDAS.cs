@@ -54,25 +54,9 @@ namespace SubSurfaceFlow
                     output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 3.0, output, input, false);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
-                case "daily-avg":
-                    output.Data = NLDAS.DailyAggregatedSum(out errorMsg, 3.0, output, input, true);
-                    output.Metadata.Add("column_2", "Daily Average");
-                    return output;
-                case "weekly":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 3.0, output, input, false);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
-                case "weekly-avg":
-                    output.Data = NLDAS.WeeklyAggregatedSum(out errorMsg, 3.0, output, input, true);
-                    output.Metadata.Add("column_2", "Weekly Average");
-                    return output;
                 case "monthly":
                     output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 3.0, output, input, false);
                     output.Metadata.Add("column_2", "Monthly Total");
-                    return output;
-                case "monthly-avg":
-                    output.Data = NLDAS.MonthlyAggregatedSum(out errorMsg, 3.0, output, input, true);
-                    output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? NLDAS.UnitConversion(out errorMsg, 3.0, output, input) : output.Data;

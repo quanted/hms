@@ -12,6 +12,13 @@ namespace Data.Source
     public class Daymet
     {
 
+        private DateTime temporalStart = new DateTime(1980, 1, 1);          // Daymet temporal coverage start date.
+        private DateTime temporalEnd = new DateTime(DateTime.UtcNow.Year, 12, 31).AddYears(-1);      // Daymet temporal coverage end date (approximate)
+        private double maxLat = 52.0;                                       // Daymet spatial coverage max latitude
+        private double minLat = 14.5;                                       // Daymet spatial coverage min latitude
+        private double maxLng = -53.0;                                      // Daymet spatial coverage max longitude
+        private double minLng = -131.0;                                     // Daymet spatial coverage min longitude
+
         /// <summary>
         /// GetData function for Daymet base class.
         /// </summary>
@@ -19,17 +26,57 @@ namespace Data.Source
         /// <param name="dataSet"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataSet, ITimeSeriesInput input)
+        public string GetData(out string errorMsg, string dataSet, ITimeSeriesInput input, int retries = 0)
         {
             errorMsg = "";
+
+            if (!this.ValidateInput(out errorMsg, input))
+            {
+                return null;
+            }
 
             string url = ConstructURL(out errorMsg, dataSet, input);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-            string data = DownloadData(url, 0).Result;
+            string data = DownloadData(url, retries).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
+        }
+
+        private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            StringBuilder errors = new StringBuilder();
+            bool valid = true;
+            // Temporal validation
+            if (input.DateTimeSpan.StartDate < this.temporalStart)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid start date, Daymet temporal coverage starts at " + this.temporalStart.ToString("yyyy-MM-dd") + ", entered start date is " + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            if (input.DateTimeSpan.EndDate > this.temporalEnd)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid end date, Daymet temporal coverage ends at " + this.temporalEnd.ToString("yyyy-MM-dd") + ", entered end date is " + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd") + ", ");
+            }
+            // Spatial calidation
+            if (input.Geometry.Point.Latitude < this.minLat || input.Geometry.Point.Latitude > this.maxLat)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid latitude, Daymet spatial coverage is between latitudes " + this.minLat.ToString() + " and " + this.maxLat.ToString() + ", entered latitude is " + input.Geometry.Point.Latitude.ToString() + ", ");
+            }
+            if (input.Geometry.Point.Longitude < this.minLng || input.Geometry.Point.Longitude > this.maxLng)
+            {
+                valid = false;
+                errors.Append("ERROR: Invalid longitude, Daymet spatial coverage is between longitude " + this.minLng.ToString() + " and " + this.maxLng.ToString() + ", entered longitude is " + input.Geometry.Point.Longitude.ToString() + ", ");
+            }
+
+            if (!valid)
+            {
+                errorMsg = errors.ToString();
+            }
+            return valid;
         }
 
         /// <summary>

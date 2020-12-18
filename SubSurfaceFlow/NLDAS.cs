@@ -59,25 +59,9 @@ namespace SubSurfaceFlow
                     output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input, false);
                     output.Metadata.Add("column_2", "Daily Total");
                     return output;
-                case "daily-avg":
-                    output.Data = DailyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("column_2", "Daily Average");
-                    return output;
-                case "weekly":
-                    output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input, false);
-                    output.Metadata.Add("column_2", "Weekly Total");
-                    return output;
-                case "weekly-avg":
-                    output.Data = WeeklyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("column_2", "Weekly Average");
-                    return output;
                 case "monthly":
                     output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input, false);
                     output.Metadata.Add("column_2", "Monthly Total");
-                    return output;
-                case "monthly-avg":
-                    output.Data = MonthlyAggregatedSum(out errorMsg, 1.0, output, input, true);
-                    output.Metadata.Add("column_2", "Monthly Average");
                     return output;
                 default:
                     output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, 1.0, output, input) : output.Data;
@@ -138,47 +122,6 @@ namespace SubSurfaceFlow
                 string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length - 1) + ":00:00";
                 DateTime.TryParse(dateString, out date);
                 if (date.Day != iDate.Day)
-                {
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum / avg).ToString(input.DataValueFormat) });
-                    iDate = date;
-                    sum = Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                    avg = 0.0;
-                }
-                else
-                {
-                    sum += Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]);
-                }
-            }
-            return tempData;
-        }
-
-        /// <summary>
-        /// Weekly aggregated sums for subsurfaceflow data.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
-        public static Dictionary<string, List<string>> WeeklyAggregatedSum(out string errorMsg, double modifier, ITimeSeriesOutput output, ITimeSeriesInput input, bool averages)
-        {
-            errorMsg = "";
-
-            DateTime iDate = new DateTime();
-            double sum = 0.0;
-            double avg = 0.0;
-            // Unit conversion coefficient
-            double unit = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
-
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length - 1) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            for (int i = 0; i < output.Data.Count; i++)
-            {
-                avg = (averages == true) ? avg++ : 1.0;
-                DateTime date = new DateTime();
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
-                DateTime.TryParse(dateString, out date);
-                int dayDif = (int)(date - iDate).TotalDays;
-                if (dayDif >= 7)
                 {
                     tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>() { (modifier * unit * sum / avg).ToString(input.DataValueFormat) });
                     iDate = date;

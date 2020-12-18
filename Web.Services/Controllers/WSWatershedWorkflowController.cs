@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Services.Models;
+using System.Text.Json;
 
 namespace Web.Services.Controllers
 {
@@ -52,6 +53,26 @@ namespace Web.Services.Controllers
         {
             return this;
         }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDaily(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
+
+        ITimeSeriesOutput ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDefault(string valueFormat)
+        {
+            throw new NotImplementedException();
+        }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToHourly(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
+
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToMonthly(string dateFormat, bool avg)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -69,7 +90,7 @@ namespace Web.Services.Controllers
         {
             WatershedWorkflowInput example = new WatershedWorkflowInput()
             {
-                Source = "nldas",
+                Source = "streamflow",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2014, 07, 01),
@@ -83,12 +104,7 @@ namespace Web.Services.Controllers
                     {
                         { "precipSource", "daymet"}
                     },
-                    Timezone = new Timezone()
-                    {
-                        Name = "EST",
-                        Offset = -5,
-                        DLS = false
-                    }
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
@@ -132,9 +148,19 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
+
+
+                Log.Information("Exception caught processing request to /workflow/watershed/, review exception log file for details.");
                 var exceptionLog = Log.ForContext("Type", "exception");
-                exceptionLog.Fatal(ex.Message);
+                exceptionLog.Fatal(workflowInput.ToString());
+                exceptionLog.Fatal(ex.Message); 
                 exceptionLog.Fatal(ex.StackTrace);
+                JsonSerializerOptions options = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(workflowInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

@@ -48,16 +48,16 @@ namespace Temperature
             output.Metadata.Add("daymet_temporalresolution", input.TemporalResolution);
 
             output.Metadata["daymet_unit"] = (input.Units.Contains("imperial")) ? "F" : "K";
-            //output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, false, output, input) : UnitConversion(out errorMsg, true, output, input);
+            output.Data = (input.Units.Contains("imperial")) ? UnitConversion(out errorMsg, false, output, input) : UnitConversion(out errorMsg, true, output, input);
 
             output.Metadata.Add("column_1", "date");
             output.Metadata.Add("column_4", "Avg Temp");
             switch (input.TemporalResolution)
             {
-                case "weekly":
-                    output.Data = WeeklyAverage(out errorMsg, output, input);
-                    output.Metadata.Add("column_4", "Avg Temp");
-                    return output;
+                //case "weekly":
+                //    output.Data = WeeklyAverage(out errorMsg, output, input);
+                //    output.Metadata.Add("column_4", "Avg Temp");
+                //    return output;
                 case "monthly":
                     output.Data = MonthlyAverage(out errorMsg, output, input);
                     output.Metadata.Add("column_2", "Avg Max Temp");
@@ -202,40 +202,40 @@ namespace Temperature
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> WeeklyAverage(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
-        {
-            errorMsg = "";
-            Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
-            DateTime iDate = new DateTime();
-            string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
-            DateTime.TryParse(dateString0, out iDate);
-            double sum = 0.0;
-            for (int i = 0; i < output.Data.Count; i++)
-            {
-                DateTime date = new DateTime();
-                string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
-                DateTime.TryParse(dateString, out date);
-                int dayDif = (int)(date - iDate).TotalDays;
-                if (dayDif >= 7)
-                {
-                    double wAverage = sum / 7.0;
-                    tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
-                    {
-                        { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
-                        { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
-                        { (wAverage).ToString(input.DataValueFormat) }
-                    });
-                    iDate = date;
-                    sum = (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
-                }
-                else
-                {
-                    sum += (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
-                }
-            }
+        //private Dictionary<string, List<string>> WeeklyAverage(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input)
+        //{
+        //    errorMsg = "";
+        //    Dictionary<string, List<string>> tempData = new Dictionary<string, List<string>>();
+        //    DateTime iDate = new DateTime();
+        //    string dateString0 = output.Data.Keys.ElementAt(0).ToString().Substring(0, output.Data.Keys.ElementAt(0).ToString().Length) + ":00:00";
+        //    DateTime.TryParse(dateString0, out iDate);
+        //    double sum = 0.0;
+        //    for (int i = 0; i < output.Data.Count; i++)
+        //    {
+        //        DateTime date = new DateTime();
+        //        string dateString = output.Data.Keys.ElementAt(i).ToString().Substring(0, output.Data.Keys.ElementAt(i).ToString().Length) + ":00:00";
+        //        DateTime.TryParse(dateString, out date);
+        //        int dayDif = (int)(date - iDate).TotalDays;
+        //        if (dayDif >= 7)
+        //        {
+        //            double wAverage = sum / 7.0;
+        //            tempData.Add(iDate.ToString(input.DateTimeSpan.DateTimeFormat), new List<string>()
+        //            {
+        //                { (output.Data[output.Data.Keys.ElementAt(i)][0]) },
+        //                { (output.Data[output.Data.Keys.ElementAt(i)][1]) },
+        //                { (wAverage).ToString(input.DataValueFormat) }
+        //            });
+        //            iDate = date;
+        //            sum = (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
+        //        }
+        //        else
+        //        {
+        //            sum += (Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][0]) + Convert.ToDouble(output.Data[output.Data.Keys.ElementAt(i)][1])) / 2;
+        //        }
+        //    }
 
-            return tempData;
-        }
+        //    return tempData;
+        //}
 
         /// <summary>
         /// Monthly averages for daymet temperature data. Calculated from sum of (daily max + daily min)/2 divided by lenght of Month.

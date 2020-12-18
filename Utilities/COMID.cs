@@ -1,5 +1,6 @@
 ﻿using Data;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Utilities
 {
@@ -8,7 +9,8 @@ namespace Utilities
         public static PointCoordinate GetCentroid(int comid, out string errorMsg)
         {
             errorMsg = "";
-            string dbPath = "./App_Data/catchments.sqlite";
+            //string dbPath = "./App_Data/catchments.sqlite";
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
             string query = "SELECT CentroidLatitude, CentroidLongitude FROM PlusFlowlineVAA WHERE ComID = " + comid.ToString();
             Dictionary<string, string> centroidDict = Utilities.SQLite.GetData(dbPath, query);
             if (centroidDict.Count == 0)

@@ -23,24 +23,7 @@ namespace Utilities
             ITimeSeriesOutput result = new TimeSeriesOutput();
             result = primary.Clone();
 
-            if (!secondary.Metadata.ContainsKey(secondary.DataSource + "_ERROR"))
-            {
-                result.DataSource = result.DataSource + ", " + secondary.DataSource;
-
-                int columns = primary.Data[primary.Data.Keys.ElementAt(0)].Count();
-                if (!result.Metadata.ContainsKey("column_" + (columns + 2)))
-                {
-                    result.Metadata.Add("column_" + (columns + 2), secondary.DataSource);
-                }
-            }
-            // Copies keys from secondary into primary.
-            foreach (string key in secondary.Metadata.Keys)
-            {
-                if (!result.Metadata.ContainsKey(key) && !key.Contains("column"))
-                {
-                    result.Metadata.Add(key, secondary.Metadata[key]);
-                }
-            }
+            int columns0 = primary.Data[primary.Data.Keys.ElementAt(0)].Count();
 
             // Assumption: secondary timeseries only has a single value for each date/data entry.
             // Merges data values for each date key in secondary into primary.
@@ -56,7 +39,27 @@ namespace Utilities
                     }
                 }
             }
+            int columns1 = primary.Data[primary.Data.Keys.ElementAt(0)].Count();
+            if (columns1 > columns0)
+            {
+                if (!secondary.Metadata.ContainsKey(secondary.DataSource + "_ERROR"))
+                {
+                    result.DataSource = result.DataSource + ", " + secondary.DataSource;
 
+                    if (!result.Metadata.ContainsKey("column_" + (columns0 + 2)))
+                    {
+                        result.Metadata.Add("column_" + (columns0 + 2), secondary.DataSource);
+                    }
+                }
+                // Copies keys from secondary into primary.
+                foreach (string key in secondary.Metadata.Keys)
+                {
+                    if (!result.Metadata.ContainsKey(key) && !key.Contains("column"))
+                    {
+                        result.Metadata.Add(key, secondary.Metadata[key]);
+                    }
+                }
+            }
             return result;
         }
 

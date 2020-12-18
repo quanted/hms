@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Threading.Tasks;
 using Web.Services.Models;
+using System.Text.Json;
 
 namespace Web.Services.Controllers
 {
@@ -45,7 +46,8 @@ namespace Web.Services.Controllers
                     {
                         Latitude = 33.925673,
                         Longitude = -83.355723
-                    }
+                    },
+                    Timezone = null
                 },
                 DataValueFormat = "E3",
                 TemporalResolution = "default",
@@ -99,6 +101,12 @@ namespace Web.Services.Controllers
                 var exceptionLog = Log.ForContext("Type", "exception");
                 exceptionLog.Fatal(ex.Message);
                 exceptionLog.Fatal(ex.StackTrace);
+                JsonSerializerOptions options = new JsonSerializerOptions()
+                {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(precipInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

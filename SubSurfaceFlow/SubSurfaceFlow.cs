@@ -60,7 +60,7 @@ namespace SubSurfaceFlow
                 this.Input.TimeLocalized = false;
             }
 
-            switch (this.Input.Source)
+            switch (this.Input.Source.ToLower())
             {
                 case "nldas":
                     // NLDAS SubSurfaceFlow Data call

@@ -81,7 +81,6 @@ namespace Precipitation.Tests
         [Trait("Priority", "1")]
         [Theory]
         [InlineData("", "2015-01-01 00", 0)]
-        [InlineData("weekly", "2015-01-01 00", 21.89)]
         [InlineData("monthly", "2015-01-01 00", 88.84)]
         [InlineData("yearly", "2015-01-01 00", 1407)]
         public void TemporalAggregation(string aggregation, string date, double expected)
