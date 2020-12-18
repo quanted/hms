@@ -99,7 +99,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(146, 72);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(663, 23);
+            this.progressBar1.Size = new System.Drawing.Size(665, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -180,7 +180,7 @@ namespace GUI.AQUATOX
             this.SVListBox.ItemHeight = 15;
             this.SVListBox.Location = new System.Drawing.Point(459, 110);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(350, 364);
+            this.SVListBox.Size = new System.Drawing.Size(352, 364);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -335,7 +335,7 @@ namespace GUI.AQUATOX
             // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(826, 494);
+            this.ClientSize = new System.Drawing.Size(828, 496);
             this.Controls.Add(this.RunStatusLabel);
             this.Controls.Add(this.ButtonPanel);
             this.Controls.Add(this.panel1);
