@@ -16,7 +16,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="comid"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, object>> Get(string comid)
+        public async Task<Dictionary<string, object>> Get(string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false)
         {
             string errorMsg = "";
             
@@ -32,26 +32,59 @@ namespace Web.Services.Models
                 errorMsg = "ERROR: Unable to get catchment data for COMID: " + comid;
                 return this.Error(errorMsg);
             }
-            Dictionary<string, string> metadata = new Dictionary<string, string>();
+            Dictionary<string, string> metadata = Utilities.COMID.GetDbData(Convert.ToInt32(comid), out errorMsg);
             PointCoordinate centroid = Utilities.COMID.GetCentroid(Convert.ToInt32(comid), out errorMsg);
-            Dictionary<string, Dictionary<string, string>> nwisGauges;
-            if (centroid != null)
-            {
-                nwisGauges = catchment.GetNWISGauges(new List<double>() { centroid.Latitude, centroid.Longitude });
-                metadata.Add("catchment_centroid_latitude", centroid.Latitude.ToString());
-                metadata.Add("catchment_centroid_longitude", centroid.Longitude.ToString());
-            }
-            else
-            {
-               nwisGauges = catchment.GetNWISGauges();
-
-            }
-            Dictionary<string, object> streamcat = catchment.GetStreamcatData();
 
             Dictionary<string, object> result = new Dictionary<string, object>();
-            if(catchment.data != null) { result.Add("nhdplus", catchment.data); }
-            if(nwisGauges != null) { result.Add("nwisGauges", nwisGauges); }
-            if(streamcat != null) { result.Add("streamcat", streamcat); }
+
+            Dictionary<string, Dictionary<string, string>> nwisGauges;
+            if (nwis)
+            {
+                if (centroid != null)
+                {
+                    nwisGauges = catchment.GetNWISGauges(new List<double>() { centroid.Latitude, centroid.Longitude });
+                }
+                else
+                {
+                    nwisGauges = catchment.GetNWISGauges();
+
+                }
+                if (nwisGauges != null) { result.Add("nwisGauges", nwisGauges); }
+            }
+            if (geometry)
+            {
+                if (catchment.data != null) { result.Add("nhdplus", catchment.data); }
+            }
+            if (streamcat)
+            {
+                Dictionary<string, object> streamcatData = catchment.GetStreamcatData();
+
+                if (streamcatData != null) { result.Add("streamcat", streamcatData); }
+            }
+            if (streamGeometry && centroid != null)
+            {
+                result.Add("stream_geometry", catchment.GetStreamGeometry(centroid.Latitude, centroid.Longitude));
+            }
+            if (cn)
+            {
+                Data.Simulate.CurveNumber curveNumber = new Data.Simulate.CurveNumber();
+                Dictionary<int, double> cnValues = curveNumber.GetCN(out errorMsg, Convert.ToInt32(comid));
+                if (errorMsg.Contains("ERROR"))
+                {
+                    result.Add("curve_number", errorMsg);
+                }
+                else
+                {
+                    DateTime dt = new DateTime(2000, 1, 1);
+                    Dictionary<string, string> cnData = new Dictionary<string, string>();
+                    foreach (KeyValuePair<int, double> kv in cnValues) 
+                    {
+                        cnData.Add(dt.ToString("MM-dd"), kv.Value.ToString());
+                        dt = dt.AddDays(16);
+                    }
+                    result.Add("curve_number", cnData);
+                }
+            }
             result.Add("metadata", metadata);
 
             // Weather Station

@@ -24,12 +24,12 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid)
+        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false)
         {
             try
             {
                 WSCatchment catchment = new WSCatchment();
-                Dictionary<string, object> result = await catchment.Get(comid);
+                Dictionary<string, object> result = await catchment.Get(comid, streamcat, geometry, nwis, streamGeometry, cn);
                 return new ObjectResult(result);
             }
             catch (Exception ex)

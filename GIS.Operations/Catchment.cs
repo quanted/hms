@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
 using Serilog;
-
+using System.Net.Mime;
 
 namespace GIS.Operations
 {
@@ -130,10 +130,19 @@ namespace GIS.Operations
             return sb.ToString();
         }
 
-        private async Task<string> DownloadData(string url, int retries)
+        private async Task<string> DownloadData(string url, int retries, string requestData=null)
         {
             string data = "";
             HttpClient hc = new HttpClient();
+            HttpRequestMessage rm = new HttpRequestMessage()
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(url)
+            };
+            if(requestData != null)
+            {
+                rm.Content = new StringContent(requestData, Encoding.UTF8, "application/json");
+            }
             HttpResponseMessage wm = new HttpResponseMessage();
             int maxRetries = 10;
 
@@ -143,7 +152,7 @@ namespace GIS.Operations
 
                 while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    wm = await hc.GetAsync(url);
+                    wm = await hc.SendAsync(rm);
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();
@@ -197,6 +206,15 @@ namespace GIS.Operations
                 }
             }
             return stations;
+        }
+
+        public object GetStreamGeometry(double latitude, double longitude)
+        {
+            string url = "https://ofmpub.epa.gov/waters10/PointIndexing.Service";
+            string dataRequest = @"{'pGeometry': 'POINT(" + longitude + " " + latitude + ")', 'pGeometryMod': 'WKT,SRSNAME=urn:ogc:def:crs:OGC::CRS84', 'pPointIndexingMethod': 'DISTANCE', 'pPointIndexingMaxDist': 25, 'pOutputPathFlag': 'TRUE', 'pReturnFlowlineGeomFlag': 'TRUE', 'optOutCS': 'SRSNAME=urn:ogc:def:crs:OGC::CRS84', 'optOutPrettyPrint': 0}";
+            string data = this.DownloadData(url, 5, dataRequest).Result;
+            object streamData = JsonSerializer.Deserialize<object>(data);
+            return streamData;
         }
 
     }
