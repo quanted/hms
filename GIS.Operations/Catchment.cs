@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Serilog;
 using System.Net.Mime;
+using System.Net.Http.Json;
 
 namespace GIS.Operations
 {
@@ -53,7 +54,7 @@ namespace GIS.Operations
             this.url = this.BuildURL();
             try
             {
-                this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5).Result);
+                this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5, null).Result);
             }
             catch(JsonException js)
             {
@@ -130,7 +131,7 @@ namespace GIS.Operations
             return sb.ToString();
         }
 
-        private async Task<string> DownloadData(string url, int retries, string requestData=null)
+        private async Task<string> DownloadData(string url, int retries, Dictionary<string, object> requestData)
         {
             string data = "";
             HttpClient hc = new HttpClient();
@@ -141,7 +142,8 @@ namespace GIS.Operations
             };
             if(requestData != null)
             {
-                rm.Content = new StringContent(requestData, Encoding.UTF8, "application/json");
+                HttpContent content = JsonContent.Create(requestData);
+                rm.Content = content;
             }
             HttpResponseMessage wm = new HttpResponseMessage();
             int maxRetries = 10;
@@ -171,7 +173,7 @@ namespace GIS.Operations
                     Log.Warning("Error: Failed to download epa waters catchment geometry data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
-                    return this.DownloadData(url, retries).Result;
+                    return this.DownloadData(url, retries, requestData).Result;
                 }
                 wm.Dispose();
                 hc.Dispose();
@@ -187,7 +189,7 @@ namespace GIS.Operations
         public Dictionary<string, object> GetStreamcatData()
         {
             string scURL = "https://ofmpub.epa.gov/waters10/streamcat.jsonv25?pcomid=" + this.comid + "&pAreaOfInterest=Catchment%2FWatershed;Riparian%20Buffer%20(100m)&pLandscapeMetricType=Agriculture;Climate;Disturbance;Hydrology;Infrastructure;Land%20Cover;Lithology;Mines;Pollution;Riparian;Soils;Topography;Urban;Wetness&pLandscapeMetricClass=Disturbance;Natural&pFilenameOverride=AUTO";
-            string data = this.DownloadData(scURL, 5).Result;
+            string data = this.DownloadData(scURL, 5, null).Result;
             Streamcat sc = JsonSerializer.Deserialize<Streamcat>(data);
             return sc.output;
         }
@@ -211,8 +213,25 @@ namespace GIS.Operations
         public object GetStreamGeometry(double latitude, double longitude)
         {
             string url = "https://ofmpub.epa.gov/waters10/PointIndexing.Service";
-            string dataRequest = @"{'pGeometry': 'POINT(" + longitude + " " + latitude + ")', 'pGeometryMod': 'WKT,SRSNAME=urn:ogc:def:crs:OGC::CRS84', 'pPointIndexingMethod': 'DISTANCE', 'pPointIndexingMaxDist': 25, 'pOutputPathFlag': 'TRUE', 'pReturnFlowlineGeomFlag': 'TRUE', 'optOutCS': 'SRSNAME=urn:ogc:def:crs:OGC::CRS84', 'optOutPrettyPrint': 0}";
-            string data = this.DownloadData(url, 5, dataRequest).Result;
+            Dictionary<string, object> dataDict = new Dictionary<string, object>()
+            {
+                {"pGeometry", "POINT(" + longitude.ToString() + " " + latitude.ToString() + ")" },
+                {"pGeometryMod", "WKT,SRSNAME=urn:ogc:def:crs:OGC::CRS84" },
+                {"pPointIndexingMethod", "DISTANCE" },
+                {"pPointIndexingMaxDist", 25 },
+                {"pOutputPathFlag", "TRUE"},
+                {"pReturnFlowlineGeomFlag", "TRUE" },
+                {"optOutCS", "SRSNAME=urn:ogc:def:crs:OGC::CRS84" },
+                {"optOutPrettyPrint", 0 }
+            };
+            string dataRequest = JsonSerializer.Serialize<Dictionary<string, object>>(dataDict);
+            StringBuilder queryUrl = new StringBuilder(url + "?");
+            foreach(KeyValuePair<string, object> kv in dataDict)
+            {
+                queryUrl.Append(kv.Key + "=" + kv.Value.ToString() + "&");
+            }
+            queryUrl.Remove(queryUrl.Length - 1, 1);
+            string data = this.DownloadData(queryUrl.ToString(), 5, null).Result;
             object streamData = JsonSerializer.Deserialize<object>(data);
             return streamData;
         }
