@@ -26,7 +26,7 @@ namespace Web.Services.Models
             // Check comid
             if(comid is null) { return this.Error("ERROR: comid input is not valid."); }
 
-            GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid);
+            GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid, geometry);
             if (catchment.data is null || catchment.data.features.Count == 0)
             {
                 errorMsg = "ERROR: Unable to get catchment data for COMID: " + comid;

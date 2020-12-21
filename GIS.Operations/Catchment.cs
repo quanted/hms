@@ -48,18 +48,22 @@ namespace GIS.Operations
         public EPAWaters data;
 
 
-        public Catchment(string comid)
+        public Catchment(string comid, bool auto=true)
         {
             this.comid = comid;
             this.url = this.BuildURL();
-            try
+            this.data = null;
+            if (auto)
             {
-                this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5, null).Result);
-            }
-            catch(JsonException js)
-            {
-                Log.Warning("Error: Failed to load data from EPA waters. Message: ", js.Message);
-                this.data = null;
+                try
+                {
+                    this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5, null).Result);
+                }
+                catch (JsonException js)
+                {
+                    Log.Warning("Error: Failed to load data from EPA waters. Message: ", js.Message);
+                    this.data = null;
+                }
             }
         }
 
