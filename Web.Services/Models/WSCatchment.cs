@@ -27,11 +27,7 @@ namespace Web.Services.Models
             if(comid is null) { return this.Error("ERROR: comid input is not valid."); }
 
             GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid, geometry);
-            if (catchment.data is null || catchment.data.features.Count == 0)
-            {
-                errorMsg = "ERROR: Unable to get catchment data for COMID: " + comid;
-                return this.Error(errorMsg);
-            }
+
             Dictionary<string, string> metadata = Utilities.COMID.GetDbData(Convert.ToInt32(comid), out errorMsg);
             PointCoordinate centroid = Utilities.COMID.GetCentroid(Convert.ToInt32(comid), out errorMsg);
 
@@ -53,7 +49,14 @@ namespace Web.Services.Models
             }
             if (geometry)
             {
-                if (catchment.data != null) { result.Add("nhdplus", catchment.data); }
+                if (catchment.data is null || catchment.data.features.Count == 0)
+                {
+                    result.Add("nhdplus", "ERROR: Unable to get catchment data for COMID: " + comid);
+                }
+                else
+                {
+                    result.Add("nhdplus", catchment.data); 
+                }
             }
             if (streamcat)
             {
