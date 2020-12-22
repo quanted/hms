@@ -92,8 +92,8 @@ namespace Web.Services.Models
 
             // Weather Station
             // URLS to data sources (NLDAS, GLDAS), local or outside
-            // Flowlines TO/FROM comids from DB
-
+            // Add NWM short term forecast, from Time of Travel.
+            
             return result;
         }
 
