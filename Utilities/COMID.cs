@@ -43,5 +43,23 @@ namespace Utilities
             return dbData;
         }
 
+        public static Dictionary<string, object> GetGageID(int comid, out string errorMsg)
+        {
+            errorMsg = "";
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT * FROM GageInfo WHERE FLComID=" + comid.ToString() + " AND Active=1";
+            Dictionary<string, object> dbData = Utilities.SQLite.GetDataObject(dbPath, query);
+            return dbData;
+        }
+
+        public static Dictionary<string, object> GetGageInfo(string gageID, out string errorMsg)
+        {
+            errorMsg = "";
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT * FROM GageInfo WHERE GAGEID=" + gageID + " AND Active=1";
+            Dictionary<string, object> dbData = Utilities.SQLite.GetDataObject(dbPath, query);
+            return dbData;
+        }
+
     }
 }

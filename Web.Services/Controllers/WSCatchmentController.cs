@@ -24,7 +24,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false)
+        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, bool streamcat=false, bool geometry=false, bool nwis=false, bool streamGeometry=false, bool cn=false)
         {
             try
             {

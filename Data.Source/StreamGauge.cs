@@ -13,6 +13,18 @@ namespace Data.Source
     public class StreamGauge
     {
 
+        public Dictionary<string, Dictionary<string, string>> StationLookup(int gageID)
+        {
+            string url = ConstructLookupURL(gageID);
+            string data = DownloadData(url, 0).Result;
+            if(data == null)
+            {
+                return null;
+            }
+            Dictionary<string, Dictionary<string, string>> station = ParseStations(data);
+            return station;
+        }
+
         public Dictionary<string, Dictionary<string, string>> FindStation(Dictionary<string, double> bounds, bool search=false, double increase=0.0, double delta=0.1, double max=1.0)
         {
             if(increase >= max)
@@ -99,6 +111,38 @@ namespace Data.Source
         }
 
         /// <summary>
+        /// Constructs the url for searching for a nwis gauge station
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="componentInput"></param>
+        /// <returns></returns>
+        private static string ConstructLookupURL(int gageID)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(@"https://waterdata.usgs.gov/nwis/uv?");
+            sb.Append(@"search_site_no=" + gageID.ToString() + "&");
+            sb.Append(@"&search_site_no_match_type=anywhere&");
+            sb.Append(@"group_key=NONE&");
+            sb.Append(@"format=sitefile_output&");
+            sb.Append(@"sitefile_output_format=rdb&");
+            sb.Append(@"column_name=agency_cd&");
+            sb.Append(@"column_name=site_no&");
+            sb.Append(@"column_name=station_nm&");
+            sb.Append(@"column_name=site_tp_cd&");
+            sb.Append(@"column_name=dec_lat_va&");
+            sb.Append(@"column_name=dec_long_va&");
+            sb.Append(@"range_selection=days&");
+            sb.Append(@"period=7&");
+            sb.Append(@"begin_date=2020-12-09&");
+            sb.Append(@"end_date=2020-12-16&");
+            sb.Append(@"date_format=YYYY-MM-DD&");
+            sb.Append(@"rdb_compression=file&");
+            sb.Append(@"list_of_search_criteria=lat_long_bounding_box%2Crealtime_parameter_selection");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Constructs the url for retrieving usgs stream gauge as data based on the given parameters.
         /// </summary>
         /// <param name="errorMsg"></param>
@@ -117,7 +161,8 @@ namespace Data.Source
             StringBuilder sb = new StringBuilder();
             sb.Append(cInput.BaseURL[0]);
             sb.Append(@"search_site_no=" + stationID + "&");
-            sb.Append(@"search_site_no_match_type=exact&");
+            //sb.Append(@"search_site_no_match_type=exact&");
+            sb.Append(@"&search_site_no_match_type=anywhere&");
             sb.Append(@"group_key=NONE&");
             sb.Append(@"index_pmcode_00060=1&");
             sb.Append(@"sitefile_output_format=html_table&");

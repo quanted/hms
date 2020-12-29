@@ -70,8 +70,10 @@ namespace Data
         {
             if(this.Data.Count >= 2)
             {
+                var r = new Random();
+                int i = r.Next(this.Data.Count - 2);
                 List<DateTime> dates = Data.Keys.ToList();
-                return dates[1].Subtract(dates[0]);
+                return dates[i].Subtract(dates[i-1]);
             }
             else
             {

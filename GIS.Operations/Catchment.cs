@@ -165,7 +165,7 @@ namespace GIS.Operations
                     retries += 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(1000 * retries);
+                        Thread.Sleep(1000);
                     }
                 }
             }
@@ -176,7 +176,7 @@ namespace GIS.Operations
                     retries += 1;
                     Log.Warning("Error: Failed to download epa waters catchment geometry data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
-                    Thread.Sleep(5000 + (r.Next(10) * 1000));
+                    Thread.Sleep(1000);
                     return this.DownloadData(url, retries, requestData).Result;
                 }
                 wm.Dispose();
@@ -196,6 +196,14 @@ namespace GIS.Operations
             string data = this.DownloadData(scURL, 5, null).Result;
             Streamcat sc = JsonSerializer.Deserialize<Streamcat>(data);
             return sc.output;
+        }
+
+        public Dictionary<string, Dictionary<string, string>> GetNWISGauge(int gageID)
+        {
+            Data.Source.StreamGauge sg = new Data.Source.StreamGauge();
+            Dictionary<string, Dictionary<string, string>> station = sg.FindStation(this.GetBounds(), true, 0.0, 0.1, 1.0);
+
+            return station;
         }
 
         public Dictionary<string, Dictionary<string, string>> GetNWISGauges(List<double> coord = null)

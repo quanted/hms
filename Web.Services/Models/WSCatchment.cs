@@ -32,18 +32,34 @@ namespace Web.Services.Models
             PointCoordinate centroid = Utilities.COMID.GetCentroid(Convert.ToInt32(comid), out errorMsg);
 
             Dictionary<string, object> result = new Dictionary<string, object>();
-
             Dictionary<string, Dictionary<string, string>> nwisGauges;
+            if(errorMsg != "")
+            {
+                return this.Error(errorMsg);
+            }
+
             if (nwis)
             {
-                if (centroid != null)
-                {
-                    nwisGauges = catchment.GetNWISGauges(new List<double>() { centroid.Latitude, centroid.Longitude });
+                Dictionary<string, object> comidGages = Utilities.COMID.GetGageID(Convert.ToInt32(comid), out errorMsg);
+                if (comidGages != null) {
+                    Data.Source.StreamGauge sg = new Data.Source.StreamGauge();
+                    nwisGauges = sg.StationLookup(Convert.ToInt32(comidGages["GAGEID"]));
+                    nwisGauges.Add("metadata", Utilities.Converter.ConvertDict(comidGages));
                 }
                 else
                 {
-                    nwisGauges = catchment.GetNWISGauges();
-
+                    if (centroid != null)
+                    {
+                        nwisGauges = catchment.GetNWISGauges(new List<double>() { centroid.Latitude, centroid.Longitude });
+                    }
+                    else
+                    {
+                        nwisGauges = catchment.GetNWISGauges();
+                    }
+                    nwisGauges.Add("metadata", new Dictionary<string, string>()
+                        {
+                            {"NWIS_GAGE_NOTE", "Direct linkage between NWIS gage ID and NHDPlus catchment COMID was not found, gage determined from expanding bounds of catchment." }
+                        });                   
                 }
                 if (nwisGauges != null) { result.Add("nwisGauges", nwisGauges); }
             }
