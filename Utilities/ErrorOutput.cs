@@ -26,17 +26,17 @@ namespace Utilities
             throw new System.NotImplementedException();
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToHourly(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToHourly(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new System.NotImplementedException();
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToDaily(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToDaily(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new System.NotImplementedException();
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToMonthly(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<T>.ToMonthly(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new System.NotImplementedException();
         }

@@ -146,18 +146,23 @@ namespace Streamflow
             }
             nwisOutput.Metadata.Add("timeseries_timezone", input.TimeLocalized ? "local": "GMT");
             nwisOutput.Metadata.Add("nwis_data_url", data[1]);
+            if (!input.Geometry.GeometryMetadata.ContainsKey("fill"))
+            {
+                input.Geometry.GeometryMetadata["fill"] = "-9999";
+            }
+
             switch (input.TemporalResolution)
             {
                 case "hourly":
-                    nwisOutput.Data = nwisOutput.ToHourly("yyyy-MM-dd HH", true);
+                    nwisOutput.Data = nwisOutput.ToHourly("yyyy-MM-dd HH", input, true);
                     nwisOutput.Metadata.Add("temporal_resolution", "hourly");
                     break;
                 case "daily":
-                    nwisOutput.Data = nwisOutput.ToDaily("yyyy-MM-dd HH", true);
+                    nwisOutput.Data = nwisOutput.ToDaily("yyyy-MM-dd HH", input, true);
                     nwisOutput.Metadata.Add("temporal_resolution", "daily");
                     break;
                 case "monthly":
-                    nwisOutput.Data = nwisOutput.ToMonthly("yyyy-MM-dd HH", true);
+                    nwisOutput.Data = nwisOutput.ToMonthly("yyyy-MM-dd HH", input, true);
                     nwisOutput.Metadata.Add("temporal_resolution", "monthly");
                     break;
                 default:

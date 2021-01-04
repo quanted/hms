@@ -40,6 +40,15 @@ namespace Utilities
                     dbData.Add(kv.Key, kv.Value);
                 }
             }
+            string query3 = "SELECT * FROM elevslope WHERE ComID =" + comid.ToString();
+            Dictionary<string, string> dbData3 = Utilities.SQLite.GetData(dbPath, query3);
+            foreach (KeyValuePair<string, string> kv in dbData3)
+            {
+                if (!dbData.ContainsKey(kv.Key))
+                {
+                    dbData.Add(kv.Key, kv.Value);
+                }
+            }
             return dbData;
         }
 

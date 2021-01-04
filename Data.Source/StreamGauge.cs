@@ -282,6 +282,11 @@ namespace Data.Source
             errorMsg = "";
 
             string[] dataLines = data.Split(new string[] {"\r\n", "\n"}, StringSplitOptions.None);
+            if(dataLines.Length < 28)
+            {
+                errorMsg = "Unable to retrieve data from USGS NWIS for Gauge: " + input.Geometry.GeometryMetadata["gaugestation"];
+                return null;
+            }
             output.Dataset = "streamflow";
             output.DataSource = "usgs";
             // output.Metadata = SetMetadata(out errorMsg, input, output);

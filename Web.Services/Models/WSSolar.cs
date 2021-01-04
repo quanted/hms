@@ -215,8 +215,12 @@ namespace Web.Services.Models
         /// <returns></returns>
         public async Task<ITimeSeriesOutput> RunSolarCalculator(SolarCalculatorInput input)
         {
+            string errorMsg = "";
             Solar.SolarCalculator soCal = new SolarCalculator();
-            soCal.Input = input;
+            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+            input.Source = "solarcalcualtor";
+            soCal.Input = iFactory.SetTimeSeriesInput(input, new List<string>() { "solar" }, out errorMsg);
+
             soCal.Model = input.Model.ToLower();
             Utilities.ErrorOutput error = new Utilities.ErrorOutput();
             //Validate unique solar calculator inputs

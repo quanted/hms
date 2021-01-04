@@ -53,7 +53,6 @@ namespace Solar
             if (this.Input.Geometry.Timezone.Offset == 0)
             {
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
-                return;
             }
 
             // Add defaults to metadata
