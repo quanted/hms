@@ -56,7 +56,7 @@ namespace Utilities
         {
             errorMsg = "";
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT * FROM GageInfo WHERE FLComID=" + comid.ToString() + " AND Active=1";
+            string query = "SELECT * FROM GageInfo WHERE FLComID=" + comid.ToString();
             Dictionary<string, object> dbData = Utilities.SQLite.GetDataObject(dbPath, query);
             return dbData;
         }
@@ -65,7 +65,7 @@ namespace Utilities
         {
             errorMsg = "";
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT * FROM GageInfo WHERE GAGEID=" + gageID + " AND Active=1";
+            string query = "SELECT * FROM GageInfo WHERE GAGEID=" + gageID;
             Dictionary<string, object> dbData = Utilities.SQLite.GetDataObject(dbPath, query);
             return dbData;
         }
