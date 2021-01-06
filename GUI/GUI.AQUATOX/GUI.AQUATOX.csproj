@@ -19,6 +19,9 @@
 
   <ItemGroup>
     <Compile Update="GraphSetup.cs" />
+    <Compile Update="LoadingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>

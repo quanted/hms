@@ -361,6 +361,188 @@ namespace AQUATOX.AQTSegment
         public TStateVariable()
         { }
 
+        // -------------------------------------------------------------------------------
+        public void UpdateUnits()
+        {
+            // *********************************
+            // Sets the correct units given
+            // the statevar type
+            // coded by JSC, modified 7/22/98
+            // *********************************
+            if ((SVType >= Consts.FirstOrgTxTyp && SVType <= Consts.LastOrgTxTyp))
+            {
+                if ((NState == AllVariables.PoreWater))
+                {
+                    StateUnit = "ug/L";
+                    LoadingUnit = "N A";
+                }
+                else if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.Cohesives) || (NState == AllVariables.POC_G1) ||
+                     (NState == AllVariables.BuriedRefrDetr) || (NState == AllVariables.BuriedLabileDetr ))
+                {
+                    StateUnit = "ug/kg dry";
+                    LoadingUnit = "ug/kg dry";
+                }
+                else
+                {
+                    StateUnit = "ug/kg wet";
+                    LoadingUnit = "ug/kg wet";
+                }
+            }
+            else
+            {
+                switch (NState)
+                {
+                    case AllVariables.Light:
+                        StateUnit = "Ly/d";
+                        LoadingUnit = "Ly/d";
+                        break;
+                    case AllVariables.pH:
+                        StateUnit = "pH";
+                        LoadingUnit = "pH";
+                        break;
+                    case AllVariables.BuriedRefrDetr:
+                    case AllVariables.BuriedLabileDetr:
+                        StateUnit = "g/m2";
+                        LoadingUnit = "N.A.";
+                        break;
+                    case AllVariables.Temperature:
+                        StateUnit = "deg. C";
+                        LoadingUnit = "deg. C";
+                        break;
+                    case AllVariables.Volume:
+                        StateUnit = "cu.m";
+                        LoadingUnit = "cu.m";
+                        break;
+                    case AllVariables.WindLoading:
+                        StateUnit = "m/s";
+                        LoadingUnit = "m/s";
+                        break;
+                    case AllVariables.PoreWater:
+                        StateUnit = "cu.m/m2";
+                        LoadingUnit = "N A";
+                        break;
+                    case AllVariables.Salinity:
+                        StateUnit = "ppt";
+                        LoadingUnit = "ppt";
+                        break;
+                    case AllVariables.Ammonia:
+                    case AllVariables.Phosphate:
+                    case AllVariables.Nitrate:
+                    case AllVariables.Avail_Silica:
+                    case AllVariables.COD:
+                    case AllVariables.TAM:
+                    case AllVariables.Silica:
+                        if (Layer > T_SVLayer.WaterCol)
+                        {
+                            StateUnit = "g/m3";
+                            LoadingUnit = "N A";
+                        }
+                        else
+                        {
+                            StateUnit = "mg/L";
+                            LoadingUnit = "mg/L";
+                        }
+                        break;
+                    case AllVariables.POC_G1:
+                    case AllVariables.POC_G2:
+                    case AllVariables.POC_G3:
+                        StateUnit = "g C/m3";
+                        LoadingUnit = "N A";
+                        break;
+                    case AllVariables.PON_G1:
+                    case AllVariables.PON_G2:
+                    case AllVariables.PON_G3:
+                        StateUnit = "g N/m3";
+                        LoadingUnit = "N A";
+                        break;
+                    case AllVariables.POP_G1:
+                    case AllVariables.POP_G2:
+                    case AllVariables.POP_G3:
+                        StateUnit = "g P/m3";
+                        LoadingUnit = "N A";
+                        break;
+                    case AllVariables.Methane:
+                    case AllVariables.Sulfide:
+                        if (Layer > T_SVLayer.WaterCol)
+                        {
+                            StateUnit = "g O2eq/ m3";
+                            LoadingUnit = "N A";
+                        }
+                        else
+                        {
+                            StateUnit = "mg/L";
+                            LoadingUnit = "mg/L";
+                        }
+                        break;
+                    case AllVariables.LaDOMPore:
+                    case AllVariables.ReDOMPore:
+                        StateUnit = "g/cu.m";
+                        LoadingUnit = "N A";
+                        break;
+                    // Modify the A .. B: AllVariables.Sand .. AllVariables.TSS, AllVariables.Cohesives .. AllVariables.NonCohesives2
+                    case AllVariables.Sand:
+                    case AllVariables.Cohesives:
+                        if (Layer > T_SVLayer.WaterCol)
+                        {
+                            StateUnit = "g/sq.m";
+                            LoadingUnit = "N A";
+                        }
+                        else
+                        {
+                            StateUnit = "mg/L";
+                            LoadingUnit = "mg/L";
+                        }
+                        break;
+                    // Modify the A .. B: Units.FirstOrgTox .. Units.LastOrgTox
+                    case AllVariables.H2OTox:
+                        StateUnit = "ug/L";
+                        LoadingUnit = "ug/L";
+                        break;
+                    // Modify the A .. B: Units.FirstPlant .. Units.LastPlant
+                    case Consts.FirstPlant:
+                        if (SVType == T_SVType.StV)
+                        {
+                            ((TPlant)this).ChangeData();
+                        }
+                        else
+                        {
+                            // NIntrnl or PIntrnl
+                            StateUnit = "ug/L";
+                            LoadingUnit = "N A";
+                        }
+                        break;
+                    case AllVariables.SedmRefrDetr:
+                    case AllVariables.SedmLabDetr:
+                        if (Layer > T_SVLayer.SedLayer1)
+                        {
+                            StateUnit = "g/m2 dry";
+                            LoadingUnit = "N A";
+                        }
+                        else
+                        {
+                            StateUnit = "g/m2 dry";
+                            LoadingUnit = "N A";
+                        }
+                        break;
+                    // Modify the A .. B: Units.FirstAnimal .. Units.LastAnimal
+                    case Consts.FirstAnimal:
+                        ((TAnimal)this).ChangeData();
+                        break;
+                    // Modify the A .. B: AllVariables.DissRefrDetr .. AllVariables.SuspLabDetr
+                    case AllVariables.DissRefrDetr:
+                        StateUnit = "mg/L dry";
+                        LoadingUnit = "mg/L dry";
+                        break;
+                    default:
+                        StateUnit = "mg/L";
+                        LoadingUnit = "mg/L";
+                        break;
+                }
+            }
+            // Case
+
+        }
+
         //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC)
         public TStateVariable(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC)
         {

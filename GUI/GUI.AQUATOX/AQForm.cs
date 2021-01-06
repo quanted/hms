@@ -612,37 +612,15 @@ namespace GUI.AQUATOX
 
         private void SVListBox_DoubleClick(object sender, EventArgs e)
         {
+            if (SVListBox.SelectedIndex == -1) { MessageBox.Show("No State Variable is Selected."); return; } 
             TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
 
-            if (TSV.IsPlant())
-            {
-                TPlant TP = TSV as TPlant;
-                Param_Form plantform = new Param_Form();
-                PlantRecord PIR = TP.PAlgalRec;
-                PIR.Setup();
-                TParameter[] PPS = PIR.InputArray();
-                plantform.EditParams(ref PPS, "Plant Parameters", false);
-            }
+            LoadingsForm LF = new LoadingsForm();
+            LF.EditSV(TSV, aQTS);
 
-            if (TSV.IsAnimal())
-            {
-                TAnimal TA = TSV as TAnimal;
-                Param_Form animform = new Param_Form();
-                AnimalRecord AIR = TA.PAnimalData;
-                AIR.Setup();
-                TParameter[] PPS = AIR.InputArray();
-                animform.EditParams(ref PPS, "Animal Parameters", false);
-            }
-
-            if (TSV.NState == AllVariables.H2OTox)
-            {
-                TToxics TC = TSV as TToxics;
-                Param_Form chemform = new Param_Form();
-                ChemicalRecord CR = TC.ChemRec; CR.Setup();
-                TParameter[] PPS = CR.InputArray();
-                chemform.EditParams(ref PPS, "Chem Parameters", false);
-            }
-
+            // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
+            ShowStudyInfo();
+            
         }
 
         private void SVListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -652,6 +630,7 @@ namespace GUI.AQUATOX
 
         private void NetCDF_Click(object sender, EventArgs e)
         {
+            
             /// Gets the path to the NetCDF file to be used as a data source.
             var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
             sds.MetadataDictionary dt = dataset.Metadata;
@@ -663,6 +642,11 @@ namespace GUI.AQUATOX
         private void RunStatusLabel_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void EditButton_Click(object sender, EventArgs e)
+        {
+            SVListBox_DoubleClick(sender, e);
         }
     }
 }

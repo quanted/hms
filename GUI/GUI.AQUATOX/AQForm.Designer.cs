@@ -57,6 +57,9 @@ namespace GUI.AQUATOX
             this.Diagenesis = new System.Windows.Forms.Button();
             this.ParamsButton = new System.Windows.Forms.Button();
             this.RunStatusLabel = new System.Windows.Forms.Label();
+            this.AddButton = new System.Windows.Forms.Button();
+            this.EditButton = new System.Windows.Forms.Button();
+            this.DeleteButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -99,7 +102,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(146, 72);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(665, 23);
+            this.progressBar1.Size = new System.Drawing.Size(667, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -180,7 +183,7 @@ namespace GUI.AQUATOX
             this.SVListBox.ItemHeight = 15;
             this.SVListBox.Location = new System.Drawing.Point(459, 110);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(352, 364);
+            this.SVListBox.Size = new System.Drawing.Size(354, 364);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -196,9 +199,9 @@ namespace GUI.AQUATOX
             // 
             // NetCDF
             // 
-            this.NetCDF.Location = new System.Drawing.Point(474, 430);
+            this.NetCDF.Location = new System.Drawing.Point(356, 419);
             this.NetCDF.Name = "NetCDF";
-            this.NetCDF.Size = new System.Drawing.Size(58, 25);
+            this.NetCDF.Size = new System.Drawing.Size(56, 25);
             this.NetCDF.TabIndex = 11;
             this.NetCDF.Text = "NetCDF";
             this.NetCDF.UseVisualStyleBackColor = true;
@@ -333,9 +336,46 @@ namespace GUI.AQUATOX
             this.RunStatusLabel.Text = "Run Status";
             this.RunStatusLabel.Click += new System.EventHandler(this.RunStatusLabel_Click);
             // 
+            // AddButton
+            // 
+            this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.AddButton.Location = new System.Drawing.Point(462, 482);
+            this.AddButton.Name = "AddButton";
+            this.AddButton.Size = new System.Drawing.Size(60, 25);
+            this.AddButton.TabIndex = 21;
+            this.AddButton.Text = "Add";
+            this.AddButton.UseVisualStyleBackColor = true;
+            // 
+            // EditButton
+            // 
+            this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.EditButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.EditButton.Location = new System.Drawing.Point(594, 482);
+            this.EditButton.Name = "EditButton";
+            this.EditButton.Size = new System.Drawing.Size(60, 25);
+            this.EditButton.TabIndex = 20;
+            this.EditButton.Text = "Edit";
+            this.EditButton.UseVisualStyleBackColor = true;
+            this.EditButton.Click += new System.EventHandler(this.EditButton_Click);
+            // 
+            // DeleteButton
+            // 
+            this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.DeleteButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.DeleteButton.Location = new System.Drawing.Point(528, 482);
+            this.DeleteButton.Name = "DeleteButton";
+            this.DeleteButton.Size = new System.Drawing.Size(60, 25);
+            this.DeleteButton.TabIndex = 19;
+            this.DeleteButton.Text = "Delete";
+            this.DeleteButton.UseVisualStyleBackColor = true;
+            // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(828, 496);
+            this.ClientSize = new System.Drawing.Size(830, 528);
+            this.Controls.Add(this.AddButton);
+            this.Controls.Add(this.EditButton);
+            this.Controls.Add(this.DeleteButton);
             this.Controls.Add(this.RunStatusLabel);
             this.Controls.Add(this.ButtonPanel);
             this.Controls.Add(this.panel1);
@@ -386,6 +426,9 @@ namespace GUI.AQUATOX
         private Button Diagenesis;
         private Button ParamsButton;
         private Label RunStatusLabel;
+        private Button AddButton;
+        private Button EditButton;
+        private Button DeleteButton;
     }
 
 
