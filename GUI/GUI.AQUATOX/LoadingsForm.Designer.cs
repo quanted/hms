@@ -34,24 +34,24 @@ namespace GUI.AQUATOX
             this.SVNameLabel = new System.Windows.Forms.Label();
             this.ICUnit = new System.Windows.Forms.Label();
             this.IgnoreLoadingsBox = new System.Windows.Forms.CheckBox();
-            this.ButtonPanel = new System.Windows.Forms.Panel();
+            this.LoadingsPanel = new System.Windows.Forms.Panel();
             this.LTLabel = new System.Windows.Forms.Label();
             this.LTBox = new System.Windows.Forms.ComboBox();
             this.UseTimeSeriesRadio = new System.Windows.Forms.RadioButton();
             this.UseConstRadio = new System.Windows.Forms.RadioButton();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.MultLoadBox = new System.Windows.Forms.TextBox();
             this.CLUnit = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.ConstLoadBox = new System.Windows.Forms.TextBox();
             this.NotesEdit2 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.NotesEdit = new System.Windows.Forms.TextBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.ParameterButton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
-            this.ButtonPanel.SuspendLayout();
+            this.LoadingsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -100,30 +100,32 @@ namespace GUI.AQUATOX
             this.IgnoreLoadingsBox.TabIndex = 18;
             this.IgnoreLoadingsBox.Text = "Ignore All Loadings";
             this.IgnoreLoadingsBox.UseVisualStyleBackColor = true;
+            this.IgnoreLoadingsBox.CheckedChanged += new System.EventHandler(this.IgnoreLoadingsBox_CheckedChanged);
             // 
-            // ButtonPanel
+            // LoadingsPanel
             // 
-            this.ButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.LoadingsPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ButtonPanel.Controls.Add(this.LTLabel);
-            this.ButtonPanel.Controls.Add(this.LTBox);
-            this.ButtonPanel.Controls.Add(this.UseTimeSeriesRadio);
-            this.ButtonPanel.Controls.Add(this.UseConstRadio);
-            this.ButtonPanel.Controls.Add(this.label5);
-            this.ButtonPanel.Controls.Add(this.textBox4);
-            this.ButtonPanel.Controls.Add(this.CLUnit);
-            this.ButtonPanel.Controls.Add(this.textBox3);
-            this.ButtonPanel.Controls.Add(this.NotesEdit2);
-            this.ButtonPanel.Controls.Add(this.label1);
-            this.ButtonPanel.Controls.Add(this.NotesEdit);
-            this.ButtonPanel.Controls.Add(this.dataGridView1);
-            this.ButtonPanel.Location = new System.Drawing.Point(12, 101);
-            this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(652, 264);
-            this.ButtonPanel.TabIndex = 21;
-            this.ButtonPanel.Visible = false;
+            this.LoadingsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LoadingsPanel.Controls.Add(this.LTLabel);
+            this.LoadingsPanel.Controls.Add(this.LTBox);
+            this.LoadingsPanel.Controls.Add(this.UseTimeSeriesRadio);
+            this.LoadingsPanel.Controls.Add(this.UseConstRadio);
+            this.LoadingsPanel.Controls.Add(this.label5);
+            this.LoadingsPanel.Controls.Add(this.MultLoadBox);
+            this.LoadingsPanel.Controls.Add(this.CLUnit);
+            this.LoadingsPanel.Controls.Add(this.ConstLoadBox);
+            this.LoadingsPanel.Controls.Add(this.NotesEdit2);
+            this.LoadingsPanel.Controls.Add(this.label1);
+            this.LoadingsPanel.Controls.Add(this.NotesEdit);
+            this.LoadingsPanel.Controls.Add(this.dataGridView1);
+            this.LoadingsPanel.Location = new System.Drawing.Point(12, 101);
+            this.LoadingsPanel.Name = "LoadingsPanel";
+            this.LoadingsPanel.Size = new System.Drawing.Size(661, 264);
+            this.LoadingsPanel.TabIndex = 21;
+            this.LoadingsPanel.Visible = false;
+            this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
             // 
             // LTLabel
             // 
@@ -139,9 +141,9 @@ namespace GUI.AQUATOX
             this.LTBox.FormattingEnabled = true;
             this.LTBox.Location = new System.Drawing.Point(108, 10);
             this.LTBox.Name = "LTBox";
-            this.LTBox.Size = new System.Drawing.Size(124, 23);
+            this.LTBox.Size = new System.Drawing.Size(157, 23);
             this.LTBox.TabIndex = 26;
-            this.LTBox.Visible = false;
+            this.LTBox.SelectedIndexChanged += new System.EventHandler(this.LTBox_SelectedIndexChanged);
             // 
             // UseTimeSeriesRadio
             // 
@@ -174,12 +176,12 @@ namespace GUI.AQUATOX
             this.label5.TabIndex = 23;
             this.label5.Text = "Multiply Loading by:";
             // 
-            // textBox4
+            // MultLoadBox
             // 
-            this.textBox4.Location = new System.Drawing.Point(169, 132);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(62, 23);
-            this.textBox4.TabIndex = 22;
+            this.MultLoadBox.Location = new System.Drawing.Point(169, 132);
+            this.MultLoadBox.Name = "MultLoadBox";
+            this.MultLoadBox.Size = new System.Drawing.Size(62, 23);
+            this.MultLoadBox.TabIndex = 22;
             // 
             // CLUnit
             // 
@@ -190,12 +192,12 @@ namespace GUI.AQUATOX
             this.CLUnit.TabIndex = 21;
             this.CLUnit.Text = "units";
             // 
-            // textBox3
+            // ConstLoadBox
             // 
-            this.textBox3.Location = new System.Drawing.Point(169, 59);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(96, 23);
-            this.textBox3.TabIndex = 19;
+            this.ConstLoadBox.Location = new System.Drawing.Point(169, 59);
+            this.ConstLoadBox.Name = "ConstLoadBox";
+            this.ConstLoadBox.Size = new System.Drawing.Size(96, 23);
+            this.ConstLoadBox.TabIndex = 19;
             // 
             // NotesEdit2
             // 
@@ -219,6 +221,7 @@ namespace GUI.AQUATOX
             this.NotesEdit.Name = "NotesEdit";
             this.NotesEdit.Size = new System.Drawing.Size(286, 23);
             this.NotesEdit.TabIndex = 16;
+            this.NotesEdit.TextChanged += new System.EventHandler(this.NotesEdit_TextChanged);
             // 
             // dataGridView1
             // 
@@ -229,7 +232,7 @@ namespace GUI.AQUATOX
             this.dataGridView1.Location = new System.Drawing.Point(363, 13);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(263, 228);
+            this.dataGridView1.Size = new System.Drawing.Size(272, 228);
             this.dataGridView1.TabIndex = 1;
             // 
             // ParameterButton
@@ -243,20 +246,21 @@ namespace GUI.AQUATOX
             this.ParameterButton.UseVisualStyleBackColor = true;
             this.ParameterButton.Click += new System.EventHandler(this.ParameterButton_Click);
             // 
-            // button1
+            // OKButton
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(538, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(61, 23);
-            this.button1.TabIndex = 23;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
+            this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.OKButton.Location = new System.Drawing.Point(547, 12);
+            this.OKButton.Name = "OKButton";
+            this.OKButton.Size = new System.Drawing.Size(61, 23);
+            this.OKButton.TabIndex = 23;
+            this.OKButton.Text = "OK";
+            this.OKButton.UseVisualStyleBackColor = true;
+            this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(605, 12);
+            this.CancelButt.Location = new System.Drawing.Point(614, 12);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 24;
@@ -279,12 +283,12 @@ namespace GUI.AQUATOX
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(676, 377);
+            this.ClientSize = new System.Drawing.Size(685, 377);
             this.Controls.Add(this.AmmoniaDriveLabel);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.ParameterButton);
-            this.Controls.Add(this.ButtonPanel);
+            this.Controls.Add(this.LoadingsPanel);
             this.Controls.Add(this.IgnoreLoadingsBox);
             this.Controls.Add(this.ICUnit);
             this.Controls.Add(this.SVNameLabel);
@@ -294,8 +298,8 @@ namespace GUI.AQUATOX
             this.Name = "LoadingsForm";
             this.Text = "Loadings Form";
             this.Load += new System.EventHandler(this.GridForm_Load);
-            this.ButtonPanel.ResumeLayout(false);
-            this.ButtonPanel.PerformLayout();
+            this.LoadingsPanel.ResumeLayout(false);
+            this.LoadingsPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -308,19 +312,19 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label SVNameLabel;
         private System.Windows.Forms.Label ICUnit;
         private System.Windows.Forms.CheckBox IgnoreLoadingsBox;
-        private System.Windows.Forms.Panel ButtonPanel;
+        private System.Windows.Forms.Panel LoadingsPanel;
         private System.Windows.Forms.RadioButton UseTimeSeriesRadio;
         private System.Windows.Forms.RadioButton UseConstRadio;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.TextBox MultLoadBox;
         private System.Windows.Forms.Label CLUnit;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox ConstLoadBox;
         private System.Windows.Forms.TextBox NotesEdit2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox NotesEdit;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button ParameterButton;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Label LTLabel;
         private System.Windows.Forms.ComboBox LTBox;

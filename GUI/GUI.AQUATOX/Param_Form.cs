@@ -16,12 +16,14 @@ namespace GUI.AQUATOX
         int Spacing;  // dense = 28; less dense 36
         int labelwidth = 210;
         int topbuffer = 5;
+        bool suppressing = false;
 
         public bool SuppressSymbol=false, SuppressComment=false;
         bool UserCanceled = false;
         int nparam;
         TParameter[] plist;
 
+        Button[] buttons;
         TextBox[] edits;
         Label[] labels;
         Label[] units;
@@ -36,7 +38,7 @@ namespace GUI.AQUATOX
             InitializeComponent();
         }
 
-        public void AddEdit(ref TParameter Param, int index)
+        public void AddEdit(ref TParameter Param, int pindex, int index)
         {
             string textstr;
 
@@ -53,6 +55,7 @@ namespace GUI.AQUATOX
                 new ToolTip().SetToolTip(booledits[index], Param.Name);
                 booledits[index].Checked = ((TBoolParam)Param).Val;
                 Controls.Add(booledits[index]);
+
                 return;
             }
 
@@ -64,6 +67,26 @@ namespace GUI.AQUATOX
                 labels[index].Size = new Size(360, 39);
                 labels[index].Font = new Font(labels[index].Font.FontFamily, 12, FontStyle.Bold);
                 labels[index].TextAlign = ContentAlignment.MiddleLeft;
+                                
+                if (index > 0)
+                {
+                    suppressing = !(((TSubheading)Param).expanded);
+                    buttons[index] = new Button();
+                    if (((TSubheading)Param).expanded) buttons[index].Text = "Collapse";
+                    else buttons[index].Text = "Expand";
+
+                    int left = 380;
+                    if (Spacing == 28) left = 330;
+                    buttons[index].Location = new Point(left, top + 8);
+                    buttons[index].Font = new Font(buttons[index].Font.FontFamily, 8);
+
+                    buttons[index].Size = new Size(60, 20);
+                    buttons[index].Click += new EventHandler(NewButton_Click);
+                    buttons[index].Tag = pindex;
+
+                    Controls.Add(buttons[index]);
+                }
+
                 Controls.Add(labels[index]);
                 return;
             }
@@ -142,6 +165,20 @@ namespace GUI.AQUATOX
                  }
         }
 
+       private void NewButton_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+
+            if (btn.Text == "Collapse") btn.Text = "Expand";
+                    else btn.Text = "Collapse";
+
+            int i = (int)btn.Tag;
+            ((TSubheading)plist[i]).expanded = !((TSubheading)plist[i]).expanded;
+            
+            UpdateScreen();
+
+        }
+
         public bool ReadEdit(ref TParameter Param, int index)
         {
             double f;
@@ -198,7 +235,7 @@ namespace GUI.AQUATOX
             bool validinputs = true;
             for (int i = 0; i < nparam; i++)
             {
-                validinputs = ReadEdit(ref plist[i], i) && validinputs;
+                // validinputs = ReadEdit(ref plist[i], i) && validinputs;
             }
 
             if (!validinputs)
@@ -210,6 +247,43 @@ namespace GUI.AQUATOX
             }
         }
 
+
+        public void UpdateScreen()
+        {
+            int j = -1;
+            suppressing = false;
+
+            for (int i = 0; i < nparam; i++) removeControls(i);
+
+            for (int i = 0; i < nparam; i++)
+            {
+                if ((!suppressing) || (plist[i] is TSubheading))
+                {
+                    j++;
+                    AddEdit(ref plist[i], i, j);
+                }
+            }
+
+            // Adjust height and width of box to be appropriate for number of edits
+            this.Height = Spacing * nparam + 75;
+            int wah = Screen.GetWorkingArea(this).Height;
+            if (this.Height > wah) this.Height = wah;
+            if (SuppressComment) this.Width = 440;
+        }
+
+        public void removeControls(int i)
+        {
+            if (edits[i] != null)  Controls.Remove(edits[i]);
+            if (labels[i] != null)  Controls.Remove(labels[i]);
+            if (units[i] != null)  Controls.Remove(units[i]);
+            if (references[i] != null)  Controls.Remove(references[i]);
+            if (dateedits[i] != null)  Controls.Remove(dateedits[i]);
+            if (booledits[i] != null)  Controls.Remove(booledits[i]);
+            if (dropboxes[i] != null)  Controls.Remove(dropboxes[i]);
+            if (buttons[i] != null) Controls.Remove(buttons[i]);
+
+        }
+
         public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense)
         {
             if (Dense) Spacing = 28; else Spacing = 36;
@@ -219,22 +293,14 @@ namespace GUI.AQUATOX
             nparam = parmlist.Length;
             edits = new TextBox[nparam];
             labels = new Label[nparam]; 
-            units = new Label[nparam]; 
+            units = new Label[nparam];
+            buttons = new Button[nparam];
             references = new TextBox[nparam];
             dateedits = new DateTimePicker[nparam];
             booledits = new CheckBox[nparam];
             dropboxes = new ComboBox[nparam];
 
-            for (int i=0; i<nparam; i++)
-            {
-                AddEdit(ref parmlist[i], i);
-            }
-
-            // Adjust height and width of box to be appropriate for number of edits
-            this.Height = Spacing * nparam + 75;
-            int wah = Screen.GetWorkingArea(this).Height;
-            if (this.Height > wah) this.Height = wah;
-            if (SuppressComment) this.Width = 440;
+            UpdateScreen();
 
             Show();
             return true;

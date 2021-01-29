@@ -124,9 +124,10 @@ namespace AQUATOX.Plants
         {
             return new TParameter[] {new TSubheading("Plant Parameters for "+PlantName.Val), PlantName,
                 ScientificName, PlantType,SurfaceFloating,
-                Taxonomic_Type, ToxicityRecord, EnteredLightSat,
-                UseAdaptiveLight, MaxLightSat, MinLightSat, KPO4, KN,
-                KCarbon, Q10, TOpt, TMax, TRef, PMax, KResp, Resp20, KMort, EMort,
+                Taxonomic_Type, ToxicityRecord, EnteredLightSat, PMax, KPO4, KN,TOpt, KMort,
+                new TSubheading("Adaptive Light, Stoichiometry, Etc."),
+                UseAdaptiveLight, MaxLightSat, MinLightSat, 
+                KCarbon, Q10,  TMax, TRef,  KResp, Resp20,  EMort,
                 P2OrgInit, N2OrgInit, ECoeffPhyto, Wet2Dry, PlantFracLipid,
                 new TSubheading("Internal Nutrients Parameters:"), NHalfSatInternal, PHalfSatInternal, MaxNUptake,
                 MaxPUptake,  Min_N_Ratio, Min_P_Ratio,

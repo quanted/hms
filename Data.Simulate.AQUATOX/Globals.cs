@@ -408,14 +408,11 @@ namespace Globals
     {
         public double Val;
         [JsonIgnore] public string Symbol = "";   // not user editable;  
-        [JsonIgnore] public string Name;     // not user editable
+        [JsonIgnore] public string Name;          // not user editable
         public string Comment = "";
         [JsonIgnore] public string Units = "";    // not user editable
-        [JsonIgnore] public bool Primary;
-
-//      [JsonIgnore] public bool Contextsensitive    // not yet  -- document 
-                
-
+        [JsonIgnore] public bool Primary = true;         // not user editable
+        //  [JsonIgnore] public bool Contextsensitive    // not yet  -- document 
     } // end TParameter
 
     public class TBoolParam : TParameter
@@ -443,6 +440,7 @@ namespace Globals
     public class TSubheading : TParameter  // used to format input screens
     {
         new public string Val;
+        new public bool expanded = false;
 
         public TSubheading(string Title) : base()
         {

@@ -41,10 +41,10 @@ namespace AQUATOX.Chemicals
 
         public void Setup()
         {
-            ChemName.Symbol = "ChemName"; ChemName.Name = "Chemical Name";
-            CASRegNo.Symbol = "CASRegNo"; CASRegNo.Name = "CAS Registry No.";
+            ChemName.Symbol = "ChemName"; ChemName.Name = "Chemical Name"; 
+            CASRegNo.Symbol = "CASRegNo"; CASRegNo.Name = "CAS Registry No."; 
             MolWt.Symbol = "Molecular Weight"; MolWt.Name = "Molecular weight of pollutant"; MolWt.Units = "g/mol";
-            pka.Symbol = "Dissociation Constant"; pka.Name = " Acid dissociation constant"; pka.Units = "negative log";
+            pka.Symbol = "Dissociation Constant"; pka.Name = "Acid dissociation constant"; pka.Units = "negative log";
             Henry.Symbol = "Henry's Law Constant"; Henry.Name = "Henry's law constant"; Henry.Units = "atm m3 mol-1";
             LogKow.Symbol = "Octanol-water partition coefficient"; LogKow.Name = "Log octanol-water partition coefficient"; LogKow.Units = "unitless";
             KPSed.Symbol = "KPSed"; KPSed.Name = "Detritus-water partition coefficient"; KPSed.Units = "L/kg OC";
