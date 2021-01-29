@@ -54,7 +54,7 @@ namespace Web.Services.Controllers
             return this;
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDaily(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToDaily(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new NotImplementedException();
         }
@@ -64,12 +64,12 @@ namespace Web.Services.Controllers
             throw new NotImplementedException();
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToHourly(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToHourly(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new NotImplementedException();
         }
 
-        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToMonthly(string dateFormat, bool avg)
+        Dictionary<string, List<double>> ITimeSeriesOutput<Dictionary<string, ITimeSeriesOutput>>.ToMonthly(string dateFormat, ITimeSeriesInput input, bool avg, bool clean)
         {
             throw new NotImplementedException();
         }

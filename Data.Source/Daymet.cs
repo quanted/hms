@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -175,8 +176,7 @@ namespace Data.Source
                 case "rad":
                     return "srad";
                 default:
-                    errorMsg = "ERROR: Parameter for Daynet did not load.";
-                    return null;
+                    return dataset;
             }
         }
 
@@ -199,6 +199,157 @@ namespace Data.Source
             }
             st.Remove(st.Length - 1, 1);
             return st.ToString();
+        }
+
+        /// <summary>
+        /// Constructs the ITimeSeriesOutput Data and MetaData object from the data string.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="dataSet"></param>
+        /// <param name="data"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataSet, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            List<string> splitData = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            int j = splitData.FindIndex(x => x.Contains("year,yday"));
+
+            //string[] splitData = data.Split(new string[] { "year,yday,prcp (mm/day)" }, StringSplitOptions.RemoveEmptyEntries);
+            output.Metadata = SetMetaData(out errorMsg, String.Join("\n", splitData.GetRange(0, j)));
+            if (errorMsg.Contains("ERROR")) { return null; }
+
+            double modifier = (input.Units.Contains("imperial")) ? 0.0393701 : 1.0;
+            Dictionary<DateTime, List<string>> outputTemp = this.SetData(out errorMsg, splitData, j, input.DataValueFormat, input.DateTimeSpan.DateTimeFormat, input.Geometry.GeometryMetadata, modifier, input.DateTimeSpan);
+            if (errorMsg.Contains("ERROR")) { return null; }
+
+            SortedDictionary<DateTime, List<string>> sortedData = new SortedDictionary<DateTime, List<string>>(outputTemp);
+            if (input.Geometry.GeometryMetadata.ContainsKey("leapYear"))
+            {
+                // Daymet Leap Year MESS!
+                // Inserts Dec 31st for leap years.
+                for (int i = 0; i <= (outputTemp.Keys.Last().Year - outputTemp.Keys.First().Year); i++)
+                {
+                    DateTime date = sortedData.Keys.First().AddYears(i);
+
+                    if (DateTime.IsLeapYear(date.Year) && sortedData.ContainsKey(new DateTime(date.Year, 12, 30)))
+                    {
+                        sortedData.Add(new DateTime(date.Year, 12, 31), new List<string>() { (0).ToString(input.DataValueFormat) });
+                    }
+                    if (i == (outputTemp.Keys.Last().Year - outputTemp.Keys.First().Year) - 1) { break; }
+                }
+            }
+            Dictionary<string, List<string>> outputFinal = new Dictionary<string, List<string>>();
+            foreach (DateTime key in sortedData.Keys)
+            {
+                outputFinal.Add(key.ToString(input.DateTimeSpan.DateTimeFormat), sortedData[key]);
+            }
+            int h = 2;
+            foreach(string s in splitData[j].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if(s != "year" && s != "yday")
+                {
+                    output.Metadata.Add("column_" + h, s);
+                    h += 1;
+                }
+            }
+
+            output.Data = outputFinal;
+            return output;
+        }
+
+        /// <summary>
+        /// Creates the metaData dictionary for Daymet data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="newMetaData"></param>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        private Dictionary<string, string> SetMetaData(out string errorMsg, string metadata)
+        {
+            errorMsg = "";
+            Dictionary<string, string> daymetMetadata = new Dictionary<string, string>();
+            string[] metaLines = metadata.Split(new string[] { "\n", "  " }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < metaLines.Length; i++)
+            {
+                if (metaLines[i].Contains("http"))
+                {
+                    daymetMetadata.Add("daymet_url_reference:", metaLines[i].Trim());
+                }
+                else if (metaLines[i].Contains(':'))
+                {
+                    string[] lineData = metaLines[i].Split(new string[] { ": " }, StringSplitOptions.RemoveEmptyEntries);
+                    daymetMetadata.Add("daymet_" + lineData[0].Trim(), lineData[1].Trim());
+                }
+            }
+            return daymetMetadata;
+        }
+
+        /// <summary>
+        /// Creates the timeseries dictionary for the daymet data.
+        /// </summary>
+        /// <param name="errorMsg"></param>
+        /// <param name="output"></param>
+        /// <param name="timeseries"></param>
+        /// <param name="dataFormat"></param>
+        /// <param name="modifier"></param>
+        /// <returns></returns>
+        private Dictionary<DateTime, List<string>> SetData(out string errorMsg, List<string> timeseries, int index, string dataFormat, string dateFormat, Dictionary<string, string> geoMeta, double modifier, IDateTimeSpan dateSpan)
+        {
+            errorMsg = "";
+            Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>();
+            if (geoMeta.ContainsKey("leapYear"))
+            {
+                for (int i = index+1; i < timeseries.Count; i++)
+                {
+                    string[] lineData = timeseries[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    DateTime date = new DateTime(Convert.ToInt16(Convert.ToDouble(lineData[0])), 1, 1);
+
+                    // Leap year dates have to be shifted by -1 day after Feb 28, due to Daymet not including Feb 29th
+                    if (DateTime.IsLeapYear(date.Year) && date > new DateTime(date.Year, 2, 28))
+                    {
+                        date = date.AddDays(-1.0);
+                    };
+
+                    DateTime date2 = new DateTime();
+                    date2 = date;
+                    if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
+                    else { date2 = date; }
+                    List<string> dset = new List<string>();
+                    for(int j = 2; j < lineData.Length; j++)
+                    {
+                        dset.Add((modifier * Convert.ToDouble(lineData[j])).ToString(dataFormat));
+                    }
+                    if (date2.Date >= dateSpan.StartDate.Date && date2.Date <= dateSpan.EndDate.Date)
+                    {
+                        data.Add(date2, dset);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = index+1; i < timeseries.Count; i++)
+                {
+                    string[] lineData = timeseries[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    DateTime date = new DateTime(Convert.ToInt16(Convert.ToDouble(lineData[0])), 1, 1);
+                    DateTime date2;
+                    List<string> dset = new List<string>();
+
+                    if (i > 0) { date2 = date.AddDays(Convert.ToDouble(lineData[1]) - 1); }
+                    else { date2 = date; }
+                    for (int j = 2; j < lineData.Length; j++)
+                    {
+                        dset.Add((modifier * Convert.ToDouble(lineData[j])).ToString(dataFormat));
+                    }
+                    if (date2 >= dateSpan.StartDate && date2 <= dateSpan.EndDate)
+                    {
+                        data.Add(date2, dset);
+                    }
+                }
+            }
+            return data;
         }
 
         /// <summary>
