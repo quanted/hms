@@ -73,19 +73,19 @@ namespace Data
         /// Aggregate Data to hourly time intervals, no action taken if current interval is hourly or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToHourly(string dateFormat, bool avg = false);
+        public Dictionary<string, List<double>> ToHourly(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean = true);
 
         /// <summary>
         /// Aggregate Data to daily time intervals, no action taken if current interval is daily or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToDaily(string dateFormat, bool avg = false);
+        public Dictionary<string, List<double>> ToDaily(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean = true);
 
         /// <summary>
         /// Aggregate Data to monthly time intervals, no action taken if current interval is monthly or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToMonthly(string dateFormat, bool avg = false);
+        public Dictionary<string, List<double>> ToMonthly(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean = true);
 
         /// <summary>
         /// Convert ITimeSeriesOutput<T> to default ITimeSeriesOutput with string representation of numerical values.
@@ -173,10 +173,113 @@ namespace Data
         }
 
         /// <summary>
+        /// Cleanup timeseries data with filled in value.
+        /// </summary>
+        /// <param name="avg">averaging aggregation or sum aggregation</param>
+        private Dictionary<DateTime, List<double>> CleanUp(ITimeSeriesInput input, Dictionary<DateTime, List<double>> data)
+        {
+            double value = -9999;
+
+            if (input.Geometry.GeometryMetadata.ContainsKey("fill"))
+            {
+                value = Double.Parse(input.Geometry.GeometryMetadata["fill"]);
+            }
+            else
+            {
+                return data;
+            }
+
+            Dictionary<DateTime, List<double>> cleaned = new Dictionary<DateTime, List<double>>();
+            DateTime d0 = input.DateTimeSpan.StartDate;
+            List<double> values = new List<double>();
+            int n = data.Values.First<List<double>>().Count;
+            for(int i = 0; i < n; i++)
+            {
+                values.Add(value);
+            }
+            int missingN = 0;
+            int totalN = 0;
+
+            if (input.TemporalResolution == "hourly")
+            {
+                while (d0 <= input.DateTimeSpan.EndDate)
+                {
+                    if (!data.ContainsKey(d0))
+                    {
+                        cleaned.Add(d0, values);
+                        missingN += 1;
+                    }
+                    else
+                    {
+                        cleaned.Add(d0, data[d0]);
+                    }
+                    d0 = d0.AddHours(1.0);
+                    totalN += 1;
+                }
+            }
+            else if (input.TemporalResolution == "daily")
+            {
+                while (d0 <= input.DateTimeSpan.EndDate)
+                {
+                    if (!data.ContainsKey(d0))
+                    {
+                        cleaned.Add(d0, values);
+                        missingN += 1;
+                    }
+                    else
+                    {
+                        cleaned.Add(d0, data[d0]);
+                    }
+                    d0 = d0.AddDays(1.0);
+                    totalN += 1;
+                }
+            }
+            else if (input.TemporalResolution == "monthly")
+            {
+                while (d0 <= input.DateTimeSpan.EndDate)
+                {
+                    if (!data.ContainsKey(d0))
+                    {
+                        cleaned.Add(d0, values);
+                        missingN += 1;
+                    }
+                    else
+                    {
+                        cleaned.Add(d0, data[d0]);
+                    }
+                    d0 = d0.AddMonths(1);
+                    totalN += 1;
+                }
+            }
+            else if (input.TemporalResolution == "yearly")
+            {
+                while (d0 <= input.DateTimeSpan.EndDate)
+                {
+                    if (!data.ContainsKey(d0))
+                    {
+                        cleaned.Add(d0, values);
+                        missingN += 1;
+                    }
+                    else
+                    {
+                        cleaned.Add(d0, data[d0]);
+                    }
+                    d0 = d0.AddYears(1);
+                    totalN += 1;
+                }
+            }
+            double missingP = (double)missingN / (double)totalN;
+            this.Metadata.Add("missing_data_value", input.Geometry.GeometryMetadata["fill"]);
+            this.Metadata.Add("missing_values", missingN.ToString());
+            this.Metadata.Add("missing_values_p", Math.Round(missingP, 3).ToString());
+            return cleaned;
+        }
+
+        /// <summary>
         /// Aggregate Data to hourly time intervals, no action taken if current interval is hourly or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToHourly(string dateFormat, bool avg = false)
+        public Dictionary<string, List<double>> ToHourly(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean=true)
         {
             if (this.Data.GetType() != typeof(Dictionary<string, List<double>>))
             {
@@ -190,7 +293,8 @@ namespace Data
             {
                 return null;
             }
-            Dictionary<string, List<double>> aggregated = new Dictionary<string, List<double>>();
+
+            Dictionary<DateTime, List<double>> aggregated = new Dictionary<DateTime, List<double>>();
             DateTime d0 = timeSeries.Data.Keys.ElementAt(0);
             List<double> values = new List<double>();
             foreach (var item in timeSeries.Data)
@@ -218,23 +322,31 @@ namespace Data
                 }
                 else
                 {
-                    aggregated.Add(d0.ToString(dateFormat), values);
+                    aggregated.Add(d0, values);
                     d0 = item.Key;
                     values = item.Value;
                 }
             }
-            if (!aggregated.ContainsKey(d0.ToString(dateFormat)))
+            if (!aggregated.ContainsKey(d0))
             {
-                aggregated.Add(d0.ToString(dateFormat), values);
+                aggregated.Add(d0, values);
             }
-            return aggregated;
+            if (clean)
+            {
+                timeSeries.Data = this.CleanUp(input, aggregated);
+            }
+            else
+            {
+                timeSeries.Data = aggregated;
+            }
+            return this.ToDict(timeSeries.Data, input.DateTimeSpan.DateTimeFormat);
         }
 
         /// <summary>
         /// Aggregate Data to daily time intervals, no action taken if current interval is daily or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToDaily(string dateFormat, bool avg = false)
+        public Dictionary<string, List<double>> ToDaily(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean = true)
         {
             if (this.Data.GetType() != typeof(Dictionary<string, List<double>>))
             {
@@ -248,7 +360,8 @@ namespace Data
             {
                 return null;
             }
-            Dictionary<string, List<double>> aggregated = new Dictionary<string, List<double>>();
+
+            Dictionary<DateTime, List<double>> aggregated = new Dictionary<DateTime, List<double>>();
             DateTime d0 = timeSeries.Data.Keys.ElementAt(0);
             List<double> values = new List<double>();
             foreach (var item in timeSeries.Data)
@@ -276,32 +389,38 @@ namespace Data
                 }
                 else
                 {
-                    string date = d0.ToString(dateFormat);
-                    if (aggregated.ContainsKey(date))
+                    if (aggregated.ContainsKey(d0))
                     {
-                        aggregated[date] = values;
+                        aggregated[d0] = values;
                     }
                     else
                     {
-                        aggregated.Add(date, values);
+                        aggregated.Add(d0, values);
                     }
                     d0 = item.Key;
                     values = item.Value;
                 }
             }
-            if (!aggregated.ContainsKey(d0.ToString(dateFormat)))
+            if (!aggregated.ContainsKey(d0))
             {
-                aggregated.Add(d0.ToString(dateFormat), values);
+                aggregated.Add(d0, values);
             }
-            return aggregated;
-
+            if (clean)
+            {
+                timeSeries.Data = this.CleanUp(input, aggregated);
+            }
+            else
+            {
+                timeSeries.Data = aggregated;
+            }
+            return this.ToDict(timeSeries.Data, input.DateTimeSpan.DateTimeFormat);
         }
 
         /// <summary>
         /// Aggregate Data to monthly time intervals, no action taken if current interval is monthly or greater.
         /// </summary>
         /// <param name="avg">averaging aggregation or sum aggregation</param>
-        public Dictionary<string, List<double>> ToMonthly(string dateFormat, bool avg = false)
+        public Dictionary<string, List<double>> ToMonthly(string dateFormat, ITimeSeriesInput input, bool avg = false, bool clean = true)
         {
             if (this.Data.GetType() != typeof(Dictionary<string, List<double>>))
             {
@@ -315,7 +434,9 @@ namespace Data
             {
                 return null;
             }
-            Dictionary<string, List<double>> aggregated = new Dictionary<string, List<double>>();
+
+
+            Dictionary<DateTime, List<double>> aggregated = new Dictionary<DateTime, List<double>>();
             DateTime d0 = timeSeries.Data.Keys.ElementAt(0);
             List<double> values = new List<double>();
             foreach (var item in timeSeries.Data)
@@ -343,24 +464,41 @@ namespace Data
                 }
                 else
                 {
-                    string date = d0.ToString(dateFormat);
-                    if (aggregated.ContainsKey(date))
+                    if (aggregated.ContainsKey(d0))
                     {
-                        aggregated[date] = values;
+                        aggregated[d0] = values;
                     }
                     else
                     {
-                        aggregated.Add(date, values);
+                        aggregated.Add(d0, values);
                     }
                     d0 = item.Key;
                     values = item.Value;
                 }
             }
-            if (!aggregated.ContainsKey(d0.ToString(dateFormat)))
+            if (!aggregated.ContainsKey(d0))
             {
-                aggregated.Add(d0.ToString(dateFormat), values);
+                aggregated.Add(d0, values);
             }
-            return aggregated;
+            if (clean)
+            {
+                timeSeries.Data = this.CleanUp(input, aggregated);
+            }
+            else
+            {
+                timeSeries.Data = aggregated;
+            }
+            return this.ToDict(timeSeries.Data, input.DateTimeSpan.DateTimeFormat);
+        }
+
+        private Dictionary<string, List<double>> ToDict(Dictionary<DateTime, List<double>> timeseries, string dateFormat)
+        {
+            Dictionary<string, List<double>> data = new Dictionary<string, List<double>>();
+            foreach(KeyValuePair<DateTime, List<double>> kv in timeseries)
+            {
+                data.Add(kv.Key.ToString(dateFormat), kv.Value);
+            }
+            return data;
         }
 
         /// <summary>

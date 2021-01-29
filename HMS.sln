@@ -91,11 +91,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX", "Ec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ecotoxicology.AQUATOX.UnitTests", "Ecotoxicology\Ecotoxicology.AQUATOX.UnitTests\Ecotoxicology.AQUATOX.UnitTests.csproj", "{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}"
 EndProject
-<<<<<<< HEAD
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GUI.AQUATOX.Workflow", "GUI\GUI.AQUATOX.Workflow\GUI.AQUATOX.Workflow.csproj", "{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}"
-=======
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamflow", "Streamflow\Streamflow.csproj", "{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}"
->>>>>>> 93db4bd897e297ed433fe3871134f5d73db984e9
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Streamflow", "Streamflow\Streamflow.csproj", "{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Animals.AQUATOX", "Animals\Animals.AQUATOX\Animals.AQUATOX.csproj", "{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Animals.AQUATOX.UnitTests", "Animals\Animals.AQUATOX.UnitTests\Animals.AQUATOX.UnitTests.csproj", "{AC736242-0EB2-43EB-9F82-429A805C7470}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -457,7 +459,6 @@ Global
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.ActiveCfg = Release|Any CPU
 		{5F290981-CC1A-47BB-A9FB-E032BF7F6A64}.Release|x64.Build.0 = Release|Any CPU
-<<<<<<< HEAD
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -466,7 +467,6 @@ Global
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Release|x64.ActiveCfg = Release|Any CPU
 		{8F74EC2B-6C1D-498C-9D2C-034B8E3E85EB}.Release|x64.Build.0 = Release|Any CPU
-=======
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -475,7 +475,22 @@ Global
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|x64.ActiveCfg = Release|Any CPU
 		{7D7C7315-75C7-4480-BA2B-3FEDBAE1B9A5}.Release|x64.Build.0 = Release|Any CPU
->>>>>>> 93db4bd897e297ed433fe3871134f5d73db984e9
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Debug|x64.Build.0 = Debug|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Release|x64.ActiveCfg = Release|Any CPU
+		{10BACDD2-E7C5-4694-8291-796EC1F9F8C2}.Release|x64.Build.0 = Release|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Debug|x64.Build.0 = Debug|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC736242-0EB2-43EB-9F82-429A805C7470}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Threading;
 using Serilog;
-
+using System.Net.Mime;
+using System.Net.Http.Json;
 
 namespace GIS.Operations
 {
@@ -47,18 +48,22 @@ namespace GIS.Operations
         public EPAWaters data;
 
 
-        public Catchment(string comid)
+        public Catchment(string comid, bool auto=true)
         {
             this.comid = comid;
             this.url = this.BuildURL();
-            try
+            this.data = null;
+            if (auto)
             {
-                this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5).Result);
-            }
-            catch(JsonException js)
-            {
-                Log.Warning("Error: Failed to load data from EPA waters. Message: ", js.Message);
-                this.data = null;
+                try
+                {
+                    this.data = JsonSerializer.Deserialize<EPAWaters>(this.DownloadData(this.url, 5, null).Result);
+                }
+                catch (JsonException js)
+                {
+                    Log.Warning("Error: Failed to load data from EPA waters. Message: ", js.Message);
+                    this.data = null;
+                }
             }
         }
 
@@ -130,10 +135,20 @@ namespace GIS.Operations
             return sb.ToString();
         }
 
-        private async Task<string> DownloadData(string url, int retries)
+        private async Task<string> DownloadData(string url, int retries, Dictionary<string, object> requestData)
         {
             string data = "";
             HttpClient hc = new HttpClient();
+            HttpRequestMessage rm = new HttpRequestMessage()
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(url)
+            };
+            if(requestData != null)
+            {
+                HttpContent content = JsonContent.Create(requestData);
+                rm.Content = content;
+            }
             HttpResponseMessage wm = new HttpResponseMessage();
             int maxRetries = 10;
 
@@ -143,14 +158,14 @@ namespace GIS.Operations
 
                 while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    wm = await hc.GetAsync(url);
+                    wm = await hc.SendAsync(rm);
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();
                     retries += 1;
                     if (!status.Contains("OK"))
                     {
-                        Thread.Sleep(1000 * retries);
+                        Thread.Sleep(1000);
                     }
                 }
             }
@@ -161,8 +176,8 @@ namespace GIS.Operations
                     retries += 1;
                     Log.Warning("Error: Failed to download epa waters catchment geometry data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
-                    Thread.Sleep(5000 + (r.Next(10) * 1000));
-                    return this.DownloadData(url, retries).Result;
+                    Thread.Sleep(1000);
+                    return this.DownloadData(url, retries, requestData).Result;
                 }
                 wm.Dispose();
                 hc.Dispose();
@@ -178,9 +193,17 @@ namespace GIS.Operations
         public Dictionary<string, object> GetStreamcatData()
         {
             string scURL = "https://ofmpub.epa.gov/waters10/streamcat.jsonv25?pcomid=" + this.comid + "&pAreaOfInterest=Catchment%2FWatershed;Riparian%20Buffer%20(100m)&pLandscapeMetricType=Agriculture;Climate;Disturbance;Hydrology;Infrastructure;Land%20Cover;Lithology;Mines;Pollution;Riparian;Soils;Topography;Urban;Wetness&pLandscapeMetricClass=Disturbance;Natural&pFilenameOverride=AUTO";
-            string data = this.DownloadData(scURL, 5).Result;
+            string data = this.DownloadData(scURL, 5, null).Result;
             Streamcat sc = JsonSerializer.Deserialize<Streamcat>(data);
             return sc.output;
+        }
+
+        public Dictionary<string, Dictionary<string, string>> GetNWISGauge(int gageID)
+        {
+            Data.Source.StreamGauge sg = new Data.Source.StreamGauge();
+            Dictionary<string, Dictionary<string, string>> station = sg.FindStation(this.GetBounds(), true, 0.0, 0.1, 1.0);
+
+            return station;
         }
 
         public Dictionary<string, Dictionary<string, string>> GetNWISGauges(List<double> coord = null)
@@ -197,6 +220,32 @@ namespace GIS.Operations
                 }
             }
             return stations;
+        }
+
+        public object GetStreamGeometry(double latitude, double longitude)
+        {
+            string url = "https://ofmpub.epa.gov/waters10/PointIndexing.Service";
+            Dictionary<string, object> dataDict = new Dictionary<string, object>()
+            {
+                {"pGeometry", "POINT(" + longitude.ToString() + " " + latitude.ToString() + ")" },
+                {"pGeometryMod", "WKT,SRSNAME=urn:ogc:def:crs:OGC::CRS84" },
+                {"pPointIndexingMethod", "DISTANCE" },
+                {"pPointIndexingMaxDist", 25 },
+                {"pOutputPathFlag", "TRUE"},
+                {"pReturnFlowlineGeomFlag", "TRUE" },
+                {"optOutCS", "SRSNAME=urn:ogc:def:crs:OGC::CRS84" },
+                {"optOutPrettyPrint", 0 }
+            };
+            string dataRequest = JsonSerializer.Serialize<Dictionary<string, object>>(dataDict);
+            StringBuilder queryUrl = new StringBuilder(url + "?");
+            foreach(KeyValuePair<string, object> kv in dataDict)
+            {
+                queryUrl.Append(kv.Key + "=" + kv.Value.ToString() + "&");
+            }
+            queryUrl.Remove(queryUrl.Length - 1, 1);
+            string data = this.DownloadData(queryUrl.ToString(), 5, null).Result;
+            object streamData = JsonSerializer.Deserialize<object>(data);
+            return streamData;
         }
 
     }

@@ -13,6 +13,9 @@ namespace Data.Simulate
     /// </summary>
     public class CurveNumber
     {
+
+        public CurveNumber() { }
+
         /// <summary>
         /// Get simulated curve number data.
         /// </summary>
@@ -70,7 +73,7 @@ namespace Data.Simulate
             return output;
         }
 
-        private Dictionary<int, double> GetCN(out string errorMsg, int comid)
+        public Dictionary<int, double> GetCN(out string errorMsg, int comid)
         {
             errorMsg = "";
             string dbPath = Path.Combine(".", "app", "App_Data", "hms_database.sqlite3");

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
+    <ProjectReference Include="..\..\Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
+  </ItemGroup>
+
+</Project>

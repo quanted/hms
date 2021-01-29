@@ -1048,8 +1048,21 @@ namespace AQUATOX.AQTSegment
             return false;
         }
 
+        public bool Has_Animal_Model()
+        {
+            for (AllVariables nS = Consts.FirstAnimal; nS <= Consts.LastAnimal; nS++)
+            {
+                TStateVariable TAn = GetStatePointer(nS, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TAn != null)
+                {
+                    if (!(TAn.UseLoadsRecAsDriver)) return true;
+                }
+            }
+            return false;
+        }
 
-public bool Has_Chemicals()
+
+        public bool Has_Chemicals()
         {
             for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
             {
@@ -1084,7 +1097,8 @@ public bool Has_Chemicals()
             if (Has_OM_Model()) dr = AQTOrganicMatter_CheckDataRequirements();
             if (dr != "") return dr;
 
-            // FIXME add check for ecotoxicology model
+            if (Has_Animal_Model()) dr = AQTAnimalModel_CheckDataRequirements();
+            if (dr != "") return dr;
 
             if (Has_Plant_Model()) dr = AQTPlantModel_CheckDataRequirements();
             if (dr != "") return dr;
@@ -1286,6 +1300,29 @@ public bool Has_Chemicals()
 
             return "";
         }
+
+        public string AQTAnimalModel_CheckDataRequirements()
+        {
+            bool FoundAnimal = false;
+            for (AllVariables nS = Consts.FirstAnimal; nS <= Consts.LastAnimal; nS++)
+            {
+                TStateVariable TAn = GetStatePointer(nS, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TAn != null)
+                {
+                    FoundAnimal = true;
+                }
+            }
+            if (!FoundAnimal) return "A TAnimal state variable must be included in the simulation. ";
+
+            TO2Obj PCO2 = (TO2Obj)GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PCO2 == null)) return "An O2 state variable (or driving variable) must be included in an animal simulation.";
+
+            TTemperature TTemp = (TTemperature)GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TTemp == null) return "A Temperature state variable or driving variable must be included in the simulation. ";
+
+            return "";
+        }
+
 
         public string AQTPlantModel_CheckDataRequirements()
         {
