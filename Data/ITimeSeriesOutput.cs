@@ -36,6 +36,13 @@ namespace Data
         /// <returns></returns>
         ITimeSeriesOutput Clone();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ITimeSeriesOutput<List<double>> ToListDouble();
+
+
     }
 
     /// <summary>
@@ -93,13 +100,14 @@ namespace Data
         /// <returns></returns>
         public ITimeSeriesOutput ToDefault(string valueFormat = "E3");
 
+
     }
 
 
     /// <summary>
     /// Concrete TimeSeriesOutput class
     /// </summary>
-        public class TimeSeriesOutput : ITimeSeriesOutput
+    public class TimeSeriesOutput : ITimeSeriesOutput
     {
         /// <summary>
         /// Dataset for the time series.
@@ -132,7 +140,33 @@ namespace Data
             newOutput = this;
             return newOutput;
         }
-        
+
+        /// <summary>
+        /// Convert ITimeSeriesOutput to ITimeSeriesOutput<list type="<double>"></list> with string representation of numerical values.
+        /// </summary>
+        /// <returns></returns>
+        public ITimeSeriesOutput<List<double>> ToListDouble()
+        {
+            if (this.Data == null)
+            {
+                return null;
+            }
+            else
+            {
+                ITimeSeriesOutput<List<double>> output = new TimeSeriesOutput<List<double>>();
+                output.DataSource = this.DataSource;
+                output.Dataset = this.Dataset;
+                output.Metadata = this.Metadata;
+                output.Data = new Dictionary<string, List<double>>();
+                foreach (var item in this.Data)
+                {
+                    List<double> values = ((IEnumerable<double>)item.Value).Cast<double>().ToList();
+                    output.Data.Add(item.Key, values);
+                }
+                return output;
+            }
+        }
+
     }
 
     /// <summary>

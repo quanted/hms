@@ -12,6 +12,16 @@ namespace Streamflow
         // -------------- Streamflow Variables -------------- //
 
         // Streamflow specific variables are listed here.
+        public string precipSource { get; set; }
+        public string runoffSource { get; set; }            // baseflow is assumed to have the same source as surface runoff
+
+        public string streamBoundarySource { get; set; }
+
+        public ITimeSeriesOutput<List<double>> precipTS { get; set; }
+        public ITimeSeriesOutput<List<double>> runoffTS { get; set; }
+        public ITimeSeriesOutput<List<double>> baseflowTS { get; set; }
+
+        public ITimeSeriesOutput<List<double>> streamTS { get; set; }
 
 
         // TimeSeries Output variable 
@@ -28,6 +38,28 @@ namespace Streamflow
         /// </summary>
         public Streamflow() { }
 
+        public Streamflow(string precipSource, string runoffSource, string streamBoundarySource)
+        {
+            this.precipSource = precipSource;
+            this.runoffSource = runoffSource;
+            this.streamBoundarySource = streamBoundarySource;
+        }
+
+        public Streamflow(ITimeSeriesOutput<List<double>> precipTS, ITimeSeriesOutput<List<double>> runoffTS, ITimeSeriesOutput<List<double>> baseflowTS)
+        {
+            this.precipTS = precipTS;
+            this.runoffTS = runoffTS;
+            this.baseflowTS = baseflowTS;
+            this.streamTS = null;
+        }
+
+        public Streamflow(ITimeSeriesOutput<List<double>> precipTS, ITimeSeriesOutput<List<double>> runoffTS, ITimeSeriesOutput<List<double>> baseflowTS, ITimeSeriesOutput<List<double>> streamTS)
+        {
+            this.precipTS = precipTS;
+            this.runoffTS = runoffTS;
+            this.baseflowTS = baseflowTS;
+            this.streamTS = streamTS;
+        }
 
         // -------------- Streamflow Functions -------------- //
 
@@ -43,7 +75,6 @@ namespace Streamflow
             this.Output = iFactory.Initialize();
 
 
-
             switch (this.Input.Source.ToLower())
             {
                 case "nwis":
@@ -51,6 +82,20 @@ namespace Streamflow
                 case "streamgauge":
                     StreamGauge sg = new StreamGauge();
                     this.Output = sg.GetData(out errorMsg, this.Output, this.Input, retries);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
+                case "constantvolume":
+                case "cv":
+                    ConstantVolume cv = new ConstantVolume();
+                    if (!System.String.IsNullOrEmpty(this.precipSource) && !System.String.IsNullOrEmpty(this.runoffSource))
+                    {
+                        // Retrieve data
+                    }
+                    else if (!(this.precipTS == null && this.runoffTS == null && this.baseflowTS == null))
+                    {
+                        // Combine data
+                    }
+
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 default:
