@@ -89,7 +89,13 @@ namespace Solar
                 };
                 this.Output.Metadata.Add("endDate", this.Input.DateTimeSpan.EndDate.ToString());
                 this.Output.Metadata.Add("columns", String.Join(", ", columns));
-                RunDayCalculation();
+                int timestep;
+                bool parsed = Int32.TryParse(this.Input.TemporalResolution, out timestep);
+                if (!parsed)
+                {
+                    timestep = 60;      // default to hourly
+                }
+                RunDayCalculation(timestep);
                 this.Output.Dataset = "Solar Calculator Day";
             }
 
@@ -249,14 +255,14 @@ namespace Solar
         /// <summary>
         /// Run day calculations for solar calculator
         /// </summary>
-        private void RunDayCalculation()
+        private void RunDayCalculation(int timestep=60)
         {
             Dictionary<string, List<string>> solarData = new Dictionary<string, List<string>>();
             DateTime currentDate = new DateTime();
 
             currentDate = this.Input.DateTimeSpan.StartDate;
             DateTime endDate = currentDate.AddDays(1);
-            currentDate = currentDate.AddMinutes(6);
+            currentDate = currentDate.AddMinutes(timestep);
 
             while (currentDate.CompareTo(endDate) <= 0)
             {
@@ -378,7 +384,7 @@ namespace Solar
                 data.Add(Math.Round(saa, 4).ToString());
 
                 solarData.Add(currentDate.ToString("MM/dd/yyyy HH:mm:ss"), data);
-                currentDate = currentDate.AddMinutes(6);
+                currentDate = currentDate.AddMinutes(timestep);
             }
             this.Output.Data = solarData;
         }
