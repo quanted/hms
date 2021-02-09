@@ -17,11 +17,15 @@ namespace Streamflow
 
         public string streamBoundarySource { get; set; }
 
+        public double constantLoading { get; set; }
+
         public ITimeSeriesOutput<List<double>> precipTS { get; set; }
         public ITimeSeriesOutput<List<double>> runoffTS { get; set; }
         public ITimeSeriesOutput<List<double>> baseflowTS { get; set; }
 
         public ITimeSeriesOutput<List<double>> streamTS { get; set; }
+
+        public ITimeSeriesOutput<List<double>> loadings { get; set; }
 
 
         // TimeSeries Output variable 
@@ -74,6 +78,12 @@ namespace Streamflow
             ITimeSeriesOutputFactory<List<double>> iFactory = new TimeSeriesOutputFactory<List<double>>();
             this.Output = iFactory.Initialize();
 
+            //TODO: Add loadings constant and loadings TS options
+            if(this.Input.Source == null)
+            {
+                errorMsg = "ERROR: Source required for retrieving data.";
+                return null;
+            }
 
             switch (this.Input.Source.ToLower())
             {
@@ -90,10 +100,15 @@ namespace Streamflow
                     if (!System.String.IsNullOrEmpty(this.precipSource) && !System.String.IsNullOrEmpty(this.runoffSource))
                     {
                         // Retrieve data
+                        this.Output = cv.GetData(out errorMsg, this.Input, this.precipSource, this.runoffSource, this.streamBoundarySource, this.streamTS, this.constantLoading, this.loadings);
                     }
                     else if (!(this.precipTS == null && this.runoffTS == null && this.baseflowTS == null))
                     {
-                        // Combine data
+                        this.Output = cv.GetData(out errorMsg, this.Input, this.precipTS, this.runoffTS, this.baseflowTS, this.streamTS, this.constantLoading, this.loadings);
+                    }
+                    else
+                    {
+                        errorMsg = "ERROR: Missing required input parameters for calculating constant volume streamflow.";
                     }
 
                     if (errorMsg.Contains("ERROR")) { return null; }

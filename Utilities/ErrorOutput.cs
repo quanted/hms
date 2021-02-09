@@ -125,6 +125,11 @@ namespace Utilities
         {
             return this.ReturnError("ERROR: Problem setting up output.");
         }
+
+        public ITimeSeriesOutput<List<double>> ToListDouble()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class MetaErrorOutput

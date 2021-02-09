@@ -160,7 +160,11 @@ namespace Data
                 output.Data = new Dictionary<string, List<double>>();
                 foreach (var item in this.Data)
                 {
-                    List<double> values = ((IEnumerable<double>)item.Value).Cast<double>().ToList();
+                    List<double> values = new List<double>();
+                    foreach (string v in item.Value)
+                    {
+                        values.Add(Convert.ToDouble(v));
+                    }
                     output.Data.Add(item.Key, values);
                 }
                 return output;

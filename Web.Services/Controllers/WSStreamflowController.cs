@@ -17,6 +17,21 @@ namespace Web.Services.Controllers
     public class StreamflowInput : TimeSeriesInput
     {
         // Add extra Dataset specific variables here.
+        public string precipSource { get; set; }
+        public string runoffSource { get; set; }            // baseflow is assumed to have the same source as surface runoff
+
+        public string streamBoundarySource { get; set; }
+
+        public double constantLoading { get; set; } = 0.0;
+
+        public ITimeSeriesOutput<List<double>> precipTS { get; set; }
+        public ITimeSeriesOutput<List<double>> runoffTS { get; set; }
+        public ITimeSeriesOutput<List<double>> baseflowTS { get; set; }
+
+        public ITimeSeriesOutput<List<double>> streamTS { get; set; }
+
+        public ITimeSeriesOutput<List<double>> loadings { get; set; }
+
     }
 
     // --------------- Swashbuckle Examples --------------- //

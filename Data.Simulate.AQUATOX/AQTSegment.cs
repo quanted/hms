@@ -217,6 +217,11 @@ namespace AQUATOX.AQTSegment
         {
             return this;
         }
+
+        public ITimeSeriesOutput<List<double>> ToListDouble()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class TRate

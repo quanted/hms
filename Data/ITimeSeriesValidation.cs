@@ -36,7 +36,7 @@ namespace Data
             ["dewpoint"] = new List<string> { "prism" },
             ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
             ["surfacepressure"] = new List<string> { "gldas" },
-            ["streamflow"] = new List<string> {"nwis", "usgs", "streamgauge"},
+            ["streamflow"] = new List<string> {"nwis", "usgs", "streamgauge", "constantvolume", "cv"},
         };
 
         static protected string[] validRemoteData =

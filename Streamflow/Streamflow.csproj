@@ -9,6 +9,9 @@
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\GIS.Operations\GIS.Operations.csproj" />
+    <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
+    <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />
+    <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 

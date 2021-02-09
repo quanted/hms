@@ -247,8 +247,7 @@ namespace WatershedDelineation
                         subsurfaceFlow[com].Input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
                     }
                     subsurfaceFlow[com].Input.InputTimeSeries["surfacerunoff"] = (TimeSeriesOutput)surfaceFlow[com].Output;
-                }
-                
+                }         
             }
 
             List<string> subsurfaceError = new List<string>();

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Streamflow
 {
-    public class ConstantVolume
+    public class KinematicWave
     {
 
         public ITimeSeriesOutput<List<double>> GetData(out string errorMsg, ITimeSeriesInput input, string precipSource, string runoffSource, string boundarySource="", ITimeSeriesOutput<List<double>> streamTS=null, double constantLoading=0.0, ITimeSeriesOutput<List<double>> loadings=null)
@@ -71,7 +71,7 @@ namespace Streamflow
         {
             ITimeSeriesOutputFactory<List<double>> oFactory = new TimeSeriesOutputFactory<List<double>>();
             ITimeSeriesOutput<List<double>> streamOut = oFactory.Initialize();
-            streamOut.DataSource = "constantvolume";
+            streamOut.DataSource = "kinematicwave";
             streamOut.Dataset = "streamflow";
             streamOut.Metadata.Add("precip_source", precipTS.DataSource);
             streamOut.Metadata.Add("runoff_source", runoffTS.DataSource);
