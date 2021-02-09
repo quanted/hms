@@ -262,5 +262,10 @@ namespace Precipitation
 
             return valid;
         }
+
+        public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string v, string rawOutput, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
