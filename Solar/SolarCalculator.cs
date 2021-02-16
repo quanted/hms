@@ -123,6 +123,8 @@ namespace Solar
             DateTime end = new DateTime();
             end = this.Input.DateTimeSpan.EndDate.AddDays(1);
 
+            string format = Input.DateTimeSpan.DateTimeFormat;
+
             TimeSpan hour = TimeSpan.Parse(this.LocalTime);
             currentDate = currentDate.Add(hour);
             while (!(currentDate.CompareTo(end) > 0))
@@ -246,7 +248,7 @@ namespace Solar
                 double saa = GetSolarAzimuthAngle(this.Input.Geometry.Point.Latitude, ha, sza, sd);
                 data.Add(Math.Round(saa, 4).ToString());
 
-                solarData.Add(currentDate.ToString("MM/dd/yyyy"), data);
+                solarData.Add(currentDate.ToString(format), data);
                 currentDate = currentDate.AddDays(1);
             }
             this.Output.Data = solarData;
@@ -259,6 +261,12 @@ namespace Solar
         {
             Dictionary<string, List<string>> solarData = new Dictionary<string, List<string>>();
             DateTime currentDate = new DateTime();
+
+            string format = Input.DateTimeSpan.DateTimeFormat;
+            if (timestep < 60)
+            {
+                format = "yyyy-MM-dd HH:mm";
+            }
 
             currentDate = this.Input.DateTimeSpan.StartDate;
             DateTime endDate = currentDate.AddDays(1);
@@ -383,7 +391,7 @@ namespace Solar
                 double saa = GetSolarAzimuthAngle(this.Input.Geometry.Point.Latitude, ha, sza, sd);
                 data.Add(Math.Round(saa, 4).ToString());
 
-                solarData.Add(currentDate.ToString("MM/dd/yyyy HH:mm:ss"), data);
+                solarData.Add(currentDate.ToString(format), data);
                 currentDate = currentDate.AddMinutes(timestep);
             }
             this.Output.Data = solarData;
