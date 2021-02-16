@@ -510,6 +510,210 @@ namespace Data.Simulate
             };
             return derivatives;
         }
+    
+    
+        private void CalculateQ()
+        {
+            // QCALC_KW.f95
+
+            //double[] qIN0;
+            //double[] qINdt;
+            //double[] qINPore;
+            //double[] qINAtm;
+            //double[] surfElTl;
+            //double[] cWaveTime;
+            //double[] qSpecSeg;
+
+            //double[] dSumQ;
+            //double[] dQSeg;
+            //double[] dQDeriv;
+            //double[] d0Vol;
+            //double[] qChanT0;
+            //double[] dQSegT0;
+            //double[] dQIN;
+            //double[] xArea;
+            //double[] dQSpecSeg;
+
+            double da;
+            double dv;
+            double dhtStep;
+            double Q;
+
+            if (this.qinit)
+            {
+                this.Initialize();
+                if (this.endPeriod)
+                {
+                    return;
+                }
+                this.tsave = this.time;
+                this.maxNRiter = 20;
+                this.qNRerr = 0.00001;
+                this.startFactor = 0.2;
+                this.startFactor2 = 0.05;
+                this.iErrorCount = 0;
+            }
+
+            for (int iseg = 1; iseg < this.noseg; iseg++)
+            {
+                if(this.itype[iseg] <= 2)
+                {
+                    qIN0[iseg] = this.qsum[iseg][iseg];
+                    this.qsum[iseg][0] = 0.0;
+                    this.qINdt[iseg] = 0.0;
+                    this.qINPore[iseg] = 0.0;
+                    this.qINAtm[iseg] = 0.0;
+                    this.qSpecSeg[iseg] = 0.0;
+                    this.dqSpecSeg[iseg] = 0.0;
+                    this.surfElTl[iseg] = this.surfElev[iseg];
+                    this.qSegT0[iseg] = this.qseg[iseg];
+                    this.dqSeg[iseg] = this.qseg[iseg];
+                    this.dqSegT0[iseg] = this.qseg[iseg];
+                    this.depthT0[iseg] = this.depthG[iseg];
+                    double r = this.depthG[iseg] - this.depthQ0[iseg];
+                    if(this.qseg[iseg] <= 0.0)
+                    {
+                        this.segWidth[iseg] = this.widthQ0[iseg];
+                    }
+                    else
+                    {
+                        this.segWidth[iseg] = this.bmult[iseg] * Math.Pow(this.qseg[iseg], this.bexp[iseg]);
+                    }
+                    this.xArea[iseg] = this.segWidth[iseg] * r;
+                    this.d0Volume[iseg] = this.dVolume[iseg];
+                    if (this.boundElevSeg[iseg])
+                    {
+                        int ni = this.iElevFunc[iseg];
+                        this.surfElevBoundT0[iseg] = this.surfElevBound[iseg];
+                        this.surfElevBound[iseg] = this.qint[1][ni];
+                    }
+                }
+            }
+
+            for (int ichn = 1; ichn < this.nChannels; ichn++)
+            {
+                this.qChanT0[ichn] = this.qChan[ichn];
+                this.velocT0[ichn] = this.velocT1[ichn];
+            }
+            for (int j = 1; j < this.noseg; j++)
+            {
+                for (int i = 0; i < this.noseg; i++)
+                {
+                    this.qsum[i][j] = 0.0;
+                }
+            }
+
+            int nf = 2;                             // l:148
+            int ninqx = this.ninQ[nf];
+            if (ninqx >= 0)
+            {
+                for (int ni = 1; ni < ninqx; ni++)
+                {
+                    int noQ = this.noQS[nf][ni];
+                    for (int nq = 1; nq < noQ; nq++)
+                    {
+                        Q = this.bqPore[ni][nq] * this.qint[nf][ni];
+                        int I = this.iqPore[ni][nq];
+                        int J = this.jqPore[ni][nq];
+                        if (this.itype[I] <= 2)
+                        {
+                            this.qINPore[I] = this.qINPore[I] + Q;
+                        }
+                    }
+                }
+            }
+
+            nf = 6;                                 // l:165
+            ninqx = this.ninQ[nf];
+            if (ninqx >= 0)
+            {
+                for (int ni = 1; ni < ninqx; ni++)
+                {
+                    int noq = this.noQS[nf][ni];
+                    for (int nq = 1; nq < ninqx; nq++)
+                    {
+                        Q = this.bqPore[ni][nq] * this.qint[nf][ni];
+                        int I = this.iqPore[ni][nq];
+                        int J = this.jqPore[ni][nq];
+                        if (this.itype[I] <= 1)
+                        {
+                            this.qINAtm[I] = this.qINAtm[I] + Q;
+                        }
+                    }
+                }
+            }
+
+            nf = 1;                                 // l:182
+            ninqx = this.ninQ[nf];
+            if (ninqx <= 0)
+            {
+                return;
+            }
+            double maxFlowRatio = 1.0;         
+            for (int ni = 1; ni < ninqx; ni++)
+            {
+                int noq = this.noQS[nf][ni];
+                if (this.internalFlowBoundary[ni])
+                {
+                    for (int nq = 1; nq < noq; nq++)
+                    {
+                        Q = this.bqFlow[ni][nq] * this.qint[nf][ni];
+                        int I = this.iqFlow[ni][nq];
+                        int J = this.jqFlow[ni][nq];
+
+                        this.qSpecSeg[J] = Q / 86400.0;
+                        this.dqSpecSeg[J] = this.qSpecSeg[J];
+                    }
+                }
+                else
+                {
+                    for(int nq = 1; nq < noq; nq++)
+                    {
+                        Q = this.bqFlow[ni][nq] * this.qint[nf][ni];
+                        int I = this.iqFlow[ni][nq];
+                        int J = this.jqFlow[ni][nq];
+                        if (J == 0)
+                        {
+                            this.qINdt[I] = this.qINdt[I] + Q;
+                            if (this.qIN0[I] > 0.0)
+                            {
+                                if (this.boundElevSeg[I])
+                                {
+                                    this.flowRatio = 1.0;
+                                }
+                                else
+                                {
+                                    this.flowRatio = this.qINdt[I] / this.qIN0[I];
+                                }
+                            }
+                            else
+                            {
+                                this.flowRatio = 2.0;
+                            }
+                            if (this.flowRatio > maxFlowRatio)
+                            {
+                                maxFlowRatio = this.flowRatio;
+                            }
+                        }
+                    }
+                }
+            }
+            for (int iseg = 1; iseg < this.noseg; iseg++)
+            {
+                double qINhdt = (this.qIN0[iseg] + this.qINdt[iseg]) / 2.0;
+                this.qsum[iseg][0] = qINhdt + this.qINPore[iseg] + this.qINAtm[iseg];
+                this.dqIN[iseg] = this.qsum[iseg][0] / 86400.0;
+            }
+
+            nf = 1;                                 // l:233
+            int ni = this.nMain;
+            int noq = this.noQS[nf][ni];
+
+
+            // l:252
+
+        }
+    
     }
 
     
