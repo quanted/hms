@@ -5,12 +5,14 @@ using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Threading.Tasks;
 using Web.Services.Models;
-using System.Text.Json;
 using System.Collections.Generic;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 namespace Web.Services.Controllers
 {
-
 
     /// <summary>
     /// HMS API controller for retrieving catchment data.
@@ -30,7 +32,9 @@ namespace Web.Services.Controllers
             {
                 WSCatchment catchment = new WSCatchment();
                 Dictionary<string, object> result = await catchment.Get(comid, streamcat, geometry, nwis, streamGeometry, cn);
-                return new ObjectResult(result);
+                string jsonResults = System.Text.Json.JsonSerializer.Serialize(result);
+                JObject jResult = JsonConvert.DeserializeObject<JObject>(jsonResults);
+                return new ObjectResult(jResult); ;
             }
             catch (Exception ex)
             {
