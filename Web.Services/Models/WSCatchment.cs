@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WatershedDelineation;
 
 namespace Web.Services.Models
 {
@@ -16,7 +17,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="comid"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, object>> Get(string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false)
+        public async Task<Dictionary<string, object>> Get(string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false, bool network=false)
         {
             string errorMsg = "";
             
@@ -104,6 +105,13 @@ namespace Web.Services.Models
                     result.Add("curve_number", cnData);
                 }
             }
+            if (network)
+            {
+                WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
+                RootObject streamNetwork = streamN.GetNetwork();
+                result.Add("network", streamNetwork);
+            }
+
             result.Add("metadata", metadata);
 
             // Weather Station

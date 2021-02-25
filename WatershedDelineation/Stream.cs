@@ -101,11 +101,19 @@ namespace WatershedDelineation
 
         LinkedList<StreamSegment> StreamSegments { get; set; }
                 
-        public Streams(string start, string end, LinkedList<StreamSegment> segs)
+        public Streams(string start, string end = null, LinkedList<StreamSegment> segs = null)
         {
             this.startCOMID = start;
             this.stopCOMID = end;
             this.StreamSegments = segs;
+        }
+
+        public RootObject GetNetwork()
+        {
+            string errorMsg = "";
+            string data = GetStreamNetwork(out errorMsg);
+            RootObject networkObject = Utilities.JSON.Deserialize<RootObject>(data);
+            return networkObject;
         }
 
         public LinkedList<StreamSegment> GetStreams(ITimeSeriesInput input, List<List<object>> contaminantInflow, string inflowSource, out string comids)
@@ -231,7 +239,43 @@ namespace WatershedDelineation
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                errorMsg = "ERROR: Unable to download requested epa waters data. " + ex.Message;
+            }
+            return data;
+        }
+
+        private string GetStreamNetwork(out string errorMsg)
+        {
+            errorMsg = "";
+            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID;
+            string data = "";
+            try
+            {
+                // TODO: Read in max retry attempt from config file.
+                int retries = 5;
+
+                // Response status message
+                string status = "";
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    WebRequest wr = WebRequest.Create(requestURL);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data = reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(200);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsg = "ERROR: Unable to download requested stream network data. " + ex.Message;
             }
             return data;
         }

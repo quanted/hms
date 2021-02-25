@@ -26,12 +26,12 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, bool streamcat=false, bool geometry=false, bool nwis=false, bool streamGeometry=false, bool cn=false)
+        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, bool streamcat=false, bool geometry=false, bool nwis=false, bool streamGeometry=false, bool cn=false, bool network=false)
         {
             try
             {
                 WSCatchment catchment = new WSCatchment();
-                Dictionary<string, object> result = await catchment.Get(comid, streamcat, geometry, nwis, streamGeometry, cn);
+                Dictionary<string, object> result = await catchment.Get(comid, streamcat, geometry, nwis, streamGeometry, cn, network);
                 string jsonResults = System.Text.Json.JsonSerializer.Serialize(result);
                 JObject jResult = JsonConvert.DeserializeObject<JObject>(jsonResults);
                 return new ObjectResult(jResult); ;
