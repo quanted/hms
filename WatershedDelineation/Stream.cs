@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WatershedDelineation
 {
@@ -108,11 +110,11 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public RootObject GetNetwork()
+        public object GetNetwork()
         {
             string errorMsg = "";
             string data = GetStreamNetwork(out errorMsg);
-            RootObject networkObject = Utilities.JSON.Deserialize<RootObject>(data);
+            object networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
             return networkObject;
         }
 
@@ -247,7 +249,7 @@ namespace WatershedDelineation
         private string GetStreamNetwork(out string errorMsg)
         {
             errorMsg = "";
-            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID;
+            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=50";
             string data = "";
             try
             {

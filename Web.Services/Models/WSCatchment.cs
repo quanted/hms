@@ -1,4 +1,5 @@
 ﻿using Data;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -108,7 +109,7 @@ namespace Web.Services.Models
             if (network)
             {
                 WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
-                RootObject streamNetwork = streamN.GetNetwork();
+                var streamNetwork = streamN.GetNetwork();
                 result.Add("network", streamNetwork);
             }
 
