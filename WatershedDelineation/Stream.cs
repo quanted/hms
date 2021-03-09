@@ -110,10 +110,10 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public object GetNetwork()
+        public object GetNetwork(double maxDistance=50.0, string endComid=null)
         {
             string errorMsg = "";
-            string data = GetStreamNetwork(out errorMsg);
+            string data = GetStreamNetwork(out errorMsg, endComid, maxDistance);
             object networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
             return networkObject;
         }
@@ -246,10 +246,14 @@ namespace WatershedDelineation
             return data;
         }
 
-        private string GetStreamNetwork(out string errorMsg)
+        private string GetStreamNetwork(out string errorMsg, string endComid=null, double maxDistance=50.0)
         {
             errorMsg = "";
-            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=50";
+            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+            if (!string.IsNullOrEmpty(endComid))
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + this.startCOMID + "&pStopComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
             string data = "";
             try
             {

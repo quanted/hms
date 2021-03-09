@@ -2,6 +2,7 @@
 using System.Data.SQLite;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace WatershedDelineation
 {
@@ -202,5 +203,36 @@ namespace WatershedDelineation
             }
             return dt;
         }
+
+        public static List<List<object>> generateTable(object networkData, string huc=null)
+        {
+            string serializedData = JsonSerializer.Serialize(networkData);
+            JsonDocument data = JsonSerializer.Deserialize<JsonDocument>(serializedData);
+            List<List<object>> networkTable = new List<List<object>>();
+            List<object> columns = new List<object>()
+            {
+                "comid", "hydroseq","uphydroseq", "dnhydroseq", "lengthkm", "travtime", "ftype", "wbd_huc12" 
+            };
+            networkTable.Add(columns);
+            foreach(var seg in data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard").EnumerateArray())
+            {
+                string comid = seg.GetProperty("comid").ToString();
+                List<object> values = new List<object>()
+                {
+                    comid,
+                    seg.GetProperty("hydroseq"),
+                    seg.GetProperty("uphydroseq"),
+                    seg.GetProperty("dnhydroseq"),
+                    seg.GetProperty("lengthkm"),
+                    seg.GetProperty("travtime"),
+                    seg.GetProperty("ftype"),
+                    seg.GetProperty("wbd_huc12")
+                };
+                networkTable.Add(values);
+            }
+
+            return networkTable;
+        }
+
     }
 }
