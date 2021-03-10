@@ -16,7 +16,7 @@ namespace Web.Services.Controllers
     /// <summary>
     /// HMS API controller for retrieving stream data.
     /// </summary>
-    [Route("api/info/stream")]
+    [Route("api/info/streamnetwork")]
     [Produces("application/json")]
     public class WSStreamController : Controller
     {
