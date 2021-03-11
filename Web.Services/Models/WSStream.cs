@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using WatershedDelineation;
 
@@ -36,23 +37,60 @@ namespace Web.Services.Models
             result.Add("network", networkTable);
             List<List<int>> segOrder = this.generateOrder(networkTable);
             result.Add("order", segOrder);
-
+            Dictionary<string, List<string>> sourceComIDs = this.getSourceComids(segOrder, networkTable);
+            result.Add("sources", sourceComIDs);
             return result;
+        }
+
+        private Dictionary<string, List<string>> getSourceComids(List<List<int>> order, List<List<object>> table)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            Dictionary<string, List<string>> sourceCOMIDs = new Dictionary<string, List<string>>();
+            List<int> hydroList = new List<int>();
+            for(int i = 1; i < table.Count; i++)
+            {
+                string comid = table[i][0].ToString();
+                sourceCOMIDs.Add(comid, new List<string>());
+                int hydroseq = Int32.Parse(table[i][1].ToString());
+                hydroList.Add(hydroseq);
+            }
+            List<string> boundaryCOMIDS = new List<string>();
+            for (int i = 1; i < table.Count; i++)
+            {
+                string comid = table[i][0].ToString();
+                int hydroseq = Int32.Parse(table[i][1].ToString());
+                int dnhydroseq = Int32.Parse(table[i][3].ToString());
+                int uphydroseq = Int32.Parse(table[i][2].ToString());
+                for(int j = 1; j < table.Count; j++)
+                {
+                    string comid2 = table[j][0].ToString();
+                    int hydroseq2 = Int32.Parse(table[j][1].ToString());
+                    if (hydroseq2 == dnhydroseq)
+                    {
+                        sourceCOMIDs[comid2].Add(comid);
+                    }
+                }
+                if(uphydroseq != 0 && !hydroList.Contains(uphydroseq))
+                {
+                    string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + hydroseq.ToString();
+                    Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
+                    sourceCOMIDs[comid].Add(sourceComid["ComID"]);
+                    boundaryCOMIDS.Add(sourceComid["ComID"]);
+                }
+            }
+            sourceCOMIDs.Add("boundaries", boundaryCOMIDS);
+            return sourceCOMIDs;
         }
 
         public List<List<int>> generateOrder(List<List<object>> networkTable)
         {
 
-            List<List<object>> seq = new List<List<object>>();
             List<int> dag = new List<int>();
             for(int i = networkTable.Count - 1; i > 0; i--)
             {
                 int hydroseq = Int32.Parse(networkTable[i][1].ToString());
-                seq.Add(new List<object>());
-                seq[0].Add(networkTable[i]);
                 dag.Add(hydroseq);
             }
-
 
             List<List<int>> seqOrder = new List<List<int>>();
             seqOrder.Add(new List<int>()
