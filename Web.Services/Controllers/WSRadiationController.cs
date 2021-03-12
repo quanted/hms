@@ -15,7 +15,13 @@ namespace Web.Services.Controllers
     public class RadiationInput : TimeSeriesInput
     {
         // Add extra radiation specific variables here
-
+        /// <summary>
+        /// Description: Radiation data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "daymet"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //

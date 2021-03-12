@@ -16,6 +16,13 @@ namespace Web.Services.Controllers
     public class PrecipitationInput : TimeSeriesInput
     {
         // Add extra Dataset specific variables here.
+        /// <summary>
+        /// Description: Precipitation data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //

@@ -16,6 +16,14 @@ namespace Web.Services.Controllers
     public class TemperatureInput : TimeSeriesInput
     {
         // Add extra evapotranspiration specific variables here
+
+        /// <summary>
+        /// Description: Temperature data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //

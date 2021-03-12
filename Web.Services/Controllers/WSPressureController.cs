@@ -15,6 +15,13 @@ namespace Web.Services.Controllers
     public class PressureInput : TimeSeriesInput
     {
         // Add extra pressure specific variables here
+        /// <summary>
+        /// Description: Pressue data source;
+        /// Default: "gldas";
+        /// Options: ["gldas"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
 
     }
 

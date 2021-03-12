@@ -15,11 +15,19 @@ namespace Web.Services.Controllers
     public class WindInput : TimeSeriesInput
     {
         // Add extra wind specific variables here
+        /// <summary>
+        /// Description: Wind data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
 
-        /// Wind component
-        /// User request for U, V values and/or speed, direction. All input is made upper case for comparison.
-        /// Valid values: U/V, SPEED/DIR (SPEED/DIRECTION), ALL
-        /// Defaults: ALL 
+        /// Description: Wind data component format;
+        /// Default: "All";
+        /// Options: ["U/V", "SPEED/DIR", "ALL"];
+        /// Required: True;
+        /// </summary>
         public string Component = "ALL";
     }
 

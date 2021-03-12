@@ -14,8 +14,20 @@ namespace Web.Services.Controllers
     /// </summary>
     public class SubSurfaceFlowInput : TimeSeriesInput
     {
+
         /// <summary>
-        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// Description: Subsurface flow data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "curvenumber"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
+
+        /// <summary>
+        /// Description: Precipitation data source for Curve Number.;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+        /// Required: False;
         /// </summary>
         public string PrecipSource { get; set; }
     }

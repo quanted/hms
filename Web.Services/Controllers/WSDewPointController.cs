@@ -15,6 +15,13 @@ namespace Web.Services.Controllers
     public class DewPointInput : TimeSeriesInput
     {
         // Add extra Dew Point specific variables here
+        /// <summary>
+        /// Description: DewPoint data source;
+        /// Default: "prism";
+        /// Options: ["prism"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //

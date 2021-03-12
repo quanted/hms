@@ -16,9 +16,20 @@ namespace Web.Services.Controllers
     {
         // Add extra Humidity specific variables here
         /// <summary>
-        /// Relative or Specific Humidity
+        /// Description: Relative or Specific Humidity. Only relative humidity implemented.;
+        /// Default: True;
+        /// Options: True;
+        /// Required: True;
         /// </summary>
         public bool Relative { get; set; }
+
+        /// <summary>
+        /// Description: Humidity data source;
+        /// Default: "prism";
+        /// Options: ["prism"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //

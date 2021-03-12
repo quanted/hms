@@ -17,9 +17,20 @@ namespace Web.Services.Controllers
     {
         // Add extra SoilMoisture specific variables here
         /// <summary>
-        /// List of requested soil moisture layers
+        /// Description: List of requested soil moisture layers;
+        /// Default: None;
+        /// Options: ["0-10", "10-40", "40-100", "100-200", "0-100", "0-200"];
+        /// Required: True;
         /// </summary>
         public List<string> Layers { get; set; }
+
+        /// <summary>
+        /// Description: Soil moisture data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas"];
+        /// Required: True;
+        /// </summary>
+        public string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
