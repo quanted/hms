@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["prism"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -39,7 +39,7 @@ namespace Web.Services.Controllers
         {
             DewPointInput example = new DewPointInput()
             {
-                Source = "prism",
+                source = "prism",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -76,12 +76,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]DewPointInput tempInput)
+        public async Task<IActionResult> POST([FromBody]DewPointInput dInput)
         {
             try
             {
+                dInput.Source = dInput.source;
                 WSDewPoint dPoint = new WSDewPoint();
-                ITimeSeriesOutput results = await dPoint.GetDewPoint(tempInput);
+                ITimeSeriesOutput results = await dPoint.GetDewPoint(dInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -95,7 +96,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(dInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

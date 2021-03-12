@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Web.Services.Controllers;
 
 namespace Web.Services.Models
 {
@@ -17,7 +18,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input">ITimeSeriesInput</param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetPrecipitation(ITimeSeriesInput input)
+        public async Task<ITimeSeriesOutput> GetPrecipitation(PrecipitationInput input)
         {
             string errorMsg = "";
             

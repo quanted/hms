@@ -30,7 +30,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -48,7 +48,7 @@ namespace Web.Services.Controllers
         {
             SoilMoistureInput example = new SoilMoistureInput()
             {
-                Source = "nldas",
+                source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -85,16 +85,17 @@ namespace Web.Services.Controllers
         /// <summary>
         /// POST method for submitting a request for soil moisture data.
         /// </summary>
-        /// <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="smInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]SoilMoistureInput evapoInput)
+        public async Task<IActionResult> POST([FromBody]SoilMoistureInput smInput)
         {
             try
             {
+                smInput.Source = smInput.source;
                 WSSoilMoisture evapo = new WSSoilMoisture();
-                ITimeSeriesOutput results = await evapo.GetSoilMoisture(evapoInput);
+                ITimeSeriesOutput results = await evapo.GetSoilMoisture(smInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -108,7 +109,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(evapoInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(smInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

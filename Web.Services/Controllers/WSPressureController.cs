@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["gldas"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
 
     }
 
@@ -40,7 +40,7 @@ namespace Web.Services.Controllers
         {
             PressureInput example = new PressureInput()
             {
-                Source = "gldas",
+                source = "gldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -78,12 +78,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]PressureInput tempInput)
+        public async Task<IActionResult> POST([FromBody]PressureInput pInput)
         {
             try
             {
+                pInput.Source = pInput.source;
                 WSPressure press = new WSPressure();
-                ITimeSeriesOutput results = await press.GetPressure(tempInput);
+                ITimeSeriesOutput results = await press.GetPressure(pInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -97,7 +98,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(pInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

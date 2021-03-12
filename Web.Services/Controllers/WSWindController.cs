@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
 
         /// Description: Wind data component format;
         /// Default: "All";
@@ -46,7 +46,7 @@ namespace Web.Services.Controllers
         {
             WindInput example = new WindInput()
             {
-                Source = "nldas",
+                source = "nldas",
                 Component = "all",
                 DateTimeSpan = new DateTimeSpan()
                 {
@@ -88,6 +88,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                tempInput.Source = tempInput.source;
                 WSWind wind = new WSWind();
                 ITimeSeriesOutput results = await wind.GetWind(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

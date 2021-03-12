@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "curvenumber"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
 
         /// <summary>
         /// Description: Precipitation data source for Curve Number.;
@@ -49,7 +49,7 @@ namespace Web.Services.Controllers
         {
             SurfaceRunoffInput example = new SurfaceRunoffInput()
             {
-                Source = "nldas",
+                source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -90,6 +90,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                runoffInput.Source = runoffInput.source;
                 if(runoffInput.Geometry.GeometryMetadata == null && runoffInput.PrecipSource != null)
                 {
                     runoffInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()

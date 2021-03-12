@@ -15,6 +15,7 @@ namespace Web.Services.Controllers
     /// </summary>
     public class PrecipitationInput : TimeSeriesInput
     {
+
         // Add extra Dataset specific variables here.
         /// <summary>
         /// Description: Precipitation data source;
@@ -22,7 +23,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -40,7 +41,7 @@ namespace Web.Services.Controllers
         {
             PrecipitationInput example = new PrecipitationInput()
             {
-                Source = "nldas",
+                source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -93,6 +94,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                precipInput.Source = precipInput.source;
                 Console.WriteLine("INPUT" + precipInput.ToString());
                 WSPrecipitation precip = new WSPrecipitation();
                 var stpWatch = System.Diagnostics.Stopwatch.StartNew();

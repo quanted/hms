@@ -23,7 +23,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "ncei", "daymet", "prism"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -41,7 +41,7 @@ namespace Web.Services.Controllers
         {
             TemperatureInput example = new TemperatureInput()
             {
-                Source = "nldas",
+                source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -82,6 +82,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                tempInput.Source = tempInput.source;
                 WSTemperature temp = new WSTemperature();
                 ITimeSeriesOutput results = await temp.GetTemperature(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

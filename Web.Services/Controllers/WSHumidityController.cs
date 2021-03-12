@@ -29,7 +29,7 @@ namespace Web.Services.Controllers
         /// Options: ["prism"];
         /// Required: True;
         /// </summary>
-        public string Source { get; set; }
+        public string source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -47,7 +47,7 @@ namespace Web.Services.Controllers
         {
             HumidityInput example = new HumidityInput()
             {
-                Source = "prism",
+                source = "prism",
                 Relative = true,
                 DateTimeSpan = new DateTimeSpan()
                 {
@@ -85,12 +85,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]HumidityInput tempInput)
+        public async Task<IActionResult> POST([FromBody]HumidityInput hInput)
         {
             try
             {
+                hInput.Source = hInput.source;
                 WSHumidity humid = new WSHumidity();
-                ITimeSeriesOutput results = await humid.GetHumidity(tempInput);
+                ITimeSeriesOutput results = await humid.GetHumidity(hInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -104,7 +105,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(hInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
