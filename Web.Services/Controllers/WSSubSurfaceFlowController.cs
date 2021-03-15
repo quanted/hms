@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "curvenumber"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
 
         /// <summary>
         /// Description: Precipitation data source for Curve Number.;
@@ -47,7 +47,7 @@ namespace Web.Services.Controllers
         {
             SubSurfaceFlowInput example = new SubSurfaceFlowInput()
             {
-                source = "nldas",
+                Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -88,7 +88,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                ssFlowInput.Source = ssFlowInput.source;
+                ((Data.TimeSeriesInput)ssFlowInput).Source = ssFlowInput.Source;
                 if (ssFlowInput.Geometry.GeometryMetadata == null && ssFlowInput.PrecipSource != null)
                 {
                     ssFlowInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()

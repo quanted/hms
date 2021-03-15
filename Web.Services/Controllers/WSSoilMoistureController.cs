@@ -30,7 +30,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -48,7 +48,7 @@ namespace Web.Services.Controllers
         {
             SoilMoistureInput example = new SoilMoistureInput()
             {
-                source = "nldas",
+                Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -93,7 +93,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                smInput.Source = smInput.source;
+                ((Data.TimeSeriesInput)smInput).Source = smInput.Source;
                 WSSoilMoisture evapo = new WSSoilMoisture();
                 ITimeSeriesOutput results = await evapo.GetSoilMoisture(smInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

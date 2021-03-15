@@ -29,7 +29,7 @@ namespace Web.Services.Controllers
         /// Options: ["prism"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -47,7 +47,7 @@ namespace Web.Services.Controllers
         {
             HumidityInput example = new HumidityInput()
             {
-                source = "prism",
+                Source = "prism",
                 Relative = true,
                 DateTimeSpan = new DateTimeSpan()
                 {
@@ -89,7 +89,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                hInput.Source = hInput.source;
+                ((Data.TimeSeriesInput)hInput).Source = hInput.Source;
                 WSHumidity humid = new WSHumidity();
                 ITimeSeriesOutput results = await humid.GetHumidity(hInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

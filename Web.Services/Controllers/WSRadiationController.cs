@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "daymet"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -39,7 +39,7 @@ namespace Web.Services.Controllers
         {
             RadiationInput example = new RadiationInput()
             {
-                source = "nldas",
+                Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -80,7 +80,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                tempInput.Source = tempInput.source;
+                ((Data.TimeSeriesInput)tempInput).Source = tempInput.Source;
                 WSRadiation rad = new WSRadiation();
                 ITimeSeriesOutput results = await rad.GetRadiation(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["prism"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -39,7 +39,7 @@ namespace Web.Services.Controllers
         {
             DewPointInput example = new DewPointInput()
             {
-                source = "prism",
+                Source = "prism",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -80,7 +80,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                dInput.Source = dInput.source;
+                ((Data.TimeSeriesInput)dInput).Source = dInput.Source;
                 WSDewPoint dPoint = new WSDewPoint();
                 ITimeSeriesOutput results = await dPoint.GetDewPoint(dInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

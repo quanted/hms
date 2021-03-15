@@ -21,7 +21,7 @@ namespace Web.Services.Controllers
         /// Options: ["gldas"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
 
     }
 
@@ -40,7 +40,7 @@ namespace Web.Services.Controllers
         {
             PressureInput example = new PressureInput()
             {
-                source = "gldas",
+                Source = "gldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -82,7 +82,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                pInput.Source = pInput.source;
+                ((Data.TimeSeriesInput)pInput).Source = pInput.Source;
                 WSPressure press = new WSPressure();
                 ITimeSeriesOutput results = await press.GetPressure(pInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

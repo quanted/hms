@@ -23,7 +23,7 @@ namespace Web.Services.Controllers
         /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
         /// Required: True;
         /// </summary>
-        public string source { get; set; }
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -41,7 +41,7 @@ namespace Web.Services.Controllers
         {
             PrecipitationInput example = new PrecipitationInput()
             {
-                source = "nldas",
+                Source = "nldas",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2015, 01, 01),
@@ -94,7 +94,7 @@ namespace Web.Services.Controllers
         {
             try
             {
-                precipInput.Source = precipInput.source;
+                ((Data.TimeSeriesInput)precipInput).Source = precipInput.Source;
                 Console.WriteLine("INPUT" + precipInput.ToString());
                 WSPrecipitation precip = new WSPrecipitation();
                 var stpWatch = System.Diagnostics.Stopwatch.StartNew();
