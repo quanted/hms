@@ -123,7 +123,7 @@ namespace Data
 
         /// <summary>
         /// Description: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.;
-        /// Defualt: "default";
+        /// Default: "default";
         /// Options: ["default", "hourly", "3hourly", "daily", "monthly"];
         /// Required: False;
         /// </summary>

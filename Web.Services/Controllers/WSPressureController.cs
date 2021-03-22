@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Pressure Input that implements TimeSeriesInput object
+    /// Label: Pressue
+    /// Description: Surface air pressure input that implements TimeSeriesInput object
     /// </summary>
     public class PressureInput : TimeSeriesInput
     {

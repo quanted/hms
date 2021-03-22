@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SubSurfaceFlow Input that implements TimeSeriesInput object
+    /// Label: Sub-Surface Flow;
+    /// Description: Sub-surface water flow (baseflow).;
     /// </summary>
     public class SubSurfaceFlowInput : TimeSeriesInput
     {

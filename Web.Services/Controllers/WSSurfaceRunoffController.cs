@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SurfaceRunoff Input that implements TimeSeriesInput object
+    /// Label: Surface Runoff;
+    /// Description: Surface rainfall runoff.;
     /// </summary>
     public class SurfaceRunoffInput : TimeSeriesInput
     {

@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Radiation Input that implements TimeSeriesInput object
+    /// Label: Solar Radiation;
+    /// Description: High and short wave radiation that reaches the ground.
     /// </summary>
     public class RadiationInput : TimeSeriesInput
     {

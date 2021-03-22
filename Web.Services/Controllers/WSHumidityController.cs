@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Humidity Input that implements TimeSeriesInput object
+    /// Label: Humidity;
+    /// Description: Humidity input;
     /// </summary>
     public class HumidityInput : TimeSeriesInput
     {

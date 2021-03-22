@@ -11,7 +11,8 @@ namespace Web.Services.Controllers
 {
 
     /// <summary>
-    /// Temperature Input that implements TimeSeriesInput object
+    /// Label: Temperature;
+    /// Description: Near-ground air temperature.;
     /// </summary>
     public class TemperatureInput : TimeSeriesInput
     {

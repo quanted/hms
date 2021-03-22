@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Wind Input that implements TimeSeriesInput object
+    /// Label: Wind;
+    /// Description: Near-ground wind.;
     /// </summary>
     public class WindInput : TimeSeriesInput
     {

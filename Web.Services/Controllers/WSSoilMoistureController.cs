@@ -11,7 +11,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SoilMoisture Input that implements TimeSeriesInput object
+    /// Label: Soil Moiture;
+    /// Description: Soil moisture content for specified layer depths;
     /// </summary>
     public class SoilMoistureInput : TimeSeriesInput
     {

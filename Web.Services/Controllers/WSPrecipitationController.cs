@@ -11,7 +11,8 @@ namespace Web.Services.Controllers
 {
 
     /// <summary>
-    /// Precipitation Input that implements TimeSeriesInput object.
+    /// Label: Precipitation;
+    /// Description: Precipitation Input that implements TimeSeriesInput object.;
     /// </summary>
     public class PrecipitationInput : TimeSeriesInput
     {

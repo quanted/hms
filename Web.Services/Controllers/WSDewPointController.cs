@@ -10,7 +10,8 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Dew Point Input that implements TimeSeriesInput object
+    /// Label: Dew Point
+    /// Description: Dew Point Input that implements TimeSeriesInput object;
     /// </summary>
     public class DewPointInput : TimeSeriesInput
     {
