@@ -74,6 +74,7 @@
     <ProjectReference Include="..\Animals\Animals.AQUATOX\Animals.AQUATOX.csproj" />
     <ProjectReference Include="..\Chemicals\Bioaccumulation.AQUATOX\Bioaccumulation.AQUATOX.csproj" />
     <ProjectReference Include="..\Chemicals\Chemicals.AQUATOX\Chemicals.AQUATOX.csproj" />
+    <ProjectReference Include="..\Coastal\Coastal.csproj" />
     <ProjectReference Include="..\ContaminantLoader\ContaminantLoader.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\DewPoint\DewPoint.csproj" />

@@ -13,18 +13,18 @@ namespace Data
         static protected string[] validDatasets = {
             "precipitation", "evapotranspiration", "nutrients", "organicmatter", "radiation",
             "soilmoisture", "solar", "streamhydrology", "subsurfaceflow", "surfacerunoff", "surfacepressure",
-            "temperature", "wind", "dewpoint", "humidity", "streamflow"
+            "temperature", "wind", "dewpoint", "humidity", "streamflow", "coastal"
         };
 
         static protected Dictionary<string, List<string>> validSources = new Dictionary<string, List<string>>()
         {
-            ["precipitation"] =  new List<string>{ "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
+            ["precipitation"] = new List<string> { "nldas", "gldas", "trmm", "daymet", "ncei", "prism", "wgen", "nwm" },
             ["evapotranspiration"] = new List<string> { "nldas", "gldas", "daymet", "prism", "grangergray", "hamon", "hspf",
                 "mcjannett", "mortoncrae", "mortoncrwe", "ncdc", "penmandaily", "penmanhourly",
-                "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" }, 
+                "penmanopenwater", "penpan", "priestlytaylor", "shuttleworthwallace" },
             ["nutrients"] = new List<string> { "aquatox" },
-            ["organicmatter"] = new List<string> { "aquatox"},
-            ["radiation"]  = new List<string> { "nldas", "gldas", "daymet"},
+            ["organicmatter"] = new List<string> { "aquatox" },
+            ["radiation"] = new List<string> { "nldas", "gldas", "daymet" },
             ["soilmoisture"] = new List<string> { "nldas", "gldas" },
             ["solar"] = new List<string> { "gcsolar", "solarcalcualtor" },
             ["streamhydrology"] = new List<string> { "aquatox" },
@@ -36,12 +36,13 @@ namespace Data
             ["dewpoint"] = new List<string> { "prism" },
             ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
             ["surfacepressure"] = new List<string> { "gldas" },
-            ["streamflow"] = new List<string> {"nwis", "usgs", "streamgauge"},
+            ["streamflow"] = new List<string> { "nwis", "usgs", "streamgauge" },
+            ["coastal"] = new List<string> { "noaa" }
         };
 
         static protected string[] validRemoteData =
         {
-            "nldas", "gldas", "trmm", "ncei", "daymet", "prism", "nwis"
+            "nldas", "gldas", "trmm", "ncei", "daymet", "prism", "nwis", "noaa"
         };
 
         /// <summary>
@@ -103,7 +104,7 @@ namespace Data
             errorMsg = string.Join(", ", errors.ToArray());
             return validInput;
         }
-        
+
         /// <summary>
         /// Validates the timezone attribute for ITimeSeriesInput
         /// </summary>
@@ -113,7 +114,7 @@ namespace Data
         public static Timezone ValidateTimezone(out List<string> errors, Timezone input)
         {
             errors = new List<string>();
-            Timezone validTZ = new Timezone(); 
+            Timezone validTZ = new Timezone();
             if (input == null)
             {
                 validTZ = new Timezone()
@@ -152,7 +153,7 @@ namespace Data
                 errors.Add("ERROR: Dataset is invalid or not found.");
                 return false;
             }
-            foreach(string ds in dataset)
+            foreach (string ds in dataset)
             {
                 string dss = ds.Split(new char[] { '_' }).Last();
                 valid = (validDatasets.Contains(dss.ToLower())) ? true : false;

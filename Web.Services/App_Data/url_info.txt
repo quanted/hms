@@ -44,3 +44,4 @@ prism_evapotranspiration_url https://csip.engr.colostate.edu:8083/csip-climate/m
 gldas_surfacepressure_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Psurf_f_inst&location=GEOM:POINT
 trmm_precipitation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=TRMM:TRMM_3B42.7:precipitation&location=GEOM:POINT
 nwis_streamflow_url https://nwis.waterdata.usgs.gov/usa/nwis/uv/?
+noaa_coastal_url https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?
