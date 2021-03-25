@@ -60,6 +60,7 @@ namespace GUI.AQUATOX
             this.AddButton = new System.Windows.Forms.Button();
             this.EditButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
+            this.FoodWebButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -199,7 +200,7 @@ namespace GUI.AQUATOX
             // 
             // NetCDF
             // 
-            this.NetCDF.Location = new System.Drawing.Point(356, 419);
+            this.NetCDF.Location = new System.Drawing.Point(357, 482);
             this.NetCDF.Name = "NetCDF";
             this.NetCDF.Size = new System.Drawing.Size(56, 25);
             this.NetCDF.TabIndex = 11;
@@ -243,6 +244,7 @@ namespace GUI.AQUATOX
             // ButtonPanel
             // 
             this.ButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ButtonPanel.Controls.Add(this.FoodWebButton);
             this.ButtonPanel.Controls.Add(this.ReminButton);
             this.ButtonPanel.Controls.Add(this.SiteButton);
             this.ButtonPanel.Controls.Add(this.ChemButton);
@@ -252,7 +254,7 @@ namespace GUI.AQUATOX
             this.ButtonPanel.Controls.Add(this.ParamsButton);
             this.ButtonPanel.Location = new System.Drawing.Point(191, 110);
             this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(244, 191);
+            this.ButtonPanel.Size = new System.Drawing.Size(244, 256);
             this.ButtonPanel.TabIndex = 17;
             this.ButtonPanel.Visible = false;
             // 
@@ -370,6 +372,16 @@ namespace GUI.AQUATOX
             this.DeleteButton.Text = "Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             // 
+            // FoodWebButton
+            // 
+            this.FoodWebButton.Location = new System.Drawing.Point(22, 203);
+            this.FoodWebButton.Name = "FoodWebButton";
+            this.FoodWebButton.Size = new System.Drawing.Size(92, 25);
+            this.FoodWebButton.TabIndex = 8;
+            this.FoodWebButton.Text = "Food Web";
+            this.FoodWebButton.UseVisualStyleBackColor = true;
+            this.FoodWebButton.Click += new System.EventHandler(this.FoodWebButton_Click);
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(830, 528);
@@ -429,6 +441,7 @@ namespace GUI.AQUATOX
         private Button AddButton;
         private Button EditButton;
         private Button DeleteButton;
+        private Button FoodWebButton;
     }
 
 

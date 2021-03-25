@@ -78,8 +78,8 @@ namespace GUI.AQUATOX
             OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
             Application.DoEvents();
             OutputBox.Visible = true;
-
-            Show();
+            
+            ShowDialog();
 
         }
 
@@ -115,6 +115,8 @@ namespace GUI.AQUATOX
         {
             int i = graphBox.SelectedIndex;
             graphBox.Items.Clear();
+            graphBox.Text = "";
+            if (outSeg == null) return;
 
             foreach (TGraphSetup TGS in outSeg.Graphs.GList)
             {
@@ -205,6 +207,7 @@ namespace GUI.AQUATOX
 
         private void NewGraphButton_Click(object sender, EventArgs e)
         {
+            if (outSeg == null) return;
             GraphSetupForm GSForm = new GraphSetupForm();
             if (GSForm.EditGraph(outSeg,-1)) UpdateGraphBox();
             graphBox.SelectedIndex = graphBox.Items.Count - 1;
@@ -218,8 +221,41 @@ namespace GUI.AQUATOX
 
         private void EditGraphButton_Click(object sender, EventArgs e)
         {
+            if (outSeg == null) return;
             GraphSetupForm GSForm = new GraphSetupForm();
             if (GSForm.EditGraph(outSeg, graphBox.SelectedIndex)) UpdateGraphBox();
+        }
+
+        private void DeleteGraphButton_Click(object sender, EventArgs e)
+        {
+            if (graphBox.SelectedIndex < 0) return;
+            if (MessageBox.Show("Erase the graph '"+graphBox.Text+ "'?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+            {
+                outSeg.Graphs.DeleteGraph(graphBox.SelectedIndex);
+                UpdateGraphBox();
+                DisplayGraph();
+            }
+
+
+        }
+
+        private void DelRunButton_Click(object sender, EventArgs e)
+        {
+            if (OutputBox.SelectedIndex < 0) return;
+            if (MessageBox.Show("Erase the archived output '" + OutputBox.Text + "'?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+            {
+                aQTS.SavedRuns.Remove(OutputBox.Text);
+                OutputBox.Items.RemoveAt(OutputBox.SelectedIndex);
+                if (OutputBox.SelectedIndex < 0) { OutputBox.Text = "";  outSeg = null; }
+
+                UpdateGraphBox();
+                DisplayGraph();
+            }
+
         }
     }
 }

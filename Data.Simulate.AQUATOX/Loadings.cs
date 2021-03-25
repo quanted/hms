@@ -62,9 +62,20 @@ namespace AQUATOX.Loadings
         public bool UseConstant = true;      // Flag for using constant load
         public bool NoUserLoad = false;      // Flag for using user input load, or ignoring  the load and using annual ranges and means.  Relevant to Temp, Light, pH, and Nutrients
         public double MultLdg = 1;           // to perturb loading
+
+        public bool ExternalLink = false;
+        public string ExternalFile = "";
+        [JsonIgnore] bool File_Translated = false;
+
         public TimeSeriesInput ITSI = null;
         [JsonIgnore] bool ITSI_Translated = false;
         [JsonIgnore] int lastindexread = -1;
+
+
+        public void Translate_File()
+        {
+            // FIXME
+        }
 
         public void Translate_ITimeSeriesInput()
         {
@@ -84,14 +95,13 @@ namespace AQUATOX.Loadings
 
                 foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
                 {
-                    string dateString = (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key;
+                    string dateString = entry.Key+":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; fixme, make flexible?
                     if (!(DateTime.TryParse(dateString, out DateTime date)))
                           throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
                     if (!(Double.TryParse(entry.Value[0], out double val)))
                         throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
                     list.Add(date, val);
                 }
-
             }
 
             ITSI_Translated = true;

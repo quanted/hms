@@ -67,13 +67,13 @@ namespace AQUATOX.Chemicals
 
         public TParameter[] InputArray()
         {
-            return new TParameter[] {new TSubheading("Chemical Parameters for "+ChemName.Val),
+            return new TParameter[] {new TSubheading("Chemical Parameters for "+ChemName.Val,""),
                         ChemName, CASRegNo, BCFUptake, MolWt, pka, Henry, LogKow, ChemIsBase,
-                        new TSubheading("Partitioning to Sediment/Organic Matter"),
+                        new TSubheading("Partitioning to Sediment/Organic Matter","Important chemical partitioning parameters"),
                         CalcKPSed,KPSed, CalcKOMRefrDOM, KOMRefrDOM, K1Detritus,
-                        new TSubheading("Chemical Fate Parameters"),ActEn, KMDegrAnaerobic, KMDegrdn, KUnCat,
+                        new TSubheading("Chemical Fate Parameters","Loss rates for chemicals"),ActEn, KMDegrAnaerobic, KMDegrdn, KUnCat,
                         KAcid, KBase, PhotolysisRate, 
-                        new TSubheading("Chemical Toxicity Parameters"), Weibull_Shape, WeibullSlopeFactor};
+                        new TSubheading("Chemical Toxicity Parameters","Relevant for ecotoxicology models"), Weibull_Shape, WeibullSlopeFactor};
         }
 
     } // end ChemicalRecord

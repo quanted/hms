@@ -98,17 +98,17 @@ namespace AQUATOX.AQSite
 
         public TParameter[] InputArray()
         {
-            return new TParameter[] {new TSubheading("Site Parameters"),
-                            SiteName, SiteLength, Volume, Min_Vol_Frac,
-                            new TSubheading("Shape, Temperature, Light, Reaeration"),
-                            UseBathymetry, ICZMean, ZMax,TempMean,TempRange,Latitude,
+            return new TParameter[] {new TSubheading("Site Parameters",""),
+                            SiteName, SiteLength, Volume, Min_Vol_Frac, UseBathymetry, ICZMean, ZMax,
+                            new TSubheading("Temperature, Light, Reaeration","Important if 'mean range' option is chosen for temperature or light, or oxygen calibration is required."),
+                            TempMean,TempRange,Latitude,
                             Altitude,LightMean,LightRange,EnclWallArea,MeanEvap,UseCovar,EnteredKReaer,
-                            new TSubheading("Water Clarify Parameters"),
+                            new TSubheading("Water Clarify Parameters","Default may be used unless secchi depth requires calibration"),
                             ECoeffWater,ECoeffSed,ECoeffDOM,ECoeffPOM,BasePercentEmbed,
-                            new TSubheading("Phytoplankton/Zooplankton Retention"),
+                            new TSubheading("Phytoplankton/Zooplankton Retention","Optional model for 0-D models of short stream reaches"),
                             UsePhytoRetention,EnterTotalLength,TotalLength,WaterShedArea,
-                            new TSubheading("Refuge"), FractalD,FD_Refuge_Coeff,HalfSatOysterRefuge,
-                            new TSubheading("Stream Parameters"),
+                            new TSubheading("Refuge","Available refuge for prey items"), FractalD,FD_Refuge_Coeff,HalfSatOysterRefuge,
+                            new TSubheading("Stream Parameters","Streams only: slope, manning coefficient, and riffle/run/pool"),
                             Channel_Slope,UseEnteredManning,EnteredManning,StreamType,PctRiffle,PctPool};
         }
 
@@ -186,12 +186,12 @@ namespace AQUATOX.AQSite
 
         public TParameter[] InputArray()
         {
-            return new TParameter[] {new TSubheading("Organic Matter Parameters"), RemRecName,
-                new TSubheading("Degradation and Nitrification"), DecayMax_Lab, DecayMax_Refr, TOpt, TMax, pHMin, pHMax, KNitri, KDenitri_Wat,
-                new TSubheading("Stoichiometry"), P2OrgLab, N2OrgLab, P2OrgRefr, N2OrgRefr, P2OrgDissLab, N2OrgDissLab, P2OrgDissRefr,
+            return new TParameter[] {new TSubheading("Organic Matter Parameters",""), RemRecName,
+                new TSubheading("Degradation and Nitrification","Defaults may be used barring site-specific data"), DecayMax_Lab, DecayMax_Refr, TOpt, TMax, pHMin, pHMax, KNitri, KDenitri_Wat,
+                new TSubheading("Stoichiometry","Defaults may be used; ratios of nutrients to organic matter"), P2OrgLab, N2OrgLab, P2OrgRefr, N2OrgRefr, P2OrgDissLab, N2OrgDissLab, P2OrgDissRefr,
                 N2OrgDissRefr, O2Biomass, O2N, Wet2DrySLab, Wet2DrySRefr, Wet2DryPLab, Wet2DryPRefr,
-                new TSubheading("Sedimentation Rate"), KSed, KSedTemp, KSedSalinity, PSedRelease, NSedRelease,
-                new TSubheading("Calcite Precipitation"), KD_P_Calcite};
+                new TSubheading("Sedimentation Rate","Sinking of organic matter"), KSed, KSedTemp, KSedSalinity, PSedRelease, NSedRelease,
+                new TSubheading("Calcite Precipitation",""), KD_P_Calcite};
         }
 
     } // end ReminRecord

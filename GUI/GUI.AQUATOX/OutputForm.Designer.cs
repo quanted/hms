@@ -67,6 +67,7 @@ namespace GUI.AQUATOX
             this.DelRunButton.TabIndex = 8;
             this.DelRunButton.Text = "Delete";
             this.DelRunButton.UseVisualStyleBackColor = true;
+            this.DelRunButton.Click += new System.EventHandler(this.DelRunButton_Click);
             // 
             // EditGraphButton
             // 
@@ -88,6 +89,7 @@ namespace GUI.AQUATOX
             this.DeleteGraphButton.TabIndex = 10;
             this.DeleteGraphButton.Text = "Delete";
             this.DeleteGraphButton.UseVisualStyleBackColor = true;
+            this.DeleteGraphButton.Click += new System.EventHandler(this.DeleteGraphButton_Click);
             // 
             // NewGraphButton
             // 

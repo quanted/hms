@@ -1,23 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using AQUATOX.Animals;
+﻿using AQUATOX.Animals;
 using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
-using AQUATOX.Plants;
 using AQUATOX.Loadings;
+using AQUATOX.Plants;
 using Globals;
+using System;
+using Data;
+using System.Data;
+using System.Threading;
+using System.Windows.Forms;
+using Web.Services.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Text;
 
 namespace GUI.AQUATOX
 {
     public partial class LoadingsForm : Form
     {
         public TStateVariable SV;
-        
+
+        StreamflowInputExample sfie = new StreamflowInputExample();
+        StreamflowInput sfi;
+        TimeSeriesOutput ATSO;
+        string taskID = null;
+
         public LoadingsForm()
         {
             InitializeComponent();
@@ -202,6 +212,147 @@ namespace GUI.AQUATOX
 
         private void NotesEdit_TextChanged(object sender, EventArgs e)
         {
+
+        }
+
+
+        private void HMS_Click(object sender, EventArgs e)
+        {
+            WSStreamflowController sfc = new WSStreamflowController(null);  // unnecessary 
+
+
+            // check to see if HMS loadings may be available for this AQUATOX time-series
+
+            if (!(SV.NState == AllVariables.Volume))
+                {
+                
+                MessageBox.Show("HMS Linkages are not available for this time series", "Information",
+                   MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                   MessageBoxDefaultButton.Button1);
+                return;                
+                }
+
+
+            // query HMS for loadings options   -- build service in HMS, data type is fixed, what sources of nutrient loadings
+            //    -- build POST request for each source, user supplied parameters?
+
+            // web services  -- streamflow for catchment, COMIDs, 
+            // gauges, endpoint for that NWES
+            // metadata time-steps missing
+
+            // outputs from other models  (HAWQS)
+            // Implement and end point that provides potential API endpoints along with optional sources / parameters
+
+            // GUI allowing user to select which HMS loadings to import, time-period, and whether to import the data or link to file/URL
+            // option to link to alternative COMID or time-period
+
+
+
+            // pull actual time-series into model or link to data
+
+            // Make a request body
+            //     Get sample code for posting request body
+            //     Deron linked to HMS open documentation
+            //     https://qed.epa.gov/hms/api_doc/#/WSStreamflow/post_api_hydrology_streamflow
+
+
+            // string crl = "curl -X POST \"https://qed.epa.gov/hms/rest/api/hydrology/streamflow\" -H \"accept: */*\" -H \"Content-Type: application/json-patch+json\" -d \"{\\\"source\\\":\\\"nwis\\\",\\\"dateTimeSpan\\\":{\\\"startDate\\\":\\\"2015-01-01T00:00:00\\\",\\\"endDate\\\":\\\"2015-12-31T00:00:00\\\",\\\"dateTimeFormat\\\":\\\"yyyy-MM-dd HH\\\"},\\\"geometry\\\":{\\\"description\\\":null,\\\"comID\\\":0,\\\"hucID\\\":null,\\\"stationID\\\":null,\\\"point\\\":null,\\\"geometryMetadata\\\":{\\\"gaugestation\\\":\\\"02191300\\\"},\\\"timezone\\\":null},\\\"dataValueFormat\\\":\\\"E3\\\",\\\"temporalResolution\\\":\\\"hourly\\\",\\\"timeLocalized\\\":false,\\\"units\\\":\\\"metric\\\",\\\"outputFormat\\\":\\\"json\\\",\\\"baseURL\\\":null,\\\"inputTimeSeries\\\":null}\"";
+
+            sfi = sfie.GetExamples();  
+
+
+            //    https://github.com/quanted/hms_api_samples/blob/master/csharp-sample/csharp-sample/HMSSample.cs
+            //            line 150, 144
+            //            var request = (HttpWebRequest)WebRequest.Create(this.dataURL + this.taskID);
+            //            var response = (HttpWebResponse)request.GetResponse();
+            //            Task<IActionResult> res;
+
+            submitRequest();
+            // getData();
+            //          res = sfc.POST(sfi);
+
+            
+            if (SV.LoadsRec.Loadings.ITSI == null)
+            {
+                TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+                TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+                input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+                SV.LoadsRec.Loadings.ITSI = input; 
+
+            }
+
+            SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
+            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput();
+            ShowGrid();
+        }
+
+
+        /// <summary>
+        /// Submit POST request to HMS web API
+        /// </summary>
+        public void submitRequest()
+        {
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            // string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string component = "hydrology";
+            string dataset = "streamflow";
+
+            var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
+            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(sfi));  //StreamFlowInput previously initialized
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            request.ContentLength = data.Length;
+
+            using (var stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+            var response = (HttpWebResponse)request.GetResponse();
+            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            ATSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+
+        }
+
+        ///// <summary>
+        ///// Start polling HMS data api, with a 5 second delay.
+        ///// </summary>
+        //private void getData()
+        //{
+        //    string dataURL = "https://qed.epacdx.net/hms/rest/api/v2/hms/data?job_id=";
+            
+        //    bool completed = false;
+        //    completed = false;
+        //    string result = null;
+
+        //    while (!completed)
+        //    {
+        //        int delay = 5000;
+        //        Thread.Sleep(delay);
+        //        var request = (HttpWebRequest)WebRequest.Create(dataURL + taskID);
+        //        var response = (HttpWebResponse)request.GetResponse();
+        //        var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+        //        var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString);
+        //        if (data["status"].Equals("SUCCESS"))
+        //        {
+        //            completed = true;
+        //            result = data["data"] + Environment.NewLine;
+        //            Console.WriteLine("Data successfully downloaded");
+        //        }
+        //        else if (data["status"].Equals("FAILURE"))
+        //        {
+        //            completed = true;
+        //            Console.WriteLine("Error: Failed to complete task.");
+        //        }
+        //    }
+        //}
+
+
+
+
+        private void File_Import_Click(object sender, EventArgs e)
+        {
+
+
 
         }
     }

@@ -122,19 +122,19 @@ namespace AQUATOX.Plants
 
         public TParameter[] InputArray()
         {
-            return new TParameter[] {new TSubheading("Plant Parameters for "+PlantName.Val), PlantName,
+            return new TParameter[] {new TSubheading("Plant Parameters for "+PlantName.Val,""), PlantName,
                 ScientificName, PlantType,SurfaceFloating,
                 Taxonomic_Type, ToxicityRecord, EnteredLightSat, PMax, KPO4, KN,TOpt, KMort,
-                new TSubheading("Adaptive Light, Stoichiometry, Etc."),
+                new TSubheading("Adaptive Light, Stoichiometry, Etc.","Defaults are usually acceptable"),
                 UseAdaptiveLight, MaxLightSat, MinLightSat, 
                 KCarbon, Q10,  TMax, TRef,  KResp, Resp20,  EMort,
                 P2OrgInit, N2OrgInit, ECoeffPhyto, Wet2Dry, PlantFracLipid,
-                new TSubheading("Internal Nutrients Parameters:"), NHalfSatInternal, PHalfSatInternal, MaxNUptake,
+                new TSubheading("Internal Nutrients Parameters","Only relevant if 'internal nutrients' is selected in setup"), NHalfSatInternal, PHalfSatInternal, MaxNUptake,
                 MaxPUptake,  Min_N_Ratio, Min_P_Ratio,
-                new TSubheading("Phytoplankton Only:"), Plant_to_Chla, KSed, KSedTemp, KSedSalinity, ESed,
-                new TSubheading("Periphyton and Macrophytes Only:"),  Macrophyte_Type, CarryCapac, Macro_VelMax, Red_Still_Water, FCrit,
-                new TSubheading("If in Stream:"),   PctSloughed, PrefRiffle, PrefPool,
-                new TSubheading("Salinity Effects:"),  SalMin_Phot, SalMax_Phot, SalCoeff1_Phot, SalCoeff2_Phot, SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort };
+                new TSubheading("Phytoplankton Only","Chlorophyll a conversion and sedimentation"), Plant_to_Chla, KSed, KSedTemp, KSedSalinity, ESed,
+                new TSubheading("Periphyton and Macrophytes Only","Important calibration parameters, but for periphyton and macrophytes only"),  Macrophyte_Type, CarryCapac, Macro_VelMax, Red_Still_Water, FCrit,
+                new TSubheading("If in Stream","Default is generally acceptable; stream-habitat preferences"),   PctSloughed, PrefRiffle, PrefPool,
+                new TSubheading("Salinity Effects","Only relevant if calculating salinity impacts"),  SalMin_Phot, SalMax_Phot, SalCoeff1_Phot, SalCoeff2_Phot, SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort };
         }
     }
 

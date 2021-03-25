@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using Data;
 using System.ComponentModel;
 using System.IO;
+using System.Data;
 
 namespace AQUATOX.AQTSegment
 
@@ -4194,6 +4195,60 @@ namespace AQUATOX.AQTSegment
             //}
 
         } // end NORMDIFF
+
+
+        public int iTrophInt(AllVariables ns)
+        {
+            return ((int)ns - (int)AllVariables.Cohesives);
+        }
+
+        public DataTable TrophInt_to_Table()
+        {
+            DataTable table = new DataTable("Trophic_Interaction_Table");
+            AllVariables nsloop;
+            AllVariables[] Predators = new AllVariables[50];
+            SetMemLocRec();
+
+            DataColumn column = new DataColumn();
+            column.ColumnName = "Prey Items";
+            column.DataType = System.Type.GetType("System.String");
+            table.Columns.Add(column);
+
+            int PredCount = 0;
+            for (nsloop = Consts.FirstAnimal; nsloop <= Consts.LastAnimal; nsloop++)
+            {
+                TAnimal TA = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (TA!=null)
+                {
+                    PredCount++;
+                    Predators[PredCount - 1] = nsloop;
+                    column = new DataColumn();
+                    column.ColumnName = TA.PName;
+                    column.DataType = System.Type.GetType("System.Double");
+                    table.Columns.Add(column);
+                }
+            }
+
+            for (nsloop = AllVariables.Cohesives; nsloop <= Consts.LastBiota; nsloop++)
+            {
+                TStateVariable TSV = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol);
+                if (TSV != null)
+                {
+                    DataRow row = table.NewRow();
+                    row[0] = TSV.PName;
+
+                    for (int i = 0; i < PredCount; i++)
+                    {
+                        TAnimal TA = GetStatePointer(Predators[i], T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                        if (TA.PTrophInt[iTrophInt(nsloop)].Pref > 1e-5) row[i+1] = Math.Round(TA.PTrophInt[iTrophInt(nsloop)].Pref, 3); 
+                    }
+                        
+                    table.Rows.Add(row);
+                }
+            }
+
+            return table;
+        }
 
         public virtual double GetPPB(AllVariables S, T_SVType T, T_SVLayer L)
         {

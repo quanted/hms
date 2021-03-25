@@ -262,6 +262,7 @@ namespace GUI.AQUATOX
 
             OutputForm OutForm = new OutputForm();
             OutForm.ShowOutput(aQTS);
+            ShowStudyInfo();
         }
 
 
@@ -272,10 +273,10 @@ namespace GUI.AQUATOX
 
             Setup_Record SR = aQTS.AQTSeg.PSetup;
             SR.Setup(false);
-            TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings"), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
-                SR.ModelTSDays, new TSubheading("Output Storage Options"), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
-                new TSubheading("Biota Modeling Options"),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
-                new TSubheading("Chemical Options"),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
+            TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
+                SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
+                new TSubheading("Biota Modeling Options",""),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
+                new TSubheading("Chemical Options",""),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
 
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
@@ -291,11 +292,11 @@ namespace GUI.AQUATOX
             DR.Setup(false);
 
             // Diagenesis Parameters setup window
-            TParameter[] PA3 = new TParameter[] { new TSubheading("Diagenesis Parameters"), DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
+            TParameter[] PA3 = new TParameter[] { new TSubheading("Diagenesis Parameters",""), DR.m1, DR.m2,DR.H1,DR.Dd,DR.w2,DR.H2,DR.KappaNH3f,DR.KappaNH3s,DR.KappaNO3_1f,DR.KappaNO3_1s,DR.KappaNO3_2,
                 DR.KappaCH4,DR.KM_NH3,DR.KM_O2_NH3,DR.KdNH3,DR.KdPO42,DR.dKDPO41f,DR.dKDPO41s,DR.O2critPO4,
                 DR.ThtaDd,DR.ThtaNH3,DR.ThtaNO3,DR.ThtaCH4,DR.SALTSW,DR.SALTND,DR.KappaH2Sd1,DR.KappaH2Sp1,DR.ThtaH2S,DR.KMHSO2,DR.KdH2S1,
-                DR.KdH2S2,new TSubheading("Mineralization"),DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
-                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,new TSubheading("Silica Parameters"),DR.ksi,DR.ThtaSi,DR.KMPSi,
+                DR.KdH2S2,new TSubheading("Mineralization","Decay rates for organic matter"),DR.kpon1,DR.kpon2, DR.kpon3,DR.kpoc1,DR.kpoc2,DR.kpoc3,DR.kpop1,DR.kpop2,DR.kpop3,DR.ThtaPON1,DR.ThtaPON2,
+                DR.ThtaPON3,DR.ThtaPOC1,DR.ThtaPOC2,DR.ThtaPOC3, DR.ThtaPOP1,DR.ThtaPOP2,DR.ThtaPOP3,DR.kBEN_STR,new TSubheading("Silica Parameters",""),DR.ksi,DR.ThtaSi,DR.KMPSi,
                 DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
 
             Param_Form PF3 = new Param_Form();
@@ -476,6 +477,8 @@ namespace GUI.AQUATOX
             return true;
         }
 
+
+
         private void AnimDB_Click(object sender, EventArgs e)
         {
             string json = File.ReadAllText("..\\..\\..\\DB\\AnimalLib.JSON");
@@ -631,11 +634,39 @@ namespace GUI.AQUATOX
         private void NetCDF_Click(object sender, EventArgs e)
         {
             
-            /// Gets the path to the NetCDF file to be used as a data source.
+            // Gets the path to the NetCDF file to be used as a data source.
+            //var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputrch.nc?openMode=readOnly");
             var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
+
             sds.MetadataDictionary dt = dataset.Metadata;
 
-            double[,,] dataValues = dataset.GetData<double[,,]>("NO3Lkg_ha");
+            string fieldname = "NO3GWkg_ha";
+
+            double[,,] dataValues = dataset.GetData<double[,,]>(fieldname);
+            var result = string.Join(",", dataValues);
+
+            StreamWriter file = new StreamWriter("N:\\AQUATOX\\CSRA\\"+ fieldname+".csv");
+            int topi = dataValues.GetLength(0);
+            int topj = dataValues.GetLength(1);
+            int topk = dataValues.GetLength(2);
+
+             topi = 365; //output first year for debugging 
+
+            for (int i = 0; i < topi; i++)
+            {
+                for (int j = 0; j < topj; j++)
+                    for (int k = 0; k < topk; k++)
+                    {
+                        file.Write(dataValues[i, j, k]);
+                        file.Write(",");
+                    }
+                //go to next line
+                file.Write("\n");
+            }
+
+            file.Close();
+
+            MessageBox.Show("Exported N:\\AQUATOX\\CSRA\\"+ fieldname+".csv");
 
         }
 
@@ -647,6 +678,14 @@ namespace GUI.AQUATOX
         private void EditButton_Click(object sender, EventArgs e)
         {
             SVListBox_DoubleClick(sender, e);
+        }
+
+        private void FoodWebButton_Click(object sender, EventArgs e)
+        {
+            DataTable table = aQTS.AQTSeg.TrophInt_to_Table();
+            TrophMatrix tm = new TrophMatrix();
+            tm.ShowGrid(table);
+
         }
     }
 }

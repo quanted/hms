@@ -440,11 +440,12 @@ namespace Globals
     public class TSubheading : TParameter  // used to format input screens
     {
         new public string Val;
-        new public bool expanded = false;
+        public bool expanded = false;
 
-        public TSubheading(string Title) : base()
+        public TSubheading(string Title, string Context) : base()
         {
             Val = Title;
+            Comment = Context;
         }
     }
 

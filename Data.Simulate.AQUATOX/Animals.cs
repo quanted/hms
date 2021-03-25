@@ -189,19 +189,19 @@ namespace AQUATOX.Animals
         }
 
         public TParameter[] InputArray() {
-            return new TParameter[] {new TSubheading("Animal Parameters for "+AnimalName.Val),
+            return new TParameter[] {new TSubheading("Animal Parameters for "+AnimalName.Val,""),
                             AnimalName, ScientificName, Animal_Type,Guild_Taxa,ToxicityRecord,BenthicDesignation,CMax,BMin,TOpt,MeanWeight,EndogResp,KMort,
-                            new TSubheading("More Feeding"),FHalfSat,Sorting,Burrow_Index,CanSeekRefuge,Visual_Feeder,SuspSedFeeding,SlopeSSFeed,InterceptSSFeed,
-                            new TSubheading("Temperature, Bioenergetics, Stoichiometry "),Q10,TMax,TRef,KResp,KExcr,N2Org,
+                            new TSubheading("More Feeding","Feeding Mechanisms and suspended sediment impacts"),FHalfSat,Sorting,Burrow_Index,CanSeekRefuge,Visual_Feeder,SuspSedFeeding,SlopeSSFeed,InterceptSSFeed,
+                            new TSubheading("Temperature, Energetics, Stoichiometry","May be kept at default in many cases"),Q10,TMax,TRef,KResp,KExcr,N2Org,
                             P2Org,Wet2Dry,PctGamete,GMort,
-                            new TSubheading("Life History Parameters"),SensToSediment,SenstoPctEmbed,PctEmbedThreshold,KCap,AveDrift,Trigger,FracInWaterCol,VelMax,
+                            new TSubheading("Life History Parameters","Sediment sensitivity, Carrying Capacity, Life Span"),SensToSediment,SenstoPctEmbed,PctEmbedThreshold,KCap,AveDrift,Trigger,FracInWaterCol,VelMax,
                             Fishing_Frac,LifeSpan,FishFracLipid,
-                            new TSubheading("Ammonia/Low-Oxygen Effects"),O2_LethalConc,O2_LethalPct,O2_EC50growth,O2_EC50repro,Ammonia_LC50,
-                            new TSubheading("Salinity Effects"),SalMin_Ing,SalMax_Ing ,SalCoeff1_Ing,SalCoeff2_Ing,SalMin_Gam,SalMax_Gam ,SalCoeff1_Gam,SalCoeff2_Gam,
+                            new TSubheading("Ammonia/Low-Oxygen Effects","Leave at defaults unless modeling ammonia toxicity or low oxygen impacts"),O2_LethalConc,O2_LethalPct,O2_EC50growth,O2_EC50repro,Ammonia_LC50,
+                            new TSubheading("Salinity Effects","Leave at defaults unless modeling salinity impacts"),SalMin_Ing,SalMax_Ing ,SalCoeff1_Ing,SalCoeff2_Ing,SalMin_Gam,SalMax_Gam ,SalCoeff1_Gam,SalCoeff2_Gam,
                             SalMin_Rsp,SalMax_Rsp ,SalCoeff1_Rsp,SalCoeff2_Rsp,SalMin_Mort,SalMax_Mort ,SalCoeff1_Mort,SalCoeff2_Mort,
-                            new TSubheading("Stream Habitat Parameters"),PrefRiffle,PrefPool,
-                            new TSubheading("Spawning"),AutoSpawn,SpawnDate1,SpawnDate2,SpawnDate3,UnlimitedSpawning,SpawnLimit,
-                            new TSubheading("Allometric Consumption and Respiration"),UseAllom_C,CA,CB,UseAllom_R,RA,RB,UseSet1,RQ,RTL,ACT,RTO,RK1,BACT,
+                            new TSubheading("Stream Habitat Parameters","Stream simulations only"),PrefRiffle,PrefPool,
+                            new TSubheading("Spawning","Dates of spawning if relevant"),AutoSpawn,SpawnDate1,SpawnDate2,SpawnDate3,UnlimitedSpawning,SpawnLimit,
+                            new TSubheading("Allometric Consumption and Respiration","Optional models of bioenergetics as a function of weight and temperature"),UseAllom_C,CA,CB,UseAllom_R,RA,RB,UseSet1,RQ,RTL,ACT,RTO,RK1,BACT,
                             RTM,RK4};
                             }
 

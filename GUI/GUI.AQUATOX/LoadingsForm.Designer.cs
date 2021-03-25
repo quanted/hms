@@ -35,6 +35,9 @@ namespace GUI.AQUATOX
             this.ICUnit = new System.Windows.Forms.Label();
             this.IgnoreLoadingsBox = new System.Windows.Forms.CheckBox();
             this.LoadingsPanel = new System.Windows.Forms.Panel();
+            this.HMS_Button = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.File_Import = new System.Windows.Forms.Button();
             this.LTLabel = new System.Windows.Forms.Label();
             this.LTBox = new System.Windows.Forms.ComboBox();
             this.UseTimeSeriesRadio = new System.Windows.Forms.RadioButton();
@@ -108,6 +111,9 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoadingsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LoadingsPanel.Controls.Add(this.HMS_Button);
+            this.LoadingsPanel.Controls.Add(this.label2);
+            this.LoadingsPanel.Controls.Add(this.File_Import);
             this.LoadingsPanel.Controls.Add(this.LTLabel);
             this.LoadingsPanel.Controls.Add(this.LTBox);
             this.LoadingsPanel.Controls.Add(this.UseTimeSeriesRadio);
@@ -122,10 +128,44 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.Controls.Add(this.dataGridView1);
             this.LoadingsPanel.Location = new System.Drawing.Point(12, 101);
             this.LoadingsPanel.Name = "LoadingsPanel";
-            this.LoadingsPanel.Size = new System.Drawing.Size(661, 264);
+            this.LoadingsPanel.Size = new System.Drawing.Size(663, 413);
             this.LoadingsPanel.TabIndex = 21;
             this.LoadingsPanel.Visible = false;
             this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
+            // 
+            // HMS_Button
+            // 
+            this.HMS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.HMS_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.HMS_Button.Location = new System.Drawing.Point(518, 380);
+            this.HMS_Button.Name = "HMS_Button";
+            this.HMS_Button.Size = new System.Drawing.Size(57, 23);
+            this.HMS_Button.TabIndex = 30;
+            this.HMS_Button.Text = "HMS";
+            this.HMS_Button.UseVisualStyleBackColor = true;
+            this.HMS_Button.Click += new System.EventHandler(this.HMS_Click);
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(363, 384);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(72, 15);
+            this.label2.TabIndex = 29;
+            this.label2.Text = "Import from";
+            // 
+            // File_Import
+            // 
+            this.File_Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.File_Import.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.File_Import.Location = new System.Drawing.Point(446, 380);
+            this.File_Import.Name = "File_Import";
+            this.File_Import.Size = new System.Drawing.Size(57, 23);
+            this.File_Import.TabIndex = 28;
+            this.File_Import.Text = "File";
+            this.File_Import.UseVisualStyleBackColor = true;
+            this.File_Import.Click += new System.EventHandler(this.File_Import_Click);
             // 
             // LTLabel
             // 
@@ -232,7 +272,7 @@ namespace GUI.AQUATOX
             this.dataGridView1.Location = new System.Drawing.Point(363, 13);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(272, 228);
+            this.dataGridView1.Size = new System.Drawing.Size(274, 359);
             this.dataGridView1.TabIndex = 1;
             // 
             // ParameterButton
@@ -249,7 +289,7 @@ namespace GUI.AQUATOX
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(547, 12);
+            this.OKButton.Location = new System.Drawing.Point(549, 12);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(61, 23);
             this.OKButton.TabIndex = 23;
@@ -260,7 +300,7 @@ namespace GUI.AQUATOX
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(614, 12);
+            this.CancelButt.Location = new System.Drawing.Point(616, 12);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 24;
@@ -283,7 +323,7 @@ namespace GUI.AQUATOX
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(685, 377);
+            this.ClientSize = new System.Drawing.Size(687, 526);
             this.Controls.Add(this.AmmoniaDriveLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
@@ -329,5 +369,8 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label LTLabel;
         private System.Windows.Forms.ComboBox LTBox;
         private System.Windows.Forms.Label AmmoniaDriveLabel;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button File_Import;
+        private System.Windows.Forms.Button HMS_Button;
     }
 }
