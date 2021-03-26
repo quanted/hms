@@ -1,4 +1,6 @@
 build:
+  tag:
+    - docker
   image: docker:19.03.12
   stage: build
   services:
