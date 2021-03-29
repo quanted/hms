@@ -1,14 +1,14 @@
 stages:
-  - Images
+  - Build
   - Testing
   
 
 Build Image:
-  stage: Images
+  stage: Build
   tags:
     - docker
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: gcr.io/kaniko-project/executor:edge
     entrypoint: [""]
   script:
     - mkdir -p /kaniko/.docker
