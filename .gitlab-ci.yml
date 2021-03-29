@@ -8,7 +8,7 @@ Build Image:
   tags:
     - docker
   image:
-    name: gcr.io/kaniko-project/executor:edge
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
     - mkdir -p /kaniko/.docker
