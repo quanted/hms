@@ -18,6 +18,7 @@ Build Image:
 Unit Tests:
   stage: Testing
   script:
+    - rm -rd Web.Services.Tests
     - 'dotnet test HMS.sln --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
   artifacts:
     when: always

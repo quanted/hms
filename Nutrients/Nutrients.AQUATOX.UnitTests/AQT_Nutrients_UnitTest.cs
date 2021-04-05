@@ -44,7 +44,7 @@ namespace Nutrients.AQUATOX.UnitTests
 
             Assert.AreEqual("", errmsg);
 
-            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoNutrients.txt;
+            filePath = "..\\..\\..\\..\\TEST\\INVALID\\AQUATOX_Nutrient_Model_NoNutrients.txt";
             json = GetTestFile(filePath);
             errmsg = "";
             AQTM = new AQTNutrientsModel(ref json, out errmsg, false);
