@@ -14,7 +14,7 @@ namespace ContaminantLoader
         /// <summary>
         /// Resulting ITimeSeriesOutput from the InputString
         /// </summary>
-        public ITimeSeriesOutput Result { get; set; }
+        public ITimeSeriesOutput<List<double>> Result { get; set; }
 
         /// <summary>
         /// The type of contaminant to be converted, different contaminants may require special treatment or handling.
@@ -52,15 +52,15 @@ namespace ContaminantLoader
         {
             switch (this.ContaminantType)
             {
+                default:
                 case ("uniform"):
                     Uniform uniform = new Uniform();
                     this.Result = uniform.GenerateUniformDistribution(this.InputString);
                     break;
-                default:
-                case ("generic"):
-                    Generic generic = new Generic();
-                    this.Result = generic.ConvertGenericInput(this.InputString, this.InputType);
-                    break;
+                //case ("generic"):
+                //    Generic generic = new Generic();
+                //    this.Result = generic.ConvertGenericInput(this.InputString, this.InputType);
+                //    break;
             }
             this.TimeSeriesAnalysis();
         }
@@ -79,7 +79,7 @@ namespace ContaminantLoader
             }
             this.Result.Metadata.Add("start_date", date0.ToString("yyyy-MM-dd HH"));
 
-            foreach(KeyValuePair<string, List<string>> data in this.Result.Data)
+            foreach(KeyValuePair<string, List<double>> data in this.Result.Data)
             {
                 DateTime date;
                 bool dateParse = DateTime.TryParse(data.Key, out date);

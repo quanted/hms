@@ -17,15 +17,15 @@ namespace ContaminantLoader
         /// </summary>
         /// <param name="inputString"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GenerateUniformDistribution(string inputString)
+        public ITimeSeriesOutput<List<double>> GenerateUniformDistribution(string inputString)
         {
-            ITimeSeriesOutputFactory oFactory = new TimeSeriesOutputFactory();
-            ITimeSeriesOutput output = oFactory.Initialize();
+            ITimeSeriesOutputFactory<List<double>> oFactory = new TimeSeriesOutputFactory<List<double>>();
+            ITimeSeriesOutput<List<double>> output = oFactory.Initialize();
 
             output.Dataset = "random_uniform_distribution";
             output.DataSource = "Random";
 
-            dynamic jsonInput = null;
+            Dictionary<string,string> jsonInput = null;
             double min = 0.0;
             double max = 0.0;
             string startDateString = null;
@@ -37,34 +37,30 @@ namespace ContaminantLoader
 
             try
             {
-                jsonInput = System.Text.Json.JsonDocument.Parse(inputString);
-                min = jsonInput.min;
-                max = jsonInput.max;
-                startDateString = jsonInput.startDate;
-                endDateString = jsonInput.endDate;
-                temporalResolution = jsonInput.temporalResolution;
+                jsonInput = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(inputString);
+                min = Double.Parse(jsonInput["min"]);
+                max = Double.Parse(jsonInput["max"]);
+                startDateString = jsonInput["startDate"];
+                endDateString = jsonInput["endDate"];
+                temporalResolution = jsonInput["temporalResolution"];
             }
             catch(System.Text.Json.JsonException ex){
                 Utilities.ErrorOutput error = new Utilities.ErrorOutput();
-                return error.ReturnError("JSON input error - " + ex.ToString());
+                return error.ReturnError<List<double>>("JSON input error - " + ex.ToString());
             }
             try
             {
-                startDate = DateTime.ParseExact(jsonInput.startDate.ToString(), "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
-                endDate = DateTime.ParseExact(jsonInput.endDate.ToString(), "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
+                startDate = DateTime.ParseExact(startDateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
+                endDate = DateTime.ParseExact(endDateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture);
             }
             catch(FormatException ex)
             {
                 Utilities.ErrorOutput error = new Utilities.ErrorOutput();
-                return error.ReturnError("JSON date error - " + ex.ToString());
+                return error.ReturnError<List<double>>("JSON date error - " + ex.ToString());
             }
-            try
+            if (jsonInput.ContainsKey("seed"))
             {
-                seed = int.Parse(jsonInput.seed.ToString());
-            }
-            catch(Exception e)
-            {
-                seed = 42;
+                seed = int.Parse(jsonInput["seed"]);
             }
 
             output.Data = this.GetRandomDistribution(startDate, endDate, temporalResolution, seed, min, max);
@@ -83,20 +79,21 @@ namespace ContaminantLoader
         /// <param name="min"></param>
         /// <param name="max"></param>
         /// <returns></returns>
-        private Dictionary<string, List<string>> GetRandomDistribution(DateTime startDate, DateTime endDate, string temporalResolution, int seed, double min, double max)
+        private Dictionary<string, List<double>> GetRandomDistribution(DateTime startDate, DateTime endDate, string temporalResolution, int seed, double min, double max)
         {
-            Dictionary<string, List<string>> output = new Dictionary<string, List<string>>();
+            Dictionary<string, List<double>> output = new Dictionary<string, List<double>>();
             Random rnd = new MersenneTwister(seed);
             IEnumerable<double> randomDistribution = ContinuousUniform.Samples(rnd, min, max);
             DateTime iDate = new DateTime();
             iDate = startDate;
             int i = 0;
-            while(iDate.CompareTo(endDate) < 1)
+            endDate = endDate.AddDays(1);
+            while(iDate.CompareTo(endDate) < 0)
             {
                 string date = iDate.ToString("yyyy-MM-dd HH");
                 double value = randomDistribution.ElementAt(i);
-                List<string> valueList = new List<string>();
-                valueList.Add(value.ToString("E3"));
+                List<double> valueList = new List<double>();
+                valueList.Add(value);
                 output.Add(date, valueList);
                 switch (temporalResolution)
                 {

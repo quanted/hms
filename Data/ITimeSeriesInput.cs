@@ -266,6 +266,10 @@ namespace Data
         public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
         {
             errorMsg = "";
+            if (input.Source.Contains("test"))
+            {
+                return input;
+            }
             TimeSeriesInput validatedInput = ITimeSeriesValidation.Validate(out errorMsg, dataset, input) as TimeSeriesInput;
             if (errorMsg.Contains("ERROR"))
             {
