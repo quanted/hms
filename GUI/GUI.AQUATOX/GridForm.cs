@@ -10,6 +10,9 @@ namespace GUI.AQUATOX
 {
     public partial class GridForm : Form
     {
+        public bool gridChange;
+        bool UserCanceled;
+
         public GridForm()
         {
             InitializeComponent();
@@ -27,10 +30,57 @@ namespace GUI.AQUATOX
 
         public bool ShowGrid(DataTable table)
         {
+            gridChange = false;
+            UserCanceled = false;
             dataGridView1.DataSource = table;
-            Show();
-            return true;
+            ShowDialog();
+            return !UserCanceled;
         }
 
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            gridChange = true;
+            changedLabel.Visible = true;
+
+        }
+
+        private void OKButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CancelButt_Click(object sender, EventArgs e)
+        {
+            if (gridChange)
+                if (MessageBox.Show("Cancel your changes to the data matrix?", "Confirm",
+                     MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                     MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    UserCanceled = true;
+                    this.Close();
+                }
+
+        }
+
+        private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            {
+                if ((e.Context & DataGridViewDataErrorContexts.Parsing) == DataGridViewDataErrorContexts.Parsing)
+                {
+                    MessageBox.Show("Wrong data type entered");
+                }
+
+                if ((e.Exception) is ConstraintException)
+                {
+                    DataGridView view = (DataGridView)sender;
+                    view.Rows[e.RowIndex].ErrorText = "an error";
+                    view.Rows[e.RowIndex].Cells[e.ColumnIndex].ErrorText = "an error";
+
+                }
+
+                e.ThrowException = false;
+
+            }
+        }
     }
 }

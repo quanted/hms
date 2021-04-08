@@ -108,7 +108,7 @@ namespace GUI.AQUATOX
         private void loadJSON_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Test File|*.txt;*.json";
+            openFileDialog1.Filter = "Text File|*.txt;*.json";
             openFileDialog1.Title = "Open a JSON File";
             openFileDialog1.ShowDialog();
 
@@ -477,6 +477,16 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        private TParameter[] Table_to_ParmArray(DataTable table)
+        {
+            TParameter[] arr = new TParameter[table.Rows.Count];
+            ColNum = 0;
+            DataRow row = table.NewRow();
+            for (int i = 0; i < arr.Length; i++)
+                AddCell(ref arr[i], row);  //workhere
+            table.Rows.Add(row);
+            return arr;
+        }
 
 
         private void AnimDB_Click(object sender, EventArgs e)
@@ -571,7 +581,23 @@ namespace GUI.AQUATOX
 
         private void SiteDB_Click(object sender, EventArgs e)
         {
-            string json = File.ReadAllText("..\\..\\..\\DB\\SiteLib.JSON");
+
+
+
+            string fileN = Path.GetFullPath("..\\..\\..\\DB\\SiteLib.JSON");
+            if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == DialogResult.No)
+            {
+                OpenFileDialog openFileDialog1 = new OpenFileDialog();
+                openFileDialog1.Filter = "Text File|*.txt;*.json";
+                openFileDialog1.Title = "Open a JSON File";
+                if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+                fileN = openFileDialog1.FileName;
+            }
+
+
+            string json = File.ReadAllText(fileN);
             List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
 
             SiteRecord SR = SiteDB[0]; SR.Setup();
@@ -584,8 +610,26 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table);
+            if (gf.ShowGrid(table))
+            {
+                if (gf.gridChange)
+                {
+                    SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                    saveFileDialog1.Filter = "JSON files (*.JSON)|*.JSON|All files (*.*)|*.*";
+                    saveFileDialog1.FilterIndex = 1;
+                    saveFileDialog1.RestoreDirectory = true;
+                    saveFileDialog1.OverwritePrompt = true;
 
+                    // SiteDB = Table_to_ParmArray(table); workhere
+
+                    if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                    {
+
+                        json = JsonConvert.SerializeObject(SiteDB);
+                        File.WriteAllText(saveFileDialog1.FileName, json);
+                    }
+                }
+            }
         }
 
         private void PlantsDB_Click(object sender, EventArgs e)
@@ -670,10 +714,7 @@ namespace GUI.AQUATOX
 
         }
 
-        private void RunStatusLabel_Click(object sender, EventArgs e)
-        {
 
-        }
 
         private void EditButton_Click(object sender, EventArgs e)
         {
@@ -685,6 +726,11 @@ namespace GUI.AQUATOX
             DataTable table = aQTS.AQTSeg.TrophInt_to_Table();
             TrophMatrix tm = new TrophMatrix();
             tm.ShowGrid(table);
+
+        }
+
+        private void MultiSegButton_Click(object sender, EventArgs e)
+        {
 
         }
     }

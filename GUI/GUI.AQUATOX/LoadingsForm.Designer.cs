@@ -137,7 +137,7 @@ namespace GUI.AQUATOX
             // 
             this.HMS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.HMS_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.HMS_Button.Location = new System.Drawing.Point(518, 380);
+            this.HMS_Button.Location = new System.Drawing.Point(525, 380);
             this.HMS_Button.Name = "HMS_Button";
             this.HMS_Button.Size = new System.Drawing.Size(57, 23);
             this.HMS_Button.TabIndex = 30;
@@ -159,7 +159,7 @@ namespace GUI.AQUATOX
             // 
             this.File_Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.File_Import.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.File_Import.Location = new System.Drawing.Point(446, 380);
+            this.File_Import.Location = new System.Drawing.Point(451, 380);
             this.File_Import.Name = "File_Import";
             this.File_Import.Size = new System.Drawing.Size(57, 23);
             this.File_Import.TabIndex = 28;
@@ -195,6 +195,7 @@ namespace GUI.AQUATOX
             this.UseTimeSeriesRadio.TabStop = true;
             this.UseTimeSeriesRadio.Text = "Use Time-series Loading";
             this.UseTimeSeriesRadio.UseVisualStyleBackColor = true;
+            this.UseTimeSeriesRadio.CheckedChanged += new System.EventHandler(this.UseConstRadio_CheckedChanged);
             // 
             // UseConstRadio
             // 
@@ -206,6 +207,7 @@ namespace GUI.AQUATOX
             this.UseConstRadio.TabStop = true;
             this.UseConstRadio.Text = "Use Constant Load of";
             this.UseConstRadio.UseVisualStyleBackColor = true;
+            this.UseConstRadio.CheckedChanged += new System.EventHandler(this.UseConstRadio_CheckedChanged);
             // 
             // label5
             // 

@@ -31,7 +31,7 @@ namespace GUI.AQUATOX
         {
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -47,7 +47,6 @@ namespace GUI.AQUATOX
             this.dataGridView1.RowTemplate.Height = 25;
             this.dataGridView1.Size = new System.Drawing.Size(716, 663);
             this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
             // label1
             // 
@@ -59,27 +58,26 @@ namespace GUI.AQUATOX
             this.label1.TabIndex = 1;
             this.label1.Text = "P R E D A T O R S          ------> ";
             // 
-            // label2
+            // label3
             // 
-            this.label2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(23, 98);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(23, 238);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "P    R    E    Y  ";
-            this.label2.UseCompatibleTextRendering = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label3.Location = new System.Drawing.Point(21, 101);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(25, 238);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "P    R    E    Y  ";
+            this.label3.UseCompatibleTextRendering = true;
             // 
             // TrophMatrix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(790, 708);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "TrophMatrix";
             this.Text = "Trophic Matrix";
-            this.Load += new System.EventHandler(this.GridForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -90,6 +88,6 @@ namespace GUI.AQUATOX
 
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
     }
 }

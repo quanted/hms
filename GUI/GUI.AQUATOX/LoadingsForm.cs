@@ -16,6 +16,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
 
 namespace GUI.AQUATOX
 {
@@ -107,10 +108,11 @@ namespace GUI.AQUATOX
 
         }
 
+        TLoadings LoadShown;
+
         public void ShowGrid()
         {
 
-            TLoadings LoadShown;
             if (LTBox.SelectedIndex<1) LoadShown = SV.LoadsRec.Loadings; 
             else LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
@@ -146,6 +148,8 @@ namespace GUI.AQUATOX
             }
 
             dataGridView1.DataSource = LoadTable;
+            if (LoadShown.UseConstant) dataGridView1.ForeColor = Color.Gray;
+            else dataGridView1.ForeColor = Color.Black;
         }
 
         private void CancelButt_Click(object sender, EventArgs e)
@@ -319,7 +323,7 @@ namespace GUI.AQUATOX
         //private void getData()
         //{
         //    string dataURL = "https://qed.epacdx.net/hms/rest/api/v2/hms/data?job_id=";
-            
+
         //    bool completed = false;
         //    completed = false;
         //    string result = null;
@@ -352,8 +356,64 @@ namespace GUI.AQUATOX
         private void File_Import_Click(object sender, EventArgs e)
         {
 
+            var fileContent = string.Empty;
+            var filePath = string.Empty;
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "csv files(*.csv)|*.csv|tab delimited txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+
+                    SV.LoadsRec.Loadings.list.Clear();
+
+                    //Get the path of specified file
+                    filePath = openFileDialog.FileName;
+
+                    string[] csvRows = System.IO.File.ReadAllLines(filePath, Encoding.Default);
+                    int errcount = 0;
+
+                    foreach (var row in csvRows)
+                    {
+                        var columns = row.Split(',');
+
+                        string field1 = columns[0];
+                        string field2 = columns[1];
+
+                        try
+                        {
+                            SV.LoadsRec.Loadings.list.Add(DateTime.Parse(field1), double.Parse(field2));
+                        }
+                        catch
+                        {
+                            errcount++;
+                            if (errcount > 1)  // header line error is OK
+                            {
+                                MessageBox.Show("Unexpected format.  A two column input file with [DATE, LOADING] expected.", "Error",
+                                                MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                                return;
+                            }
+                        }
 
 
+
+                    }
+
+                    ShowGrid();
+
+                }
+
+            }
+        }
+
+        private void UseConstRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            LoadShown.UseConstant = UseConstRadio.Checked;
+            ShowGrid();
         }
     }
 }

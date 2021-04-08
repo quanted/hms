@@ -49,6 +49,7 @@ namespace GUI.AQUATOX
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.ButtonPanel = new System.Windows.Forms.Panel();
+            this.FoodWebButton = new System.Windows.Forms.Button();
             this.ReminButton = new System.Windows.Forms.Button();
             this.SiteButton = new System.Windows.Forms.Button();
             this.ChemButton = new System.Windows.Forms.Button();
@@ -60,7 +61,7 @@ namespace GUI.AQUATOX
             this.AddButton = new System.Windows.Forms.Button();
             this.EditButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
-            this.FoodWebButton = new System.Windows.Forms.Button();
+            this.MultiSegButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -103,7 +104,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(146, 72);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(667, 23);
+            this.progressBar1.Size = new System.Drawing.Size(649, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -184,7 +185,7 @@ namespace GUI.AQUATOX
             this.SVListBox.ItemHeight = 15;
             this.SVListBox.Location = new System.Drawing.Point(459, 110);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(354, 364);
+            this.SVListBox.Size = new System.Drawing.Size(336, 304);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -200,7 +201,8 @@ namespace GUI.AQUATOX
             // 
             // NetCDF
             // 
-            this.NetCDF.Location = new System.Drawing.Point(357, 482);
+            this.NetCDF.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.NetCDF.Location = new System.Drawing.Point(357, 424);
             this.NetCDF.Name = "NetCDF";
             this.NetCDF.Size = new System.Drawing.Size(56, 25);
             this.NetCDF.TabIndex = 11;
@@ -254,9 +256,19 @@ namespace GUI.AQUATOX
             this.ButtonPanel.Controls.Add(this.ParamsButton);
             this.ButtonPanel.Location = new System.Drawing.Point(191, 110);
             this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(244, 256);
+            this.ButtonPanel.Size = new System.Drawing.Size(244, 259);
             this.ButtonPanel.TabIndex = 17;
             this.ButtonPanel.Visible = false;
+            // 
+            // FoodWebButton
+            // 
+            this.FoodWebButton.Location = new System.Drawing.Point(22, 203);
+            this.FoodWebButton.Name = "FoodWebButton";
+            this.FoodWebButton.Size = new System.Drawing.Size(92, 25);
+            this.FoodWebButton.TabIndex = 8;
+            this.FoodWebButton.Text = "Food Web";
+            this.FoodWebButton.UseVisualStyleBackColor = true;
+            this.FoodWebButton.Click += new System.EventHandler(this.FoodWebButton_Click);
             // 
             // ReminButton
             // 
@@ -336,13 +348,12 @@ namespace GUI.AQUATOX
             this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
             this.RunStatusLabel.TabIndex = 18;
             this.RunStatusLabel.Text = "Run Status";
-            this.RunStatusLabel.Click += new System.EventHandler(this.RunStatusLabel_Click);
             // 
             // AddButton
             // 
             this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.AddButton.Location = new System.Drawing.Point(462, 482);
+            this.AddButton.Location = new System.Drawing.Point(462, 425);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(60, 25);
             this.AddButton.TabIndex = 21;
@@ -353,7 +364,7 @@ namespace GUI.AQUATOX
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.EditButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditButton.Location = new System.Drawing.Point(594, 482);
+            this.EditButton.Location = new System.Drawing.Point(594, 425);
             this.EditButton.Name = "EditButton";
             this.EditButton.Size = new System.Drawing.Size(60, 25);
             this.EditButton.TabIndex = 20;
@@ -365,26 +376,29 @@ namespace GUI.AQUATOX
             // 
             this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteButton.Location = new System.Drawing.Point(528, 482);
+            this.DeleteButton.Location = new System.Drawing.Point(528, 425);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(60, 25);
             this.DeleteButton.TabIndex = 19;
             this.DeleteButton.Text = "Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             // 
-            // FoodWebButton
+            // MultiSegButton
             // 
-            this.FoodWebButton.Location = new System.Drawing.Point(22, 203);
-            this.FoodWebButton.Name = "FoodWebButton";
-            this.FoodWebButton.Size = new System.Drawing.Size(92, 25);
-            this.FoodWebButton.TabIndex = 8;
-            this.FoodWebButton.Text = "Food Web";
-            this.FoodWebButton.UseVisualStyleBackColor = true;
-            this.FoodWebButton.Click += new System.EventHandler(this.FoodWebButton_Click);
+            this.MultiSegButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.MultiSegButton.Location = new System.Drawing.Point(26, 424);
+            this.MultiSegButton.Name = "MultiSegButton";
+            this.MultiSegButton.Size = new System.Drawing.Size(110, 24);
+            this.MultiSegButton.TabIndex = 22;
+            this.MultiSegButton.Text = "AQUATOX 2-D";
+            this.MultiSegButton.UseVisualStyleBackColor = true;
+            this.MultiSegButton.Visible = false;
+            this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
             // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(830, 528);
+            this.ClientSize = new System.Drawing.Size(812, 471);
+            this.Controls.Add(this.MultiSegButton);
             this.Controls.Add(this.AddButton);
             this.Controls.Add(this.EditButton);
             this.Controls.Add(this.DeleteButton);
@@ -400,7 +414,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.integrate);
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
-            this.MinimumSize = new System.Drawing.Size(828, 298);
+            this.MinimumSize = new System.Drawing.Size(828, 465);
             this.Name = "AQTTestForm";
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
             this.panel1.ResumeLayout(false);
@@ -442,6 +456,7 @@ namespace GUI.AQUATOX
         private Button EditButton;
         private Button DeleteButton;
         private Button FoodWebButton;
+        private Button MultiSegButton;
     }
 
 

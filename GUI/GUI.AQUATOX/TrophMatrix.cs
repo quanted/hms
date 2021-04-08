@@ -11,16 +11,6 @@ namespace GUI.AQUATOX
             InitializeComponent();
         }
 
-        private void GridForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
         /// <summary>
         /// Return the minimum width in pixels a DataGridView can be before the control's vertical scrollbar would be displayed.
         /// </summary>
