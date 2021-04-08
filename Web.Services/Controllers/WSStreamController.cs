@@ -25,12 +25,12 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, string endComid=null, double maxDistance = 50.0)
+        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, string endComid=null, double maxDistance = 50.0, string mainstem="false", string huc=null)
         {
             try
             {
                 WSStream catchment = new WSStream();
-                Dictionary<string, object> result = await catchment.Get(comid, endComid, null, maxDistance);
+                Dictionary<string, object> result = await catchment.Get(comid, endComid, huc, maxDistance, mainstem == "false");
                 string jsonResults = System.Text.Json.JsonSerializer.Serialize(result);
                 JObject jResult = JsonConvert.DeserializeObject<JObject>(jsonResults);
                 return new ObjectResult(jResult); ;

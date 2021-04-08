@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using WatershedDelineation;
 
@@ -19,7 +20,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="comid"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, object>> Get(string comid, string endComid=null, string huc=null, double maxDistance=50.0)
+        public async Task<Dictionary<string, object>> Get(string comid, string endComid=null, string huc=null, double maxDistance=50.0, bool mainstem=false)
         {
             string errorMsg = "";
             
@@ -32,7 +33,7 @@ namespace Web.Services.Models
             Dictionary<string, object> result = new Dictionary<string, object>();
 
             WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
-            var streamNetwork = streamN.GetNetwork(maxDistance, endComid);
+            var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
             List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, huc);
             result.Add("network", networkTable);
             List<List<int>> segOrder = this.generateOrder(networkTable);
@@ -127,11 +128,23 @@ namespace Web.Services.Models
                         break;
                     }
                 }
-                comidOrder[seq_j].Add(comid);
-                seqOrder[seq_j].Add(hydroseq);
+                if (seq_j == -1)
+                {
+                    List<int> newOrderLevel = new List<int>();
+                    newOrderLevel.Add(comid);
+                    comidOrder = comidOrder.Prepend(newOrderLevel).ToList();
+                    List<int> newSeqLevel = new List<int>();
+                    newSeqLevel.Add(hydroseq);
+                    seqOrder = seqOrder.Prepend(newSeqLevel).ToList();
+                }
+                else
+                {
+                    comidOrder[seq_j].Add(comid);
+                    seqOrder[seq_j].Add(hydroseq);
+                }
             }
-
-            for (int i = dag.Count - 1; i >= 0; i--)
+            int nOrder = comidOrder.Count;
+            for (int i = nOrder - 1; i >= 0; i--)
             {
                 if (comidOrder[i].Count == 0)
                 {

@@ -110,10 +110,10 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public object GetNetwork(double maxDistance=50.0, string endComid=null)
+        public object GetNetwork(double maxDistance=50.0, string endComid=null, bool mainstem=false)
         {
             string errorMsg = "";
-            string data = GetStreamNetwork(out errorMsg, endComid, maxDistance);
+            string data = GetStreamNetwork(out errorMsg, endComid, maxDistance, mainstem);
             object networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
             return networkObject;
         }
@@ -246,14 +246,23 @@ namespace WatershedDelineation
             return data;
         }
 
-        private string GetStreamNetwork(out string errorMsg, string endComid=null, double maxDistance=50.0)
+        private string GetStreamNetwork(out string errorMsg, string endComid=null, double maxDistance=50.0, bool mainstem=false)
         {
             errorMsg = "";
-            string requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
-            if (!string.IsNullOrEmpty(endComid))
+            string requestURL = "";
+            if (mainstem)
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
+            else if (!string.IsNullOrEmpty(endComid))
             {
                 requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + this.startCOMID + "&pStopComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
             }
+            else
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UM&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
+
             string data = "";
             try
             {

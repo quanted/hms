@@ -214,21 +214,26 @@ namespace WatershedDelineation
                 "comid", "hydroseq","uphydroseq", "dnhydroseq", "lengthkm", "travtime", "ftype", "wbd_huc12" 
             };
             networkTable.Add(columns);
+            string hucstr = (huc is null) ? "" : huc; 
             foreach(var seg in data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard").EnumerateArray())
             {
-                string comid = seg.GetProperty("comid").ToString();
-                List<object> values = new List<object>()
+                string cHUC = seg.GetProperty("wbd_huc12").ToString();
+                if ((cHUC.Contains(hucstr) || cHUC.Equals(hucstr)) || hucstr == "")
                 {
-                    comid,
-                    seg.GetProperty("hydroseq"),
-                    seg.GetProperty("uphydroseq"),
-                    seg.GetProperty("dnhydroseq"),
-                    seg.GetProperty("lengthkm"),
-                    seg.GetProperty("travtime"),
-                    seg.GetProperty("ftype"),
-                    seg.GetProperty("wbd_huc12")
-                };
-                networkTable.Add(values);
+                    string comid = seg.GetProperty("comid").ToString();
+                    List<object> values = new List<object>()
+                    {
+                        comid,
+                        seg.GetProperty("hydroseq"),
+                        seg.GetProperty("uphydroseq"),
+                        seg.GetProperty("dnhydroseq"),
+                        seg.GetProperty("lengthkm"),
+                        seg.GetProperty("travtime"),
+                        seg.GetProperty("ftype"),
+                        cHUC
+                    };
+                    networkTable.Add(values);
+                }
             }
 
             return networkTable;
