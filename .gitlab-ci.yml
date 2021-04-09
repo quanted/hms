@@ -17,6 +17,8 @@ Build Image:
 
 Unit Tests:
   stage: Testing
+  tags:
+    - docker
   image: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
   script:
     - rm -rd Web.Services.Tests
