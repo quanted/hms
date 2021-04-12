@@ -23,7 +23,6 @@ Unit Tests:
     name: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
     entrypoint: [""]
   script:
-    - dotnet restore HMS.sln
     - 'dotnet test HMS.sln -c Test --no-build --filter FullyQualifiedName!~IntegrationTests --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
   artifacts:
     when: always
