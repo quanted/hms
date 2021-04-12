@@ -17,7 +17,9 @@ Build Image:
 
 Unit Tests:
   stage: Testing
-  image: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
+  image: 
+    name: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
+    entrypoint: [""]
   script:
     - rm -rd Web.Services.Tests
     - 'dotnet test HMS.sln --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
