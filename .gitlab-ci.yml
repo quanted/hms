@@ -23,11 +23,11 @@ Unit Tests:
     name: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
     entrypoint: [""]
   script:
-    - 'dotnet test HMS.sln -c Test --no-build --filter FullyQualifiedName!~IntegrationTests --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+    - 'dotnet test HMS.sln -c Test --no-build --filter FullyQualifiedName!~IntegrationTests --test-adapter-path:. --logger:"junit;LogFilePath=/app/artifacts/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
   artifacts:
     when: always
     paths:
-      - ./**/*test-result.xml
+      - /app/artifacts/*test-result.xml
     reports:
       junit:
-        - ./**/*test-result.xml
+        - /app/artifacts/*test-result.xml
