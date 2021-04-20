@@ -42,7 +42,6 @@ namespace Web.Services.Controllers
                     {
                         ["product"] = "water_level",
                         ["datum"] = "mllw",
-                        ["vel_type"] = "",
                         ["application"] = "web_services",
                     }
                 },

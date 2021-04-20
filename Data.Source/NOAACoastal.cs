@@ -31,7 +31,8 @@ namespace Data.Source
         {
             ITimeSeriesOutput data = output;
             errorMsg = "";
-
+            ValidateInput(componentInput);
+  
             // Max size of request is 31 days. Get difference of begin and end dates in days.
             double totalDays = (componentInput.DateTimeSpan.EndDate - componentInput.DateTimeSpan.StartDate).TotalDays;
 
@@ -55,6 +56,22 @@ namespace Data.Source
             }
 
             return data;
+        }
+
+        private void ValidateInput(ITimeSeriesInput input)
+        {
+            if (input.Geometry.Timezone.Name != "LST" && input.TimeLocalized == true)
+            {
+                input.Geometry.Timezone.Name = "LST";
+            }
+            else if(input.Geometry.Timezone.Name == "LST" && input.TimeLocalized == false)
+            {
+                input.Geometry.Timezone.Name = "GMT";
+            }
+            else
+            {
+                input.Geometry.Timezone.Name = "GMT";
+            }
         }
 
         /// <summary>

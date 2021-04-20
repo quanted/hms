@@ -1,12 +1,12 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 
-namespace Temperature
+namespace Wind
 {
-    public class NOAACoastal
+    class NOAACoastal
     {
         /// <summary>
         /// Default Coastal constructor
@@ -25,13 +25,13 @@ namespace Temperature
         {
             Data.Source.NOAACoastal noaaCoastal = new Data.Source.NOAACoastal();
 
-            // Set metadata fields for url construction
-            input.Geometry.GeometryMetadata.Add("product", "air_temperature");
+            // Set metadata fields for url construction in data source
+            input.Geometry.GeometryMetadata.Add("product", "wind");
             input.Geometry.GeometryMetadata.Add("datum", "");
             input.Geometry.GeometryMetadata.Add("application", "web_services");
 
             // Get data and set to output
-            ITimeSeriesOutput noaaCoastalOutput = noaaCoastal.GetData(out errorMsg, "Temperature", output, input, retries);
+            ITimeSeriesOutput noaaCoastalOutput = noaaCoastal.GetData(out errorMsg, "Wind", output, input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Prune data based on product and set correct metadata columns
@@ -44,6 +44,7 @@ namespace Temperature
             return noaaCoastalOutput;
         }
 
+
         /// <summary>
         /// Sets the metadata columns.
         /// </summary>
@@ -52,13 +53,28 @@ namespace Temperature
         private ITimeSeriesOutput SetDataColumns(ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             // Date is always first data column
-            output.Metadata.Add("column_1", "Date");
-            output.Metadata.Add("column_2", "Avg Temperature");
-            output.Metadata.Add("column_3", "Max Temperature");
-            output.Metadata.Add("column_4", "Min Temperature");
-            output.Metadata.Add("noaa_coastal_units", input.Units == "metric" ? "C" : "F");
+            output.Metadata.Add("column_1", "Date " + input.Geometry.Timezone.Name);
+            output.Metadata.Add("column_2", "Avg Wind Speed");
+            output.Metadata.Add("column_3", "Max Wind Speed");
+            output.Metadata.Add("column_4", "Min Wind Speed");
+            output.Metadata.Add("column_5", "Avg Wind Direction");
+            output.Metadata.Add("column_6", "Max Wind Direction");
+            output.Metadata.Add("column_7", "Min Wind Direction");
+            output.Metadata.Add("column_8", "Avg Wind Gust");
+            output.Metadata.Add("column_9", "Max Wind Gust");
+            output.Metadata.Add("column_10", "Min Wind Gust");
+            output.Metadata.Add("column_2_units", "m/s");
+            output.Metadata.Add("column_3_units", "m/s");
+            output.Metadata.Add("column_4_units", "m/s");
+            output.Metadata.Add("column_5_units", "degrees");
+            output.Metadata.Add("column_6_units", "degrees");
+            output.Metadata.Add("column_7_units", "degrees");
+            output.Metadata.Add("column_8_units", "m/s");
+            output.Metadata.Add("column_9_units", "m/s");
+            output.Metadata.Add("column_10_units", "m/s");
             return output;
         }
+
 
         /// <summary>
         /// Checks temporal resolution and runs appropriate aggregation function.
@@ -92,6 +108,7 @@ namespace Temperature
             }
         }
 
+
         /// <summary>
         /// Aggregates 6-minute interval data into hourly.
         /// </summary>
@@ -102,6 +119,8 @@ namespace Temperature
             // Create new dictionary assign values and assign to output
             Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
             List<double> firstValueList = new List<double>();
+            List<double> secondValueList = new List<double>();
+            List<double> thirdValueList = new List<double>();
 
             // Get first hour and set lastKey
             string lastKey = output.Data.Keys.ToArray()[0];
@@ -129,17 +148,56 @@ namespace Temperature
                         values.Add("No Value");
                         values.Add("No Value");
                     }
+
+                    if (secondValueList.Count > 0)
+                    {
+                        values.Add(secondValueList.Average().ToString());
+                        values.Add(secondValueList.Max().ToString());
+                        values.Add(secondValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
+                    if (thirdValueList.Count > 0)
+                    {
+                        values.Add(thirdValueList.Average().ToString());
+                        values.Add(thirdValueList.Max().ToString());
+                        values.Add(thirdValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
                     data.Add(lastKey.Split(":")[0], values);
                     firstValueList.Clear();
                     previous = current;
                 }
                 else
                 {
-                    // Add value to list
+                    // Add wind speed
                     bool success = double.TryParse(item.Value[0], out double value);
                     if (success)
                     {
                         firstValueList.Add(value);
+                    }
+                    // Add wind direction
+                    success = double.TryParse(item.Value[1], out value);
+                    if (success)
+                    {
+                        secondValueList.Add(value);
+                    }
+                    // Add wind gust speed
+                    success = double.TryParse(item.Value[3], out value);
+                    if (success)
+                    {
+                        thirdValueList.Add(value);
                     }
                 }
                 lastKey = item.Key;
@@ -149,7 +207,7 @@ namespace Temperature
 
 
         /// <summary>
-        /// Aggregates 6-minute interval data into daily data.
+        /// Aggregates 6-minute interval data into daily.
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
@@ -158,19 +216,21 @@ namespace Temperature
             // Create new dictionary assign values and assign to output
             Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
             List<double> firstValueList = new List<double>();
+            List<double> secondValueList = new List<double>();
+            List<double> thirdValueList = new List<double>();
 
-            // Get first day and set lastKey
+            // Get first hour and set lastKey
             string lastKey = output.Data.Keys.ToArray()[0];
             KeyValuePair<string, List<string>> endItem = output.Data.Last();
-            int previousDay = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[2]);
+            int previous = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[2]);
             foreach (KeyValuePair<string, List<string>> item in output.Data)
             {
-                // Get the current day
-                int currentDay = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[2]);
+                // Get the current hour
+                int current = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[2]);
 
                 // If days are different then we have a new day. Set values to data dict and 
                 // set previous day to current day.
-                if (currentDay != previousDay || item.Key == endItem.Key)
+                if (current != previous || item.Key == endItem.Key)
                 {
                     List<string> values = new List<string>();
                     if (firstValueList.Count > 0)
@@ -185,17 +245,58 @@ namespace Temperature
                         values.Add("No Value");
                         values.Add("No Value");
                     }
+
+                    if (secondValueList.Count > 0)
+                    {
+                        values.Add(secondValueList.Average().ToString());
+                        values.Add(secondValueList.Max().ToString());
+                        values.Add(secondValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
+                    if (thirdValueList.Count > 0)
+                    {
+                        values.Add(thirdValueList.Average().ToString());
+                        values.Add(thirdValueList.Max().ToString());
+                        values.Add(thirdValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
                     data.Add(lastKey.Split(" ")[0], values);
                     firstValueList.Clear();
-                    previousDay = currentDay;
+                    secondValueList.Clear();
+                    thirdValueList.Clear();
+                    previous = current;
                 }
                 else
                 {
-                    // Add value to list
+                    // Add wind speed
                     bool success = double.TryParse(item.Value[0], out double value);
                     if (success)
                     {
                         firstValueList.Add(value);
+                    }
+                    // Add wind direction
+                    success = double.TryParse(item.Value[1], out value);
+                    if (success)
+                    {
+                        secondValueList.Add(value);
+                    }
+                    // Add wind gust speed
+                    success = double.TryParse(item.Value[3], out value);
+                    if (success)
+                    {
+                        thirdValueList.Add(value);
                     }
                 }
                 lastKey = item.Key;
@@ -203,9 +304,8 @@ namespace Temperature
             return data;
         }
 
-
         /// <summary>
-        /// Aggregates 6-minute interval data into monthly data.
+        /// Aggregates 6-minute interval data into monthly.
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
@@ -214,19 +314,21 @@ namespace Temperature
             // Create new dictionary assign values and assign to output
             Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
             List<double> firstValueList = new List<double>();
+            List<double> secondValueList = new List<double>();
+            List<double> thirdValueList = new List<double>();
 
-            // Get first month and set lastKey
+            // Get first hour and set lastKey
             string lastKey = output.Data.Keys.ToArray()[0];
             KeyValuePair<string, List<string>> endItem = output.Data.Last();
-            int previousMonth = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[1]);
+            int previous = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[1]);
             foreach (KeyValuePair<string, List<string>> item in output.Data)
             {
-                // Get the current month
-                int currentMonth = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[1]);
+                // Get the current hour
+                int current = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[1]);
 
-                // If months are different then we have a new month. Set values to data dict and 
-                // set previous month to current month.
-                if (currentMonth != previousMonth || item.Key == endItem.Key)
+                // If days are different then we have a new day. Set values to data dict and 
+                // set previous day to current day.
+                if (current != previous || item.Key == endItem.Key)
                 {
                     List<string> values = new List<string>();
                     if (firstValueList.Count > 0)
@@ -241,18 +343,59 @@ namespace Temperature
                         values.Add("No Value");
                         values.Add("No Value");
                     }
+
+                    if (secondValueList.Count > 0)
+                    {
+                        values.Add(secondValueList.Average().ToString());
+                        values.Add(secondValueList.Max().ToString());
+                        values.Add(secondValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
+                    if (thirdValueList.Count > 0)
+                    {
+                        values.Add(thirdValueList.Average().ToString());
+                        values.Add(thirdValueList.Max().ToString());
+                        values.Add(thirdValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
                     string[] date = lastKey.Split(" ")[0].Split("-");
                     data.Add(date[0] + "-" + date[1], values);
                     firstValueList.Clear();
-                    previousMonth = currentMonth;
+                    secondValueList.Clear();
+                    thirdValueList.Clear();
+                    previous = current;
                 }
                 else
                 {
-                    // Add value to list
+                    // Add wind speed
                     bool success = double.TryParse(item.Value[0], out double value);
                     if (success)
                     {
                         firstValueList.Add(value);
+                    }
+                    // Add wind direction
+                    success = double.TryParse(item.Value[1], out value);
+                    if (success)
+                    {
+                        secondValueList.Add(value);
+                    }
+                    // Add wind gust speed
+                    success = double.TryParse(item.Value[3], out value);
+                    if (success)
+                    {
+                        thirdValueList.Add(value);
                     }
                 }
                 lastKey = item.Key;
@@ -261,9 +404,8 @@ namespace Temperature
         }
 
 
-
         /// <summary>
-        /// Aggregates 6-minute interval data into yearly data.
+        /// Aggregates 6-minute interval data into yearly.
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
@@ -272,19 +414,21 @@ namespace Temperature
             // Create new dictionary assign values and assign to output
             Dictionary<string, List<string>> data = new Dictionary<string, List<string>>();
             List<double> firstValueList = new List<double>();
+            List<double> secondValueList = new List<double>();
+            List<double> thirdValueList = new List<double>();
 
-            // Get first year and set lastKey
+            // Get first hour and set lastKey
             string lastKey = output.Data.Keys.ToArray()[0];
             KeyValuePair<string, List<string>> endItem = output.Data.Last();
-            int previousYear = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[0]);
+            int previous = Convert.ToInt32(lastKey.Split(" ")[0].Split("-")[0]);
             foreach (KeyValuePair<string, List<string>> item in output.Data)
             {
-                // Get the current month
-                int currentYear = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[0]);
+                // Get the current hour
+                int current = Convert.ToInt32(item.Key.Split(" ")[0].Split("-")[0]);
 
-                // If months are different then we have a new month. Set values to data dict and 
-                // set previous month to current month.
-                if (currentYear != previousYear || item.Key == endItem.Key)
+                // If days are different then we have a new day. Set values to data dict and 
+                // set previous day to current day.
+                if (current != previous || item.Key == endItem.Key)
                 {
                     List<string> values = new List<string>();
                     if (firstValueList.Count > 0)
@@ -292,6 +436,32 @@ namespace Temperature
                         values.Add(firstValueList.Average().ToString());
                         values.Add(firstValueList.Max().ToString());
                         values.Add(firstValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
+                    if (secondValueList.Count > 0)
+                    {
+                        values.Add(secondValueList.Average().ToString());
+                        values.Add(secondValueList.Max().ToString());
+                        values.Add(secondValueList.Min().ToString());
+                    }
+                    else
+                    {
+                        values.Add("No Value");
+                        values.Add("No Value");
+                        values.Add("No Value");
+                    }
+
+                    if (thirdValueList.Count > 0)
+                    {
+                        values.Add(thirdValueList.Average().ToString());
+                        values.Add(thirdValueList.Max().ToString());
+                        values.Add(thirdValueList.Min().ToString());
                     }
                     else
                     {
@@ -302,15 +472,29 @@ namespace Temperature
                     string[] date = lastKey.Split(" ")[0].Split("-");
                     data.Add(date[0], values);
                     firstValueList.Clear();
-                    previousYear = currentYear;
+                    secondValueList.Clear();
+                    thirdValueList.Clear();
+                    previous = current;
                 }
                 else
                 {
-                    // Add value to list
+                    // Add wind speed
                     bool success = double.TryParse(item.Value[0], out double value);
                     if (success)
                     {
                         firstValueList.Add(value);
+                    }
+                    // Add wind direction
+                    success = double.TryParse(item.Value[1], out value);
+                    if (success)
+                    {
+                        secondValueList.Add(value);
+                    }
+                    // Add wind gust speed
+                    success = double.TryParse(item.Value[3], out value);
+                    if (success)
+                    {
+                        thirdValueList.Add(value);
                     }
                 }
                 lastKey = item.Key;

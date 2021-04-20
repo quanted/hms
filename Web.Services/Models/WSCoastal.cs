@@ -41,6 +41,10 @@ namespace Web.Services.Models
             ITimeSeriesOutput result = coast.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
+            // Get generic statistics
+            result = Utilities.Statistics.GetStatistics(out errorMsg, coast.Input, result);
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
             return result;
         }
     }

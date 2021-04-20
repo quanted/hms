@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
-namespace Temperature
+namespace Humidity
 {
     public class NOAACoastal
     {
@@ -21,17 +21,21 @@ namespace Temperature
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, bool Relative, int retries = 0)
         {
             Data.Source.NOAACoastal noaaCoastal = new Data.Source.NOAACoastal();
 
+            // Check input
+            ValidateInput(out errorMsg, input, Relative);
+            if (errorMsg.Contains("ERROR")) { return null; }
+
             // Set metadata fields for url construction
-            input.Geometry.GeometryMetadata.Add("product", "air_temperature");
+            input.Geometry.GeometryMetadata.Add("product", "humidity");
             input.Geometry.GeometryMetadata.Add("datum", "");
             input.Geometry.GeometryMetadata.Add("application", "web_services");
 
             // Get data and set to output
-            ITimeSeriesOutput noaaCoastalOutput = noaaCoastal.GetData(out errorMsg, "Temperature", output, input, retries);
+            ITimeSeriesOutput noaaCoastalOutput = noaaCoastal.GetData(out errorMsg, "Humidity", output, input, retries);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Prune data based on product and set correct metadata columns
@@ -44,6 +48,12 @@ namespace Temperature
             return noaaCoastalOutput;
         }
 
+        private void ValidateInput(out string errorMsg, ITimeSeriesInput input, bool Relative)
+        {
+            // Must have relative
+            errorMsg = Relative ? "" : "ERROR: Specific humidity not supported by the noaa_coastal data source.";
+        }
+
         /// <summary>
         /// Sets the metadata columns.
         /// </summary>
@@ -53,10 +63,10 @@ namespace Temperature
         {
             // Date is always first data column
             output.Metadata.Add("column_1", "Date");
-            output.Metadata.Add("column_2", "Avg Temperature");
-            output.Metadata.Add("column_3", "Max Temperature");
-            output.Metadata.Add("column_4", "Min Temperature");
-            output.Metadata.Add("noaa_coastal_units", input.Units == "metric" ? "C" : "F");
+            output.Metadata.Add("column_2", "Avg Humidity");
+            output.Metadata.Add("column_3", "Max Humidity");
+            output.Metadata.Add("column_4", "Min Humidity");
+            output.Metadata.Add("noaa_coastal_units", "percent");
             return output;
         }
 
