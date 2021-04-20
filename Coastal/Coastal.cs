@@ -34,12 +34,11 @@ namespace Coastal
         /// <returns></returns>
         public ITimeSeriesOutput GetData(out string errorMsg, int retries = 0)
         {
-            errorMsg = "";
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone variable.
-            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("noaa"))
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("noaa_coastal"))
             {
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -47,7 +46,7 @@ namespace Coastal
 
             switch (this.Input.Source.ToLower())
             {
-                case "noaa":
+                case "noaa_coastal":
                     // NOAA Coastal Data call
                     NOAACoastal noaaCoastal = new NOAACoastal();
                     this.Output = noaaCoastal.GetData(out errorMsg, this.Output, this.Input, retries);
@@ -63,21 +62,6 @@ namespace Coastal
             this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
 
             return this.Output;
-        }
-
-        /// <summary>
-        /// Check coastal data endpoints.
-        /// </summary>
-        /// <returns></returns>
-        public Dictionary<string, string> CheckEndpointStatus()
-        {
-            switch (this.Input.Source)
-            {
-                case "noaa":
-                    return NOAACoastal.CheckStatus(this.Input);
-                default:
-                    return new Dictionary<string, string>() { { "status", "invalid source" } };
-            }
         }
     }
 }

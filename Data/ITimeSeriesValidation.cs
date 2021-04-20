@@ -30,19 +30,19 @@ namespace Data
             ["streamhydrology"] = new List<string> { "aquatox" },
             ["subsurfaceflow"] = new List<string> { "nldas", "gldas", "curvenumber" },
             ["surfacerunoff"] = new List<string> { "nldas", "gldas", "curvenumber" },
-            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei" },
+            ["temperature"] = new List<string> { "nldas", "gldas", "daymet", "prism", "ncei", "noaa_coastal" },
             ["workflow"] = new List<string> { "streamflow" },
-            ["wind"] = new List<string> { "nldas", "gldas", "ncei" },
+            ["wind"] = new List<string> { "nldas", "gldas", "ncei", "noaa_coastal" },
             ["dewpoint"] = new List<string> { "prism" },
-            ["humidity"] = new List<string> { "prism", "nldas", "gldas" },
+            ["humidity"] = new List<string> { "prism", "nldas", "gldas", "noaa_coastal" },
             ["surfacepressure"] = new List<string> { "gldas" },
             ["streamflow"] = new List<string> { "nwis", "usgs", "streamgauge" },
-            ["coastal"] = new List<string> { "noaa" }
+            ["coastal"] = new List<string> { "noaa_coastal" }
         };
 
         static protected string[] validRemoteData =
         {
-            "nldas", "gldas", "trmm", "ncei", "daymet", "prism", "nwis", "noaa"
+            "nldas", "gldas", "trmm", "ncei", "daymet", "prism", "nwis", "noaa_coastal"
         };
 
         /// <summary>

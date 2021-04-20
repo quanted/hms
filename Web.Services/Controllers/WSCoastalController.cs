@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using Web.Services.Models;
@@ -27,7 +24,7 @@ namespace Web.Services.Controllers
         {
             TimeSeriesInput example = new TimeSeriesInput()
             {
-                Source = "noaa",
+                Source = "noaa_coastal",
                 DateTimeSpan = new DateTimeSpan()
                 {
                     StartDate = new DateTime(2013, 01, 01),
@@ -75,7 +72,6 @@ namespace Web.Services.Controllers
         {
             try
             {
-                Console.WriteLine("INPUT" + coastalInput.ToString());
                 WSCoastal coastal = new WSCoastal();
                 var stpWatch = System.Diagnostics.Stopwatch.StartNew();
                 ITimeSeriesOutput results = await coastal.GetCoastal(coastalInput);

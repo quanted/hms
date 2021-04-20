@@ -10,7 +10,7 @@ namespace Web.Services.Models
     /// </summary>
     public class WSCoastal
     {
-        private enum CoastalSources { noaa };
+        private enum CoastalSources { noaa_coastal };
 
         /// <summary>
         /// Gets coastal data using the given TimeSeriesInput parameters.
@@ -19,7 +19,7 @@ namespace Web.Services.Models
         /// <returns></returns>
         public async Task<ITimeSeriesOutput> GetCoastal(TimeSeriesInput input)
         {
-            string errorMsg = "";
+            string errorMsg;
 
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -41,8 +41,6 @@ namespace Web.Services.Models
             ITimeSeriesOutput result = coast.GetData(out errorMsg);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-            // Get generic statistics
-            result = Utilities.Statistics.GetStatistics(out errorMsg, coast.Input, result);
             return result;
         }
     }

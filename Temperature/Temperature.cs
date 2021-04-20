@@ -58,6 +58,12 @@ namespace Temperature
 
             switch (this.Input.Source.ToLower())
             {
+                case "noaa_coastal":
+                    // NOAA Temperature Data call
+                    NOAACoastal noaa = new NOAACoastal();
+                    this.Output = noaa.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 case "nldas":
                     // NLDAS Temperature Data call
                     NLDAS nldas = new NLDAS();

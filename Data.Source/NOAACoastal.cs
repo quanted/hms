@@ -1,9 +1,12 @@
 ﻿using Serilog;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,16 +14,6 @@ namespace Data.Source
 {
     public class NOAACoastal
     {
-
-        private DateTime temporalStart = new DateTime(1979, 1, 1);
-        private DateTime temporalEnd = DateTime.UtcNow;
-
-        // May need these later for getting nearest station?
-        private double maxLat = 53.0;                                       // NLDAS spatial coverage max latitude
-        private double minLat = 25.0;                                       // NLDAS spatial coverage min latitude
-        private double maxLng = -63.0;                                      // NLDAS spatial coverage max longitude
-        private double minLng = -125.0;                                     // NLDAS spatial coverage min longitude
-
         /// <summary>
         /// Default Coastal constructor
         /// </summary>
@@ -34,67 +27,34 @@ namespace Data.Source
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
+        public ITimeSeriesOutput GetData(out string errorMsg, string dataset, ITimeSeriesOutput output, ITimeSeriesInput componentInput, int retries = 0)
         {
+            ITimeSeriesOutput data = output;
             errorMsg = "";
 
-            if (!this.ValidateInput(out errorMsg, componentInput))
+            // Max size of request is 31 days. Get difference of begin and end dates in days.
+            double totalDays = (componentInput.DateTimeSpan.EndDate - componentInput.DateTimeSpan.StartDate).TotalDays;
+
+            // Divide total days by 31 and round up to nearest whole number. Then loop and concatenate data.
+            int dayIncrements = (int)Math.Ceiling(totalDays / 31);
+            DateTime begin = componentInput.DateTimeSpan.StartDate;
+            DateTime end = begin.AddDays(31);
+            for (int i = 0; i < dayIncrements; i++)
             {
-                return null;
+                // Constructs the url for the data request and it's query string.
+                string url = ConstructURL(begin, end, componentInput);
+                if (errorMsg.Contains("ERROR")) { return null; }
+
+                // Uses the constructed url to download time series data.
+                // Parse json string into json object for easy concatenation of data
+                data = SetDataToOutput(out errorMsg, dataset, DownloadData(url, retries).Result, data, componentInput);
+                if (errorMsg.Contains("ERROR") || data == null) { return null; }
+
+                begin = end;
+                end = begin.AddDays(31);
             }
-
-            // Adjusts date/times by the timezone offset if timelocalized is set to true.
-            // componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
-
-            // Constructs the url for the NLDAS data request and it's query string.
-            string url = ConstructURL(out errorMsg, dataset, componentInput);
-            if (errorMsg.Contains("ERROR")) { return null; }
-
-            // Uses the constructed url to download time series data.
-            string data = DownloadData(url, retries).Result;
-            if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return data;
-        }
-
-        // TODO: Implement
-        private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
-        {
-            errorMsg = "";
-            StringBuilder errors = new StringBuilder();
-            bool valid = true;
-            return valid;
-        }
-
-        /// <summary>
-        /// Directly downloads from the source using the testInput object. Used for checking the status of the NOAACoastal endpoints.
-        /// </summary>
-        /// <param name="dataset"></param>
-        /// <param name="testInput"></param>
-        /// <returns></returns>
-        public static Dictionary<string, string> CheckStatus(string dataset, ITimeSeriesInput testInput)
-        {
-            try
-            {
-                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput));
-                HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-                string status = response.StatusCode.ToString();
-                string description = response.StatusDescription;
-                response.Close();
-                return new Dictionary<string, string>()
-                {
-                    { "status", status },
-                    { "description", description}
-                };
-            }
-            catch (Exception ex)
-            {
-                return new Dictionary<string, string>()
-                {
-                    { "status", "ERROR" },
-                    { "description", ex.Message }
-                };
-            }
         }
 
         /// <summary>
@@ -103,28 +63,34 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
+        private static string ConstructURL(DateTime begin, DateTime end, ITimeSeriesInput cInput)
         {
-            errorMsg = "";
             StringBuilder sb = new StringBuilder();
             // Append noaa coastal url
             sb.Append(cInput.BaseURL[0]);
 
             // Add Begin and End Date
-            string[] begin_date = cInput.DateTimeSpan.StartDate.ToString("yyyyMMdd HH:mm").Split(' ');
-            string[] end_date = cInput.DateTimeSpan.EndDate.ToString("yyyyMMdd HH:mm").Split(' ');
+            string[] begin_date = begin.ToString("yyyyMMdd HH:mm").Split(' ');
+            string[] end_date = end.ToString("yyyyMMdd HH:mm").Split(' ');
             sb.Append("begin_date=" + begin_date[0] + "%20" + begin_date[1]
                 + @"&end_date=" + end_date[0] + "%20" + end_date[1]);
 
-            // Add all other inputs
+            // Set units to english if imperial is specified
+            string units = cInput.Units;
+            if(cInput.Units.Contains("imperial"))
+            {
+                units = "english";
+            }
+
+            // Add all other inputs to request url
             sb.Append(
                 @"&station=" + cInput.Geometry.StationID +
-                @"&product=" + cInput.Geometry.GeometryMetadata["product"] +
+                @"&product=" + cInput.Geometry.GeometryMetadata["product"] + 
                 @"&datum=" + cInput.Geometry.GeometryMetadata["datum"] +
-                @"&units=" + cInput.Units +
+                @"&units=" + units +
                 @"&time_zone=" + cInput.Geometry.Timezone.Name +
                 @"&application=" + cInput.Geometry.GeometryMetadata["application"] +
-                @"&format=" + cInput.OutputFormat
+                @"&format=json"
             );
 
             return sb.ToString();
@@ -134,7 +100,6 @@ namespace Data.Source
 
         /// <summary>
         /// Downloads noaa data from noaa tides and currents. If Http Request fails will retry up to 5 times.
-        /// TODO: Add in start date and end date check prior to the download call (Probably add to Validators class)
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
@@ -168,14 +133,14 @@ namespace Data.Source
                 if (retries < maxRetries)
                 {
                     retries += 1;
-                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
+                    Log.Warning("Error: Failed to download noaa coastal data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
                     return this.DownloadData(url, retries).Result;
                 }
                 wm.Dispose();
                 hc.Dispose();
-                Log.Warning(ex, "Error: Failed to download nldas data.");
+                Log.Warning(ex, "Error: Failed to download noaa coastal data.");
                 return null;
             }
             wm.Dispose();
@@ -195,46 +160,81 @@ namespace Data.Source
         public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
-            string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
-            if (splitData.Length <= 1)
-            {
-                splitData = data.Split(new string[] { "Data\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            }
+            // Parse json string into json object for easy manipulation
+            JsonElement root = JsonDocument.Parse(data).RootElement;
+
+            // Set output dataset/source
             output.Dataset = dataset;
             output.DataSource = input.Source;
-            output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+
+            // Check for error message
+            if (root.TryGetProperty(@"error", out JsonElement value))
+            {
+                // Error found, set error msg to errorMsg
+                value.TryGetProperty(@"message", out value);
+                errorMsg = "ERROR: " + value.ToString();
+            }
+            
+            // Check for metadata and set to output
+            if (root.TryGetProperty(@"metadata", out value) && output.Metadata.Count == 0)
+            {
+                output.Metadata = SetMetadata(out errorMsg, JsonSerializer.Serialize<JsonElement>(value), output);
+            }
+
+            // Check for data and set to output
+            if (root.TryGetProperty(@"data", out value))
+            {
+                // Set data to output data
+                SetData(out errorMsg, value, input).ToList().ForEach(x => {
+                    // Add data to ouput if key is not already there and if the key does not exceed the end date
+                    if(!output.Data.ContainsKey(x.Key) && 
+                    !(DateTime.ParseExact(x.Key, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) > input.DateTimeSpan.EndDate))
+                    {
+                        output.Data.Add(x.Key, x.Value);
+                    }
+                });
+            }
+
             return output;
         }
 
-
         /// <summary>
-        /// Parses data string from nldas and sets the data for the ITimeSeries object.
+        /// Parses data string from noaa and sets the data for the ITimeSeries object.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
-        /// <returns></returns>
-        private Dictionary<string, List<string>> SetData(out string errorMsg, string data, bool localTime, string dateFormat, string dataFormat, ITimezone tzDetails)
+        /// <returns></returns> 
+        private Dictionary<string, List<string>> SetData(out string errorMsg, JsonElement data, ITimeSeriesInput input)
         {
             errorMsg = "";
             Dictionary<string, List<string>> dataDict = new Dictionary<string, List<string>>();
-            List<string> timestepData;
-            double offset = (localTime == true) ? tzDetails.Offset : 0.0;
-            string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            double offset = (input.TimeLocalized == true) ? input.Geometry.Timezone.Offset : 0.0;
 
-            for (int i = 0; i < tsLines.Length; i++)
+            // Loop over array of objects. Objects take form of:
+            //
+            // {"t":"2013-08-08 15:00", "v":"72.5", "f":"0,0,0"}
+            //
+            foreach (JsonElement item in data.EnumerateArray())
             {
-                timestepData = new List<string>();
-                string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
-                dataDict[SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
+                // Serialize to string then deserialize to dictionary of strings
+                string itemString = JsonSerializer.Serialize<JsonElement>(item);
+                Dictionary<string, string> dict = JsonSerializer.Deserialize<Dictionary<string, string>>(itemString);
+
+                // Get time value and convert to string array
+                string time = dict["t"];
+
+                // Remove t and other unneccsarry values from data
+                dict.Remove("t");
+
+                // Assign list of stings of data to dict
+                dataDict[time] = dict.Values.ToList();
             }
+
             return dataDict;
         }
 
-
         /// <summary>
-        /// Parses data string from nldas and sets the metadata for the ITimeSeries object.
+        /// Parses data string from noaa and sets the metadata for the ITimeSeries object.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="data"></param>
@@ -243,46 +243,12 @@ namespace Data.Source
         private Dictionary<string, string> SetMetadata(out string errorMsg, string metaData, ITimeSeriesOutput output)
         {
             errorMsg = "";
-            Dictionary<string, string> meta = output.Metadata;
-            string[] metaDataLines = metaData.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < metaDataLines.Length - 1; i++)
+            Dictionary<string, string> meta = new Dictionary<string, string>();
+            foreach(KeyValuePair<string, string> item in JsonSerializer.Deserialize<Dictionary<string, string>>(metaData))
             {
-                if (metaDataLines[i].Contains("="))
-                {
-                    string[] line = metaDataLines[i].Split('=');
-                    if (line[0].Contains("column"))
-                    {
-                        meta[line[0]] = line[1];
-                    }
-                    else
-                    {
-                        meta["nldas_" + line[0]] = line[1];
-                    }
-                }
+                meta.Add(output.DataSource + "_"+ item.Key, item.Value);
             }
             return meta;
-        }
-
-
-        /// <summary>
-        /// Adjusts the Date/Time value to the local time, using the offset.
-        /// </summary>
-        /// <param name="errorMsg"></param>
-        /// <param name="offset"></param>
-        /// <param name="dateHour"></param>
-        /// <returns></returns>
-        public static string SetDateToLocal(double offset, string dateHour, string dateFormat)
-        {
-
-            string[] date = dateHour.Split(' ');
-            string hourStr = date[1].Substring(0, 2);
-            string dateHourStr = date[0] + " " + hourStr;
-            double adjustedOffset = offset + 1;
-            DateTime newDate = new DateTime();
-            DateTime.TryParseExact(dateHourStr, new string[] { "yyyy-MM-dd HH" }, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out newDate);
-            newDate = (offset != 0.0) ? newDate.AddHours(offset) : newDate;
-            string newDateString = newDate.ToString(dateFormat);
-            return newDateString;
         }
     }
 }
