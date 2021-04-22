@@ -723,7 +723,7 @@ namespace AQUATOX.AQTSegment
         {
             bool result;
             result = ((NState == AllVariables.SmForageFish1) || (NState == AllVariables.SmForageFish2) || (NState == AllVariables.SmBottomFish1) || (NState == AllVariables.SmBottomFish2) 
-                   || (NState == AllVariables.SmGameFish1)) && (SVType == T_SVType.StV);
+                   || (NState == AllVariables.SmGameFish1) || (NState == AllVariables.SmGameFish2) || (NState == AllVariables.SmGameFish3) || (NState == AllVariables.SmGameFish4)) && (SVType == T_SVType.StV);
             return result;
         }
 
@@ -4681,9 +4681,10 @@ namespace AQUATOX.AQTSegment
                                           typeof(TSilica_Sediment), typeof(TCOD), typeof(TParameter), typeof(Diagenesis_Rec), typeof(TToxics), typeof(TLight),
                                           typeof(ChemicalRecord), typeof(TWindLoading), typeof(TPlant), typeof(PlantRecord), typeof(TMacrophyte), typeof(TAnimal),typeof(AnimalRecord),
                                           typeof(TSandSiltClay), typeof(InteractionFields), typeof(TAnimalTox), typeof(TParticleTox), typeof(TBioTransObject),
-                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant),
-                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam), typeof (TStringParam),typeof(TGraphSetup) , typeof(TGraphs), typeof(SeriesID)}; 
-    }
+                                          typeof(TAlgaeTox), typeof(TPlantToxRecord), typeof(TAnimalToxRecord), typeof(T_N_Internal_Plant), typeof(DateTimeSpan), typeof(TimeSeriesGeometry),
+                                          typeof(TBoolParam), typeof(TDateParam), typeof (TDropDownParam), typeof (TStringParam),typeof(TGraphSetup) , typeof(TGraphs), typeof(SeriesID),
+                                          typeof(PointCoordinate)};   //, typeof(Dictionary<string,TimeSeriesOutput>)
+        }
 }
 
 }

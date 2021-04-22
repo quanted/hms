@@ -392,7 +392,6 @@ namespace GUI.AQUATOX
             this.MultiSegButton.TabIndex = 22;
             this.MultiSegButton.Text = "AQUATOX 2-D";
             this.MultiSegButton.UseVisualStyleBackColor = true;
-            this.MultiSegButton.Visible = false;
             this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
             // 
             // AQTTestForm

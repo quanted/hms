@@ -60,7 +60,7 @@ namespace AQUATOX.AQSite
         {
             SiteName.Symbol = "Site Name"; SiteName.Name = "Site Name";
             SiteLength.Symbol = "SiteLength"; SiteLength.Name = "Max Length (or reach)"; SiteLength.Units = "km";
-            Volume.Symbol = "Vol."; Volume.Name = "Volume (reference only)"; SiteLength.Units = "m3";
+            Volume.Symbol = "Vol."; Volume.Name = "Volume (reference only)"; Volume.Units = "m3";
             SurfArea.Symbol = "Surface Area"; SurfArea.Name = "Initial Condition Surface Area"; SurfArea.Units = "m2"; 
             ICZMean.Symbol = "Mean Depth"; ICZMean.Name = "Mean depth, (initial condition if dynamic mean depth is selected)"; ICZMean.Units = "M";
             ZMax.Symbol = "Maximum Depth"; ZMax.Name = "Maximum depth"; ZMax.Units = "M";

@@ -42,7 +42,7 @@ namespace GUI.AQUATOX
         public bool EditSV(TStateVariable IncomingS, AQTSim AQS)
         {
 
-            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings()); ;
+            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings()); 
 
             SV = IncomingS;
             UpdateScreen();
@@ -222,7 +222,7 @@ namespace GUI.AQUATOX
 
         private void HMS_Click(object sender, EventArgs e)
         {
-            WSStreamflowController sfc = new WSStreamflowController(null);  // unnecessary 
+            // WSStreamflowController sfc = new WSStreamflowController(null);  // unnecessary 
 
 
             // check to see if HMS loadings may be available for this AQUATOX time-series
@@ -414,6 +414,11 @@ namespace GUI.AQUATOX
         {
             LoadShown.UseConstant = UseConstRadio.Checked;
             ShowGrid();
+        }
+
+        private void ICEdit_TextChanged(object sender, EventArgs e)
+        {
+            SV.InitialCond = double.Parse(ICEdit.Text);
         }
     }
 }

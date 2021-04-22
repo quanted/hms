@@ -5,7 +5,7 @@ using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
-using Microsoft.Research.Science.Data.Imperative;
+//using Microsoft.Research.Science.Data.Imperative;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Windows.Forms;
-using sds = Microsoft.Research.Science.Data;
+// using sds = Microsoft.Research.Science.Data;
 
 namespace GUI.AQUATOX
 {
@@ -680,13 +680,13 @@ namespace GUI.AQUATOX
             
             // Gets the path to the NetCDF file to be used as a data source.
             //var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputrch.nc?openMode=readOnly");
-            var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
+           // var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
 
-            sds.MetadataDictionary dt = dataset.Metadata;
+          //  sds.MetadataDictionary dt = dataset.Metadata;
 
             string fieldname = "NO3GWkg_ha";
 
-            double[,,] dataValues = dataset.GetData<double[,,]>(fieldname);
+            double[,,] dataValues = null; //  dataset.GetData<double[,,]>(fieldname);
             var result = string.Join(",", dataValues);
 
             StreamWriter file = new StreamWriter("N:\\AQUATOX\\CSRA\\"+ fieldname+".csv");
@@ -731,6 +731,8 @@ namespace GUI.AQUATOX
 
         private void MultiSegButton_Click(object sender, EventArgs e)
         {
+            MultiSegForm MSForm = new MultiSegForm();
+            MSForm.ShowDialog();
 
         }
     }

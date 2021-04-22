@@ -73,6 +73,7 @@ namespace GUI.AQUATOX
             this.ICEdit.Name = "ICEdit";
             this.ICEdit.Size = new System.Drawing.Size(95, 23);
             this.ICEdit.TabIndex = 14;
+            this.ICEdit.TextChanged += new System.EventHandler(this.ICEdit_TextChanged);
             // 
             // SVNameLabel
             // 

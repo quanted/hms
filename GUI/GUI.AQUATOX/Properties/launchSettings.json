@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GUI.AQUATOX": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
