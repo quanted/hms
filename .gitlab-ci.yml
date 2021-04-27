@@ -29,5 +29,5 @@ Unit Tests:
     paths:
       - /app/artifacts/*test-result.xml
     reports:
-      nunit:
+      junit:
         - /app/artifacts/*test-result.xml
