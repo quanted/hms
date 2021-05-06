@@ -467,7 +467,7 @@ namespace GUI.AQUATOX
 
             CreateControls();
 
-            Show();
+            ShowDialog();
             return true;
         }
     }

@@ -1,49 +1,145 @@
-﻿using AQUATOX.AQTSegment;
-using AQUATOX.Loadings;
+﻿using AQUATOX.AQSim_2D;
+using AQUATOX.AQTSegment;
 using AQUATOX.Volume;
-using AQUATOX.Animals;
-using AQUATOX.Plants;
 using Data;
 using Globals;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
 {
     public partial class MultiSegForm : Form
     {
+        private BackgroundWorker Worker = new BackgroundWorker();
+        private AQSim_2D AQT2D = null;
 
-        /// <summary>
-        /// An application sends the WM_SETREDRAW message to a window to allow changes in that 
-        /// window to be redrawn or to prevent changes in that window from being redrawn.
-        /// </summary>
-        private const int WM_SETREDRAW = 11;
+        private StreamflowInput sfi;
+        private StreamflowInputExample sfie = new StreamflowInputExample();
+        private TimeSeriesOutput ATSO;
 
+        private Chart chart1 = new Chart();
+        ChartArea chartArea1 = new ChartArea();
+        Legend legend1 = new Legend();
+        Series series1 = new Series();
 
         public MultiSegForm()
         {
             AutoScroll = true;
             InitializeComponent();
+            //Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
+            //Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
+            //Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
+            Worker.WorkerReportsProgress = true;
+
+            // 
+            // chart1
+            // 
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            SuspendLayout();
+
+            this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chart1.BorderlineColor = System.Drawing.Color.Black;
+            this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
+            chartArea1.Name = "ChartArea1";
+            chart1.ChartAreas.Add(chartArea1);
+
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
+            chart1.Location = new System.Drawing.Point(306, 59);
+            chart1.Name = "chart1";
+            this.chart1.Size = new System.Drawing.Size(474, 414);
+            chart1.TabIndex = 3;
+            this.chart1.Text = "chart1";
+            chart1.Series.Clear();
+            chart1.Visible = false;
+            this.chart1.CustomizeLegend += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.CustomizeLegendEventArgs>(this.chart1_CustomizeLegend_1);
+            this.chart1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.chart1_MouseDown);
+
+            Controls.Add(chart1);
+
+            chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
+            chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
+
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        private void chart1_MouseDown(object sender, MouseEventArgs e)
+        {
+            HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
+            if (resultExplode.Series != null)
+            {
+                if (resultExplode.Object is LegendItem)
+                {
+                    LegendItem legendItem = (LegendItem)resultExplode.Object;
+                    Series selectedSeries = (Series)legendItem.Tag;
+                    if (selectedSeries != null)
+                        selectedSeries.Enabled = !selectedSeries.Enabled;
+                    chart1.ChartAreas[0].RecalculateAxesScale();
+                }
+
+                string msgstr = resultExplode.Series.Name;
+                if (resultExplode.PointIndex > 0)
+                {
+                    msgstr = msgstr + ": " +
+                    resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
+                    System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
+                    System.Windows.Forms.MessageBox.Show(msgstr);
+                }
+            }
+        }
+
+        private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e)
+        {
+            e.LegendItems.Clear();
+            foreach (var series in this.chart1.Series)
+            {
+                var legendItem = new LegendItem();
+                legendItem.SeriesName = series.Name;
+                legendItem.ImageStyle = LegendImageStyle.Rectangle;
+                legendItem.BorderColor = Color.Transparent;
+                legendItem.Name = series.Name + "_legend_item";
+
+                int i = legendItem.Cells.Add(LegendCellType.SeriesSymbol, "", ContentAlignment.MiddleCenter);
+                legendItem.Cells.Add(LegendCellType.Text, series.Name, ContentAlignment.MiddleCenter);
+
+                if (series.Enabled)
+                { legendItem.Color = series.Color; legendItem.BorderColor = Color.Black; }
+                else
+                { legendItem.Color = Color.FromArgb(100, series.Color); legendItem.BorderColor = Color.White; }
+
+                legendItem.Tag = series;
+                e.LegendItems.Add(legendItem);
+            }
         }
 
 
         private void cancel_click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Cancel any changes to inputs?", "Confirm",
-                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                 MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
-            {
-                // UserCanceled = true;
-                this.Close();
-            }
+            this.Close();
+
+            //if (MessageBox.Show("Cancel any changes to inputs?", "Confirm",
+            //     MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+            //     MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+            //{
+            //    // UserCanceled = true;
+            //    this.Close();
+            //}
         }
 
         private void OK_click(object sender, EventArgs e)
@@ -51,20 +147,28 @@ namespace GUI.AQUATOX
             this.Close();
         }
 
-        class streamNetwork
+        private void AddToProcessLog(string msg)
         {
-            public string[][] network;
-            public int[][] order;
-            public Dictionary<string, int[]> sources;
+            ProcessLog.AppendText(msg + Environment.NewLine);
+            Application.DoEvents();
         }
 
-        private StreamflowInput sfi;
-        private TimeSeriesOutput ATSO;
+        private void TSafeAddToProcessLog(string msg)
+        {
+
+            if (InvokeRequired)
+                ProcessLog.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    ProcessLog.AppendText(msg + Environment.NewLine);
+                });
+            else AddToProcessLog(msg);
+        }
+
 
         /// <summary>
         /// Submit POST request to HMS web API
         /// </summary>
-        public void submitRequest(string comid)
+        public void submitHydrologyRequest(string comid)  // Circularity issue -- move to AQ_Sim_2D?  
         {
 
             string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
@@ -88,285 +192,219 @@ namespace GUI.AQUATOX
 
         }
 
-        private void AddToTextBox(string msg)
+        public string PopulateStreamNetwork(int iSeg, string filen, out string jsondata)  // Circularity issue -- move to AQ_Sim_2D?  
         {
-            textBox3.AppendText(msg + Environment.NewLine);
-            Application.DoEvents();
+            jsondata = "";
+            string comid = AQT2D.SN.network[iSeg][0];
+            double lenkm = double.Parse(AQT2D.SN.network[iSeg][4]);
+
+            AQTSim Sim = new AQTSim();
+            string err = Sim.Instantiate(AQT2D.baseSimJSON);
+
+            AQT2D.MasterSetup = Sim.AQTSeg.PSetup; 
+
+            if (err != "") { return err; }
+
+            Sim.AQTSeg.SetMemLocRec();
+
+            Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
+            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From 2-D Linkage";
+
+            sfi = sfie.GetExamples();
+            sfi.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
+            sfi.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
+            sfi.TemporalResolution = "daily";
+            sfi.Geometry.ComID = int.Parse(comid);
+            sfi.Source = "test";
+
+            submitHydrologyRequest(comid);
+
+            AQT2D.UpdateDischarge(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, ATSO);
+
+            AddToProcessLog("Imported Flow Data for " + comid);
+
+            jsondata = "";
+            Sim.AQTSeg.FileName = filen;
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            return errmessage;
         }
 
-        private void TSafeAddToTextBox(string msg)
-        {
 
-            if (InvokeRequired)
-                textBox3.BeginInvoke((MethodInvoker)delegate ()
-                {
-                    textBox3.AppendText(msg + Environment.NewLine);
-                });
-            else AddToTextBox(msg);
-
-
-        }
-
-
-        private void UpdateDischarge(TVolume TVol)
-        {
-            TVol.Calc_Method = VolumeMethType.Manning;
-
-            // 1 is discharge in this case
-            TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
-
-            if (DischargeLoad.ITSI == null)
-            {
-                TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
-                TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
-                input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-                DischargeLoad.ITSI = input;
-            }
-
-            DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
-            DischargeLoad.Translate_ITimeSeriesInput();
-            DischargeLoad.MultLdg = 1e6;
-            DischargeLoad.UseConstant = false;
-            TVol.LoadNotes1 = "From 2-D Linkage";
-            TVol.LoadNotes2 = "";
-            DischargeLoad.ITSI = null;
-
-        }
-
-        streamNetwork SN = null;
         private void createButton_Click(object sender, EventArgs e)
         {
             StreamflowInputExample sfie = new StreamflowInputExample();
+            AQT2D = new AQSim_2D();
+
+            // string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, pourIDBox.Text, spanBox.Text);
 
             string SNJSON = System.IO.File.ReadAllText(@"C:\Users\cloug\Downloads\response_1618863788756.json", Encoding.Default);  //C:\Users\cloug\Downloads\response_1617838994520.json
-            SN = Newtonsoft.Json.JsonConvert.DeserializeObject<streamNetwork>(SNJSON);
 
-            int nSegs = SN.network.Count() - 1;
-            AddToTextBox("System has " + nSegs.ToString() + " segments");
-            string BaseFileN = @"C:\work\AQUATOX\CSRA\LBR Glenwood 4.JSON";
-            AddToTextBox(" Basefile = " + BaseFileN);
+            AQT2D.CreateStreamNetwork(SNJSON);
+
+            int nSegs = AQT2D.SN.network.Count() - 1;
+            AddToProcessLog("System has " + nSegs.ToString() + " segments");
+            string BaseFileN = BaseJSONBox.Text;
+            AddToProcessLog(" Basefile = " + BaseFileN);
 
             string BaseDir = basedirBox.Text;
-            AddToTextBox(" BaseDir = " + BaseDir);
+            AddToProcessLog(" BaseDir = " + BaseDir);
+
+            AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
 
             File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
 
             for (int iSeg = 1; iSeg <= nSegs; iSeg++)
             {
-                string comid = SN.network[iSeg][0];
-                double lenkm = double.Parse(SN.network[iSeg][4]);
+                string comid = AQT2D.SN.network[iSeg][0];
+                string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
+                string errmessage = PopulateStreamNetwork(iSeg, filen, out string jsondata);
 
-                string json = File.ReadAllText(BaseFileN);
-                AQTSim Sim = new AQTSim();
-                string err = Sim.Instantiate(json);
-                if (err != "") { MessageBox.Show(err); return; }
-                Sim.AQTSeg.SetMemLocRec();
-
-                Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From 2-D Linkage";
-
-                sfi = sfie.GetExamples();
-                sfi.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
-                sfi.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
-                sfi.TemporalResolution = "daily";
-                sfi.Geometry.ComID = int.Parse(comid);
-                sfi.Source = "test";
-                submitRequest(comid);
-                UpdateDischarge(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume);
-
-                AddToTextBox("Imported Flow Data for " + comid);
-
-                string jsondata = "";
-                string errmessage = Sim.SaveJSON(ref jsondata);
                 if (errmessage == "")
                 {
-                    Sim.AQTSeg.FileName = BaseDir + "AQT_Nutrient_" + comid + ".JSON";
-                    File.WriteAllText(Sim.AQTSeg.FileName, jsondata);
+                    File.WriteAllText(filen, jsondata);
+                    AddToProcessLog("Saved JSON for " + comid);
                 }
-                else MessageBox.Show(errmessage);
+                else AddToProcessLog(errmessage);
 
-                AddToTextBox("Saved JSON for " + comid);
-
-                AddToTextBox("");
+                AddToProcessLog("");
             }
 
-            if (SN.sources.TryGetValue("boundaries", out int[] boundaries))
+            if (AQT2D.SN.sources.TryGetValue("boundaries", out int[] boundaries))
             {
-                string bnote = "Note: Boundary Condition Flows and State Variables should be added to COMIDs: ";
+                string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
                 foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
+                AddToProcessLog(bnote);
             }
         }
 
-        Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
-
-        class archived_results
-        {
-            public DateTime[] dates;
-            public double[] washout;  // m3
-            public double[][] concs; // g/m3 or mg/m3 depending on state var
-        }
-
-        private void archiveOutput(int comid, AQTSim Sim)
-        {
-            archived_results AR = new archived_results();
-            TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-            int ndates = tvol.SVoutput.Data.Keys.Count;
-            AR.dates = new DateTime[ndates];
-            AR.washout = new double[ndates];
-            for (int i = 0; i < ndates; i++)
-            {
-                ITimeSeriesOutput ito = tvol.SVoutput;
-                string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                AR.dates[i] = Convert.ToDateTime(datestr);
-                AR.washout[i] = Val;  // fixme, convert to washout
-            }
-
-            AR.concs = new double[Sim.AQTSeg.SV.Count()][];
-            for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
-            {
-                AR.concs[iTSV] = new double[ndates];
-                TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
-                for (int i = 0; i < ndates; i++)
-                {
-                    ITimeSeriesOutput ito = TSV.SVoutput;
-                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-                    AR.concs[iTSV][i] = Val;
-                }
-            }
-
-            archive.Add(comid, AR);
-        }
-
-        private void Pass_Data(AQTSim Sim, int SrcID, int ninputs)
-        {
-            archived_results AR;
-            archive.TryGetValue(SrcID, out AR);
-
-            for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
-            {
-                TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
-
-                if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState <= AllVariables.TSS)) ||   //fixme improve conditions for drift
-                    ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || // fixme macrophytes 
-                    ((TSV.IsPlant()) && ((TPlant)TSV).IsPhytoplankton()) ||
-                    ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
-                {
-                    TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-                    int ndates = AR.dates.Count();
-                    TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];  //fixme refine with inflow load?
-                    SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
-
-                    for (int i = 0; i < ndates; i++)
-                    {
-                        double InVol = AR.washout[i];  // fixme replace with calculated inflow volume using Mannings N;
-                        double OutVol = AR.washout[i];   
-                                                
-                        if (ninputs == 1) newlist.Add(AR.dates[i] , AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
-                        else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol));  //adding second or third inputs
-
-                    }
-
-                    TSV.LoadsRec.Loadings.list = newlist;
-                }
-
-            }
-        }
-
-
-            private string executeModel(int comid)
-        {
-            string strout = "";
-            string BaseDir = basedirBox.Text;
-            string json = File.ReadAllText(BaseDir+ "AQT_Nutrient_" + comid.ToString() + ".JSON");
-            AQTSim Sim = new AQTSim();
-            string err = Sim.Instantiate(json);
-            if (err != "") { MessageBox.Show(err); return(err); }
-            Sim.AQTSeg.SetMemLocRec();
-
-            int nSources = 0;
-            if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
-                foreach (int SrcID in Sources)
-                { 
-                  if (SrcID != comid)  // set to itself in boundaries 
-                    {
-                        nSources++;
-                        Pass_Data(Sim, SrcID, nSources);
-                        strout = strout + "Passed data from Source "+ SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
-                    }
-                };
-
-            Sim.AQTSeg.RunID = "2D Run: "+ DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
-            string errmessage = Sim.Integrate();
-            if (errmessage == "")
-            {
-                archiveOutput(comid, Sim);
-
-                string jsondata = "";
-                errmessage = Sim.SaveJSON(ref jsondata);
-                if (errmessage == "")
-                {
-                    Sim.AQTSeg.FileName = BaseDir + "AQT_Run_" + comid + ".JSON";
-                    File.WriteAllText(Sim.AQTSeg.FileName, jsondata);
-                }
-                else strout = strout + errmessage + Environment.NewLine;
-            }
-            else strout = strout + errmessage +Environment.NewLine;
-
-
-            return (strout + "--> Executed COMID " + comid.ToString());
-        }
 
         private void executeButton_Click(object sender, EventArgs e)
         {
-            if (SN == null)
+            if (AQT2D == null) AQT2D = new AQSim_2D();
+            if (AQT2D.SN == null)
             {
                 string BaseDir = basedirBox.Text;
                 string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //C:\Users\cloug\Downloads\response_1617838994520.json
-                SN = Newtonsoft.Json.JsonConvert.DeserializeObject<streamNetwork>(SNJSON);
-                AddToTextBox("Read stream network from "+ BaseDir + "StreamNetwork.JSON");
+                AQT2D.SN = Newtonsoft.Json.JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
+                AddToProcessLog("Read stream network from "+ BaseDir + "StreamNetwork.JSON");
             }
 
-            archive.Clear();
-            for (int ordr = 0; ordr < SN.order.Length; ordr++)
+            AddToProcessLog("Starting model execution...");
+            AQT2D.archive.Clear();
+            for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
             {
-                 Parallel.ForEach(SN.order[ordr], runID =>
+                 Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
                  {
-                    TSafeAddToTextBox(executeModel(runID) );
+                     string strout = "";
+                     string BaseDir = basedirBox.Text;
+                     string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");
+                     if (AQT2D.executeModel(runID, ref strout, ref json)) 
+                         File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
+                     TSafeAddToProcessLog(strout);
                  });
                 Application.DoEvents();
             }
 
-
+            BindingSource bs = new BindingSource();
+            bs.DataSource = AQT2D.SVList;
+            SVBox.DataSource = bs;
+            AddToProcessLog("Model execution complete");
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void CSVButton_Click(object sender, EventArgs e)
         {
-            int SVIndex = int.Parse(SVBox.Text);
-            //StreamWriter file = new StreamWriter("N:\\AQUATOX\\CSRA\\" + "Test2" + ".csv");
+            chart1.Hide();
+
+            if (AQT2D == null) return;
+
+            int SVIndex = SVBox.SelectedIndex;
             string csv = "";
 
             int NDates = 0;
+            int[] comids = new int[AQT2D.archive.Count];
+            int i = 0;
 
-            foreach (KeyValuePair<int, archived_results> entry in archive)
+            foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
             {
                 csv += (entry.Key)+",";
-                NDates = entry.Value.dates.Count();
+                if (i==0) NDates = entry.Value.dates.Count();
+                comids[i] = entry.Key;
+                i++;
             }
             csv += Environment.NewLine;
 
-            for (int i = 0; i < NDates; i++)
-            {
-                foreach (KeyValuePair<int, archived_results> entry in archive)
+            for (i = 0; i < NDates; i++)
+            { 
+              for (int j=0; j < AQT2D.archive.Count; j++)
                 {
-                    csv += (entry.Value.concs[SVIndex][i])+ ",";
+                    AQT2D.archive.TryGetValue(comids[j], out AQSim_2D.archived_results val);
+                    csv += (val.concs[SVIndex][i])+ ",";
                 }
                 csv += Environment.NewLine;
             }
 
-            textBox3.Text = csv;
-            //file.Close();
-            //MessageBox.Show("Exported N:\\AQUATOX\\CSRA\\" + "Test2" + ".csv");
+            ProcessLog.Text = csv;
+        }
+
+        private void ChartButtonClick(object sender, EventArgs e)
+        {
+            if (AQT2D == null) return;
+
+            int SVIndex = SVBox.SelectedIndex;
+
+            chart1.Series.Clear();
+            chart1.BringToFront();
+            int sercnt = 0;
+
+            foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
+            {
+                Series ser = chart1.Series.Add(entry.Key.ToString());
+                ser.ChartType = SeriesChartType.Line;
+                ser.BorderWidth = 2;
+                ser.MarkerStyle = MarkerStyle.Diamond;
+                ser.Enabled = true;
+                sercnt++;
+
+                for (int i = 0; i < entry.Value.dates.Count(); i++)
+                {
+                    ser.Points.AddXY(entry.Value.dates[i], entry.Value.concs[SVIndex][i]); 
+                }
+            }
+
+            chart1.Visible = true;
+
+        }
+
+        private void SetupButton_Click(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText(BaseJSONBox.Text);
+            AQTSim Sim = new AQTSim();
+            string err = Sim.Instantiate(json);
+            if (err != "") { MessageBox.Show(err); return; }
+
+            Sim.AQTSeg.SetMemLocRec();
+            Setup_Record SR = Sim.AQTSeg.PSetup;
+            SR.Setup(false);
+            TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
+                SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
+                new TSubheading("Biota Modeling Options",""),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
+                new TSubheading("Chemical Options",""),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
+
+            Param_Form SetupForm = new Param_Form();
+            SetupForm.SuppressComment = true;
+            SetupForm.SuppressSymbol = true;
+            SetupForm.EditParams(ref SS, "Simulation Setup", true);
+
+            if (AQT2D != null) AQT2D.MasterSetup = Sim.AQTSeg.PSetup;
+
+            string jsondata = "";
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            if (errmessage == "")
+            {
+                Sim.AQTSeg.FileName = BaseJSONBox.Text;
+                File.WriteAllText(BaseJSONBox.Text, jsondata);
+            }
+            else MessageBox.Show(errmessage);
 
         }
     }

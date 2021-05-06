@@ -240,7 +240,7 @@ namespace AQUATOX.Volume
 
             void Derivative_WriteRates()
             {
-                if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))
+                // if ((AQTSeg.PSetup.SaveBRates.Val)&& (SaveRates))  always save rates for volume, for data passage
                 {
                     this.ClearRate();
                     this.SaveRate("Inflow", Inflow);

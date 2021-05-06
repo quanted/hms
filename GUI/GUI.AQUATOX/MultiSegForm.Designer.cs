@@ -35,17 +35,26 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.createButton = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.ProcessLog = new System.Windows.Forms.TextBox();
             this.executeButton = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.SVBox = new System.Windows.Forms.TextBox();
+            this.CSVButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.pourIDBox = new System.Windows.Forms.TextBox();
+            this.spanLabel = new System.Windows.Forms.Label();
+            this.spanBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.BaseJSONBox = new System.Windows.Forms.TextBox();
+            this.SVBox = new System.Windows.Forms.ComboBox();
+            this.chartButton = new System.Windows.Forms.Button();
+            this.SetupButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(728, 10);
+            this.CancelButt.Location = new System.Drawing.Point(719, 10);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 0;
@@ -56,7 +65,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(661, 10);
+            this.button1.Location = new System.Drawing.Point(652, 10);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -66,17 +75,17 @@
             // 
             // comidBox
             // 
-            this.comidBox.Location = new System.Drawing.Point(115, 42);
+            this.comidBox.Location = new System.Drawing.Point(141, 42);
             this.comidBox.Name = "comidBox";
-            this.comidBox.Size = new System.Drawing.Size(127, 23);
+            this.comidBox.Size = new System.Drawing.Size(71, 23);
             this.comidBox.TabIndex = 1;
             this.comidBox.Text = "23398915";
             // 
             // basedirBox
             // 
-            this.basedirBox.Location = new System.Drawing.Point(115, 84);
+            this.basedirBox.Location = new System.Drawing.Point(79, 161);
             this.basedirBox.Name = "basedirBox";
-            this.basedirBox.Size = new System.Drawing.Size(146, 23);
+            this.basedirBox.Size = new System.Drawing.Size(183, 23);
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "C:\\newtemp\\TestDir1\\";
@@ -84,7 +93,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(58, 45);
+            this.label1.Location = new System.Drawing.Point(84, 45);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 15);
             this.label1.TabIndex = 3;
@@ -93,7 +102,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(39, 87);
+            this.label2.Location = new System.Drawing.Point(11, 164);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 15);
             this.label2.TabIndex = 4;
@@ -101,7 +110,7 @@
             // 
             // createButton
             // 
-            this.createButton.Location = new System.Drawing.Point(167, 129);
+            this.createButton.Location = new System.Drawing.Point(167, 281);
             this.createButton.Name = "createButton";
             this.createButton.Size = new System.Drawing.Size(75, 23);
             this.createButton.TabIndex = 5;
@@ -109,20 +118,21 @@
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
-            // textBox3
+            // ProcessLog
             // 
-            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ProcessLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox3.Location = new System.Drawing.Point(306, 59);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(483, 417);
-            this.textBox3.TabIndex = 6;
+            this.ProcessLog.Location = new System.Drawing.Point(306, 59);
+            this.ProcessLog.Multiline = true;
+            this.ProcessLog.Name = "ProcessLog";
+            this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.ProcessLog.Size = new System.Drawing.Size(474, 414);
+            this.ProcessLog.TabIndex = 6;
             // 
             // executeButton
             // 
-            this.executeButton.Location = new System.Drawing.Point(167, 173);
+            this.executeButton.Location = new System.Drawing.Point(167, 324);
             this.executeButton.Name = "executeButton";
             this.executeButton.Size = new System.Drawing.Size(75, 23);
             this.executeButton.TabIndex = 7;
@@ -130,43 +140,134 @@
             this.executeButton.UseVisualStyleBackColor = true;
             this.executeButton.Click += new System.EventHandler(this.executeButton_Click);
             // 
-            // button2
+            // CSVButton
             // 
-            this.button2.Location = new System.Drawing.Point(167, 223);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 8;
-            this.button2.Text = "CSV";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // SVBox
-            // 
-            this.SVBox.Location = new System.Drawing.Point(108, 223);
-            this.SVBox.Name = "SVBox";
-            this.SVBox.Size = new System.Drawing.Size(29, 23);
-            this.SVBox.TabIndex = 9;
-            this.SVBox.Text = "0";
+            this.CSVButton.Location = new System.Drawing.Point(167, 403);
+            this.CSVButton.Name = "CSVButton";
+            this.CSVButton.Size = new System.Drawing.Size(75, 23);
+            this.CSVButton.TabIndex = 8;
+            this.CSVButton.Text = "CSV";
+            this.CSVButton.UseVisualStyleBackColor = true;
+            this.CSVButton.Click += new System.EventHandler(this.CSVButton_Click);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(50, 226);
+            this.label3.Location = new System.Drawing.Point(25, 370);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(52, 15);
             this.label3.TabIndex = 10;
             this.label3.Text = "SV Index";
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(25, 74);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(103, 15);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "Pour Point ComID";
+            // 
+            // pourIDBox
+            // 
+            this.pourIDBox.Location = new System.Drawing.Point(141, 71);
+            this.pourIDBox.Name = "pourIDBox";
+            this.pourIDBox.Size = new System.Drawing.Size(71, 23);
+            this.pourIDBox.TabIndex = 11;
+            // 
+            // spanLabel
+            // 
+            this.spanLabel.AutoSize = true;
+            this.spanLabel.Location = new System.Drawing.Point(49, 103);
+            this.spanLabel.Name = "spanLabel";
+            this.spanLabel.Size = new System.Drawing.Size(79, 15);
+            this.spanLabel.TabIndex = 14;
+            this.spanLabel.Text = "Up-river Span";
+            // 
+            // spanBox
+            // 
+            this.spanBox.Location = new System.Drawing.Point(141, 100);
+            this.spanBox.Name = "spanBox";
+            this.spanBox.Size = new System.Drawing.Size(71, 23);
+            this.spanBox.TabIndex = 13;
+            this.spanBox.Text = "5";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(218, 103);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(24, 15);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "km";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 205);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(62, 15);
+            this.label5.TabIndex = 17;
+            this.label5.Text = "Base JSON";
+            // 
+            // BaseJSONBox
+            // 
+            this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.BaseJSONBox.Location = new System.Drawing.Point(79, 203);
+            this.BaseJSONBox.Name = "BaseJSONBox";
+            this.BaseJSONBox.Size = new System.Drawing.Size(205, 23);
+            this.BaseJSONBox.TabIndex = 16;
+            this.BaseJSONBox.Tag = "";
+            this.BaseJSONBox.Text = "C:\\work\\AQUATOX\\CSRA\\LBR Glenwood 4.JSON";
+            this.BaseJSONBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // SVBox
+            // 
+            this.SVBox.FormattingEnabled = true;
+            this.SVBox.Location = new System.Drawing.Point(102, 365);
+            this.SVBox.Name = "SVBox";
+            this.SVBox.Size = new System.Drawing.Size(160, 23);
+            this.SVBox.TabIndex = 18;
+            // 
+            // chartButton
+            // 
+            this.chartButton.Location = new System.Drawing.Point(167, 446);
+            this.chartButton.Name = "chartButton";
+            this.chartButton.Size = new System.Drawing.Size(75, 23);
+            this.chartButton.TabIndex = 19;
+            this.chartButton.Text = "Graph";
+            this.chartButton.UseVisualStyleBackColor = true;
+            this.chartButton.Click += new System.EventHandler(this.ChartButtonClick);
+            // 
+            // SetupButton
+            // 
+            this.SetupButton.Location = new System.Drawing.Point(167, 241);
+            this.SetupButton.Name = "SetupButton";
+            this.SetupButton.Size = new System.Drawing.Size(75, 23);
+            this.SetupButton.TabIndex = 20;
+            this.SetupButton.Text = "Setup";
+            this.SetupButton.UseVisualStyleBackColor = true;
+            this.SetupButton.Click += new System.EventHandler(this.SetupButton_Click);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(821, 515);
-            this.Controls.Add(this.label3);
+            this.ClientSize = new System.Drawing.Size(812, 512);
+            this.Controls.Add(this.SetupButton);
+            this.Controls.Add(this.chartButton);
             this.Controls.Add(this.SVBox);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.BaseJSONBox);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.spanLabel);
+            this.Controls.Add(this.spanBox);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.pourIDBox);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.CSVButton);
             this.Controls.Add(this.executeButton);
-            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.ProcessLog);
             this.Controls.Add(this.createButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -190,10 +291,19 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button createButton;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox ProcessLog;
         private System.Windows.Forms.Button executeButton;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.TextBox SVBox;
+        private System.Windows.Forms.Button CSVButton;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox pourIDBox;
+        private System.Windows.Forms.Label spanLabel;
+        private System.Windows.Forms.TextBox spanBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox BaseJSONBox;
+        private System.Windows.Forms.ComboBox SVBox;
+        private System.Windows.Forms.Button chartButton;
+        private System.Windows.Forms.Button SetupButton;
     }
 }

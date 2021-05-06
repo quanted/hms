@@ -124,8 +124,8 @@ namespace GUI.AQUATOX
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
                 ButtonPanel.Visible = true;
                 integrate.Visible = true;
-                ShowStudyInfo();
                 aQTS.ArchiveSimulation();
+                ShowStudyInfo();
 
             }
         }
