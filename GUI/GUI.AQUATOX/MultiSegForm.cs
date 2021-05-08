@@ -15,23 +15,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using Web.Services.Controllers;
+//using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
 {
     public partial class MultiSegForm : Form
     {
-        private BackgroundWorker Worker = new BackgroundWorker();
+        // private BackgroundWorker Worker = new BackgroundWorker();  potentially to be added, to report progress
         private AQSim_2D AQT2D = null;
-
-        private StreamflowInput sfi;
-        private StreamflowInputExample sfie = new StreamflowInputExample();
-        private TimeSeriesOutput ATSO;
 
         private Chart chart1 = new Chart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
-        Series series1 = new Series();
 
         public MultiSegForm()
         {
@@ -40,7 +35,7 @@ namespace GUI.AQUATOX
             //Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
             //Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             //Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
-            Worker.WorkerReportsProgress = true;
+            //Worker.WorkerReportsProgress = true;
 
             // 
             // chart1
@@ -73,13 +68,17 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
 
+            // 
+            // end chart1
+            // 
+
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        private void chart1_MouseDown(object sender, MouseEventArgs e)
+        private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
         {
             HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
             if (resultExplode.Series != null)
@@ -104,7 +103,7 @@ namespace GUI.AQUATOX
             }
         }
 
-        private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e)
+        private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e) // legend info for chart
         {
             e.LegendItems.Clear();
             foreach (var series in this.chart1.Series)
@@ -153,7 +152,7 @@ namespace GUI.AQUATOX
             Application.DoEvents();
         }
 
-        private void TSafeAddToProcessLog(string msg)
+        private void TSafeAddToProcessLog(string msg)  //thread safe addition to progress log
         {
 
             if (InvokeRequired)
@@ -164,111 +163,79 @@ namespace GUI.AQUATOX
             else AddToProcessLog(msg);
         }
 
-
-        /// <summary>
-        /// Submit POST request to HMS web API
-        /// </summary>
-        public void submitHydrologyRequest(string comid)  // Circularity issue -- move to AQ_Sim_2D?  
+        private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
+            if (AQT2D == null) AQT2D = new AQSim_2D();
 
-            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            // string requestURL = "https://qed.epa.gov/hms/rest/api/";
-            string component = "hydrology";
-            string dataset = "streamflow";
-
-            var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
-            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(sfi));  //StreamFlowInput previously initialized
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            request.ContentLength = data.Length;
-
-            using (var stream = request.GetRequestStream())
+            AddToProcessLog("Please wait, reading stream network from web service");
+            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, pourIDBox.Text, spanBox.Text);
+            if (SNJSON == "")
             {
-                stream.Write(data, 0, data.Length);
+                AddToProcessLog("Error: web service returned empty JSON."); return;
             }
-            var response = (HttpWebResponse)request.GetResponse();
-            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            ATSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+            if (SNJSON.IndexOf("ERROR") >= 0)
+            {
+                AddToProcessLog("Error: web service returned: " + SNJSON); return;
+            }
+            try
+            { AQT2D.CreateStreamNetwork(SNJSON); }
+            catch
+            { AddToProcessLog("Error converting JSON:" + SNJSON); return; }
 
-        }
-
-        public string PopulateStreamNetwork(int iSeg, string filen, out string jsondata)  // Circularity issue -- move to AQ_Sim_2D?  
-        {
-            jsondata = "";
-            string comid = AQT2D.SN.network[iSeg][0];
-            double lenkm = double.Parse(AQT2D.SN.network[iSeg][4]);
-
-            AQTSim Sim = new AQTSim();
-            string err = Sim.Instantiate(AQT2D.baseSimJSON);
-
-            AQT2D.MasterSetup = Sim.AQTSeg.PSetup; 
-
-            if (err != "") { return err; }
-
-            Sim.AQTSeg.SetMemLocRec();
-
-            Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From 2-D Linkage";
-
-            sfi = sfie.GetExamples();
-            sfi.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
-            sfi.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
-            sfi.TemporalResolution = "daily";
-            sfi.Geometry.ComID = int.Parse(comid);
-            sfi.Source = "test";
-
-            submitHydrologyRequest(comid);
-
-            AQT2D.UpdateDischarge(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, ATSO);
-
-            AddToProcessLog("Imported Flow Data for " + comid);
-
-            jsondata = "";
-            Sim.AQTSeg.FileName = filen;
-            string errmessage = Sim.SaveJSON(ref jsondata);
-            return errmessage;
-        }
-
-
-        private void createButton_Click(object sender, EventArgs e)
-        {
-            StreamflowInputExample sfie = new StreamflowInputExample();
-            AQT2D = new AQSim_2D();
-
-            // string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, pourIDBox.Text, spanBox.Text);
-
-            string SNJSON = System.IO.File.ReadAllText(@"C:\Users\cloug\Downloads\response_1618863788756.json", Encoding.Default);  //C:\Users\cloug\Downloads\response_1617838994520.json
-
-            AQT2D.CreateStreamNetwork(SNJSON);
-
-            int nSegs = AQT2D.SN.network.Count() - 1;
-            AddToProcessLog("System has " + nSegs.ToString() + " segments");
+            AddToProcessLog("System has " + AQT2D.nSegs.ToString() + " segments");
             string BaseFileN = BaseJSONBox.Text;
             AddToProcessLog(" Basefile = " + BaseFileN);
 
             string BaseDir = basedirBox.Text;
             AddToProcessLog(" BaseDir = " + BaseDir);
 
-            AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
-
             File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
+        }
 
-            for (int iSeg = 1; iSeg <= nSegs; iSeg++)
+        private void createButton_Click(object sender, EventArgs e)  //create a set of 0D jsons for stream network given AQT2D "SN" object
+        {
+            chart1.Visible = false;
+            string BaseDir = basedirBox.Text;
+
+            if (AQT2D == null) AQT2D = new AQSim_2D();
+            if (AQT2D.SN == null)
+            {
+                try
+                {
+                    AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
+                    if (!ValidFilen(BaseDir + "StreamNetwork.JSON")) return;
+                    string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);
+                    AQT2D.CreateStreamNetwork(SNJSON);
+                }
+                catch
+                {
+                    AddToProcessLog("Cannot process stream network file " + BaseDir + "StreamNetwork.JSON");
+                    return;
+                }
+            }
+
+            for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
             {
                 string comid = AQT2D.SN.network[iSeg][0];
                 string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
-                string errmessage = PopulateStreamNetwork(iSeg, filen, out string jsondata);
+                string BaseFileN = BaseJSONBox.Text;
+                if (!ValidFilen(BaseJSONBox.Text)) return;
+                AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
+                string errmessage = AQT2D.PopulateStreamNetwork(iSeg, MasterSetupJson(), out string jsondata);
 
                 if (errmessage == "")
                 {
                     File.WriteAllText(filen, jsondata);
-                    AddToProcessLog("Saved JSON for " + comid);
+                    AddToProcessLog("Read Flows and Saved JSON for " + comid);
                 }
-                else AddToProcessLog(errmessage);
-
-                AddToProcessLog("");
+                else
+                {
+                    AddToProcessLog(errmessage);
+                    return;
+                }
             }
 
+            AddToProcessLog("");
             if (AQT2D.SN.sources.TryGetValue("boundaries", out int[] boundaries))
             {
                 string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
@@ -278,44 +245,50 @@ namespace GUI.AQUATOX
         }
 
 
-        private void executeButton_Click(object sender, EventArgs e)
+        private void executeButton_Click(object sender, EventArgs e)  //execute the full model run given initialized AQT2D
         {
+            chart1.Visible = false;
+
             if (AQT2D == null) AQT2D = new AQSim_2D();
             if (AQT2D.SN == null)
             {
                 string BaseDir = basedirBox.Text;
-                string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //C:\Users\cloug\Downloads\response_1617838994520.json
-                AQT2D.SN = Newtonsoft.Json.JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
-                AddToProcessLog("Read stream network from "+ BaseDir + "StreamNetwork.JSON");
+                if (!ValidFilen(BaseDir + "StreamNetwork.JSON")) return;
+                string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
+                AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
+                AddToProcessLog("Read stream network from " + BaseDir + "StreamNetwork.JSON");
             }
 
             AddToProcessLog("Starting model execution...");
             AQT2D.archive.Clear();
             for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
             {
-                 Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
-                 {
-                     string strout = "";
-                     string BaseDir = basedirBox.Text;
-                     string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");
-                     if (AQT2D.executeModel(runID, ref strout, ref json)) 
+                Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
+                {
+                    string strout = "";
+                    string BaseDir = basedirBox.Text;
+                    if (!ValidFilen(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON")) return;
+                    string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
+                     if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
                          File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
-                     TSafeAddToProcessLog(strout);
+                    TSafeAddToProcessLog(strout);  //write update to status log
                  });
                 Application.DoEvents();
             }
 
             BindingSource bs = new BindingSource();
             bs.DataSource = AQT2D.SVList;
-            SVBox.DataSource = bs;
+            SVBox.DataSource = bs;   //update state variable list for graphing, CSV
+
             AddToProcessLog("Model execution complete");
         }
 
-        private void CSVButton_Click(object sender, EventArgs e)
+        private void CSVButton_Click(object sender, EventArgs e)  //write CSV output from archived results given selected state variable in dropdown box
         {
             chart1.Hide();
 
             if (AQT2D == null) return;
+            if (AQT2D.archive == null) return;
 
             int SVIndex = SVBox.SelectedIndex;
             string csv = "";
@@ -326,19 +299,19 @@ namespace GUI.AQUATOX
 
             foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
             {
-                csv += (entry.Key)+",";
-                if (i==0) NDates = entry.Value.dates.Count();
+                csv += (entry.Key) + ",";
+                if (i == 0) NDates = entry.Value.dates.Count();
                 comids[i] = entry.Key;
                 i++;
             }
             csv += Environment.NewLine;
 
             for (i = 0; i < NDates; i++)
-            { 
-              for (int j=0; j < AQT2D.archive.Count; j++)
+            {
+                for (int j = 0; j < AQT2D.archive.Count; j++)
                 {
                     AQT2D.archive.TryGetValue(comids[j], out AQSim_2D.archived_results val);
-                    csv += (val.concs[SVIndex][i])+ ",";
+                    csv += (val.concs[SVIndex][i]) + ",";
                 }
                 csv += Environment.NewLine;
             }
@@ -346,66 +319,109 @@ namespace GUI.AQUATOX
             ProcessLog.Text = csv;
         }
 
-        private void ChartButtonClick(object sender, EventArgs e)
+        private void ChartButtonClick(object sender, EventArgs e)   //produce graphics from archived results given selected state variable in dropdown box
         {
             if (AQT2D == null) return;
 
-            int SVIndex = SVBox.SelectedIndex;
-
-            chart1.Series.Clear();
-            chart1.BringToFront();
-            int sercnt = 0;
-
-            foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
+            try
             {
-                Series ser = chart1.Series.Add(entry.Key.ToString());
-                ser.ChartType = SeriesChartType.Line;
-                ser.BorderWidth = 2;
-                ser.MarkerStyle = MarkerStyle.Diamond;
-                ser.Enabled = true;
-                sercnt++;
+                int SVIndex = SVBox.SelectedIndex;
 
-                for (int i = 0; i < entry.Value.dates.Count(); i++)
+                chart1.Series.Clear();
+                chart1.BringToFront();
+                int sercnt = 0;
+
+                foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
                 {
-                    ser.Points.AddXY(entry.Value.dates[i], entry.Value.concs[SVIndex][i]); 
+                    Series ser = chart1.Series.Add(entry.Key.ToString());
+                    ser.ChartType = SeriesChartType.Line;
+                    ser.BorderWidth = 2;
+                    ser.MarkerStyle = MarkerStyle.Diamond;
+                    ser.Enabled = true;
+                    sercnt++;
+
+                    for (int i = 0; i < entry.Value.dates.Count(); i++)
+                    {
+                        ser.Points.AddXY(entry.Value.dates[i], entry.Value.concs[SVIndex][i]);
+                    }
                 }
+
+                chart1.Visible = true;
             }
-
-            chart1.Visible = true;
-
-        }
-
-        private void SetupButton_Click(object sender, EventArgs e)
-        {
-            string json = File.ReadAllText(BaseJSONBox.Text);
-            AQTSim Sim = new AQTSim();
-            string err = Sim.Instantiate(json);
-            if (err != "") { MessageBox.Show(err); return; }
-
-            Sim.AQTSeg.SetMemLocRec();
-            Setup_Record SR = Sim.AQTSeg.PSetup;
-            SR.Setup(false);
-            TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
-                SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
-                new TSubheading("Biota Modeling Options",""),SR.Internal_Nutrients,SR.NFix_UseRatio,SR.NtoPRatio,
-                new TSubheading("Chemical Options",""),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
-
-            Param_Form SetupForm = new Param_Form();
-            SetupForm.SuppressComment = true;
-            SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS, "Simulation Setup", true);
-
-            if (AQT2D != null) AQT2D.MasterSetup = Sim.AQTSeg.PSetup;
-
-            string jsondata = "";
-            string errmessage = Sim.SaveJSON(ref jsondata);
-            if (errmessage == "")
+            catch (Exception ex)
             {
-                Sim.AQTSeg.FileName = BaseJSONBox.Text;
-                File.WriteAllText(BaseJSONBox.Text, jsondata);
+                ProcessLog.Text = "Error rendering chart: " + ex.Message;
+                chart1.Visible = false;
             }
-            else MessageBox.Show(errmessage);
 
         }
+
+        private bool ValidFilen(string filen)
+        {
+            if (!File.Exists(filen)) { MessageBox.Show("Cannot find file "+Path.GetFullPath(filen)); return false; }
+            return true;
+        }
+
+        private string MasterSetupJson()
+        {
+            string msfilen = basedirBox.Text + "MasterSetup.json";
+            if (File.Exists(msfilen))
+            {
+                return File.ReadAllText(msfilen);
+            }
+            else  // create the master record from the base file
+            {
+                if (!ValidFilen(BaseJSONBox.Text)) return "";
+                string json = File.ReadAllText(BaseJSONBox.Text);
+
+                AQTSim Sim = new AQTSim();
+                string err = Sim.Instantiate(json);
+                if (err != "") { MessageBox.Show(err); return ""; }
+                Setup_Record SR = Sim.AQTSeg.PSetup;
+                string msr = JsonConvert.SerializeObject(SR);
+                File.WriteAllText(msfilen, msr);
+                AddToProcessLog("Wrote master setup record.  Copied from base JSON to " + msfilen);
+                return msr;
+            }
+
+        }
+
+        private void SetupButton_Click(object sender, EventArgs e)  //Open the master setup record for editing, save to "Mastersetup" json
+        {
+            try
+            {
+                chart1.Visible = false;
+                string msj = MasterSetupJson();
+                if (msj == "") return;
+                Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
+
+                SR.Setup(false);
+                TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
+                SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
+                new TSubheading("Biota Modeling Options",""),SR.NFix_UseRatio,SR.NtoPRatio,
+                new TSubheading("Chemical Options",""),SR.ChemsDrivingVars,SR.TSedDetrIsDriving,SR.UseExternalConcs,SR.T1IsAggregate };
+                Param_Form SetupForm = new Param_Form();
+                SetupForm.SuppressComment = true;
+                SetupForm.SuppressSymbol = true;
+                SetupForm.EditParams(ref SS, "Simulation Setup", true);
+
+                string msfilen = basedirBox.Text + "MasterSetup.json";
+                string msr = JsonConvert.SerializeObject(SR);
+                File.WriteAllText(msfilen, msr);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            
+
+        }
+
+        private void SVBox_SelectedIndexChanged(object sender, EventArgs e)  //update chart when dropdown changes
+        {
+            ChartButtonClick(sender, e);
+        }
+
     }
 }

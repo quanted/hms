@@ -9,7 +9,6 @@ using Data;
 using System.Data;
 using System.Threading;
 using System.Windows.Forms;
-using Web.Services.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.IO;
@@ -20,14 +19,36 @@ using System.Drawing;
 
 namespace GUI.AQUATOX
 {
+
+
+
     public partial class LoadingsForm : Form
     {
         public TStateVariable SV;
 
-        StreamflowInputExample sfie = new StreamflowInputExample();
-        StreamflowInput sfi;
         TimeSeriesOutput ATSO;
         string taskID = null;
+
+        private TimeSeriesInput TSI = new TimeSeriesInput()
+        {
+            Source = "nwis",
+            DateTimeSpan = new DateTimeSpan()
+            {
+                StartDate = new DateTime(2015, 01, 01),
+                EndDate = new DateTime(2015, 12, 31),
+                DateTimeFormat = "yyyy-MM-dd HH"
+            },
+            Geometry = new TimeSeriesGeometry()
+            {
+                GeometryMetadata = new Dictionary<string, string>()
+                {
+                }
+            },
+            DataValueFormat = "E3",
+            TemporalResolution = "daily",
+            Units = "metric",
+            OutputFormat = "json"
+        };
 
         public LoadingsForm()
         {
@@ -262,8 +283,6 @@ namespace GUI.AQUATOX
 
             // string crl = "curl -X POST \"https://qed.epa.gov/hms/rest/api/hydrology/streamflow\" -H \"accept: */*\" -H \"Content-Type: application/json-patch+json\" -d \"{\\\"source\\\":\\\"nwis\\\",\\\"dateTimeSpan\\\":{\\\"startDate\\\":\\\"2015-01-01T00:00:00\\\",\\\"endDate\\\":\\\"2015-12-31T00:00:00\\\",\\\"dateTimeFormat\\\":\\\"yyyy-MM-dd HH\\\"},\\\"geometry\\\":{\\\"description\\\":null,\\\"comID\\\":0,\\\"hucID\\\":null,\\\"stationID\\\":null,\\\"point\\\":null,\\\"geometryMetadata\\\":{\\\"gaugestation\\\":\\\"02191300\\\"},\\\"timezone\\\":null},\\\"dataValueFormat\\\":\\\"E3\\\",\\\"temporalResolution\\\":\\\"hourly\\\",\\\"timeLocalized\\\":false,\\\"units\\\":\\\"metric\\\",\\\"outputFormat\\\":\\\"json\\\",\\\"baseURL\\\":null,\\\"inputTimeSeries\\\":null}\"";
 
-            sfi = sfie.GetExamples();  
-
 
             //    https://github.com/quanted/hms_api_samples/blob/master/csharp-sample/csharp-sample/HMSSample.cs
             //            line 150, 144
@@ -272,8 +291,6 @@ namespace GUI.AQUATOX
             //            Task<IActionResult> res;
 
             submitRequest();
-            // getData();
-            //          res = sfc.POST(sfi);
 
             
             if (SV.LoadsRec.Loadings.ITSI == null)
@@ -302,7 +319,7 @@ namespace GUI.AQUATOX
             string dataset = "streamflow";
 
             var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
-            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(sfi));  //StreamFlowInput previously initialized
+            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(TSI));  //StreamFlowInput previously initialized
             request.Method = "POST";
             request.ContentType = "application/json";
             request.ContentLength = data.Length;

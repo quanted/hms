@@ -17,13 +17,18 @@ using System.IO;
 using System.Data;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
+using System.Net;
+using System.Text;
 
 namespace AQUATOX.AQSim_2D
 
-
 {
     public class AQSim_2D
+        
     {
+        /// <summary>
+        /// holds results from streamNetwork web service
+        /// </summary>
         public class streamNetwork
         {
             public string[][] network;
@@ -31,22 +36,59 @@ namespace AQUATOX.AQSim_2D
             public Dictionary<string, int[]> sources;
         }
 
-        public string baseSimJSON;
+        /// <summary>
+        /// current stream network object
+        /// </summary>
         public streamNetwork SN = null;
-        public List<string> SVList = null;
-        public Setup_Record MasterSetup = null;
 
+        /// <summary>
+        /// number of stream segments in stream network
+        /// </summary>
+        public int nSegs;
+
+        /// <summary>
+        /// JSON string holds the base AQUATOX simulation that is propagated to create a 2D network
+        /// </summary>
+        public string baseSimJSON = "";
+
+
+        /// <summary>
+        /// list of state variables in simulation for summarizing output and verifying the list has not changed
+        /// </summary>
+        public List<string> SVList = null;
+
+        /// <summary>
+        /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.
+        /// </summary>
+        public Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
+
+        /// <summary>
+        /// Archived results for a single COMID;  
+        /// array of dates, water-volume discharge on the main stem, and 2-D array of state variable concentrations
+        /// </summary>
+        public class archived_results
+        {
+            public DateTime[] dates;
+            public double[] washout;  // m3
+            public double[][] concs; // g/m3 or mg/m3 depending on state var
+        }
+
+
+        /// <summary>
+        /// converts stream network json string into SN variable and saves number of segments
+        /// </summary>
+        /// <param name="SNJSON">input json</param>
         public void CreateStreamNetwork(string SNJSON)
         {
             SN = Newtonsoft.Json.JsonConvert.DeserializeObject<streamNetwork>(SNJSON);
-
+            nSegs = SN.network.Count() - 1;
         }
 
-        public void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)
+        private void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)
         {
             TVol.Calc_Method = VolumeMethType.Manning;
 
-            // 1 is discharge in this case
+            // array slot [1] is "discharge" in this case (TVolume)
             TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
 
             if (DischargeLoad.ITSI == null)
@@ -64,16 +106,6 @@ namespace AQUATOX.AQSim_2D
             TVol.LoadNotes1 = "From 2-D Linkage";
             TVol.LoadNotes2 = "";
             DischargeLoad.ITSI = null;
-
-        }
-
-        public Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
-
-        public class archived_results
-        {
-            public DateTime[] dates;
-            public double[] washout;  // m3
-            public double[][] concs; // g/m3 or mg/m3 depending on state var
         }
 
 
@@ -96,10 +128,10 @@ namespace AQUATOX.AQSim_2D
             AR.dates = new DateTime[ndates];
             AR.washout = new double[ndates];
 
-            for (int i = 0; i < ndates; i++)  
+            for (int i = 0; i < ndates; i++)
             {
                 string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[washoutindex-1]);
+                Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[washoutindex - 1]);
                 AR.dates[i] = Convert.ToDateTime(datestr);
                 AR.washout[i] = Val;  // m3/d
             }
@@ -120,6 +152,142 @@ namespace AQUATOX.AQSim_2D
             archive.Add(comid, AR);
         }
 
+
+        /// <summary>
+        /// Reads the stream network data structure from web services
+        /// </summary>
+        /// <param name="comid">Primary comid</param>
+        /// <param name="pourID">Optional PourID</param>
+        /// <param name="span">Optional up-stream distance to search in km</param>
+        /// <returns>JSON or error message</returns>
+        public string ReadStreamNetwork(string comid, string pourID, string span)
+        {
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string component = "info";
+            string dataset = "streamnetwork";
+
+            try
+            {
+                string rurl = requestURL + "" + component + "/" + dataset + "?mainstem=false&comid=" + comid;
+                if (pourID != "") rurl += "&endComid=" + pourID;
+                if (span != "") rurl += "&maxDistance=" + span;
+                var request = (HttpWebRequest)WebRequest.Create(rurl);
+                var response = (HttpWebResponse)request.GetResponse();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private TimeSeriesInput TSI = new TimeSeriesInput()
+        {
+            Source = "nwis",
+            DateTimeSpan = new DateTimeSpan()
+            {
+                StartDate = new DateTime(2015, 01, 01),
+                EndDate = new DateTime(2015, 12, 31),
+                DateTimeFormat = "yyyy-MM-dd HH"
+            },
+            Geometry = new TimeSeriesGeometry()
+            {
+                GeometryMetadata = new Dictionary<string, string>()
+                {
+                }
+            },
+            DataValueFormat = "E3",
+            TemporalResolution = "daily",
+            Units = "metric",
+            OutputFormat = "json"
+        };
+
+
+        /// <summary>
+        /// Submit POST request to HMS web API for stream flow
+        /// </summary>
+        private TimeSeriesOutput submitHydrologyRequest(string comid, out string errmsg)  
+        {
+
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string component = "hydrology";
+            string dataset = "streamflow";
+            errmsg = "";
+
+            var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
+            string json = JsonConvert.SerializeObject(TSI);
+            var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            request.ContentLength = data.Length;
+
+            using (var stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+            var response = (HttpWebResponse)request.GetResponse();
+            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            if (rstring.IndexOf("ERROR") >= 0)
+            {
+                errmsg = "Error from web service returned: " + rstring; 
+                return null;
+            }
+            return JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+        }
+
+        /// <summary>
+        /// After the SN streamnetwork object has been initialized, this method is iterated through for each segment 
+        /// to read physical parameters from the streamnetwork, read updated flow data from web services, and save the
+        /// resulting segment to a unique json string
+        /// </summary>
+        /// <param name="iSeg">index of segment being set up</param>
+        /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="jsondata">a json string holding the modified AQUATOX segment</param>
+        /// <returns>a blank string if no error, or error details otherwise</returns>
+        public string PopulateStreamNetwork(int iSeg, string setupjson, out string jsondata) 
+        {
+            jsondata = "";
+            string comid = SN.network[iSeg][0];
+            double lenkm = double.Parse(SN.network[iSeg][4]);
+
+            AQTSim Sim = new AQTSim();
+            string err = Sim.Instantiate(baseSimJSON);
+
+            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
+
+            if (err != "") { return err; }
+
+            Sim.AQTSeg.SetMemLocRec();
+
+            Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
+            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From 2-D Linkage";
+
+            // create a new itimeseries
+            TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
+            TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
+            TSI.Geometry.ComID = int.Parse(comid);
+            TSI.Source = "test";
+
+            try
+            {
+                TimeSeriesOutput TSO = submitHydrologyRequest(comid, out string errstr);
+                if (errstr != "") return errstr;
+                UpdateDischarge(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO);
+                // Could add to Log -- "Imported Flow Data for " + comid 
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+            jsondata = "";
+
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            return errmessage;
+        }
+
         private void Pass_Data(AQTSim Sim, int SrcID, int ninputs)
         {
             archived_results AR;
@@ -129,20 +297,20 @@ namespace AQUATOX.AQSim_2D
             {
                 TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
 
-                if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState <= AllVariables.TSS)) ||   //fixme improve conditions for drift
-                    ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || // fixme macrophytes 
-                    ((TSV.IsPlant()) && ((TPlant)TSV).IsPhytoplankton()) ||
+                if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState < AllVariables.TSS)) ||   
+                    ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || 
+                    ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
                     ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
                 {
                     TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
-                    TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];  //fixme refine with inflow load?
+                    TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
 
                     for (int i = 0; i < ndates; i++)
                     {
-                        double InVol = AR.washout[i];  // fixme replace with calculated inflow volume using Mannings N;
-                        double OutVol = AR.washout[i];
+                        double OutVol = AR.washout[i];  // out volume from upstream segment
+                        double InVol = DischargeLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment, currently estimated as current seg. outflow -- fixme replace with calculated inflow volume using Mannings N to account for changes in seg volume
 
                         if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
                         else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol));  //adding second or third inputs
@@ -155,15 +323,25 @@ namespace AQUATOX.AQSim_2D
             }
         }
 
-        public bool executeModel(int comid, ref string outstr, ref string jsonstring)  
+        /// <summary>
+        /// Runs one segment of the 2D simulation given the comid.  Reads loadings from upstream reach prior to execution.
+        /// Segments must be executed in the order and with the parallel processing specified within SN streamnetwork object.
+        /// Results of the simulation are passed back in a json and stored in the archive Dictionary.
+        /// </summary>
+        /// <param name="comid">integer comid of segment in network</param>
+        /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="outstr">information about the status of the run for the user's log</param>
+        /// <param name="jsonstring">the completed simulation with results </param>
+        /// <returns>boolean: true if the run was completed successfully</returns>
+        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring)  
         {
             AQTSim Sim = new AQTSim();
             outstr = Sim.Instantiate(jsonstring);
 
             if (outstr != "")  return false; 
             Sim.AQTSeg.SetMemLocRec();
-          //   Sim.AQTSeg.PSetup = MasterSetup;  // fixme test copying back of parameters
 
+            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);   
 
             if (SVList == null)
             {
@@ -210,13 +388,7 @@ namespace AQUATOX.AQSim_2D
             return true;
         }
 
-
-
-
     }
-
-
-
 
 }
 

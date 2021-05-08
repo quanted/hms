@@ -49,12 +49,13 @@
             this.SVBox = new System.Windows.Forms.ComboBox();
             this.chartButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
+            this.ReadSNButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(719, 10);
+            this.CancelButt.Location = new System.Drawing.Point(763, 10);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 0;
@@ -65,7 +66,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(652, 10);
+            this.button1.Location = new System.Drawing.Point(696, 10);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -75,7 +76,7 @@
             // 
             // comidBox
             // 
-            this.comidBox.Location = new System.Drawing.Point(141, 42);
+            this.comidBox.Location = new System.Drawing.Point(141, 107);
             this.comidBox.Name = "comidBox";
             this.comidBox.Size = new System.Drawing.Size(71, 23);
             this.comidBox.TabIndex = 1;
@@ -83,17 +84,17 @@
             // 
             // basedirBox
             // 
-            this.basedirBox.Location = new System.Drawing.Point(79, 161);
+            this.basedirBox.Location = new System.Drawing.Point(79, 48);
             this.basedirBox.Name = "basedirBox";
             this.basedirBox.Size = new System.Drawing.Size(183, 23);
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
-            this.basedirBox.Text = "C:\\newtemp\\TestDir1\\";
+            this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(84, 45);
+            this.label1.Location = new System.Drawing.Point(84, 110);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 15);
             this.label1.TabIndex = 3;
@@ -102,7 +103,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 164);
+            this.label2.Location = new System.Drawing.Point(12, 51);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 15);
             this.label2.TabIndex = 4;
@@ -110,11 +111,11 @@
             // 
             // createButton
             // 
-            this.createButton.Location = new System.Drawing.Point(167, 281);
+            this.createButton.Location = new System.Drawing.Point(131, 252);
             this.createButton.Name = "createButton";
-            this.createButton.Size = new System.Drawing.Size(75, 23);
+            this.createButton.Size = new System.Drawing.Size(111, 23);
             this.createButton.TabIndex = 5;
-            this.createButton.Text = "Create";
+            this.createButton.Text = "Create 2D inputs";
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
@@ -127,22 +128,22 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(474, 414);
+            this.ProcessLog.Size = new System.Drawing.Size(518, 405);
             this.ProcessLog.TabIndex = 6;
             // 
             // executeButton
             // 
-            this.executeButton.Location = new System.Drawing.Point(167, 324);
+            this.executeButton.Location = new System.Drawing.Point(131, 289);
             this.executeButton.Name = "executeButton";
-            this.executeButton.Size = new System.Drawing.Size(75, 23);
+            this.executeButton.Size = new System.Drawing.Size(111, 23);
             this.executeButton.TabIndex = 7;
-            this.executeButton.Text = "Execute";
+            this.executeButton.Text = "Execute 2D";
             this.executeButton.UseVisualStyleBackColor = true;
             this.executeButton.Click += new System.EventHandler(this.executeButton_Click);
             // 
             // CSVButton
             // 
-            this.CSVButton.Location = new System.Drawing.Point(167, 403);
+            this.CSVButton.Location = new System.Drawing.Point(167, 421);
             this.CSVButton.Name = "CSVButton";
             this.CSVButton.Size = new System.Drawing.Size(75, 23);
             this.CSVButton.TabIndex = 8;
@@ -153,7 +154,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(25, 370);
+            this.label3.Location = new System.Drawing.Point(25, 384);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(52, 15);
             this.label3.TabIndex = 10;
@@ -162,7 +163,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(25, 74);
+            this.label4.Location = new System.Drawing.Point(25, 139);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(103, 15);
             this.label4.TabIndex = 12;
@@ -170,7 +171,7 @@
             // 
             // pourIDBox
             // 
-            this.pourIDBox.Location = new System.Drawing.Point(141, 71);
+            this.pourIDBox.Location = new System.Drawing.Point(141, 136);
             this.pourIDBox.Name = "pourIDBox";
             this.pourIDBox.Size = new System.Drawing.Size(71, 23);
             this.pourIDBox.TabIndex = 11;
@@ -178,7 +179,7 @@
             // spanLabel
             // 
             this.spanLabel.AutoSize = true;
-            this.spanLabel.Location = new System.Drawing.Point(49, 103);
+            this.spanLabel.Location = new System.Drawing.Point(49, 168);
             this.spanLabel.Name = "spanLabel";
             this.spanLabel.Size = new System.Drawing.Size(79, 15);
             this.spanLabel.TabIndex = 14;
@@ -186,7 +187,7 @@
             // 
             // spanBox
             // 
-            this.spanBox.Location = new System.Drawing.Point(141, 100);
+            this.spanBox.Location = new System.Drawing.Point(141, 165);
             this.spanBox.Name = "spanBox";
             this.spanBox.Size = new System.Drawing.Size(71, 23);
             this.spanBox.TabIndex = 13;
@@ -195,7 +196,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(218, 103);
+            this.label6.Location = new System.Drawing.Point(218, 168);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(24, 15);
             this.label6.TabIndex = 15;
@@ -204,7 +205,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 205);
+            this.label5.Location = new System.Drawing.Point(12, 12);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
             this.label5.TabIndex = 17;
@@ -213,25 +214,25 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(79, 203);
+            this.BaseJSONBox.Location = new System.Drawing.Point(80, 10);
             this.BaseJSONBox.Name = "BaseJSONBox";
-            this.BaseJSONBox.Size = new System.Drawing.Size(205, 23);
+            this.BaseJSONBox.Size = new System.Drawing.Size(327, 23);
             this.BaseJSONBox.TabIndex = 16;
             this.BaseJSONBox.Tag = "";
-            this.BaseJSONBox.Text = "C:\\work\\AQUATOX\\CSRA\\LBR Glenwood 4.JSON";
-            this.BaseJSONBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\LBR Glenwood 4.JSON";
             // 
             // SVBox
             // 
             this.SVBox.FormattingEnabled = true;
-            this.SVBox.Location = new System.Drawing.Point(102, 365);
+            this.SVBox.Location = new System.Drawing.Point(84, 381);
             this.SVBox.Name = "SVBox";
-            this.SVBox.Size = new System.Drawing.Size(160, 23);
+            this.SVBox.Size = new System.Drawing.Size(178, 23);
             this.SVBox.TabIndex = 18;
+            this.SVBox.SelectedIndexChanged += new System.EventHandler(this.SVBox_SelectedIndexChanged);
             // 
             // chartButton
             // 
-            this.chartButton.Location = new System.Drawing.Point(167, 446);
+            this.chartButton.Location = new System.Drawing.Point(167, 450);
             this.chartButton.Name = "chartButton";
             this.chartButton.Size = new System.Drawing.Size(75, 23);
             this.chartButton.TabIndex = 19;
@@ -241,19 +242,30 @@
             // 
             // SetupButton
             // 
-            this.SetupButton.Location = new System.Drawing.Point(167, 241);
+            this.SetupButton.Location = new System.Drawing.Point(424, 10);
             this.SetupButton.Name = "SetupButton";
-            this.SetupButton.Size = new System.Drawing.Size(75, 23);
+            this.SetupButton.Size = new System.Drawing.Size(123, 23);
             this.SetupButton.TabIndex = 20;
-            this.SetupButton.Text = "Setup";
+            this.SetupButton.Text = "Edit Master Setup";
             this.SetupButton.UseVisualStyleBackColor = true;
             this.SetupButton.Click += new System.EventHandler(this.SetupButton_Click);
+            // 
+            // ReadSNButton
+            // 
+            this.ReadSNButton.Location = new System.Drawing.Point(131, 218);
+            this.ReadSNButton.Name = "ReadSNButton";
+            this.ReadSNButton.Size = new System.Drawing.Size(111, 23);
+            this.ReadSNButton.TabIndex = 21;
+            this.ReadSNButton.Text = "Read Network";
+            this.ReadSNButton.UseVisualStyleBackColor = true;
+            this.ReadSNButton.Click += new System.EventHandler(this.ReadNetwork_Click);
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(812, 512);
+            this.ClientSize = new System.Drawing.Size(856, 503);
+            this.Controls.Add(this.ReadSNButton);
             this.Controls.Add(this.SetupButton);
             this.Controls.Add(this.chartButton);
             this.Controls.Add(this.SVBox);
@@ -305,5 +317,6 @@
         private System.Windows.Forms.ComboBox SVBox;
         private System.Windows.Forms.Button chartButton;
         private System.Windows.Forms.Button SetupButton;
+        private System.Windows.Forms.Button ReadSNButton;
     }
 }

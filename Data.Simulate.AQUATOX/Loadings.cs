@@ -95,7 +95,7 @@ namespace AQUATOX.Loadings
 
                 foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
                 {
-                    string dateString = entry.Key+":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; fixme, make flexible?
+                    string dateString = entry.Key+":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; make flexible?
                     if (!(DateTime.TryParse(dateString, out DateTime date)))
                           throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
                     if (!(Double.TryParse(entry.Value[0], out double val)))
