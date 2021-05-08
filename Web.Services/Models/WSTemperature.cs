@@ -11,7 +11,7 @@ namespace Web.Services.Models
     public class WSTemperature
     {
 
-        private enum TempSources { nldas, gldas, daymet, prism, ncei }
+        private enum TempSources { nldas, gldas, daymet, prism, ncei, noaa_coastal }
 
         /// <summary>
         /// Gets temperature data using the given TimeSeriesInput parameters.

@@ -87,54 +87,69 @@ namespace Data
     public class TimeSeriesInput : ITimeSeriesInput
     {
         /// <summary>
-        /// REQUIRED: Source of the timeseries data (i.e. NLDAS, GLDAS).
+        /// Description: Time-series data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm", "nwm", "nwis"];
+        /// Required: True;        
         /// </summary>
         [Required]
         public string Source { get; set; }
 
         /// <summary>
-        /// REQUIRED: Temporal timeframe of interest, specified by a start and end date.
+        /// Description: The start and end date for the requested time-series;
+        /// Default: None;
+        /// Options: None;
+        /// Required: True;
         /// </summary>
         [Required]   
         public DateTimeSpan DateTimeSpan { get; set; }
 
         /// <summary>
-        /// REQUIRED: Geospatial area of interest idenifier. Specific identifier is directly related to the Source chosen. Possible options include Point (containing a latitude and longitude), a COMID (stream catchment identifier), stationID (NCEI station identifier), HUC8 (NHD Hydrologic Unit Code 8).
+        /// Description: The spatial area of interest of the requested time-series. One geometry identifier is required.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: True;
         /// </summary>
         [Required]
         public TimeSeriesGeometry Geometry { get; set; }
 
         /// <summary>
-        /// OPTIONAL: Specifies the output format for the data values in the timeseries.
-        /// DEFAULT: E3
-        /// Format Reference: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx
+        /// Description: Specifies the output format for the data values in the timeseries;
+        /// Default: "E3";
+        /// Options: https://msdn.microsoft.com/en-us/library/kfsatb94(v=vs.110).aspx ;
+        /// Required: False;
         /// </summary>
         public string DataValueFormat { get; set; }
 
         /// <summary>
-        /// OPTIONAL: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.
-        /// DEFAULT: "default"
-        /// VALUES: "default", "hourly", "3hourly", "daily", "monthly"
+        /// Description: The temporal resolution of the time series to be returned. Valid options dependent on the dataset and source of the timeseries.;
+        /// Default: "default";
+        /// Options: ["default", "hourly", "3hourly", "daily", "monthly"];
+        /// Required: False;
         /// </summary>
         public string TemporalResolution { get; set; }
 
         /// <summary>
-        /// OPTIONAL: Indicates if the timezone of the geometry is used for the date/time values of the returned timeseries.
-        /// DEFAULT: True
+        /// Description: Indicates if the timezone of the geometry is used for the date/time values of the returned timeseries.;
+        /// Default: True;
+        /// Options: [True, False];
+        /// Required: False;
         /// </summary>
         public bool TimeLocalized { get; set; }
 
         /// <summary>
-        /// OPTIONAL: Unit system of the output values.
-        /// DEFAULT: "metric"
-        /// VALUES: "metric", "imperial"
+        /// Description: Unit system of the output values.;
+        /// Default: "metric";
+        /// Options: ["metric", "imperial"];
+        /// Required: False;
         /// </summary>
         public string Units { get; set; }
 
         /// <summary>
-        /// OPTIONAL: Specifies output format type.
-        /// DEFAULT: "json"
-        /// VALUES: "json"
+        /// Description: Specifies output format type.;
+        /// Default: "json";
+        /// Options: "json";
+        /// Required: False;
         /// </summary>
         public string OutputFormat { get; set; }
 
@@ -145,7 +160,10 @@ namespace Data
 
         //------------------------//
         /// <summary>
-        /// Optional: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.
+        /// Description: A dictionary for utilizing an ITimeSeriesOutput as an input variable, where the key is a provided identifier of the ITimeSeriesOutput.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;
         /// </summary>
         public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
 
@@ -248,6 +266,10 @@ namespace Data
         public override ITimeSeriesInput SetTimeSeriesInput(ITimeSeriesInput input, List<string> dataset, out string errorMsg)
         {
             errorMsg = "";
+            if (input.Source.Contains("test"))
+            {
+                return input;
+            }
             TimeSeriesInput validatedInput = ITimeSeriesValidation.Validate(out errorMsg, dataset, input) as TimeSeriesInput;
             if (errorMsg.Contains("ERROR"))
             {
@@ -323,19 +345,26 @@ namespace Data
     public class DateTimeSpan : IDateTimeSpan
     {
         /// <summary>
-        /// Start date of the time series.
+        /// Description: The start date for the requested time-series.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: True;        
         /// </summary>
         public DateTime StartDate { get; set; }
 
         /// <summary>
-        /// End date of the time series.
+        /// Description: The end date for the requested time-series.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: True;        
         /// </summary>
         public DateTime EndDate { get; set; }
 
         /// <summary>
-        /// Format for the output of DateTime values.
-        /// Format Reference: https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
-        /// Default Value: E3
+        /// Description: Format for the output of DateTime values.;
+        /// Default: "yyyy-MM-dd HH;
+        /// Options: https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx;
+        /// Required: False;        
         /// </summary>
         public string DateTimeFormat { get; set; }
     }
@@ -349,17 +378,26 @@ namespace Data
     public interface ITimezone
     {
         /// <summary>
-        /// Timezone name.
+        /// Description: Time zone.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         string Name { get; set; }
 
         /// <summary>
-        /// Timezone offset from GMT.
+        /// Description: Timezone offset from GMT.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         double Offset { get; set; }
 
         /// <summary>
-        /// Indicates if day light savings is active or not.
+        /// Description: Indicates if day light savings is active or not. Not currently used.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         bool DLS { get; set; }
     }
@@ -370,18 +408,26 @@ namespace Data
     public class Timezone : ITimezone
     {
         /// <summary>
-        /// Timezone name.
+        /// Description: Time zone.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Timezone offset from GMT.
+        /// Description: Timezone offset from GMT.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public double Offset { get; set; }
 
         /// <summary>
-        /// Indicates if day light savings is active or not.
-        /// Currently not being utilized.
+        /// Description: Indicates if day light savings is active or not. Not currently used.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public bool DLS { get; set; }
     }
@@ -435,38 +481,60 @@ namespace Data
     /// </summary>
     public class TimeSeriesGeometry : ITimeSeriesGeometry
     {
+
         /// <summary>
-        /// Description of the geometry, used to indicate details about the type of location the point represents.
+        /// Description: Description of the geometry, used to indicate details about the type of location the point represents.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// NHDPlus v2 catchment identifier.
+        /// Description: NHDPlus v2 catchment identifier.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public int ComID { get; set; }
 
         /// <summary>
-        /// NHDPlus v2 Hydrologic Unit Code idendifier, specifically a HUC8 or HUC12 ID.
+        /// Description: NHDPlus v2 Hydrologic Unit Code idendifier, specifically a HUC8 or HUC12 ID.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public string HucID { get; set; }
 
         /// <summary>
-        /// NCEI weather station ID, supports GHCND and COOP stations. If station type is not prepended to the ID, assumed to be GHCND.
+        /// Description: NCEI weather station ID, supports GHCND and COOP stations. If station type is not prepended to the ID, assumed to be GHCND.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public string StationID { get; set; }
 
         /// <summary>
-        /// Point coordinate object for providing latitude and longitude coordinates.
+        /// Description: Point coordinate object for providing latitude and longitude coordinates.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public PointCoordinate Point { get; set; }
 
         /// <summary>
-        /// Dictionary for holding metadata and additional information about the provided geometry. 
+        /// Description: Dictionary for holding metadata and additional information about the provided geometry. ;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public Dictionary<string, string> GeometryMetadata { get; set; }
 
         /// <summary>
-        /// Timezone information for the input geometry.
+        /// Description: Timezone information for the input geometry.;
+        /// Default: None;
+        /// Options: None;
+        /// Required: False;        
         /// </summary>
         public Timezone Timezone { get; set; }
 
@@ -496,13 +564,20 @@ namespace Data
     /// </summary>
     public class PointCoordinate : IPointCoordinate
     {
+
         /// <summary>
-        /// Latitude value of point geometry.
+        /// Description: Latitude value of point geometry.;
+        /// Default: None;
+        /// Options: [-90.0,90.0];
+        /// Required: False;        
         /// </summary>
         public double Latitude { get; set; }
 
         /// <summary>
-        /// Longitude value of point geometry.
+        /// Description: Longitude value of point geometry.;
+        /// Default: None;
+        /// Options: [-180.0, 180.0];
+        /// Required: False;        
         /// </summary>
         public double Longitude { get; set; }
     }

@@ -11,11 +11,20 @@ namespace Web.Services.Controllers
 {
 
     /// <summary>
-    /// Temperature Input that implements TimeSeriesInput object
+    /// Label: Temperature;
+    /// Description: Near-ground air temperature.;
     /// </summary>
     public class TemperatureInput : TimeSeriesInput
     {
         // Add extra evapotranspiration specific variables here
+
+        /// <summary>
+        /// Description: Temperature data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -74,6 +83,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)tempInput).Source = tempInput.Source;
                 WSTemperature temp = new WSTemperature();
                 ITimeSeriesOutput results = await temp.GetTemperature(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

@@ -7,7 +7,7 @@ namespace Wind
     public class Wind
     {
 
-        private enum validSources { nldas, gldas, ncei };
+        private enum validSources { nldas, gldas, ncei, noaa_coastal };
 
         // -------------- Wind Variables -------------- //
 
@@ -49,14 +49,16 @@ namespace Wind
 
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
             this.Output = iFactory.Initialize();
-            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
+            if ((this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point == null) 
+                || (this.Input.Geometry.ComID > 1 && this.Input.Geometry.Point.Latitude == -9999))
             {
                 this.Input.Geometry.Point = Utilities.COMID.GetCentroid(this.Input.Geometry.ComID, out errorMsg);
                 this.Output.Metadata.Add("catchment_comid", this.Input.Geometry.ComID.ToString());
             }
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
+            if (this.Input.Geometry.Timezone.Offset == 0 
+                && !this.Input.Source.Contains("ncei") && !this.Input.Source.Contains("noaa_coastal"))
             {
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -69,6 +71,10 @@ namespace Wind
 
             switch (this.Input.Source.ToLower())
             {
+                case "noaa_coastal":
+                    NOAACoastal noaaCoastal = new NOAACoastal();
+                    this.Output = noaaCoastal.GetData(out errorMsg, this.Output, this.Input);
+                    break;
                 case "nldas":
                     NLDAS nldas = new NLDAS();
                     this.Output = nldas.GetData(out errorMsg, this.component, this.Output, this.Input);

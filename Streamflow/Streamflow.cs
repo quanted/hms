@@ -52,15 +52,20 @@ namespace Streamflow
                     StreamGauge sg = new StreamGauge();
                     this.Output = sg.GetData(out errorMsg, this.Output, this.Input, retries);
                     if (errorMsg.Contains("ERROR")) { return null; }
+                    // Adds Timezone info to metadata
+                    this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
+                    this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+                    break;
+                case "test":
+                    TestData td = new TestData();
+                    this.Output = td.GenerateData(out errorMsg, this.Output, this.Input);
                     break;
                 default:
                     errorMsg = "ERROR: 'Source' for Streamflow was not found among available sources or is invalid.";
                     break;
             };
 
-            // Adds Timezone info to metadata
-            this.Output.Metadata.Add(this.Input.Source + "_timeZone", this.Input.Geometry.Timezone.Name);
-            this.Output.Metadata.Add(this.Input.Source + "_tz_offset", this.Input.Geometry.Timezone.Offset.ToString());
+
 
             return this.Output;
         }

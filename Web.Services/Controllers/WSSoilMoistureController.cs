@@ -11,15 +11,27 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SoilMoisture Input that implements TimeSeriesInput object
+    /// Label: Soil Moiture;
+    /// Description: Soil moisture content for specified layer depths;
     /// </summary>
     public class SoilMoistureInput : TimeSeriesInput
     {
         // Add extra SoilMoisture specific variables here
         /// <summary>
-        /// List of requested soil moisture layers
+        /// Description: List of requested soil moisture layers;
+        /// Default: None;
+        /// Options: ["0-10", "10-40", "40-100", "100-200", "0-100", "0-200"];
+        /// Required: True;
         /// </summary>
         public List<string> Layers { get; set; }
+
+        /// <summary>
+        /// Description: Soil moisture data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -74,16 +86,17 @@ namespace Web.Services.Controllers
         /// <summary>
         /// POST method for submitting a request for soil moisture data.
         /// </summary>
-        /// <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+        /// <param name="smInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]SoilMoistureInput evapoInput)
+        public async Task<IActionResult> POST([FromBody]SoilMoistureInput smInput)
         {
             try
             {
+                ((Data.TimeSeriesInput)smInput).Source = smInput.Source;
                 WSSoilMoisture evapo = new WSSoilMoisture();
-                ITimeSeriesOutput results = await evapo.GetSoilMoisture(evapoInput);
+                ITimeSeriesOutput results = await evapo.GetSoilMoisture(smInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -97,7 +110,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(evapoInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(smInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

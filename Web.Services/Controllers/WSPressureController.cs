@@ -10,11 +10,19 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Pressure Input that implements TimeSeriesInput object
+    /// Label: Pressue
+    /// Description: Surface air pressure input that implements TimeSeriesInput object
     /// </summary>
     public class PressureInput : TimeSeriesInput
     {
         // Add extra pressure specific variables here
+        /// <summary>
+        /// Description: Pressue data source;
+        /// Default: "gldas";
+        /// Options: ["gldas"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
 
     }
 
@@ -71,12 +79,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]PressureInput tempInput)
+        public async Task<IActionResult> POST([FromBody]PressureInput pInput)
         {
             try
             {
+                ((Data.TimeSeriesInput)pInput).Source = pInput.Source;
                 WSPressure press = new WSPressure();
-                ITimeSeriesOutput results = await press.GetPressure(tempInput);
+                ITimeSeriesOutput results = await press.GetPressure(pInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -90,7 +99,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(pInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

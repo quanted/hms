@@ -46,7 +46,7 @@ namespace Humidity
             }
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0)
+            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("noaa_coastal"))
             {
                 this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
                 if (errorMsg.Contains("ERROR")) { return null; }
@@ -60,6 +60,11 @@ namespace Humidity
                         // PRISM relative humidity Data call
                         PRISM prism = new PRISM();
                         this.Output = prism.GetRelativeHumidityData(out errorMsg, this.Output, this.Input);
+                        if (errorMsg.Contains("ERROR")) { return null; }
+                        break;
+                    case "noaa_coastal":
+                        NOAACoastal noaaCoastal = new NOAACoastal();
+                        this.Output = noaaCoastal.GetData(out errorMsg, this.Output, this.Input, this.Relative);
                         if (errorMsg.Contains("ERROR")) { return null; }
                         break;
                     default:

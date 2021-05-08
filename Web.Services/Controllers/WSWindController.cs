@@ -10,16 +10,25 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Wind Input that implements TimeSeriesInput object
+    /// Label: Wind;
+    /// Description: Near-ground wind.;
     /// </summary>
     public class WindInput : TimeSeriesInput
     {
         // Add extra wind specific variables here
+        /// <summary>
+        /// Description: Wind data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
 
-        /// Wind component
-        /// User request for U, V values and/or speed, direction. All input is made upper case for comparison.
-        /// Valid values: U/V, SPEED/DIR (SPEED/DIRECTION), ALL
-        /// Defaults: ALL 
+        /// Description: Wind data component format;
+        /// Default: "All";
+        /// Options: ["U/V", "SPEED/DIR", "ALL"];
+        /// Required: True;
+        /// </summary>
         public string Component = "ALL";
     }
 
@@ -80,6 +89,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)tempInput).Source = tempInput.Source;
                 WSWind wind = new WSWind();
                 ITimeSeriesOutput results = await wind.GetWind(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

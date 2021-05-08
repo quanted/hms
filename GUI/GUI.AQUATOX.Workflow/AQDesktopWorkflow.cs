@@ -217,7 +217,7 @@ namespace GUI.AQUATOX.Workflow
             {
                 string contaminantInput = "{'startDate': '" + this.startDate.ToString("yyyy-MM-dd HH") + "', 'endDate': '" + this.endDate.ToString("yyyy-MM-dd HH") + "', 'temporalResolution': 'daily', 'min':'5000', 'max':'6000'}";
                 ContaminantLoader.ContaminantLoader contaminant = new ContaminantLoader.ContaminantLoader("uniform", "json", contaminantInput);
-                nwmData.Data = contaminant.Result.Data;
+                nwmData.Data = contaminant.Result.ToDefault().Data;
             }
             else
             {

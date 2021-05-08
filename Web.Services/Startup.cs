@@ -39,6 +39,9 @@ namespace Web.Services
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
+            // Add support for JObjects
+            services.AddControllers().AddNewtonsoftJson();
+
             services.AddLogging();
 
             services.AddCors();

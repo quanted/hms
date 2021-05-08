@@ -10,12 +10,25 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SubSurfaceFlow Input that implements TimeSeriesInput object
+    /// Label: Sub-Surface Flow;
+    /// Description: Sub-surface water flow (baseflow).;
     /// </summary>
     public class SubSurfaceFlowInput : TimeSeriesInput
     {
+
         /// <summary>
-        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// Description: Subsurface flow data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "curvenumber"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
+
+        /// <summary>
+        /// Description: Precipitation data source for Curve Number.;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+        /// Required: False;
         /// </summary>
         public string PrecipSource { get; set; }
     }
@@ -76,6 +89,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)ssFlowInput).Source = ssFlowInput.Source;
                 if (ssFlowInput.Geometry.GeometryMetadata == null && ssFlowInput.PrecipSource != null)
                 {
                     ssFlowInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()

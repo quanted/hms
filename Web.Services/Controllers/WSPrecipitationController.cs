@@ -11,11 +11,20 @@ namespace Web.Services.Controllers
 {
 
     /// <summary>
-    /// Precipitation Input that implements TimeSeriesInput object.
+    /// Label: Precipitation;
+    /// Description: Precipitation Input that implements TimeSeriesInput object.;
     /// </summary>
     public class PrecipitationInput : TimeSeriesInput
     {
+
         // Add extra Dataset specific variables here.
+        /// <summary>
+        /// Description: Precipitation data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -86,6 +95,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)precipInput).Source = precipInput.Source;
                 Console.WriteLine("INPUT" + precipInput.ToString());
                 WSPrecipitation precip = new WSPrecipitation();
                 var stpWatch = System.Diagnostics.Stopwatch.StartNew();

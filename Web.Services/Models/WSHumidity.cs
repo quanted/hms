@@ -12,7 +12,7 @@ namespace Web.Services.Models
     public class WSHumidity
     {
 
-        private enum HumidSource { prism }
+        private enum HumidSource { prism, noaa_coastal }
 
         /// <summary>
         /// Gets humidty data using the given TimeSeriesInput parameters.

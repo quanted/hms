@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.Services.Controllers;
 
 namespace Web.Services.Models
 {
@@ -18,7 +19,7 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<ITimeSeriesOutput> GetSurfaceRunoff(ITimeSeriesInput input)
+        public async Task<ITimeSeriesOutput> GetSurfaceRunoff(SurfaceRunoffInput input)
         {
             string errorMsg = "";
 

@@ -10,12 +10,19 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Radiation Input that implements TimeSeriesInput object
+    /// Label: Solar Radiation;
+    /// Description: High and short wave radiation that reaches the ground.
     /// </summary>
     public class RadiationInput : TimeSeriesInput
     {
         // Add extra radiation specific variables here
-
+        /// <summary>
+        /// Description: Radiation data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "daymet"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -74,6 +81,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)tempInput).Source = tempInput.Source;
                 WSRadiation rad = new WSRadiation();
                 ITimeSeriesOutput results = await rad.GetRadiation(tempInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);

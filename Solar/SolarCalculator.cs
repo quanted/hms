@@ -89,7 +89,13 @@ namespace Solar
                 };
                 this.Output.Metadata.Add("endDate", this.Input.DateTimeSpan.EndDate.ToString());
                 this.Output.Metadata.Add("columns", String.Join(", ", columns));
-                RunDayCalculation();
+                int timestep;
+                bool parsed = Int32.TryParse(this.Input.TemporalResolution, out timestep);
+                if (!parsed)
+                {
+                    timestep = 60;      // default to hourly
+                }
+                RunDayCalculation(timestep);
                 this.Output.Dataset = "Solar Calculator Day";
             }
 
@@ -101,7 +107,7 @@ namespace Solar
                 "those latitudes. However, due to variations in atmospheric composition, temperature, pressure and conditions, observed values may vary from calculations.");
             this.Output.Metadata.Add("dataForLitigation", "The NOAA Solar Calculator is for research and recreational use only. NOAA cannot certify or authenticate sunrise, " +
                 "sunset or solar position data. The U.S. Government does not collect observations of astronomical data, and due to atmospheric conditions our calculated " +
-                "results may vary significantly from actual observed values."); 
+                "results may vary significantly from actual observed values.");
         }
 
         /// <summary>
@@ -111,11 +117,13 @@ namespace Solar
         {
             Dictionary<string, List<string>> solarData = new Dictionary<string, List<string>>();
             DateTime currentDate = new DateTime();
-            
+
             currentDate = this.Input.DateTimeSpan.StartDate;
 
             DateTime end = new DateTime();
             end = this.Input.DateTimeSpan.EndDate.AddDays(1);
+
+            string format = Input.DateTimeSpan.DateTimeFormat;
 
             TimeSpan hour = TimeSpan.Parse(this.LocalTime);
             currentDate = currentDate.Add(hour);
@@ -196,7 +204,7 @@ namespace Solar
                 double sn = GetSolarNoon(this.Input.Geometry.Point.Longitude, this.Input.Geometry.Timezone.Offset, eot);
                 TimeSpan snTS = TimeSpan.FromDays(sn);
                 data.Add(snTS.ToString());
-                
+
                 // Sunrise Time [LST] (Y)
                 double srt = GetSunriseTime(has, sn);
                 TimeSpan srtTS = TimeSpan.FromDays(srt);
@@ -240,7 +248,7 @@ namespace Solar
                 double saa = GetSolarAzimuthAngle(this.Input.Geometry.Point.Latitude, ha, sza, sd);
                 data.Add(Math.Round(saa, 4).ToString());
 
-                solarData.Add(currentDate.ToString("MM/dd/yyyy"), data);
+                solarData.Add(currentDate.ToString(format), data);
                 currentDate = currentDate.AddDays(1);
             }
             this.Output.Data = solarData;
@@ -249,14 +257,20 @@ namespace Solar
         /// <summary>
         /// Run day calculations for solar calculator
         /// </summary>
-        private void RunDayCalculation()
+        private void RunDayCalculation(int timestep = 60)
         {
             Dictionary<string, List<string>> solarData = new Dictionary<string, List<string>>();
             DateTime currentDate = new DateTime();
 
+            string format = Input.DateTimeSpan.DateTimeFormat;
+            if (timestep < 60)
+            {
+                format = "yyyy-MM-dd HH:mm";
+            }
+
             currentDate = this.Input.DateTimeSpan.StartDate;
             DateTime endDate = currentDate.AddDays(1);
-            currentDate = currentDate.AddMinutes(6);
+            currentDate = currentDate.AddMinutes(timestep);
 
             while (currentDate.CompareTo(endDate) <= 0)
             {
@@ -377,8 +391,8 @@ namespace Solar
                 double saa = GetSolarAzimuthAngle(this.Input.Geometry.Point.Latitude, ha, sza, sd);
                 data.Add(Math.Round(saa, 4).ToString());
 
-                solarData.Add(currentDate.ToString("MM/dd/yyyy HH:mm:ss"), data);
-                currentDate = currentDate.AddMinutes(6);
+                solarData.Add(currentDate.ToString(format), data);
+                currentDate = currentDate.AddMinutes(timestep);
             }
             this.Output.Data = solarData;
         }
@@ -587,7 +601,7 @@ namespace Solar
         /// <returns></returns>
         public double GetHASunrise(double latitude, double sd)
         {
-            return ToDegree(Math.Acos(Math.Cos(ToRadian(90.833)) / (Math.Cos(ToRadian(latitude)) 
+            return ToDegree(Math.Acos(Math.Cos(ToRadian(90.833)) / (Math.Cos(ToRadian(latitude))
                 * Math.Cos(ToRadian(sd))) - Math.Tan(ToRadian(latitude)) * Math.Tan(ToRadian(sd))));
         }
 
@@ -646,7 +660,7 @@ namespace Solar
         public double GetTrueSolarTime(double longitude, double offset, double hours, double eot)
         {
             double n = ((hours * 1440.0) + eot + (4.0 * longitude) - (60.0 * offset));
-            if(n < 0)
+            if (n < 0)
             {
                 return (1440 - Math.Abs(n)) % 1440;
             }
@@ -762,7 +776,8 @@ namespace Solar
                 double n = (540 - ToDegree(Math.Acos(
                     ((Math.Sin(ToRadian(latitude)) * Math.Cos(ToRadian(sza))) - Math.Sin(ToRadian(sd)))
                     / (Math.Cos(ToRadian(latitude)) * Math.Sin(ToRadian(sza))))));
-                if (n >= 0) {
+                if (n >= 0)
+                {
                     return n % 360.0;
                 }
                 else

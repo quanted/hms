@@ -29,20 +29,20 @@ namespace Precipitation.Tests
             Assert.Equal(expected, Convert.ToDouble(convertedData["2015-01-04 10"][0]));
         }
 
-        [Trait("Priority", "1")]
-        [Fact]
-        public void CheckStatus()
-        {
-            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            ITimeSeriesInput input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject);
-            string errorMsg;
-            Precipitation precip = new Precipitation
-            {
-                Input = iFactory.SetTimeSeriesInput(input, new List<string> { "precipitation" }, out errorMsg)
-            };
-            Dictionary<string, string> status = TRMM.CheckStatus(precip.Input);
-            Assert.Equal("OK", status["status"]);
-        }
+        //[Trait("Priority", "1")]
+        //[Fact]
+        //public void CheckStatus()
+        //{
+        //    ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+        //    ITimeSeriesInput input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject);
+        //    string errorMsg;
+        //    Precipitation precip = new Precipitation
+        //    {
+        //        Input = iFactory.SetTimeSeriesInput(input, new List<string> { "precipitation" }, out errorMsg)
+        //    };
+        //    Dictionary<string, string> status = TRMM.CheckStatus(precip.Input);
+        //    Assert.Equal("OK", status["status"]);
+        //}
 
 
         [Trait("Priority", "1")]

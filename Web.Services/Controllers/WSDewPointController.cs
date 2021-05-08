@@ -10,11 +10,19 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Dew Point Input that implements TimeSeriesInput object
+    /// Label: Dew Point
+    /// Description: Dew Point Input that implements TimeSeriesInput object;
     /// </summary>
     public class DewPointInput : TimeSeriesInput
     {
         // Add extra Dew Point specific variables here
+        /// <summary>
+        /// Description: DewPoint data source;
+        /// Default: "prism";
+        /// Options: ["prism"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -69,12 +77,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]DewPointInput tempInput)
+        public async Task<IActionResult> POST([FromBody]DewPointInput dInput)
         {
             try
             {
+                ((Data.TimeSeriesInput)dInput).Source = dInput.Source;
                 WSDewPoint dPoint = new WSDewPoint();
-                ITimeSeriesOutput results = await dPoint.GetDewPoint(tempInput);
+                ITimeSeriesOutput results = await dPoint.GetDewPoint(dInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -88,7 +97,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(dInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

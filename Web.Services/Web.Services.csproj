@@ -61,27 +61,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.0-beta0001" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.3.0-dev-00152" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.3.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="5.1.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.12.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="SDSLite" Version="2.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.2" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <ProjectReference Include="..\Animals\Animals.AQUATOX\Animals.AQUATOX.csproj" />
+    <ProjectReference Include="..\Chemicals\Bioaccumulation.AQUATOX\Bioaccumulation.AQUATOX.csproj" />
+    <ProjectReference Include="..\Chemicals\Chemicals.AQUATOX\Chemicals.AQUATOX.csproj" />
+    <ProjectReference Include="..\Coastal\Coastal.csproj" />
     <ProjectReference Include="..\ContaminantLoader\ContaminantLoader.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\DewPoint\DewPoint.csproj" />
+    <ProjectReference Include="..\Diagenesis\Diagenesis.AQUATOX\Diagenesis.AQUATOX.csproj" />
+    <ProjectReference Include="..\Ecotoxicology\Ecotoxicology.AQUATOX\Ecotoxicology.AQUATOX.csproj" />
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj" />
     <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Nutrients\Nutrients.AQUATOX\Nutrients.AQUATOX.csproj" />
+    <ProjectReference Include="..\OrganicMatter\OrganicMatter.AQUATOX\OrganicMatter.AQUATOX.csproj" />
+    <ProjectReference Include="..\Plants\Plants.AQUATOX\Plants.AQUATOX.csproj" />
     <ProjectReference Include="..\Precipitation\Precipitation.csproj" />
     <ProjectReference Include="..\Pressure\Pressure.csproj" />
     <ProjectReference Include="..\Radiation\Radiation.csproj" />
     <ProjectReference Include="..\SoilMoisture\SoilMoisture.csproj" />
     <ProjectReference Include="..\Solar\Solar.csproj" />
+    <ProjectReference Include="..\Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
     <ProjectReference Include="..\Streamflow\Streamflow.csproj" />
     <ProjectReference Include="..\SubSurfaceFlow\SubSurfaceFlow.csproj" />
     <ProjectReference Include="..\SurfaceRunoff\SurfaceRunoff.csproj" />

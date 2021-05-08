@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WatershedDelineation
 {
@@ -101,11 +103,19 @@ namespace WatershedDelineation
 
         LinkedList<StreamSegment> StreamSegments { get; set; }
                 
-        public Streams(string start, string end, LinkedList<StreamSegment> segs)
+        public Streams(string start, string end = null, LinkedList<StreamSegment> segs = null)
         {
             this.startCOMID = start;
             this.stopCOMID = end;
             this.StreamSegments = segs;
+        }
+
+        public object GetNetwork(double maxDistance=50.0, string endComid=null, bool mainstem=false)
+        {
+            string errorMsg = "";
+            string data = GetStreamNetwork(out errorMsg, endComid, maxDistance, mainstem);
+            object networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
+            return networkObject;
         }
 
         public LinkedList<StreamSegment> GetStreams(ITimeSeriesInput input, List<List<object>> contaminantInflow, string inflowSource, out string comids)
@@ -231,7 +241,56 @@ namespace WatershedDelineation
             }
             catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to download requested nldas data. " + ex.Message;
+                errorMsg = "ERROR: Unable to download requested epa waters data. " + ex.Message;
+            }
+            return data;
+        }
+
+        private string GetStreamNetwork(out string errorMsg, string endComid=null, double maxDistance=50.0, bool mainstem=false)
+        {
+            errorMsg = "";
+            string requestURL = "";
+            if (mainstem)
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
+            else if (!string.IsNullOrEmpty(endComid))
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + this.startCOMID + "&pStopComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
+            else
+            {
+                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UM&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+            }
+
+            string data = "";
+            try
+            {
+                // TODO: Read in max retry attempt from config file.
+                int retries = 5;
+
+                // Response status message
+                string status = "";
+                while (retries > 0 && !status.Contains("OK"))
+                {
+                    WebRequest wr = WebRequest.Create(requestURL);
+                    HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+                    status = response.StatusCode.ToString();
+                    Stream dataStream = response.GetResponseStream();
+                    StreamReader reader = new StreamReader(dataStream);
+                    data = reader.ReadToEnd();
+                    reader.Close();
+                    response.Close();
+                    retries -= 1;
+                    if (!status.Contains("OK"))
+                    {
+                        Thread.Sleep(200);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsg = "ERROR: Unable to download requested stream network data. " + ex.Message;
             }
             return data;
         }

@@ -97,7 +97,7 @@ namespace Web.Services.Tests
         [InlineData(nldasRequest, 365)]
         [InlineData(nldas2Request, 12)]
         [InlineData(gldasRequest, 365)]
-        [InlineData(gldas2Request, 12)]
+        [InlineData(gldas2Request, 13)]
         [InlineData(curvenumberRequest, 365)]
         [InlineData(curvenumber2Request, 12)]
         public async Task ValidRequests(string inputString, int expected)

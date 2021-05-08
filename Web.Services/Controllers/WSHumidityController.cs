@@ -10,15 +10,27 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// Humidity Input that implements TimeSeriesInput object
+    /// Label: Humidity;
+    /// Description: Humidity input;
     /// </summary>
     public class HumidityInput : TimeSeriesInput
     {
         // Add extra Humidity specific variables here
         /// <summary>
-        /// Relative or Specific Humidity
+        /// Description: Relative or Specific Humidity. Only relative humidity implemented.;
+        /// Default: True;
+        /// Options: True;
+        /// Required: True;
         /// </summary>
         public bool Relative { get; set; }
+
+        /// <summary>
+        /// Description: Humidity data source;
+        /// Default: "prism";
+        /// Options: ["prism"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -74,12 +86,13 @@ namespace Web.Services.Controllers
         /// <returns>ITimeSeries</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> POST([FromBody]HumidityInput tempInput)
+        public async Task<IActionResult> POST([FromBody]HumidityInput hInput)
         {
             try
             {
+                ((Data.TimeSeriesInput)hInput).Source = hInput.Source;
                 WSHumidity humid = new WSHumidity();
-                ITimeSeriesOutput results = await humid.GetHumidity(tempInput);
+                ITimeSeriesOutput results = await humid.GetHumidity(hInput);
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
@@ -93,7 +106,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(tempInput, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(hInput, options));
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));

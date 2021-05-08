@@ -1,0 +1,59 @@
+stages:
+  - Build
+  - Testing
+  
+
+Build Image:
+  stage: Build
+  tags:
+    - docker
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Web.Services/Dockerfile --destination $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
+
+Unit Tests:
+  stage: Testing
+  tags:
+    - docker
+  image: 
+    name: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
+    entrypoint: [""]
+  script:
+    - 'dotnet test HMS.sln -c Test --no-build --filter FullyQualifiedName!~IntegrationTests --test-adapter-path:. --logger:"nunit;LogFilePath=/app/artifacts/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+  artifacts:
+    when: always
+    paths:
+      - /app/artifacts/Animals.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Bioaccumulation.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Chemicals.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Data.Source.Tests-test-result.xml
+      - /app/artifacts/Data.Tests-test-result.xml
+      - /app/artifacts/Diagenesis.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Ecotoxicology.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Nutrients.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/OrganicMatter.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Precipitation.Tests-test-result.xml
+      - /app/artifacts/Solar.Tests-test-result.xml
+      - /app/artifacts/Stream.Hydrology.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Utilities.Tests-test-result.xml
+      - /app/artifacts/Web.Services.Tests-test-result.xml
+    reports:
+      junit:
+      - /app/artifacts/Animals.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Bioaccumulation.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Chemicals.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Data.Source.Tests-test-result.xml
+      - /app/artifacts/Data.Tests-test-result.xml
+      - /app/artifacts/Diagenesis.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Ecotoxicology.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Nutrients.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/OrganicMatter.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Precipitation.Tests-test-result.xml
+      - /app/artifacts/Solar.Tests-test-result.xml
+      - /app/artifacts/Stream.Hydrology.AQUATOX.UnitTests-test-result.xml
+      - /app/artifacts/Utilities.Tests-test-result.xml
+      - /app/artifacts/Web.Services.Tests-test-result.xml

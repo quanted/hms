@@ -50,14 +50,21 @@ namespace Temperature
             }
 
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
-            if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
+            if (this.Input.Geometry.Timezone.Offset == 0 
+                && !this.Input.Source.Contains("ncei") && !this.Input.Source.Contains("noaa_coastal"))
             {
-                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
-                if (errorMsg.Contains("ERROR")) { return null; }
+               this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+               if (errorMsg.Contains("ERROR")) { return null; }
             }
 
             switch (this.Input.Source.ToLower())
             {
+                case "noaa_coastal":
+                    // NOAA Temperature Data call
+                    NOAACoastal noaa = new NOAACoastal();
+                    this.Output = noaa.GetData(out errorMsg, this.Output, this.Input);
+                    if (errorMsg.Contains("ERROR")) { return null; }
+                    break;
                 case "nldas":
                     // NLDAS Temperature Data call
                     NLDAS nldas = new NLDAS();

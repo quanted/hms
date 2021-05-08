@@ -374,7 +374,7 @@ namespace Web.Services.Tests
         [Theory]
         [InlineData(nldasRequest, 365)]
         [InlineData(nldas2Request, 12)]
-        [InlineData(gldasRequest, 365)]
+        [InlineData(gldasRequest, 364)]
         [InlineData(gldas2Request, 12)]
         [InlineData(hamonNldasRequest, 365)]
         //[InlineData(priestlytaylorNldasRequest, 365)]

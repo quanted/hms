@@ -10,19 +10,28 @@ using System.Text.Json;
 namespace Web.Services.Controllers
 {
     /// <summary>
-    /// SurfaceRunoff Input that implements TimeSeriesInput object
+    /// Label: Surface Runoff;
+    /// Description: Surface rainfall runoff.;
     /// </summary>
     public class SurfaceRunoffInput : TimeSeriesInput
     {
+
         /// <summary>
-        /// OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+        /// Description: Surface runoff data source;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "curvenumber"];
+        /// Required: True;
+        /// </summary>
+        public new string Source { get; set; }
+
+        /// <summary>
+        /// Description: Precipitation data source for Curve Number.;
+        /// Default: "nldas";
+        /// Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+        /// Required: False;
         /// </summary>
         public string PrecipSource { get; set; }
 
-        /// <summary>
-        /// Determines whether to use point-based runoff or area-based runoff
-        /// </summary>
-        //public string RunoffType { get; set; }
         // Add extra SurfaceRunoff specific variables here
     }
 
@@ -82,6 +91,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                ((Data.TimeSeriesInput)runoffInput).Source = runoffInput.Source;
                 if(runoffInput.Geometry.GeometryMetadata == null && runoffInput.PrecipSource != null)
                 {
                     runoffInput.Geometry.GeometryMetadata = new System.Collections.Generic.Dictionary<string, string>()
