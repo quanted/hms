@@ -55,7 +55,7 @@ namespace GUI.AQUATOX
             this.chart1.Legends.Add(legend1);
             chart1.Location = new System.Drawing.Point(306, 59);
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(474, 414);
+            this.chart1.Size = new System.Drawing.Size(474, 435);
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
