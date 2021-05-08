@@ -72,28 +72,6 @@ namespace Precipitation.Tests
             Assert.Contains(errorMsg, error);
         }
 
-<<<<<<< HEAD
-        [Trait("Priority", "1")]
-        [Theory]
-        [InlineData(365, false)]
-        [InlineData(365, true)]
-        public void SetDataToOutput(int count, bool leap)
-        {
-            Precipitation precip = new Precipitation
-            {
-                Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
-                Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
-            };
-            string errorMsg = "";
-            Daymet daymet = new Daymet();
-            if (leap)
-            {
-                precip.Input.Geometry.GeometryMetadata.Add("leapYear", "");
-            }
-           //  precip.Output = daymet.SetDataToOutput(out errorMsg, "", rawOutput, precip.Output, precip.Input);  fixme
-            Assert.Equal(count, precip.Output.Data.Count);
-        }
-=======
         //[Trait("Priority", "1")]
         //[Theory]
         //[InlineData(365, false)]
@@ -111,9 +89,9 @@ namespace Precipitation.Tests
         //    {
         //        precip.Input.Geometry.GeometryMetadata.Add("leapYear", "");
         //    }
-        //    precip.Output = daymet.SetDataToOutput(out errorMsg, "", rawOutput, precip.Output, precip.Input);
+        //   //  precip.Output = daymet.SetDataToOutput(out errorMsg, "", rawOutput, precip.Output, precip.Input);  fixme
         //    Assert.Equal(count, precip.Output.Data.Count);
         //}
->>>>>>> 2446722a8931eb3b74918cc67a97360b7d4dc958
+
     }
 }
