@@ -12,7 +12,14 @@ namespace Streamflow
         {
             errorMsg = "";
 
-            string dataRequest = "/hms/nwm/data/?dataset=streamflow&comid=" + input.Geometry.ComID.ToString() + 
+            string comids = input.Geometry.ComID.ToString();
+            if (input.Geometry.GeometryMetadata.ContainsKey("comids"))
+            {
+                comids = comids + "," + input.Geometry.GeometryMetadata["comids"];
+            }
+            output.Metadata.Add("comids", comids);
+
+            string dataRequest = "/hms/nwm/data/?dataset=streamflow&comid=" + comids + 
                 "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + 
                 "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
 
@@ -30,7 +37,6 @@ namespace Streamflow
             else
             {
                 output.Metadata.Add("temporal_timestep", "hourly");
-
             }
             return output;
         }
