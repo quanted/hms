@@ -66,6 +66,7 @@ namespace Web.Services
 
             // ---- Swashbuckle Swagger Examples for POST requests ---- //
 
+            services.AddSwaggerExamplesFromAssemblyOf<WSAquatoxWorkflowControllerInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<ContaminantLoaderInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<DewPointInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<EvapotranspirationInputExample>();
