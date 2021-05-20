@@ -310,7 +310,7 @@ namespace AQUATOX.AQSim_2D
                     for (int i = 0; i < ndates; i++)
                     {
                         double OutVol = AR.washout[i];  // out volume from upstream segment
-                        double InVol = DischargeLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment, currently estimated as current seg. outflow -- fixme replace with calculated inflow volume using Mannings N to account for changes in seg volume
+                        double InVol = DischargeLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment, currently estimated as current seg. outflow -- can be replaced with calculated inflow volume using Mannings N to account for changes in seg volume
 
                         if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
                         else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol));  //adding second or third inputs

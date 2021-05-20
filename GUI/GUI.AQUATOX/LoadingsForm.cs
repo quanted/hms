@@ -77,16 +77,17 @@ namespace GUI.AQUATOX
 
         }
 
-        public bool Has_Alt_Loadings()
+        public void UpdateUnits()
         {
-            return (SV.Layer == T_SVLayer.WaterCol) &&
-            ((SV.NState == AllVariables.Volume) || (SV.NState == AllVariables.H2OTox) || (SV.NState == AllVariables.Phosphate)
-            || (SV.NState == AllVariables.Oxygen) || (SV.NState == AllVariables.Ammonia) || (SV.NState == AllVariables.Nitrate));
+            SV.UpdateUnits();
+            ICUnit.Text = SV.StateUnit;
 
-            //  Salinity, DissRefrDetr..LastDetr, FirstAnimal..LastFish]) and (Typ = StV))  FIXME
+            string loadunit = SV.LoadUnit(LTBox.SelectedIndex);
+            CLUnit.Text = loadunit;
+            TSUnit.Text = loadunit;
         }
-            
 
+        
         public void UpdateScreen()
         {
             // Future, add button for frac avail, trophic matrix, biotransformation
@@ -97,9 +98,6 @@ namespace GUI.AQUATOX
             // Future CO2 Equilibrium button
             // Future Exposure Inputs
 
-            SV.UpdateUnits();
-            ICUnit.Text = SV.StateUnit;
-            CLUnit.Text = SV.LoadingUnit;
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
 
             AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
@@ -115,17 +113,12 @@ namespace GUI.AQUATOX
 
             if (!SV.LoadsRec.Loadings.NoUserLoad) {
                 LTBox.Items.Clear();
-                LTBox.Items.Add("Inflow Water");
-                if (Has_Alt_Loadings())
-                {
-                    LTBox.Items.Add("Point Source");
-                    LTBox.Items.Add("Direct. Precip.");
-                    LTBox.Items.Add("Non-Point Source");
-                }
+                LTBox.DataSource = SV.LoadList();
                 LTBox.SelectedIndex = 0;
                 ShowGrid();
             }
 
+            UpdateUnits();
 
         }
 
@@ -232,6 +225,7 @@ namespace GUI.AQUATOX
 
         private void LTBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            UpdateUnits();
             ShowGrid();
         }
 

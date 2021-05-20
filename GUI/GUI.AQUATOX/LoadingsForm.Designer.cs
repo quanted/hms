@@ -54,6 +54,7 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
+            this.TSUnit = new System.Windows.Forms.Label();
             this.LoadingsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -112,6 +113,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoadingsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LoadingsPanel.Controls.Add(this.TSUnit);
             this.LoadingsPanel.Controls.Add(this.HMS_Button);
             this.LoadingsPanel.Controls.Add(this.label2);
             this.LoadingsPanel.Controls.Add(this.File_Import);
@@ -322,6 +324,15 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.TabIndex = 25;
             this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             // 
+            // TSUnit
+            // 
+            this.TSUnit.AutoSize = true;
+            this.TSUnit.Location = new System.Drawing.Point(271, 102);
+            this.TSUnit.Name = "TSUnit";
+            this.TSUnit.Size = new System.Drawing.Size(33, 15);
+            this.TSUnit.TabIndex = 31;
+            this.TSUnit.Text = "units";
+            // 
             // LoadingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -375,5 +386,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button File_Import;
         private System.Windows.Forms.Button HMS_Button;
+        private System.Windows.Forms.Label TSUnit;
     }
 }

@@ -280,6 +280,8 @@ namespace GUI.AQUATOX
             bs.DataSource = AQT2D.SVList;
             SVBox.DataSource = bs;   //update state variable list for graphing, CSV
 
+            // Get Deron the size of the archive
+
             AddToProcessLog("Model execution complete");
         }
 
