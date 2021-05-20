@@ -51,6 +51,10 @@ namespace Web.Services.Models
             {
                 return File.ReadAllBytes(path);
             }
+            else if (File.Exists("/app/Nutrients/DOCS/AQUATOX_Nutrient_Model_Valid.JSON"))
+            {
+                return File.ReadAllBytes("/app/Nutrients/DOCS/AQUATOX_Nutrient_Model_Valid.JSON");
+            }
             else
             {
                 return null;
@@ -71,6 +75,10 @@ namespace Web.Services.Models
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
+            }
+            else if (File.Exists("/app/Nutrients/DOCS/AQUATOX_Nutrient_Model_Valid.JSON"))
+            {
+                return File.ReadAllText("/app/Nutrients/DOCS/AQUATOX_Nutrient_Model_Valid.JSON");
             }
             else
             {

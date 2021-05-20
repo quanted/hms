@@ -49,6 +49,10 @@ namespace Web.Services.Models
             {
                 return File.ReadAllBytes(path);
             }
+            else if (File.Exists("/app/Animals/DOCS/Animal_Valid.JSON"))
+            {
+                return File.ReadAllBytes("/app/Animals/DOCS/Animal_Valid.JSON");
+            }
             else
             {
                 return null;
@@ -68,6 +72,10 @@ namespace Web.Services.Models
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
+            }
+            else if(File.Exists("/app/Animals/DOCS/Animal_Valid.JSON"))
+            {
+                return File.ReadAllText("/app/Animals/DOCS/Animal_Valid.JSON");
             }
             else
             {

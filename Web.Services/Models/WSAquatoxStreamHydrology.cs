@@ -51,6 +51,10 @@ namespace Web.Services.Models
             {
                 return File.ReadAllBytes(path);
             }
+            else if (File.Exists("/app/Stream.Hydrology/AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON"))
+            {
+                return File.ReadAllBytes("/app/Stream.Hydrology/AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON");
+            }
             else
             {
                 return null;
@@ -71,6 +75,10 @@ namespace Web.Services.Models
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
+            }
+            else if (File.Exists("/app/Stream.Hydrology/AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON"))
+            {
+                return File.ReadAllText("/app/Stream.Hydrology/AQUATOX/DOCS/AQUATOX_Volume_Model_Valid.JSON");
             }
             else
             {

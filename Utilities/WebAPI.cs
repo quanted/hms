@@ -35,6 +35,7 @@ namespace Utilities
             string data = "";
 
             HttpClient hc = new HttpClient();
+            hc.Timeout = TimeSpan.FromMinutes(10);
             HttpResponseMessage wm = new HttpResponseMessage();
             try
             {
@@ -110,6 +111,13 @@ namespace Utilities
             return taskData;
         }
 
+    }
+
+    public class FlaskData<T>
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+        public T data { get; set; }
     }
 
     public class NCEIResult

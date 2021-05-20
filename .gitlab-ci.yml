@@ -6,7 +6,7 @@ stages:
 Build Image:
   stage: Build
   tags:
-    - docker
+    - devsecops-instance
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -18,7 +18,7 @@ Build Image:
 Unit Tests:
   stage: Testing
   tags:
-    - docker
+    - devsecops-instance
   image: 
     name: $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
     entrypoint: [""]

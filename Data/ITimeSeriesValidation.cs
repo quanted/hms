@@ -36,7 +36,7 @@ namespace Data
             ["dewpoint"] = new List<string> { "prism" },
             ["humidity"] = new List<string> { "prism", "nldas", "gldas", "noaa_coastal" },
             ["surfacepressure"] = new List<string> { "gldas" },
-            ["streamflow"] = new List<string> { "nwis", "usgs", "streamgauge" },
+            ["streamflow"] = new List<string> { "nwis", "usgs", "streamgauge", "test", "nwm" },
             ["coastal"] = new List<string> { "noaa_coastal" }
         };
 
@@ -426,6 +426,11 @@ namespace Data
                     path = "/app/App_Data/url_info.txt";
                 }
 
+                // If file still not found, use web.services directory.
+                if (!File.Exists(@path))
+                {
+                    path = Directory.GetCurrentDirectory() + "/App_Data/url_info.txt";
+                }
 
                 urls = Data.Files.FileToDictionary(path);
 

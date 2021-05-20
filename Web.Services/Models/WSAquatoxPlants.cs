@@ -51,6 +51,10 @@ namespace Web.Services.Models
             {
                 return File.ReadAllBytes(path);
             }
+            else if (File.Exists("/app/Plants/DOCS/AQUATOX_Plant_Model_Complex_Valid.JSON"))
+            {
+                return File.ReadAllBytes("/app/Plants/DOCS/AQUATOX_Plant_Model_Complex_Valid.JSON");
+            }
             else
             {
                 return null;
@@ -71,6 +75,10 @@ namespace Web.Services.Models
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
+            }
+            else if (File.Exists("/app/Plants/DOCS/AQUATOX_Plant_Model_Complex_Valid.JSON"))
+            {
+                return File.ReadAllText("/app/Plants/DOCS/AQUATOX_Plant_Model_Complex_Valid.JSON");
             }
             else
             {

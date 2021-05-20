@@ -169,9 +169,19 @@ namespace Data
                 DataSource = output.DataSource,
                 Metadata = output.Metadata
             };
+            string dFormat = "yyyy-MM-dd HH:mm";
+            try
+            {
+                DateTime d = DateTime.ParseExact(output.Data.First<KeyValuePair<string, T>>().Key, dFormat, CultureInfo.InvariantCulture);
+            }
+            catch(FormatException e)
+            {
+                dFormat = "yyyy-MM-dd HH";
+            }
+
             foreach (var item in output.Data)
             {
-                DateTime date = DateTime.ParseExact(item.Key, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                DateTime date = DateTime.ParseExact(item.Key, dFormat, CultureInfo.InvariantCulture);
                 List<double> values = new List<double>();
                 List<double> v = ((IEnumerable<double>)item.Value).Cast<double>().ToList();
                 for (int i = 0; i < v.Count; i++)
