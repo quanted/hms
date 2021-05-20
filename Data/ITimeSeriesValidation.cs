@@ -426,6 +426,11 @@ namespace Data
                     path = "/app/App_Data/url_info.txt";
                 }
 
+                // If file still not found, use web.services directory.
+                if (!File.Exists(@path))
+                {
+                    path = Directory.GetCurrentDirectory() + "/App_Data/url_info.txt";
+                }
 
                 urls = Data.Files.FileToDictionary(path);
 

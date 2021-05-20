@@ -363,6 +363,53 @@ namespace AQUATOX.AQTSegment
         { }
 
         // -------------------------------------------------------------------------------
+        public bool Has_Alt_Loadings()
+        {
+            if (Layer != T_SVLayer.WaterCol) return false;
+
+            bool result = ((NState == AllVariables.Volume) || (NState == AllVariables.H2OTox) || (NState == AllVariables.Phosphate)
+            || (NState == AllVariables.Oxygen) || (NState == AllVariables.Ammonia) || (NState == AllVariables.Nitrate)
+            || (NState == AllVariables.Salinity) || ((NState >= AllVariables.DissRefrDetr) && (NState <= Consts.LastDetr)));
+
+            if (!result) result = IsFish();
+            return result;
+        }
+
+        public string LoadUnit(int index)
+        {
+            if (index < 1) return LoadingUnit;
+            if (index == 1) // pointsource
+            {
+                if (IsAnimal()) return "pct./day";  //special case
+                if (NState == AllVariables.Volume) return "cu.m/d"; //special case
+                return "g / d"; //point-source loadings
+            }
+            if (index == 2) // direct precip.
+            {
+                if (IsAnimal()) return "g/m2 - d";  //special case
+                if (NState == AllVariables.Volume) return "cu.m/d"; //special case
+                return "g/m2 - d"; //direct precip. loadings
+            }
+            // (index == 3) // non-point source
+            {
+                if (IsAnimal()) return "error"; //special case, not relevant to animals
+                if (NState == AllVariables.Volume) return "error"; //special case, not relevant to volume
+                if (NState == AllVariables.CO2) return "mg/L";  // special case equilibrium CO2 Import
+                return "g / d"; //non point-source loadings
+            }
+        }
+
+        public List<string> LoadList()
+        {
+            if ((NState == AllVariables.pH) || (NState == AllVariables.TSS) || (NState == AllVariables.Temperature) || (NState == AllVariables.Salinity) || (NState == AllVariables.COD))
+                return new List<string>(new string[] { "Segment Values" });  //special cases, no inflow loadings, just in-segment driving values
+            if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case
+            if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case
+            if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case
+            return new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  //special case
+        }
+
+
         public void UpdateUnits()
         {
             // *********************************
@@ -1048,6 +1095,8 @@ namespace AQUATOX.AQTSegment
             }
             return false;
         }
+
+
 
         public bool Has_Animal_Model()
         {

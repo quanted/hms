@@ -49,6 +49,10 @@ namespace Web.Services.Models
             {
                 return File.ReadAllBytes(path);
             }
+            else if (File.Exists("/app/Ecotoxicology/DOCS/AQUATOX_Ecotoxicology_Valid.JSON"))
+            {
+                return File.ReadAllBytes("/app/Ecotoxicology/DOCS/AQUATOX_Ecotoxicology_Valid.JSON");
+            }
             else
             {
                 return null;
@@ -68,6 +72,10 @@ namespace Web.Services.Models
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
+            }
+            else if (File.Exists("/app/Ecotoxicology/DOCS/AQUATOX_Ecotoxicology_Valid.JSON"))
+            {
+                return File.ReadAllText("/app/Ecotoxicology/DOCS/AQUATOX_Ecotoxicology_Valid.JSON");
             }
             else
             {
