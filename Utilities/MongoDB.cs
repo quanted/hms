@@ -28,6 +28,7 @@ namespace Utilities
                 { "data", BsonValue.Create(data) }
             };
             await collection.InsertOneAsync(newDump);
+
         }
     }
 }

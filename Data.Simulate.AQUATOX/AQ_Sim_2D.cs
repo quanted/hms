@@ -288,10 +288,13 @@ namespace AQUATOX.AQSim_2D
             return errmessage;
         }
 
-        private void Pass_Data(AQTSim Sim, int SrcID, int ninputs)
+        private void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null)
         {
-            archived_results AR;
-            archive.TryGetValue(SrcID, out AR);
+            //archived_results AR;
+            if (AR.Equals(null))
+            {
+                archive.TryGetValue(SrcID, out AR);
+            }
 
             for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
             {
@@ -319,7 +322,6 @@ namespace AQUATOX.AQSim_2D
 
                     TSV.LoadsRec.Loadings.list = newlist;
                 }
-
             }
         }
 

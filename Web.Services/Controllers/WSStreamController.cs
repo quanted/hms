@@ -30,7 +30,7 @@ namespace Web.Services.Controllers
             try
             {
                 WSStream catchment = new WSStream();
-                Dictionary<string, object> result = await catchment.Get(comid, endComid, huc, maxDistance, mainstem == "false");
+                Dictionary<string, object> result = await catchment.Get(comid, endComid, huc, maxDistance, mainstem.ToLower() == "true");
                 string jsonResults = System.Text.Json.JsonSerializer.Serialize(result);
                 JObject jResult = JsonConvert.DeserializeObject<JObject>(jsonResults);
                 return new ObjectResult(jResult); ;
