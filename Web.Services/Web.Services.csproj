@@ -101,6 +101,9 @@
     <ProjectReference Include="..\Utilities\Utilities.csproj" />
     <ProjectReference Include="..\WatershedDelineation\WatershedDelineation.csproj" />
     <ProjectReference Include="..\Wind\Wind.csproj" />
+    <ProjectReference Include="..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
