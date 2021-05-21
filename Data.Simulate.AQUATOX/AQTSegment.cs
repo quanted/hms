@@ -406,7 +406,10 @@ namespace AQUATOX.AQTSegment
             if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case
             if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case
             if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case
-            return new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  //special case
+
+            if (Has_Alt_Loadings())
+              return new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
+              else return new List<string>(new string[] { "In Inflow Water"});  
         }
 
 

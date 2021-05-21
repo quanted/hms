@@ -59,7 +59,6 @@ namespace GUI.AQUATOX
                     UserCanceled = true;
                     this.Close();
                 }
-
         }
 
         private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -67,15 +66,12 @@ namespace GUI.AQUATOX
             {
                 if ((e.Context & DataGridViewDataErrorContexts.Parsing) == DataGridViewDataErrorContexts.Parsing)
                 {
-                    MessageBox.Show("Wrong data type entered");
+                    MessageBox.Show("Wrong data type entered.");
                 }
 
                 if ((e.Exception) is ConstraintException)
                 {
-                    DataGridView view = (DataGridView)sender;
-                    view.Rows[e.RowIndex].ErrorText = "an error";
-                    view.Rows[e.RowIndex].Cells[e.ColumnIndex].ErrorText = "an error";
-
+                    MessageBox.Show(e.Exception.Message);
                 }
 
                 e.ThrowException = false;

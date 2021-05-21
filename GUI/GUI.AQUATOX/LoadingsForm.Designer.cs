@@ -35,6 +35,7 @@ namespace GUI.AQUATOX
             this.ICUnit = new System.Windows.Forms.Label();
             this.IgnoreLoadingsBox = new System.Windows.Forms.CheckBox();
             this.LoadingsPanel = new System.Windows.Forms.Panel();
+            this.TSUnit = new System.Windows.Forms.Label();
             this.HMS_Button = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.File_Import = new System.Windows.Forms.Button();
@@ -54,7 +55,6 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
-            this.TSUnit = new System.Windows.Forms.Label();
             this.LoadingsPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -136,11 +136,20 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.Visible = false;
             this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
             // 
+            // TSUnit
+            // 
+            this.TSUnit.AutoSize = true;
+            this.TSUnit.Location = new System.Drawing.Point(271, 102);
+            this.TSUnit.Name = "TSUnit";
+            this.TSUnit.Size = new System.Drawing.Size(33, 15);
+            this.TSUnit.TabIndex = 31;
+            this.TSUnit.Text = "units";
+            // 
             // HMS_Button
             // 
             this.HMS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.HMS_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.HMS_Button.Location = new System.Drawing.Point(525, 380);
+            this.HMS_Button.Location = new System.Drawing.Point(536, 380);
             this.HMS_Button.Name = "HMS_Button";
             this.HMS_Button.Size = new System.Drawing.Size(57, 23);
             this.HMS_Button.TabIndex = 30;
@@ -152,7 +161,7 @@ namespace GUI.AQUATOX
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(363, 384);
+            this.label2.Location = new System.Drawing.Point(373, 384);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 15);
             this.label2.TabIndex = 29;
@@ -162,7 +171,7 @@ namespace GUI.AQUATOX
             // 
             this.File_Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.File_Import.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.File_Import.Location = new System.Drawing.Point(451, 380);
+            this.File_Import.Location = new System.Drawing.Point(462, 380);
             this.File_Import.Name = "File_Import";
             this.File_Import.Size = new System.Drawing.Size(57, 23);
             this.File_Import.TabIndex = 28;
@@ -227,6 +236,7 @@ namespace GUI.AQUATOX
             this.MultLoadBox.Name = "MultLoadBox";
             this.MultLoadBox.Size = new System.Drawing.Size(62, 23);
             this.MultLoadBox.TabIndex = 22;
+            this.MultLoadBox.TextChanged += new System.EventHandler(this.MultLoadBox_TextChanged);
             // 
             // CLUnit
             // 
@@ -243,6 +253,7 @@ namespace GUI.AQUATOX
             this.ConstLoadBox.Name = "ConstLoadBox";
             this.ConstLoadBox.Size = new System.Drawing.Size(96, 23);
             this.ConstLoadBox.TabIndex = 19;
+            this.ConstLoadBox.TextChanged += new System.EventHandler(this.ConstLoadBox_TextChanged);
             // 
             // NotesEdit2
             // 
@@ -250,6 +261,7 @@ namespace GUI.AQUATOX
             this.NotesEdit2.Name = "NotesEdit2";
             this.NotesEdit2.Size = new System.Drawing.Size(286, 23);
             this.NotesEdit2.TabIndex = 18;
+            this.NotesEdit2.TextChanged += new System.EventHandler(this.NotesEdit2_TextChanged);
             // 
             // label1
             // 
@@ -279,6 +291,8 @@ namespace GUI.AQUATOX
             this.dataGridView1.RowTemplate.Height = 25;
             this.dataGridView1.Size = new System.Drawing.Size(274, 359);
             this.dataGridView1.TabIndex = 1;
+            this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
+            this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
             // 
             // ParameterButton
             // 
@@ -294,6 +308,7 @@ namespace GUI.AQUATOX
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.OKButton.Location = new System.Drawing.Point(549, 12);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(61, 23);
@@ -305,6 +320,7 @@ namespace GUI.AQUATOX
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CancelButt.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.CancelButt.Location = new System.Drawing.Point(616, 12);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
@@ -323,15 +339,6 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.Size = new System.Drawing.Size(346, 15);
             this.AmmoniaDriveLabel.TabIndex = 25;
             this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
-            // 
-            // TSUnit
-            // 
-            this.TSUnit.AutoSize = true;
-            this.TSUnit.Location = new System.Drawing.Point(271, 102);
-            this.TSUnit.Name = "TSUnit";
-            this.TSUnit.Size = new System.Drawing.Size(33, 15);
-            this.TSUnit.TabIndex = 31;
-            this.TSUnit.Text = "units";
             // 
             // LoadingsForm
             // 

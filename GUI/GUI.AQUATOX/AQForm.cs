@@ -483,7 +483,7 @@ namespace GUI.AQUATOX
             ColNum = 0;
             DataRow row = table.NewRow();
             for (int i = 0; i < arr.Length; i++)
-                AddCell(ref arr[i], row);  //workhere
+                // AddCell(ref arr[i], row);  workhere
             table.Rows.Add(row);
             return arr;
         }
@@ -620,7 +620,7 @@ namespace GUI.AQUATOX
                     saveFileDialog1.RestoreDirectory = true;
                     saveFileDialog1.OverwritePrompt = true;
 
-                    // SiteDB = Table_to_ParmArray(table); workhere
+                    // SiteDB = Table_to_ParmArray(table);  workhere
 
                     if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                     {
@@ -663,9 +663,10 @@ namespace GUI.AQUATOX
             TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
 
             LoadingsForm LF = new LoadingsForm();
-            LF.EditSV(TSV, aQTS);
+            LF.EditSV(ref TSV, aQTS);
 
             // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
+
             ShowStudyInfo();
             
         }

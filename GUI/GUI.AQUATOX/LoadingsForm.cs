@@ -20,11 +20,10 @@ using System.Drawing;
 namespace GUI.AQUATOX
 {
 
-
-
     public partial class LoadingsForm : Form
     {
         public TStateVariable SV;
+        private bool GridChanged = false;
 
         TimeSeriesOutput ATSO;
         string taskID = null;
@@ -60,19 +59,19 @@ namespace GUI.AQUATOX
 
         }
 
-        public bool EditSV(TStateVariable IncomingS, AQTSim AQS)
+        public bool EditSV(ref TStateVariable IncomingS, AQTSim AQS)
         {
 
-            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings()); 
+            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings());
 
             SV = IncomingS;
             UpdateScreen();
 
-            if (ShowDialog() != DialogResult.Cancel)
+            if (ShowDialog() == DialogResult.Cancel)
             {
-                IncomingS = Newtonsoft.Json.JsonConvert.DeserializeObject<TStateVariable>(backup, AQS.AQTJSONSettings());
+                Newtonsoft.Json.JsonConvert.PopulateObject(backup, IncomingS, AQS.AQTJSONSettings());
                 return false;
-              }
+            }
             else return true;
 
         }
@@ -87,7 +86,7 @@ namespace GUI.AQUATOX
             TSUnit.Text = loadunit;
         }
 
-        
+
         public void UpdateScreen()
         {
             // Future, add button for frac avail, trophic matrix, biotransformation
@@ -101,7 +100,7 @@ namespace GUI.AQUATOX
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
 
             AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
-        
+
             NotesEdit.Text = SV.LoadNotes1;
             NotesEdit2.Text = SV.LoadNotes2;
 
@@ -111,7 +110,9 @@ namespace GUI.AQUATOX
             IgnoreLoadingsBox.Checked = SV.LoadsRec.Loadings.NoUserLoad;
             LoadingsPanel.Visible = !SV.LoadsRec.Loadings.NoUserLoad;
 
-            if (!SV.LoadsRec.Loadings.NoUserLoad) {
+            if (!SV.LoadsRec.Loadings.NoUserLoad)
+            {
+                LTBox.DataSource = null;
                 LTBox.Items.Clear();
                 LTBox.DataSource = SV.LoadList();
                 LTBox.SelectedIndex = 0;
@@ -127,7 +128,8 @@ namespace GUI.AQUATOX
         public void ShowGrid()
         {
 
-            if (LTBox.SelectedIndex<1) LoadShown = SV.LoadsRec.Loadings; 
+            GridChanged = false;
+            if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;
             else LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
             UseConstRadio.Checked = LoadShown.UseConstant;
@@ -153,7 +155,7 @@ namespace GUI.AQUATOX
             loadcolumn.DataType = System.Type.GetType("System.Double");
             LoadTable.Columns.Add(loadcolumn);
 
-            for (int i=0; i<LoadShown.list.Count; i++)
+            for (int i = 0; i < LoadShown.list.Count; i++)
             {
                 DataRow row = LoadTable.NewRow();
                 row[0] = (LoadShown.list.Keys[i]);
@@ -220,18 +222,15 @@ namespace GUI.AQUATOX
 
         private void OKButton_Click(object sender, EventArgs e)
         {
+            if (GridChanged) SaveGrid();
             this.Close();
         }
 
         private void LTBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (GridChanged) SaveGrid();
             UpdateUnits();
             ShowGrid();
-        }
-
-        private void NotesEdit_TextChanged(object sender, EventArgs e)
-        {
-
         }
 
 
@@ -243,13 +242,13 @@ namespace GUI.AQUATOX
             // check to see if HMS loadings may be available for this AQUATOX time-series
 
             if (!(SV.NState == AllVariables.Volume))
-                {
-                
+            {
+
                 MessageBox.Show("HMS Linkages are not available for this time series", "Information",
                    MessageBoxButtons.OK, MessageBoxIcon.Warning,
                    MessageBoxDefaultButton.Button1);
-                return;                
-                }
+                return;
+            }
 
 
             // query HMS for loadings options   -- build service in HMS, data type is fixed, what sources of nutrient loadings
@@ -286,13 +285,13 @@ namespace GUI.AQUATOX
 
             submitRequest();
 
-            
+
             if (SV.LoadsRec.Loadings.ITSI == null)
             {
                 TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
                 TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
                 input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-                SV.LoadsRec.Loadings.ITSI = input; 
+                SV.LoadsRec.Loadings.ITSI = input;
 
             }
 
@@ -409,9 +408,6 @@ namespace GUI.AQUATOX
                                 return;
                             }
                         }
-
-
-
                     }
 
                     ShowGrid();
@@ -423,13 +419,98 @@ namespace GUI.AQUATOX
 
         private void UseConstRadio_CheckedChanged(object sender, EventArgs e)
         {
+            if (GridChanged) SaveGrid();
             LoadShown.UseConstant = UseConstRadio.Checked;
             ShowGrid();
         }
 
+        private void SaveGrid()
+        {
+            DataTable LoadTable = dataGridView1.DataSource as DataTable;
+            LoadShown.list.Clear();
+            LoadShown.list.Capacity = LoadTable.Rows.Count;
+            for (int i = 0; i < LoadTable.Rows.Count; i++)
+            {
+                DataRow row = LoadTable.Rows[i];
+                LoadShown.list.Add(row.Field<DateTime>(0), row.Field<double>(1));
+            }
+            
+        }
+
         private void ICEdit_TextChanged(object sender, EventArgs e)
         {
-            SV.InitialCond = double.Parse(ICEdit.Text);
+            try
+            {
+                SV.InitialCond = double.Parse(ICEdit.Text);
+                ICEdit.BackColor = Color.White;
+            }
+            catch
+            {
+                ICEdit.BackColor = Color.Yellow;
+            }
         }
+
+            private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            {
+                if ((e.Context & DataGridViewDataErrorContexts.Parsing) == DataGridViewDataErrorContexts.Parsing)
+                {
+                    MessageBox.Show("Wrong data type entered.");
+                }
+
+                if ((e.Exception) is ConstraintException)
+                {
+                    MessageBox.Show(e.Exception.Message);
+                }
+
+                e.ThrowException = false;
+
+            }
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            GridChanged = true;
+        }
+
+        private void NotesEdit_TextChanged(object sender, EventArgs e)
+        {
+            SV.LoadNotes1 = NotesEdit.Text;
+        }
+
+        private void NotesEdit2_TextChanged(object sender, EventArgs e)
+        {
+            SV.LoadNotes2 = NotesEdit2.Text;
+        }
+
+        private void ConstLoadBox_TextChanged(object sender, EventArgs e)
+        {
+
+            {
+                try
+                {
+                    LoadShown.ConstLoad = double.Parse(ConstLoadBox.Text);
+                    ConstLoadBox.BackColor = Color.White;
+                }
+                catch
+                {
+                    ConstLoadBox.BackColor = Color.Yellow;
+                }
+            }
+        }
+
+        private void MultLoadBox_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                LoadShown.MultLdg = double.Parse(MultLoadBox.Text);
+                MultLoadBox.BackColor = Color.White;
+            }
+            catch
+            {
+                MultLoadBox.BackColor = Color.Yellow;
+            }
+        }
+
     }
 }
