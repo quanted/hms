@@ -101,10 +101,11 @@ namespace AQUATOX.AQSim_2D
 
             DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
             DischargeLoad.Translate_ITimeSeriesInput();
-            DischargeLoad.MultLdg = 1e6;
+            DischargeLoad.MultLdg = 86400;  // seconds per day
+            DischargeLoad.Hourly = true;
             DischargeLoad.UseConstant = false;
-            TVol.LoadNotes1 = "From 2-D Linkage";
-            TVol.LoadNotes2 = "";
+            TVol.LoadNotes1 = "Discharge from NWM in m3/s";
+            TVol.LoadNotes2 = "Converted to m3/d using multiplier";
             DischargeLoad.ITSI = null;
         }
 
@@ -187,7 +188,7 @@ namespace AQUATOX.AQSim_2D
             Source = "nwis",
             DateTimeSpan = new DateTimeSpan()
             {
-                StartDate = new DateTime(2015, 01, 01),
+                StartDate = new DateTime(2015, 01, 01),  // overwritten below
                 EndDate = new DateTime(2015, 12, 31),
                 DateTimeFormat = "yyyy-MM-dd HH"
             },
@@ -198,7 +199,7 @@ namespace AQUATOX.AQSim_2D
                 }
             },
             DataValueFormat = "E3",
-            TemporalResolution = "daily",
+            TemporalResolution = "hourly",
             Units = "metric",
             OutputFormat = "json"
         };
@@ -262,13 +263,13 @@ namespace AQUATOX.AQSim_2D
             Sim.AQTSeg.SetMemLocRec();
 
             Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From 2-D Linkage";
+            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
 
             // create a new itimeseries
             TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
             TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
             TSI.Geometry.ComID = int.Parse(comid);
-            TSI.Source = "test";
+            TSI.Source = "nwm"; //  "test";
 
             try
             {
@@ -291,7 +292,7 @@ namespace AQUATOX.AQSim_2D
         private void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null)
         {
             //archived_results AR;
-            if (AR.Equals(null))
+            if (AR == null)    // (AR.Equals(null)) crashed
             {
                 archive.TryGetValue(SrcID, out AR);
             }
@@ -315,12 +316,16 @@ namespace AQUATOX.AQSim_2D
                         double OutVol = AR.washout[i];  // out volume from upstream segment
                         double InVol = DischargeLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment, currently estimated as current seg. outflow -- can be replaced with calculated inflow volume using Mannings N to account for changes in seg volume
 
-                        if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
+                        if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
+                        else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
                         else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol));  //adding second or third inputs
 
                     }
 
                     TSV.LoadsRec.Loadings.list = newlist;
+                    TSV.LoadsRec.Loadings.UseConstant = false;
+                    TSV.LoadsRec.Loadings.Hourly = true;
+                    TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
                 }
             }
         }

@@ -111,11 +111,11 @@
             // 
             // createButton
             // 
-            this.createButton.Location = new System.Drawing.Point(131, 252);
+            this.createButton.Location = new System.Drawing.Point(115, 252);
             this.createButton.Name = "createButton";
-            this.createButton.Size = new System.Drawing.Size(111, 23);
+            this.createButton.Size = new System.Drawing.Size(127, 23);
             this.createButton.TabIndex = 5;
-            this.createButton.Text = "Create 2D inputs";
+            this.createButton.Text = "Create Linked Inputs";
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
@@ -133,11 +133,11 @@
             // 
             // executeButton
             // 
-            this.executeButton.Location = new System.Drawing.Point(131, 289);
+            this.executeButton.Location = new System.Drawing.Point(115, 289);
             this.executeButton.Name = "executeButton";
-            this.executeButton.Size = new System.Drawing.Size(111, 23);
+            this.executeButton.Size = new System.Drawing.Size(127, 23);
             this.executeButton.TabIndex = 7;
-            this.executeButton.Text = "Execute 2D";
+            this.executeButton.Text = "Execute Network";
             this.executeButton.UseVisualStyleBackColor = true;
             this.executeButton.Click += new System.EventHandler(this.executeButton_Click);
             // 
@@ -252,9 +252,9 @@
             // 
             // ReadSNButton
             // 
-            this.ReadSNButton.Location = new System.Drawing.Point(131, 218);
+            this.ReadSNButton.Location = new System.Drawing.Point(115, 218);
             this.ReadSNButton.Name = "ReadSNButton";
-            this.ReadSNButton.Size = new System.Drawing.Size(111, 23);
+            this.ReadSNButton.Size = new System.Drawing.Size(127, 23);
             this.ReadSNButton.TabIndex = 21;
             this.ReadSNButton.Text = "Read Network";
             this.ReadSNButton.UseVisualStyleBackColor = true;

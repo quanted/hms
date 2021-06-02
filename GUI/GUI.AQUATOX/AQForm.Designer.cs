@@ -388,9 +388,9 @@ namespace GUI.AQUATOX
             this.MultiSegButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.MultiSegButton.Location = new System.Drawing.Point(26, 424);
             this.MultiSegButton.Name = "MultiSegButton";
-            this.MultiSegButton.Size = new System.Drawing.Size(110, 24);
+            this.MultiSegButton.Size = new System.Drawing.Size(138, 24);
             this.MultiSegButton.TabIndex = 22;
-            this.MultiSegButton.Text = "AQUATOX 2-D";
+            this.MultiSegButton.Text = "Multi-Segment Runs";
             this.MultiSegButton.UseVisualStyleBackColor = true;
             this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
             // 

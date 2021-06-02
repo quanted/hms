@@ -1441,12 +1441,27 @@ namespace AQUATOX.AQTSegment
             // display:   Ordered by enumerated list position. JonC
             TStateVariable TSV;
             AllVariables SVLoop;
+            T_SVType SVTLoop;
             string Name;
 
             if (List == null) List = new List<string>();
             List.Clear();
             if (TSVList == null) TSVList = new List<TStateVariable>();
             TSVList.Clear();
+
+            for (SVTLoop = Consts.FirstOrgTxTyp; SVTLoop <= Consts.FirstOrgTxTyp; SVTLoop++)
+            {
+                TSV = GetStatePointer(AllVariables.H2OTox, SVTLoop, T_SVLayer.WaterCol);
+                if (TSV != null)
+                {
+                    Name = TSV.PName;
+                    if (Name != "Undisplayed")
+                    {
+                        List.Add(Name);
+                        TSVList.Add(TSV);
+                    }
+                }
+            }
 
             for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++)
             {
