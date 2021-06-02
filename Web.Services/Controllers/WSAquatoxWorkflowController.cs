@@ -1,13 +1,15 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
-using AQUATOX.AQTSegment;
 using System.Collections.Generic;
 using System;
 using Data;
 using Web.Services.Models;
 using System.Text.Json;
 using Serilog;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using AQUATOX.AQTSegment;
 
 namespace Web.Services.Controllers
 {
@@ -17,9 +19,10 @@ namespace Web.Services.Controllers
     /// </summary>
     public class WSAquatoxWorkflowInput
     {
-        public AQTSim Sim_Input { get; set; }
+        public JObject Input { get; set; }
         public Dictionary<string, string> Upstream { get; set; }
         public Dictionary<string, string> Data_Sources { get; set; }
+        public Dictionary<string, string> Dependencies { get; set; }
     }
 
     /***************** Swagger Example JSON **********************/
@@ -36,13 +39,14 @@ namespace Web.Services.Controllers
         {
             WSAquatoxWorkflowInput example = new WSAquatoxWorkflowInput()
             {
-                Sim_Input = new AQTSim(),
+                Input = new JObject(),
                 Upstream = new Dictionary<string, string>()
                 {
                     ["comid1"] = "taskid_comid1",
                     ["comid2"] = "taskid_comid2",
                 },
-                Data_Sources = null
+                Data_Sources = null,
+                Dependencies = null
             };
             return example;
         }
@@ -62,22 +66,23 @@ namespace Web.Services.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> POST([FromBody] WSAquatoxWorkflowInput input)
         {
             try
             {
                 WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+                string json = JsonConvert.SerializeObject(input.Input);
                 string errormsg = "";
-                string output = "";
+                // Start workflow
                 await Task.Run(() =>
                 {
-                    // Start workflow
-                    output = aqt.Run(input, out errormsg);
+                    aqt.Run(input, ref json, out errormsg);
                 });
                 ITimeSeriesOutput err = aqt.CheckForErrors(errormsg);
                 if (err == null)
                 {
-                    return Ok(output);
+                    return Ok(JsonConvert.DeserializeObject<JObject>(json));
                 }
                 return Ok(err);
             }
@@ -91,7 +96,7 @@ namespace Web.Services.Controllers
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true
                 };
-                exceptionLog.Fatal(JsonSerializer.Serialize(input, options));
+                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(input, options));
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
                 return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
             }

@@ -110,7 +110,7 @@ namespace AQUATOX.AQSim_2D
         }
 
 
-        private void archiveOutput(int comid, AQTSim Sim)
+        public void archiveOutput(int comid, AQTSim Sim)
         {
             archived_results AR = new archived_results();
             TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
@@ -289,7 +289,7 @@ namespace AQUATOX.AQSim_2D
             return errmessage;
         }
 
-        private void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null)
+        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null)
         {
             //archived_results AR;
             if (AR == null)    // (AR.Equals(null)) crashed

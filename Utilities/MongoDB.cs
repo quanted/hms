@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Utilities
 {
-    public class MongoDB
+    public static class MongoDB
     {
 
         public static async void DumpData(string taskID, string data)
@@ -29,6 +30,29 @@ namespace Utilities
             };
             await collection.InsertOneAsync(newDump);
 
+        }
+
+        /// <summary>
+        /// Given a taskId, finds a single result that matches it.
+        /// </summary>
+        /// <param name="taskID"></param>
+        /// <returns></returns>
+        public static async Task<BsonDocument> FindByTaskID(string taskID)
+        {
+            string databaseName = "hms"; 
+            string collectionName = "data";
+
+            DateTime now = DateTime.Now;
+            string host = (Environment.GetEnvironmentVariable("MONGODB") != null) ? Environment.GetEnvironmentVariable("MONGODB") : "localhost";
+            var settings = new MongoClientSettings
+            {
+                Server = new MongoServerAddress(host, 27017)
+            };
+            var client = new MongoClient(settings);
+            IMongoDatabase db = client.GetDatabase(databaseName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var filter = Builders<BsonDocument>.Filter.Eq("task_id", taskID);
+            return await collection.Find(filter).SingleAsync();
         }
     }
 }
