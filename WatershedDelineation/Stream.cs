@@ -250,7 +250,7 @@ namespace WatershedDelineation
         {
             errorMsg = "";
             string requestURL = "";
-            if (mainstem)
+            if (!mainstem)
             {
                 requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
             }
