@@ -1,0 +1,1159 @@
+{"$type": "AQTSim", "AQTSeg":{
+  "Comment": "JSON Export from AQUATOX 3.2",
+  "$type": "AQUATOXSegment",
+  "VersionWrite": "3.97      ",
+  "FileName": "MS_OM.json",
+  "LastRun": "1899-12-29T00:00:00",
+  "ControlRun": "1899-12-29T00:00:00",
+  "StudyName": "Multi-Seg OM Base",
+  "SV": [
+    {
+      "$type": "TNH4Obj",
+      "InitialCond": 0.04,
+      "State": 0,
+      "nState": 20,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Total Ammonia as N",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.045,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L",
+      "LoadingUnit": "mg/L",
+      "LoadsRec.MultLdg": 1,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TNO3Obj",
+      "InitialCond": 0.01,
+      "State": 0,
+      "nState": 21,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Nitrate as N",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.222,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L",
+      "LoadingUnit": "mg/L",
+      "LoadsRec.MultLdg": 1,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true,
+      "TN_IC": false,
+      "TN_Inflow": false,
+      "TN_PS": false,
+      "TN_NPS": false
+    },
+    {
+      "$type": "TCO2Obj",
+      "ImportCO2Equil": false,
+      "Hourly": false,
+      "InitialCond": 0.7,
+      "State": 0,
+      "nState": 23,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Carbon dioxide",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.7,
+          "MultLdg": 1
+        }
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L",
+      "LoadingUnit": "mg/L",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TO2Obj",
+      "Threshhold": 3,
+      "CalcDuration": false,
+      "NoLoadOrWash": false,
+      "InitialCond": 9.68,
+      "State": 0,
+      "nState": 24,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Oxygen",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 6.6003,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L",
+      "LoadingUnit": "mg/L",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TSedRefrDetr",
+      "InitialCond": 600,
+      "State": 0,
+      "nState": 51,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Refrac. sed. detritus",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.001,
+          "MultLdg": 1
+        }
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "g/m2 dry",
+      "LoadingUnit": "N A",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TSedLabileDetr",
+      "InitialCond": 25,
+      "State": 0,
+      "nState": 52,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Labile sed. detritus",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.001,
+          "MultLdg": 1
+        }
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "g/m2 dry",
+      "LoadingUnit": "N A",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TDissRefrDetr",
+      "InputRecord": {
+        "$type": "DetritalInputRecordType",
+        "DataType": 1,
+        "InitCond": 19.6,
+        "Percent_PartIC": 18.5243509,
+        "Percent_RefrIC": 60,
+        "Load": {
+          "$type": "LoadingsRecord",
+          "Loadings": {
+            "$type": "TLoadings",
+            "NoUserLoad": false,
+            "UseConstant": true,
+            "ConstLoad": 12.05,
+            "MultLdg": 1
+          },
+          "Alt_Loadings": [
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 0,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 0,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 0,
+              "MultLdg": 1
+            }
+          ]
+        },
+        "Percent_Part": {
+          "$type": "LoadingsRecord",
+          "Loadings": {
+            "$type": "TLoadings",
+            "NoUserLoad": false,
+            "UseConstant": true,
+            "ConstLoad": 5.74,
+            "MultLdg": 1
+          },
+          "Alt_Loadings": [
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 5.74,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 5.74,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 5.74,
+              "MultLdg": 1
+            }
+          ]
+        },
+        "Percent_Refr": {
+          "$type": "LoadingsRecord",
+          "Loadings": {
+            "$type": "TLoadings",
+            "NoUserLoad": false,
+            "UseConstant": true,
+            "ConstLoad": 60,
+            "MultLdg": 1
+          },
+          "Alt_Loadings": [
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 50,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 50,
+              "MultLdg": 1
+            },
+            {
+              "$type": "TLoadings",
+              "UseConstant": true,
+              "ConstLoad": 50,
+              "MultLdg": 1
+            }
+          ]
+        }
+      },
+      "InitialCond": 18.204919034904,
+      "State": 0,
+      "nState": 53,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Diss Refr Detr",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 10.7904135,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L dry",
+      "LoadingUnit": "mg/L dry",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TDissLabDetr",
+      "InitialCond": 12.136612689936,
+      "State": 0,
+      "nState": 54,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Diss Lab Detr",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 10.7904135,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L dry",
+      "LoadingUnit": "mg/L dry",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TSuspRefrDetr",
+      "InitialCond": 4.139080965096,
+      "State": 0,
+      "nState": 55,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Susp Refr Detr",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.6570865,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L dry",
+      "LoadingUnit": "mg/L dry",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TSuspLabDetr",
+      "InitialCond": 2.759387310064,
+      "State": 0,
+      "nState": 56,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Susp Lab Detr",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0.6570865,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "mg/L dry",
+      "LoadingUnit": "mg/L dry",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TVolume",
+	  "Calc_Method":0,
+      "InitialCond": 180000,
+      "State": 0,
+      "nState": 144,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Water Volume",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 0,
+          "MultLdg": 1
+        },
+        "Alt_Loadings": [
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 712750,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 600880,
+            "MultLdg": 1
+          },
+          {
+            "$type": "TLoadings",
+            "UseConstant": true,
+            "ConstLoad": 0,
+            "MultLdg": 1
+          }
+        ]
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "cu.m",
+      "LoadingUnit": "cu.m",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true,
+      "StratInflow": 2,
+      "StratOutflow": 2,
+      "StratAutomatically": true,
+      "Hourly": false
+    },
+    {
+      "$type": "TTemperature",
+      "InitialCond": 17,
+      "State": 0,
+      "nState": 145,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "Temperature",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": true,
+          "UseConstant": true,
+          "ConstLoad": 0,
+          "MultLdg": 1
+        }
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "deg. C",
+      "LoadingUnit": "deg. C",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true
+    },
+    {
+      "$type": "TpHObj",
+      "InitialCond": 8.8157,
+      "State": 0,
+      "nState": 148,
+      "SVType": 0,
+      "Layer": 0,
+      "PName": "pH",
+      "LoadsRec": {
+        "$type": "LoadingsRecord",
+        "Loadings": {
+          "$type": "TLoadings",
+          "NoUserLoad": false,
+          "UseConstant": true,
+          "ConstLoad": 8.8157,
+          "MultLdg": 1
+        }
+      },
+      "PRequiresData": false,
+      "PHasData": false,
+      "StateUnit": "pH",
+      "LoadingUnit": "pH",
+      "LoadsRec.MultLdg": 1,
+      "yHold": 0,
+      "YOrig": 0,
+      "yout": 0,
+      "stepres[1]": 0,
+      "yError": 0,
+      "yScale": 0,
+      "PShowRates^": true,
+      "LoadNotes1": "",
+      "LoadNotes2": "",
+      "PTrackResults^": true,
+      "alkalinity": 1000
+    }
+  ],
+  "MeanDischarge": 0,
+  "HypoTempIC": 0,
+  "HypoTempLoads": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+      "$type": "TLoadings",
+      "NoUserLoad": false,
+      "UseConstant": true,
+      "ConstLoad": 0,
+      "MultLdg": 1
+    }
+  },
+  "Shade": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+      "$type": "TLoadings",
+      "NoUserLoad": false,
+      "UseConstant": true,
+      "ConstLoad": 0,
+      "MultLdg": 1
+    }
+  },
+  "Z_Thermocline": {
+    "$type": "LoadingsRecord",
+    "Loadings": {
+      "$type": "TLoadings",
+      "NoUserLoad": true,
+      "UseConstant": true,
+      "ConstLoad": 0,
+      "MultLdg": 1
+    }
+  },
+  "CalcVelocity": true,
+  "Hourly": false,
+  "N Used Distributions": 0,
+  "PControlInfo": {
+    "$type": "Control_Opt_Rec",
+    "Tox.ZeroInitCond": true,
+    "Tox.OmitInflow": true,
+    "Tox.OmitPS": true,
+    "Tox.OmitDP": true,
+    "Tox.OmitNPS": true,
+    "Tox.SetMult": true,
+    "Nutrient.ZeroInitCond": false,
+    "Nutrient.OmitInflow": false,
+    "Nutrient.OmitPS": false,
+    "Nutrient.OmitDP": false,
+    "Nutrient.OmitNPS": false,
+    "Nutrient.SetMult": false,
+    "Sediment.ZeroInitCond": false,
+    "Sediment.OmitInflow": false,
+    "Sediment.OmitPS": false,
+    "Sediment.OmitDP": false,
+    "Sediment.OmitNPS": false,
+    "Sediment.SetMult": false,
+    "Detritus.ZeroInitCond": false,
+    "Detritus.OmitInflow": false,
+    "Detritus.OmitPS": false,
+    "Detritus.OmitDP": false,
+    "Detritus.OmitNPS": false,
+    "Detritus.SetMult": false
+  },
+  "PSavePPB^": true,
+  "PSaveBAFs^": true,
+  "WriteMultiRec": false,
+  "WriteSed": false,
+  "SedNonReactive": false,
+  "Densities47": 0,
+  "Densities48": 0,
+  "Densities49": 0,
+  "Densities50": 0,
+  "Densities51": 0,
+  "Densities52": 0,
+  "UseSSC": false,
+  "MaxUpperThick": 0.5,
+  "BioTurbThick": 0.2,
+  "NumSeries": 1,
+  "CurrentIndex": -1001,
+  "NumGraphs": 18,
+  "SelectedGraph": 18,
+  "UseConstZMean": true,
+  "UseConstEvap": true,
+  "Diagenesis_Steady_State": false,
+  "PSetup": {
+    "FirstDay":{"Val":"2000-06-01T00:00:00","ValList":null,"Comment":""},"LastDay":{"Val":"2000-06-30T00:00:00","ValList":null,"Comment":""},"StoreStepSize":{"Val":1.0,"Comment":""},"MinStepSize":{"Val":1E-10,"Comment":""},"RelativeError":{"Val":0.005,"Comment":""},"SaveBRates":{"Val":true,"Comment":""},"ChemsDrivingVars":{"Val":false,"Comment":""},"AverageOutput":{"Val":true,"Comment":""},"UseExternalConcs":{"Val":false,"Comment":""},"StepSizeInDays":{"Val":false,"Comment":""},"ModelTSDays":{"Val":false,"Comment":""},"NFix_UseRatio":{"Val":false,"Comment":""},"NtoPRatio":{"Val":7.0,"Comment":""},"FixStepSize":{"Val":0.1,"Comment":""},"UseFixStepSize":{"Val":false,"Comment":""},"Internal_Nutrients":{"Val":false,"Comment":""},"T1IsAggregate":{"Val":false,"Comment":""},"AmmoniaIsDriving":{"Val":false,"Comment":""},"TSedDetrIsDriving":{"Val":false,"Comment":""}
+  },
+  "Location": {
+    "$type": "TAQTSite",
+      "Locale": {
+        "$type": "SiteRecord",
+        "SiteName": {
+          "$type": "TStringParam",
+          "Val": "LBR Glenwood Br ID",
+          "Comment": ""
+        },
+        "SiteLength": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": ""
+        },
+        "Volume": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": ""
+        },
+        "SurfArea": {
+          "$type": "TParameter",
+          "Val": 170000,
+          "Comment": ""
+        },
+        "ICZMean": {
+          "$type": "TParameter",
+          "Val": 0.82,
+          "Comment": ""
+        },
+        "ZMax": {
+          "$type": "TParameter",
+          "Val": 1.82,
+          "Comment": ""
+        },
+        "TempMean": {
+          "$type": "TParameter",
+          "Val": 13,
+          "Comment": ""
+        },
+        "TempRange": {
+          "$type": "TParameter",
+          "Val": 24,
+          "Comment": ""
+        },
+        "Latitude": {
+          "$type": "TParameter",
+          "Val": 43.57,
+          "Comment": ""
+        },
+        "Altitude": {
+          "$type": "TParameter",
+          "Val": 200,
+          "Comment": ""
+        },
+        "LightMean": {
+          "$type": "TParameter",
+          "Val": 258,
+          "Comment": "sol.crest.org/cgi-bin/solrad/ kwhr*86 = Ly/d"
+        },
+        "LightRange": {
+          "$type": "TParameter",
+          "Val": 387,
+          "Comment": "calc. from sol.crest; ave * 0.75 (canopy)"
+        },
+        "EnclWallArea": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": "NA"
+        },
+        "MeanEvap": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": ""
+        },
+        "ECoeffWater": {
+          "$type": "TParameter",
+          "Val": 0.05,
+          "Comment": ""
+        },
+        "ECoeffSed": {
+          "$type": "TParameter",
+          "Val": 0.17,
+          "Comment": "mid value from Straskraba & Gnauck, 1985"
+        },
+        "ECoeffDOM": {
+          "$type": "TParameter",
+          "Val": 0.03,
+          "Comment": "calc. from Effler et al., 1985"
+        },
+        "ECoeffPOM": {
+          "$type": "TParameter",
+          "Val": 0.12,
+          "Comment": "Verduin, 1982"
+        },
+        "BasePercentEmbed": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": "Default, Used for O2Sat"
+        },
+        "Min_Vol_Frac": {
+          "$type": "TParameter",
+          "Val": 0.01,
+          "Comment": "default"
+        },
+        "UseCovar": {
+          "$type": "TBoolParam",
+          "Val": true,
+          "Comment": ""
+        },
+        "EnteredKReaer": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": "NA"
+        },
+        "EnterTotalLength": {
+          "$type": "TBoolParam",
+          "Val": true,
+          "Comment": ""
+        },
+        "TotalLength": {
+          "$type": "TParameter",
+          "Val": 40,
+          "Comment": "Lucky Peak Dam is 16 km upstream"
+        },
+        "WaterShedArea": {
+          "$type": "TParameter",
+          "Val": 3522,
+          "Comment": "SITE SUMMARY.xls mi2 converted to km2"
+        },
+        "FractalD": {
+          "$type": "TParameter",
+          "Val": 1,
+          "Comment": "default"
+        },
+        "FD_Refuge_Coeff": {
+          "$type": "TParameter",
+          "Val": -0.15,
+          "Comment": "default"
+        },
+        "HalfSatOysterRefuge": {
+          "$type": "TParameter",
+          "Val": 80,
+          "Comment": "default"
+        },
+        "Channel_Slope": {
+          "$type": "TParameter",
+          "Val": 0.002473,
+          "Comment": ""
+        },
+        "UseBathymetry": {
+          "$type": "TBoolParam",
+          "Val": true,
+          "Comment": ""
+        },
+        "StreamType": {
+          "$type": "TDropDownParam",
+          "Val": "Natural Channel",
+          "ValList": null,
+          "Comment": ""
+        },
+        "UseEnteredManning": {
+          "$type": "TBoolParam",
+          "Val": true,
+          "Comment": ""
+        },
+        "EnteredManning": {
+          "$type": "TParameter",
+          "Val": 0.07,
+          "Comment": ""
+        },
+        "PctRiffle": {
+          "$type": "TParameter",
+          "Val": 80,
+          "Comment": ""
+        },
+        "PctPool": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": ""
+        },
+        "UsePhytoRetention": {
+          "$type": "TBoolParam",
+          "Val": true,
+          "Comment": ""
+        }
+      },
+      "Remin": {
+        "$type": "ReminRecord",
+        "RemRecName": {
+          "$type": "TStringParam",
+          "Val": "Default Remin Record",
+          "Comment": ""
+        },
+        "DecayMax_Lab": {
+          "$type": "TParameter",
+          "Val": 0.0159,
+          "Comment": "Gunnison 1985, p. 63 (phytoplankton)"
+        },
+        "DecayMax_Refr": {
+          "$type": "TParameter",
+          "Val": 0.04,
+          "Comment": "default"
+        },
+        "TOpt": {
+          "$type": "TParameter",
+          "Val": 25,
+          "Comment": "temperature at which degradation measured"
+        },
+        "TMax": {
+          "$type": "TParameter",
+          "Val": 65,
+          "Comment": " Alexander, 1961"
+        },
+        "pHMin": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": "Lyman et al.'82;Francis et al. in Hendrey '84"
+        },
+        "pHMax": {
+          "$type": "TParameter",
+          "Val": 8.5,
+          "Comment": "Lyman et al., '82"
+        },
+        "KNitri": {
+          "$type": "TParameter",
+          "Val": 0.3,
+          "Comment": "Default"
+        },
+        "KDenitri_Wat": {
+          "$type": "TParameter",
+          "Val": 0.09,
+          "Comment": "Default"
+        },
+        "P2OrgLab": {
+          "$type": "TParameter",
+          "Val": 0.018,
+          "Comment": "Redfield '58 ratio"
+        },
+        "N2OrgLab": {
+          "$type": "TParameter",
+          "Val": 0.079,
+          "Comment": "   '"
+        },
+        "P2OrgRefr": {
+          "$type": "TParameter",
+          "Val": 0.0002,
+          "Comment": "default"
+        },
+        "N2OrgRefr": {
+          "$type": "TParameter",
+          "Val": 0.002,
+          "Comment": "default"
+        },
+        "P2OrgDissLab": {
+          "$type": "TParameter",
+          "Val": 0.0002,
+          "Comment": "default"
+        },
+        "N2OrgDissLab": {
+          "$type": "TParameter",
+          "Val": 0.002,
+          "Comment": "default"
+        },
+        "P2OrgDissRefr": {
+          "$type": "TParameter",
+          "Val": 0.0002,
+          "Comment": "default"
+        },
+        "N2OrgDissRefr": {
+          "$type": "TParameter",
+          "Val": 0.002,
+          "Comment": "default"
+        },
+        "O2Biomass": {
+          "$type": "TParameter",
+          "Val": 0.575,
+          "Comment": "Winfield et al., '71 & Redfield '58"
+        },
+        "O2N": {
+          "$type": "TParameter",
+          "Val": 4.57,
+          "Comment": "Scavia '80"
+        },
+        "KSed": {
+          "$type": "TParameter",
+          "Val": 0.15,
+          "Comment": "Collins & Wlosinski '83 (0.69)"
+        },
+        "KSedTemp": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": "placeholder"
+        },
+        "KSedSalinity": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": "placeholder"
+        },
+        "PSedRelease": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": ""
+        },
+        "NSedRelease": {
+          "$type": "TParameter",
+          "Val": 0,
+          "Comment": ""
+        },
+        "Wet2DrySLab": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": "<--- default"
+        },
+        "Wet2DrySRefr": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": "<--- default"
+        },
+        "Wet2DryPLab": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": "<--- default"
+        },
+        "Wet2DryPRefr": {
+          "$type": "TParameter",
+          "Val": 5,
+          "Comment": "<--- default"
+        },
+        "KD_P_Calcite": {
+          "$type": "TParameter",
+          "Val": 300,
+          "Comment": "Default"
+        }
+      },
+      "SiteType": 1,
+    "MeanThick[Epilimnion]": 0,
+    "MeanThick[Hypolimnion]": 0,
+    "P_Shape": -0.4,
+    "TotDischarge": 0
+  },
+  "LoadChem1": false,
+  "LoadChem2": false,
+  "LoadChem3": false,
+  "LoadChem4": false,
+  "LoadChem5": false,
+  "LoadChem6": false,
+  "LoadChem7": false,
+  "LoadChem8": false,
+  "LoadChem9": false,
+  "LoadChem10": false,
+  "LoadChem11": false,
+  "LoadChem12": false,
+  "LoadChem13": false,
+  "LoadChem14": false,
+  "LoadChem15": false,
+  "LoadChem16": false,
+  "LoadChem17": false,
+  "LoadChem18": false,
+  "LoadChem19": false,
+  "LoadChem20": false
+}}

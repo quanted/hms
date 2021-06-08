@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.CancelButt = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.comidBox = new System.Windows.Forms.TextBox();
             this.basedirBox = new System.Windows.Forms.TextBox();
@@ -50,23 +49,13 @@
             this.chartButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
             this.ReadSNButton = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // CancelButt
-            // 
-            this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(763, 10);
-            this.CancelButt.Name = "CancelButt";
-            this.CancelButt.Size = new System.Drawing.Size(61, 23);
-            this.CancelButt.TabIndex = 0;
-            this.CancelButt.Text = "Cancel";
-            this.CancelButt.UseVisualStyleBackColor = true;
-            this.CancelButt.Click += new System.EventHandler(this.cancel_click);
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(696, 10);
+            this.button1.Location = new System.Drawing.Point(752, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -128,7 +117,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(518, 405);
+            this.ProcessLog.Size = new System.Drawing.Size(507, 387);
             this.ProcessLog.TabIndex = 6;
             // 
             // executeButton
@@ -260,11 +249,22 @@
             this.ReadSNButton.UseVisualStyleBackColor = true;
             this.ReadSNButton.Click += new System.EventHandler(this.ReadNetwork_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(567, 10);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(107, 23);
+            this.button2.TabIndex = 22;
+            this.button2.Text = "Overland Flows";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.OverlandFlow_Click);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(856, 503);
+            this.ClientSize = new System.Drawing.Size(845, 485);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.ReadSNButton);
             this.Controls.Add(this.SetupButton);
             this.Controls.Add(this.chartButton);
@@ -286,7 +286,7 @@
             this.Controls.Add(this.basedirBox);
             this.Controls.Add(this.comidBox);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.CancelButt);
+            this.MinimumSize = new System.Drawing.Size(861, 524);
             this.Name = "MultiSegForm";
             this.Text = "MultiSegForm";
             this.ResumeLayout(false);
@@ -295,8 +295,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox comidBox;
         private System.Windows.Forms.TextBox basedirBox;
@@ -318,5 +316,6 @@
         private System.Windows.Forms.Button chartButton;
         private System.Windows.Forms.Button SetupButton;
         private System.Windows.Forms.Button ReadSNButton;
+        private System.Windows.Forms.Button button2;
     }
 }

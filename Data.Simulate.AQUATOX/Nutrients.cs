@@ -1048,8 +1048,8 @@ namespace AQUATOX.Nutrients
         
 
             Assim = 0.0;
-            SVN = AQTSeg.GetState(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) * N2NO3;
-            SVA = AQTSeg.GetState(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) * N2NH4;
+            SVN = AQTSeg.GetStateVal(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol) * N2NO3;
+            SVA = AQTSeg.GetStateVal(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol) * N2NH4;
 
             if ((SVA > 0) || (SVN > 0))
                 foreach (TStateVariable TSV in AQTSeg.SV) Assimilation_AddAssim(TSV);

@@ -55,7 +55,7 @@ namespace GUI.AQUATOX
             this.chart1.Legends.Add(legend1);
             chart1.Location = new System.Drawing.Point(306, 59);
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(494, 415);
+            this.chart1.Size = new System.Drawing.Size(520, 405);
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
@@ -192,27 +192,40 @@ namespace GUI.AQUATOX
             File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
         }
 
-        private void createButton_Click(object sender, EventArgs e)  //create a set of 0D jsons for stream network given AQT2D "SN" object
+        private bool VerifyStreamNetwork()
         {
-            chart1.Visible = false;
             string BaseDir = basedirBox.Text;
-
             if (AQT2D == null) AQT2D = new AQSim_2D();
             if (AQT2D.SN == null)
             {
                 try
                 {
                     AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
-                    if (!ValidFilen(BaseDir + "StreamNetwork.JSON")) return;
+                    if (!ValidFilen(BaseDir + "StreamNetwork.JSON"))
+                    {
+                        AddToProcessLog("Cannot find stream network file " + BaseDir + "StreamNetwork.JSON");
+                        return false;
+                    }
                     string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);
                     AQT2D.CreateStreamNetwork(SNJSON);
                 }
                 catch
                 {
                     AddToProcessLog("Cannot process stream network file " + BaseDir + "StreamNetwork.JSON");
-                    return;
+                    return false;
                 }
             }
+            return true;
+
+        }
+
+
+        private void createButton_Click(object sender, EventArgs e)  //create a set of 0D jsons for stream network given AQT2D "SN" object
+        {
+            chart1.Visible = false;
+            string BaseDir = basedirBox.Text;
+
+            if (!VerifyStreamNetwork()) return;
 
             for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
             {
@@ -269,7 +282,7 @@ namespace GUI.AQUATOX
                     string BaseDir = basedirBox.Text;
                     if (!ValidFilen(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON")) return;
                     string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
-                     if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
+                    if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
                          File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
                     TSafeAddToProcessLog(strout);  //write update to status log
                  });
@@ -425,5 +438,10 @@ namespace GUI.AQUATOX
             ChartButtonClick(sender, e);
         }
 
+        private void OverlandFlow_Click(object sender, EventArgs e)
+        {
+            if (!VerifyStreamNetwork()) return;
+
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace AQUATOX.AQSim_2D
 
 {
     public class AQSim_2D
-        
+
     {
         /// <summary>
         /// holds results from streamNetwork web service
@@ -84,7 +84,21 @@ namespace AQUATOX.AQSim_2D
             nSegs = SN.network.Count() - 1;
         }
 
-        private void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)
+        public List<string> MultiSegSimFlags()
+        {
+            return new List<string>(new string[] { "Nitrogen", "Phosphorus", "Organic Matter" });
+        }
+
+        public string MultiSegSimName(List<bool> flags)
+        {
+            if ((flags[2]) && (flags[1])) return "MS_OM.json";  // [2] is organic matter, organic matter simulations require nitrogen
+            else if (flags[2]) return "MS_OM_NoP.json";  // [1] is phosphorus, and this is not selected 
+            else if ((flags[0]) && (flags[1])) return "MS_Nutrients.json";  // [0] is nitrogen; [1] is phosphorus 
+            else if (flags[0]) return "MS_Nitrogen.json"; //flag [0] for nitrogen is the only one selected
+            else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
+        }
+
+        private void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)  // time series output must currently be in m3/s
         {
             TVol.Calc_Method = VolumeMethType.Manning;
 
@@ -104,7 +118,7 @@ namespace AQUATOX.AQSim_2D
             DischargeLoad.MultLdg = 86400;  // seconds per day
             DischargeLoad.Hourly = true;
             DischargeLoad.UseConstant = false;
-            TVol.LoadNotes1 = "Discharge from NWM in m3/s";
+            TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
             TVol.LoadNotes2 = "Converted to m3/d using multiplier";
             DischargeLoad.ITSI = null;
         }
@@ -377,8 +391,7 @@ namespace AQUATOX.AQSim_2D
             if (errmessage == "")
             {
                 archiveOutput(comid, Sim);
-                string jsondata = "";
-                errmessage = Sim.SaveJSON(ref jsondata);
+                errmessage = Sim.SaveJSON(ref jsonstring);
 
                 if (errmessage != "")
                 {

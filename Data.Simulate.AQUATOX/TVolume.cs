@@ -279,11 +279,18 @@ namespace AQUATOX.Volume
                     // db = Manning_Volume-state, discharge, evap known
                     Discharg = DischargeLoad;
                     Inflow = Manning_Volume() - State + Discharg + Evap;
-                    if (Inflow < 0)
-                    {
-                        Discharg = Discharg - Inflow;
-                        Inflow = 0;
-                    }
+
+                    if (Discharg < Consts.Tiny)   // new code 6/3/2021, hold things constant at state where flows = 0 for NWM linkage
+                        {
+                            Inflow = 0;
+                            Discharg = 0;  // handle negative case
+                            Evap = 0;   
+                        }
+                    else if (Inflow < 0)
+                        {
+                            Discharg = Discharg - Inflow;
+                            Inflow = 0;
+                        }
                     break;
             }    // Switch
 

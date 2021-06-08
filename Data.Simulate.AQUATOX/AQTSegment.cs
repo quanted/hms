@@ -1063,8 +1063,8 @@ namespace AQUATOX.AQTSegment
             bool PO4model = (PPO4 != null);
 
             if (NH4model) NH4model = !(PNH4.UseLoadsRecAsDriver);
-            if (NO3model) NO3model = !(PNH4.UseLoadsRecAsDriver);
-            if (PO4model) PO4model = !(PNH4.UseLoadsRecAsDriver);
+            if (NO3model) NO3model = !(PNO3.UseLoadsRecAsDriver);
+            if (PO4model) PO4model = !(PPO4.UseLoadsRecAsDriver);
 
             return (NH4model || NO3model || PO4model);
         }
@@ -1281,6 +1281,9 @@ namespace AQUATOX.AQTSegment
 
             TO2Obj PO2 = (TO2Obj)GetStatePointer(AllVariables.Oxygen, T_SVType.StV, T_SVLayer.WaterCol);
             if ((PO2 == null)) return "An oxygen state variable (or driving variable) must be included in an organic-matter simulation.";
+
+            TNO3Obj PN = (TNO3Obj)GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            if ((PN == null)) return "Nitrogen and Ammonia variables (or driving variable) must be included in an organic-matter simulation.";
 
             return "";
         }
@@ -2970,7 +2973,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");
+                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
                 // result = -1;
             }
         }
