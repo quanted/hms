@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using MongoDB.Bson;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Web.Services.Models
 {
@@ -27,11 +29,16 @@ namespace Web.Services.Models
             errormsg = sim.Instantiate(json);
             if(errormsg != "") { return; }
 
+            // Convert upstream comids to ints to run with AQSim_2D
+            errormsg = convertUpstreamToInt(input.Upstream.Keys.ToList(), out List<int> comids);
+            if (errormsg != "") { return; }
+
             // Get upstream outputs and archive them
-            ArchiveUpstreamOutputs(input.Upstream);
+            errormsg = ArchiveUpstreamOutputs(comids, input.Upstream);
+            if (errormsg != "") { return; }
 
             // Pass data from upstream to current simulation
-            // passData(sim, input);
+            Pass_Data(sim, comids);
 
             // Execute simulation
             errormsg = sim.Integrate();
@@ -42,47 +49,76 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        /// Itterate over each comid and generate the archive results for each
-        /// one.
+        /// Itterate over each comid and convert to int.
         /// </summary>
-        private void ArchiveUpstreamOutputs(Dictionary<string, string> upstream)
+        private string convertUpstreamToInt(List<string> upstream, out List<int> comids)
         {
-            foreach(KeyValuePair<string, string> item in upstream)
+            comids = new List<int>();
+            foreach(string item in upstream)
             {
-                // Get the sim output from database for current comid/taskid
-                Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(item.Value);
-
-                // TODO: May need to remove extra database keys from output.
-
-                // Convert to string and instaniate a new simulation
-                string json = JsonConvert.SerializeObject(output);
-                AQTSim sim = new AQTSim();
-                sim.Instantiate(json);
-
-                // Archive the simulation to the inherited property: archive
-                archiveOutput(int.Parse(item.Key), sim);
+                if(int.TryParse(item, out int value)) 
+                {
+                    comids.Add(value);
+                } 
+                else 
+                {
+                    // Try parse failed
+                    return $"Invalid Comid: {item}";
+                }
             }
+            return "";
         }
 
         /// <summary>
-        /// 
+        /// Itterate over each comid and generate the archive results for each.
         /// </summary>
-        /// <param name="sim"></param>
-        /// <param name="sim2D"></param>
-        /// <param name="input"></param>
-        private void PassData(AQTSim sim, WSAquatoxWorkflowInput input)
+        /// <param name="comids">List of comids</param>
+        /// <param name="upstream">Dictionary of comids and taskids</param>
+        private string ArchiveUpstreamOutputs(List<int> comids, Dictionary<string, string> upstream)
+        {
+            foreach(int item in comids)
+            {
+                try 
+                {
+                    // Get the sim output from database for current comid_taskid
+                    upstream.TryGetValue(item.ToString(), out string value);
+                    Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(value);
+
+                    // Convert to string and instantiate a new simulation
+                    string json = JsonConvert.SerializeObject(output.Result.GetValue("input"));
+                    AQTSim sim = new AQTSim();
+                    string error = sim.Instantiate(json);
+                    if(error != "") 
+                    {
+                        return $"Invalid simulation input.";
+                    }
+
+                    // Archive the simulation to the inherited property: archive
+                    archiveOutput(item, sim);
+                }
+                catch(Exception ex) 
+                {
+                    return "Invalid input, or unknown eror.";
+                }
+            }
+            // No errors return empty string
+            return "";
+        }
+
+        /// <summary>
+        /// Auxiliary function to mimic how data is passed in AQSim_2D.executeModel() : Line 363
+        /// </summary>
+        /// <param name="sim">The currrent simulation to pass data to.</param>
+        /// <param name="comids">List of comids</param>
+        private void Pass_Data(AQTSim sim, List<int> comids)
         {
             // Pass the archived data to the current simulation
-            int comid = 0;
+            // TODO: -  May need to find current comid incase current comid is in upstream comids.
             int nSources = 0;
-            foreach (string SrcID in input.Upstream.Keys)
+            foreach (int SrcId in comids)
             {
-                int id = int.Parse(SrcID);
-                if (id != comid)  // set to itself in boundaries 
-                {
-                    nSources++;
-                    Pass_Data(sim, id, nSources);
-                }
+                nSources++;
+                Pass_Data(sim, SrcId, nSources);
             };
         }
 
