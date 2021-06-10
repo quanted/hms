@@ -45,10 +45,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX Bioaccumulation controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/bioaccumulation")]
     [Produces("application/json")]
-    public class AQTBioaccumulationController : Controller
+    public class WSAQTBioaccumulationController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Bioaccumulation.

@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX plants controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/plants")]
     [Produces("application/json")]
-    public class AQTPlantController : Controller
+    public class WSAQTPlantController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Plants.

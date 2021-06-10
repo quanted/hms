@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX Diagenesis controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/diagenesis")]
     [Produces("application/json")]
-    public class AQTDiagenesisController : Controller
+    public class WSAQTDiagenesisController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Diagenesis.

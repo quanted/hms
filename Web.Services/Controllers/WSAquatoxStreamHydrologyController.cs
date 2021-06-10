@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX stream hydrology controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/streamhydrology")]
     [Produces("application/json")]
-    public class AQTStreamHydrologyController : Controller
+    public class WSAQTStreamHydrologyController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Stream Hydrology.

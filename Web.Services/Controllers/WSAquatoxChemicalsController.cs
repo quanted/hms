@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX chemicals controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/chemicals")]
     [Produces("application/json")]
-    public class AQTChemicalsController : Controller
+    public class WSAQTChemicalsController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Chemicals.
