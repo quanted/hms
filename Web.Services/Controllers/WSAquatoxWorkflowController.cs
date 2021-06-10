@@ -9,7 +9,6 @@ using System.Text.Json;
 using Serilog;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using AQUATOX.AQTSegment;
 
 namespace Web.Services.Controllers
 {
@@ -23,6 +22,15 @@ namespace Web.Services.Controllers
         public Dictionary<string, string> Upstream { get; set; }
         public Dictionary<string, string> Data_Sources { get; set; }
         public Dictionary<string, string> Dependencies { get; set; }
+    }
+
+    /***************** Aquatox Workflow Conaminant Matrix Input Class **********************/
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ContaminantMatrix
+    {
+        Dictionary<string, List<string>> matrix { get; set; }
     }
 
     /***************** Swagger Example JSON **********************/
@@ -60,6 +68,48 @@ namespace Web.Services.Controllers
     [Produces("application/json")]
     public class WSAquatoxWorkflowController : Controller
     {
+        /// <summary>
+        /// GET method for returning the AQUATOX workflow options/flags/modules.
+        /// </summary>
+        /// <returns>[ { "option" : "option_1", "flag" : "0" }, { "option" : "option_2", "flag" : "1" } ... ]</returns>
+        [HttpGet]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        public IActionResult GetOptions()
+        {
+            WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+            JArray options = new JArray();
+            int index = 0;
+            foreach(string option in aqt.GetOptions()) 
+            {
+                options.Add(
+                    new JObject
+                    {
+                        new JProperty("option", option),
+                        new JProperty("flag", index),
+                    }
+                );
+                index++;
+            }
+            return Ok(options);
+        }
+
+        /// <summary>
+        /// POST method for returning the AQUATOX workflow base json.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        public IActionResult PostOptions([FromBody] ContaminantMatrix input)
+        {
+            // 
+            return Ok(input);
+        }
+
+        
+
+
         /// <summary>
         /// POST method for calling the AQUATOX workflow.
         /// </summary>

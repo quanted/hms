@@ -16,6 +16,14 @@ namespace Web.Services.Models
     public class WSAquatoxWorkflow : AQSim_2D
     {
         /// <summary>
+        /// Returns the types of flags for getting a base simulation json.
+        /// </summary>
+        public List<string> GetOptions()
+        {
+            return MultiSegSimFlags();
+        }
+
+        /// <summary>
         /// Gets output from upstream segments from mongodb and merges them to
         /// the input of the current segment in input.sim_input. 
         /// </summary>
@@ -78,7 +86,7 @@ namespace Web.Services.Models
         {
             foreach(int item in comids)
             {
-                try 
+                try
                 {
                     // Get the sim output from database for current comid_taskid
                     upstream.TryGetValue(item.ToString(), out string value);
