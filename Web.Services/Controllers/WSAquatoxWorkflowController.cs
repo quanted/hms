@@ -24,7 +24,7 @@ namespace Web.Services.Controllers
         public Dictionary<string, string> Dependencies { get; set; }
     }
 
-    /***************** Aquatox Workflow Conaminant Matrix Input Class **********************/
+    /***************** Aquatox Workflow Contaminant Matrix Input Class **********************/
     /// <summary>
     /// 
     /// </summary>
@@ -95,20 +95,37 @@ namespace Web.Services.Controllers
         }
 
         /// <summary>
-        /// POST method for returning the AQUATOX workflow base json.
+        /// POST method for returning the AQUATOX workflow base json based on set flags.
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [Route("options")]
-        public IActionResult PostOptions([FromBody] ContaminantMatrix input)
+        public async Task<IActionResult> PostOptions([FromBody] ContaminantMatrix input, List<int> flags)
         {
-            // 
+            // [
+            //    comid_1 : SV[],
+            //    comid_2 : SV[]
+            // ]
+
+            // 1. Get template from flags
+            WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+            // JObject json = aqt.GetBaseJson(flags);
+
+            // 2. Itterate over comids in CM
+
+            // 3. Flush template, call JC function to put contaminant into SV for current comids
+            // await
+
+            // Return SV block for eaach catchment
+            // Dictionary<comid, SV>
+            //
             return Ok(input);
         }
 
-        
-
+        ///  public IActionResult PostOptions([FromBody] string input, List<int> flags)
+        /// 
+ 
 
         /// <summary>
         /// POST method for calling the AQUATOX workflow.

@@ -32,6 +32,10 @@ namespace Web.Services.Models
         /// <returns>Serialized json string of the AQUATOX simulation output.</returns>
         public void Run(WSAquatoxWorkflowInput input, ref string json, out string errormsg)
         {
+            // CheckDependencies()
+            // 
+            //     foreach => switch streamflow => AQSim_2D.UpdateDischarge()
+
             // Instantiate new simulation
             AQTSim sim = new AQTSim();
             errormsg = sim.Instantiate(json);
@@ -121,7 +125,6 @@ namespace Web.Services.Models
         private void Pass_Data(AQTSim sim, List<int> comids)
         {
             // Pass the archived data to the current simulation
-            // TODO: -  May need to find current comid incase current comid is in upstream comids.
             int nSources = 0;
             foreach (int SrcId in comids)
             {
