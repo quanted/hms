@@ -13,6 +13,9 @@ namespace Utilities
         /// Generic exception logger that returns an object stating unkown error. Used in API controllers
         /// to handle and log exceptions from trycatch blocks, then return a generic error.
         /// </summary>
+        /// <param name="ex">The exception to be logged.</param>
+        /// <param name="input">The input sent from an API request.</param>
+        /// <returns>ObjectResult json with generic error.</returns>
         public static IActionResult LogAPIException<T>(Exception ex, T input)
         {
             var exceptionLog = Log.ForContext("Type", "exception");
