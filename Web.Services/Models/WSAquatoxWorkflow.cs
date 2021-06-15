@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Specialized;
 using Data;
 using Web.Services.Controllers;
 using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
 using Newtonsoft.Json;
 using MongoDB.Bson;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
@@ -18,6 +19,7 @@ namespace Web.Services.Models
         /// <summary>
         /// Returns the types of flags for getting a base simulation json.
         /// </summary>
+        /// <returns>List of flag options</returns>
         public List<string> GetOptions()
         {
             return MultiSegSimFlags();
@@ -26,18 +28,42 @@ namespace Web.Services.Models
         /// <summary>
         /// Returns a base simulation json from file based on set flags.
         /// </summary>
-        public string GetBaseJson(List<bool> flags)
+        /// <param name="flags">Dictionary of flag names and values</param>
+        /// <returns>Base json string from file</returns>
+        public string GetBaseJson(Dictionary<string, bool> flags)
         {
+            // Create ordered dictionary to gaurauntee flag order and populate.
+            OrderedDictionary flagDict = new OrderedDictionary();
+            foreach(string item in MultiSegSimFlags()) 
+            {
+                if(flags.ContainsKey(item)) 
+                {
+                    flagDict.Add(item, flags[item]);
+                } 
+                else 
+                {
+                    flagDict.Add(item, false);
+                }
+            }
+
+            // Construct the flag list of bools
+            List<bool> flagOptions = new List<bool>();
+            foreach(DictionaryEntry item in flagDict) 
+            {
+                flagOptions.Add(Convert.ToBoolean(item.Value));
+            }
+
+            // Construct path and return base json
             string path = Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flags));
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions));
 
             if (File.Exists(path))
             {
                 return File.ReadAllText(path);
             }
-            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flags)))
+            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flagOptions)))
             {
-                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flags));
+                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flagOptions));
             }
             else
             {
@@ -50,6 +76,7 @@ namespace Web.Services.Models
         /// the input of the current segment in input.sim_input. 
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="json"></param>
         /// <param name="errormsg"></param>
         /// <returns>Serialized json string of the AQUATOX simulation output.</returns>
         public void Run(WSAquatoxWorkflowInput input, ref string json, out string errormsg)

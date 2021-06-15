@@ -71,36 +71,24 @@ namespace Web.Services.Controllers
         /// <summary>
         /// GET method for returning the AQUATOX workflow options/flags/modules.
         /// </summary>
-        /// <returns>[ { "option" : "option_1" }, { "option" : "option_2" } ... ]</returns>
+        /// <returns>List of Aquatox base json flag names.</returns>
         [HttpGet]
         [ProducesResponseType(200)]
         [Route("options")]
         public IActionResult GetOptions()
         {
             WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
-            JArray options = new JArray();
-            int index = 0;
-            foreach(string option in aqt.GetOptions()) 
-            {
-                options.Add(
-                    new JObject
-                    {
-                        new JProperty("option", option),
-                    }
-                );
-                index++;
-            }
-            return Ok(options);
+            return Ok(aqt.GetOptions());
         }
 
         /// <summary>
         /// POST method for returning the AQUATOX workflow base json based on set flags.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Base json for aquatox simulation.</returns>
         [HttpPost]
         [ProducesResponseType(200)]
         [Route("options")]
-        public async Task<IActionResult> PostOptionsBase([FromBody] List<bool> flags)
+        public async Task<IActionResult> PostOptionsBase([FromBody] Dictionary<string, bool> flags)
         {
             // Return base Json from flags
             try
@@ -115,10 +103,11 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
-                Utilities.Logger.LogAPIException(ex, flags);
+                return Utilities.Logger.LogAPIException(ex, flags);
             }
         }
 
+/*
         /// <summary>
         /// POST method for returning the AQUATOX workflow base json based on set flags and updating base json 
         /// from contaminant matrix.
@@ -151,7 +140,7 @@ namespace Web.Services.Controllers
 
         ///  public IActionResult PostOptions([FromBody] string input, List<int> flags)
         /// 
-
+*/
         /// <summary>
         /// POST method for calling the AQUATOX workflow.
         /// </summary>
@@ -180,7 +169,7 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
-                
+                return Utilities.Logger.LogAPIException(ex, input);
             }
         }
     }
