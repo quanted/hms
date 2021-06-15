@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 using MongoDB.Bson;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Linq;
+using System.IO;
 
 namespace Web.Services.Models
 {
@@ -21,6 +21,28 @@ namespace Web.Services.Models
         public List<string> GetOptions()
         {
             return MultiSegSimFlags();
+        }
+
+        /// <summary>
+        /// Returns a base simulation json from file based on set flags.
+        /// </summary>
+        public string GetBaseJson(List<bool> flags)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flags));
+
+            if (File.Exists(path))
+            {
+                return File.ReadAllText(path);
+            }
+            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flags)))
+            {
+                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flags));
+            }
+            else
+            {
+                return @"{Error: 'Base json file could not be found.'}";
+            }
         }
 
         /// <summary>

@@ -71,7 +71,7 @@ namespace Web.Services.Controllers
         /// <summary>
         /// GET method for returning the AQUATOX workflow options/flags/modules.
         /// </summary>
-        /// <returns>[ { "option" : "option_1", "flag" : "0" }, { "option" : "option_2", "flag" : "1" } ... ]</returns>
+        /// <returns>[ { "option" : "option_1" }, { "option" : "option_2" } ... ]</returns>
         [HttpGet]
         [ProducesResponseType(200)]
         [Route("options")]
@@ -86,7 +86,6 @@ namespace Web.Services.Controllers
                     new JObject
                     {
                         new JProperty("option", option),
-                        new JProperty("flag", index),
                     }
                 );
                 index++;
@@ -96,6 +95,33 @@ namespace Web.Services.Controllers
 
         /// <summary>
         /// POST method for returning the AQUATOX workflow base json based on set flags.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        public async Task<IActionResult> PostOptionsBase([FromBody] List<bool> flags)
+        {
+            // Return base Json from flags
+            try
+            {
+                WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+                string json = "";
+                await Task.Run(() =>
+                {
+                    json = aqt.GetBaseJson(flags);
+                });
+                return Ok(JsonConvert.DeserializeObject(json));
+            }
+            catch (Exception ex)
+            {
+                Utilities.Logger.LogAPIException(ex, flags);
+            }
+        }
+
+        /// <summary>
+        /// POST method for returning the AQUATOX workflow base json based on set flags and updating base json 
+        /// from contaminant matrix.
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -125,7 +151,6 @@ namespace Web.Services.Controllers
 
         ///  public IActionResult PostOptions([FromBody] string input, List<int> flags)
         /// 
- 
 
         /// <summary>
         /// POST method for calling the AQUATOX workflow.
@@ -155,17 +180,7 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
-                var exceptionLog = Log.ForContext("Type", "exception");
-                exceptionLog.Fatal(ex.Message);
-                exceptionLog.Fatal(ex.StackTrace);
-                JsonSerializerOptions options = new JsonSerializerOptions()
-                {
-                    AllowTrailingCommas = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(input, options));
-                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                
             }
         }
     }
