@@ -33,7 +33,7 @@ namespace Web.Services.Controllers
         Dictionary<string, List<string>> matrix { get; set; }
     }
 
-    /***************** Swagger Example JSON **********************/
+    /***************** Swagger Example JSONs **********************/
     /// <summary>
     /// AQUATOX workflow input example. 
     /// </summary>
@@ -55,6 +55,27 @@ namespace Web.Services.Controllers
                 },
                 Data_Sources = null,
                 Dependencies = null
+            };
+            return example;
+        }
+    }
+
+    /// <summary>
+    /// AQUATOX workflow get base jsons input example. 
+    /// </summary>
+    public class WSAquatoxWorkflowControllerGetBaseJsonInputExample : IExamplesProvider<Dictionary<string, bool>>
+    {
+        /// <summary>
+        /// Get Example.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, bool> GetExamples()
+        {
+            Dictionary<string, bool> example = new Dictionary<string, bool>()
+            {
+                ["Nitrogen"] = true,
+                ["Phosphorus"] = false,
+                ["Organic Matter"] = false
             };
             return example;
         }
@@ -88,6 +109,7 @@ namespace Web.Services.Controllers
         [HttpPost]
         [ProducesResponseType(200)]
         [Route("options")]
+        [SwaggerRequestExample(typeof(Dictionary<string, bool> ), typeof(WSAquatoxWorkflowControllerGetBaseJsonInputExample))]
         public async Task<IActionResult> PostOptionsBase([FromBody] Dictionary<string, bool> flags)
         {
             // Return base Json from flags
