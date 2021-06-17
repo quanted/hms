@@ -9,7 +9,6 @@ using System.Text.Json;
 using Serilog;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using AQUATOX.AQTSegment;
 
 namespace Web.Services.Controllers
 {
@@ -25,7 +24,16 @@ namespace Web.Services.Controllers
         public Dictionary<string, string> Dependencies { get; set; }
     }
 
-    /***************** Swagger Example JSON **********************/
+    /***************** Aquatox Workflow Contaminant Matrix Input Class **********************/
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ContaminantMatrix
+    {
+        Dictionary<string, List<string>> matrix { get; set; }
+    }
+
+    /***************** Swagger Example JSONs **********************/
     /// <summary>
     /// AQUATOX workflow input example. 
     /// </summary>
@@ -53,6 +61,27 @@ namespace Web.Services.Controllers
     }
 
     /// <summary>
+    /// AQUATOX workflow get base jsons input example. 
+    /// </summary>
+    public class WSAquatoxWorkflowControllerGetBaseJsonInputExample : IExamplesProvider<Dictionary<string, bool>>
+    {
+        /// <summary>
+        /// Get Example.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, bool> GetExamples()
+        {
+            Dictionary<string, bool> example = new Dictionary<string, bool>()
+            {
+                ["Nitrogen"] = true,
+                ["Phosphorus"] = false,
+                ["Organic Matter"] = false
+            };
+            return example;
+        }
+    }
+
+    /// <summary>
     /// AQUATOX workflow controller class.
     /// </summary>
     [ApiVersion("0.1")]
@@ -60,6 +89,80 @@ namespace Web.Services.Controllers
     [Produces("application/json")]
     public class WSAquatoxWorkflowController : Controller
     {
+        /// <summary>
+        /// GET method for returning the AQUATOX workflow options/flags/modules.
+        /// </summary>
+        /// <returns>List of Aquatox base json flag names.</returns>
+        [HttpGet]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        public IActionResult GetOptions()
+        {
+            WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+            return Ok(aqt.GetOptions());
+        }
+
+        /// <summary>
+        /// POST method for returning the AQUATOX workflow base json based on set flags.
+        /// </summary>
+        /// <returns>Base json for aquatox simulation.</returns>
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        [SwaggerRequestExample(typeof(Dictionary<string, bool> ), typeof(WSAquatoxWorkflowControllerGetBaseJsonInputExample))]
+        public async Task<IActionResult> PostOptionsBase([FromBody] Dictionary<string, bool> flags)
+        {
+            // Return base Json from flags
+            try
+            {
+                WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+                string json = "";
+                await Task.Run(() =>
+                {
+                    json = aqt.GetBaseJson(flags);
+                });
+                return Ok(JsonConvert.DeserializeObject(json));
+            }
+            catch (Exception ex)
+            {
+                return Utilities.Logger.LogAPIException(ex, flags);
+            }
+        }
+
+/*
+        /// <summary>
+        /// POST method for returning the AQUATOX workflow base json based on set flags and updating base json 
+        /// from contaminant matrix.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(200)]
+        [Route("options")]
+        public async Task<IActionResult> PostOptions([FromBody] ContaminantMatrix input, List<int> flags)
+        {
+            // [
+            //    comid_1 : SV[],
+            //    comid_2 : SV[]
+            // ]
+
+            // 1. Get template from flags
+            WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
+            // JObject json = aqt.GetBaseJson(flags);
+
+            // 2. Itterate over comids in CM
+
+            // 3. Flush template, call JC function to put contaminant into SV for current comids
+            // await
+
+            // Return SV block for eaach catchment
+            // Dictionary<comid, SV>
+            //
+            return Ok(input);
+        }
+
+        ///  public IActionResult PostOptions([FromBody] string input, List<int> flags)
+        /// 
+*/
         /// <summary>
         /// POST method for calling the AQUATOX workflow.
         /// </summary>
@@ -88,17 +191,7 @@ namespace Web.Services.Controllers
             }
             catch (Exception ex)
             {
-                var exceptionLog = Log.ForContext("Type", "exception");
-                exceptionLog.Fatal(ex.Message);
-                exceptionLog.Fatal(ex.StackTrace);
-                JsonSerializerOptions options = new JsonSerializerOptions()
-                {
-                    AllowTrailingCommas = true,
-                    PropertyNameCaseInsensitive = true
-                };
-                exceptionLog.Fatal(System.Text.Json.JsonSerializer.Serialize(input, options));
-                Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                return new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                return Utilities.Logger.LogAPIException(ex, input);
             }
         }
     }

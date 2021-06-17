@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX Ecotoxicology controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/ecotoxicology")]
     [Produces("application/json")]
-    public class AQTEcotoxicologyController : Controller
+    public class WSAQTEcotoxicologyController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Ecotoxicology.

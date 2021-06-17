@@ -39,7 +39,7 @@ namespace Utilities
         /// <returns></returns>
         public static async Task<BsonDocument> FindByTaskID(string taskID)
         {
-            string databaseName = "hms"; 
+            string databaseName = "hms_workflows"; 
             string collectionName = "data";
 
             DateTime now = DateTime.Now;
@@ -51,7 +51,7 @@ namespace Utilities
             var client = new MongoClient(settings);
             IMongoDatabase db = client.GetDatabase(databaseName);
             var collection = db.GetCollection<BsonDocument>(collectionName);
-            var filter = Builders<BsonDocument>.Filter.Eq("task_id", taskID);
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", taskID);
             return await collection.Find(filter).SingleAsync();
         }
     }

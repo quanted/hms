@@ -43,10 +43,12 @@ namespace Web.Services.Controllers
     /// <summary>
     /// AQUATOX organic matter controller for HMS.
     /// </summary>
+    [Obsolete]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiVersion("0.1")]
     [Route("api/aquatox/organicmatter")]
     [Produces("application/json")]
-    public class AQTOrgMatterController : Controller
+    public class WSAQTOrgMatterController : Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Organic Matter.

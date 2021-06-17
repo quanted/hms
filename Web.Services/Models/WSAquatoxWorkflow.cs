@@ -1,37 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Specialized;
 using Data;
 using Web.Services.Controllers;
 using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
 using Newtonsoft.Json;
 using MongoDB.Bson;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Linq;
+using System.IO;
 
 namespace Web.Services.Models
 {
     public class WSAquatoxWorkflow : AQSim_2D
     {
         /// <summary>
+        /// Returns the types of flags for getting a base simulation json.
+        /// </summary>
+        /// <returns>List of flag options</returns>
+        public List<string> GetOptions()
+        {
+            return MultiSegSimFlags();
+        }
+
+        /// <summary>
+        /// Returns a base simulation json from file based on set flags.
+        /// </summary>
+        /// <param name="flags">Dictionary of flag names and values</param>
+        /// <returns>Base json string from file</returns>
+        public string GetBaseJson(Dictionary<string, bool> flags)
+        {
+            // Create ordered dictionary to gaurauntee flag order and populate.
+            OrderedDictionary flagDict = new OrderedDictionary();
+            foreach(string item in MultiSegSimFlags()) 
+            {
+                if(flags.ContainsKey(item)) 
+                {
+                    flagDict.Add(item, flags[item]);
+                } 
+                else 
+                {
+                    flagDict.Add(item, false);
+                }
+            }
+
+            // Construct the flag list of bools
+            List<bool> flagOptions = new List<bool>();
+            foreach(DictionaryEntry item in flagDict) 
+            {
+                flagOptions.Add(Convert.ToBoolean(item.Value));
+            }
+
+            // Construct path and return base json
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions));
+
+            if (File.Exists(path))
+            {
+                return File.ReadAllText(path);
+            }
+            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flagOptions)))
+            {
+                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON" + MultiSegSimName(flagOptions));
+            }
+            else
+            {
+                return @"{Error: 'Base json file could not be found.'}";
+            }
+        }
+
+        /// <summary>
         /// Gets output from upstream segments from mongodb and merges them to
         /// the input of the current segment in input.sim_input. 
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="json"></param>
         /// <param name="errormsg"></param>
         /// <returns>Serialized json string of the AQUATOX simulation output.</returns>
         public void Run(WSAquatoxWorkflowInput input, ref string json, out string errormsg)
         {
+            // CheckDependencies()
+            // 
+            //     foreach => switch streamflow => AQSim_2D.UpdateDischarge()
+
             // Instantiate new simulation
             AQTSim sim = new AQTSim();
             errormsg = sim.Instantiate(json);
             if(errormsg != "") { return; }
 
+            // Convert upstream comids to ints to run with AQSim_2D
+            errormsg = convertUpstreamToInt(input.Upstream.Keys.ToList(), out List<int> comids);
+            if (errormsg != "") { return; }
+
             // Get upstream outputs and archive them
-            ArchiveUpstreamOutputs(input.Upstream);
+            errormsg = ArchiveUpstreamOutputs(comids, input.Upstream);
+            if (errormsg != "") { return; }
 
             // Pass data from upstream to current simulation
-            // passData(sim, input);
+            Pass_Data(sim, comids);
 
             // Execute simulation
             errormsg = sim.Integrate();
@@ -42,47 +110,75 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        /// Itterate over each comid and generate the archive results for each
-        /// one.
+        /// Itterate over each comid and convert to int.
         /// </summary>
-        private void ArchiveUpstreamOutputs(Dictionary<string, string> upstream)
+        private string convertUpstreamToInt(List<string> upstream, out List<int> comids)
         {
-            foreach(KeyValuePair<string, string> item in upstream)
+            comids = new List<int>();
+            foreach(string item in upstream)
             {
-                // Get the sim output from database for current comid/taskid
-                Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(item.Value);
-
-                // TODO: May need to remove extra database keys from output.
-
-                // Convert to string and instaniate a new simulation
-                string json = JsonConvert.SerializeObject(output);
-                AQTSim sim = new AQTSim();
-                sim.Instantiate(json);
-
-                // Archive the simulation to the inherited property: archive
-                archiveOutput(int.Parse(item.Key), sim);
+                if(int.TryParse(item, out int value)) 
+                {
+                    comids.Add(value);
+                } 
+                else 
+                {
+                    // Try parse failed
+                    return $"Invalid Comid: {item}";
+                }
             }
+            return "";
         }
 
         /// <summary>
-        /// 
+        /// Itterate over each comid and generate the archive results for each.
         /// </summary>
-        /// <param name="sim"></param>
-        /// <param name="sim2D"></param>
-        /// <param name="input"></param>
-        private void PassData(AQTSim sim, WSAquatoxWorkflowInput input)
+        /// <param name="comids">List of comids</param>
+        /// <param name="upstream">Dictionary of comids and taskids</param>
+        private string ArchiveUpstreamOutputs(List<int> comids, Dictionary<string, string> upstream)
+        {
+            foreach(int item in comids)
+            {
+                try
+                {
+                    // Get the sim output from database for current comid_taskid
+                    upstream.TryGetValue(item.ToString(), out string value);
+                    Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(value);
+
+                    // Convert to string and instantiate a new simulation
+                    string json = JsonConvert.SerializeObject(output.Result.GetValue("input"));
+                    AQTSim sim = new AQTSim();
+                    string error = sim.Instantiate(json);
+                    if(error != "") 
+                    {
+                        return $"Invalid simulation input.";
+                    }
+
+                    // Archive the simulation to the inherited property: archive
+                    archiveOutput(item, sim);
+                }
+                catch(Exception ex) 
+                {
+                    return "Invalid input, or unknown eror.";
+                }
+            }
+            // No errors return empty string
+            return "";
+        }
+
+        /// <summary>
+        /// Auxiliary function to mimic how data is passed in AQSim_2D.executeModel() : Line 363
+        /// </summary>
+        /// <param name="sim">The currrent simulation to pass data to.</param>
+        /// <param name="comids">List of comids</param>
+        private void Pass_Data(AQTSim sim, List<int> comids)
         {
             // Pass the archived data to the current simulation
-            int comid = 0;
             int nSources = 0;
-            foreach (string SrcID in input.Upstream.Keys)
+            foreach (int SrcId in comids)
             {
-                int id = int.Parse(SrcID);
-                if (id != comid)  // set to itself in boundaries 
-                {
-                    nSources++;
-                    Pass_Data(sim, id, nSources);
-                }
+                nSources++;
+                Pass_Data(sim, SrcId, nSources);
             };
         }
 
