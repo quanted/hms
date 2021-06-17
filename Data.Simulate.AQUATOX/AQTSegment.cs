@@ -399,6 +399,7 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+
         public List<string> LoadList()
         {
             if ((NState == AllVariables.pH) || (NState == AllVariables.TSS) || (NState == AllVariables.Temperature) || (NState == AllVariables.Salinity) || (NState == AllVariables.COD))
@@ -1437,7 +1438,6 @@ namespace AQUATOX.AQTSegment
         }
 
 
-        // Load Blank Study
         public void DisplayNames(ref List<string> List, ref List<TStateVariable> TSVList)
         {
             // Puts all statevariables from collection into TStrings item for screen
@@ -1480,6 +1480,37 @@ namespace AQUATOX.AQTSegment
                 }
             }
         }
+
+        public string StateText(AllVariables ns)
+        {
+            string outtext = ns.ToString();
+            return outtext;
+        }
+
+        public List<string> GetInsertableStates(ref List<AllVariables> SVs)
+        {
+            List<string> list = new List<string>();
+            SVs = new List<AllVariables>();
+
+            for (AllVariables ns = Consts.FirstState; ns < Consts.LastState; ns++)
+            {
+                if (GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) == null)
+                {
+                    if  ((ns == AllVariables.H2OTox) || (ns == AllVariables.TSS) ||  // some variables vestigal from AQUATOX 3.2, not shown here
+                        ((ns >= AllVariables.Ammonia) && (ns <= AllVariables.Oxygen)) ||
+                        ((ns >= AllVariables.Salinity) && (ns <= AllVariables.LgGameFish4)) ||
+                        ((ns >= AllVariables.Volume) && (ns <= AllVariables.pH)))
+                    {  list.Add(StateText(ns));
+                       SVs.Add(ns);
+                    }
+                     
+                }
+            }
+
+            return list;
+        }
+
+
 
         public void Derivs_ZeroDerivative(TStateVariable P)
         {

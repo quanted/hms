@@ -63,10 +63,27 @@ namespace AQUATOX.Animals
         public TParameter O2_EC50growth = new TParameter();
         public TParameter O2_EC50repro = new TParameter();
         public TParameter Ammonia_LC50 = new TParameter();
-        public TParameter SalMin_Ing, SalMax_Ing, SalCoeff1_Ing, SalCoeff2_Ing = new TParameter();
-        public TParameter SalMin_Gam, SalMax_Gam, SalCoeff1_Gam, SalCoeff2_Gam = new TParameter();
-        public TParameter SalMin_Rsp, SalMax_Rsp, SalCoeff1_Rsp, SalCoeff2_Rsp = new TParameter();
-        public TParameter SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort = new TParameter();
+
+        public TParameter SalMin_Ing = new TParameter();
+        public TParameter SalMax_Ing = new TParameter();
+        public TParameter SalCoeff1_Ing = new TParameter();
+        public TParameter SalCoeff2_Ing = new TParameter();
+
+        public TParameter SalMin_Gam = new TParameter();
+        public TParameter SalMax_Gam = new TParameter();
+        public TParameter SalCoeff1_Gam = new TParameter();
+        public TParameter SalCoeff2_Gam = new TParameter();
+
+        public TParameter SalMin_Rsp = new TParameter();
+        public TParameter SalMax_Rsp = new TParameter();
+        public TParameter SalCoeff1_Rsp = new TParameter();
+        public TParameter SalCoeff2_Rsp = new TParameter();
+
+        public TParameter SalMin_Mort = new TParameter();
+        public TParameter SalMax_Mort = new TParameter();
+        public TParameter SalCoeff1_Mort = new TParameter();
+        public TParameter SalCoeff2_Mort = new TParameter();
+
         public TParameter PrefRiffle = new TParameter();
         public TParameter PrefPool = new TParameter();
 

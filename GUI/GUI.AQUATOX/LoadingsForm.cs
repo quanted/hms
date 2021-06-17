@@ -3,6 +3,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
 using AQUATOX.Loadings;
 using AQUATOX.Plants;
+using AQUATOX.Volume;
 using Globals;
 using System;
 using Data;
@@ -16,7 +17,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
-
+ 
 namespace GUI.AQUATOX
 {
 
@@ -97,6 +98,17 @@ namespace GUI.AQUATOX
             // Future CO2 Equilibrium button
             // Future Exposure Inputs
 
+            int sel_load = 0;
+            VolumePanel.Visible = (SV.NState == AllVariables.Volume);
+            if (SV.NState == AllVariables.Volume)
+                switch ((SV as TVolume).Calc_Method)
+                {
+                    case VolumeMethType.Manning: manningButton.Checked = true; sel_load = 2; break;
+                    case VolumeMethType.KeepConst: KeepConstantButton.Checked = true; sel_load = 1; break;
+                    case VolumeMethType.Dynam: CalcDynamicButton.Checked = true; sel_load = 1; break;
+                    default: KnownVolButton.Checked = true; break;
+                }
+            
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
 
             AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
@@ -115,7 +127,7 @@ namespace GUI.AQUATOX
                 LTBox.DataSource = null;
                 LTBox.Items.Clear();
                 LTBox.DataSource = SV.LoadList();
-                LTBox.SelectedIndex = 0;
+                LTBox.SelectedIndex = sel_load;
                 ShowGrid();
             }
 
@@ -512,5 +524,17 @@ namespace GUI.AQUATOX
             }
         }
 
+        private void Volume_Choice_Changed(object sender, EventArgs e)
+        {
+            VolumeMethType newmeth;
+
+            if (manningButton.Checked) newmeth = VolumeMethType.Manning;
+            else if (KeepConstantButton.Checked) newmeth = VolumeMethType.KeepConst;
+            else if (CalcDynamicButton.Checked) newmeth = VolumeMethType.Dynam;
+            else newmeth = VolumeMethType.KnownVal;
+
+            (SV as TVolume).Calc_Method = newmeth;
+
+        }
     }
 }

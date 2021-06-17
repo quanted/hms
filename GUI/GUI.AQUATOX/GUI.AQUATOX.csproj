@@ -21,6 +21,10 @@
 
   <ItemGroup>
     <Compile Update="GraphSetup.cs" />
+
+    <Compile Update="ListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="MultiSegForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -31,5 +35,6 @@
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
+
 
 </Project>

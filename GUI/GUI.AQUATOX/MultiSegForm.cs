@@ -216,7 +216,6 @@ namespace GUI.AQUATOX
                 }
             }
             return true;
-
         }
 
 
@@ -368,7 +367,6 @@ namespace GUI.AQUATOX
                 ProcessLog.Text = "Error rendering chart: " + ex.Message;
                 chart1.Visible = false;
             }
-
         }
 
         private bool ValidFilen(string filen)
@@ -428,9 +426,6 @@ namespace GUI.AQUATOX
             {
                 MessageBox.Show(ex.Message);
             }
-
-            
-
         }
 
         private void SVBox_SelectedIndexChanged(object sender, EventArgs e)  //update chart when dropdown changes
@@ -441,7 +436,21 @@ namespace GUI.AQUATOX
         private void OverlandFlow_Click(object sender, EventArgs e)
         {
             if (!VerifyStreamNetwork()) return;
-
         }
+
+        private void Choose_from_Template_Click(object sender, EventArgs e)
+        {
+            if (AQT2D == null) AQT2D = new AQSim_2D();
+            CheckboxForm CBF = new CheckboxForm();
+            CBF.Text = "Select elements to include in template";
+            List<bool> BoolList = CBF.SelectFromBoxes(AQT2D.MultiSegSimFlags());
+            if (BoolList == null) return;
+
+            string filen = AQT2D.MultiSegSimName(BoolList);
+
+            BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + filen;
+            MessageBox.Show("Selected Template File: " + filen);
+        }
+
     }
 }

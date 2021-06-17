@@ -59,8 +59,15 @@ namespace AQUATOX.Plants
         public TParameter PctSloughed = new TParameter();
         public TParameter PrefRiffle = new TParameter();
         public TParameter PrefPool = new TParameter();
-        public TParameter SalMin_Phot, SalMax_Phot, SalCoeff1_Phot, SalCoeff2_Phot = new TParameter();
-        public TParameter SalMin_Mort, SalMax_Mort, SalCoeff1_Mort, SalCoeff2_Mort = new TParameter();
+        public TParameter SalMin_Phot = new TParameter();
+        public TParameter SalMax_Phot = new TParameter();
+        public TParameter SalCoeff1_Phot = new TParameter();
+        public TParameter SalCoeff2_Phot = new TParameter();
+
+        public TParameter SalMin_Mort = new TParameter();
+        public TParameter SalMax_Mort = new TParameter();
+        public TParameter SalCoeff1_Mort = new TParameter();
+        public TParameter SalCoeff2_Mort = new TParameter();
 
         public void Setup()
         {

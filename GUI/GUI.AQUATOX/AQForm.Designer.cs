@@ -104,7 +104,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(146, 72);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(649, 23);
+            this.progressBar1.Size = new System.Drawing.Size(659, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -185,7 +185,7 @@ namespace GUI.AQUATOX
             this.SVListBox.ItemHeight = 15;
             this.SVListBox.Location = new System.Drawing.Point(459, 110);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(336, 304);
+            this.SVListBox.Size = new System.Drawing.Size(346, 259);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -202,7 +202,7 @@ namespace GUI.AQUATOX
             // NetCDF
             // 
             this.NetCDF.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NetCDF.Location = new System.Drawing.Point(357, 424);
+            this.NetCDF.Location = new System.Drawing.Point(357, 381);
             this.NetCDF.Name = "NetCDF";
             this.NetCDF.Size = new System.Drawing.Size(56, 25);
             this.NetCDF.TabIndex = 11;
@@ -353,40 +353,45 @@ namespace GUI.AQUATOX
             // 
             this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.AddButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.AddButton.Location = new System.Drawing.Point(462, 425);
+            this.AddButton.Location = new System.Drawing.Point(462, 382);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(60, 25);
             this.AddButton.TabIndex = 21;
             this.AddButton.Text = "Add";
             this.AddButton.UseVisualStyleBackColor = true;
+            this.AddButton.Visible = false;
+            this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
             // EditButton
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.EditButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditButton.Location = new System.Drawing.Point(594, 425);
+            this.EditButton.Location = new System.Drawing.Point(594, 382);
             this.EditButton.Name = "EditButton";
             this.EditButton.Size = new System.Drawing.Size(60, 25);
             this.EditButton.TabIndex = 20;
             this.EditButton.Text = "Edit";
             this.EditButton.UseVisualStyleBackColor = true;
+            this.EditButton.Visible = false;
             this.EditButton.Click += new System.EventHandler(this.EditButton_Click);
             // 
             // DeleteButton
             // 
             this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteButton.Location = new System.Drawing.Point(528, 425);
+            this.DeleteButton.Location = new System.Drawing.Point(528, 382);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(60, 25);
             this.DeleteButton.TabIndex = 19;
             this.DeleteButton.Text = "Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
+            this.DeleteButton.Visible = false;
+            this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
             // MultiSegButton
             // 
             this.MultiSegButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.MultiSegButton.Location = new System.Drawing.Point(26, 424);
+            this.MultiSegButton.Location = new System.Drawing.Point(26, 381);
             this.MultiSegButton.Name = "MultiSegButton";
             this.MultiSegButton.Size = new System.Drawing.Size(138, 24);
             this.MultiSegButton.TabIndex = 22;
@@ -396,7 +401,7 @@ namespace GUI.AQUATOX
             // 
             // AQTTestForm
             // 
-            this.ClientSize = new System.Drawing.Size(812, 471);
+            this.ClientSize = new System.Drawing.Size(822, 428);
             this.Controls.Add(this.MultiSegButton);
             this.Controls.Add(this.AddButton);
             this.Controls.Add(this.EditButton);

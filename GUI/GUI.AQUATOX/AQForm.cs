@@ -117,13 +117,19 @@ namespace GUI.AQUATOX
                 string json = File.ReadAllText(openFileDialog1.FileName);
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
-                if (err != "") {MessageBox.Show(err); return; }
+                if (err != "") { MessageBox.Show(err); return; }
 
                 aQTS = Sim;
                 aQTS.AQTSeg.SetMemLocRec();
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
                 ButtonPanel.Visible = true;
+                AddButton.Visible = true;
+                DeleteButton.Visible = true;
+                EditButton.Visible = true;
+
                 integrate.Visible = true;
+
+
                 aQTS.ArchiveSimulation();
                 ShowStudyInfo();
 
@@ -194,9 +200,9 @@ namespace GUI.AQUATOX
         {
             string SimName = "";
 
-            if (aQTS == null) { MessageBox.Show("No Simulation Loaded");  return; }
-                else
-                {
+            if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
+            else
+            {
                 //if (aQTS.Has_Chemicals())
                 //{
                 //    AQTCM = new(AQTChemicalModel(aQTS));
@@ -344,7 +350,7 @@ namespace GUI.AQUATOX
             ChemButton.Enabled = aQTS.AQTSeg.Has_Chemicals();
 
             if (!aQTS.HasResults()) RunStatusLabel.Text = "No Saved Runs";
-                else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
+            else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
 
             aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
             SVListBox.Visible = true;
@@ -369,7 +375,7 @@ namespace GUI.AQUATOX
                     TToxics TC = TSV as TToxics;
                     Chemforms[nchm] = new Param_Form();
 
-                    ChemicalRecord CR = TC.ChemRec;  CR.Setup();
+                    ChemicalRecord CR = TC.ChemRec; CR.Setup();
                     TParameter[] PPS = CR.InputArray();
 
                     Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false);
@@ -385,7 +391,7 @@ namespace GUI.AQUATOX
 
             SiteRecord SR = aQTS.AQTSeg.Location.Locale;
             SR.Setup();
-            TParameter[] PPS = SR.InputArray(); 
+            TParameter[] PPS = SR.InputArray();
 
             Siteform.EditParams(ref PPS, "Site Parameters", false);
         }
@@ -397,7 +403,7 @@ namespace GUI.AQUATOX
             if (aQTS == null) return;
 
             ReminRecord RR = aQTS.AQTSeg.Location.Remin;
-            RR.Setup(); 
+            RR.Setup();
             TParameter[] PPS = RR.InputArray();
 
             Reminform.EditParams(ref PPS, "Remineralization Parameters", false);
@@ -412,7 +418,7 @@ namespace GUI.AQUATOX
 
             column = new DataColumn();
             column.ColumnName = Param.Symbol;
-            if (table.Columns.Count==0) column.Unique = true;
+            if (table.Columns.Count == 0) column.Unique = true;
             if (Param.Symbol == "") column.ColumnName = Param.Name;
 
             if (Param.GetType() == typeof(TParameter))
@@ -433,14 +439,13 @@ namespace GUI.AQUATOX
 
         }
 
-        int ColNum;
 
-        private void AddCell(ref TParameter Param, DataRow row)
+        private void AddCell(ref TParameter Param, DataRow row, ref int ColNum)
         {
             if (Param is TSubheading) return;
 
             if (Param.GetType() == typeof(TParameter))
-            {   row[ColNum] = Param.Val;
+            { row[ColNum] = Param.Val;
                 row[ColNum + 1] = Param.Comment;
                 ColNum++;
             }
@@ -452,6 +457,28 @@ namespace GUI.AQUATOX
                 row[ColNum] = (Param as TBoolParam).Val;
             else if (Param is TDateParam)
                 row[ColNum] = (Param as TDateParam).Val;
+
+            ColNum++;
+        }
+
+        private void ReadCell(ref TParameter Param, DataRow row, ref int ColNum)
+        {
+            if (Param is TSubheading) return;
+
+            if (Param.GetType() == typeof(TParameter))
+            {
+                Param.Val = (double)row[ColNum];
+                Param.Comment = (string)row[ColNum + 1];
+                ColNum++;
+            }
+            else if (Param is TStringParam)
+                (Param as TStringParam).Val = (string)row[ColNum];
+            else if (Param is TDropDownParam)
+                (Param as TDropDownParam).Val = (string)row[ColNum];
+            else if (Param is TBoolParam)
+                (Param as TBoolParam).Val = (bool)row[ColNum];
+            else if (Param is TDateParam)
+                (Param as TDateParam).Val = (DateTime)row[ColNum];
 
             ColNum++;
         }
@@ -469,44 +496,141 @@ namespace GUI.AQUATOX
 
         private bool ParmArray_to_Table_Row(ref DataTable table, TParameter[] arr)
         {
-            ColNum = 0;
+            int ColNum = 0;
             DataRow row = table.NewRow();
             for (int i = 0; i < arr.Length; i++)
-                  AddCell(ref arr[i], row);
+                AddCell(ref arr[i], row, ref ColNum);
             table.Rows.Add(row);
             return true;
         }
 
-        private TParameter[] Table_to_ParmArray(DataTable table)
+        private List<ReminRecord> Table_to_ReminDB(DataTable table)
         {
-            TParameter[] arr = new TParameter[table.Rows.Count];
-            ColNum = 0;
-            DataRow row = table.NewRow();
-            for (int i = 0; i < arr.Length; i++)
-                // AddCell(ref arr[i], row);  workhere
-            table.Rows.Add(row);
-            return arr;
+            List<ReminRecord> SRL = new List<ReminRecord>();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                int ColNum = 0;
+                ReminRecord SR = new ReminRecord();
+                SR.Setup();
+                DataRow row = table.Rows[i];
+                TParameter[] TPS = SR.InputArray();
+                for (int j = 0; j < TPS.Length; j++)
+                {
+                    ReadCell(ref TPS[j], row, ref ColNum);
+                }
+                SRL.Add(SR);
+            }
+            return SRL;
         }
+
+        private List<SiteRecord> Table_to_SiteDB(DataTable table)
+        {
+            List<SiteRecord> SRL = new List<SiteRecord>();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                int ColNum = 0;
+                SiteRecord SR = new SiteRecord();
+                SR.Setup();
+                DataRow row = table.Rows[i];
+                TParameter[] TPS = SR.InputArray();
+                for (int j = 0; j < TPS.Length; j++)
+                {
+                    ReadCell(ref TPS[j], row, ref ColNum);
+                }
+                SRL.Add(SR);
+            }
+            return SRL;
+        }
+
+        private List<ChemicalRecord> Table_to_ChemDB(DataTable table)
+        {
+            List<ChemicalRecord> SRL = new List<ChemicalRecord>();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                int ColNum = 0;
+                ChemicalRecord SR = new ChemicalRecord();
+                SR.Setup();
+                DataRow row = table.Rows[i];
+                TParameter[] TPS = SR.InputArray();
+                for (int j = 0; j < TPS.Length; j++)
+                {
+                    ReadCell(ref TPS[j], row, ref ColNum);
+                }
+                SRL.Add(SR);
+            }
+            return SRL;
+        }
+
+        private List<PlantRecord> Table_to_PlantDB(DataTable table)
+        {
+            List<PlantRecord> SRL = new List<PlantRecord>();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                int ColNum = 0;
+                PlantRecord SR = new PlantRecord();
+                SR.Setup();
+                DataRow row = table.Rows[i];
+                TParameter[] TPS = SR.InputArray();
+                for (int j = 0; j < TPS.Length; j++)
+                {
+                    ReadCell(ref TPS[j], row, ref ColNum);
+                }
+                SRL.Add(SR);
+            }
+            return SRL;
+        }
+
+        private List<AnimalRecord> Table_to_AnimDB(DataTable table)
+        {
+            List<AnimalRecord> ARL = new List<AnimalRecord>();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                int ColNum = 0;
+                AnimalRecord AR = new AnimalRecord();
+                AR.Setup();
+                DataRow row = table.Rows[i];
+                TParameter[] TPS = AR.InputArray();
+                for (int j = 0; j < TPS.Length; j++)
+                {
+                    ReadCell(ref TPS[j], row, ref ColNum);
+                }
+                ARL.Add(AR);
+            }
+            return ARL;
+        }
+
 
 
         private void AnimDB_Click(object sender, EventArgs e)
         {
-            string json = File.ReadAllText("..\\..\\..\\DB\\AnimalLib.JSON");
+            string fileN = ReadDBPath("AnimalLib.JSON");
+            if (fileN == "") return;
+
+            string json = File.ReadAllText(fileN);
             List<AnimalRecord> AnimDB = JsonConvert.DeserializeObject<List<AnimalRecord>>(json);
 
-            AnimalRecord AIR = AnimDB[0];  AIR.Setup();
-            TParameter[] PPS = AIR.InputArray();
-            
-            DataTable table = ParmArray_to_Table("AnimalGrid", PPS);
+            AnimalRecord SR = AnimDB[0]; SR.Setup();
+            TParameter[] PPS = SR.InputArray();
 
+            DataTable table = ParmArray_to_Table("AnimGrid", PPS);
             for (int r = 0; r < AnimDB.Count; r++)
             {
                 ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table); 
+            if (gf.ShowGrid(table))
+            {
+                if (gf.gridChange)
+                {
+                    fileN = ReadSaveName();
+                    if (fileN == "") return;
 
+                    List<AnimalRecord> AnimDB2 = Table_to_AnimDB(table);
+                    json = JsonConvert.SerializeObject(AnimDB2);
+                    File.WriteAllText(fileN, json);
+                }
+            }
         }
 
         private void AnimButton_Click(object sender, EventArgs e)
@@ -517,7 +641,7 @@ namespace GUI.AQUATOX
 
             int nanm = 0;
             foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
-              if (TSV.IsAnimal())
+                if (TSV.IsAnimal())
                 {
                     TAnimal TA = TSV as TAnimal;
                     AnimDB.Add(TA.PAnimalData);
@@ -530,7 +654,7 @@ namespace GUI.AQUATOX
             TParameter[] PPS = AIR.InputArray();
 
             DataTable table = ParmArray_to_Table("AnimalGrid", PPS);
-                        for (int r = 0; r < AnimDB.Count; r++)
+            for (int r = 0; r < AnimDB.Count; r++)
             {
                 ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
             }
@@ -541,50 +665,71 @@ namespace GUI.AQUATOX
 
         private void ReminDB_Click(object sender, EventArgs e)
         {
-                string json = File.ReadAllText("..\\..\\..\\DB\\ReminLib.JSON");
-                List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
+            string fileN = ReadDBPath("ReminLib.JSON");
+            if (fileN == "") return;
 
-                ReminRecord RR = ReminDB[0]; RR.Setup();
-                TParameter[] PPS = RR.InputArray();
+            string json = File.ReadAllText(fileN);
+            List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
 
-                DataTable table = ParmArray_to_Table("ReminGrid", PPS);
+            ReminRecord SR = ReminDB[0]; SR.Setup();
+            TParameter[] PPS = SR.InputArray();
 
-                for (int r = 0; r < ReminDB.Count; r++)
+            DataTable table = ParmArray_to_Table("ReminGrid", PPS);
+            for (int r = 0; r < ReminDB.Count; r++)
+            {
+                ParmArray_to_Table_Row(ref table, ReminDB[r].InputArray());
+            }
+
+            GridForm gf = new GridForm();
+            if (gf.ShowGrid(table))
+            {
+                if (gf.gridChange)
                 {
-                    ParmArray_to_Table_Row(ref table, ReminDB[r].InputArray());
+                    fileN = ReadSaveName();
+                    if (fileN == "") return;
+
+                    List<ReminRecord> ReminDB2 = Table_to_ReminDB(table);
+                    json = JsonConvert.SerializeObject(ReminDB2);
+                    File.WriteAllText(fileN, json);
                 }
-
-                GridForm gf = new GridForm();
-                gf.ShowGrid(table);
-
+            }
         }
 
         private void ChemDB_Click(object sender, EventArgs e)
         {
-            string json = File.ReadAllText("..\\..\\..\\DB\\ChemLib.JSON");
+            string fileN = ReadDBPath("ChemLib.JSON");
+            if (fileN == "") return;
+
+            string json = File.ReadAllText(fileN);
             List<ChemicalRecord> ChemDB = JsonConvert.DeserializeObject<List<ChemicalRecord>>(json);
 
-            ChemicalRecord CR = ChemDB[0]; CR.Setup();
-            TParameter[] PPS = CR.InputArray();
+            ChemicalRecord SR = ChemDB[0]; SR.Setup();
+            TParameter[] PPS = SR.InputArray();
 
             DataTable table = ParmArray_to_Table("ChemGrid", PPS);
-
             for (int r = 0; r < ChemDB.Count; r++)
             {
                 ParmArray_to_Table_Row(ref table, ChemDB[r].InputArray());
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table);
+            if (gf.ShowGrid(table))
+            {
+                if (gf.gridChange)
+                {
+                    fileN = ReadSaveName();
+                    if (fileN == "") return;
 
+                    List<ChemicalRecord> ChemDB2 = Table_to_ChemDB(table);
+                    json = JsonConvert.SerializeObject(ChemDB2);
+                    File.WriteAllText(fileN, json);
+                }
+            }
         }
 
-        private void SiteDB_Click(object sender, EventArgs e)
+        private string ReadDBPath(string deflt)
         {
-
-
-
-            string fileN = Path.GetFullPath("..\\..\\..\\DB\\SiteLib.JSON");
+            string fileN = Path.GetFullPath("..\\..\\..\\DB\\"+deflt);
             if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No)
@@ -592,10 +737,30 @@ namespace GUI.AQUATOX
                 OpenFileDialog openFileDialog1 = new OpenFileDialog();
                 openFileDialog1.Filter = "Text File|*.txt;*.json";
                 openFileDialog1.Title = "Open a JSON File";
-                if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+                if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return "";
                 fileN = openFileDialog1.FileName;
             }
 
+            return fileN;
+        }
+
+        private string ReadSaveName()
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "JSON files (*.JSON)|*.JSON|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 1;
+            saveFileDialog1.RestoreDirectory = true;
+            saveFileDialog1.OverwritePrompt = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK) return saveFileDialog1.FileName;
+            else return "";
+
+        }
+
+        private void SiteDB_Click(object sender, EventArgs e)
+        {
+            string fileN = ReadDBPath("SiteLib.JSON");
+            if (fileN == "") return;    
 
             string json = File.ReadAllText(fileN);
             List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
@@ -614,27 +779,22 @@ namespace GUI.AQUATOX
             {
                 if (gf.gridChange)
                 {
-                    SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-                    saveFileDialog1.Filter = "JSON files (*.JSON)|*.JSON|All files (*.*)|*.*";
-                    saveFileDialog1.FilterIndex = 1;
-                    saveFileDialog1.RestoreDirectory = true;
-                    saveFileDialog1.OverwritePrompt = true;
+                    fileN = ReadSaveName();
+                    if (fileN == "") return;
 
-                    // SiteDB = Table_to_ParmArray(table);  workhere
-
-                    if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-                    {
-
-                        json = JsonConvert.SerializeObject(SiteDB);
-                        File.WriteAllText(saveFileDialog1.FileName, json);
-                    }
+                    List<SiteRecord> SiteDB2 = Table_to_SiteDB(table);
+                    json = JsonConvert.SerializeObject(SiteDB2);
+                    File.WriteAllText(fileN, json);
                 }
             }
         }
 
         private void PlantsDB_Click(object sender, EventArgs e)
         {
-            string json = File.ReadAllText("..\\..\\..\\DB\\PlantLib.JSON");
+            string fileN = ReadDBPath("PlantLib.JSON");
+            if (fileN == "") return;
+
+            string json = File.ReadAllText(fileN);
             List<PlantRecord> PlantDB = JsonConvert.DeserializeObject<List<PlantRecord>>(json);
 
             PlantRecord PR = PlantDB[0]; PR.Setup();
@@ -647,9 +807,20 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table);
+            if (gf.ShowGrid(table))
+            {
+                if (gf.gridChange)
+                {
+                    fileN = ReadSaveName();
+                    if (fileN == "") return;
 
+                    List<PlantRecord> PlantDB2 = Table_to_PlantDB(table);
+                    json = JsonConvert.SerializeObject(PlantDB2);
+                    File.WriteAllText(fileN, json);
+                }
+            }
         }
+
 
         private void StudyNameBox_TextChanged(object sender, EventArgs e)
         {
@@ -734,6 +905,26 @@ namespace GUI.AQUATOX
         {
             MultiSegForm MSForm = new MultiSegForm();
             MSForm.ShowDialog();
+
+        }
+
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            ListForm LF = new ListForm();
+            List<AllVariables> SVs = null;
+
+            int index = LF.SelectFromList(aQTS.AQTSeg.GetInsertableStates(ref SVs));
+            if (index < 0) return;
+            AllVariables ns = SVs[index];
+
+            // if (ns == AllVariables(H2OTox)) aQTS.AQTSeg.Add_OrgTox_SVs()
+
+            MessageBox.Show("Add state variables still being implemented");  //fixme
+
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
 
         }
     }
