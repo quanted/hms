@@ -288,6 +288,7 @@
             this.SVBox.Name = "SVBox";
             this.SVBox.Size = new System.Drawing.Size(178, 23);
             this.SVBox.TabIndex = 22;
+            this.SVBox.SelectedIndexChanged += new System.EventHandler(this.SVBox_SelectedIndexChanged);
             // 
             // label3
             // 
