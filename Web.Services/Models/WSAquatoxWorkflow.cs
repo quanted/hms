@@ -16,6 +16,7 @@ namespace Web.Services.Models
 {
     public class WSAquatoxWorkflow : AQSim_2D
     {
+
         /// <summary>
         /// Returns the types of flags for getting a base simulation json.
         /// </summary>
@@ -110,7 +111,7 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        /// Itterate over each comid and convert to int.
+        /// Iterate over each comid and convert to int.
         /// </summary>
         private string convertUpstreamToInt(List<string> upstream, out List<int> comids)
         {
@@ -144,22 +145,24 @@ namespace Web.Services.Models
                     // Get the sim output from database for current comid_taskid
                     upstream.TryGetValue(item.ToString(), out string value);
                     Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(value);
+                    output.Wait();
 
                     // Convert to string and instantiate a new simulation
-                    string json = JsonConvert.SerializeObject(output.Result.GetValue("input"));
+                    string json = output.Result.GetValue("output").AsString;
                     AQTSim sim = new AQTSim();
                     string error = sim.Instantiate(json);
                     if(error != "") 
                     {
-                        return $"Invalid simulation input.";
+                        return $"Invalid simulation output.";
                     }
 
                     // Archive the simulation to the inherited property: archive
+
                     archiveOutput(item, sim);
                 }
                 catch(Exception ex) 
                 {
-                    return "Invalid input, or unknown eror.";
+                    return "Invalid input, or unknown error.";
                 }
             }
             // No errors return empty string
@@ -178,7 +181,7 @@ namespace Web.Services.Models
             foreach (int SrcId in comids)
             {
                 nSources++;
-                Pass_Data(sim, SrcId, nSources);
+                Pass_Data(sim, SrcId, nSources, this.archive[SrcId]);
             };
         }
 

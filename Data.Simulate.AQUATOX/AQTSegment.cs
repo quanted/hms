@@ -2988,6 +2988,10 @@ namespace AQUATOX.AQTSegment
 
         public TStateVariable GetStatePointer(AllVariables S, T_SVType T, T_SVLayer L)
         {
+            if (MemLocRec == null)
+            {
+                SetMemLocRec();
+            }
             return MemLocRec[(int)S, (int)T, (int)L];
         }
 
