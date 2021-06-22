@@ -12,19 +12,34 @@ using Newtonsoft.Json;
 
 namespace Web.Services.Controllers
 {
-    /***************** Aquatox Workflow Input Class **********************/
+    /******************** Aquatox Workflow Input Class ***********************/
     /// <summary>
-    /// 
+    /// Input class for Aquatox Workflow POST request. 
     /// </summary>
     public class WSAquatoxWorkflowInput
     {
+        /// <summary>
+        /// The json for the current Aquatox simulation/comid.
+        /// </summary>
         public JObject Input { get; set; }
+
+        /// <summary>
+        /// A dictionary of [comids : comid_taskids]
+        /// </summary>
         public Dictionary<string, string> Upstream { get; set; }
+
+        /// <summary>
+        /// A dictionary of data sources.
+        /// </summary>
         public Dictionary<string, string> Data_Sources { get; set; }
+
+        /// <summary>
+        /// A dictionary of [comid : dependency_type]
+        /// </summary>
         public Dictionary<string, string> Dependencies { get; set; }
     }
 
-    /***************** Aquatox Workflow Contaminant Matrix Input Class **********************/
+    /*********** Aquatox Workflow Contaminant Matrix Input Class *************/
     /// <summary>
     /// 
     /// </summary>
@@ -33,7 +48,7 @@ namespace Web.Services.Controllers
         Dictionary<string, List<string>> matrix { get; set; }
     }
 
-    /***************** Swagger Example JSONs **********************/
+    /*********************** Swagger Example JSONs ***************************/
     /// <summary>
     /// AQUATOX workflow input example. 
     /// </summary>
@@ -81,6 +96,7 @@ namespace Web.Services.Controllers
         }
     }
 
+    /************************** Controller Class *****************************/
     /// <summary>
     /// AQUATOX workflow controller class.
     /// </summary>

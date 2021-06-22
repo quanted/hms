@@ -98,7 +98,7 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-        private void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)  // time series output must currently be in m3/s
+        public void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)  // time series output must currently be in m3/s
         {
             TVol.Calc_Method = VolumeMethType.Manning;
 
