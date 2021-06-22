@@ -118,7 +118,7 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        ///  foreach comid => switch streamflow => AQSim_2D.UpdateDischarge()
+        ///  foreach dependency => switch streamflow => AQSim_2D.UpdateDischarge()
         /// </summary>
         /// <returns>Error message or empty string</returns>
         private string CheckDependencies(WSAquatoxWorkflowInput input  ,AQTSim sim) 
@@ -126,27 +126,16 @@ namespace Web.Services.Models
             // Iterate over dependencies dict
             foreach(KeyValuePair<string, string> item in input.Dependencies)
             {
-                // Get simulation for the current comid to be updated from database. 
-                // JC is handling this by resaving the json back to file. 
-                //
-                // So resave this back to database then? Or carry it around for remainder of sim2D? 
-                // JC is updating discharge for every comid always. Should we do that too or when only as dependency? 
-                //
-                // This might best be handled in ArchiveUpstreamOutputs() to mimimize database reads and to 
-                // eliminate handling of multiple comid sims at a time. 
-                //
-                // 
-
                 // Switch based on dependency value, eg: streamflow, etc..
-                switch(item.Value)
+                switch(item.Key)
                 {
                     case "streamflow":
-                        // Need to get flow data for updating discharge. Where/how? 
-                        TimeSeriesOutput TSO = new TimeSeriesOutput(); //submitHydrologyRequest(comid, out string errstr);
+                        // Get streamflow from database
+                        TimeSeriesOutput TSO = new TimeSeriesOutput();
                         UpdateDischarge(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO);
                         break;
                     default:
-                        return "Unrecognized dependency: " + item.Value;
+                        return "Unrecognized dependency: " + item.Key;
                 }
             }
             return "";

@@ -34,7 +34,7 @@ namespace Web.Services.Controllers
         public Dictionary<string, string> Data_Sources { get; set; }
 
         /// <summary>
-        /// A dictionary of [comid : dependency_type]
+        /// A dictionary of [dependency_type : streamflow_taskid]
         /// </summary>
         public Dictionary<string, string> Dependencies { get; set; }
     }
