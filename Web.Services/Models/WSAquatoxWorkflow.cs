@@ -207,7 +207,7 @@ namespace Web.Services.Models
         /// <param name="comids">List of comids</param>
         /// <param name="upstream">Dictionary of comids and taskids</param>
         /// <returns>Error message or empty string</returns>
-        private string ArchiveUpstreamOutputs(List<int> comids, Dictionary<string, string> upstream)
+        public string ArchiveUpstreamOutputs(List<int> comids, Dictionary<string, string> upstream)
         {
             foreach(int item in comids)
             {
@@ -232,7 +232,7 @@ namespace Web.Services.Models
                 }
                 catch(Exception ex) 
                 {
-                    return "Invalid input, or unknown error.";
+                    return "Invalid simulation output, or unknown error.";
                 }
             }
             // No errors return empty string
