@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System;
 using Data;
 using Web.Services.Models;
-using System.Text.Json;
-using Serilog;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 

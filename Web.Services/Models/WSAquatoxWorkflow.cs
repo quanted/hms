@@ -12,11 +12,12 @@ using MongoDB.Bson;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Web.Services.Models
 {
     /// <summary>
-    /// Web.Services model class for running a 2D Aquatox simulation.
+    /// Web.Services model class for running an Aquatox simulation.
     /// </summary>
     public class WSAquatoxWorkflow : AQSim_2D
     {
@@ -58,19 +59,35 @@ namespace Web.Services.Models
                 flagOptions.Add(Convert.ToBoolean(item.Value));
             }
 
-            // Construct path and return base json
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions));
+            return GetBaseJsonHelper(flagOptions);
+        }
 
+        /// <summary>
+        /// Helper for returning file from GetBaseJson. Made in an attempt to make code 
+        /// modular and more readable.
+        /// </summary>
+        /// <param name="flagOptions">List of flags</param>
+        /// <returns>Base json string from file</returns>
+        public string GetBaseJsonHelper(List<bool> flagOptions)
+        {
             // Check local file path
-            if (File.Exists(path))
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions))))
             {
-                return File.ReadAllText(path);
+                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions)));
             }
             // Check for docker file path 
             else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + MultiSegSimName(flagOptions)))
             {
                 return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + MultiSegSimName(flagOptions));
+            }
+            // Check for local testing file path 
+            else if(File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions))))
+            {
+                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions)));
             }
             // Error 
             else
@@ -91,11 +108,16 @@ namespace Web.Services.Models
         {
             // Instantiate new simulation
             AQTSim sim = new AQTSim();
-            errormsg = sim.Instantiate(json);
+            try { errormsg = sim.Instantiate(json); }
+            catch(NullReferenceException ex)
+            {
+                // Can't instantiate from empty sim or incorrect sim format given
+                errormsg = "Error starting simulation. Incorrect simulation input given.";
+            }
             if(errormsg != "") { return; }
 
             // Check for dependencies in input
-            errormsg = CheckDependencies(input, sim);
+            errormsg = CheckDependencies(input.Dependencies, sim);
             if(errormsg != "") { return; }
 
             // Convert upstream comids to ints to run with AQSim_2D
@@ -118,20 +140,34 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        ///  foreach dependency => switch streamflow => AQSim_2D.UpdateDischarge()
+        ///  Iterates over dictionary of dependencies and performs the appropriate action.
         /// </summary>
+        /// <param name="dependencies">Dictionary of: [dependency_type : dependency_taskid]</param>
+        /// <param name="sim">Current segment simulation</param>
         /// <returns>Error message or empty string</returns>
-        private string CheckDependencies(WSAquatoxWorkflowInput input  ,AQTSim sim) 
+        public string CheckDependencies(Dictionary<string, string> dependencies, AQTSim sim) 
         {
             // Iterate over dependencies dict
-            foreach(KeyValuePair<string, string> item in input.Dependencies)
+            foreach(KeyValuePair<string, string> item in dependencies)
             {
                 // Switch based on dependency value, eg: streamflow, etc..
                 switch(item.Key)
                 {
                     case "streamflow":
                         // Get streamflow from database
+                        Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", item.Value);
+                        output.Wait();
+                        // Get result as string and deserialize to time series output 
                         TimeSeriesOutput TSO = new TimeSeriesOutput();
+                        try
+                        {
+                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result.GetValue("output").AsString);
+                        }
+                        catch(Exception ex)
+                        {
+                            return "Invalid Time Series Output.";
+                        }
+                        // Update stream discharge for current segment simulation
                         UpdateDischarge(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO);
                         break;
                     default:
@@ -144,6 +180,8 @@ namespace Web.Services.Models
         /// <summary>
         /// Iterate over each comid and convert to int.
         /// </summary>
+        /// <param name="upstream">List of comids as strings</param>
+        /// <param name="comids">List of comids converted to ints</param>
         /// <returns>Error message or empty string</returns>
         private string ConvertUpstreamToInt(List<string> upstream, out List<int> comids)
         {
@@ -177,7 +215,7 @@ namespace Web.Services.Models
                 {
                     // Get the sim output from database for current comid_taskid
                     upstream.TryGetValue(item.ToString(), out string value);
-                    Task<BsonDocument> output = Utilities.MongoDB.FindByTaskID(value);
+                    Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", value);
                     output.Wait();
 
                     // Convert to string and instantiate a new simulation
@@ -220,6 +258,7 @@ namespace Web.Services.Models
         /// <summary>
         /// Utility function to check for error by API controller.
         /// </summary>
+        /// <param name="errorMsg">Error message</param>
         /// <returns>ITimeSeriesOutput with error</returns>
         public ITimeSeriesOutput CheckForErrors(string errorMsg)
         {
