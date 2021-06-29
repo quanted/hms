@@ -36,7 +36,15 @@ namespace Web.Services.Models
             var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
             List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, huc);
             result.Add("network", networkTable);
-            List<List<int>> segOrder = this.generateOrder(networkTable);
+            List<List<int>> segOrder = new List<List<int>>();
+            if (mainstem)
+            {
+                segOrder = this.generateMainstemOrder(networkTable);
+            }
+            else
+            {
+                segOrder = this.generateOrder(networkTable);
+            }
             result.Add("order", segOrder);
             Dictionary<string, List<string>> sourceComIDs = this.getSourceComids(segOrder, networkTable);
             result.Add("sources", sourceComIDs);
@@ -66,14 +74,14 @@ namespace Web.Services.Models
                 {
                     string comid2 = table[j][0].ToString();
                     int hydroseq2 = Int32.Parse(table[j][1].ToString());
-                    if (hydroseq2 == dnhydroseq)
+                    if (hydroseq2 == dnhydroseq && !comid.Equals(comid2))
                     {
                         sourceCOMIDs[comid2].Add(comid);
                     }
                 }
                 if(uphydroseq != 0 && !hydroList.Contains(uphydroseq))
                 {
-                    string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + hydroseq.ToString();
+                    string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydroseq.ToString();
                     Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
                     sourceCOMIDs[comid].Add(sourceComid["ComID"]);
                     boundaryCOMIDS.Add(sourceComid["ComID"]);
@@ -125,6 +133,73 @@ namespace Web.Services.Models
                     else if (seqOrder[j].Contains(uphydroseq))
                     {
                         seq_j = j - 1;
+                        break;
+                    }
+                }
+                if (seq_j == -1)
+                {
+                    List<int> newOrderLevel = new List<int>();
+                    newOrderLevel.Add(comid);
+                    comidOrder = comidOrder.Prepend(newOrderLevel).ToList();
+                    List<int> newSeqLevel = new List<int>();
+                    newSeqLevel.Add(hydroseq);
+                    seqOrder = seqOrder.Prepend(newSeqLevel).ToList();
+                }
+                else
+                {
+                    comidOrder[seq_j].Add(comid);
+                    seqOrder[seq_j].Add(hydroseq);
+                }
+            }
+            int nOrder = comidOrder.Count;
+            for (int i = nOrder - 1; i >= 0; i--)
+            {
+                if (comidOrder[i].Count == 0)
+                {
+                    comidOrder.RemoveAt(i);
+                }
+            }
+            comidOrder.Reverse();
+
+            return comidOrder;
+        }
+
+        public List<List<int>> generateMainstemOrder(List<List<object>> networkTable)
+        {
+
+            List<int> dag = new List<int>();
+            for (int i = 1; i <= networkTable.Count - 1; i++)
+            {
+                int hydroseq = Int32.Parse(networkTable[i][1].ToString());
+                dag.Add(hydroseq);
+            }
+
+            List<List<int>> seqOrder = new List<List<int>>();
+            seqOrder.Add(new List<int>()
+            {
+                Int32.Parse(networkTable[networkTable.Count-1][1].ToString())
+            });
+            List<List<int>> comidOrder = new List<List<int>>();
+            comidOrder.Add(new List<int>()
+            {
+                Int32.Parse(networkTable[networkTable.Count-1][0].ToString())
+            });
+            for (int i = 2; i <= dag.Count; i++)
+            {
+                seqOrder.Add(new List<int>());
+                comidOrder.Add(new List<int>());
+            }
+            for (int i = dag.Count-1; i >= 1; i--)
+            {
+                int comid = Int32.Parse(networkTable[i][0].ToString());
+                int hydroseq = Int32.Parse(networkTable[i][1].ToString());
+                int dnhydroseq = Int32.Parse(networkTable[i][3].ToString());
+                int seq_j = 0;
+                for (int j = seqOrder.Count - 1; j >= 0; j--)
+                {
+                    if (seqOrder[j].Contains(dnhydroseq))
+                    {
+                        seq_j = j + 1;
                         break;
                     }
                 }
