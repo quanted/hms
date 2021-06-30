@@ -69,6 +69,10 @@ namespace Utilities
                                 {
                                     data.Add(k, v);
                                 }
+                                else
+                                {
+                                    data[k] = data[k] + "," + v;
+                                }
                             }
                         }
                     }
