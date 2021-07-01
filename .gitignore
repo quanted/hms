@@ -37,3 +37,4 @@ exception_log.txt
 
 # test files
 *.opencover.xml
+.vscode

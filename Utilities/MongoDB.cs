@@ -29,19 +29,17 @@ namespace Utilities
                 { "data", BsonValue.Create(data) }
             };
             await collection.InsertOneAsync(newDump);
-
         }
 
         /// <summary>
-        /// Given a taskId, finds a single result that matches it.
+        /// Given a databaseName, collectionName, and taskId: finds a single result that matches.
         /// </summary>
-        /// <param name="taskID"></param>
+        /// <param name="databaseName">Database</param>
+        /// <param name="collectionName">Collection</param>
+        /// <param name="taskID">Task ID</param>
         /// <returns></returns>
-        public static async Task<BsonDocument> FindByTaskID(string taskID)
+        public static async Task<BsonDocument> FindByTaskIDAsync(string databaseName, string collectionName, string taskID)
         {
-            string databaseName = "hms_workflows"; 
-            string collectionName = "data";
-
             DateTime now = DateTime.Now;
             string host = (Environment.GetEnvironmentVariable("MONGODB") != null) ? Environment.GetEnvironmentVariable("MONGODB") : "localhost";
             var settings = new MongoClientSettings
@@ -53,6 +51,26 @@ namespace Utilities
             var collection = db.GetCollection<BsonDocument>(collectionName);
             var filter = Builders<BsonDocument>.Filter.Eq("_id", taskID);
             return await collection.Find(filter).SingleAsync();
+        }
+
+        /// <summary>
+        /// Given a databaseName, collectionName, and data: inserts a single entry.
+        /// </summary>
+        /// <param name="databaseName">Database</param>
+        /// <param name="collectionName">Collection</param>
+        /// <param name="data">Data to insert</param>
+        public static void InsertOne(string databaseName, string collectionName, BsonDocument data)
+        {
+            DateTime now = DateTime.Now;
+            string host = (Environment.GetEnvironmentVariable("MONGODB") != null) ? Environment.GetEnvironmentVariable("MONGODB") : "localhost";
+            var settings = new MongoClientSettings
+            {
+                Server = new MongoServerAddress(host, 27017)
+            };
+            var client = new MongoClient(settings);
+            IMongoDatabase db = client.GetDatabase(databaseName);
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            collection.InsertOne(data);
         }
     }
 }
