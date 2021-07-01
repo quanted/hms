@@ -98,11 +98,7 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-<<<<<<< HEAD
-        private void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput ATSO, bool useVelocity)  // time series output must currently be in m3/s
-=======
-        public void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)  // time series output must currently be in m3/s
->>>>>>> 16ad4aff3f0f0620c77e49d36f18f7793785e2a2
+        public void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput ATSO, bool useVelocity)  // time series output must currently be in m3/s
         {
             if (useVelocity)
             {
