@@ -57,8 +57,6 @@ namespace Animals.AQUATOX
             if (checkvol != "") return checkvol;
 
             return AQSim.AQTSeg.AQTAnimalModel_CheckDataRequirements();
-
-            return "";
         }
 
     }

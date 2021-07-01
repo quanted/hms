@@ -1,5 +1,6 @@
 ﻿using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
+using AQUATOX.OrgMatter;
 using AQUATOX.Volume;
 using Data;
 using Globals;
@@ -7,6 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -27,6 +29,7 @@ namespace GUI.AQUATOX
         private Chart chart1 = new Chart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
+        DataTable OverlandTable = null;
 
         public MultiSegForm()
         {
@@ -200,7 +203,6 @@ namespace GUI.AQUATOX
             {
                 try
                 {
-                    AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
                     if (!ValidFilen(BaseDir + "StreamNetwork.JSON"))
                     {
                         AddToProcessLog("Cannot find stream network file " + BaseDir + "StreamNetwork.JSON");
@@ -225,6 +227,8 @@ namespace GUI.AQUATOX
             string BaseDir = basedirBox.Text;
 
             if (!VerifyStreamNetwork()) return;
+
+            AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
 
             for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
             {
@@ -292,7 +296,7 @@ namespace GUI.AQUATOX
             bs.DataSource = AQT2D.SVList;
             SVBox.DataSource = bs;   //update state variable list for graphing, CSV
 
-            // Get Deron the size of the archive
+            OutputPanel.Enabled = true;
 
             AddToProcessLog("Model execution complete");
         }
@@ -375,6 +379,17 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        private AQTSim InstantiateBaseJSON()
+        {
+            if (!ValidFilen(BaseJSONBox.Text)) { MessageBox.Show("Specify Valid File in Base JSON"); return null; }
+            string json = File.ReadAllText(BaseJSONBox.Text);
+
+            AQTSim Sim = new AQTSim();
+            string err = Sim.Instantiate(json);
+            if (err != "") { MessageBox.Show(err); return null; }
+            return Sim;
+        }
+
         private string MasterSetupJson()
         {
             string msfilen = basedirBox.Text + "MasterSetup.json";
@@ -384,12 +399,9 @@ namespace GUI.AQUATOX
             }
             else  // create the master record from the base file
             {
-                if (!ValidFilen(BaseJSONBox.Text)) return "";
-                string json = File.ReadAllText(BaseJSONBox.Text);
+                AQTSim Sim = InstantiateBaseJSON();
+                if (Sim == null) return "";
 
-                AQTSim Sim = new AQTSim();
-                string err = Sim.Instantiate(json);
-                if (err != "") { MessageBox.Show(err); return ""; }
                 Setup_Record SR = Sim.AQTSeg.PSetup;
                 string msr = JsonConvert.SerializeObject(SR);
                 File.WriteAllText(msfilen, msr);
@@ -436,6 +448,83 @@ namespace GUI.AQUATOX
         private void OverlandFlow_Click(object sender, EventArgs e)
         {
             if (!VerifyStreamNetwork()) return;
+
+            if (OverlandTable == null)
+            {   // set up input table based on base JSON specification 
+
+                // To be replaced with call to AQT2D.GetOverlandTable(string BaseJSON);
+
+                OverlandTable = new DataTable();
+
+                AQTSim Sim = InstantiateBaseJSON();
+                if (Sim == null) return;
+
+                OverlandTable.Columns.Add(new DataColumn("COMID"));
+
+                TStateVariable TNH4 = Sim.AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+                TStateVariable TNO3 = Sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+                TStateVariable TTSP = Sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+                TStateVariable TOM = Sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+
+                bool HasN = (TNH4 != null);
+                bool HasP = (TTSP != null);
+                bool HasOM = (TOM != null);
+
+                if (HasN)
+                {
+                    OverlandTable.Columns.Add(new DataColumn("Ammonia (g/d)", System.Type.GetType("System.Double")));
+                    OverlandTable.Columns.Add(new DataColumn("Nitrate (g/d)", System.Type.GetType("System.Double")));
+                }
+
+                if (HasP)
+                    OverlandTable.Columns.Add(new DataColumn("Phosphate (g/d)", System.Type.GetType("System.Double")));
+
+                if (HasOM)
+                    OverlandTable.Columns.Add(new DataColumn("Organic Matter (g/d)", System.Type.GetType("System.Double")));
+
+                string BaseDir = basedirBox.Text;
+                for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
+                {
+                    int ColNum = 0;
+                    DataRow row = OverlandTable.NewRow();
+                    string comid = AQT2D.SN.network[iSeg][0];
+                    row[0] = comid;
+
+                    string FileN = BaseDir + "AQT_2D_" + comid.ToString() + ".JSON";
+                    if (!ValidFilen(FileN))
+                    {
+                        AddToProcessLog("Cannot Find File " + FileN + ".  Create Linked Inputs before specifying overland flows");
+                        return;
+                    }
+                    string json = File.ReadAllText(FileN);
+
+                    if (HasN)
+                    {
+                        row[ColNum + 1] = TNH4.LoadsRec.Alt_Loadings[2].ConstLoad;
+                        ColNum++;
+                        row[ColNum + 1] = TNO3.LoadsRec.Alt_Loadings[2].ConstLoad;
+                        ColNum++;
+                    }
+
+                    if (HasP)
+                    {
+                        row[ColNum + 1] = TTSP.LoadsRec.Alt_Loadings[2].ConstLoad;
+                        ColNum++;
+                    }
+
+                    if (HasOM)
+                    {
+                        row[ColNum + 1] = ((TDissRefrDetr)TOM).InputRecord.Load.Alt_Loadings[2].ConstLoad;
+                        ColNum++;
+                    }
+
+                    OverlandTable.Rows.Add(row);
+                }
+            }
+
+            GridForm gf = new GridForm();
+            gf.Text = "Add Non-Point Source (Overland) Inputs";
+            if (!gf.ShowGrid(OverlandTable,true,false)) OverlandTable = null;
         }
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
@@ -452,6 +541,22 @@ namespace GUI.AQUATOX
             MessageBox.Show("Selected Template File: " + filen);
         }
 
+        private void basedirBox_Leave(object sender, EventArgs e)
+        {
+            if (!basedirBox.Text.EndsWith("\\")) basedirBox.Text = basedirBox.Text + "\\";
+        }
 
+        private void MultiSegForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.BaseJSON = BaseJSONBox.Text;
+            Properties.Settings.Default.MS_Directory = basedirBox.Text;
+            Properties.Settings.Default.Save();
+        }
+
+        private void MultiSegForm_Shown(object sender, EventArgs e)
+        {
+            BaseJSONBox.Text = Properties.Settings.Default.BaseJSON;  // default is "..\..\..\2D_Inputs\LBR Glenwood 4.JSON"
+            basedirBox.Text = Properties.Settings.Default.MS_Directory; // default is "..\..\..\2D_Inputs\TestDir1\"
+        }
     }
 }

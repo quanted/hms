@@ -72,12 +72,7 @@ namespace AQUATOX.Loadings
         [JsonIgnore] int lastindexread = -1;
 
 
-        public void Translate_File()
-        {
-            // FIXME
-        }
-
-        public void Translate_ITimeSeriesInput()
+        public void Translate_ITimeSeriesInput(int column)   
         {
           if (ITSI!=null)
             {
@@ -98,7 +93,7 @@ namespace AQUATOX.Loadings
                     string dateString = entry.Key+":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; make flexible?
                     if (!(DateTime.TryParse(dateString, out DateTime date)))
                           throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
-                    if (!(Double.TryParse(entry.Value[0], out double val)))
+                    if (!(Double.TryParse(entry.Value[column], out double val)))
                         throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
                     list.Add(date, val);
                 }
@@ -110,7 +105,7 @@ namespace AQUATOX.Loadings
 
         public double ReturnLoad(DateTime TimeIndex)
         {
-            if (!ITSI_Translated) Translate_ITimeSeriesInput();
+            if (!ITSI_Translated) Translate_ITimeSeriesInput(0);
 
             double RetLoad; // Hold Result
 
@@ -127,7 +122,7 @@ namespace AQUATOX.Loadings
         public double ReturnTSLoad(DateTime TimeIndex)
         {
 
-            if (!ITSI_Translated) Translate_ITimeSeriesInput();
+            if (!ITSI_Translated) Translate_ITimeSeriesInput(0);
 
             double RetLoad;
             DateTime TIHolder;

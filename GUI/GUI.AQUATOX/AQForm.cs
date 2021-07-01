@@ -336,7 +336,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table);
+            gf.ShowGrid(table,false,true);
         }
 
         private void ShowStudyInfo()
@@ -619,7 +619,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table))
+            if (gf.ShowGrid(table, false, true))
             {
                 if (gf.gridChange)
                 {
@@ -660,7 +660,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table);
+            gf.ShowGrid(table, false, true);
         }
 
         private void ReminDB_Click(object sender, EventArgs e)
@@ -681,7 +681,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table))
+            if (gf.ShowGrid(table, false, true))
             {
                 if (gf.gridChange)
                 {
@@ -713,7 +713,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table))
+            if (gf.ShowGrid(table, false, true))
             {
                 if (gf.gridChange)
                 {
@@ -775,7 +775,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table))
+            if (gf.ShowGrid(table, false, true))
             {
                 if (gf.gridChange)
                 {
@@ -807,7 +807,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table))
+            if (gf.ShowGrid(table, false, true))
             {
                 if (gf.gridChange)
                 {

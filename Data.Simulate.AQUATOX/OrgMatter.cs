@@ -8,6 +8,7 @@ using AQUATOX.Plants;
 using AQUATOX.Animals;
 using Newtonsoft.Json;
 using Globals;
+using System.Collections.Generic;
 
 namespace AQUATOX.OrgMatter
 {
@@ -658,6 +659,25 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
     {
 
         public DetritalInputRecordType InputRecord = new DetritalInputRecordType();
+
+        public override List<string> GUIRadioButtons()
+        {
+            return new List<string>(new string[] { "Inputs are Organic Matter", "Inputs are Organic Carbon", "Inputs are CBOD" });
+        }
+
+        public override int RadioButtonState()
+        {
+            if (InputRecord.DataType == DetrDataType.Org_Matt) return 0;
+            if (InputRecord.DataType == DetrDataType.Org_Carb) return 1;
+            return 2; // CBOD;
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
+            if (iButton == 0) InputRecord.DataType = DetrDataType.Org_Matt;
+            if (iButton == 1) InputRecord.DataType = DetrDataType.Org_Carb;
+            InputRecord.DataType = DetrDataType.CBOD;
+        }
 
         // -------------------------------------------------------------------------------------------------------
         //Constructor  Init( Ns,  SVT,  aName,  P,  IC,  IsTempl)

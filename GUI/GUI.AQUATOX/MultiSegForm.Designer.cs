@@ -48,7 +48,7 @@
             this.pourIDBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comidBox = new System.Windows.Forms.TextBox();
-            this.panel3 = new System.Windows.Forms.Panel();
+            this.OutputPanel = new System.Windows.Forms.Panel();
             this.chartButton = new System.Windows.Forms.Button();
             this.SVBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -59,7 +59,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.OutputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -81,6 +81,7 @@
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
+            this.basedirBox.Leave += new System.EventHandler(this.basedirBox_Leave);
             // 
             // label2
             // 
@@ -100,7 +101,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(507, 387);
+            this.ProcessLog.Size = new System.Drawing.Size(507, 404);
             this.ProcessLog.TabIndex = 6;
             // 
             // label5
@@ -185,7 +186,7 @@
             this.panel2.Controls.Add(this.pourIDBox);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.comidBox);
-            this.panel2.Location = new System.Drawing.Point(25, 95);
+            this.panel2.Location = new System.Drawing.Point(25, 93);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(259, 145);
             this.panel2.TabIndex = 24;
@@ -212,7 +213,7 @@
             // spanLabel
             // 
             this.spanLabel.AutoSize = true;
-            this.spanLabel.Location = new System.Drawing.Point(35, 76);
+            this.spanLabel.Location = new System.Drawing.Point(41, 76);
             this.spanLabel.Name = "spanLabel";
             this.spanLabel.Size = new System.Drawing.Size(79, 15);
             this.spanLabel.TabIndex = 27;
@@ -229,11 +230,11 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(11, 50);
+            this.label4.Location = new System.Drawing.Point(2, 50);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(103, 15);
+            this.label4.Size = new System.Drawing.Size(119, 15);
             this.label4.TabIndex = 25;
-            this.label4.Text = "Pour Point ComID";
+            this.label4.Text = "(optional) endComID";
             // 
             // pourIDBox
             // 
@@ -245,7 +246,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(70, 22);
+            this.label1.Location = new System.Drawing.Point(76, 22);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 15);
             this.label1.TabIndex = 23;
@@ -259,17 +260,18 @@
             this.comidBox.TabIndex = 22;
             this.comidBox.Text = "23398915";
             // 
-            // panel3
+            // OutputPanel
             // 
-            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel3.Controls.Add(this.chartButton);
-            this.panel3.Controls.Add(this.SVBox);
-            this.panel3.Controls.Add(this.label3);
-            this.panel3.Controls.Add(this.CSVButton);
-            this.panel3.Location = new System.Drawing.Point(25, 392);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(259, 81);
-            this.panel3.TabIndex = 25;
+            this.OutputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.OutputPanel.Controls.Add(this.chartButton);
+            this.OutputPanel.Controls.Add(this.SVBox);
+            this.OutputPanel.Controls.Add(this.label3);
+            this.OutputPanel.Controls.Add(this.CSVButton);
+            this.OutputPanel.Enabled = false;
+            this.OutputPanel.Location = new System.Drawing.Point(25, 392);
+            this.OutputPanel.Name = "OutputPanel";
+            this.OutputPanel.Size = new System.Drawing.Size(259, 81);
+            this.OutputPanel.TabIndex = 25;
             // 
             // chartButton
             // 
@@ -312,7 +314,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(54, 89);
+            this.label7.Location = new System.Drawing.Point(54, 87);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(121, 15);
             this.label7.TabIndex = 26;
@@ -350,12 +352,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(845, 485);
+            this.ClientSize = new System.Drawing.Size(845, 502);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.OutputPanel);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label5);
@@ -367,11 +369,13 @@
             this.MinimumSize = new System.Drawing.Size(861, 524);
             this.Name = "MultiSegForm";
             this.Text = "MultiSegForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);
+            this.Shown += new System.EventHandler(this.MultiSegForm_Shown);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
-            this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
+            this.OutputPanel.ResumeLayout(false);
+            this.OutputPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -398,7 +402,6 @@
         private System.Windows.Forms.TextBox pourIDBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox comidBox;
-        private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button chartButton;
         private System.Windows.Forms.ComboBox SVBox;
         private System.Windows.Forms.Label label3;
@@ -407,5 +410,6 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Panel OutputPanel;
     }
 }

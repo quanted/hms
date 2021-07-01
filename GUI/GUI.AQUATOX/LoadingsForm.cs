@@ -3,6 +3,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
 using AQUATOX.Loadings;
 using AQUATOX.Plants;
+using AQUATOX.OrgMatter;
 using AQUATOX.Volume;
 using Globals;
 using System;
@@ -24,10 +25,13 @@ namespace GUI.AQUATOX
     public partial class LoadingsForm : Form
     {
         public TStateVariable SV;
+        public int RBReturn = -1;
         private bool GridChanged = false;
+        private bool DetritusScreen = false; //special case where the four suspended and dissolved detritus inputs are governed by one input
+        private string Displayname;
 
         TimeSeriesOutput ATSO;
-        string taskID = null;
+        // string taskID = null;
 
         private TimeSeriesInput TSI = new TimeSeriesInput()
         {
@@ -92,23 +96,44 @@ namespace GUI.AQUATOX
         {
             // Future, add button for frac avail, trophic matrix, biotransformation
             // Future add photoperiod edit for light inputs
-            // Future add TSS TSSolids vs TSSediment
-            // Future add LInk Inflow/outflow warnings?
             // Future manage Detritus Inputs
             // Future CO2 Equilibrium button
-            // Future Exposure Inputs
+            // Future Toxicant Exposure Inputs
 
             int sel_load = 0;
-            VolumePanel.Visible = (SV.NState == AllVariables.Volume);
-            if (SV.NState == AllVariables.Volume)
-                switch ((SV as TVolume).Calc_Method)
-                {
-                    case VolumeMethType.Manning: manningButton.Checked = true; sel_load = 2; break;
-                    case VolumeMethType.KeepConst: KeepConstantButton.Checked = true; sel_load = 1; break;
-                    case VolumeMethType.Dynam: CalcDynamicButton.Checked = true; sel_load = 1; break;
-                    default: KnownVolButton.Checked = true; break;
-                }
-            
+
+            IgnoreLoadingsBox.Text = SV.IgnoreLabel();  // add unique labels for state variables in which the ignore flag has different meanings (e.g. light, pH)
+
+            List<string> RBList = SV.GUIRadioButtons();
+
+            Displayname = SV.PName;
+            DetritusScreen = (SV.NState == AllVariables.DissRefrDetr);
+            if (DetritusScreen) Displayname = "Suspended and Dissolved Detritus";
+
+            RBPanel.Visible = false;
+            if (RBList != null)  // handle dynamic radio button portion of screen depending on list sent from state variable
+            {
+                RBPanel.Visible = true;
+                RBLabel.Text = Displayname + " Options";
+
+                int RBChecked = SV.RadioButtonState();
+
+                RB0.Text = RBList[0];
+                if (RBChecked == 0) RB0.Checked = true;
+
+                RB1.Text = RBList[1];
+                if (RBChecked == 1) RB1.Checked = true;
+
+                RB2.Visible = (RBList.Count > 2);
+                if (RBList.Count > 2)  RB2.Text = RBList[2];
+                if (RBChecked == 2) RB2.Checked = true;
+
+
+                RB3.Visible = (RBList.Count > 3);
+                if (RBList.Count > 3) RB3.Text = RBList[3];
+                if (RBChecked == 3) RB3.Checked = true;
+            }  //end radio button code
+
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
 
             AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
@@ -116,8 +141,10 @@ namespace GUI.AQUATOX
             NotesEdit.Text = SV.LoadNotes1;
             NotesEdit2.Text = SV.LoadNotes2;
 
-            SVNameLabel.Text = SV.PName;
-            ICEdit.Text = SV.InitialCond.ToString("G9");
+            SVNameLabel.Text = Displayname;
+            
+            if (DetritusScreen) ICEdit.Text = ((TDissRefrDetr)SV).InputRecord.InitCond.ToString("G9");  //special case diss&susp detr
+              else ICEdit.Text = SV.InitialCond.ToString("G9");
 
             IgnoreLoadingsBox.Checked = SV.LoadsRec.Loadings.NoUserLoad;
             LoadingsPanel.Visible = !SV.LoadsRec.Loadings.NoUserLoad;
@@ -141,10 +168,25 @@ namespace GUI.AQUATOX
         {
 
             GridChanged = false;
-            if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;
-            else LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
-            UseConstRadio.Checked = LoadShown.UseConstant;
+            if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
+            else if (LTBox.SelectedIndex < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
+
+            if (DetritusScreen) //special case suspended & dissolved detr -- quick implementation, move this logic to .NET later
+            {   // pull-down list is "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved/Particulate", "Labile/Refractory"  special case for detritus
+
+                DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
+                switch (LTBox.SelectedIndex)
+                {
+                    case 0: LoadShown = DIR.Load.Loadings; break;
+                    case 1: LoadShown = DIR.Load.Alt_Loadings[0]; break;
+                    case 2: LoadShown = DIR.Load.Alt_Loadings[2]; break;
+                    case 3: LoadShown = DIR.Percent_Part.Loadings; break;
+                    case 4: LoadShown = DIR.Percent_Refr.Loadings; break;
+                }
+            }
+
+            UseConstRadio.Checked = LoadShown.UseConstant;  // Update interface based on "LoadShown"
             UseTimeSeriesRadio.Checked = !LoadShown.UseConstant;
             dataGridView1.Enabled = !LoadShown.UseConstant;
             ConstLoadBox.Enabled = LoadShown.UseConstant;
@@ -276,8 +318,6 @@ namespace GUI.AQUATOX
             // GUI allowing user to select which HMS loadings to import, time-period, and whether to import the data or link to file/URL
             // option to link to alternative COMID or time-period
 
-
-
             // pull actual time-series into model or link to data
 
             // Make a request body
@@ -308,7 +348,7 @@ namespace GUI.AQUATOX
             }
 
             SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
-            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput();
+            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0);
             ShowGrid();
         }
 
@@ -453,7 +493,8 @@ namespace GUI.AQUATOX
         {
             try
             {
-                SV.InitialCond = double.Parse(ICEdit.Text);
+                if (DetritusScreen) ((TDissRefrDetr)SV).InputRecord.InitCond = double.Parse(ICEdit.Text);  //special case diss&susp detr
+                else  SV.InitialCond = double.Parse(ICEdit.Text);
                 ICEdit.BackColor = Color.White;
             }
             catch
@@ -524,17 +565,15 @@ namespace GUI.AQUATOX
             }
         }
 
-        private void Volume_Choice_Changed(object sender, EventArgs e)
+        private void RB_Changed(object sender, EventArgs e)
         {
-            VolumeMethType newmeth;
+            if (RB0.Checked) RBReturn = 0;
+            else if (RB1.Checked) RBReturn = 1;
+            else if (RB2.Checked) RBReturn = 2;
+            else RBReturn = 3;
 
-            if (manningButton.Checked) newmeth = VolumeMethType.Manning;
-            else if (KeepConstantButton.Checked) newmeth = VolumeMethType.KeepConst;
-            else if (CalcDynamicButton.Checked) newmeth = VolumeMethType.Dynam;
-            else newmeth = VolumeMethType.KnownVal;
-
-            (SV as TVolume).Calc_Method = newmeth;
-
+            SV.SetVarFromRadioButton(RBReturn);
         }
+
     }
 }

@@ -35,12 +35,12 @@ namespace GUI.AQUATOX
             this.ICUnit = new System.Windows.Forms.Label();
             this.IgnoreLoadingsBox = new System.Windows.Forms.CheckBox();
             this.LoadingsPanel = new System.Windows.Forms.Panel();
-            this.VolumePanel = new System.Windows.Forms.Panel();
-            this.KnownVolButton = new System.Windows.Forms.RadioButton();
-            this.CalcDynamicButton = new System.Windows.Forms.RadioButton();
-            this.KeepConstantButton = new System.Windows.Forms.RadioButton();
-            this.manningButton = new System.Windows.Forms.RadioButton();
-            this.label3 = new System.Windows.Forms.Label();
+            this.RBPanel = new System.Windows.Forms.Panel();
+            this.RB3 = new System.Windows.Forms.RadioButton();
+            this.RB2 = new System.Windows.Forms.RadioButton();
+            this.RB1 = new System.Windows.Forms.RadioButton();
+            this.RB0 = new System.Windows.Forms.RadioButton();
+            this.RBLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.TSUnit = new System.Windows.Forms.Label();
             this.LTLabel = new System.Windows.Forms.Label();
@@ -63,7 +63,7 @@ namespace GUI.AQUATOX
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
             this.LoadingsPanel.SuspendLayout();
-            this.VolumePanel.SuspendLayout();
+            this.RBPanel.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -122,7 +122,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoadingsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.LoadingsPanel.Controls.Add(this.VolumePanel);
+            this.LoadingsPanel.Controls.Add(this.RBPanel);
             this.LoadingsPanel.Controls.Add(this.panel1);
             this.LoadingsPanel.Controls.Add(this.HMS_Button);
             this.LoadingsPanel.Controls.Add(this.label2);
@@ -135,76 +135,76 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.Visible = false;
             this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
             // 
-            // VolumePanel
+            // RBPanel
             // 
-            this.VolumePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.VolumePanel.Controls.Add(this.KnownVolButton);
-            this.VolumePanel.Controls.Add(this.CalcDynamicButton);
-            this.VolumePanel.Controls.Add(this.KeepConstantButton);
-            this.VolumePanel.Controls.Add(this.manningButton);
-            this.VolumePanel.Controls.Add(this.label3);
-            this.VolumePanel.Location = new System.Drawing.Point(10, 272);
-            this.VolumePanel.Name = "VolumePanel";
-            this.VolumePanel.Size = new System.Drawing.Size(338, 130);
-            this.VolumePanel.TabIndex = 33;
+            this.RBPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.RBPanel.Controls.Add(this.RB3);
+            this.RBPanel.Controls.Add(this.RB2);
+            this.RBPanel.Controls.Add(this.RB1);
+            this.RBPanel.Controls.Add(this.RB0);
+            this.RBPanel.Controls.Add(this.RBLabel);
+            this.RBPanel.Location = new System.Drawing.Point(13, 13);
+            this.RBPanel.Name = "RBPanel";
+            this.RBPanel.Size = new System.Drawing.Size(338, 130);
+            this.RBPanel.TabIndex = 33;
             // 
-            // KnownVolButton
+            // RB3
             // 
-            this.KnownVolButton.AutoSize = true;
-            this.KnownVolButton.Location = new System.Drawing.Point(38, 97);
-            this.KnownVolButton.Name = "KnownVolButton";
-            this.KnownVolButton.Size = new System.Drawing.Size(236, 19);
-            this.KnownVolButton.TabIndex = 21;
-            this.KnownVolButton.TabStop = true;
-            this.KnownVolButton.Text = "Use Known Vals. (discharge is fn. inflow)";
-            this.KnownVolButton.UseVisualStyleBackColor = true;
-            this.KnownVolButton.CheckedChanged += new System.EventHandler(this.Volume_Choice_Changed);
+            this.RB3.AutoSize = true;
+            this.RB3.Location = new System.Drawing.Point(38, 97);
+            this.RB3.Name = "RB3";
+            this.RB3.Size = new System.Drawing.Size(236, 19);
+            this.RB3.TabIndex = 21;
+            this.RB3.TabStop = true;
+            this.RB3.Text = "Use Known Vals. (discharge is fn. inflow)";
+            this.RB3.UseVisualStyleBackColor = true;
+            this.RB3.CheckedChanged += new System.EventHandler(this.RB_Changed);
             // 
-            // CalcDynamicButton
+            // RB2
             // 
-            this.CalcDynamicButton.AutoSize = true;
-            this.CalcDynamicButton.Location = new System.Drawing.Point(38, 75);
-            this.CalcDynamicButton.Name = "CalcDynamicButton";
-            this.CalcDynamicButton.Size = new System.Drawing.Size(259, 19);
-            this.CalcDynamicButton.TabIndex = 20;
-            this.CalcDynamicButton.TabStop = true;
-            this.CalcDynamicButton.Text = "Calculate (vol. is fn. inflow, discharge, evap.)";
-            this.CalcDynamicButton.UseVisualStyleBackColor = true;
-            this.CalcDynamicButton.CheckedChanged += new System.EventHandler(this.Volume_Choice_Changed);
+            this.RB2.AutoSize = true;
+            this.RB2.Location = new System.Drawing.Point(38, 75);
+            this.RB2.Name = "RB2";
+            this.RB2.Size = new System.Drawing.Size(259, 19);
+            this.RB2.TabIndex = 20;
+            this.RB2.TabStop = true;
+            this.RB2.Text = "Calculate (vol. is fn. inflow, discharge, evap.)";
+            this.RB2.UseVisualStyleBackColor = true;
+            this.RB2.CheckedChanged += new System.EventHandler(this.RB_Changed);
             // 
-            // KeepConstantButton
+            // RB1
             // 
-            this.KeepConstantButton.AutoSize = true;
-            this.KeepConstantButton.Location = new System.Drawing.Point(38, 53);
-            this.KeepConstantButton.Name = "KeepConstantButton";
-            this.KeepConstantButton.Size = new System.Drawing.Size(228, 19);
-            this.KeepConstantButton.TabIndex = 19;
-            this.KeepConstantButton.TabStop = true;
-            this.KeepConstantButton.Text = "Keep Constant (discharge is fn. inflow)";
-            this.KeepConstantButton.UseVisualStyleBackColor = true;
-            this.KeepConstantButton.CheckedChanged += new System.EventHandler(this.Volume_Choice_Changed);
+            this.RB1.AutoSize = true;
+            this.RB1.Location = new System.Drawing.Point(38, 53);
+            this.RB1.Name = "RB1";
+            this.RB1.Size = new System.Drawing.Size(228, 19);
+            this.RB1.TabIndex = 19;
+            this.RB1.TabStop = true;
+            this.RB1.Text = "Keep Constant (discharge is fn. inflow)";
+            this.RB1.UseVisualStyleBackColor = true;
+            this.RB1.CheckedChanged += new System.EventHandler(this.RB_Changed);
             // 
-            // manningButton
+            // RB0
             // 
-            this.manningButton.AutoSize = true;
-            this.manningButton.Location = new System.Drawing.Point(38, 32);
-            this.manningButton.Name = "manningButton";
-            this.manningButton.Size = new System.Drawing.Size(219, 19);
-            this.manningButton.TabIndex = 18;
-            this.manningButton.TabStop = true;
-            this.manningButton.Text = "Manning\'s Eqn. (vol. is fn. discharge)";
-            this.manningButton.UseVisualStyleBackColor = true;
-            this.manningButton.CheckedChanged += new System.EventHandler(this.Volume_Choice_Changed);
+            this.RB0.AutoSize = true;
+            this.RB0.Location = new System.Drawing.Point(38, 32);
+            this.RB0.Name = "RB0";
+            this.RB0.Size = new System.Drawing.Size(219, 19);
+            this.RB0.TabIndex = 18;
+            this.RB0.TabStop = true;
+            this.RB0.Text = "Manning\'s Eqn. (vol. is fn. discharge)";
+            this.RB0.UseVisualStyleBackColor = true;
+            this.RB0.CheckedChanged += new System.EventHandler(this.RB_Changed);
             // 
-            // label3
+            // RBLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(8, 8);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(95, 15);
-            this.label3.TabIndex = 17;
-            this.label3.Text = "Volume Options";
+            this.RBLabel.AutoSize = true;
+            this.RBLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.RBLabel.Location = new System.Drawing.Point(8, 8);
+            this.RBLabel.Name = "RBLabel";
+            this.RBLabel.Size = new System.Drawing.Size(95, 15);
+            this.RBLabel.TabIndex = 17;
+            this.RBLabel.Text = "Volume Options";
             // 
             // panel1
             // 
@@ -221,7 +221,7 @@ namespace GUI.AQUATOX
             this.panel1.Controls.Add(this.NotesEdit2);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.NotesEdit);
-            this.panel1.Location = new System.Drawing.Point(10, 13);
+            this.panel1.Location = new System.Drawing.Point(13, 158);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(338, 247);
             this.panel1.TabIndex = 32;
@@ -309,6 +309,7 @@ namespace GUI.AQUATOX
             this.ConstLoadBox.Name = "ConstLoadBox";
             this.ConstLoadBox.Size = new System.Drawing.Size(96, 23);
             this.ConstLoadBox.TabIndex = 35;
+            this.ConstLoadBox.TextChanged += new System.EventHandler(this.ConstLoadBox_TextChanged);
             // 
             // NotesEdit2
             // 
@@ -450,8 +451,8 @@ namespace GUI.AQUATOX
             this.Load += new System.EventHandler(this.GridForm_Load);
             this.LoadingsPanel.ResumeLayout(false);
             this.LoadingsPanel.PerformLayout();
-            this.VolumePanel.ResumeLayout(false);
-            this.VolumePanel.PerformLayout();
+            this.RBPanel.ResumeLayout(false);
+            this.RBPanel.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -475,12 +476,11 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button File_Import;
         private System.Windows.Forms.Button HMS_Button;
-        private System.Windows.Forms.Panel VolumePanel;
-        private System.Windows.Forms.RadioButton DynamicVolButton;
-        private System.Windows.Forms.RadioButton CalcDynamicButton;
-        private System.Windows.Forms.RadioButton KeepConstantButton;
-        private System.Windows.Forms.RadioButton manningButton;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Panel RBPanel;
+        private System.Windows.Forms.RadioButton RB2;
+        private System.Windows.Forms.RadioButton RB1;
+        private System.Windows.Forms.RadioButton RB0;
+        private System.Windows.Forms.Label RBLabel;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label TSUnit;
         private System.Windows.Forms.Label LTLabel;
@@ -494,6 +494,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.TextBox NotesEdit2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox NotesEdit;
-        private System.Windows.Forms.RadioButton KnownVolButton;
+        private System.Windows.Forms.RadioButton RB3;
     }
 }

@@ -3,6 +3,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
 using Globals;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace AQUATOX.Volume
 {
@@ -27,6 +28,27 @@ namespace AQUATOX.Volume
         [JsonIgnore] double KnownValueLoad = 0.0;
         // [JsonIgnore] double OOSDischFracLoad = 0;
         // [JsonIgnore] double OOSInflowFracLoad = 0;  // don't need saving
+
+        public override List<string> GUIRadioButtons()
+        {
+            return new List<string>(new string[] { "Manning's Eqn. (vol. is fn. discharge)", "Keep Constant (discharge is fn. inflow)", "Calculate (vol. is fn. inflow, discharge, evap.)","Use Known Vals. (discharge is fn. inflow)" });
+        }
+
+        public override int RadioButtonState()
+        {
+            if (Calc_Method == VolumeMethType.Manning) return 0;
+            if (Calc_Method == VolumeMethType.KeepConst) return 1;
+            if (Calc_Method == VolumeMethType.Dynam) return 2;
+            return 3;
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
+            if (iButton==0) Calc_Method = VolumeMethType.Manning;
+            if (iButton == 0) Calc_Method = VolumeMethType.KeepConst;
+            if (iButton == 0) Calc_Method = VolumeMethType.Dynam;
+            Calc_Method = VolumeMethType.KnownVal;
+        }
 
         public VolumeMethType Calc_Method;
 

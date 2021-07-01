@@ -312,14 +312,36 @@ namespace AQUATOX.AQTSegment
                                              //        double LastTimeWrit = 0;
 
 
+        
         public virtual void Derivative(ref double DB)
         {
             DB = 0;
         }
 
+        public virtual string IgnoreLabel()
+        {
+            return "Ignore All Loadings";  // default label meaning
+        }
+
         public int ToxInt(T_SVType typ)
         {
             return (int)typ - 2;
+        }
+
+        public virtual List<string> GUIRadioButtons()
+        {
+            return null;  //return a list of radio buttons for the interface that is specific to this state variable type.
+                          //Null for base TStateVariable or any state variable that does not need radio buttons..
+        }
+
+        public virtual int RadioButtonState()
+        {
+            return -1;  //return the state of the radio button based on current state variable parameters
+        }
+
+        public virtual void SetVarFromRadioButton(int iButton)
+        {
+            //set the current state variable parameters based on which button is true (iButton parameter)  // no action required for base object.
         }
 
         public virtual void SetToInitCond()
@@ -377,8 +399,18 @@ namespace AQUATOX.AQTSegment
 
         public string LoadUnit(int index)
         {
+          
             if (index < 1) return LoadingUnit;
-            if (index == 1) // pointsource
+
+            if (NState == AllVariables.DissRefrDetr) // special case
+            {
+                if (index < 3) return "g / d"; //point and non-point source loadings
+                else if (index == 3) return "pct. part.";
+                else return "pct. refr.";
+            }
+
+
+                if (index == 1) // pointsource
             {
                 if (IsAnimal()) return "pct./day";  //special case
                 if (NState == AllVariables.Volume) return "cu.m/d"; //special case
@@ -407,6 +439,7 @@ namespace AQUATOX.AQTSegment
             if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case
             if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case
             if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case
+            if (NState == AllVariables.DissRefrDetr) return new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
 
             if (Has_Alt_Loadings())
               return new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
@@ -1452,7 +1485,7 @@ namespace AQUATOX.AQTSegment
             if (TSVList == null) TSVList = new List<TStateVariable>();
             TSVList.Clear();
 
-            for (SVTLoop = Consts.FirstOrgTxTyp; SVTLoop <= Consts.FirstOrgTxTyp; SVTLoop++)
+            for (SVTLoop = Consts.FirstOrgTxTyp; SVTLoop <= Consts.FirstOrgTxTyp; SVTLoop++)  //list chemicals first
             {
                 TSV = GetStatePointer(AllVariables.H2OTox, SVTLoop, T_SVLayer.WaterCol);
                 if (TSV != null)
@@ -1466,12 +1499,13 @@ namespace AQUATOX.AQTSegment
                 }
             }
 
-            for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++)
+            for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++) // list state variables
             {
                 TSV = GetStatePointer(SVLoop, T_SVType.StV, T_SVLayer.WaterCol);
-                if (TSV != null)
+                if ((TSV != null) && (SVLoop != AllVariables.DissLabDetr) && (SVLoop != AllVariables.SuspLabDetr) && (SVLoop != AllVariables.SuspRefrDetr))  
                 {
                     Name = TSV.PName;
+                    if (SVLoop == AllVariables.DissRefrDetr) Name = "Suspended & Dissolved Detritus";  //special case, four state variables govered by one GUI screen
                     if (Name != "Undisplayed")
                     {
                         List.Add(Name);
@@ -4469,6 +4503,14 @@ namespace AQUATOX.AQTSegment
         public double Alkalinity = 1000;
         // -------------------------------------------------------------------------------
         //Constructor  Init( Ns,  SVT,  Lyr,  aName,  P,  IC,  IsTempl)
+
+
+        public override string IgnoreLabel()
+        {
+            return "Compute pH from CO2 / alkalinity";  // pH specific label and flag meaning
+        }
+
+
         public TpHObj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             Alkalinity = 1000;   // ( default ueq CaCO3/L)
@@ -4524,9 +4566,14 @@ namespace AQUATOX.AQTSegment
 
     public class TTemperature : TStateVariable
     {
-        public TTemperature(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
 
+        public override string IgnoreLabel()
+        {
+            return "Estimate Temperature from Annual Mean and Range (in site data)";  // temperature specific label and flag meaning
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
         }
 
         // (***********************************)
@@ -4609,6 +4656,11 @@ namespace AQUATOX.AQTSegment
             UserPhotoPeriod = 12;
         }
 
+        public override string IgnoreLabel()
+        {
+            return "Estimate Light from Annual Mean and Range (in site data)";  // light specific label and flag meaning
+        }
+
         public override void CalculateLoad(DateTime TimeIndex)
         {
             double adjustedjulian, lighttime, light, solar, ShadeVal, pp, fracdaypassed;
@@ -4684,6 +4736,11 @@ namespace AQUATOX.AQTSegment
         public TWindLoading(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             MeanValue = 0;
+        }
+
+        public override string IgnoreLabel()
+        {
+            return "Use Default Time Series based on Mean Windspeed";  // light specific label and flag meaning
         }
 
         public static double CalculateWindLoading(DateTime TimeIndex, double MeanVal)
@@ -4762,6 +4819,22 @@ namespace AQUATOX.AQTSegment
                 throw new ArgumentException("TSandSiltClay Implemented for TSS only.  Sand, Silt, Clay model not implemented in AQUATOX HMS");
             }
 
+        }
+
+        public override List<string> GUIRadioButtons()
+        {
+            return new List<string>(new string[] { "TSS are Solids Including Organics", "TSS are Inorganics Only" });
+        }
+
+        public override int RadioButtonState()
+        {
+            if (TSS_Solids) return 1;
+            return 0;
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
+            TSS_Solids = (iButton == 0);
         }
 
         public override void Derivative(ref double DB)

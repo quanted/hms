@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GUI.AQUATOX.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="BaseJSON" Type="System.String" Scope="User">
+      <Value Profile="(Default)">..\..\..\2D_Inputs\LBR Glenwood 4.JSON</Value>
+    </Setting>
+    <Setting Name="MS_Directory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">..\..\..\2D_Inputs\TestDir1\</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

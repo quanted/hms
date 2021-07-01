@@ -28,11 +28,14 @@ namespace GUI.AQUATOX
 
         }
 
-        public bool ShowGrid(DataTable table)
+        public bool ShowGrid(DataTable table, bool LockLeftColumn, bool addrows)
         {
             gridChange = false;
             UserCanceled = false;
             dataGridView1.DataSource = table;
+            dataGridView1.Columns[0].ReadOnly = LockLeftColumn;
+            dataGridView1.Columns[0].Frozen = true;
+            dataGridView1.AllowUserToAddRows = addrows;
             ShowDialog();
             return !UserCanceled;
         }
@@ -78,5 +81,7 @@ namespace GUI.AQUATOX
 
             }
         }
+
+        
     }
 }

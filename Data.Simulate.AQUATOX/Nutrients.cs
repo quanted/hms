@@ -8,6 +8,7 @@ using AQUATOX.Organisms;
 using AQUATOX.Animals;
 using Newtonsoft.Json;
 using Globals;
+using System.Collections.Generic;
 
 namespace AQUATOX.Nutrients
 {
@@ -1075,6 +1076,24 @@ namespace AQUATOX.Nutrients
         public Loadings.TLoadings OM_Remin_Link = null;
         public Loadings.TLoadings CalcitePcpt_Link = null;
 
+        public override List<string> GUIRadioButtons()
+        {
+            return new List<string>(new string[] { "Inputs are TSP", "Inputs are Total P"});
+        }
+
+        public override int RadioButtonState()
+        {
+            if (!TP_IC && !TP_Inflow && !TP_PS && !TP_NPS) return 0;
+            if (TP_IC && TP_Inflow && TP_PS && TP_NPS) return 1;
+            return -1;
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
+            if (iButton == 0) { TP_IC = false; TP_Inflow = false; TP_PS = false; TP_NPS = false; }
+            if (iButton == 1) { TP_IC = true; TP_Inflow = true; TP_PS = true; TP_NPS = true; }
+        }
+
         // Remineralization
         public double Remineralization()
             {
@@ -1283,14 +1302,14 @@ namespace AQUATOX.Nutrients
         public Loadings.TLoadings OM_Remin_Link = null;
 
         public TNH4Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
-        {
-            }
+        {            }
 
-            // {mg N/ L}
-            // ---------------------------------
-            // nitrification & denitrification
-            // ---------------------------------
-            public double Nitrification()
+
+        // {mg N/ L}
+        // ---------------------------------
+        // nitrification & denitrification
+        // ---------------------------------
+        public double Nitrification()
             {
                 double T;
                 double p;
@@ -1538,10 +1557,28 @@ namespace AQUATOX.Nutrients
 
         public TNO3Obj(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
-            }
+        }
 
-            // -------------------------------------------------------------------------------------------------------
-            public double Denitrification()
+        public override List<string> GUIRadioButtons()
+        {
+            return new List<string>(new string[] { "Input Nitrate and Ammonia", "Nitrate Inputs represent Total N" });
+        }
+
+        public override int RadioButtonState()
+        {
+            if (!TN_IC && !TN_Inflow && !TN_PS && !TN_NPS) return 0;
+            if (TN_IC && TN_Inflow && TN_PS && TN_NPS) return 1;
+            return -1;
+        }
+
+        public override void SetVarFromRadioButton(int iButton)
+        {
+            if (iButton == 0) { TN_IC = false; TN_Inflow = false; TN_PS = false; TN_NPS = false; }
+            if (iButton == 1) { TN_IC = true; TN_Inflow = true; TN_PS = true; TN_NPS = true; }
+        }
+
+        // -------------------------------------------------------------------------------------------------------
+        public double Denitrification()
             {
                 // , Sed_Surf_Corr
                 double T, O2;
@@ -1917,8 +1954,8 @@ namespace AQUATOX.Nutrients
             //Threshhold = 1.0;
             NoLoadOrWash = false;
             // TRemineralize
-
         }
+
         //// temp adjustment, Churchill et al., 1962
         //public void KReaer_Estuarine_Reaeration()
         //{

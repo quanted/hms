@@ -98,30 +98,92 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-        private void UpdateDischarge(TVolume TVol, Data.TimeSeriesOutput ATSO)  // time series output must currently be in m3/s
+        private void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput ATSO, bool useVelocity)  // time series output must currently be in m3/s
         {
-            TVol.Calc_Method = VolumeMethType.Manning;
-
-            // array slot [1] is "discharge" in this case (TVolume)
-            TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
-
-            if (DischargeLoad.ITSI == null)
+            if (useVelocity)
             {
-                TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
-                TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
-                input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-                DischargeLoad.ITSI = input;
-            }
+                TVol.Calc_Method = VolumeMethType.KnownVal;
 
-            DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
-            DischargeLoad.Translate_ITimeSeriesInput();
-            DischargeLoad.MultLdg = 86400;  // seconds per day
-            DischargeLoad.Hourly = true;
-            DischargeLoad.UseConstant = false;
-            TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
-            TVol.LoadNotes2 = "Converted to m3/d using multiplier";
-            DischargeLoad.ITSI = null;
+                TLoadings KnownValLoad = TVol.LoadsRec.Loadings;
+                TLoadings InflowLoad = TVol.LoadsRec.Alt_Loadings[0];  // array slot [0] is "inflow" in this case (TVolume)
+
+                if (InflowLoad.ITSI == null)
+                {
+                    TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+                    TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+                    input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+                    InflowLoad.ITSI = input;
+                }
+
+                InflowLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+
+                KnownValLoad.UseConstant = false;
+                KnownValLoad.MultLdg = 1;
+                KnownValLoad.NoUserLoad = false;
+                KnownValLoad.Hourly = true;  
+
+                ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
+
+                KnownValLoad.list.Clear();
+                KnownValLoad.list.Capacity = TSO.Data.Count;
+
+                bool firstvol = true;
+                foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
+                {
+                    string dateString = entry.Key + ":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; make flexible?
+                    if (!(DateTime.TryParse(dateString, out DateTime date)))
+                        throw new ArgumentException("Cannot convert '" + entry.Key + "' to TDateTime");
+                    if (!(Double.TryParse(entry.Value[0], out double flow)))
+                        throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+                    if (!(Double.TryParse(entry.Value[1], out double velocity)))
+                        throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+
+                    if (velocity < Consts.Tiny) velocity = flow; // default to 1 m2 for now
+                    double VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
+                    // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 0.001 (m/km)
+
+                    if (flow > Consts.Tiny) 
+                        KnownValLoad.list.Add(date,VolCalc);
+                    
+                    if ((firstvol) && (VolCalc > Consts.Tiny)) TVol.InitialCond = VolCalc;
+                }
+
+                InflowLoad.Translate_ITimeSeriesInput(0);
+                InflowLoad.MultLdg = 86400;  // seconds per day
+                InflowLoad.Hourly = true;
+                InflowLoad.UseConstant = false;
+                TVol.LoadNotes1 = "Volumes from NWM using discharge in m3/s";       
+                TVol.LoadNotes2 = "NWM inflow converted from m3/d using multiplier";
+                InflowLoad.ITSI = null;
+            }
+            else  // use discharge and manning's equation
+            {
+                TVol.Calc_Method = VolumeMethType.Manning;
+
+                // array slot [1] is "discharge" in this case (TVolume)
+                TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
+
+                if (DischargeLoad.ITSI == null)
+                {
+                    TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+                    TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+                    input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+                    DischargeLoad.ITSI = input;
+                }
+
+
+                DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+                DischargeLoad.Translate_ITimeSeriesInput(0);
+                DischargeLoad.MultLdg = 86400;  // seconds per day
+                DischargeLoad.Hourly = true;
+                DischargeLoad.UseConstant = false;
+                TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
+                TVol.LoadNotes2 = "Converted to m3/d using multiplier";
+                DischargeLoad.ITSI = null;
+            }
         }
+
+    //  public DataTable GetOverlandTable(string BaseJSON)() {}              WORKHERE
 
 
         public void archiveOutput(int comid, AQTSim Sim)
@@ -289,7 +351,7 @@ namespace AQUATOX.AQSim_2D
             {
                 TimeSeriesOutput TSO = submitHydrologyRequest(comid, out string errstr);
                 if (errstr != "") return errstr;
-                UpdateDischarge(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO);
+                FlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
                 // Could add to Log -- "Imported Flow Data for " + comid 
             }
             catch (Exception ex)
@@ -309,6 +371,7 @@ namespace AQUATOX.AQSim_2D
             if (AR == null)    // (AR.Equals(null)) crashed
             {
                 archive.TryGetValue(SrcID, out AR);
+                if (AR == null) return;
             }
 
             for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
@@ -322,13 +385,14 @@ namespace AQUATOX.AQSim_2D
                 {
                     TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
-                    TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
+                    // TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
+                    TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
 
                     for (int i = 0; i < ndates; i++)
                     {
                         double OutVol = AR.washout[i];  // out volume from upstream segment
-                        double InVol = DischargeLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment, currently estimated as current seg. outflow -- can be replaced with calculated inflow volume using Mannings N to account for changes in seg volume
+                        double InVol = InflowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
 
                         if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
                         else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
