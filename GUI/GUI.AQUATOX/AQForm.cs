@@ -105,6 +105,25 @@ namespace GUI.AQUATOX
         //}
 
 
+        private string TEST_INSERT_LOAD(string json)
+        {
+            AQTSim AQS = new AQTSim();
+
+            json= AQS.InsertLoadings(json, "TNO3Obj", 2, 56.56, 1.56);  //2 = non-point source loading
+
+            SortedList<DateTime, double> TSL = new SortedList<DateTime, double>() { { new DateTime(2004, 1, 1), 2004.11 }, { new DateTime(2004, 5, 5), 2004.55 } };
+            json = AQS.InsertLoadings(json, "TNH4Obj", -1, TSL,1.2004);  //-1 = inflow loading
+
+            json = AQS.InsertLoadings(json, "TPO4Obj", 0, 123456,1.23456);   //0 = point source loading
+
+            json = AQS.InsertLoadings(json, "TDissRefrDetr", 0, 3.1415926,1.314); //0 = point source loading; TDissRefrDetr=Organic Matter
+
+            TSL = new SortedList<DateTime, double>() { { new DateTime(2009, 2, 2), 2009.22 }, { new DateTime(2012, 3, 3), 2012.33 } };
+            json = AQS.InsertLoadings(json, "TDissRefrDetr", 2, TSL,1.2009);  //2 = non-point source loading; TDissRefrDetr=Organic Matter 
+
+            return json;
+        }
+
         private void loadJSON_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -115,6 +134,9 @@ namespace GUI.AQUATOX
             if (openFileDialog1.FileName != "")
             {
                 string json = File.ReadAllText(openFileDialog1.FileName);
+
+                /// json = TEST_INSERT_LOAD(json);  temporary used to test insert load code
+
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
                 if (err != "") { MessageBox.Show(err); return; }

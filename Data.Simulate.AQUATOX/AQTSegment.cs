@@ -55,7 +55,6 @@ namespace AQUATOX.AQTSegment
             finally
             {
             }
-
         }
 
         public JsonSerializerSettings AQTJSONSettings()
@@ -177,8 +176,86 @@ namespace AQUATOX.AQTSegment
             return Integrate();
         }
 
+        private TLoadings TLoadingsFromString(string SVType, int LoadingType)
+        {
+            bool isdetritus = false;
+            TStateVariable TSV = null;
+            switch (SVType)
+            {
+                case "TNH4Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol); break;
+                case "TNO3Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol); break;
+                case "TPO4Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol); break;
+                case "TDissRefrDetr": TSV = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol); isdetritus = true; break;
+            }
 
-    }
+            if (TSV == null) return null;
+
+            LoadingsRecord LR = TSV.LoadsRec;
+            if (isdetritus) { LR = ((TDissRefrDetr)TSV).InputRecord.Load;}
+
+            if (LoadingType < 0) return LR.Loadings;
+            else return LR.Alt_Loadings[LoadingType];
+        }
+
+        /// <summary>
+        /// Accepts an input JSON sting and information about a constant point-source, nonpoint-source, or inflow loading and inserts that into a return JSON string
+        /// </summary>
+        /// <param name="inJSON"></param>
+        /// <param name="SVType">string with the relevant $Type string e.g. "TNH4Obj"</param>
+        /// <param name="Loadingtype">int, -1 = inflow load,  0=point-source, 1=direct precipitation (maybe irrelevant), 2=nonpoint-source </param>
+        /// <param name="constload">constant daily loading usually in g/d</param>
+        /// <param name="multldg">multiply loading by constant, default to 1.0</param>
+        /// <returns>
+        /// JSON String with loadings inserted, or string starting with "ERROR:" if error encountered
+        /// </returns>
+        public string InsertLoadings(string inJSON, string SVType, int Loadingtype, double constload, double multldg)
+        {
+            string instResult = Instantiate(inJSON);
+            if (instResult != "") return "ERROR: " + instResult;
+
+            TLoadings TL = TLoadingsFromString(SVType, Loadingtype);
+            if (TL == null) return "State Variable Type not Found";
+
+            TL.UseConstant = true;
+            TL.MultLdg = multldg;
+            TL.ConstLoad = constload;
+
+            string outjson = "";
+            string saveErr = SaveJSON(ref outjson);
+            if (saveErr != "") return "ERROR: " + saveErr;
+            return outjson;
+        }
+
+        /// <summary>
+        /// Accepts an input JSON sting and information about a constant point-source, nonpoint-source, or inflow loading and inserts that into a return JSON string
+        /// </summary>
+        /// <param name="inJSON"></param>
+        /// <param name="SVType">string with the relevant $Type string e.g. "TNH4Obj"</param>
+        /// <param name="Loadingtype">int, -1 = inflow load,  0=point-source, 1=direct precipitation (maybe irrelevant), 2=nonpoint-source </param>
+        /// <param name="inlist">SortedList to be inserted with datetime field and double type, usually in g/d</param>
+        /// <param name="multldg">multiply loading by constant, default to 1.0</param>
+        /// 
+        /// <returns>
+        /// JSON String with loadings inserted, or string starting with "ERROR:" if error encountered
+        /// </returns>
+        public string InsertLoadings(string inJSON, string SVType, int Loadingtype, SortedList<DateTime, double> inlist, double multldg)
+        {
+            string instResult = Instantiate(inJSON);
+            if (instResult != "") return "ERROR: " + instResult;
+
+            TLoadings TL = TLoadingsFromString(SVType, Loadingtype);
+            if (TL == null) return "State Variable Type not Found";
+
+            TL.UseConstant = false;
+            TL.MultLdg = multldg;
+            TL.list = inlist;
+
+            string outjson = "";
+            string saveErr = SaveJSON(ref outjson);
+            if (saveErr != "") return "ERROR: " + saveErr;
+            return outjson;
+        }
+     }
 
 
     public class AQUATOXTSOutput : ITimeSeriesOutput
