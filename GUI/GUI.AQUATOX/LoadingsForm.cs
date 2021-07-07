@@ -159,7 +159,6 @@ namespace GUI.AQUATOX
             }
 
             UpdateUnits();
-
         }
 
         TLoadings LoadShown;
@@ -238,7 +237,8 @@ namespace GUI.AQUATOX
                 PlantRecord PIR = TP.PAlgalRec;
                 PIR.Setup();
                 TParameter[] PPS = PIR.InputArray();
-                plantform.EditParams(ref PPS, "Plant Parameters", false);
+                plantform.EditParams(ref PPS, "Plant Parameters", false, "PlantLib.JSON");
+                TP.ChangeData();
             }
 
             if (SV.IsAnimal())
@@ -248,7 +248,8 @@ namespace GUI.AQUATOX
                 AnimalRecord AIR = TA.PAnimalData;
                 AIR.Setup();
                 TParameter[] PPS = AIR.InputArray();
-                animform.EditParams(ref PPS, "Animal Parameters", false);
+                animform.EditParams(ref PPS, "Animal Parameters", false, "AnimalLib.JSON");
+                TA.ChangeData();
             }
 
             if (SV.NState == AllVariables.H2OTox)
@@ -257,9 +258,12 @@ namespace GUI.AQUATOX
                 Param_Form chemform = new Param_Form();
                 ChemicalRecord CR = TC.ChemRec; CR.Setup();
                 TParameter[] PPS = CR.InputArray();
-                chemform.EditParams(ref PPS, "Chem Parameters", false);
+                chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON");
             }
 
+            
+            SV.UpdateName();
+            UpdateScreen();
         }
 
         private void ButtonPanel_Paint(object sender, PaintEventArgs e)

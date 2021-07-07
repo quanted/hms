@@ -1,9 +1,15 @@
-﻿using Globals;
+﻿using AQUATOX.Animals;
+using AQUATOX.AQSite;
+using AQUATOX.Chemicals;
+using AQUATOX.Plants;
+using Globals;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,6 +23,8 @@ namespace GUI.AQUATOX
         int labelwidth = 210;
         int topbuffer = 5;
         bool suppressing = false;
+
+        string DBString = "";
 
         public bool SuppressSymbol = false, SuppressComment = false;
         bool UserCanceled = false;
@@ -76,6 +84,21 @@ namespace GUI.AQUATOX
             InitializeComponent();
         }
 
+        public void AdjustVals(TParameter Param, int index)
+        {
+
+            if (Param is TSubheading) return;
+            else if (Param is TBoolParam) booledits[index].Checked = ((TBoolParam)Param).Val;
+            else if (Param is TDropDownParam) dropboxes[index].Text = ((TDropDownParam)Param).Val;
+            else if (Param is TDateParam) dateedits[index].Value = ((TDateParam)Param).Val;
+            else if (Param is TStringParam) edits[index].Text = ((TStringParam)Param).Val;
+            else edits[index].Text = Param.Val.ToString();
+
+            if (references[index] != null)
+                references[index].Text = Param.Comment;
+        }
+
+
         public void AdjustEdit(ref TParameter Param, int index)
         {
 
@@ -94,27 +117,27 @@ namespace GUI.AQUATOX
 
             if (Param is TSubheading)
             {
-                labels[index].Location = new Point(AX +12, top - 2 + AY);
+                labels[index].Location = new Point(AX + 12, top - 2 + AY);
 
                 if (index > 0)
                 {
                     suppressing = !(((TSubheading)Param).expanded);
                     int left = 330;
                     if (Spacing == 28) left = 330;
-                    buttons[index].Location = new Point(AX +left, top + 8 + AY);
+                    buttons[index].Location = new Point(AX + left, top + 8 + AY);
 
                     if (!SuppressComment)  //no subheading info on narrow parameter forms
-                        units[index].Location = new Point(AX +395, top - 1 + AY);
+                        units[index].Location = new Point(AX + 395, top - 1 + AY);
                 }
                 return;
             }
 
-            labels[index].Location = new Point(AX +12, top + AY);
+            labels[index].Location = new Point(AX + 12, top + AY);
             labels[index].Visible = !suppressing;
 
             if (Param is TDropDownParam)
             {
-                dropboxes[index].Location = new Point(AX +labelwidth + 22, top + 9 + AY);
+                dropboxes[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
                 dropboxes[index].Visible = !suppressing;
                 return;
             }
@@ -122,15 +145,15 @@ namespace GUI.AQUATOX
 
             if (Param is TDateParam)
             {
-                dateedits[index].Location = new Point(AX +labelwidth + 22, top + 9 + AY);
+                dateedits[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
                 dateedits[index].Visible = !suppressing;
                 return;
             }
 
-            edits[index].Location = new Point(AX +labelwidth + 22, top + 9 + AY);
+            edits[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
             edits[index].Visible = !suppressing;
 
-            units[index].Location = new Point(AX +labelwidth + 115, top + AY);
+            units[index].Location = new Point(AX + labelwidth + 115, top + AY);
             units[index].Visible = !suppressing;
 
             if (!(SuppressComment || (Param is TStringParam) || (Param is TDropDownParam)))
@@ -144,7 +167,7 @@ namespace GUI.AQUATOX
         {
             string textstr;
 
-            if ((!suppressing)|| (Param is TSubheading)) nRendered++;  // always render sub-headings
+            if ((!suppressing) || (Param is TSubheading)) nRendered++;  // always render sub-headings
             int top = topbuffer + (Spacing * nRendered);
 
             if (Param is TBoolParam)
@@ -365,7 +388,7 @@ namespace GUI.AQUATOX
 
             for (int i = 0; i < nparam; i++)
             {
-              validinputs = ReadEdit(ref plist[i], i, false) && validinputs;
+                validinputs = ReadEdit(ref plist[i], i, false) && validinputs;
             }
             return validinputs;
         }
@@ -376,7 +399,7 @@ namespace GUI.AQUATOX
 
             for (int i = 0; i < nparam; i++)
             {
-               ReadEdit(ref plist[i], i, true);
+                ReadEdit(ref plist[i], i, true);
             }
         }
 
@@ -429,9 +452,9 @@ namespace GUI.AQUATOX
             nRendered = 0;
 
             for (int i = 0; i < nparam; i++)
-                {
-                    AdjustEdit(ref plist[i], i);
-                }
+            {
+                AdjustEdit(ref plist[i], i);
+            }
 
             ResizeScreen();
             EndControlUpdate(this);
@@ -439,18 +462,155 @@ namespace GUI.AQUATOX
 
         public void removeControls(int i)
         {
-            if (edits[i] != null)  Controls.Remove(edits[i]);
-            if (labels[i] != null)  Controls.Remove(labels[i]);
-            if (units[i] != null)  Controls.Remove(units[i]);
-            if (references[i] != null)  Controls.Remove(references[i]);
-            if (dateedits[i] != null)  Controls.Remove(dateedits[i]);
-            if (booledits[i] != null)  Controls.Remove(booledits[i]);
-            if (dropboxes[i] != null)  Controls.Remove(dropboxes[i]);
+            if (edits[i] != null) Controls.Remove(edits[i]);
+            if (labels[i] != null) Controls.Remove(labels[i]);
+            if (units[i] != null) Controls.Remove(units[i]);
+            if (references[i] != null) Controls.Remove(references[i]);
+            if (dateedits[i] != null) Controls.Remove(dateedits[i]);
+            if (booledits[i] != null) Controls.Remove(booledits[i]);
+            if (dropboxes[i] != null) Controls.Remove(dropboxes[i]);
             if (buttons[i] != null) Controls.Remove(buttons[i]);
         }
 
-        public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense)
+        private string ReadDBPath(string deflt)
         {
+            string fileN = Path.GetFullPath("..\\..\\..\\DB\\" + deflt);
+            if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == DialogResult.No)
+            {
+                OpenFileDialog openFileDialog1 = new OpenFileDialog();
+                openFileDialog1.Filter = "Text File|*.txt;*.json";
+                openFileDialog1.Title = "Open a JSON File";
+                if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return "";
+                fileN = openFileDialog1.FileName;
+            }
+
+            return fileN;
+        }
+
+        public object ReturnRecordFromDB(string DBStr)
+        {
+            string DBPath = ReadDBPath(DBStr);
+            if (DBPath == "") return null;
+
+            string json = File.ReadAllText(DBPath);
+            ListForm LF = new ListForm();
+            List<string> stringlist = new List<string>();
+
+            if (DBStr == "SiteLib.JSON")
+            {
+                List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
+                foreach (SiteRecord SR in SiteDB) stringlist.Add(SR.SiteName.Val);
+                int index = LF.SelectFromList(stringlist);
+                if (index < 0) return null;
+
+                return SiteDB[index];
+            }
+
+            if (DBStr == "ChemLib.JSON")
+            {
+                List<ChemicalRecord> ChemDB = JsonConvert.DeserializeObject<List<ChemicalRecord>>(json);
+                foreach (ChemicalRecord CR in ChemDB) stringlist.Add(CR.ChemName.Val);
+                int index = LF.SelectFromList(stringlist);
+                if (index < 0) return null;
+
+                return ChemDB[index];
+            }
+
+            if (DBStr == "AnimalLib.JSON")
+            {
+                List<AnimalRecord> AnimalDB = JsonConvert.DeserializeObject<List<AnimalRecord>>(json);
+                foreach (AnimalRecord AR in AnimalDB) stringlist.Add(AR.AnimalName.Val);
+                int index = LF.SelectFromList(stringlist);
+                if (index < 0) return null;
+
+                return AnimalDB[index];
+            }
+
+            if (DBStr == "PlantLib.JSON")
+            {
+                List<PlantRecord> PlantDB = JsonConvert.DeserializeObject<List<PlantRecord>>(json);
+                foreach (PlantRecord PR in PlantDB) stringlist.Add(PR.PlantName.Val);
+                int index = LF.SelectFromList(stringlist);
+                if (index < 0) return null;
+
+                return PlantDB[index];
+            }
+
+            if (DBStr == "ReminLib.JSON")
+            {
+                List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
+                foreach (ReminRecord RR in ReminDB) stringlist.Add(RR.RemRecName.Val);
+                int index = LF.SelectFromList(stringlist);
+                if (index < 0) return null;
+
+                return ReminDB[index];
+            }
+
+            return null;
+        }
+
+            
+
+        private void DB_Button_Click(object sender, EventArgs e)
+        {
+            object recrd = ReturnRecordFromDB(DBString);
+            TParameter[] plist2 = null;
+
+            if (DBString == "SiteLib.JSON")
+            { 
+                SiteRecord SR2 = recrd as SiteRecord;
+                SR2.Setup();
+                plist2 = SR2.InputArray();
+            }
+
+            if (DBString == "ChemLib.JSON")
+            {
+                ChemicalRecord CR2 = recrd as ChemicalRecord;
+                CR2.Setup();
+                plist2 = CR2.InputArray();
+            }
+
+            if (DBString == "AnimalLib.JSON")
+            {
+                AnimalRecord AR2 = recrd as AnimalRecord;
+                AR2.Setup();
+                plist2 = AR2.InputArray();
+            }
+
+            if (DBString == "PlantLib.JSON")
+            {
+                PlantRecord PR2 = recrd as PlantRecord;
+                PR2.Setup();
+                plist2 = PR2.InputArray();
+            }
+
+            if (DBString == "ReminLib.JSON")
+            {
+                ReminRecord RR2 = recrd as ReminRecord;
+                RR2.Setup();
+                plist2 = RR2.InputArray();
+            }
+
+            BeginControlUpdate(this);
+            suppressing = false;
+            nRendered = 0;
+
+            for (int i = 0; i < nparam; i++)
+            {
+                AdjustVals(plist2[i], i);
+            }
+
+            //ResizeScreen();
+            EndControlUpdate(this);
+        }
+
+        public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense, string DefaultDB)
+        {
+            DB_Button.Visible = (DefaultDB != "");
+            DBString = DefaultDB;
+            
             if (Dense) Spacing = 28; else Spacing = 36;
             this.CancelButton = CancelButt;
             plist = parmlist;

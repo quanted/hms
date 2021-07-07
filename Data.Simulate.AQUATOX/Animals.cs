@@ -323,7 +323,10 @@ namespace AQUATOX.Animals
         [JsonIgnore] public double PreyTrophicLevel = 0;
         [JsonIgnore] public double TrophicLevel = 0;
 
-        // ChangeData MUST be called when the underlying data record is changed
+        public override void UpdateName()
+        {
+            PName = AQTSeg.StateText(NState) + ": ["+PAnimalData.AnimalName.Val+']';
+        }
         // ------------------------------------------------------------------------
         public override void SetToInitCond()
         {

@@ -39,6 +39,7 @@ namespace AQUATOX.Organisms
 
         public TOrganism(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
+         
             int ToxLoop;
             int StepLoop;
             int Ionized;

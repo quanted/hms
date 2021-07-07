@@ -309,7 +309,7 @@ namespace GUI.AQUATOX
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS, "Simulation Setup", true);
+            SetupForm.EditParams(ref SS, "Simulation Setup", true,"");
 
         }
 
@@ -328,7 +328,7 @@ namespace GUI.AQUATOX
                 DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
 
             Param_Form PF3 = new Param_Form();
-            PF3.EditParams(ref PA3, "Diagenesis Parameters", false);
+            PF3.EditParams(ref PA3, "Diagenesis Parameters", false,"");
         }
 
         private void Plants(object sender, EventArgs e)
@@ -358,7 +358,10 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table,false,true);
+            gf.ShowGrid(table,false,false);
+
+            // FIXME load changes back into plants
+
         }
 
         private void ShowStudyInfo()
@@ -400,7 +403,7 @@ namespace GUI.AQUATOX
                     ChemicalRecord CR = TC.ChemRec; CR.Setup();
                     TParameter[] PPS = CR.InputArray();
 
-                    Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false);
+                    Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON");
                     nchm++;
                 }
         }
@@ -415,7 +418,7 @@ namespace GUI.AQUATOX
             SR.Setup();
             TParameter[] PPS = SR.InputArray();
 
-            Siteform.EditParams(ref PPS, "Site Parameters", false);
+            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON");
         }
 
         private void Remin(object sender, EventArgs e)
@@ -428,7 +431,7 @@ namespace GUI.AQUATOX
             RR.Setup();
             TParameter[] PPS = RR.InputArray();
 
-            Reminform.EditParams(ref PPS, "Remineralization Parameters", false);
+            Reminform.EditParams(ref PPS, "Remineralization Parameters", false, "ReminLib.JSON");
         }
 
 
@@ -937,11 +940,47 @@ namespace GUI.AQUATOX
 
             int index = LF.SelectFromList(aQTS.AQTSeg.GetInsertableStates(ref SVs));
             if (index < 0) return;
+
             AllVariables ns = SVs[index];
+            Param_Form PF = new Param_Form();
 
-            // if (ns == AllVariables(H2OTox)) aQTS.AQTSeg.Add_OrgTox_SVs()
+            TStateVariable NewSV = null;
+ 
+            if ((ns >= Consts.FirstAnimal) && (ns <= Consts.LastAnimal))
+            {
+                AnimalRecord AR = PF.ReturnRecordFromDB("AnimalLib.JSON") as AnimalRecord;
+                if (AR == null) return;
+                NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
+                if (NewSV != null)
+                {
+                    ((TAnimal)NewSV).PAnimalData = AR;
+                    ((TAnimal)NewSV).ChangeData();
+                }
+            }
+            else if ((ns >= Consts.FirstPlant) && (ns <= Consts.LastPlant))
+            {
+                PlantRecord PR = PF.ReturnRecordFromDB("PlantLib.JSON") as PlantRecord;
+                if (PR == null) return;
+                NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
+                if (NewSV != null)
+                {
+                    ((TPlant)NewSV).PAlgalRec = PR;
+                    ((TPlant)NewSV).ChangeData();
+                }
+            }
+            else if (ns == AllVariables.H2OTox)
+            {
+                ChemicalRecord CR = PF.ReturnRecordFromDB("ChemLib.JSON") as ChemicalRecord;
+                if (CR == null) return;
+                NewSV = aQTS.AQTSeg.Add_OrgTox_SVs(CR);
+            }
+            else NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
 
-            MessageBox.Show("Add state variables still being implemented");  //fixme
+            if (NewSV == null) MessageBox.Show("Error adding State Variable");
+
+            NewSV.UpdateName();
+            ShowStudyInfo();
+            return;
 
         }
 

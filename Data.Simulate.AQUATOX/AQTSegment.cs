@@ -89,6 +89,7 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+
         public string SaveSegJSON(ref string json)
         {
             try
@@ -248,6 +249,7 @@ namespace AQUATOX.AQTSegment
 
             TL.UseConstant = false;
             TL.MultLdg = multldg;
+            TL.Hourly = true;
             TL.list = inlist;
 
             string outjson = "";
@@ -363,7 +365,6 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public double yscale = 0;          // use in Integration
         [JsonIgnore] public SavedResults SVResults = null;   // holds numerical results, internal, not evenly spaced if variable stepsize
 
-
         public AQUATOXTSOutput SVoutput = null;  // public and evenly-spaced results following integration / interpolation
 
         [JsonIgnore] public AQUATOXSegment AQTSeg = null;   // Pointer to Collection of State Variables of which I am a member
@@ -389,7 +390,34 @@ namespace AQUATOX.AQTSegment
                                              //        double LastTimeWrit = 0;
 
 
-        
+        //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC)
+        public TStateVariable(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC)
+        {
+            int j;
+            PName = aName;
+            NState = Ns;
+            SVType = SVT;
+            Layer = L;
+            InitialCond = IC;
+            State = 0;
+
+            AQTSeg = P;
+            if (P != null) Location = P.Location;
+
+            LoadNotes1 = "";
+            LoadNotes2 = "";
+
+            yhold = 0;
+            for (j = 1; j <= 6; j++) StepRes[j] = 0;
+
+            LoadsRec = new LoadingsRecord();
+        }
+
+        public virtual void UpdateName()
+        {
+            PName = AQTSeg.StateText(NState);
+        }
+
         public virtual void Derivative(ref double DB)
         {
             DB = 0;
@@ -442,9 +470,7 @@ namespace AQUATOX.AQTSegment
 
                 ((this) as TToxics).IsAGGR = false;
                 if ((SVType == Consts.FirstOrgTxTyp) && (AQTSeg.PSetup.T1IsAggregate.Val))
-                {
                     ((this) as TToxics).IsAGGR = true;
-                }
             }
         }
 
@@ -479,7 +505,7 @@ namespace AQUATOX.AQTSegment
           
             if (index < 1) return LoadingUnit;
 
-            if (NState == AllVariables.DissRefrDetr) // special case
+            if (NState == AllVariables.DissRefrDetr) // special case 
             {
                 if (index < 3) return "g / d"; //point and non-point source loadings
                 else if (index == 3) return "pct. part.";
@@ -489,20 +515,20 @@ namespace AQUATOX.AQTSegment
 
                 if (index == 1) // pointsource
             {
-                if (IsAnimal()) return "pct./day";  //special case
-                if (NState == AllVariables.Volume) return "cu.m/d"; //special case
+                if (IsAnimal()) return "pct./day";  //special case 
+                if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
                 return "g / d"; //point-source loadings
             }
             if (index == 2) // direct precip.
             {
-                if (IsAnimal()) return "g/m2 - d";  //special case
-                if (NState == AllVariables.Volume) return "cu.m/d"; //special case
+                if (IsAnimal()) return "g/m2 - d";  //special case 
+                if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
                 return "g/m2 - d"; //direct precip. loadings
             }
             // (index == 3) // non-point source
             {
-                if (IsAnimal()) return "error"; //special case, not relevant to animals
-                if (NState == AllVariables.Volume) return "error"; //special case, not relevant to volume
+                if (IsAnimal()) return "error"; //special case , not relevant to animals
+                if (NState == AllVariables.Volume) return "error"; //special case , not relevant to volume
                 if (NState == AllVariables.CO2) return "mg/L";  // special case equilibrium CO2 Import
                 return "g / d"; //non point-source loadings
             }
@@ -512,10 +538,10 @@ namespace AQUATOX.AQTSegment
         public List<string> LoadList()
         {
             if ((NState == AllVariables.pH) || (NState == AllVariables.TSS) || (NState == AllVariables.Temperature) || (NState == AllVariables.Salinity) || (NState == AllVariables.COD))
-                return new List<string>(new string[] { "Segment Values" });  //special cases, no inflow loadings, just in-segment driving values
-            if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case
-            if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case
-            if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case
+                return new List<string>(new string[] { "Segment Values" });  //special case s, no inflow loadings, just in-segment driving values
+            if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case 
+            if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case 
+            if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case 
             if (NState == AllVariables.DissRefrDetr) return new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
 
             if (Has_Alt_Loadings())
@@ -641,31 +667,20 @@ namespace AQUATOX.AQTSegment
                         StateUnit = "g/cu.m";
                         LoadingUnit = "N A";
                         break;
-                    // Modify the A .. B: AllVariables.Sand .. AllVariables.TSS, AllVariables.Cohesives .. AllVariables.NonCohesives2
-                    case AllVariables.Sand:
-                    case AllVariables.Cohesives:
-                        if (Layer > T_SVLayer.WaterCol)
-                        {
-                            StateUnit = "g/sq.m";
-                            LoadingUnit = "N A";
-                        }
-                        else
+                    //  AllVariables.Sand .. AllVariables.TSS, AllVariables.Cohesives .. AllVariables.NonCohesives2
+                    case AllVariables.TSS:
                         {
                             StateUnit = "mg/L";
                             LoadingUnit = "mg/L";
                         }
                         break;
-                    // Modify the A .. B: Units.FirstOrgTox .. Units.LastOrgTox
                     case AllVariables.H2OTox:
                         StateUnit = "ug/L";
                         LoadingUnit = "ug/L";
                         break;
-                    // Modify the A .. B: Units.FirstPlant .. Units.LastPlant
-                    case Consts.FirstPlant:
+                    case AllVariables pl when ((pl >= Consts.FirstPlant) && (pl <= Consts.LastPlant)):
                         if (SVType == T_SVType.StV)
-                        {
                             ((TPlant)this).ChangeData();
-                        }
                         else
                         {
                             // NIntrnl or PIntrnl
@@ -675,23 +690,14 @@ namespace AQUATOX.AQTSegment
                         break;
                     case AllVariables.SedmRefrDetr:
                     case AllVariables.SedmLabDetr:
-                        if (Layer > T_SVLayer.SedLayer1)
-                        {
-                            StateUnit = "g/m2 dry";
-                            LoadingUnit = "N A";
-                        }
-                        else
-                        {
-                            StateUnit = "g/m2 dry";
-                            LoadingUnit = "N A";
-                        }
+                        StateUnit = "g/m2 dry";
+                        LoadingUnit = "N A";
                         break;
-                    // Modify the A .. B: Units.FirstAnimal .. Units.LastAnimal
-                    case Consts.FirstAnimal:
+                    case AllVariables pl when ((pl >= Consts.FirstAnimal) && (pl <= Consts.LastAnimal)):
                         ((TAnimal)this).ChangeData();
                         break;
-                    // Modify the A .. B: AllVariables.DissRefrDetr .. AllVariables.SuspLabDetr
                     case AllVariables.DissRefrDetr:
+                    case AllVariables.SuspLabDetr:
                         StateUnit = "mg/L dry";
                         LoadingUnit = "mg/L dry";
                         break;
@@ -701,34 +707,7 @@ namespace AQUATOX.AQTSegment
                         break;
                 }
             }
-            // Case
 
-        }
-
-        //Constructor  Init( Ns,  SVT,  L,  aName,  P,  IC)
-        public TStateVariable(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC)
-        {
-            int j;
-            PName = aName;
-            NState = Ns;
-            SVType = SVT;
-            Layer = L;
-            InitialCond = IC;
-            State = 0;
-
-            AQTSeg = P;
-            if (P != null)
-            {
-                Location = P.Location;
-            }
-            LoadNotes1 = "";
-            LoadNotes2 = "";
-
-            yhold = 0;
-            for (j = 1; j <= 6; j++)
-            {
-                StepRes[j] = 0;
-            }
         }
 
         public virtual void CalculateLoad(DateTime TimeIndex)
@@ -755,7 +734,7 @@ namespace AQUATOX.AQTSegment
             result = Disch * State / AQTSeg.SegVol();
             // unit/d // m3/d // unit        // cu m.
 
-            // WashoutStep[AllStates.DerivStep] = result * AllStates.SegVol(); // FIXME MB Tracking 
+            // WashoutStep[AllStates.DerivStep] = result * AllStates.SegVol(); // No MB Tracking for now
             // 1000*mass                   // mass/L*d            // m3
 
             return result;
@@ -935,7 +914,7 @@ namespace AQUATOX.AQTSegment
                     return 1.0;
                 default:
                     throw new Exception("TStateVariable Wet To Dry called for irrelevant variable.");
-            }   // case
+            }  
         }
 
         public double NutrToOrg(AllVariables S)
@@ -1233,6 +1212,184 @@ namespace AQUATOX.AQTSegment
                 if (GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null) return true;
             }
             return false;
+        }
+
+
+        public TStateVariable AddStateVariable(AllVariables NS, T_SVLayer Lyr)
+        {
+            TStateVariable P = null;
+
+            // Add the NS variable and the associated toxicity S.V. if appropriate
+            if (NS == AllVariables.Volume) P = new TVolume(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Temperature) P = new TTemperature(NS, T_SVType.StV, Lyr, "", this, 0);   
+            else if (NS == AllVariables.WindLoading) P = new TWindLoading(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Light) P = new TLight(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.pH) P = new TpHObj(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Phosphate)
+            {
+                if (Lyr > T_SVLayer.WaterCol)
+                    P = new TPO4_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+                else
+                    P = new TPO4Obj(NS, T_SVType.StV, Lyr, "", this, 0);
+            }
+            else if (NS == AllVariables.Ammonia)
+            {
+                if (Lyr > T_SVLayer.WaterCol)
+                    P = new TNH4_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+                else
+                    P = new TNH4Obj(NS, T_SVType.StV, Lyr, "", this, 0);
+            }
+            else if (NS == AllVariables.Nitrate)
+            {
+                if (Lyr > T_SVLayer.WaterCol)
+                    P = new TNO3_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+                else
+                    P = new TNO3Obj(NS, T_SVType.StV, Lyr, "", this, 0);
+            }
+            else if ((NS == AllVariables.Silica) || (NS == AllVariables.Avail_Silica))
+                P = new TSilica_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Sulfide)
+                P = new TSulfide_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Methane)
+                P = new TMethane(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.COD)
+                P = new TCOD(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS >= AllVariables.POC_G1) && (NS <= AllVariables.POC_G3))
+                P = new TPOC_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS == AllVariables.POP_G1) && (NS <= AllVariables.POP_G3))
+                P = new TPOP_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS == AllVariables.PON_G1) && (NS <= AllVariables.PON_G3))
+                P = new TPON_Sediment(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.CO2)
+                P = new TCO2Obj(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Oxygen)
+                P = new TO2Obj(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.Salinity)
+                P = new TSalinity(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.TSS)
+                P = new TSandSiltClay(NS, T_SVType.StV, Lyr, "", this, 0); 
+            else if (NS == AllVariables.SedmLabDetr)
+                P = new TSedLabileDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.SedmRefrDetr)
+            {
+                if (Lyr > T_SVLayer.WaterCol)
+                    P = new TSedRefrDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+                else if (NS == AllVariables.SuspRefrDetr)
+                    P = new TSuspRefrDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+            }
+            else if (NS == AllVariables.SuspLabDetr)
+                P = new TSuspLabDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.DissRefrDetr)
+                P = new TDissRefrDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if (NS == AllVariables.DissLabDetr)
+                P = new TDissLabDetr(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS >= Consts.FirstAlgae) && (NS <= Consts.LastAlgae))
+                P = new TPlant(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS >= Consts.FirstMacro) && (NS <= Consts.LastMacro))
+                P = new TMacrophyte(NS, T_SVType.StV, Lyr, "", this, 0);
+            else if ((NS >= Consts.FirstAnimal) && (NS <= Consts.LastAnimal))
+                P = new TAnimal(NS, T_SVType.StV, Lyr, "", this, 0);
+            else P = null;
+
+            if (P == null) return null;
+            int SVIndex = 0;
+            while ((NS > SV[SVIndex].NState) && (SVIndex < SV.Count())) SVIndex++;
+
+            SV.Insert(SVIndex,P);
+            SetMemLocRec();
+
+            // Add OrgTox SVs if one or more H2OTox variables are included
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
+            {
+                if (GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null)
+                    AddOrgToxStateVariable(NS, Lyr, ToxLoop);
+            }
+
+            //if ((NS >= Consts.FirstPlant && NS <= Consts.LastPlant) && SV.SetupRec.Internal_Nutrients)
+            //{
+            //    AddInternalNutSVs(NS);
+            //}
+
+            return P;
+        }
+
+        public void AddOrgToxStateVariable(AllVariables NS, T_SVLayer Lyr, T_SVType ToxType)
+        {
+            TStateVariable P;
+
+            if ((NS == AllVariables.SuspRefrDetr) || (NS == AllVariables.SuspLabDetr))
+                P = new TParticleTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS == AllVariables.DissRefrDetr) || (NS == AllVariables.DissLabDetr))
+                P = new TParticleTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS == AllVariables.SedmRefrDetr) || (NS == AllVariables.SedmLabDetr))
+                P = new TParticleTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS >= Consts.FirstPlant) && (NS <= Consts.LastPlant))
+                P = new TAlgaeTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS >= Consts.FirstInvert) && (NS <= Consts.LastInvert))
+                P = new TAnimalTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS >= Consts.FirstFish) && (NS <= Consts.LastFish))
+                P = new TAnimalTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+            else if ((NS >= AllVariables.POC_G1) && (NS <= AllVariables.POC_G3))
+                P = new TPOCTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
+
+        //            if (NS == AllVariables.BuriedLabileDetr)
+        //                P = new TBuriedDetrTox(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);  //sequestered organic matter not in HMS version
+        //            else if (NS ==  AllVariables.BuriedRefrDetr)
+        //                P = new TBuriedDetrTox1(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);
+
+            else P = null;
+                
+            if (P != null) SV.Add(P);
+            SetMemLocRec();
+
+            // set up tox loadings for susp&Diss detritus
+            if (NS == AllVariables.DissRefrDetr)
+            {
+                TDissRefrDetr PDRD = GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol) as TDissRefrDetr;
+                int TI = PDRD.ToxInt(ToxType);
+                PDRD.InputRecord.ToxInitCond[TI] = 0;
+                PDRD.InputRecord.ToxLoad[TI] = new LoadingsRecord();
+                PDRD.InputRecord.ToxLoad[TI].Loadings.UseConstant = true;
+                PDRD.InputRecord.ToxLoad[TI].Loadings.ConstLoad = 0;
+                PDRD.InputRecord.ToxLoad[TI].Loadings.MultLdg = 1.0;
+                foreach (TLoadings LR in PDRD.InputRecord.ToxLoad[TI].Alt_Loadings)
+                {
+                    LR.UseConstant = true;
+                    LR.ConstLoad = 0;
+                    LR.MultLdg = 1.0;
+                }
+            }
+        }
+
+
+        public TStateVariable Add_OrgTox_SVs(ChemicalRecord CR)
+        {
+            T_SVType ToxType = T_SVType.OrgTox1;
+            while ((ToxType < T_SVType.OrgTox20) && (GetStatePointer(AllVariables.H2OTox,ToxType,T_SVLayer.WaterCol) != null))
+                ToxType++;
+
+            if (GetStatePointer(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol) != null) return null;  // no open slots for organic chemicals
+
+            TToxics ChemVar = new TToxics(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol, "", this, 0);
+            if (ChemVar == null) return null;
+
+            ChemVar.ChemRec = CR;
+            int SVIndex = ChemVar.ToxInt(ToxType);
+            SV.Insert(SVIndex, ChemVar);
+            SetMemLocRec();
+
+            // ChemVar.ChangeData();  
+
+            // For each state variable, add associated toxicant if relevant
+            for (AllVariables ToxAddLoop = Consts.FirstState; ToxAddLoop <= Consts.LastState; ToxAddLoop++)
+              for (T_SVLayer ToxSedLoop = T_SVLayer.WaterCol; ToxSedLoop <= T_SVLayer.SedLayer2; ToxSedLoop++)
+                { 
+                  TStateVariable p = GetStatePointer(ToxAddLoop, T_SVType.StV, ToxSedLoop);
+                  if (p != null) AddOrgToxStateVariable(ToxAddLoop, ToxSedLoop, ToxType);
+                }
+
+            SetMemLocRec();
+            return ChemVar;
         }
 
         public string Verify_Runnable()
@@ -1595,6 +1752,23 @@ namespace AQUATOX.AQTSegment
         public string StateText(AllVariables ns)
         {
             string outtext = ns.ToString();
+            if (ns == AllVariables.Volume) outtext = "Water Volume";
+            if (ns == AllVariables.Phosphate) outtext = "Phosphate as P";
+            if (ns == AllVariables.Ammonia) outtext = "Total Ammonia as N";
+            if (ns == AllVariables.Nitrate) outtext = "Nitrate as N";
+            if (ns == AllVariables.CO2) outtext = "Carbon dioxide";
+            if (ns == AllVariables.TSS) outtext = "Tot. Susp. Solids";
+            if (ns == AllVariables.SedmRefrDetr) outtext = "Refrac. sed. detritus";
+            if (ns == AllVariables.SedmLabDetr) outtext = "Labile sed. detritus";
+            if (ns == AllVariables.DissRefrDetr) outtext = "Susp. and dissolved detritus";
+            if (ns == AllVariables.BlGreens1) outtext = "Cyanobacteria1";
+            if (ns == AllVariables.BlGreens2) outtext = "Cyanobacteria2";
+            if (ns == AllVariables.BlGreens3) outtext = "Cyanobacteria3";
+            if (ns == AllVariables.BlGreens4) outtext = "Cyanobacteria4";
+            if (ns == AllVariables.BlGreens5) outtext = "Cyanobacteria5";
+            if (ns == AllVariables.BlGreens6) outtext = "Cyanobacteria6";
+            if (ns == AllVariables.H2OTox) outtext = "Dissolved org. tox";
+
             return outtext;
         }
 
@@ -1620,8 +1794,6 @@ namespace AQUATOX.AQTSegment
 
             return list;
         }
-
-
 
         public void Derivs_ZeroDerivative(TStateVariable P)
         {
@@ -2752,7 +2924,7 @@ namespace AQUATOX.AQTSegment
                     return 0.0;  // Temperature at which ice cover occurs in moving water
                 default:
                     return 3.0;  // Temperature at which ice cover occurs in fresh water
-            }    // case
+            }    //  
         }
 
 
@@ -3085,7 +3257,7 @@ namespace AQUATOX.AQTSegment
             TVolume PVol;
             if (Location.Locale.UseBathymetry.Val)
             {
-                // zmean does not vary in this case
+                // zmean does not vary in this case 
                 return Location.Locale.ICZMean.Val;
             }
             else
@@ -3575,7 +3747,7 @@ namespace AQUATOX.AQTSegment
                     AllVariables.POP_G1 => Location.Remin.P2OrgLab.Val,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
                     _ => 1.0 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 };
-                // Case
+ 
                 TAnimal PA = P as TAnimal;
                 if ((Typ == T_SVType.StV))
                     Def = Def + Def2Detr * PA.Defecation() * NFrac;
@@ -3627,27 +3799,26 @@ namespace AQUATOX.AQTSegment
                 switch (NS)
                 {
                     case AllVariables.Avail_Silica:
-                        // Case
                         // taxonomic type diatoms
                         if (PP.NState >= Consts.FirstDiatom && PP.NState <= Consts.LastDiatom)
                             NFrac = Diagenesis_Params.Si_Diatom.Val;
                         else NFrac = 0;
                         break;
-                    // Modify the A .. B: AllVariables.PON_G1 .. AllVariables.PON_G3
                     case AllVariables.PON_G1:
+                    case AllVariables.PON_G2:
+                    case AllVariables.PON_G3:
                         NFrac = PP.N_2_Org();
                         break;
-                    // Modify the A .. B: AllVariables.POP_G1 .. AllVariables.POP_G3
                     case AllVariables.POP_G1:
+                    case AllVariables.POP_G2:
+                    case AllVariables.POP_G3:
                         NFrac = PP.P_2_Org();
                         break;
-                    default:
-                        // POCG1..POCG3:
+                    default: // POCG1..POCG3:
                         NFrac = 1.0 / Consts.Detr_OM_2_OC;
                         break;
                         // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 }
-                // case
                 // in which case all deposition goes to the periphyton directly
                 if (!PP.IsLinkedPhyto())
                 {
@@ -3692,7 +3863,6 @@ namespace AQUATOX.AQTSegment
                         _ => 1,   // POC_G1
                     };
                 }
-                // Case
                 if ((Typ == T_SVType.StV))
                     Sed = Sed + ((P) as TSuspendedDetr).Sedimentation() * NFrac;
                 else
@@ -4643,6 +4813,9 @@ namespace AQUATOX.AQTSegment
 
     public class TTemperature : TStateVariable
     {
+        public TTemperature(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+        }
 
         public override string IgnoreLabel()
         {
@@ -4881,6 +5054,10 @@ namespace AQUATOX.AQTSegment
     public class TSandSiltClay : TStateVariable   // TSS
     {
         public bool TSS_Solids = true;
+
+        public TSandSiltClay(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+        }
 
         // ----------------------------------------------------------------------
         public override void CalculateLoad(DateTime TimeIndex)

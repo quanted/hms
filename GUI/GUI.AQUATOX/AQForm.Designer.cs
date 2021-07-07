@@ -366,7 +366,7 @@ namespace GUI.AQUATOX
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.EditButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditButton.Location = new System.Drawing.Point(594, 382);
+            this.EditButton.Location = new System.Drawing.Point(602, 382);
             this.EditButton.Name = "EditButton";
             this.EditButton.Size = new System.Drawing.Size(60, 25);
             this.EditButton.TabIndex = 20;
@@ -379,7 +379,7 @@ namespace GUI.AQUATOX
             // 
             this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DeleteButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteButton.Location = new System.Drawing.Point(528, 382);
+            this.DeleteButton.Location = new System.Drawing.Point(532, 382);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(60, 25);
             this.DeleteButton.TabIndex = 19;

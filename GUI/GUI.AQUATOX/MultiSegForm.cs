@@ -428,7 +428,7 @@ namespace GUI.AQUATOX
                 Param_Form SetupForm = new Param_Form();
                 SetupForm.SuppressComment = true;
                 SetupForm.SuppressSymbol = true;
-                SetupForm.EditParams(ref SS, "Simulation Setup", true);
+                SetupForm.EditParams(ref SS, "Simulation Setup", true, "SiteLib.JSON");
 
                 string msfilen = basedirBox.Text + "MasterSetup.json";
                 string msr = JsonConvert.SerializeObject(SR);

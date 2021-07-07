@@ -136,6 +136,15 @@ namespace AQUATOX.Chemicals
             ppb = 0;
         }
 
+        public TToxics(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
+        {
+        }
+
+        public override void UpdateName()
+        {
+            PName = AQTSeg.StateText(NState) + ": [" + ChemRec.ChemName.Val + ']';
+        }
+
         public override void SetToInitCond() 
         {
             double Wet2Dry, Mass;

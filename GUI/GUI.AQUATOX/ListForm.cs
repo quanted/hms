@@ -21,5 +21,11 @@ namespace GUI.AQUATOX
             if (ShowDialog()== DialogResult.Cancel) return -1;
             return listBox1.SelectedIndex;
         }
+
+        private void listBox1_DoubleClick(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
     }
 }

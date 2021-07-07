@@ -208,6 +208,11 @@ namespace AQUATOX.Plants
         [JsonIgnore] public bool IsEunotia = false;          // Is this Eunotia?  Scientific name includes "eunotia,"  NOSAVE
         public AllVariables PSameSpecies = AllVariables.NullStateVar;
 
+        public override void UpdateName()
+        {
+            PName = AQTSeg.StateText(NState) + ": [" + PAlgalRec.PlantName.Val + ']';
+        }
+
         public TPlant(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
             int ToxLoop;
