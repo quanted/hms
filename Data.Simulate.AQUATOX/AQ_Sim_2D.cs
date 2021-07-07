@@ -84,12 +84,12 @@ namespace AQUATOX.AQSim_2D
             nSegs = SN.network.Count() - 1;
         }
 
-        public List<string> MultiSegSimFlags()
+        public static List<string> MultiSegSimFlags()
         {
             return new List<string>(new string[] { "Nitrogen", "Phosphorus", "Organic Matter" });
         }
 
-        public string MultiSegSimName(List<bool> flags)
+        public static string MultiSegSimName(List<bool> flags)
         {
             if ((flags[2]) && (flags[1])) return "MS_OM.json";  // [2] is organic matter, organic matter simulations require nitrogen
             else if (flags[2]) return "MS_OM_NoP.json";  // [1] is phosphorus, and this is not selected 

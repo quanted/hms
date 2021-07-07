@@ -21,94 +21,27 @@ namespace Web.Services.Models
     /// </summary>
     public class WSAquatoxWorkflow : AQSim_2D
     {
+        private Dictionary<string, string> upstream;
+        private Dictionary<string, string> dependencies;
 
-        /// <summary>
-        /// Returns the types of flags for getting a base simulation json.
-        /// </summary>
-        /// <returns>List of flag options</returns>
-        public List<string> GetOptions()
-        {
-            return MultiSegSimFlags();
-        }
-
-        /// <summary>
-        /// Returns a base simulation json from file based on set flags.
-        /// </summary>
-        /// <param name="flags">Dictionary of flag names and values</param>
-        /// <returns>Base json string from file</returns>
-        public string GetBaseJson(Dictionary<string, bool> flags)
-        {
-            // Create ordered dictionary to guarantee flag order and populate.
-            OrderedDictionary flagDict = new OrderedDictionary();
-            foreach(string item in MultiSegSimFlags()) 
-            {
-                if(flags.ContainsKey(item)) 
-                {
-                    flagDict.Add(item, flags[item]);
-                } 
-                else 
-                {
-                    flagDict.Add(item, false);
-                }
-            }
-
-            // Construct the flag list of bools
-            List<bool> flagOptions = new List<bool>();
-            foreach(DictionaryEntry item in flagDict) 
-            {
-                flagOptions.Add(Convert.ToBoolean(item.Value));
-            }
-
-            return GetBaseJsonHelper(flagOptions);
-        }
-
-        /// <summary>
-        /// Helper for returning file from GetBaseJson. Made in an attempt to make code 
-        /// modular and more readable.
-        /// </summary>
-        /// <param name="flagOptions">List of flags</param>
-        /// <returns>Base json string from file</returns>
-        public string GetBaseJsonHelper(List<bool> flagOptions)
-        {
-            // Check local file path
-            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions))))
-            {
-                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions)));
-            }
-            // Check for docker file path 
-            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + MultiSegSimName(flagOptions)))
-            {
-                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + MultiSegSimName(flagOptions));
-            }
-            // Check for local testing file path 
-            else if(File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions))))
-            {
-                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
-                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", MultiSegSimName(flagOptions)));
-            }
-            // Error 
-            else
-            {
-                return "Base json file could not be found.";
-            }
-        }
 
         /// <summary>
         /// Gets output from upstream segments from mongodb and merges them to
         /// the input of the current segment simulation.
         /// </summary>
-        /// <param name="input">Workflow input from controller.</param>
-        /// <param name="json">Stringified sim input, leaves function as sim output.</param>
+        /// <param name="task_id">Task ID of current simulation in database.</param>
+        /// <param name="json">Stringified sim output.</param>
         /// <param name="errormsg">Error message or empty string.</param>
         /// <returns>Serialized json string of the AQUATOX simulation output.</returns>
-        public void Run(WSAquatoxWorkflowInput input, ref string json, out string errormsg)
+        public void Run(string task_id, ref string json, out string errormsg)
         {
+            // Get simulation from database
+            errormsg = GetCurrentSim(task_id);
+            if(errormsg != "") { return; }
+
             // Instantiate new simulation
             AQTSim sim = new AQTSim();
-            try { errormsg = sim.Instantiate(json); }
+            try { errormsg = sim.Instantiate(baseSimJSON); }
             catch(NullReferenceException ex)
             {
                 // Can't instantiate from empty sim or incorrect sim format given
@@ -117,15 +50,15 @@ namespace Web.Services.Models
             if(errormsg != "") { return; }
 
             // Check for dependencies in input
-            errormsg = CheckDependencies(input.Dependencies, sim);
+            errormsg = CheckDependencies(sim);
             if(errormsg != "") { return; }
 
             // Convert upstream comids to ints to run with AQSim_2D
-            errormsg = ConvertUpstreamToInt(input.Upstream.Keys.ToList(), out List<int> comids);
+            errormsg = ConvertUpstreamToInt(upstream.Keys.ToList(), out List<int> comids);
             if (errormsg != "") { return; }
 
             // Get upstream outputs and archive them
-            errormsg = ArchiveUpstreamOutputs(comids, input.Upstream);
+            errormsg = ArchiveUpstreamOutputs(comids);
             if (errormsg != "") { return; }
 
             // Pass data from upstream to current simulation
@@ -140,17 +73,40 @@ namespace Web.Services.Models
         }
 
         /// <summary>
+        /// Using the given task ID, get the simulation json, upstream dictionary, and dependencies dictionary
+        /// from the mongodb. 
+        /// </summary>
+        /// <param name="task_id">Task ID for current simulation in database.</param>
+        /// <returns>Error message or empty string</returns>
+        private string GetCurrentSim(string task_id)
+        {
+            // Get from database
+            try 
+            {
+                Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
+                output.Wait();
+                baseSimJSON = output.Result.GetValue("input").AsString;
+                upstream = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("upstream").AsString);
+                //dependencies = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("dependencies").AsString);
+            }
+            catch(Exception ex) 
+            {
+                return "Error getting simulation from database." + ex.Message;
+            }
+            return "";
+        }
+
+        /// <summary>
         ///  Iterates over dictionary of dependencies and performs the appropriate action.
         /// </summary>
-        /// <param name="dependencies">Dictionary of: [dependency_type : dependency_taskid]</param>
         /// <param name="sim">Current segment simulation</param>
         /// <returns>Error message or empty string</returns>
-        public string CheckDependencies(Dictionary<string, string> dependencies, AQTSim sim) 
+        public string CheckDependencies(AQTSim sim) 
         {
             // Iterate over dependencies dict
             foreach(KeyValuePair<string, string> item in dependencies)
             {
-                // Switch based on dependency value, eg: streamflow, etc..
+                // Switch based on dependency key, eg: streamflow, etc..
                 switch(item.Key)
                 {
                     case "streamflow":
@@ -205,9 +161,8 @@ namespace Web.Services.Models
         /// Iterate over each comid and generate the archive results for each.
         /// </summary>
         /// <param name="comids">List of comids</param>
-        /// <param name="upstream">Dictionary of comids and taskids</param>
         /// <returns>Error message or empty string</returns>
-        public string ArchiveUpstreamOutputs(List<int> comids, Dictionary<string, string> upstream)
+        public string ArchiveUpstreamOutputs(List<int> comids)
         {
             foreach(int item in comids)
             {
