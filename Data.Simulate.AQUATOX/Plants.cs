@@ -261,7 +261,7 @@ namespace AQUATOX.Plants
 
         public void ChangeData()
         {
-            // Modify THE UNITS WHICH CHANGE WITH PLANT TYPE
+            // Modify the units which change with plant type
             if ((IsPhytoplankton()))
             {
                 StateUnit = "mg/L dry";

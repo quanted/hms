@@ -529,13 +529,12 @@ namespace GUI.AQUATOX
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
-            if (AQT2D == null) AQT2D = new AQSim_2D();
             CheckboxForm CBF = new CheckboxForm();
             CBF.Text = "Select elements to include in template";
-            List<bool> BoolList = CBF.SelectFromBoxes(AQT2D.MultiSegSimFlags());
+            List<bool> BoolList = CBF.SelectFromBoxes(AQSim_2D.MultiSegSimFlags());
             if (BoolList == null) return;
 
-            string filen = AQT2D.MultiSegSimName(BoolList);
+            string filen = AQSim_2D.MultiSegSimName(BoolList);
 
             BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + filen;
             MessageBox.Show("Selected Template File: " + filen);
