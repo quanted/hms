@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 using Web.Services.Models;
 using Newtonsoft.Json;
-using Data;
+using Newtonsoft.Json.Linq;
 
 namespace Web.Services.Controllers
 {
@@ -135,7 +135,8 @@ namespace Web.Services.Controllers
                 // Get template from flags
                 string json = await WSAquatoxInputBuilder.GetBaseJson(input.Flags);
                 // Insert loadings into template and return 
-                return Ok(await WSAquatoxInputBuilder.InsertLoadings(json, input));
+                json = await WSAquatoxInputBuilder.InsertLoadings(json, input);
+                return Ok(JsonConvert.DeserializeObject<JObject>(json));
             }
             catch (Exception ex)
             {

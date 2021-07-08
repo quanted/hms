@@ -100,12 +100,12 @@ namespace Web.Services.Models
             foreach(KeyValuePair<string, Loading> loading in input.Loadings)
             {
                 // Check for no time series and constant value is greater than -1
-                if(loading.Value.TimeSeries.Count == 0 && loading.Value.Constant > -1)
+                if(loading.Value.TimeSeries == null && loading.Value.Constant > -1)
                 {
                     // Insert constant
                     json = sim.InsertLoadings(json, loading.Key, loading.Value.Type, loading.Value.Constant, loading.Value.MultLdg);
                 }
-                else if(loading.Value.TimeSeries.Count > 0 && loading.Value.Constant <= -1)
+                else if(loading.Value.TimeSeries != null && loading.Value.Constant <= -1)
                 {
                     // Insert time series
                     json = sim.InsertLoadings(json, loading.Key, loading.Value.Type, loading.Value.TimeSeries, loading.Value.MultLdg);
