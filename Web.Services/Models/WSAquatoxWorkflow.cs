@@ -86,12 +86,12 @@ namespace Web.Services.Models
                 Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
                 output.Wait();
                 baseSimJSON = output.Result.GetValue("input").AsString;
-                upstream = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("upstream").AsString);
-                //dependencies = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("dependencies").AsString);
+                upstream = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result["upstream"].AsBsonDocument.ToJson());
+                dependencies = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result["dependencies"].AsBsonDocument.ToJson());
             }
             catch(Exception ex) 
             {
-                return "Error getting simulation from database." + ex.Message;
+                return "Error getting simulation from database. " + ex.Message;
             }
             return "";
         }
@@ -121,6 +121,7 @@ namespace Web.Services.Models
                         }
                         catch(Exception ex)
                         {
+                            Console.WriteLine(ex);
                             return "Invalid Time Series Output.";
                         }
                         // Update stream discharge for current segment simulation
@@ -151,7 +152,7 @@ namespace Web.Services.Models
                 else 
                 {
                     // Try parse failed
-                    return $"Invalid Comid: {item}";
+                    return $"Invalid Comid: '{item}' in upstream segments.";
                 }
             }
             return "";
