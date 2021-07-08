@@ -37,14 +37,14 @@ namespace Web.Services.Controllers
     public class WSAquatoxWorkflowController : Controller
     {
         /// <summary>
-        /// POST method for calling the AQUATOX workflow.
+        /// GET method for calling the AQUATOX workflow.
         /// </summary>
         /// <param name="task_id"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [ProducesResponseType(200)]
         [SwaggerRequestExample(typeof(string), typeof(WSAquatoxWorkflowControllerInputExample))]
-        public async Task<IActionResult> POST([FromQuery] string task_id)
+        public async Task<IActionResult> GET([FromQuery] string task_id)
         {
             try
             {
