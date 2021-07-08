@@ -3,13 +3,25 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using System.Collections.Generic;
 using System;
-using Data;
 using Web.Services.Models;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Data;
 
 namespace Web.Services.Controllers
 {
+    public class LoadingsInput 
+    {
+        public Dictionary<string, bool> Flags { get; set; }
+        public Dictionary<string, Loading> Loadings { get; set; }
+    }
+
+    public class Loading
+    {
+        public int Type { get; set; }
+        public double Constant { get; set; }
+        public SortedList<DateTime, double> TimeSeries { get; set; }
+        public double MultLdg { get; set; }
+    }
 
     /// <summary>
     /// AQUATOX workflow get base jsons input example. 
@@ -27,6 +39,39 @@ namespace Web.Services.Controllers
                 ["Nitrogen"] = true,
                 ["Phosphorus"] = false,
                 ["Organic Matter"] = false
+            };
+            return example;
+        }
+    }
+
+    /// <summary>
+    /// AQUATOX workflow get base jsons input example. 
+    /// </summary>
+    public class WSAquatoxInputBuilderControllerLoadingsInputExample : IExamplesProvider<LoadingsInput>
+    {
+        /// <summary>
+        /// Get Example.
+        /// </summary>
+        /// <returns></returns>
+        public LoadingsInput GetExamples()
+        {
+            LoadingsInput example = new LoadingsInput()
+            {
+                Flags = new Dictionary<string, bool>()
+                {
+                    ["Nitrogen"] = true,
+                    ["Phosphorus"] = false,
+                    ["Organic Matter"] = false
+                },
+                Loadings = new Dictionary<string, Loading>()
+                {
+                    ["TNH4Obj"] = new Loading()
+                    {
+                        Type = -1,
+                        Constant = 0.0853,
+                        MultLdg = 1
+                    }
+                }
             };
             return example;
         }
@@ -78,26 +123,24 @@ namespace Web.Services.Controllers
         /// POST method for returning the AQUATOX workflow base json based on set flags and updating base json 
         /// with contaminant matrix values.
         /// </summary>
-        /// <param name="input">Dictionary of flags and contanimants</param>
+        /// <param name="input">Object of flags and dictionary of loadings</param>
         /// <returns>Base json for aquatox simulation with SV contaminants updated.</returns>
-        /*
         [HttpPost]
         [ProducesResponseType(200)]
-        [Route("loadings")]
-        public async Task<IActionResult> PostLoadings([FromBody] ContaminantMatrix input)
+        [Route("insert-loadings")]
+        public async Task<IActionResult> PostLoadingsConstant([FromBody] LoadingsInput input)
         {
             try 
             {
                 // Get template from flags
-                WSAquatoxWorkflow aqt = new WSAquatoxWorkflow();
-                string json = await aqt.GetBaseJson(input.Flags);
-                return Ok(input);
+                string json = await WSAquatoxInputBuilder.GetBaseJson(input.Flags);
+                // Insert loadings into template and return 
+                return Ok(await WSAquatoxInputBuilder.InsertLoadings(json, input));
             }
             catch (Exception ex)
             {
                 return Utilities.Logger.LogAPIException(ex, input);
             }
         }
-        */
     }
 }

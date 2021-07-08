@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Collections.Specialized;
 using AQUATOX.AQSim_2D;
+using AQUATOX.AQTSegment;
 using System.Threading.Tasks;
 using System.IO;
+using Web.Services.Controllers;
 
 namespace Web.Services.Models
 {
@@ -86,6 +88,34 @@ namespace Web.Services.Models
             {
                 return "Base json file could not be found.";
             }
+        }
+
+        /// <summary>
+        /// Method to insert loadings into an Aquatox simulation. Iterates over dictionary of
+        /// loadings and calls AQTSegment.InsertLoadings depending on if constant or time series is supplied. 
+        /// </summary>
+        public static Task<string> InsertLoadings(string json, LoadingsInput input)
+        {
+            AQTSim sim = new AQTSim();
+            foreach(KeyValuePair<string, Loading> loading in input.Loadings)
+            {
+                // Check for no time series and constant value is greater than -1
+                if(loading.Value.TimeSeries.Count == 0 && loading.Value.Constant > -1)
+                {
+                    // Insert constant
+                    json = sim.InsertLoadings(json, loading.Key, loading.Value.Type, loading.Value.Constant, loading.Value.MultLdg);
+                }
+                else if(loading.Value.TimeSeries.Count > 0 && loading.Value.Constant <= -1)
+                {
+                    // Insert time series
+                    json = sim.InsertLoadings(json, loading.Key, loading.Value.Type, loading.Value.TimeSeries, loading.Value.MultLdg);
+                }
+                else
+                {
+                    return Task.FromResult("E");
+                }
+            }
+            return Task.FromResult(json);
         }
     }
 }
