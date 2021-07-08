@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS base
-WORKDIR /app
+#WORKDIR /app
 EXPOSE 80
 
 #FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
@@ -13,7 +13,7 @@ RUN dotnet publish -c Release -o /app
 
 #FROM base AS final
 WORKDIR /app
-COPY . /app
+#COPY . /app
 #COPY --from=publish /app .
 RUN ls /app/App_Data
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp3.1
