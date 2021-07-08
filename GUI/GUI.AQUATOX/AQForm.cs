@@ -135,7 +135,7 @@ namespace GUI.AQUATOX
             {
                 string json = File.ReadAllText(openFileDialog1.FileName);
 
-                json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
+               // json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
 
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
