@@ -6,6 +6,9 @@ namespace GUI.AQUATOX
 {
     public partial class TrophMatrix : Form
     {
+        public bool gridChange;
+        bool UserCanceled;
+
         public TrophMatrix()
         {
             InitializeComponent();
@@ -26,6 +29,8 @@ namespace GUI.AQUATOX
         public bool ShowGrid(DataTable table)
         {
             dataGridView1.DataSource = table;
+            gridChange = false;
+            UserCanceled = false;
 
             foreach (DataGridViewColumn col in dataGridView1.Columns)
             {
@@ -41,9 +46,46 @@ namespace GUI.AQUATOX
             int waw = Screen.GetWorkingArea(this).Width;
             if (this.Width > waw) this.Width = waw;
 
-            Show();
-            return true;
+            ShowDialog();
+            return !UserCanceled;
         }
 
+        private void OKButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void CancelButt_Click(object sender, EventArgs e)
+        {
+            if (gridChange)
+                if (MessageBox.Show("Cancel your changes to the data matrix?", "Confirm",
+                     MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                     MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    UserCanceled = true;
+                    this.Close();
+                }
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            gridChange = true;
+            changedLabel.Visible = true;
+        }
+
+        private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+                if ((e.Context & DataGridViewDataErrorContexts.Parsing) == DataGridViewDataErrorContexts.Parsing)
+                {
+                    MessageBox.Show("Wrong data type entered.");
+                }
+
+                if ((e.Exception) is ConstraintException)
+                {
+                    MessageBox.Show(e.Exception.Message);
+                }
+
+                e.ThrowException = false;
+        }
     }
 }

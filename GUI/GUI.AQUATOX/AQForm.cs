@@ -109,12 +109,12 @@ namespace GUI.AQUATOX
         {
             AQTSim AQS = new AQTSim();
 
-            json= AQS.InsertLoadings(json, "TNO3Obj", 2, 56.56, 1.56);  //2 = non-point source loading
+            json= AQS.InsertLoadings(json, "TN", 2, 56.56, 1.56);  //2 = non-point source loading
 
             SortedList<DateTime, double> TSL = new SortedList<DateTime, double>() { { new DateTime(2004, 1, 1), 2004.11 }, { new DateTime(2004, 5, 5), 2004.55 } };
-            json = AQS.InsertLoadings(json, "TNH4Obj", -1, TSL,1.2004);  //-1 = inflow loading
+            json = AQS.InsertLoadings(json, "TP", -1, TSL,1.2004);  //-1 = inflow loading
 
-            json = AQS.InsertLoadings(json, "TPO4Obj", 0, 123456,1.23456);   //0 = point source loading
+            json = AQS.InsertLoadings(json, "TP", 0, 123456,1.23456);   //0 = point source loading
 
             json = AQS.InsertLoadings(json, "TDissRefrDetr", 0, 3.1415926,1.314); //0 = point source loading; TDissRefrDetr=Organic Matter
 
@@ -135,7 +135,7 @@ namespace GUI.AQUATOX
             {
                 string json = File.ReadAllText(openFileDialog1.FileName);
 
-                /// json = TEST_INSERT_LOAD(json);  temporary used to test insert load code
+                json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
 
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
@@ -346,7 +346,11 @@ namespace GUI.AQUATOX
                     nplt++;
                 }
 
-            if (nplt == 0) return;
+            if (nplt == 0)
+            {
+                MessageBox.Show("There are no plants in the current simulation"); 
+                return;
+            }
 
             PlantRecord PR = PlantDB[0]; PR.Setup();
             TParameter[] PPS = PR.InputArray();
@@ -358,10 +362,22 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table,false,false);
+            if (gf.ShowGrid(table, false, false))
+            {
+                if (gf.gridChange)
+                {
+                    List<PlantRecord> PlantDB2 = Table_to_PlantDB(table);
+                    nplt = 0;
+                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+                        if (TSV.IsPlant())
+                        {
+                            TPlant TP = TSV as TPlant;
+                            TP.PAlgalRec = PlantDB2[nplt];
+                            nplt++;
+                        }
 
-            // FIXME load changes back into plants
-
+                }
+            }
         }
 
         private void ShowStudyInfo()
@@ -410,15 +426,10 @@ namespace GUI.AQUATOX
 
         private void Sites(object sender, EventArgs e)
         {
-            Param_Form Siteform = new Param_Form();
-
             if (aQTS == null) return;
 
-            SiteRecord SR = aQTS.AQTSeg.Location.Locale;
-            SR.Setup();
-            TParameter[] PPS = SR.InputArray();
-
-            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON");
+            SiteForm SF = new SiteForm();
+            SF.EditSiteInfo(aQTS);
         }
 
         private void Remin(object sender, EventArgs e)
@@ -673,7 +684,11 @@ namespace GUI.AQUATOX
                     nanm++;
                 }
 
-            if (nanm == 0) return;
+            if (nanm == 0)
+            {
+                MessageBox.Show("There are no animals in the current simulation");
+                return;
+            }
 
             AnimalRecord AIR = AnimDB[0]; AIR.Setup();
             TParameter[] PPS = AIR.InputArray();
@@ -685,7 +700,22 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            gf.ShowGrid(table, false, true);
+            if (gf.ShowGrid(table, false, false))
+            {
+                if (gf.gridChange)
+                {
+                    List<AnimalRecord> AnimalDB2 = Table_to_AnimDB(table);
+                    nanm = 0;
+                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+                        if (TSV.IsAnimal())
+                        {
+                            TAnimal TA = TSV as TAnimal;
+                            TA.PAnimalData = AnimalDB2[nanm];
+                            nanm++;
+                        }
+
+                }
+            }
         }
 
         private void ReminDB_Click(object sender, EventArgs e)
@@ -922,8 +952,8 @@ namespace GUI.AQUATOX
         {
             DataTable table = aQTS.AQTSeg.TrophInt_to_Table();
             TrophMatrix tm = new TrophMatrix();
-            tm.ShowGrid(table);
-
+            if (tm.ShowGrid(table))
+               aQTS.AQTSeg.Table_to_Trophint(table);
         }
 
         private void MultiSegButton_Click(object sender, EventArgs e)

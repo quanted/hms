@@ -155,6 +155,25 @@ namespace AQUATOX.AQSim_2D
                 TVol.LoadNotes1 = "Volumes from NWM using discharge in m3/s";       
                 TVol.LoadNotes2 = "NWM inflow converted from m3/d using multiplier";
                 InflowLoad.ITSI = null;
+
+                if (TVol.AQTSeg.DynVelocity==null) TVol.AQTSeg.DynVelocity = new TLoadings();
+                TLoadings VelocityLoad = TVol.AQTSeg.DynVelocity;
+                TVol.AQTSeg.CalcVelocity = false;
+
+                if (VelocityLoad.ITSI == null)
+                {
+                    TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+                    TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+                    input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+                    VelocityLoad.ITSI = input;
+                }
+
+                VelocityLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+                VelocityLoad.Translate_ITimeSeriesInput(1);  //bank 1 for velocity
+                VelocityLoad.MultLdg = 100;  // m/s to cm/s
+                VelocityLoad.Hourly = true;
+                VelocityLoad.UseConstant = false;
+                VelocityLoad.ITSI = null;
             }
             else  // use discharge and manning's equation
             {
