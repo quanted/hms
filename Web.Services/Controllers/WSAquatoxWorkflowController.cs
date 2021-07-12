@@ -70,6 +70,7 @@ namespace Web.Services.Controllers
 
         ///
         [HttpGet]
+        [Route("/test/")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> TEST()
         {
