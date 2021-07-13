@@ -117,7 +117,7 @@ namespace Web.Services.Models
                         TimeSeriesOutput TSO = new TimeSeriesOutput();
                         try
                         {
-                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result.GetValue("output").AsString);
+                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result["output"].AsBsonDocument.ToJson());
                         }
                         catch(Exception ex)
                         {
