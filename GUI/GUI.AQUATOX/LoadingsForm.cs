@@ -168,12 +168,16 @@ namespace GUI.AQUATOX
 
             GridChanged = false;
 
+            int toploadindex = 0;
+            if (SV.Has_Alt_Loadings()) toploadindex = 3;
+
+
             if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
             else if (LTBox.SelectedIndex < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
             if (DetritusScreen) //special case suspended & dissolved detr -- quick implementation, move this logic to .NET later
             {   // pull-down list is "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved/Particulate", "Labile/Refractory"  special case for detritus
-
+                toploadindex = 4;
                 DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
                 switch (LTBox.SelectedIndex)
                 {
@@ -183,6 +187,19 @@ namespace GUI.AQUATOX
                     case 3: LoadShown = DIR.Percent_Part.Loadings; break;
                     case 4: LoadShown = DIR.Percent_Refr.Loadings; break;
                 }
+            }
+
+            if (LTBox.SelectedIndex > toploadindex) //toxicant shown
+            {
+                int chemint = LTBox.SelectedIndex - toploadindex;
+                T_SVType chemtype = T_SVType.OrgTox1;
+                int currentchem = 0;
+                while (chemint > currentchem)
+                {
+                    TToxics TT = SV.AQTSeg.GetStatePointer(SV.NState, chemtype, T_SVLayer.WaterCol) as TToxics;
+                    if (TT != null) { chemint++; }
+                }
+
             }
 
             UseConstRadio.Checked = LoadShown.UseConstant;  // Update interface based on "LoadShown"
@@ -435,7 +452,7 @@ namespace GUI.AQUATOX
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
 
-                    SV.LoadsRec.Loadings.list.Clear();
+                    LoadShown.list.Clear();
 
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
@@ -452,7 +469,7 @@ namespace GUI.AQUATOX
 
                         try
                         {
-                            SV.LoadsRec.Loadings.list.Add(DateTime.Parse(field1), double.Parse(field2));
+                            LoadShown.list.Add(DateTime.Parse(field1), double.Parse(field2));
                         }
                         catch
                         {
@@ -467,9 +484,7 @@ namespace GUI.AQUATOX
                     }
 
                     ShowGrid();
-
                 }
-
             }
         }
 

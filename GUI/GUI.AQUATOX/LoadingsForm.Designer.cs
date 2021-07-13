@@ -62,6 +62,9 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
+            this.ToxICUnitLabel = new System.Windows.Forms.Label();
+            this.ToxICLabel = new System.Windows.Forms.Label();
+            this.ToxIC = new System.Windows.Forms.TextBox();
             this.LoadingsPanel.SuspendLayout();
             this.RBPanel.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -145,7 +148,7 @@ namespace GUI.AQUATOX
             this.RBPanel.Controls.Add(this.RBLabel);
             this.RBPanel.Location = new System.Drawing.Point(13, 13);
             this.RBPanel.Name = "RBPanel";
-            this.RBPanel.Size = new System.Drawing.Size(338, 130);
+            this.RBPanel.Size = new System.Drawing.Size(345, 130);
             this.RBPanel.TabIndex = 33;
             // 
             // RB3
@@ -209,6 +212,9 @@ namespace GUI.AQUATOX
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.ToxICUnitLabel);
+            this.panel1.Controls.Add(this.ToxICLabel);
+            this.panel1.Controls.Add(this.ToxIC);
             this.panel1.Controls.Add(this.TSUnit);
             this.panel1.Controls.Add(this.LTLabel);
             this.panel1.Controls.Add(this.LTBox);
@@ -223,13 +229,13 @@ namespace GUI.AQUATOX
             this.panel1.Controls.Add(this.NotesEdit);
             this.panel1.Location = new System.Drawing.Point(13, 158);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(338, 247);
+            this.panel1.Size = new System.Drawing.Size(345, 247);
             this.panel1.TabIndex = 32;
             // 
             // TSUnit
             // 
             this.TSUnit.AutoSize = true;
-            this.TSUnit.Location = new System.Drawing.Point(270, 104);
+            this.TSUnit.Location = new System.Drawing.Point(270, 109);
             this.TSUnit.Name = "TSUnit";
             this.TSUnit.Size = new System.Drawing.Size(33, 15);
             this.TSUnit.TabIndex = 43;
@@ -256,7 +262,7 @@ namespace GUI.AQUATOX
             // UseTimeSeriesRadio
             // 
             this.UseTimeSeriesRadio.AutoSize = true;
-            this.UseTimeSeriesRadio.Location = new System.Drawing.Point(24, 100);
+            this.UseTimeSeriesRadio.Location = new System.Drawing.Point(24, 105);
             this.UseTimeSeriesRadio.Name = "UseTimeSeriesRadio";
             this.UseTimeSeriesRadio.Size = new System.Drawing.Size(153, 19);
             this.UseTimeSeriesRadio.TabIndex = 40;
@@ -268,7 +274,7 @@ namespace GUI.AQUATOX
             // UseConstRadio
             // 
             this.UseConstRadio.AutoSize = true;
-            this.UseConstRadio.Location = new System.Drawing.Point(24, 65);
+            this.UseConstRadio.Location = new System.Drawing.Point(24, 76);
             this.UseConstRadio.Name = "UseConstRadio";
             this.UseConstRadio.Size = new System.Drawing.Size(138, 19);
             this.UseConstRadio.TabIndex = 39;
@@ -297,7 +303,7 @@ namespace GUI.AQUATOX
             // CLUnit
             // 
             this.CLUnit.AutoSize = true;
-            this.CLUnit.Location = new System.Drawing.Point(270, 67);
+            this.CLUnit.Location = new System.Drawing.Point(270, 78);
             this.CLUnit.Name = "CLUnit";
             this.CLUnit.Size = new System.Drawing.Size(33, 15);
             this.CLUnit.TabIndex = 36;
@@ -305,9 +311,9 @@ namespace GUI.AQUATOX
             // 
             // ConstLoadBox
             // 
-            this.ConstLoadBox.Location = new System.Drawing.Point(168, 61);
+            this.ConstLoadBox.Location = new System.Drawing.Point(184, 72);
             this.ConstLoadBox.Name = "ConstLoadBox";
-            this.ConstLoadBox.Size = new System.Drawing.Size(96, 23);
+            this.ConstLoadBox.Size = new System.Drawing.Size(79, 23);
             this.ConstLoadBox.TabIndex = 35;
             this.ConstLoadBox.TextChanged += new System.EventHandler(this.ConstLoadBox_TextChanged);
             // 
@@ -430,6 +436,34 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.TabIndex = 25;
             this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             // 
+            // ToxICUnitLabel
+            // 
+            this.ToxICUnitLabel.AutoSize = true;
+            this.ToxICUnitLabel.Location = new System.Drawing.Point(269, 44);
+            this.ToxICUnitLabel.Name = "ToxICUnitLabel";
+            this.ToxICUnitLabel.Size = new System.Drawing.Size(33, 15);
+            this.ToxICUnitLabel.TabIndex = 46;
+            this.ToxICUnitLabel.Text = "units";
+            this.ToxICUnitLabel.Visible = false;
+            // 
+            // ToxICLabel
+            // 
+            this.ToxICLabel.AutoSize = true;
+            this.ToxICLabel.Location = new System.Drawing.Point(70, 44);
+            this.ToxICLabel.Name = "ToxICLabel";
+            this.ToxICLabel.Size = new System.Drawing.Size(92, 15);
+            this.ToxICLabel.TabIndex = 45;
+            this.ToxICLabel.Text = "Initial Condition";
+            this.ToxICLabel.Visible = false;
+            // 
+            // ToxIC
+            // 
+            this.ToxIC.Location = new System.Drawing.Point(185, 41);
+            this.ToxIC.Name = "ToxIC";
+            this.ToxIC.Size = new System.Drawing.Size(78, 23);
+            this.ToxIC.TabIndex = 44;
+            this.ToxIC.Visible = false;
+            // 
             // LoadingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -495,5 +529,8 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox NotesEdit;
         private System.Windows.Forms.RadioButton RB3;
+        private System.Windows.Forms.Label ToxICUnitLabel;
+        private System.Windows.Forms.Label ToxICLabel;
+        private System.Windows.Forms.TextBox ToxIC;
     }
 }

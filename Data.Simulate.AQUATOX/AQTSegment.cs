@@ -184,7 +184,9 @@ namespace AQUATOX.AQTSegment
             switch (SVType)
             {
                 case "TNH4Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol); break;
+                case "TN":
                 case "TNO3Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol); break;
+                case "TP":
                 case "TPO4Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol); break;
                 case "TDissRefrDetr": TSV = AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol); isdetritus = true; break;
             }
@@ -193,6 +195,30 @@ namespace AQUATOX.AQTSegment
 
             LoadingsRecord LR = TSV.LoadsRec;
             if (isdetritus) { LR = ((TDissRefrDetr)TSV).InputRecord.Load;}
+
+            bool isTN = (SVType == "TN");      //set TN flags based on user input
+            if (isTN || (SVType == "TNO3Obj"))
+            {
+                ((TNO3Obj)TSV).TN_IC = isTN;
+                ((TNO3Obj)TSV).TN_Inflow = isTN;
+                ((TNO3Obj)TSV).TN_PS = isTN;
+                ((TNO3Obj)TSV).TN_NPS = isTN;
+                //if (LoadingType < 0) ((TNO3Obj)TSV).TN_Inflow = isTN;
+                //else if (LoadingType == 0) ((TNO3Obj)TSV).TN_PS = isTN;
+                //else ((TNO3Obj)TSV).TN_NPS = isTN;
+            }
+
+            bool isTP = (SVType == "TP");  //set TP flags based on user input
+            if (isTP || (SVType == "TPO4Obj"))
+            {
+                ((TPO4Obj)TSV).TP_IC = isTP;
+                ((TPO4Obj)TSV).TP_Inflow = isTP;
+                ((TPO4Obj)TSV).TP_PS = isTP;
+                ((TPO4Obj)TSV).TP_NPS = isTP;
+                //if (LoadingType < 0) ((TPO4Obj)TSV).TP_Inflow = isTP;
+                //else if (LoadingType == 0) ((TPO4Obj)TSV).TP_PS = isTP;
+                //else ((TPO4Obj)TSV).TP_NPS = isTP;
+            }
 
             if (LoadingType < 0) return LR.Loadings;
             else return LR.Alt_Loadings[LoadingType];
@@ -502,51 +528,69 @@ namespace AQUATOX.AQTSegment
 
         public string LoadUnit(int index)
         {
-          
             if (index < 1) return LoadingUnit;
+
+            int toploadindex = 0;
+            if (Has_Alt_Loadings()) toploadindex = 3;
 
             if (NState == AllVariables.DissRefrDetr) // special case 
             {
+                toploadindex = 4; 
                 if (index < 3) return "g / d"; //point and non-point source loadings
                 else if (index == 3) return "pct. part.";
-                else return "pct. refr.";
+                else if (index == 4) return "pct. refr.";
             }
 
-
+            if (index<=toploadindex)
+            { 
+            
                 if (index == 1) // pointsource
-            {
-                if (IsAnimal()) return "pct./day";  //special case 
-                if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
-                return "g / d"; //point-source loadings
+                {
+                    if (IsAnimal()) return "pct./day";  //special case 
+                    if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
+                    return "g / d"; //point-source loadings
+                }
+                if (index == 2) // direct precip.
+                {
+                    if (IsAnimal()) return "g/m2 - d";  //special case 
+                    if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
+                    return "g/m2 - d"; //direct precip. loadings
+                }
+                // (index == 3) // non-point source
+                {
+                    if (IsAnimal()) return "error"; //special case , not relevant to animals
+                    if (NState == AllVariables.Volume) return "error"; //special case , not relevant to volume
+                    if (NState == AllVariables.CO2) return "mg/L";  // special case equilibrium CO2 Import
+                    return "g / d"; //non point-source loadings
+                }
             }
-            if (index == 2) // direct precip.
-            {
-                if (IsAnimal()) return "g/m2 - d";  //special case 
-                if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
-                return "g/m2 - d"; //direct precip. loadings
-            }
-            // (index == 3) // non-point source
-            {
-                if (IsAnimal()) return "error"; //special case , not relevant to animals
-                if (NState == AllVariables.Volume) return "error"; //special case , not relevant to volume
-                if (NState == AllVariables.CO2) return "mg/L";  // special case equilibrium CO2 Import
-                return "g / d"; //non point-source loadings
-            }
+
+            if ((NState >= Consts.FirstDetr) && (NState <= Consts.LastDetr)) return "ug/kg dry";
+            else return "ug/kg wet";
         }
 
 
         public List<string> LoadList()
         {
+            List<string> outList; 
             if ((NState == AllVariables.pH) || (NState == AllVariables.TSS) || (NState == AllVariables.Temperature) || (NState == AllVariables.Salinity) || (NState == AllVariables.COD))
-                return new List<string>(new string[] { "Segment Values" });  //special case s, no inflow loadings, just in-segment driving values
-            if (NState == AllVariables.Volume) return new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case 
-            if (NState == AllVariables.Light) return new List<string>(new string[] { "Top of Segment Loading" });  //special case 
-            if (IsAnimal()) return new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case 
-            if (NState == AllVariables.DissRefrDetr) return new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
+                outList = new List<string>(new string[] { "Segment Values" });  //special case s, no inflow loadings, just in-segment driving values
+            else if (NState == AllVariables.Volume) outList = new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case 
+            else if (NState == AllVariables.Light) outList = new List<string>(new string[] { "Top of Segment Loading" });  //special case 
+            else if (IsAnimal()) outList = new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case 
+            else if (NState == AllVariables.DissRefrDetr) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
+            else if (Has_Alt_Loadings()) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
+            else outList = new List<string>(new string[] { "In Inflow Water"});
 
-            if (Has_Alt_Loadings())
-              return new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
-              else return new List<string>(new string[] { "In Inflow Water"});  
+            AQTSeg.AssignChemRecs();
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)  // add tox exposures
+            {
+                TToxics TT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                
+                if (TT != null) outList.Add(TT.ChemRec.ChemName.Val +" exposure");
+
+            }
+            return outList;
         }
 
 
@@ -1370,7 +1414,7 @@ namespace AQUATOX.AQTSegment
 
             if (GetStatePointer(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol) != null) return null;  // no open slots for organic chemicals
 
-            TToxics ChemVar = new TToxics(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol, "", this, 0);
+            TToxics ChemVar = new TToxics(AllVariables.H2OTox, AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol, "", this, 0);
             if (ChemVar == null) return null;
 
             ChemVar.ChemRec = CR;
@@ -3176,6 +3220,13 @@ namespace AQUATOX.AQTSegment
         }
 
         // ---------------------------------------------------------------
+        public void AssignChemRecs()
+        {
+            foreach (TToxics P in SV.OfType<TToxics>())
+                P.ChemRec = ((TToxics)GetStatePointer(AllVariables.H2OTox, P.SVType, T_SVLayer.WaterCol)).ChemRec;
+        }
+
+        // ---------------------------------------------------------------
 
         public void SVsToInitConds()
         {
@@ -3183,8 +3234,7 @@ namespace AQUATOX.AQTSegment
 
             TVolume TV = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
 
-            foreach (TToxics P in SV.OfType<TToxics>())
-                P.ChemRec = ((TToxics)GetStatePointer(AllVariables.H2OTox, P.SVType, T_SVLayer.WaterCol)).ChemRec;
+            AssignChemRecs();
 
             TV.SetToInitCond();
             foreach (TStateVariable TSV in SV)
@@ -4646,6 +4696,36 @@ namespace AQUATOX.AQTSegment
             }
 
             return table;
+        }
+
+        public bool Table_to_Trophint(DataTable table)
+        {
+            SetMemLocRec();
+
+            int PredIndex = 0;
+            for (AllVariables predloop = Consts.FirstAnimal; predloop <= Consts.LastAnimal; predloop++)
+            {
+                TAnimal TA = GetStatePointer(predloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (TA != null)
+                {
+                    PredIndex++;
+                    int PreyIndex = -1;
+                    for (AllVariables preyloop = AllVariables.Cohesives; preyloop <= Consts.LastBiota; preyloop++)
+                    {
+                        TStateVariable TSV = GetStatePointer(preyloop, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (TSV != null)
+                        {
+                            PreyIndex++;
+                            object df = table.Rows[PreyIndex][PredIndex];
+                            double pref;
+                            if (df == DBNull.Value) pref = 0;
+                            else pref = (double)df;
+                            TA.PTrophInt[iTrophInt(preyloop)].Pref = pref;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         public virtual double GetPPB(AllVariables S, T_SVType T, T_SVLayer L)

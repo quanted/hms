@@ -86,12 +86,27 @@ namespace Web.Services.Models
                 Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
                 output.Wait();
                 baseSimJSON = output.Result.GetValue("input").AsString;
-                upstream = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("upstream").AsString);
-                //dependencies = JsonConvert.DeserializeObject<Dictionary<string, string>>(output.Result.GetValue("dependencies").AsString);
+                var tempUp = output.Result.GetValue("upstream");
+                if (tempUp is BsonNull)
+                {
+                    upstream = new Dictionary<string, string>();
+                }
+                else
+                {
+                    upstream = JsonConvert.DeserializeObject<Dictionary<string, string>>(tempUp.AsBsonDocument.ToJson());
+                }
+                var tempDep = output.Result.GetValue("dependencies");
+                if (tempDep is BsonNull)
+                {
+                    dependencies = new Dictionary<string, string>();
+                }
+                else {
+                    dependencies = JsonConvert.DeserializeObject<Dictionary<string, string>>(tempDep.AsBsonDocument.ToJson());
+                }
             }
             catch(Exception ex) 
             {
-                return "Error getting simulation from database." + ex.Message;
+                return "Error getting simulation from database. " + ex.Message;
             }
             return "";
         }
@@ -117,10 +132,11 @@ namespace Web.Services.Models
                         TimeSeriesOutput TSO = new TimeSeriesOutput();
                         try
                         {
-                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result.GetValue("output").AsString);
+                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result.GetValue("output").ToJson());
                         }
                         catch(Exception ex)
                         {
+                            Console.WriteLine(ex);
                             return "Invalid Time Series Output.";
                         }
                         // Update stream discharge for current segment simulation
@@ -151,7 +167,7 @@ namespace Web.Services.Models
                 else 
                 {
                     // Try parse failed
-                    return $"Invalid Comid: {item}";
+                    return $"Invalid Comid: '{item}' in upstream segments.";
                 }
             }
             return "";

@@ -67,33 +67,5 @@ namespace Web.Services.Controllers
                 return Utilities.Logger.LogAPIException(ex, task_id);
             }
         }
-
-        ///
-        [HttpGet]
-        [Route("/test/")]
-        [ProducesResponseType(200)]
-        public async Task<IActionResult> TEST()
-        {
-            BsonDocument data = new BsonDocument()
-            {
-                { "_id", "60bfbb301036b32c88d23235324"},
-                { "input", await WSAquatoxInputBuilder.GetBaseJson(new Dictionary<string, bool>())},
-                { "upstream", new BsonDocument() 
-                    {
-                        {"comid_1", "425436"},
-                        {"comid_2", "355i587"}
-                    }
-                },
-                { "dependencies", new BsonDocument() 
-                    {
-                        {"streamflow", ""}
-                    }
-                }
-            };
-
-            Utilities.MongoDB.InsertOne("hms_workflows", "data", data);
-
-            return Ok();
-        }
     }
 }
