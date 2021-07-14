@@ -23,7 +23,7 @@ namespace Streamflow
                 "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + 
                 "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
 
-            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest).Result;
+            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 500).Result;
             output = results.data;
             if (input.TemporalResolution.ToLower() == "daily") {
                 output.Data = output.ToDaily(input.DateTimeSpan.DateTimeFormat, input, true, false);

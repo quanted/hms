@@ -17,7 +17,7 @@ namespace Utilities
         /// <param name="errorMsg"></param>
         /// <param name="queryString"></param>
         /// <returns></returns>
-        public static async Task<T> RequestData<T>(string queryString)
+        public static async Task<T> RequestData<T>(string queryString, int pings = 100)
         {
             string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
             if (flaskURL == null)
@@ -71,7 +71,7 @@ namespace Utilities
             try
             {
                 int retries = 0;
-                int maxRetries = 100;
+                int maxRetries = pings;
                 string status = "";
                 bool success = false;
                 wm = await hc.GetAsync(dataURL + jobID);
