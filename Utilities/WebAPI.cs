@@ -90,7 +90,7 @@ namespace Utilities
                     }
                     else if (taskData.status == "FAILURE" || taskData.status == "PENDING")
                     {
-
+                        Log.Warning("Warning: Task failed to complete, status: " + taskData.status);
                         break;
                     }
                     else
@@ -99,6 +99,7 @@ namespace Utilities
                     }
                     retries += 1;
                 }
+                Log.Warning("TASK END, ID: " + jobID + ", STATUS: " + taskData.status + ", TRY COUNT: " + retries.ToString() + "/" + pings.ToString());
             }
             catch (Exception ex)
             {
