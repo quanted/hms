@@ -224,6 +224,7 @@ namespace AQUATOX.AQTSegment
             else return LR.Alt_Loadings[LoadingType];
         }
 
+        
         /// <summary>
         /// Accepts an input JSON sting and information about a constant point-source, nonpoint-source, or inflow loading and inserts that into a return JSON string
         /// </summary>
@@ -406,6 +407,7 @@ namespace AQUATOX.AQTSegment
         public bool SaveRates = true;      // Does the user want rates written for this SV?
         [JsonIgnore] public List<TRate> RateColl = null; // Collection of saved rates for current timestep
         [JsonIgnore] public int RateIndex = 0;
+        [JsonIgnore] public int nontoxloadings;
 
         public string LoadNotes1;
         public string LoadNotes2;            // Notes associated with loadings
@@ -532,8 +534,9 @@ namespace AQUATOX.AQTSegment
 
             int toploadindex = 0;
             if (Has_Alt_Loadings()) toploadindex = 3;
+            if ((IsAnimal()) || (NState == AllVariables.Volume)) toploadindex = 2; // specialcases
 
-            if (NState == AllVariables.DissRefrDetr) // special case 
+                if (NState == AllVariables.DissRefrDetr) // special case 
             {
                 toploadindex = 4; 
                 if (index < 3) return "g / d"; //point and non-point source loadings
@@ -543,7 +546,6 @@ namespace AQUATOX.AQTSegment
 
             if (index<=toploadindex)
             { 
-            
                 if (index == 1) // pointsource
                 {
                     if (IsAnimal()) return "pct./day";  //special case 
@@ -582,11 +584,11 @@ namespace AQUATOX.AQTSegment
             else if (Has_Alt_Loadings()) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
             else outList = new List<string>(new string[] { "In Inflow Water"});
 
+            nontoxloadings = outList.Count;
             AQTSeg.AssignChemRecs();
-            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)  // add tox exposures
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // add tox exposures
             {
                 TToxics TT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TToxics;
-                
                 if (TT != null) outList.Add(TT.ChemRec.ChemName.Val +" exposure");
 
             }
@@ -1251,7 +1253,7 @@ namespace AQUATOX.AQTSegment
 
         public bool Has_Chemicals()
         {
-            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
+            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
             {
                 if (GetStatePointer(AllVariables.H2OTox, ToxLoop, T_SVLayer.WaterCol) != null) return true;
             }
@@ -1582,8 +1584,10 @@ namespace AQUATOX.AQTSegment
             TDissLabDetr PDLD = (TDissLabDetr)GetStatePointer(AllVariables.DissLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
             TSuspRefrDetr PSRD = (TSuspRefrDetr)GetStatePointer(AllVariables.SuspRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
             TSuspLabDetr PSLD = (TSuspLabDetr)GetStatePointer(AllVariables.SuspLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSedRefrDetr PSdRD = (TSedRefrDetr)GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-            TSedLabileDetr PSdLD = (TSedLabileDetr)GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable PSdRD = GetStatePointer(AllVariables.SedmRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable PSdLD = GetStatePointer(AllVariables.SedmLabDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            if (PSdRD == null) PSdRD = GetStatePointer(AllVariables.POC_G1, T_SVType.StV, T_SVLayer.SedLayer2); // check for diagenesis option
+            if (PSdLD == null) PSdLD = GetStatePointer(AllVariables.POC_G2, T_SVType.StV, T_SVLayer.SedLayer2); // check for diagenesis option
 
             if ((PDRD == null) || (PDLD == null) || (PSRD == null) || (PSLD == null) || (PSdRD == null) || (PSdLD == null))
                 return "All six organic matter state variables must be included in an organic-matter simulation.";
@@ -1763,7 +1767,7 @@ namespace AQUATOX.AQTSegment
             if (TSVList == null) TSVList = new List<TStateVariable>();
             TSVList.Clear();
 
-            for (SVTLoop = Consts.FirstOrgTxTyp; SVTLoop <= Consts.FirstOrgTxTyp; SVTLoop++)  //list chemicals first
+            for (SVTLoop = Consts.FirstOrgTxTyp; SVTLoop <= Consts.LastOrgTxTyp; SVTLoop++)  //list chemicals first
             {
                 TSV = GetStatePointer(AllVariables.H2OTox, SVTLoop, T_SVLayer.WaterCol);
                 if (TSV != null)
@@ -2348,7 +2352,7 @@ namespace AQUATOX.AQTSegment
                         else POF.State = PYF.State;
 
                         // promote org toxicants and mercury
-                        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.FirstOrgTxTyp; ToxLoop++)
+                        for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
                         {
                             POF = GetStatePointer(MFLoop, ToxLoop, T_SVLayer.WaterCol);
                             if (POF != null)
@@ -4788,6 +4792,69 @@ namespace AQUATOX.AQTSegment
             }
         }
         // ------------------------------------------------------------------------
+        public string ResultsToCSV()
+        {
+
+            TStateVariable TSV1 = null;
+            bool SuppressText = true;
+
+            int sercnt = 0;
+            string outtxt = "";
+
+            foreach (TStateVariable TSV in SV) if (TSV.SVoutput != null)
+                {
+                    TSV1 = TSV; // identify TSV1 with an output that is not null
+                    int cnt = 0;
+                    if (sercnt == 0) outtxt = "Date, ";
+
+                    List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
+                    for (int col = 1; col <= vallist.Count(); col++)
+                    {
+                        string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
+                                TSV.SVoutput.Metadata["Name_" + col.ToString()] +
+                                " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+
+                        if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+
+                        sercnt++;
+
+                        SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
+                        for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
+                        {
+                            ITimeSeriesOutput ito = TSV.SVoutput;
+                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
+                            cnt++;
+                        }
+                    }
+                }
+
+            outtxt = outtxt + Environment.NewLine;
+
+            if (!SuppressText)
+            {
+                for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
+                {
+                    bool writedate = true;
+                    foreach (TStateVariable TSV in SV) if (TSV.SVoutput != null)
+                        {
+                            ITimeSeriesOutput ito = TSV.SVoutput;
+                            if (writedate)
+                            {
+                                string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                                outtxt = outtxt + datestr + ", ";
+                                writedate = false;
+                            }
+                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
+                            outtxt = outtxt + Val.ToString() + ", ";
+                        }
+                    outtxt = outtxt + Environment.NewLine;
+                }
+            }
+
+            return outtxt;
+        }
+
 
     }  // end TAQUATOXSegment
 

@@ -41,88 +41,25 @@ namespace GUI.AQUATOX
 
         }
 
-        //public void DisplaySVs()
 
+        //private string TEST_INSERT_LOAD(string json)
         //{
-        //    TStateVariable TSV1 = null;
-        //    bool SuppressText = true;
+        //    AQTSim AQS = new AQTSim();
 
-        //    int sercnt = 0;
-        //    string outtxt = "";
+        //    json= AQS.InsertLoadings(json, "TN", 2, 56.56, 1.56);  //2 = non-point source loading
 
-        //    foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
-        //        {
-        //            TSV1 = TSV; // identify TSV1 with an output that is not null
-        //            int cnt = 0;
-        //            if (sercnt == 0) outtxt = "Date, ";
+        //    SortedList<DateTime, double> TSL = new SortedList<DateTime, double>() { { new DateTime(2004, 1, 1), 2004.11 }, { new DateTime(2004, 5, 5), 2004.55 } };
+        //    json = AQS.InsertLoadings(json, "TP", -1, TSL,1.2004);  //-1 = inflow loading
 
-        //            List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
-        //            for (int col = 1; col <= vallist.Count(); col++)
-        //            {
-        //                string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
-        //                     TSV.SVoutput.Metadata["Name_" + col.ToString()] +
-        //                     " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+        //    json = AQS.InsertLoadings(json, "TP", 0, 123456,1.23456);   //0 = point source loading
 
-        //                if (col == 1) outtxt = outtxt + sertxt.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+        //    json = AQS.InsertLoadings(json, "TDissRefrDetr", 0, 3.1415926,1.314); //0 = point source loading; TDissRefrDetr=Organic Matter
 
-        //                sercnt++;
+        //    TSL = new SortedList<DateTime, double>() { { new DateTime(2009, 2, 2), 2009.22 }, { new DateTime(2012, 3, 3), 2012.33 } };
+        //    json = AQS.InsertLoadings(json, "TDissRefrDetr", 2, TSL,1.2009);  //2 = non-point source loading; TDissRefrDetr=Organic Matter 
 
-        //                SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
-        //                for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
-        //                {
-        //                    ITimeSeriesOutput ito = TSV.SVoutput;
-        //                    string datestr = ito.Data.Keys.ElementAt(i).ToString();
-        //                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[col - 1]);
-        //                    cnt++;
-        //                }
-        //            }
-        //        }
-
-        //    outtxt = outtxt + Environment.NewLine;
-
-        //    if (!SuppressText)
-        //    {
-        //        for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
-        //        {
-        //            bool writedate = true;
-        //            foreach (TStateVariable TSV in outSeg.SV) if (TSV.SVoutput != null)
-        //                {
-        //                    ITimeSeriesOutput ito = TSV.SVoutput;
-        //                    if (writedate)
-        //                    {
-        //                        string datestr = ito.Data.Keys.ElementAt(i).ToString();
-        //                        outtxt = outtxt + datestr + ", ";
-        //                        writedate = false;
-        //                    }
-        //                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[0]);
-        //                    outtxt = outtxt + Val.ToString() + ", ";
-        //                }
-        //            outtxt = outtxt + Environment.NewLine;
-        //        }
-        //    }
-
-        //    textBox1.Text = outtxt;
+        //    return json;
         //}
-
-
-        private string TEST_INSERT_LOAD(string json)
-        {
-            AQTSim AQS = new AQTSim();
-
-            json= AQS.InsertLoadings(json, "TN", 2, 56.56, 1.56);  //2 = non-point source loading
-
-            SortedList<DateTime, double> TSL = new SortedList<DateTime, double>() { { new DateTime(2004, 1, 1), 2004.11 }, { new DateTime(2004, 5, 5), 2004.55 } };
-            json = AQS.InsertLoadings(json, "TP", -1, TSL,1.2004);  //-1 = inflow loading
-
-            json = AQS.InsertLoadings(json, "TP", 0, 123456,1.23456);   //0 = point source loading
-
-            json = AQS.InsertLoadings(json, "TDissRefrDetr", 0, 3.1415926,1.314); //0 = point source loading; TDissRefrDetr=Organic Matter
-
-            TSL = new SortedList<DateTime, double>() { { new DateTime(2009, 2, 2), 2009.22 }, { new DateTime(2012, 3, 3), 2012.33 } };
-            json = AQS.InsertLoadings(json, "TDissRefrDetr", 2, TSL,1.2009);  //2 = non-point source loading; TDissRefrDetr=Organic Matter 
-
-            return json;
-        }
 
         private void loadJSON_Click(object sender, EventArgs e)
         {
@@ -161,8 +98,9 @@ namespace GUI.AQUATOX
         private void saveJSON_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = "Test File|*.JSON";
+            saveFileDialog1.Filter = "JSON File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
+            saveFileDialog1.FileName = aQTS.AQTSeg.FileName;
             saveFileDialog1.ShowDialog();
 
             if (saveFileDialog1.FileName != "")
