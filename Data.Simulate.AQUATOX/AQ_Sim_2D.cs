@@ -141,18 +141,19 @@ namespace AQUATOX.AQSim_2D
                     if (velocity < Consts.Tiny) velocity = flow; // default to 1 m2 for now
                     double VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
                     // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 0.001 (m/km)
-
-                    if (flow > Consts.Tiny) 
-                        KnownValLoad.list.Add(date,VolCalc);
                     
-                    if ((firstvol) && (VolCalc > Consts.Tiny)) TVol.InitialCond = VolCalc;
+                    if (VolCalc < Consts.Tiny) VolCalc = TVol.AQTSeg.Location.Locale.SiteLength.Val *1000; //default minimum volume (length * XSec 1 m2) for now
+                    KnownValLoad.list.Add(date,VolCalc);
+                    
+                    if (firstvol) TVol.InitialCond = VolCalc;
                 }
 
-                InflowLoad.Translate_ITimeSeriesInput(0);
+                InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
                 InflowLoad.MultLdg = 86400;  // seconds per day
                 InflowLoad.Hourly = true;
                 InflowLoad.UseConstant = false;
-                TVol.LoadNotes1 = "Volumes from NWM using discharge in m3/s";       
+                
+                TVol.LoadNotes1 = "Volumes from NWM using flows in m3/s";       
                 TVol.LoadNotes2 = "NWM inflow converted from m3/d using multiplier";
                 InflowLoad.ITSI = null;
 
@@ -169,7 +170,7 @@ namespace AQUATOX.AQSim_2D
                 }
 
                 VelocityLoad.ITSI.InputTimeSeries.Add("input", ATSO);
-                VelocityLoad.Translate_ITimeSeriesInput(1);  //bank 1 for velocity
+                VelocityLoad.Translate_ITimeSeriesInput(1,0);  //bank 1 for velocity;  minimum velocity of zero
                 VelocityLoad.MultLdg = 100;  // m/s to cm/s
                 VelocityLoad.Hourly = true;
                 VelocityLoad.UseConstant = false;
@@ -190,9 +191,8 @@ namespace AQUATOX.AQSim_2D
                     DischargeLoad.ITSI = input;
                 }
 
-
                 DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
-                DischargeLoad.Translate_ITimeSeriesInput(0);
+                DischargeLoad.Translate_ITimeSeriesInput(0,1000/86400);  //default minimum flow of 1000 cu m /d for now
                 DischargeLoad.MultLdg = 86400;  // seconds per day
                 DischargeLoad.Hourly = true;
                 DischargeLoad.UseConstant = false;
@@ -202,7 +202,6 @@ namespace AQUATOX.AQSim_2D
             }
         }
 
-       //  public DataTable GetOverlandTable(string BaseJSON)() {}              WORKHERE
 
         public void archiveOutput(int comid, AQTSim Sim)
         {

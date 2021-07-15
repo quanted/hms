@@ -10,7 +10,7 @@ using AQUATOX.AQTSegment;
 using Globals;
 using Data;
 using System.Linq;
-
+using System.IO;
 
 namespace GUI.AQUATOX
 {
@@ -61,7 +61,6 @@ namespace GUI.AQUATOX
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         public void ShowOutput(AQTSim aQ)
@@ -78,7 +77,7 @@ namespace GUI.AQUATOX
             OutputBox.SelectedIndex = OutputBox.Items.Count - 1;
             Application.DoEvents();
             OutputBox.Visible = true;
-            
+
             ShowDialog();
 
         }
@@ -106,9 +105,7 @@ namespace GUI.AQUATOX
                     System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
                     System.Windows.Forms.MessageBox.Show(msgstr);
                 }
-
             }
-
         }
 
         private void UpdateGraphBox()
@@ -123,8 +120,8 @@ namespace GUI.AQUATOX
                 graphBox.Items.Add(TGS.GraphName);
             }
 
-            if ((i>-1) && (graphBox.Items.Count > i)) graphBox.SelectedIndex = i;
-            if ((graphBox.SelectedIndex <0) && (graphBox.Items.Count>0)) graphBox.SelectedIndex = 0;
+            if ((i > -1) && (graphBox.Items.Count > i)) graphBox.SelectedIndex = i;
+            if ((graphBox.SelectedIndex < 0) && (graphBox.Items.Count > 0)) graphBox.SelectedIndex = 0;
 
         }
 
@@ -133,7 +130,7 @@ namespace GUI.AQUATOX
             Application.DoEvents();
 
             aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
- 
+
             UpdateGraphBox();
             DisplayGraph();
         }
@@ -161,7 +158,6 @@ namespace GUI.AQUATOX
                 legendItem.Tag = series;
                 e.LegendItems.Add(legendItem);
             }
-
         }
 
 
@@ -197,10 +193,9 @@ namespace GUI.AQUATOX
                     {
                         ITimeSeriesOutput ito = TSV.SVoutput;
                         string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                        Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx-1]);
+                        Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx - 1]);
                         ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
                     }
-
                 }
             }
         }
@@ -209,7 +204,7 @@ namespace GUI.AQUATOX
         {
             if (outSeg == null) return;
             GraphSetupForm GSForm = new GraphSetupForm();
-            if (GSForm.EditGraph(outSeg,-1)) UpdateGraphBox();
+            if (GSForm.EditGraph(outSeg, -1)) UpdateGraphBox();
             graphBox.SelectedIndex = graphBox.Items.Count - 1;
 
         }
@@ -229,7 +224,7 @@ namespace GUI.AQUATOX
         private void DeleteGraphButton_Click(object sender, EventArgs e)
         {
             if (graphBox.SelectedIndex < 0) return;
-            if (MessageBox.Show("Erase the graph '"+graphBox.Text+ "'?", "Confirm",
+            if (MessageBox.Show("Erase the graph '" + graphBox.Text + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
             {
@@ -237,8 +232,6 @@ namespace GUI.AQUATOX
                 UpdateGraphBox();
                 DisplayGraph();
             }
-
-
         }
 
         private void DelRunButton_Click(object sender, EventArgs e)
@@ -250,12 +243,27 @@ namespace GUI.AQUATOX
             {
                 aQTS.SavedRuns.Remove(OutputBox.Text);
                 OutputBox.Items.RemoveAt(OutputBox.SelectedIndex);
-                if (OutputBox.SelectedIndex < 0) { OutputBox.Text = "";  outSeg = null; }
+                if (OutputBox.SelectedIndex < 0) { OutputBox.Text = ""; outSeg = null; }
 
                 UpdateGraphBox();
                 DisplayGraph();
             }
+        }
 
+        private void ExportButton_Click(object sender, EventArgs e)
+        {
+            if (OutputBox.SelectedIndex < 0) return;
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "CSV File|*.CSV";
+            saveFileDialog1.Title = "Save to Comma-Separated Text";
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                string CSVstring = outSeg.ResultsToCSV();
+                File.WriteAllText(saveFileDialog1.FileName, CSVstring);
+            }
         }
     }
 }

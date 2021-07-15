@@ -37,6 +37,7 @@ namespace GUI.AQUATOX
             this.NewGraphButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.ExportButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // OutputBox
@@ -52,7 +53,7 @@ namespace GUI.AQUATOX
             // graphBox
             // 
             this.graphBox.FormattingEnabled = true;
-            this.graphBox.Location = new System.Drawing.Point(339, 33);
+            this.graphBox.Location = new System.Drawing.Point(418, 35);
             this.graphBox.Name = "graphBox";
             this.graphBox.Size = new System.Drawing.Size(236, 23);
             this.graphBox.TabIndex = 6;
@@ -72,7 +73,7 @@ namespace GUI.AQUATOX
             // EditGraphButton
             // 
             this.EditGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditGraphButton.Location = new System.Drawing.Point(581, 31);
+            this.EditGraphButton.Location = new System.Drawing.Point(660, 33);
             this.EditGraphButton.Name = "EditGraphButton";
             this.EditGraphButton.Size = new System.Drawing.Size(56, 24);
             this.EditGraphButton.TabIndex = 9;
@@ -83,7 +84,7 @@ namespace GUI.AQUATOX
             // DeleteGraphButton
             // 
             this.DeleteGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteGraphButton.Location = new System.Drawing.Point(643, 31);
+            this.DeleteGraphButton.Location = new System.Drawing.Point(722, 33);
             this.DeleteGraphButton.Name = "DeleteGraphButton";
             this.DeleteGraphButton.Size = new System.Drawing.Size(56, 24);
             this.DeleteGraphButton.TabIndex = 10;
@@ -94,7 +95,7 @@ namespace GUI.AQUATOX
             // NewGraphButton
             // 
             this.NewGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.NewGraphButton.Location = new System.Drawing.Point(498, 6);
+            this.NewGraphButton.Location = new System.Drawing.Point(577, 8);
             this.NewGraphButton.Name = "NewGraphButton";
             this.NewGraphButton.Size = new System.Drawing.Size(77, 23);
             this.NewGraphButton.TabIndex = 11;
@@ -114,17 +115,29 @@ namespace GUI.AQUATOX
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(342, 11);
+            this.label2.Location = new System.Drawing.Point(421, 13);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 15);
             this.label2.TabIndex = 13;
             this.label2.Text = "Saved Graphs";
             // 
+            // ExportButton
+            // 
+            this.ExportButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.ExportButton.Location = new System.Drawing.Point(318, 33);
+            this.ExportButton.Name = "ExportButton";
+            this.ExportButton.Size = new System.Drawing.Size(75, 24);
+            this.ExportButton.TabIndex = 14;
+            this.ExportButton.Text = "Save CSV";
+            this.ExportButton.UseVisualStyleBackColor = true;
+            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
+            // 
             // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(796, 512);
+            this.ClientSize = new System.Drawing.Size(872, 512);
+            this.Controls.Add(this.ExportButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.NewGraphButton);
@@ -150,5 +163,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button NewGraphButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button ExportButton;
     }
 }

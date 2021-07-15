@@ -165,19 +165,13 @@ namespace GUI.AQUATOX
 
         public void ShowGrid()
         {
-
             GridChanged = false;
-
-            int toploadindex = 0;
-            if (SV.Has_Alt_Loadings()) toploadindex = 3;
-
 
             if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
             else if (LTBox.SelectedIndex < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
             if (DetritusScreen) //special case suspended & dissolved detr -- quick implementation, move this logic to .NET later
             {   // pull-down list is "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved/Particulate", "Labile/Refractory"  special case for detritus
-                toploadindex = 4;
                 DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
                 switch (LTBox.SelectedIndex)
                 {
@@ -189,17 +183,19 @@ namespace GUI.AQUATOX
                 }
             }
 
-            if (LTBox.SelectedIndex > toploadindex) //toxicant shown
+            if (LTBox.SelectedIndex > SV.nontoxloadings-1)  //then toxicant selected
             {
-                int chemint = LTBox.SelectedIndex - toploadindex;
-                T_SVType chemtype = T_SVType.OrgTox1;
+                int chemint = 1 + LTBox.SelectedIndex - SV.nontoxloadings;
+                T_SVType chemtype = T_SVType.OrgTox1;  chemtype--;  //set to enumerated variable before
                 int currentchem = 0;
+                TToxics TT = null;
                 while (chemint > currentchem)
                 {
-                    TToxics TT = SV.AQTSeg.GetStatePointer(SV.NState, chemtype, T_SVLayer.WaterCol) as TToxics;
-                    if (TT != null) { chemint++; }
+                    chemtype++;
+                    TT = SV.AQTSeg.GetStatePointer(SV.NState, chemtype, T_SVLayer.WaterCol) as TToxics;
+                    if (TT != null) { currentchem++; }
                 }
-
+                LoadShown = TT.LoadsRec.Loadings;
             }
 
             UseConstRadio.Checked = LoadShown.UseConstant;  // Update interface based on "LoadShown"
@@ -369,7 +365,7 @@ namespace GUI.AQUATOX
             }
 
             SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
-            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0);
+            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0,0.0);
             ShowGrid();
         }
 

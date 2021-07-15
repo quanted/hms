@@ -283,7 +283,8 @@ namespace GUI.AQUATOX
                 {
                     string strout = "";
                     string BaseDir = basedirBox.Text;
-                    if (!ValidFilen(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON")) return;
+                    string FileN = BaseDir + "AQT_2D_" + runID.ToString() + ".JSON";
+                    if (!ValidFilen(FileN)) { AddToProcessLog("Error File Missing " + FileN); return; }
                     string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
                     if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
                          File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
@@ -449,26 +450,24 @@ namespace GUI.AQUATOX
         {
             if (!VerifyStreamNetwork()) return;
 
+            AQTSim Sim = InstantiateBaseJSON();
+            if (Sim == null) return;
+
+            TStateVariable TNH4 = Sim.AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TNO3 = Sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TTSP = Sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TOM = Sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+
+            bool HasN = (TNH4 != null);
+            bool HasP = (TTSP != null);
+            bool HasOM = (TOM != null);
+
             if (OverlandTable == null)
             {   // set up input table based on base JSON specification 
 
-                // To be replaced with call to AQT2D.GetOverlandTable(string BaseJSON);
-
                 OverlandTable = new DataTable();
 
-                AQTSim Sim = InstantiateBaseJSON();
-                if (Sim == null) return;
-
                 OverlandTable.Columns.Add(new DataColumn("COMID"));
-
-                TStateVariable TNH4 = Sim.AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
-                TStateVariable TNO3 = Sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-                TStateVariable TTSP = Sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-                TStateVariable TOM = Sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-
-                bool HasN = (TNH4 != null);
-                bool HasP = (TTSP != null);
-                bool HasOM = (TOM != null);
 
                 if (HasN)
                 {
@@ -524,7 +523,41 @@ namespace GUI.AQUATOX
 
             GridForm gf = new GridForm();
             gf.Text = "Add Non-Point Source (Overland) Inputs";
-            if (!gf.ShowGrid(OverlandTable,true,false)) OverlandTable = null;
+            if (!gf.ShowGrid(OverlandTable,true,false)) return;
+
+            for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
+            {
+                int ColNum = 0;
+                DataRow row = OverlandTable.Rows[iSeg-1];
+                string comid = AQT2D.SN.network[iSeg][0];
+                string BaseDir = basedirBox.Text;
+                string FileN = BaseDir + "AQT_2D_" + comid + ".JSON";
+                if (!ValidFilen(FileN)) { AddToProcessLog("Error File Missing " + FileN); return; }
+
+                string JSON = System.IO.File.ReadAllText(FileN);
+                if (HasN)
+                {
+                    JSON = Sim.InsertLoadings(JSON, "TNH4Obj", 2, (double)row[ColNum+1], 1);
+                    ColNum++;
+                    JSON = Sim.InsertLoadings(JSON, "TNO3Obj", 2, (double)row[ColNum + 1], 1);
+                    ColNum++;
+                }
+
+                if (HasP)
+                {
+                    JSON = Sim.InsertLoadings(JSON, "TPO4Obj", 2, (double)row[ColNum + 1], 1);
+                    ColNum++;
+                }
+
+                if (HasOM)
+                {
+                    JSON = Sim.InsertLoadings(JSON, "TDissRefrDetr", 2, (double)row[ColNum + 1], 1);
+                    ColNum++;
+                }
+
+                System.IO.File.WriteAllText(FileN, JSON);
+                AddToProcessLog("Overwrote non point-source loadings with selected inputs for " + comid); 
+            }
         }
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
