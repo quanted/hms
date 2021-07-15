@@ -88,7 +88,7 @@ namespace Utilities
                     {
                         success = true;
                     }
-                    else if (taskData.status == "FAILURE" || taskData.status == "PENDING")
+                    else if (taskData.status == "FAILURE")
                     {
                         Log.Warning("Warning: Task failed to complete, status: " + taskData.status);
                         break;
