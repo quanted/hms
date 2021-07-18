@@ -62,6 +62,7 @@ namespace GUI.AQUATOX
             this.EditButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.MultiSegButton = new System.Windows.Forms.Button();
+            this.HelpButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -399,9 +400,22 @@ namespace GUI.AQUATOX
             this.MultiSegButton.UseVisualStyleBackColor = true;
             this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton.Location = new System.Drawing.Point(26, 191);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(87, 24);
+            this.HelpButton.TabIndex = 23;
+            this.HelpButton.Text = "Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // AQTTestForm
             // 
             this.ClientSize = new System.Drawing.Size(822, 428);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.MultiSegButton);
             this.Controls.Add(this.AddButton);
             this.Controls.Add(this.EditButton);
@@ -461,6 +475,7 @@ namespace GUI.AQUATOX
         private Button DeleteButton;
         private Button FoodWebButton;
         private Button MultiSegButton;
+        private Button HelpButton;
     }
 
 

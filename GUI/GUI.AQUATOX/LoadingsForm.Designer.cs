@@ -42,6 +42,9 @@ namespace GUI.AQUATOX
             this.RB0 = new System.Windows.Forms.RadioButton();
             this.RBLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.ToxICUnitLabel = new System.Windows.Forms.Label();
+            this.ToxICLabel = new System.Windows.Forms.Label();
+            this.ToxIC = new System.Windows.Forms.TextBox();
             this.TSUnit = new System.Windows.Forms.Label();
             this.LTLabel = new System.Windows.Forms.Label();
             this.LTBox = new System.Windows.Forms.ComboBox();
@@ -62,9 +65,6 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
-            this.ToxICUnitLabel = new System.Windows.Forms.Label();
-            this.ToxICLabel = new System.Windows.Forms.Label();
-            this.ToxIC = new System.Windows.Forms.TextBox();
             this.LoadingsPanel.SuspendLayout();
             this.RBPanel.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -231,6 +231,35 @@ namespace GUI.AQUATOX
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(345, 247);
             this.panel1.TabIndex = 32;
+            // 
+            // ToxICUnitLabel
+            // 
+            this.ToxICUnitLabel.AutoSize = true;
+            this.ToxICUnitLabel.Location = new System.Drawing.Point(269, 44);
+            this.ToxICUnitLabel.Name = "ToxICUnitLabel";
+            this.ToxICUnitLabel.Size = new System.Drawing.Size(33, 15);
+            this.ToxICUnitLabel.TabIndex = 46;
+            this.ToxICUnitLabel.Text = "units";
+            this.ToxICUnitLabel.Visible = false;
+            // 
+            // ToxICLabel
+            // 
+            this.ToxICLabel.AutoSize = true;
+            this.ToxICLabel.Location = new System.Drawing.Point(70, 44);
+            this.ToxICLabel.Name = "ToxICLabel";
+            this.ToxICLabel.Size = new System.Drawing.Size(92, 15);
+            this.ToxICLabel.TabIndex = 45;
+            this.ToxICLabel.Text = "Initial Condition";
+            this.ToxICLabel.Visible = false;
+            // 
+            // ToxIC
+            // 
+            this.ToxIC.Location = new System.Drawing.Point(185, 41);
+            this.ToxIC.Name = "ToxIC";
+            this.ToxIC.Size = new System.Drawing.Size(78, 23);
+            this.ToxIC.TabIndex = 44;
+            this.ToxIC.Visible = false;
+            this.ToxIC.TextChanged += new System.EventHandler(this.ToxIC_TextChanged);
             // 
             // TSUnit
             // 
@@ -435,34 +464,6 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.Size = new System.Drawing.Size(346, 15);
             this.AmmoniaDriveLabel.TabIndex = 25;
             this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
-            // 
-            // ToxICUnitLabel
-            // 
-            this.ToxICUnitLabel.AutoSize = true;
-            this.ToxICUnitLabel.Location = new System.Drawing.Point(269, 44);
-            this.ToxICUnitLabel.Name = "ToxICUnitLabel";
-            this.ToxICUnitLabel.Size = new System.Drawing.Size(33, 15);
-            this.ToxICUnitLabel.TabIndex = 46;
-            this.ToxICUnitLabel.Text = "units";
-            this.ToxICUnitLabel.Visible = false;
-            // 
-            // ToxICLabel
-            // 
-            this.ToxICLabel.AutoSize = true;
-            this.ToxICLabel.Location = new System.Drawing.Point(70, 44);
-            this.ToxICLabel.Name = "ToxICLabel";
-            this.ToxICLabel.Size = new System.Drawing.Size(92, 15);
-            this.ToxICLabel.TabIndex = 45;
-            this.ToxICLabel.Text = "Initial Condition";
-            this.ToxICLabel.Visible = false;
-            // 
-            // ToxIC
-            // 
-            this.ToxIC.Location = new System.Drawing.Point(185, 41);
-            this.ToxIC.Name = "ToxIC";
-            this.ToxIC.Size = new System.Drawing.Size(78, 23);
-            this.ToxIC.TabIndex = 44;
-            this.ToxIC.Visible = false;
             // 
             // LoadingsForm
             // 

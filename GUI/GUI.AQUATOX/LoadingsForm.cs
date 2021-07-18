@@ -87,6 +87,7 @@ namespace GUI.AQUATOX
             ICUnit.Text = SV.StateUnit;
 
             string loadunit = SV.LoadUnit(LTBox.SelectedIndex);
+            ToxICUnitLabel.Text = loadunit;
             CLUnit.Text = loadunit;
             TSUnit.Text = loadunit;
         }
@@ -161,7 +162,9 @@ namespace GUI.AQUATOX
             UpdateUnits();
         }
 
-        TLoadings LoadShown;
+        private TLoadings LoadShown;
+        private TToxics TT = null;
+
 
         public void ShowGrid()
         {
@@ -183,12 +186,15 @@ namespace GUI.AQUATOX
                 }
             }
 
+            ToxIC.Visible = false;
+            ToxICLabel.Visible = false;
+            ToxICUnitLabel.Visible = false;
             if (LTBox.SelectedIndex > SV.nontoxloadings-1)  //then toxicant selected
             {
                 int chemint = 1 + LTBox.SelectedIndex - SV.nontoxloadings;
                 T_SVType chemtype = T_SVType.OrgTox1;  chemtype--;  //set to enumerated variable before
                 int currentchem = 0;
-                TToxics TT = null;
+                TT = null;
                 while (chemint > currentchem)
                 {
                     chemtype++;
@@ -196,6 +202,12 @@ namespace GUI.AQUATOX
                     if (TT != null) { currentchem++; }
                 }
                 LoadShown = TT.LoadsRec.Loadings;
+
+                ToxIC.Visible = true;
+                ToxICLabel.Visible = true;
+                ToxICUnitLabel.Visible = true;
+                ToxIC.Text = TT.InitialCond.ToString("G9");
+
             }
 
             UseConstRadio.Checked = LoadShown.UseConstant;  // Update interface based on "LoadShown"
@@ -590,5 +602,17 @@ namespace GUI.AQUATOX
             SV.SetVarFromRadioButton(RBReturn);
         }
 
+        private void ToxIC_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                TT.InitialCond = double.Parse(ToxIC.Text);
+                ToxIC.BackColor = Color.White;
+            }
+            catch
+            {
+                ToxIC.BackColor = Color.Yellow;
+            }
+        }
     }
 }

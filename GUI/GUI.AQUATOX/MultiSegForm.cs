@@ -590,5 +590,11 @@ namespace GUI.AQUATOX
             BaseJSONBox.Text = Properties.Settings.Default.BaseJSON;  // default is "..\..\..\2D_Inputs\LBR Glenwood 4.JSON"
             basedirBox.Text = Properties.Settings.Default.MS_Directory; // default is "..\..\..\2D_Inputs\TestDir1\"
         }
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            string target = "_Toc77252249";
+            AQTTestForm.OpenUrl(target);
+        }
     }
 }

@@ -134,6 +134,8 @@ namespace AQUATOX.Chemicals
         {
             Carrier = Carry;
             ppb = 0;
+            Chem_Anim_Tox = new List<TAnimalToxRecord>();
+            Chem_Plant_Tox = new List<TPlantToxRecord>();
         }
 
         public override void UpdateName()

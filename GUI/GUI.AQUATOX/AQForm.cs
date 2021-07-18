@@ -11,7 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 // using sds = Microsoft.Research.Science.Data;
 
@@ -948,13 +950,63 @@ namespace GUI.AQUATOX
 
             NewSV.UpdateName();
             ShowStudyInfo();
-            return;
-
         }
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
+            if (SVListBox.SelectedIndex == -1) { MessageBox.Show("No State Variable is Selected."); return; }
+            AllVariables ns = TSVList[SVListBox.SelectedIndex].NState;
 
+            int index = -1;
+            for (int i=0; i< aQTS.AQTSeg.SV.Count; i++)
+            {
+                if (ns == aQTS.AQTSeg.SV[i].NState) index = i;
+            }
+
+            if (ns == AllVariables.H2OTox) 
+              aQTS.AQTSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
+            else aQTS.AQTSeg.DeleteVar(index);
+
+            ShowStudyInfo();
+
+        }
+
+        static public void OpenUrl(string bookmark)
+        {
+            string url = "file:"+Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
+            url = Uri.UnescapeDataString(url +"#" +bookmark);
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true});
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            string target = "_Toc77252201";
+            OpenUrl(target);
         }
     }
 }

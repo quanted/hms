@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 
 namespace Globals
 {
+
+
     public enum AllVariables
     {
         H2OTox,

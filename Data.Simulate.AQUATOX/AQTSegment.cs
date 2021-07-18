@@ -1359,6 +1359,20 @@ namespace AQUATOX.AQTSegment
             return P;
         }
 
+        public void DeleteVar(int index)
+        {
+            SV.RemoveAt(index);
+            SetMemLocRec();
+        }
+
+        public void RemoveOrgToxStateVariable(int index)
+        {
+            T_SVType RemoveTyp = SV[index].SVType;
+            for (int i = SV.Count-1; i >= 0; i--)
+                if (SV[i].SVType == RemoveTyp) DeleteVar(i);
+        }
+
+
         public void AddOrgToxStateVariable(AllVariables NS, T_SVLayer Lyr, T_SVType ToxType)
         {
             TStateVariable P;
