@@ -57,6 +57,10 @@ namespace Web.Services.Models
             errormsg = ConvertUpstreamToInt(upstream.Keys.ToList(), out List<int> comids);
             if (errormsg != "") { return; }
 
+            // Get upstream outputs and archive them
+            errormsg = ArchiveUpstreamOutputs(comids);
+            if (errormsg != "") { return; }
+
             // Pass data from upstream to current simulation
             Pass_Data(sim, comids);
 
@@ -233,6 +237,43 @@ namespace Web.Services.Models
                 errormsg = "Error retrieving task_id from database.";
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Iterate over each comid and generate the archive results for each.
+        /// </summary>
+        /// <param name="comids">List of comids</param>
+        /// <returns>Error message or empty string</returns>
+        public string ArchiveUpstreamOutputs(List<int> comids)
+        {
+            foreach (int item in comids)
+            {
+                try
+                {
+                    // Get the sim output from database for current comid_taskid
+                    upstream.TryGetValue(item.ToString(), out string value);
+                    Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", value);
+                    output.Wait();
+
+                    // Convert to string and instantiate a new simulation
+                    string json = output.Result.GetValue("output").AsString;
+                    AQTSim sim = new AQTSim();
+                    string error = sim.Instantiate(json);
+                    if (error != "")
+                    {
+                        return $"Invalid simulation output.";
+                    }
+
+                    // Archive the simulation to the inherited property: archive
+                    archiveOutput(item, sim);
+                }
+                catch (Exception ex)
+                {
+                    return "Invalid simulation output, or unknown error.";
+                }
+            }
+            // No errors return empty string
+            return "";
         }
 
         /// <summary>   
