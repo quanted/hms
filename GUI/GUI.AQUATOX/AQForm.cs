@@ -985,7 +985,10 @@ namespace GUI.AQUATOX
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true});
+                    // string args = $"/c start {url}";
+                    string args = $"/c start iexplore.exe {url}";
+
+                    Process.Start(new ProcessStartInfo("cmd", args) { CreateNoWindow = true});
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {

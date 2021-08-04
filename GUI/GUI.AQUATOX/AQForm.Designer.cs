@@ -406,9 +406,9 @@ namespace GUI.AQUATOX
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.HelpButton.Location = new System.Drawing.Point(26, 191);
             this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(87, 24);
+            this.HelpButton.Size = new System.Drawing.Size(87, 28);
             this.HelpButton.TabIndex = 23;
-            this.HelpButton.Text = "Help";
+            this.HelpButton.Text = "  Help";
             this.HelpButton.UseVisualStyleBackColor = true;
             this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
             // 
