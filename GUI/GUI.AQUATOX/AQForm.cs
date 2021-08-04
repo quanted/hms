@@ -986,7 +986,7 @@ namespace GUI.AQUATOX
                 {
                     url = url.Replace("&", "^&");
                     // string args = $"/c start {url}";
-                    string args = $"/c start iexplore.exe {url}";
+                    string args = $"/c start iexplore.exe {url}";  // force internet explorer for now
 
                     Process.Start(new ProcessStartInfo("cmd", args) { CreateNoWindow = true});
                 }

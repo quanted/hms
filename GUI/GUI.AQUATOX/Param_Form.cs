@@ -556,6 +556,7 @@ namespace GUI.AQUATOX
         private void DB_Button_Click(object sender, EventArgs e)
         {
             object recrd = ReturnRecordFromDB(DBString);
+            if (recrd == null) return;
             TParameter[] plist2 = null;
 
             if (DBString == "SiteLib.JSON")
