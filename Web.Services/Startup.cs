@@ -49,7 +49,8 @@ namespace Web.Services
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
                     Title = "HMS REST API",
                     Version = "v1",
                     Description = "Swagger documentation for HMS REST API with example requests and responses."
@@ -65,8 +66,6 @@ namespace Web.Services
             });
 
             // ---- Swashbuckle Swagger Examples for POST requests ---- //
-
-            services.AddSwaggerExamplesFromAssemblyOf<WSAquatoxWorkflowControllerInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<ContaminantLoaderInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<DewPointInputExample>();
             services.AddSwaggerExamplesFromAssemblyOf<EvapotranspirationInputExample>();
@@ -107,7 +106,7 @@ namespace Web.Services
             // Enable static files middleware.
             app.UseStaticFiles();
             // app.UseMvcWithDefaultRoute();
-;
+            ;
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.

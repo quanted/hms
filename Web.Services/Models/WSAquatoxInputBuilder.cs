@@ -36,13 +36,13 @@ namespace Web.Services.Models
         {
             // Create ordered dictionary to guarantee flag order and populate.
             OrderedDictionary flagDict = new OrderedDictionary();
-            foreach(string item in AQSim_2D.MultiSegSimFlags()) 
+            foreach (string item in AQSim_2D.MultiSegSimFlags())
             {
-                if(flags.ContainsKey(item)) 
+                if (flags.ContainsKey(item))
                 {
                     flagDict.Add(item, flags[item]);
                 }
-                else 
+                else
                 {
                     flagDict.Add(item, false);
                 }
@@ -50,7 +50,7 @@ namespace Web.Services.Models
 
             // Construct the flag list of bools
             List<bool> flagOptions = new List<bool>();
-            foreach(DictionaryEntry item in flagDict) 
+            foreach (DictionaryEntry item in flagDict)
             {
                 flagOptions.Add(Convert.ToBoolean(item.Value));
             }
@@ -67,28 +67,37 @@ namespace Web.Services.Models
         public static string GetBaseJsonHelper(List<bool> flagOptions)
         {
             // Check local file path
-            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions))))
             {
-                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI", 
+                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
             }
             // Check for docker file path 
-            else if(File.Exists("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + AQSim_2D.MultiSegSimName(flagOptions)))
-            {
-                return File.ReadAllText("/app/GUI/GUI.AQUATOX/2D_Inputs/BaseJSON/" + AQSim_2D.MultiSegSimName(flagOptions));
-            }
-            // Check for local testing file path 
-            else if(File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
+            else if (File.Exists(Path.Combine("app", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions))))
             {
-                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI", 
+                return File.ReadAllText(Path.Combine("app", "GUI",
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
+            }
+            // Check for docker file path - 2
+            else if (File.Exists(Path.Combine("..", "src", "GUI",
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions))))
+            {
+                return File.ReadAllText(Path.Combine("..", "src", "GUI",
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
+            }
+            // Check for local testing file path 
+            else if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI",
+                "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions))))
+            {
+                return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
             }
             // Error 
             else
             {
-                return "Base json file could not be found.";
+                return "{\"Error\" : \"Base json file could not be found.\"}";
             }
         }
 
@@ -98,15 +107,15 @@ namespace Web.Services.Models
         public static Task<string> InsertConstantLoadings(string json, LoadingsInput input)
         {
             AQTSim sim = new AQTSim();
-            foreach(KeyValuePair<string, List<string>> item in input.Loadings.Data)
+            foreach (KeyValuePair<string, List<string>> item in input.Loadings.Data)
             {
                 try
                 {
                     // Insert loading and assign result over original input
-                    json = sim.InsertLoadings(json, item.Key, int.Parse(item.Value[0]), 
+                    json = sim.InsertLoadings(json, item.Key, int.Parse(item.Value[0]),
                         double.Parse(item.Value[2]), double.Parse(item.Value[1]));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return Task.FromResult("Invalid loadings input.");
                 }
@@ -127,13 +136,13 @@ namespace Web.Services.Models
 
                 // Split TimeSeriesOutput into array of SortedLists with length
                 SortedList<DateTime, double>[] data = new SortedList<DateTime, double>[length];
-                for(int i = 0; i < length; i++)
+                for (int i = 0; i < length; i++)
                 {
                     data[i] = new SortedList<DateTime, double>();
                 }
-                foreach(KeyValuePair<string, List<string>> item in input.Loadings.Data)
+                foreach (KeyValuePair<string, List<string>> item in input.Loadings.Data)
                 {
-                    for(int i = 0; i < length; i++)
+                    for (int i = 0; i < length; i++)
                     {
                         // Example: 
                         // [
@@ -144,18 +153,18 @@ namespace Web.Services.Models
                 }
 
                 // Iterate over length of list array, get loading types, and call insert method
-                for(int i = 0; i < length; i++)
+                for (int i = 0; i < length; i++)
                 {
                     // Get loading column info
-                    string name = input.Loadings.Metadata[$"column_{i+1}"];
-                    int type = int.Parse(input.Loadings.Metadata[$"column_{i+1}_type"]);
-                    double multldg = double.Parse(input.Loadings.Metadata[$"column_{i+1}_multldg"]);
+                    string name = input.Loadings.Metadata[$"column_{i + 1}"];
+                    int type = int.Parse(input.Loadings.Metadata[$"column_{i + 1}_type"]);
+                    double multldg = double.Parse(input.Loadings.Metadata[$"column_{i + 1}_multldg"]);
 
                     // Insert loading and assign result over original input
                     json = sim.InsertLoadings(json, name, type, data[i], multldg);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Task.FromResult("Invalid time series.");
             }

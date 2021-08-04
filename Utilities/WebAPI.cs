@@ -100,6 +100,11 @@ namespace Utilities
                     retries += 1;
                 }
                 Log.Warning("TASK END, ID: " + jobID + ", STATUS: " + taskData.status + ", TRY COUNT: " + retries.ToString() + "/" + pings.ToString());
+                if(taskData.status != "SUCCESS")    // Send task cancel request on non-success
+                {
+                    string revokeUrl = flaskURL + "/hms/task/revoke/?task_id=" + jobID;
+                    await hc.GetAsync(revokeUrl);
+                }
             }
             catch (Exception ex)
             {
