@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
+using AQUATOX.AQTSegment;
 
 namespace GUI.AQUATOX
 {
@@ -8,6 +9,8 @@ namespace GUI.AQUATOX
     {
         public bool gridChange;
         bool UserCanceled;
+        AQUATOXSegment AQS = null;
+        DataTable tbl;
 
         public TrophMatrix()
         {
@@ -26,8 +29,10 @@ namespace GUI.AQUATOX
             return dgv.Columns.GetColumnsWidth(DataGridViewElementStates.Visible) + dgv.RowHeadersWidth + controlBorderWidth;
         }
 
-        public bool ShowGrid(DataTable table)
+        public bool ShowGrid(DataTable table, AQUATOXSegment AQTS)
         {
+            AQS = AQTS;
+            tbl = table;
             dataGridView1.DataSource = table;
             gridChange = false;
             UserCanceled = false;
@@ -86,6 +91,12 @@ namespace GUI.AQUATOX
                 }
 
                 e.ThrowException = false;
+        }
+
+        private void RenormalizeButton_Click(object sender, EventArgs e)
+        {
+            AQS.Normalize_Trophint_Table(ref tbl);
+            dataGridView1.DataSource = tbl;
         }
     }
 }

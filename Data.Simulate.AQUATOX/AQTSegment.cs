@@ -1267,7 +1267,7 @@ namespace AQUATOX.AQTSegment
 
             // Add the NS variable and the associated toxicity S.V. if appropriate
             if (NS == AllVariables.Volume) P = new TVolume(NS, T_SVType.StV, Lyr, "", this, 0);
-            else if (NS == AllVariables.Temperature) P = new TTemperature(NS, T_SVType.StV, Lyr, "", this, 0);   
+            else if (NS == AllVariables.Temperature) P = new TTemperature(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.WindLoading) P = new TWindLoading(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.Light) P = new TLight(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.pH) P = new TpHObj(NS, T_SVType.StV, Lyr, "", this, 0);
@@ -1313,7 +1313,7 @@ namespace AQUATOX.AQTSegment
             else if (NS == AllVariables.Salinity)
                 P = new TSalinity(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.TSS)
-                P = new TSandSiltClay(NS, T_SVType.StV, Lyr, "", this, 0); 
+                P = new TSandSiltClay(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.SedmLabDetr)
                 P = new TSedLabileDetr(NS, T_SVType.StV, Lyr, "", this, 0);
             else if (NS == AllVariables.SedmRefrDetr)
@@ -1341,7 +1341,7 @@ namespace AQUATOX.AQTSegment
             int SVIndex = 0;
             while ((NS > SV[SVIndex].NState) && (SVIndex < SV.Count())) SVIndex++;
 
-            SV.Insert(SVIndex,P);
+            SV.Insert(SVIndex, P);
             SetMemLocRec();
 
             // Add OrgTox SVs if one or more H2OTox variables are included
@@ -1368,7 +1368,7 @@ namespace AQUATOX.AQTSegment
         public void RemoveOrgToxStateVariable(int index)
         {
             T_SVType RemoveTyp = SV[index].SVType;
-            for (int i = SV.Count-1; i >= 0; i--)
+            for (int i = SV.Count - 1; i >= 0; i--)
                 if (SV[i].SVType == RemoveTyp) DeleteVar(i);
         }
 
@@ -1392,13 +1392,13 @@ namespace AQUATOX.AQTSegment
             else if ((NS >= AllVariables.POC_G1) && (NS <= AllVariables.POC_G3))
                 P = new TPOCTox(NS, NS, ToxType, Lyr, "Undisplayed", this, 0);
 
-        //            if (NS == AllVariables.BuriedLabileDetr)
-        //                P = new TBuriedDetrTox(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);  //sequestered organic matter not in HMS version
-        //            else if (NS ==  AllVariables.BuriedRefrDetr)
-        //                P = new TBuriedDetrTox1(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);
+            //            if (NS == AllVariables.BuriedLabileDetr)
+            //                P = new TBuriedDetrTox(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);  //sequestered organic matter not in HMS version
+            //            else if (NS ==  AllVariables.BuriedRefrDetr)
+            //                P = new TBuriedDetrTox1(NS, NS, ToxType, Lyr, "Undisplayed", SV, 0);
 
             else P = null;
-                
+
             if (P != null) SV.Add(P);
             SetMemLocRec();
 
@@ -1425,7 +1425,7 @@ namespace AQUATOX.AQTSegment
         public TStateVariable Add_OrgTox_SVs(ChemicalRecord CR)
         {
             T_SVType ToxType = T_SVType.OrgTox1;
-            while ((ToxType < T_SVType.OrgTox20) && (GetStatePointer(AllVariables.H2OTox,ToxType,T_SVLayer.WaterCol) != null))
+            while ((ToxType < T_SVType.OrgTox20) && (GetStatePointer(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol) != null))
                 ToxType++;
 
             if (GetStatePointer(AllVariables.H2OTox, ToxType, T_SVLayer.WaterCol) != null) return null;  // no open slots for organic chemicals
@@ -1442,10 +1442,10 @@ namespace AQUATOX.AQTSegment
 
             // For each state variable, add associated toxicant if relevant
             for (AllVariables ToxAddLoop = Consts.FirstState; ToxAddLoop <= Consts.LastState; ToxAddLoop++)
-              for (T_SVLayer ToxSedLoop = T_SVLayer.WaterCol; ToxSedLoop <= T_SVLayer.SedLayer2; ToxSedLoop++)
-                { 
-                  TStateVariable p = GetStatePointer(ToxAddLoop, T_SVType.StV, ToxSedLoop);
-                  if (p != null) AddOrgToxStateVariable(ToxAddLoop, ToxSedLoop, ToxType);
+                for (T_SVLayer ToxSedLoop = T_SVLayer.WaterCol; ToxSedLoop <= T_SVLayer.SedLayer2; ToxSedLoop++)
+                {
+                    TStateVariable p = GetStatePointer(ToxAddLoop, T_SVType.StV, ToxSedLoop);
+                    if (p != null) AddOrgToxStateVariable(ToxAddLoop, ToxSedLoop, ToxType);
                 }
 
             SetMemLocRec();
@@ -1798,7 +1798,7 @@ namespace AQUATOX.AQTSegment
             for (SVLoop = Consts.FirstState; SVLoop <= Consts.LastState; SVLoop++) // list state variables
             {
                 TSV = GetStatePointer(SVLoop, T_SVType.StV, T_SVLayer.WaterCol);
-                if ((TSV != null) && (SVLoop != AllVariables.DissLabDetr) && (SVLoop != AllVariables.SuspLabDetr) && (SVLoop != AllVariables.SuspRefrDetr))  
+                if ((TSV != null) && (SVLoop != AllVariables.DissLabDetr) && (SVLoop != AllVariables.SuspLabDetr) && (SVLoop != AllVariables.SuspRefrDetr))
                 {
                     Name = TSV.PName;
                     if (SVLoop == AllVariables.DissRefrDetr) Name = "Suspended & Dissolved Detritus";  //special case, four state variables govered by one GUI screen
@@ -1843,14 +1843,14 @@ namespace AQUATOX.AQTSegment
             {
                 if (GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) == null)
                 {
-                    if  ((ns == AllVariables.H2OTox) || (ns == AllVariables.TSS) ||  // some variables vestigal from AQUATOX 3.2, not shown here
+                    if ((ns == AllVariables.H2OTox) || (ns == AllVariables.TSS) ||  // some variables vestigal from AQUATOX 3.2, not shown here
                         ((ns >= AllVariables.Ammonia) && (ns <= AllVariables.Oxygen)) ||
                         ((ns >= AllVariables.Salinity) && (ns <= AllVariables.LgGameFish4)) ||
                         ((ns >= AllVariables.Volume) && (ns <= AllVariables.pH)))
-                    {  list.Add(StateText(ns));
-                       SVs.Add(ns);
+                    { list.Add(StateText(ns));
+                        SVs.Add(ns);
                     }
-                     
+
                 }
             }
 
@@ -3815,7 +3815,7 @@ namespace AQUATOX.AQTSegment
                     AllVariables.POP_G1 => Location.Remin.P2OrgLab.Val,    // Was PA.PAnimalData.P2Org, 6/6/2008, defecation has same nutrients as labile detritus
                     _ => 1.0 / Consts.Detr_OM_2_OC,                      // Winberg et al. 1971, relevant to animals, non-macrophyte plants, bacteria
                 };
- 
+
                 TAnimal PA = P as TAnimal;
                 if ((Typ == T_SVType.StV))
                     Def = Def + Def2Detr * PA.Defecation() * NFrac;
@@ -4670,6 +4670,8 @@ namespace AQUATOX.AQTSegment
 
         public DataTable TrophInt_to_Table()
         {
+
+
             DataTable table = new DataTable("Trophic_Interaction_Table");
             AllVariables nsloop;
             AllVariables[] Predators = new AllVariables[50];
@@ -4715,6 +4717,54 @@ namespace AQUATOX.AQTSegment
 
             return table;
         }
+
+        public void Normalize_Trophint_Table(ref DataTable table)
+        {
+            SetMemLocRec();
+
+            int PredIndex = 0;
+            for (AllVariables predloop = Consts.FirstAnimal; predloop <= Consts.LastAnimal; predloop++)
+            {
+                TAnimal TA = GetStatePointer(predloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                if (TA != null)
+                {
+                    PredIndex++;
+                    int PreyIndex = -1;
+                    double SumPref = 0;
+                    for (AllVariables preyloop = AllVariables.Cohesives; preyloop <= Consts.LastBiota; preyloop++)
+                    {
+                        TStateVariable TSV = GetStatePointer(preyloop, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (TSV != null)
+                        {
+                            PreyIndex++;
+                            object df = table.Rows[PreyIndex][PredIndex];
+                            double pref;
+                            if (df == DBNull.Value) pref = 0;
+                            else pref = (double)df;
+                            SumPref += pref;
+                        }
+                    }
+
+                    PreyIndex = -1;
+                    for (AllVariables preyloop = AllVariables.Cohesives; preyloop <= Consts.LastBiota; preyloop++)
+                    {
+                        TStateVariable TSV = GetStatePointer(preyloop, T_SVType.StV, T_SVLayer.WaterCol);
+                        if (TSV != null)
+                        {
+                            PreyIndex++;
+                            object df = table.Rows[PreyIndex][PredIndex];
+                            double pref;
+                            if (df == DBNull.Value) pref = 0;
+                            else pref = (double)df;
+
+                           if (pref > 1e-5) table.Rows[PreyIndex][PredIndex] = Math.Round(pref / SumPref,3);
+
+                        }
+                    }
+                }
+            }
+        }
+
 
         public bool Table_to_Trophint(DataTable table)
         {

@@ -892,7 +892,7 @@ namespace GUI.AQUATOX
         {
             DataTable table = aQTS.AQTSeg.TrophInt_to_Table();
             TrophMatrix tm = new TrophMatrix();
-            if (tm.ShowGrid(table))
+            if (tm.ShowGrid(table,aQTS.AQTSeg))
                aQTS.AQTSeg.Table_to_Trophint(table);
         }
 
@@ -974,10 +974,10 @@ namespace GUI.AQUATOX
         static public void OpenUrl(string bookmark)
         {
             string url = "file:"+Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
-            url = Uri.UnescapeDataString(url +"#" +bookmark);
+            url = Uri.UnescapeDataString(url +"#"+bookmark);
             try
             {
-                Process.Start(url);
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = false });  //true opens default browser, but not at bookmark
             }
             catch
             {

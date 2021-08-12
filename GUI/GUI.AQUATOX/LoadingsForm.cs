@@ -614,5 +614,27 @@ namespace GUI.AQUATOX
                 ToxIC.BackColor = Color.Yellow;
             }
         }
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            switch (SV.NState)
+            {
+                case AllVariables.WindLoading: AQTTestForm.OpenUrl("Wind"); break;
+                case AllVariables.Light: AQTTestForm.OpenUrl("Light"); break;
+                case AllVariables.pH: AQTTestForm.OpenUrl("pHScreen"); break;
+                case AllVariables.Volume: AQTTestForm.OpenUrl("Volume"); break;
+                case AllVariables.TSS: AQTTestForm.OpenUrl("TSS"); break;
+                case AllVariables.Temperature: AQTTestForm.OpenUrl("Temperature"); break;
+                case AllVariables.DissRefrDetr: AQTTestForm.OpenUrl("SuspDiss"); break;
+                case AllVariables.SedmLabDetr:
+                case AllVariables.SedmRefrDetr: AQTTestForm.OpenUrl("Default_Sediment"); break;
+                // case AllVariables.H2OTox: AQTTestForm.OpenUrl("DissOrgToxLoadings"); break;
+                case AllVariables.Nitrate:
+                case AllVariables.Ammonia:
+                case AllVariables.Phosphate: AQTTestForm.OpenUrl("NutrientLoadings"); break;
+                default : AQTTestForm.OpenUrl("ICandLoadings"); break;
+
+            }
+        }
     }
 }

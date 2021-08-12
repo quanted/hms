@@ -65,6 +65,7 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
+            this.HelpButton = new System.Windows.Forms.Button();
             this.LoadingsPanel.SuspendLayout();
             this.RBPanel.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -133,7 +134,7 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.Controls.Add(this.dataGridView1);
             this.LoadingsPanel.Location = new System.Drawing.Point(12, 101);
             this.LoadingsPanel.Name = "LoadingsPanel";
-            this.LoadingsPanel.Size = new System.Drawing.Size(677, 425);
+            this.LoadingsPanel.Size = new System.Drawing.Size(680, 446);
             this.LoadingsPanel.TabIndex = 21;
             this.LoadingsPanel.Visible = false;
             this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
@@ -375,7 +376,7 @@ namespace GUI.AQUATOX
             // 
             this.HMS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.HMS_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.HMS_Button.Location = new System.Drawing.Point(536, 392);
+            this.HMS_Button.Location = new System.Drawing.Point(536, 413);
             this.HMS_Button.Name = "HMS_Button";
             this.HMS_Button.Size = new System.Drawing.Size(57, 23);
             this.HMS_Button.TabIndex = 30;
@@ -387,7 +388,7 @@ namespace GUI.AQUATOX
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(373, 396);
+            this.label2.Location = new System.Drawing.Point(373, 417);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 15);
             this.label2.TabIndex = 29;
@@ -397,7 +398,7 @@ namespace GUI.AQUATOX
             // 
             this.File_Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.File_Import.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.File_Import.Location = new System.Drawing.Point(462, 392);
+            this.File_Import.Location = new System.Drawing.Point(462, 413);
             this.File_Import.Name = "File_Import";
             this.File_Import.Size = new System.Drawing.Size(57, 23);
             this.File_Import.TabIndex = 28;
@@ -414,15 +415,16 @@ namespace GUI.AQUATOX
             this.dataGridView1.Location = new System.Drawing.Point(371, 13);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(285, 371);
+            this.dataGridView1.Size = new System.Drawing.Size(288, 392);
             this.dataGridView1.TabIndex = 1;
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
             this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
             // 
             // ParameterButton
             // 
+            this.ParameterButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ParameterButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.ParameterButton.Location = new System.Drawing.Point(376, 12);
+            this.ParameterButton.Location = new System.Drawing.Point(442, 12);
             this.ParameterButton.Name = "ParameterButton";
             this.ParameterButton.Size = new System.Drawing.Size(90, 23);
             this.ParameterButton.TabIndex = 22;
@@ -434,7 +436,7 @@ namespace GUI.AQUATOX
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.OKButton.Location = new System.Drawing.Point(563, 12);
+            this.OKButton.Location = new System.Drawing.Point(566, 12);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(61, 23);
             this.OKButton.TabIndex = 23;
@@ -446,7 +448,7 @@ namespace GUI.AQUATOX
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CancelButt.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.CancelButt.Location = new System.Drawing.Point(630, 12);
+            this.CancelButt.Location = new System.Drawing.Point(633, 12);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 24;
@@ -465,11 +467,25 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.TabIndex = 25;
             this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton.Location = new System.Drawing.Point(319, 10);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(87, 27);
+            this.HelpButton.TabIndex = 26;
+            this.HelpButton.Text = "  Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // LoadingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(701, 538);
+            this.ClientSize = new System.Drawing.Size(704, 559);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.AmmoniaDriveLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
@@ -533,5 +549,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label ToxICUnitLabel;
         private System.Windows.Forms.Label ToxICLabel;
         private System.Windows.Forms.TextBox ToxIC;
+        private System.Windows.Forms.Button HelpButton;
     }
 }
