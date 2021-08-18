@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 
 namespace Utilities
 {
@@ -51,6 +52,19 @@ namespace Utilities
             var collection = db.GetCollection<BsonDocument>(collectionName);
             var filter = Builders<BsonDocument>.Filter.Eq("_id", taskID);
             return await collection.Find(filter).SingleAsync();
+        }
+
+        public static string FindInGridFS(string databaseName, BsonObjectId dataID)
+        {
+            string host = (Environment.GetEnvironmentVariable("MONGODB") != null) ? Environment.GetEnvironmentVariable("MONGODB") : "localhost";
+            var settings = new MongoClientSettings
+            {
+                Server = new MongoServerAddress(host, 27017)
+            };
+            var client = new MongoClient(settings);
+            IMongoDatabase db = client.GetDatabase(databaseName);
+            var bucket = new GridFSBucket(db);
+            return System.Text.Encoding.UTF8.GetString(bucket.DownloadAsBytesAsync(dataID).Result).Replace("\\", "");
         }
 
         /// <summary>
