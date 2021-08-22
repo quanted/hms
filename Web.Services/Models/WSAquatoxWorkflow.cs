@@ -85,7 +85,7 @@ namespace Web.Services.Models
             {
                 Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
                 output.Wait();
-                baseSimJSON = output.Result.GetValue("input").AsString;
+                baseSimJSON = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("input"));
                 var tempUp = output.Result.GetValue("upstream");
                 if (tempUp is BsonNull)
                 {
@@ -133,7 +133,8 @@ namespace Web.Services.Models
                         TimeSeriesOutput TSO = new TimeSeriesOutput();
                         try
                         {
-                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(output.Result.GetValue("output").ToJson());
+                            string outputJson = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(outputJson);
                         }
                         catch (Exception ex)
                         {
@@ -217,7 +218,8 @@ namespace Web.Services.Models
                 output.Wait();
 
                 // Convert to string and instantiate a new simulation
-                string json = output.Result.GetValue("output").AsString;
+                string json = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                // string json = output.Result.GetValue("output").AsString;
                 AQTSim sim = new AQTSim();
                 errormsg = sim.Instantiate(json);
                 if (errormsg != "")
@@ -256,7 +258,8 @@ namespace Web.Services.Models
                     output.Wait();
 
                     // Convert to string and instantiate a new simulation
-                    string json = output.Result.GetValue("output").AsString;
+                    string json = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                    //string json = output.Result.GetValue("output").AsString;
                     AQTSim sim = new AQTSim();
                     string error = sim.Instantiate(json);
                     if (error != "")
