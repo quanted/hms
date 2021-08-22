@@ -36,6 +36,8 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.RenormalizeButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.ToggleLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -49,7 +51,7 @@ namespace GUI.AQUATOX
             this.dataGridView1.Location = new System.Drawing.Point(52, 47);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(566, 348);
+            this.dataGridView1.Size = new System.Drawing.Size(682, 521);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
             this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
@@ -78,7 +80,7 @@ namespace GUI.AQUATOX
             // 
             this.changedLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.changedLabel.AutoSize = true;
-            this.changedLabel.Location = new System.Drawing.Point(420, 15);
+            this.changedLabel.Location = new System.Drawing.Point(536, 15);
             this.changedLabel.Name = "changedLabel";
             this.changedLabel.Size = new System.Drawing.Size(53, 15);
             this.changedLabel.TabIndex = 30;
@@ -88,7 +90,7 @@ namespace GUI.AQUATOX
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(490, 11);
+            this.OKButton.Location = new System.Drawing.Point(606, 11);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(61, 23);
             this.OKButton.TabIndex = 28;
@@ -99,7 +101,7 @@ namespace GUI.AQUATOX
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(557, 11);
+            this.CancelButt.Location = new System.Drawing.Point(673, 11);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 29;
@@ -110,7 +112,7 @@ namespace GUI.AQUATOX
             // RenormalizeButton
             // 
             this.RenormalizeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.RenormalizeButton.Location = new System.Drawing.Point(52, 405);
+            this.RenormalizeButton.Location = new System.Drawing.Point(52, 578);
             this.RenormalizeButton.Name = "RenormalizeButton";
             this.RenormalizeButton.Size = new System.Drawing.Size(85, 23);
             this.RenormalizeButton.TabIndex = 31;
@@ -118,11 +120,35 @@ namespace GUI.AQUATOX
             this.RenormalizeButton.UseVisualStyleBackColor = true;
             this.RenormalizeButton.Click += new System.EventHandler(this.RenormalizeButton_Click);
             // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button1.Location = new System.Drawing.Point(455, 576);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(85, 23);
+            this.button1.TabIndex = 32;
+            this.button1.Text = "Toggle";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.toggle_button_click);
+            // 
+            // ToggleLabel
+            // 
+            this.ToggleLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.ToggleLabel.AutoSize = true;
+            this.ToggleLabel.Font = new System.Drawing.Font("Segoe UI Semibold", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.ToggleLabel.Location = new System.Drawing.Point(234, 577);
+            this.ToggleLabel.Name = "ToggleLabel";
+            this.ToggleLabel.Size = new System.Drawing.Size(193, 19);
+            this.ToggleLabel.TabIndex = 33;
+            this.ToggleLabel.Text = "Showing Feeding Preferences";
+            // 
             // TrophMatrix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(640, 438);
+            this.ClientSize = new System.Drawing.Size(756, 611);
+            this.Controls.Add(this.ToggleLabel);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.RenormalizeButton);
             this.Controls.Add(this.changedLabel);
             this.Controls.Add(this.OKButton);
@@ -148,5 +174,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Button RenormalizeButton;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label ToggleLabel;
     }
 }

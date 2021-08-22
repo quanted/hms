@@ -138,6 +138,14 @@ namespace AQUATOX.AQTSegment
             SaveSegJSON(ref JSONToArchive);
             AQTSim SimToArchive = new AQTSim();
             SimToArchive.InstantiateSeg(JSONToArchive);
+
+            if (SavedRuns.Count > 0)
+            {
+                string GraphJSON = JsonConvert.SerializeObject(SavedRuns[SavedRuns.Keys.Last()].Graphs, AQTJSONSettings());  
+                TGraphs LatestGraphs = JsonConvert.DeserializeObject<TGraphs>(GraphJSON);
+                SimToArchive.AQTSeg.Graphs = LatestGraphs;
+            }
+
             SavedRuns.Add(AQTSeg.RunID, SimToArchive.AQTSeg);
 
             return true;
@@ -4668,32 +4676,42 @@ namespace AQUATOX.AQTSegment
             return ((int)ns - (int)AllVariables.Cohesives);
         }
 
-        public DataTable TrophInt_to_Table()
+        public DataTable[] TrophInt_to_Table()
         {
-
-
-            DataTable table = new DataTable("Trophic_Interaction_Table");
+            DataTable[] tables =  { new DataTable("Trophic_Interaction_Table"), new DataTable("Egestion_Table"), new DataTable("Trophint_Comments") };
             AllVariables nsloop;
             AllVariables[] Predators = new AllVariables[50];
             SetMemLocRec();
 
-            DataColumn column = new DataColumn();
-            column.ColumnName = "Prey Items";
-            column.DataType = System.Type.GetType("System.String");
-            table.Columns.Add(column);
-
             int PredCount = 0;
-            for (nsloop = Consts.FirstAnimal; nsloop <= Consts.LastAnimal; nsloop++)
+            for (int tindx = 0; tindx < 3; tindx++)
             {
-                TAnimal TA = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                if (TA != null)
+                DataColumn column = new DataColumn();
+                column.ColumnName = "Prey Items";
+                column.DataType = System.Type.GetType("System.String");
+                tables[tindx].Columns.Add(column);
+
+                PredCount = 0;
+                for (nsloop = Consts.FirstAnimal; nsloop <= Consts.LastAnimal; nsloop++)
                 {
-                    PredCount++;
-                    Predators[PredCount - 1] = nsloop;
-                    column = new DataColumn();
-                    column.ColumnName = TA.PName;
-                    column.DataType = System.Type.GetType("System.Double");
-                    table.Columns.Add(column);
+                    TAnimal TA = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+                    if (TA != null)
+                    {
+                        PredCount++;
+                        Predators[PredCount - 1] = nsloop;
+                        column = new DataColumn();
+                        column.ColumnName = TA.PName;
+                        if (tindx < 2)
+                        {
+                            column.DataType = System.Type.GetType("System.Double");
+                            tables[tindx].Columns.Add(column);
+                        }
+                        else
+                        {
+                            column.DataType = System.Type.GetType("System.String");
+                            tables[tindx].Columns.Add(column);
+                        }
+                    }
                 }
             }
 
@@ -4702,20 +4720,29 @@ namespace AQUATOX.AQTSegment
                 TStateVariable TSV = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol);
                 if (TSV != null)
                 {
-                    DataRow row = table.NewRow();
-                    row[0] = TSV.PName;
-
-                    for (int i = 0; i < PredCount; i++)
+                    for (int tindx = 0; tindx<3; tindx++)
                     {
-                        TAnimal TA = GetStatePointer(Predators[i], T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
-                        if (TA.PTrophInt[iTrophInt(nsloop)].Pref > 1e-5) row[i + 1] = Math.Round(TA.PTrophInt[iTrophInt(nsloop)].Pref, 3);
-                    }
+                        DataRow row = tables[tindx].NewRow();
+                        row[0] = TSV.PName;
 
-                    table.Rows.Add(row);
+                        for (int i = 0; i < PredCount; i++)
+                        {
+                            TAnimal TA = GetStatePointer(Predators[i], T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;
+
+                            if (tindx == 0)
+                            { if (TA.PTrophInt[iTrophInt(nsloop)].Pref > 1e-5) row[i + 1] = Math.Round(TA.PTrophInt[iTrophInt(nsloop)].Pref, 3); }
+                            if (tindx == 1)
+                            { if (TA.PTrophInt[iTrophInt(nsloop)].Pref > 1e-5) row[i + 1] = Math.Round(TA.PTrophInt[iTrophInt(nsloop)].ECoeff, 3); }
+                            if (tindx == 2)
+                            { row[i + 1] = TA.PTrophInt[iTrophInt(nsloop)].XInteraction; }
+                        }
+
+                        tables[tindx].Rows.Add(row);
+                    }
                 }
             }
 
-            return table;
+            return tables;
         }
 
         public void Normalize_Trophint_Table(ref DataTable table)
@@ -4765,8 +4792,20 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+        private double convcell (object obj)
+        {
+            if (obj == DBNull.Value) return 0.0;
+            else return (double)obj;
+        }
 
-        public bool Table_to_Trophint(DataTable table)
+        private string convstr(object obj)
+        {
+            if (obj == DBNull.Value) return "";
+            else return (string)obj;
+        }
+
+
+        public bool Tables_to_Trophint(DataTable[] tables)
         {
             SetMemLocRec();
 
@@ -4784,11 +4823,14 @@ namespace AQUATOX.AQTSegment
                         if (TSV != null)
                         {
                             PreyIndex++;
-                            object df = table.Rows[PreyIndex][PredIndex];
-                            double pref;
-                            if (df == DBNull.Value) pref = 0;
-                            else pref = (double)df;
-                            TA.PTrophInt[iTrophInt(preyloop)].Pref = pref;
+                            object df = tables[0].Rows[PreyIndex][PredIndex];
+                            TA.PTrophInt[iTrophInt(preyloop)].Pref = convcell(df);
+
+                            object df2 = tables[1].Rows[PreyIndex][PredIndex];
+                            TA.PTrophInt[iTrophInt(preyloop)].ECoeff = convcell(df2);
+
+                            object df3 = tables[2].Rows[PreyIndex][PredIndex];
+                            TA.PTrophInt[iTrophInt(preyloop)].XInteraction = convstr(df3);
                         }
                     }
                 }

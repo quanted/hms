@@ -890,10 +890,13 @@ namespace GUI.AQUATOX
 
         private void FoodWebButton_Click(object sender, EventArgs e)
         {
-            DataTable table = aQTS.AQTSeg.TrophInt_to_Table();
+            DataTable[] tTables = new DataTable[3];
+
+            tTables = aQTS.AQTSeg.TrophInt_to_Table();
+
             TrophMatrix tm = new TrophMatrix();
-            if (tm.ShowGrid(table,aQTS.AQTSeg))
-               aQTS.AQTSeg.Table_to_Trophint(table);
+            if (tm.ShowGrid(tTables,aQTS.AQTSeg))
+               aQTS.AQTSeg.Tables_to_Trophint(tTables);
         }
 
         private void MultiSegButton_Click(object sender, EventArgs e)

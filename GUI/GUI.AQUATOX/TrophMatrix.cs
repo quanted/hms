@@ -10,7 +10,8 @@ namespace GUI.AQUATOX
         public bool gridChange;
         bool UserCanceled;
         AQUATOXSegment AQS = null;
-        DataTable tbl;
+        DataTable[] tbl;
+        int iTable = 0;
 
         public TrophMatrix()
         {
@@ -29,11 +30,11 @@ namespace GUI.AQUATOX
             return dgv.Columns.GetColumnsWidth(DataGridViewElementStates.Visible) + dgv.RowHeadersWidth + controlBorderWidth;
         }
 
-        public bool ShowGrid(DataTable table, AQUATOXSegment AQTS)
+        public bool ShowGrid(DataTable[] table, AQUATOXSegment AQTS)
         {
             AQS = AQTS;
             tbl = table;
-            dataGridView1.DataSource = table;
+            dataGridView1.DataSource = table[0];
             gridChange = false;
             UserCanceled = false;
 
@@ -62,7 +63,12 @@ namespace GUI.AQUATOX
 
         private void CancelButt_Click(object sender, EventArgs e)
         {
-            if (gridChange)
+            if (!gridChange)
+            {
+                UserCanceled = true;
+                this.Close();
+            }
+            else //grid has changed, get confirmation first
                 if (MessageBox.Show("Cancel your changes to the data matrix?", "Confirm",
                      MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                      MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
@@ -70,6 +76,7 @@ namespace GUI.AQUATOX
                     UserCanceled = true;
                     this.Close();
                 }
+
         }
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -95,8 +102,20 @@ namespace GUI.AQUATOX
 
         private void RenormalizeButton_Click(object sender, EventArgs e)
         {
-            AQS.Normalize_Trophint_Table(ref tbl);
-            dataGridView1.DataSource = tbl;
+            AQS.Normalize_Trophint_Table(ref tbl[0]);
+            dataGridView1.DataSource = tbl[0];
+            ToggleLabel.Text = "Showing Feeding Preferences";
+        }
+
+        private void toggle_button_click(object sender, EventArgs e)
+        {
+            iTable++;
+            if (iTable == 3) iTable = 0;
+            if (iTable == 0) ToggleLabel.Text = "Showing Feeding Preferences";
+              else if (iTable == 1) ToggleLabel.Text = "Showing Egestion Coefficients";
+              else ToggleLabel.Text = "Showing Comments/References";
+            dataGridView1.DataSource = tbl[iTable];
+
         }
     }
 }
