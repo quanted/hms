@@ -46,7 +46,10 @@ namespace Web.Services.Models
             }
             else
             {
-                segOrder = this.generateOrder(networkTable);
+                //segOrder = this.generateOrder(networkTable);
+                result = this.generateOrderAndSources(networkTable, comid);
+                result.Add("network", networkTable);
+                return result;
             }
             if (!String.IsNullOrEmpty(endComid))
             {
@@ -256,5 +259,130 @@ namespace Web.Services.Models
             output.Add("ERROR", errorMsg);
             return output;
         }
+
+        private void recTraverse(int hydroseq, string upComid, string pourpoint, ref List<string> sequence, ref List<int> traversed, ref Dictionary<string, List<string>> sources, Dictionary<int, string> hydroComid, Dictionary<int, List<object>> mapping)
+        {
+            sequence.Add(hydroComid[hydroseq]);
+            if (!sources[hydroComid[hydroseq]].Contains(upComid))
+            {
+                sources[hydroComid[hydroseq]].Add(upComid);
+            }
+            if (traversed.Contains(hydroseq) || hydroComid[hydroseq].Equals(pourpoint))
+            {
+                return;
+            }
+            else
+            {
+                traversed.Add(hydroseq);
+                int dnHydroseq = Int32.Parse(mapping[hydroseq][3].ToString());
+                recTraverse(dnHydroseq, hydroComid[hydroseq], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, mapping);
+            }
+        }
+
+        private void ReorderSequence(ref List<List<string>> order, List<string> sequence)
+        {
+            int n = 0;
+            if (order.Count == 0)
+            {
+                for (int i = 0; i < sequence.Count; i++)
+                {
+                    order.Add(new List<string>() { sequence[i] });
+                }
+            }
+            else
+            {
+                for (int i = 0; i < order.Count; i++)
+                {
+                    if (order[i].Contains(sequence.Last<string>()))
+                    {
+                        n = i;
+                        break;
+                    }
+                }
+                int j = 0;
+                for (int i = sequence.Count - 2; i >= 0; i--)
+                {
+                    int m = n - j - 1;
+                    if( m < 0) { 
+                        order.Insert(0, new List<string>() { { sequence[i] } });
+                    }
+                    else
+                    {
+                        order[m].Add(sequence[i]);
+                    }
+                    j++;
+   
+                }
+            }
+        }
+
+
+        public Dictionary<string, object> generateOrderAndSources(List<List<object>> networkTable, string pourpoint)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+
+            List<int> networkHydro = new List<int>();
+            Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
+            Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();
+            Dictionary<int, string> hydroComid = new Dictionary<int, string>();
+
+            for(int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                int hydro = Int32.Parse(networkTable[i][1].ToString());
+                networkHydro.Add(hydro);
+                sources.Add(comid, new List<string>());
+                hydroMapping.Add(hydro, networkTable[i]);
+                hydroComid.Add(hydro, comid);
+            }
+            List<int> edges = new List<int>();
+            List<string> headwaters = new List<string>();
+            List<string> outNetwork = new List<string>();
+
+            for (int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                int hydro = Int32.Parse(networkTable[i][1].ToString());
+                int uphydro = Int32.Parse(networkTable[i][2].ToString());
+                if (uphydro == 0)
+                {
+                    headwaters.Add(comid);
+                    edges.Add(hydro);
+                }
+                else if (!networkHydro.Contains(uphydro))
+                {
+                    outNetwork.Add(comid);
+                    edges.Add(hydro);
+                    string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
+                    Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
+                    if (sourceComid.ContainsKey("COMID")) {
+                        sources[comid].Add(sourceComid["COMID"]);
+                    }
+                }
+            }
+            List<int> traversed = new List<int>();
+            List<List<string>> order = new List<List<string>>();
+            for(int i = 0; i < edges.Count; i++)
+            {
+                traversed.Add(edges[i]);
+                List<string> sequence = new List<string>();
+                sequence.Add(hydroComid[edges[i]]);
+                int dnHydro = Int32.Parse(hydroMapping[edges[i]][3].ToString());
+                recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
+                ReorderSequence(ref order, sequence);
+            }
+
+
+            return new Dictionary<string, object>()
+            {
+                { "sources", sources },
+                { "order", order },
+                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork} }
+                }
+            };
+
+        }
+
+
     }
 }

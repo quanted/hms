@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 
 namespace Web.Services.Controllers
@@ -29,8 +30,11 @@ namespace Web.Services.Controllers
         {
             try
             {
+                var stopwatch = Stopwatch.StartNew();
                 WSStream catchment = new WSStream();
                 Dictionary<string, object> result = await catchment.Get(comid, endComid, huc, maxDistance, mainstem.ToLower() == "true");
+                var runtime = stopwatch.ElapsedMilliseconds;
+                result["runtime"] = runtime.ToString() + " ms";
                 string jsonResults = System.Text.Json.JsonSerializer.Serialize(result);
                 JObject jResult = JsonConvert.DeserializeObject<JObject>(jsonResults);
                 return new ObjectResult(jResult); ;
