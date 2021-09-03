@@ -429,7 +429,7 @@ namespace GUI.AQUATOX
                 Param_Form SetupForm = new Param_Form();
                 SetupForm.SuppressComment = true;
                 SetupForm.SuppressSymbol = true;
-                SetupForm.EditParams(ref SS, "Simulation Setup", true, "SiteLib.JSON");
+                SetupForm.EditParams(ref SS, "Simulation Setup", true, "SiteLib.JSON", "_Toc77252216");
 
                 string msfilen = basedirBox.Text + "MasterSetup.json";
                 string msr = JsonConvert.SerializeObject(SR);
@@ -523,7 +523,7 @@ namespace GUI.AQUATOX
 
             GridForm gf = new GridForm();
             gf.Text = "Add Non-Point Source (Overland) Inputs";
-            if (!gf.ShowGrid(OverlandTable,true,false)) return;
+            if (!gf.ShowGrid(OverlandTable,true,false, "")) return;
 
             for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
             {

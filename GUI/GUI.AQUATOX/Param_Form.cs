@@ -28,6 +28,7 @@ namespace GUI.AQUATOX
 
         public bool SuppressSymbol = false, SuppressComment = false;
         bool UserCanceled = false;
+        string HelpTopic = "";
         int nparam;
         int nRendered;
         TParameter[] plist;
@@ -607,10 +608,16 @@ namespace GUI.AQUATOX
             EndControlUpdate(this);
         }
 
-        public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense, string DefaultDB)
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            AQTTestForm.OpenUrl(HelpTopic);
+        }
+
+        public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense, string DefaultDB, string HelpContext)
         {
             DB_Button.Visible = (DefaultDB != "");
             DBString = DefaultDB;
+            HelpTopic = HelpContext;
             
             if (Dense) Spacing = 28; else Spacing = 36;
             this.CancelButton = CancelButt;

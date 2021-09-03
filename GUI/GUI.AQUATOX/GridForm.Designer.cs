@@ -33,6 +33,7 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.changedLabel = new System.Windows.Forms.Label();
+            this.HelpButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -84,11 +85,25 @@ namespace GUI.AQUATOX
             this.changedLabel.Text = "changed";
             this.changedLabel.Visible = false;
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton.Location = new System.Drawing.Point(456, 10);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(87, 27);
+            this.HelpButton.TabIndex = 28;
+            this.HelpButton.Text = "  Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // GridForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(794, 535);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.changedLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
@@ -108,5 +123,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Label changedLabel;
+        private System.Windows.Forms.Button HelpButton;
     }
 }

@@ -34,8 +34,7 @@ namespace GUI.AQUATOX
         // string taskID = null;
 
         private TimeSeriesInput TSI = new TimeSeriesInput()
-        {
-            Source = "nwis",
+        {            Source = "nwis",
             DateTimeSpan = new DateTimeSpan()
             {
                 StartDate = new DateTime(2015, 01, 01),
@@ -262,7 +261,7 @@ namespace GUI.AQUATOX
                 PlantRecord PIR = TP.PAlgalRec;
                 PIR.Setup();
                 TParameter[] PPS = PIR.InputArray();
-                plantform.EditParams(ref PPS, "Plant Parameters", false, "PlantLib.JSON");
+                plantform.EditParams(ref PPS, "Plant Parameters", false, "PlantLib.JSON","PlantData");
                 TP.ChangeData();
             }
 
@@ -273,7 +272,7 @@ namespace GUI.AQUATOX
                 AnimalRecord AIR = TA.PAnimalData;
                 AIR.Setup();
                 TParameter[] PPS = AIR.InputArray();
-                animform.EditParams(ref PPS, "Animal Parameters", false, "AnimalLib.JSON");
+                animform.EditParams(ref PPS, "Animal Parameters", false, "AnimalLib.JSON", "AnimalDataScreen");
                 TA.ChangeData();
             }
 
@@ -283,7 +282,7 @@ namespace GUI.AQUATOX
                 Param_Form chemform = new Param_Form();
                 ChemicalRecord CR = TC.ChemRec; CR.Setup();
                 TParameter[] PPS = CR.InputArray();
-                chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON");
+                chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON","ChemData");
             }
 
             

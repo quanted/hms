@@ -249,7 +249,7 @@ namespace GUI.AQUATOX
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS, "Simulation Setup", true,"");
+            SetupForm.EditParams(ref SS, "Simulation Setup", true,"", "_Toc77252221");
 
         }
 
@@ -268,7 +268,7 @@ namespace GUI.AQUATOX
                 DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
 
             Param_Form PF3 = new Param_Form();
-            PF3.EditParams(ref PA3, "Diagenesis Parameters", false,"");
+            PF3.EditParams(ref PA3, "Diagenesis Parameters", false,"", "Remineralization");
         }
 
         private void Plants(object sender, EventArgs e)
@@ -302,7 +302,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, false))
+            if (gf.ShowGrid(table, false, false, "PlantData"))
             {
                 if (gf.gridChange)
                 {
@@ -359,7 +359,7 @@ namespace GUI.AQUATOX
                     ChemicalRecord CR = TC.ChemRec; CR.Setup();
                     TParameter[] PPS = CR.InputArray();
 
-                    Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON");
+                    Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON", "ChemData");
                     nchm++;
                 }
         }
@@ -382,7 +382,7 @@ namespace GUI.AQUATOX
             RR.Setup();
             TParameter[] PPS = RR.InputArray();
 
-            Reminform.EditParams(ref PPS, "Remineralization Parameters", false, "ReminLib.JSON");
+            Reminform.EditParams(ref PPS, "Remineralization Parameters", false, "ReminLib.JSON", "Remineralization");
         }
 
 
@@ -595,7 +595,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true))
+            if (gf.ShowGrid(table, false, true, "AnimalDataScreen"))
             {
                 if (gf.gridChange)
                 {
@@ -640,7 +640,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, false))
+            if (gf.ShowGrid(table, false, false,"AnimalDataScreen"))
             {
                 if (gf.gridChange)
                 {
@@ -676,7 +676,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true))
+            if (gf.ShowGrid(table, false, true, "Remineralization"))
             {
                 if (gf.gridChange)
                 {
@@ -708,7 +708,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true))
+            if (gf.ShowGrid(table, false, true, "ChemData"))
             {
                 if (gf.gridChange)
                 {
@@ -770,7 +770,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true))
+            if (gf.ShowGrid(table, false, true, "_Toc77252216"))
             {
                 if (gf.gridChange)
                 {
@@ -802,7 +802,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true))
+            if (gf.ShowGrid(table, false, true,"PlantData"))
             {
                 if (gf.gridChange)
                 {

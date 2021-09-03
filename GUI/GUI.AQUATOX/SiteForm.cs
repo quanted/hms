@@ -151,7 +151,6 @@ namespace GUI.AQUATOX
         private void CancelButt_Click(object sender, EventArgs e)
         {
             this.Close();
-
         }
 
 
@@ -161,7 +160,7 @@ namespace GUI.AQUATOX
             SiteRecord SR = Sim.AQTSeg.Location.Locale;
             SR.Setup();
             TParameter[] PPS = SR.InputArray();
-            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON");
+            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON", "_Toc77252216");
             
             UpdateScreen();
         }

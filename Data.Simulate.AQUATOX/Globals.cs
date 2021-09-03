@@ -246,7 +246,7 @@ namespace Globals
 
         public void Setup(bool DefaultVals)
         {
-            FirstDay.Name = "End of Model Simulation";
+            FirstDay.Name = "Start of Model Simulation";
             LastDay.Name = "End of Model Simulation";
             StoreStepSize.Name = "Data-storage Step Size (averaging period)";
             StoreStepSize.Units = "hours or days";

@@ -12,6 +12,7 @@ namespace GUI.AQUATOX
     {
         public bool gridChange;
         bool UserCanceled;
+        string HelpTopic = "";
 
         public GridForm()
         {
@@ -28,8 +29,10 @@ namespace GUI.AQUATOX
 
         }
 
-        public bool ShowGrid(DataTable table, bool LockLeftColumn, bool addrows)
+        public bool ShowGrid(DataTable table, bool LockLeftColumn, bool addrows, string HelpContext)
         {
+
+            HelpTopic = HelpContext;
             gridChange = false;
             UserCanceled = false;
             dataGridView1.DataSource = table;
@@ -82,6 +85,9 @@ namespace GUI.AQUATOX
             }
         }
 
-        
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            AQTTestForm.OpenUrl(HelpTopic);
+        }
     }
 }

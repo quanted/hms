@@ -31,12 +31,13 @@
             this.CancelButt = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.DB_Button = new System.Windows.Forms.Button();
+            this.HelpButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(878, 10);
+            this.CancelButt.Location = new System.Drawing.Point(883, 10);
             this.CancelButt.Name = "CancelButt";
             this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 0;
@@ -47,7 +48,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(811, 10);
+            this.button1.Location = new System.Drawing.Point(816, 10);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -58,7 +59,7 @@
             // DB_Button
             // 
             this.DB_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DB_Button.Location = new System.Drawing.Point(602, 10);
+            this.DB_Button.Location = new System.Drawing.Point(574, 10);
             this.DB_Button.Name = "DB_Button";
             this.DB_Button.Size = new System.Drawing.Size(105, 23);
             this.DB_Button.TabIndex = 1;
@@ -66,11 +67,25 @@
             this.DB_Button.UseVisualStyleBackColor = true;
             this.DB_Button.Click += new System.EventHandler(this.DB_Button_Click);
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton.Location = new System.Drawing.Point(703, 8);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(87, 27);
+            this.HelpButton.TabIndex = 24;
+            this.HelpButton.Text = "  Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // Param_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(955, 498);
+            this.ClientSize = new System.Drawing.Size(960, 497);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.DB_Button);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.CancelButt);
@@ -87,5 +102,6 @@
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button DB_Button;
+        private System.Windows.Forms.Button HelpButton;
     }
 }
