@@ -19,9 +19,9 @@ namespace Streamflow
             }
             output.Metadata.Add("comids", comids);
 
-            string dataRequest = "/hms/nwm/data/?dataset=streamflow&comid=" + comids + 
-                "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd") + 
-                "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+            string dataRequest = "/hms/nwm/data/?dataset=streamflow&comid=" + comids;
+            dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
+            dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
 
             FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000).Result;
             output = results.data;

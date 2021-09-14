@@ -85,7 +85,7 @@ namespace Web.Services.Models
             {
                 Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
                 output.Wait();
-                baseSimJSON = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("input"));
+                baseSimJSON = Utilities.MongoDB.FindInGridFS("hms_workflows",(BsonObjectId)output.Result.GetValue("input"));
                 var tempUp = output.Result.GetValue("upstream");
                 if (tempUp is BsonNull)
                 {
