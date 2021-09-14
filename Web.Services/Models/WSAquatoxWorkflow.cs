@@ -85,7 +85,17 @@ namespace Web.Services.Models
             {
                 Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", task_id);
                 output.Wait();
-                baseSimJSON = Utilities.MongoDB.FindInGridFS("hms_workflows",(BsonObjectId)output.Result.GetValue("input"));
+                BsonObjectId key;
+                var outputKey = output.Result.GetValue("input");
+                if (outputKey.GetType() == typeof(BsonObjectId))
+                {
+                    key = (BsonObjectId)outputKey;
+                }
+                else
+                {
+                    key = new BsonObjectId(new ObjectId(outputKey.AsString));
+                }
+                baseSimJSON = Utilities.MongoDB.FindInGridFS("hms_workflows",key);
                 var tempUp = output.Result.GetValue("upstream");
                 if (tempUp is BsonNull)
                 {
@@ -133,7 +143,17 @@ namespace Web.Services.Models
                         TimeSeriesOutput TSO = new TimeSeriesOutput();
                         try
                         {
-                            string outputJson = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                            BsonObjectId key;
+                            var outputKey = output.Result.GetValue("output");
+                            if (outputKey.GetType() == typeof(BsonObjectId))
+                            {
+                                key = (BsonObjectId)outputKey;
+                            }
+                            else
+                            {
+                                key = new BsonObjectId(new ObjectId(outputKey.AsString));
+                            }
+                            string outputJson = Utilities.MongoDB.FindInGridFS("hms_workflows", key);
                             TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(outputJson);
                         }
                         catch (Exception ex)
@@ -218,7 +238,17 @@ namespace Web.Services.Models
                 output.Wait();
 
                 // Convert to string and instantiate a new simulation
-                string json = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                BsonObjectId key;
+                var outputKey = output.Result.GetValue("output");
+                if (outputKey.GetType() == typeof(BsonObjectId))
+                {
+                    key = (BsonObjectId)outputKey;
+                }
+                else
+                {
+                    key = new BsonObjectId(new ObjectId(outputKey.AsString));
+                }
+                string json = Utilities.MongoDB.FindInGridFS("hms_workflows", key);
                 // string json = output.Result.GetValue("output").AsString;
                 AQTSim sim = new AQTSim();
                 errormsg = sim.Instantiate(json);
@@ -258,7 +288,17 @@ namespace Web.Services.Models
                     output.Wait();
 
                     // Convert to string and instantiate a new simulation
-                    string json = Utilities.MongoDB.FindInGridFS("hms_workflows", (BsonObjectId)output.Result.GetValue("output"));
+                    BsonObjectId key;
+                    var outputKey = output.Result.GetValue("output");
+                    if (outputKey.GetType() == typeof(BsonObjectId))
+                    {
+                        key = (BsonObjectId)outputKey;
+                    }
+                    else
+                    {
+                        key = new BsonObjectId(new ObjectId(outputKey.AsString));
+                    }
+                    string json = Utilities.MongoDB.FindInGridFS("hms_workflows", key);
                     //string json = output.Result.GetValue("output").AsString;
                     AQTSim sim = new AQTSim();
                     string error = sim.Instantiate(json);
