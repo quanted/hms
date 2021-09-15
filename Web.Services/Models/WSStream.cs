@@ -55,11 +55,11 @@ namespace Web.Services.Models
             {
                 networkTable = this.purgeTable(networkTable, segOrder);
             }
-            Dictionary<string, List<string>> sourceComIDs = this.getSourceComids(segOrder, networkTable);
+            result = this.getSourceComids(segOrder, networkTable);
 
             result.Add("network", networkTable);
             result.Add("order", segOrder);
-            result.Add("sources", sourceComIDs);
+            //result.Add("sources", sourceComIDs);
             return result;
         }
 
@@ -86,7 +86,7 @@ namespace Web.Services.Models
             return purgedTable;
         } 
 
-        private Dictionary<string, List<string>> getSourceComids(List<List<int>> order, List<List<object>> table)
+        private Dictionary<string, object> getSourceComids(List<List<int>> order, List<List<object>> table)
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
             Dictionary<string, List<string>> sourceCOMIDs = new Dictionary<string, List<string>>();
@@ -128,8 +128,12 @@ namespace Web.Services.Models
                     }
                 }
             }
-            sourceCOMIDs.Add("boundaries", boundaryCOMIDS);
-            return sourceCOMIDs;
+            //sourceCOMIDs.Add("boundaries", boundaryCOMIDS);
+            Dictionary<string, object> boundaries = new Dictionary<string, object>()
+            {
+                { "headwater", new List<string>() },{ "out-of-network", boundaryCOMIDS }
+            };
+            return new Dictionary<string, object>() { { "sources", sourceCOMIDs }, { "boundary", boundaries } };
         }
 
         public List<List<int>> generateOrder(List<List<object>> networkTable)
@@ -355,8 +359,8 @@ namespace Web.Services.Models
                     edges.Add(hydro);
                     string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
                     Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
-                    if (sourceComid.ContainsKey("COMID")) {
-                        sources[comid].Add(sourceComid["COMID"]);
+                    if (sourceComid.ContainsKey("ComID")) {
+                        sources[comid].Add(sourceComid["ComID"]);
                     }
                 }
             }
