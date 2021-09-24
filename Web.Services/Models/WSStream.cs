@@ -363,8 +363,14 @@ namespace Web.Services.Models
                     int dnhydro = Int32.Parse(networkTable[i][3].ToString());
                     if (!outOfNetwork.Contains(dnhydro))
                     {
-                        sources[hydroMapping[dnhydro][0].ToString()].Add(comid);
-                        outNetwork.Add(comid);
+                        if (!sources[hydroMapping[dnhydro][0].ToString()].Contains(comid))
+                        {
+                            sources[hydroMapping[dnhydro][0].ToString()].Add(comid);
+                        }
+                        if (!outNetwork.Contains(comid))
+                        {
+                            outNetwork.Add(comid);
+                        }
                     }
                 }
                 else if (uphydro == 0)
@@ -374,12 +380,18 @@ namespace Web.Services.Models
                 }
                 else if (!networkHydro.Contains(uphydro))
                 {
-                    outNetwork.Add(comid);
+                    string srcComid = hydroMapping[uphydro][0].ToString();
+                    if (!outNetwork.Contains(srcComid)){
+                        outNetwork.Add(srcComid);
+                    }
                     edges.Add(hydro);
                     string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
                     Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
                     if (sourceComid.ContainsKey("ComID")) {
-                        sources[comid].Add(sourceComid["ComID"]);
+                        if (!sources[comid].Contains(sourceComid["ComID"]))
+                        {
+                            sources[comid].Add(sourceComid["ComID"]);
+                        }
                     }
                 }
             }
