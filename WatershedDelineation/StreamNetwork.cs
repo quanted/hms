@@ -215,10 +215,10 @@ namespace WatershedDelineation
             };
             networkTable.Add(columns);
             string hucstr = (huc is null) ? "" : huc;
-            if (hucstr == "12")
-            {
-                hucstr = data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard")[1].GetProperty("wbd_huc12").ToString();
-            }
+            //if (hucstr == "12")
+            //{
+            //    hucstr = data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard")[1].GetProperty("wbd_huc12").ToString();
+            //}
             foreach(var seg in data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard").EnumerateArray())
             {
                 string cHUC = seg.GetProperty("wbd_huc12").ToString();

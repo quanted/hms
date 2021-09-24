@@ -32,7 +32,7 @@ namespace Web.Services.Models
 
             WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
             var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
-            List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, huc);
+            List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, null);
             List<List<int>> segOrder = new List<List<int>>();
             if (mainstem)
             {
@@ -47,7 +47,7 @@ namespace Web.Services.Models
             else
             {
                 //segOrder = this.generateOrder(networkTable);
-                result = this.generateOrderAndSources(networkTable, comid);
+                result = this.generateOrderAndSources(networkTable, comid, huc);
                 result.Add("network", networkTable);
                 return result;
             }
@@ -321,7 +321,7 @@ namespace Web.Services.Models
         }
 
 
-        public Dictionary<string, object> generateOrderAndSources(List<List<object>> networkTable, string pourpoint)
+        public Dictionary<string, object> generateOrderAndSources(List<List<object>> networkTable, string pourpoint, string huc = "")
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
@@ -329,13 +329,23 @@ namespace Web.Services.Models
             Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
             Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();
             Dictionary<int, string> hydroComid = new Dictionary<int, string>();
+            List<int> outOfNetwork = new List<int>();
+            string networkHuc = networkTable[1][7].ToString();
 
             for(int i = 1; i < networkTable.Count; i++)
             {
                 string comid = networkTable[i][0].ToString();
                 int hydro = Int32.Parse(networkTable[i][1].ToString());
-                networkHydro.Add(hydro);
-                sources.Add(comid, new List<string>());
+                string huc12 = networkTable[i][7].ToString();
+                if (huc.Equals("12") && !huc12.Equals(networkHuc))
+                {
+                    outOfNetwork.Add(hydro);
+                }
+                else
+                {
+                    networkHydro.Add(hydro);
+                    sources.Add(comid, new List<string>());
+                }
                 hydroMapping.Add(hydro, networkTable[i]);
                 hydroComid.Add(hydro, comid);
             }
@@ -348,7 +358,16 @@ namespace Web.Services.Models
                 string comid = networkTable[i][0].ToString();
                 int hydro = Int32.Parse(networkTable[i][1].ToString());
                 int uphydro = Int32.Parse(networkTable[i][2].ToString());
-                if (uphydro == 0)
+                if (outOfNetwork.Contains(hydro))
+                {
+                    int dnhydro = Int32.Parse(networkTable[i][3].ToString());
+                    if (!outOfNetwork.Contains(dnhydro))
+                    {
+                        sources[hydroMapping[dnhydro][0].ToString()].Add(comid);
+                        outNetwork.Add(comid);
+                    }
+                }
+                else if (uphydro == 0)
                 {
                     headwaters.Add(comid);
                     edges.Add(hydro);
