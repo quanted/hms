@@ -325,6 +325,7 @@ namespace Web.Services.Models
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
+            huc = (huc == null) ? "" : huc;
             List<int> networkHydro = new List<int>();
             Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
             Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();
@@ -380,17 +381,31 @@ namespace Web.Services.Models
                 }
                 else if (!networkHydro.Contains(uphydro))
                 {
-                    string srcComid = hydroMapping[uphydro][0].ToString();
-                    if (!outNetwork.Contains(srcComid)){
-                        outNetwork.Add(srcComid);
-                    }
                     edges.Add(hydro);
+                    bool addToOut = false;
+                    if (hydroMapping.ContainsKey(uphydro))
+                    {
+                        string srcComid = hydroMapping[uphydro][0].ToString();
+                        if (!outNetwork.Contains(srcComid))
+                        {
+                            outNetwork.Add(srcComid);
+                        }
+                    }
+                    else
+                    {
+                        addToOut = true;
+                    }
+
                     string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
                     Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
                     if (sourceComid.ContainsKey("ComID")) {
                         if (!sources[comid].Contains(sourceComid["ComID"]))
                         {
                             sources[comid].Add(sourceComid["ComID"]);
+                        }
+                        if (addToOut)
+                        {
+                            outNetwork.Add(sourceComid["ComID"]);
                         }
                     }
                 }
