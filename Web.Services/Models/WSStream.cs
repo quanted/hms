@@ -412,16 +412,22 @@ namespace Web.Services.Models
             }
             List<int> traversed = new List<int>();
             List<List<string>> order = new List<List<string>>();
-            for(int i = 0; i < edges.Count; i++)
+            if (networkTable.Count == 2)
             {
-                traversed.Add(edges[i]);
-                List<string> sequence = new List<string>();
-                sequence.Add(hydroComid[edges[i]]);
-                int dnHydro = Int32.Parse(hydroMapping[edges[i]][3].ToString());
-                recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
-                ReorderSequence(ref order, sequence);
+                order.Add(new List<string>() { networkTable[1][0].ToString() });
             }
-
+            else
+            {
+                for (int i = 0; i < edges.Count; i++)
+                {
+                    traversed.Add(edges[i]);
+                    List<string> sequence = new List<string>();
+                    sequence.Add(hydroComid[edges[i]]);
+                    int dnHydro = Int32.Parse(hydroMapping[edges[i]][3].ToString());
+                    recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
+                    ReorderSequence(ref order, sequence);
+                }
+            }
 
             return new Dictionary<string, object>()
             {
