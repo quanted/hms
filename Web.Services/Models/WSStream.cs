@@ -412,7 +412,7 @@ namespace Web.Services.Models
             }
             List<int> traversed = new List<int>();
             List<List<string>> order = new List<List<string>>();
-            if (networkTable.Count == 2)
+            if (networkHydro.Count == 1)
             {
                 order.Add(new List<string>() { networkTable[1][0].ToString() });
             }
