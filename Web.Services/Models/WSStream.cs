@@ -412,6 +412,8 @@ namespace Web.Services.Models
             }
             List<int> traversed = new List<int>();
             List<List<string>> order = new List<List<string>>();
+            List<int> diffEdges = new List<int>();
+            List<string> divComids = new List<string>();
             if (networkHydro.Count == 1)
             {
                 order.Add(new List<string>() { networkTable[1][0].ToString() });
@@ -427,13 +429,41 @@ namespace Web.Services.Models
                     recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
                     ReorderSequence(ref order, sequence);
                 }
+                if(networkHydro.Count != traversed.Count)
+                {
+                    List<int> diff = new List<int>();
+                    foreach(int hydro in hydroComid.Keys)
+                    {
+                        if (!traversed.Contains(hydro) && hydroComid[hydro] != pourpoint)
+                        {
+                            diff.Add(hydro);
+                        }
+                    }
+                    for(int i = 0; i < diff.Count; i++)
+                    {
+                        if (traversed.Contains(Int32.Parse(hydroMapping[diff[i]][2].ToString())))
+                        {
+                            diffEdges.Add(diff[i]);
+                            divComids.Add(hydroComid[diff[i]]);
+                        }
+                    }
+                    for(int i = 0; i < diffEdges.Count; i++)
+                    {
+                        traversed.Add(diffEdges[i]);
+                        List<string> sequence = new List<string>();
+                        sequence.Add(hydroComid[diffEdges[i]]);
+                        int dnHydro = Int32.Parse(hydroMapping[diffEdges[i]][3].ToString());
+                        recTraverse(dnHydro, hydroComid[diffEdges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
+                        ReorderSequence(ref order, sequence);
+                    }
+                }
             }
 
             return new Dictionary<string, object>()
             {
                 { "sources", sources },
                 { "order", order },
-                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork} }
+                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork}, {"divergence", divComids } }
                 }
             };
 
