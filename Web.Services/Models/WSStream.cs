@@ -445,6 +445,7 @@ namespace Web.Services.Models
                         {
                             diffEdges.Add(diff[i]);
                             divComids.Add(hydroComid[diff[i]]);
+                            sources[hydroComid[diff[i]]].Add(hydroComid[Int32.Parse(hydroMapping[diff[i]][2].ToString())]);
                         }
                     }
                     for(int i = 0; i < diffEdges.Count; i++)
