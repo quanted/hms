@@ -312,7 +312,9 @@ namespace Web.Services.Models
                     }
                     else
                     {
-                        order[m].Add(sequence[i]);
+                        if (!order[m].Contains(sequence[i])){
+                            order[m].Add(sequence[i]);
+                        }
                     }
                     j++;
    
@@ -429,10 +431,11 @@ namespace Web.Services.Models
                     recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
                     ReorderSequence(ref order, sequence);
                 }
-                if(networkHydro.Count != traversed.Count)
+                while(networkHydro.Count > traversed.Count+1)
                 {
                     List<int> diff = new List<int>();
-                    foreach(int hydro in hydroComid.Keys)
+                    diffEdges = new List<int>();
+                    foreach(int hydro in networkHydro)
                     {
                         if (!traversed.Contains(hydro) && hydroComid[hydro] != pourpoint)
                         {
@@ -441,12 +444,21 @@ namespace Web.Services.Models
                     }
                     for(int i = 0; i < diff.Count; i++)
                     {
-                        if (traversed.Contains(Int32.Parse(hydroMapping[diff[i]][2].ToString())))
+                        int upHydro = Int32.Parse(hydroMapping[diff[i]][2].ToString());
+                        if (traversed.Contains(upHydro))
                         {
                             diffEdges.Add(diff[i]);
-                            divComids.Add(hydroComid[diff[i]]);
-                            sources[hydroComid[diff[i]]].Add(hydroComid[Int32.Parse(hydroMapping[diff[i]][2].ToString())]);
+                            if (!divComids.Contains(hydroComid[diff[i]]))
+                            {
+                                divComids.Add(hydroComid[diff[i]]);
+                            }
                         }
+                        string comid = hydroComid[Int32.Parse(hydroMapping[diff[i]][2].ToString())];
+                        if (!sources[hydroComid[diff[i]]].Contains(comid))
+                        {
+                            sources[hydroComid[diff[i]]].Add(comid);
+                        }
+
                     }
                     for(int i = 0; i < diffEdges.Count; i++)
                     {
