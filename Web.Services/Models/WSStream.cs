@@ -364,9 +364,10 @@ namespace Web.Services.Models
                 if (outOfNetwork.Contains(hydro))
                 {
                     int dnhydro = Int32.Parse(networkTable[i][3].ToString());
-                    if (!outOfNetwork.Contains(dnhydro))
+                    if (!outOfNetwork.Contains(dnhydro) && hydroMapping.ContainsKey(dnhydro))
                     {
-                        if (!sources[hydroMapping[dnhydro][0].ToString()].Contains(comid))
+                        string dnCOMID = hydroMapping[dnhydro][0].ToString();
+                        if (!sources[dnCOMID].Contains(comid))
                         {
                             sources[hydroMapping[dnhydro][0].ToString()].Add(comid);
                         }
