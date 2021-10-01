@@ -162,6 +162,7 @@ namespace AQUATOX.AQTSegment
                 if (errmsg != "") return errmsg;
 
                 AQTSeg.ClearResults();
+
                 AQTSeg.SVsToInitConds();
                 Setup_Record PS = AQTSeg.PSetup;
                 AQTSeg.Integrate(PS.FirstDay.Val, PS.LastDay.Val, PS.RelativeError.Val, PS.MinStepSize.Val, PS.StoreStepSize.Val);
@@ -512,7 +513,7 @@ namespace AQUATOX.AQTSegment
 
         public void TakeDerivative(int Step)
         {   // commment
-            if (UseLoadsRecAsDriver)  // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
+            if ((UseLoadsRecAsDriver)||(Location.SiteType == SiteTypes.TribInput)) // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
             {
                 State = LoadsRec.ReturnLoad(AQTSeg.TPresent);
                 StepRes[Step] = 0;
@@ -2684,6 +2685,8 @@ namespace AQUATOX.AQTSegment
             double FracChange;
             double VolInitCond;
 
+            if (Location.SiteType == SiteTypes.TribInput) return;
+
             TVolume TV = (TVolume)(GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol));
             if (TV == null) return;
 
@@ -3259,6 +3262,13 @@ namespace AQUATOX.AQTSegment
             CopySuspDetrData();
 
             TVolume TV = (TVolume)GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+
+            if (Location.SiteType == SiteTypes.TribInput)
+            {
+                TV.Calc_Method = VolumeMethType.Dynam;
+                if (TV.InitialCond < Consts.Tiny) TV.InitialCond = 1.0;  // arbitrary but must be non - zero
+            }
+
 
             AssignChemRecs();
 

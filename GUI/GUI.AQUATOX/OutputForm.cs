@@ -26,7 +26,6 @@ namespace GUI.AQUATOX
 
         public OutputForm()
         {
-            InitializeComponent();
 
             // 
             // chart1
@@ -61,6 +60,9 @@ namespace GUI.AQUATOX
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
+            InitializeComponent();
+
         }
 
         public void ShowOutput(AQTSim aQ)

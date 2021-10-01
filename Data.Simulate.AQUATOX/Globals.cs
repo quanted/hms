@@ -263,9 +263,13 @@ namespace Globals
 
             ChemsDrivingVars.Name = "Chemicals are 'Driving Variables'";
             AverageOutput.Name = "Trapezoidally Integrate Results";
+
             UseExternalConcs.Name = "Calculate Toxicity using External Concentrations";
+
             StepSizeInDays.Name = "Storage Stepsize is Days (not Hours)";
+
             ModelTSDays.Name = "Model Stepsize is Days (not Hours)";
+
             // Spinup_Mode.Name = "
 
             NFix_UseRatio.Name = "Calculate Nitrogen Fixation using N to Inorganic P Ratio";
@@ -277,8 +281,9 @@ namespace Globals
 
             FixStepSize.Name = "Fixed Step Size";
             FixStepSize.Units = "days";
-
             UseFixStepSize.Name = "Use Fixed Step Size";
+
+
             Internal_Nutrients.Name = "Model Nutrients Internally in Plants";
             T1IsAggregate.Name = "T1 is an aggregate of all other toxicants in study";
             AmmoniaIsDriving.Name = "Ammonia is a 'Driving Variable'";
@@ -416,6 +421,7 @@ namespace Globals
         [JsonIgnore] public string Units = "";    // not user editable
         [JsonIgnore] public bool Primary = true;         // not user editable
         //  [JsonIgnore] public bool Contextsensitive    // not yet  -- document 
+        //ToDictionary  work-here
     } // end TParameter
 
     public class TBoolParam : TParameter

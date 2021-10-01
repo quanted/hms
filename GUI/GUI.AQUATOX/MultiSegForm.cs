@@ -230,26 +230,30 @@ namespace GUI.AQUATOX
 
             AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
 
-            for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
-            {
-                string comid = AQT2D.SN.network[iSeg][0];
-                string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
-                string BaseFileN = BaseJSONBox.Text;
-                if (!ValidFilen(BaseJSONBox.Text)) return;
-                AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
-                string errmessage = AQT2D.PopulateStreamNetwork(iSeg, MasterSetupJson(), out string jsondata);
+            string BaseFileN = BaseJSONBox.Text;
+            if (!ValidFilen(BaseJSONBox.Text)) return;
+            AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
+            string msj = MasterSetupJson();
 
-                if (errmessage == "")
-                {
-                    File.WriteAllText(filen, jsondata);
-                    AddToProcessLog("Read Flows and Saved JSON for " + comid);
-                }
-                else
-                {
-                    AddToProcessLog(errmessage);
-                    return;
-                }
-            }
+//          Parallel.For(1, AQT2D.nSegs+1 , iSeg =>  
+            for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
+               {
+                  string comid = AQT2D.SN.network[iSeg][0];
+                  string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
+                 
+                  string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
+
+                  if (errmessage == "")
+                  {
+                      File.WriteAllText(filen, jsondata);
+                      TSafeAddToProcessLog("Read Flows and Saved JSON for " + comid);
+                  }
+                  else
+                  {
+                      TSafeAddToProcessLog(errmessage);
+                      return;
+                  }
+               }
 
             AddToProcessLog("");
             if (AQT2D.SN.sources.TryGetValue("boundaries", out int[] boundaries))

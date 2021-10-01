@@ -414,6 +414,8 @@ namespace GUI.AQUATOX
             // 
             // AQTTestForm
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 428);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.MultiSegButton);

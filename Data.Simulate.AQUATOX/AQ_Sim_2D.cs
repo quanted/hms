@@ -139,13 +139,16 @@ namespace AQUATOX.AQSim_2D
                         throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
 
                     if (velocity < Consts.Tiny) velocity = flow; // default to 1 m2 for now
-                    double VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
+
+                    double VolCalc = 0;
+                    if (flow > Consts.Tiny)
+                       VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
                     // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 0.001 (m/km)
-                    
                     if (VolCalc < Consts.Tiny) VolCalc = TVol.AQTSeg.Location.Locale.SiteLength.Val *1000; //default minimum volume (length * XSec 1 m2) for now
                     KnownValLoad.list.Add(date,VolCalc);
                     
                     if (firstvol) TVol.InitialCond = VolCalc;
+                    firstvol = false;
                 }
 
                 InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
