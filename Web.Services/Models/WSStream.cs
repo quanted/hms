@@ -266,6 +266,12 @@ namespace Web.Services.Models
 
         private void recTraverse(int hydroseq, string upComid, string pourpoint, ref List<string> sequence, ref List<int> traversed, ref Dictionary<string, List<string>> sources, Dictionary<int, string> hydroComid, Dictionary<int, List<object>> mapping)
         {
+            if (!hydroComid.ContainsKey(hydroseq))
+            {
+                // Downstream flows out of the network
+                sequence.Add("-1");
+                return;
+            }
             sequence.Add(hydroComid[hydroseq]);
             if (!sources[hydroComid[hydroseq]].Contains(upComid))
             {
@@ -430,7 +436,20 @@ namespace Web.Services.Models
                     sequence.Add(hydroComid[edges[i]]);
                     int dnHydro = Int32.Parse(hydroMapping[edges[i]][3].ToString());
                     recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
-                    ReorderSequence(ref order, sequence);
+                    if (!sequence.Contains("-1"))
+                    {
+                        ReorderSequence(ref order, sequence);
+                    }
+                    else
+                    {
+                        foreach(string s in sequence)
+                        {
+                            if(s != "-1")
+                            {
+                                sources.Remove(s);
+                            }
+                        }
+                    }
                 }
                 while(networkHydro.Count > traversed.Count+1)
                 {
@@ -468,7 +487,20 @@ namespace Web.Services.Models
                         sequence.Add(hydroComid[diffEdges[i]]);
                         int dnHydro = Int32.Parse(hydroMapping[diffEdges[i]][3].ToString());
                         recTraverse(dnHydro, hydroComid[diffEdges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
-                        ReorderSequence(ref order, sequence);
+                        if (!sequence.Contains("-1"))
+                        {
+                            ReorderSequence(ref order, sequence);
+                        }
+                        else
+                        {
+                            foreach (string s in sequence)
+                            {
+                                if (s != "-1")
+                                {
+                                    sources.Remove(s);
+                                }
+                            }
+                        }
                     }
                 }
             }
