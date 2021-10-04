@@ -46,5 +46,41 @@ namespace GUI.AQUATOX.Properties {
                 this["MS_Directory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23398915")]
+        public string COMID {
+            get {
+                return ((string)(this["COMID"]));
+            }
+            set {
+                this["COMID"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EndCOMID {
+            get {
+                return ((string)(this["EndCOMID"]));
+            }
+            set {
+                this["EndCOMID"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public string UpSpan {
+            get {
+                return ((string)(this["UpSpan"]));
+            }
+            set {
+                this["UpSpan"] = value;
+            }
+        }
     }
 }

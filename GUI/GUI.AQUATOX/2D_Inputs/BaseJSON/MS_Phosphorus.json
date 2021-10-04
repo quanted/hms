@@ -34,7 +34,7 @@
           {
             "$type": "TLoadings",
             "UseConstant": true,
-            "ConstLoad": 0.00059912,
+            "ConstLoad": 0,
             "MultLdg": 1
           },
           {
@@ -60,8 +60,8 @@
       "LoadNotes1": "",
       "LoadNotes2": "",
       "PTrackResults^": true,
-      "FracAvail": 0.5,
-	  "Alt_FracAvail":[1.0,0.913,0.5],	  
+      "FracAvail": 1.0,
+	  "Alt_FracAvail":[1.0,1.0,1.0],	  
       "TP_IC": false,
       "TP_Inflow": false,
       "TP_PS": false,

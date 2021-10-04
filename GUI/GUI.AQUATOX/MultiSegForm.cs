@@ -171,7 +171,7 @@ namespace GUI.AQUATOX
             if (AQT2D == null) AQT2D = new AQSim_2D();
 
             AddToProcessLog("Please wait, reading stream network from web service");
-            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, pourIDBox.Text, spanBox.Text);
+            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
             if (SNJSON == "")
             {
                 AddToProcessLog("Error: web service returned empty JSON."); return;
@@ -586,6 +586,10 @@ namespace GUI.AQUATOX
         {
             Properties.Settings.Default.BaseJSON = BaseJSONBox.Text;
             Properties.Settings.Default.MS_Directory = basedirBox.Text;
+            Properties.Settings.Default.COMID = comidBox.Text;
+            Properties.Settings.Default.EndCOMID = EndCOMIDBox.Text;
+            Properties.Settings.Default.UpSpan = spanBox.Text;
+
             Properties.Settings.Default.Save();
         }
 
@@ -593,6 +597,11 @@ namespace GUI.AQUATOX
         {
             BaseJSONBox.Text = Properties.Settings.Default.BaseJSON;  // default is "..\..\..\2D_Inputs\LBR Glenwood 4.JSON"
             basedirBox.Text = Properties.Settings.Default.MS_Directory; // default is "..\..\..\2D_Inputs\TestDir1\"
+
+            comidBox.Text = Properties.Settings.Default.COMID ;
+            EndCOMIDBox.Text = Properties.Settings.Default.EndCOMID;
+            spanBox.Text = Properties.Settings.Default.UpSpan;
+
         }
 
         private void HelpButton_Click(object sender, EventArgs e)
@@ -600,5 +609,7 @@ namespace GUI.AQUATOX
             string target = "_Toc77252249";
             AQTTestForm.OpenUrl(target);
         }
+
+
     }
 }

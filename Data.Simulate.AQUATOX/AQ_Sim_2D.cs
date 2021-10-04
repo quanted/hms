@@ -143,7 +143,7 @@ namespace AQUATOX.AQSim_2D
                     double VolCalc = 0;
                     if (flow > Consts.Tiny)
                        VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
-                    // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 0.001 (m/km)
+                    // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 1000 (m/km)
                     if (VolCalc < Consts.Tiny) VolCalc = TVol.AQTSeg.Location.Locale.SiteLength.Val *1000; //default minimum volume (length * XSec 1 m2) for now
                     KnownValLoad.list.Add(date,VolCalc);
                     

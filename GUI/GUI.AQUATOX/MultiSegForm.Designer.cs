@@ -45,7 +45,7 @@
             this.spanLabel = new System.Windows.Forms.Label();
             this.spanBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.pourIDBox = new System.Windows.Forms.TextBox();
+            this.EndCOMIDBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comidBox = new System.Windows.Forms.TextBox();
             this.OutputPanel = new System.Windows.Forms.Panel();
@@ -184,7 +184,7 @@
             this.panel2.Controls.Add(this.spanLabel);
             this.panel2.Controls.Add(this.spanBox);
             this.panel2.Controls.Add(this.label4);
-            this.panel2.Controls.Add(this.pourIDBox);
+            this.panel2.Controls.Add(this.EndCOMIDBox);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.comidBox);
             this.panel2.Location = new System.Drawing.Point(25, 93);
@@ -237,12 +237,12 @@
             this.label4.TabIndex = 25;
             this.label4.Text = "(optional) endComID";
             // 
-            // pourIDBox
+            // EndCOMIDBox
             // 
-            this.pourIDBox.Location = new System.Drawing.Point(127, 47);
-            this.pourIDBox.Name = "pourIDBox";
-            this.pourIDBox.Size = new System.Drawing.Size(71, 23);
-            this.pourIDBox.TabIndex = 24;
+            this.EndCOMIDBox.Location = new System.Drawing.Point(127, 47);
+            this.EndCOMIDBox.Name = "EndCOMIDBox";
+            this.EndCOMIDBox.Size = new System.Drawing.Size(71, 23);
+            this.EndCOMIDBox.TabIndex = 24;
             // 
             // label1
             // 
@@ -413,7 +413,7 @@
         private System.Windows.Forms.Label spanLabel;
         private System.Windows.Forms.TextBox spanBox;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox pourIDBox;
+        private System.Windows.Forms.TextBox EndCOMIDBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox comidBox;
         private System.Windows.Forms.Button chartButton;
