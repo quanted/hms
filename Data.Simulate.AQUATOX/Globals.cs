@@ -161,7 +161,7 @@ namespace Globals
         NullStateVar
     } // end AllVariables
 
-    
+
     //    public enum Alt_LoadingsType
     //    
     //0        PointSource,  or Inflow(TVolume)
@@ -243,6 +243,7 @@ namespace Globals
         public TBoolParam T1IsAggregate = new TBoolParam();
         public TBoolParam AmmoniaIsDriving = new TBoolParam();
         public TBoolParam TSedDetrIsDriving = new TBoolParam();
+        public TBoolParam UseDetrInputRecInflow = new TBoolParam(true);
 
         public void Setup(bool DefaultVals)
         {
@@ -288,6 +289,7 @@ namespace Globals
             T1IsAggregate.Name = "T1 is an aggregate of all other toxicants in study";
             AmmoniaIsDriving.Name = "Ammonia is a 'Driving Variable'";
             TSedDetrIsDriving.Name = "Toxicant in Sediment Detritus is a 'Driving Variable'";
+            UseDetrInputRecInflow.Name = "Input Inflow OM as Susp. and Diss. Detritus";
 
             if (DefaultVals)
             {
@@ -314,6 +316,7 @@ namespace Globals
                 T1IsAggregate.Val = false;
                 AmmoniaIsDriving.Val = false;
                 TSedDetrIsDriving.Val = false;
+                UseDetrInputRecInflow.Val = true;
             }
         }
     } // end Setup_Record
@@ -427,7 +430,19 @@ namespace Globals
     public class TBoolParam : TParameter
     {
         new public bool Val;
+
+        public TBoolParam()
+        {
+        }
+
+        public TBoolParam(Boolean vl)
+        {
+            Val = vl;
+        }
     }
+
+    
+
 
     public class TStringParam : TParameter
     {

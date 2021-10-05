@@ -394,6 +394,8 @@ namespace AQUATOX.AQSim_2D
                 if (AR == null) return;
             }
 
+            Sim.AQTSeg.PSetup.UseDetrInputRecInflow.Val = false;  // 10/4/2021 inflow from upstream for detritus, not from input record
+
             for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
             {
                 TStateVariable TSV = Sim.AQTSeg.SV[iTSV];

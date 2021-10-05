@@ -711,17 +711,27 @@ namespace AQUATOX.Chemicals
 
             Inflow = Location.Morph.InflowH2O;  //  * _wvar1.OOSInflowFrac;
 
-            if (NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr)
+            if ((NState >= AllVariables.DissRefrDetr && NState <= AllVariables.SuspLabDetr))
             {
                 // Code to support organisms or sediments with PS, NPS, Inflow Loadings
                 CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);
                 Loading = 0;
 
-                // Split into four compartments
+                // Split inflow into four compartments
                 PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
-                LoadRes = PInputRec.Load.ReturnLoad(TimeIndex) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, -1);
-                if (PInputRec.ToxLoad[ToxInt(SVType)] == null) ToxLoad = 0;
-                  else ToxLoad = PInputRec.ToxLoad[ToxInt(SVType)].ReturnLoad(TimeIndex);
+
+                if (AQTSeg.PSetup.UseDetrInputRecInflow.Val)
+                {
+                    LoadRes = PInputRec.Load.ReturnLoad(TimeIndex) * ((CPtr) as TDetritus).MultFrac(TimeIndex, false, -1);
+                    if (PInputRec.ToxLoad[ToxInt(SVType)] == null) ToxLoad = 0;
+                    else ToxLoad = PInputRec.ToxLoad[ToxInt(SVType)].ReturnLoad(TimeIndex);
+                }
+                else
+                {
+                    CPtr = AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol);    //inflow load of carrier
+                    LoadRes = CPtr.LoadsRec.ReturnLoad(TimeIndex);                     // mg/L
+                    ToxLoad = LoadsRec.ReturnLoad(TimeIndex);  // ug/kg
+                } 
 
                 LoadRes = LoadRes * Inflow / SegVolume * ToxLoad / 1e6;
                 // ug/L       mg/L     cu m/d     cu m       ug/kg   mg/kg
@@ -774,7 +784,7 @@ namespace AQUATOX.Chemicals
                 if ((NState == AllVariables.SedmRefrDetr || NState == AllVariables.SuspLabDetr) && AQTSeg.PSetup.TSedDetrIsDriving.Val)
                 {
                     State = Loading * CPtr.State / 1e6;        // 6/7/2013  Directly assign toxicants to sediment on OC Norm basis
-                    // ug/L     ug/kg      mg/L    mg/kg
+                    // ug/L    ug/kg      mg/L    mg/kg
                     return;
                 }
 

@@ -81,7 +81,7 @@ public class TDetritus : TRemineralize
             DetritalInputRecordType PInputRec;
             PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
             result = 0;
-            if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr))
+            if ((!AQTSeg.PSetup.UseDetrInputRecInflow.Val)||((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr)))
             {
                 // TStateVariable
                 // This function is for Susp&Diss Detritus Only
@@ -114,7 +114,7 @@ public class TDetritus : TRemineralize
             MorphRecord MR = Location.Morph;
             Inflow = MR.InflowH2O; //  [vseg] * (OOSInflowFrac);    // inflow from inflow screen only, associated with loadings
 
-            if ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr))
+            if ((!AQTSeg.PSetup.UseDetrInputRecInflow.Val) || ((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr)))
             {
                 // This function is for Susp&Diss Detritus Only
                 base.CalculateLoad(TimeIndex);

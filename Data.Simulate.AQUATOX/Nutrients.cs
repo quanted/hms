@@ -159,8 +159,8 @@ namespace AQUATOX.Nutrients
                 TDetr = AQTSeg.GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol) as TDetritus;
                 if (TDetr != null)
                 {
-                    DetrAltLdg = PInputRec.Load.ReturnAltLoad(TimeIndex, LdType); 
-                    // g/d                                                       
+                    DetrAltLdg = PInputRec.Load.ReturnAltLoad(TimeIndex, LdType);  // g/d                                                       
+
                     DetrAltLdg = DetrAltLdg / SegVolume;
                     // mg/L d      // g/d     // cu m
                     CNutrient = CNutrient - DetrAltLdg * CalculateLoad_DetrNutr2Org(nsloop);
