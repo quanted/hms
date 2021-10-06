@@ -272,6 +272,11 @@ namespace Web.Services.Models
                 sequence.Add("-1");
                 return;
             }
+            if (!sources.ContainsKey(hydroComid[hydroseq]))
+            {
+                sequence.Add("-1");
+                return;
+            }
             sequence.Add(hydroComid[hydroseq]);
             if (!sources[hydroComid[hydroseq]].Contains(upComid))
             {
@@ -388,7 +393,7 @@ namespace Web.Services.Models
                     headwaters.Add(comid);
                     edges.Add(hydro);
                 }
-                else if (!networkHydro.Contains(uphydro))
+                else if (!networkHydro.Contains(uphydro) && comid != pourpoint)
                 {
                     edges.Add(hydro);
                     bool addToOut = false;
