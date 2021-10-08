@@ -266,6 +266,10 @@ namespace Web.Services.Models
 
         private void recTraverse(int hydroseq, string upComid, string pourpoint, ref List<string> sequence, ref List<int> traversed, ref Dictionary<string, List<string>> sources, Dictionary<int, string> hydroComid, Dictionary<int, List<object>> mapping)
         {
+            if (upComid == pourpoint)
+            {
+                return;
+            }
             if (!hydroComid.ContainsKey(hydroseq))
             {
                 // Downstream flows out of the network
@@ -286,6 +290,7 @@ namespace Web.Services.Models
             {
                 return;
             }
+
             else
             {
                 traversed.Add(hydroseq);
@@ -345,7 +350,7 @@ namespace Web.Services.Models
             string query2 = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12='" + aoiHUC + "'";
             Dictionary<string, string> aoiCOMIDSq = Utilities.SQLite.GetData(dbPath, query2);
             List<string> aoiCOMIDs = (aoiCOMIDSq.ContainsKey("COMID")) ? aoiCOMIDSq["COMID"].Split(",").ToList<string>() : new List<string>();
-            // TODO: Get pourpoints HUC12 from database, then get all the catchments for that HUC12 from the database, use that as the filter, and trim the network table
+
             huc = (huc == null) ? "" : huc;
             List<int> networkHydro = new List<int>();
             Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
@@ -381,7 +386,6 @@ namespace Web.Services.Models
             List<int> edges = new List<int>();
             List<string> headwaters = new List<string>();
             List<string> outNetwork = new List<string>();
-            networkTable = filteredNetworkTable;
 
             for (int i = 1; i < networkTable.Count; i++)
             {
@@ -525,6 +529,7 @@ namespace Web.Services.Models
                     }
                 }
             }
+            networkTable = filteredNetworkTable;
 
             return new Dictionary<string, object>()
             {
