@@ -30,6 +30,7 @@ namespace Web.Services.Controllers
         {
             try
             {
+                maxDistance = (maxDistance > 100.0) ? 100.0 : maxDistance;      // Max maxDistance of 100km
                 var stopwatch = Stopwatch.StartNew();
                 WSStream catchment = new WSStream();
                 Dictionary<string, object> result = await catchment.Get(comid, endComid, huc, maxDistance, mainstem.ToLower() == "true");
