@@ -47,7 +47,7 @@ namespace Web.Services.Models
             else
             {
                 //segOrder = this.generateOrder(networkTable);
-                result = this.generateOrderAndSources(networkTable, comid, huc);
+                result = this.generateOrderAndSources(ref networkTable, comid, huc);
                 result.Add("network", networkTable);
                 return result;
             }
@@ -334,24 +334,36 @@ namespace Web.Services.Models
         }
 
 
-        public Dictionary<string, object> generateOrderAndSources(List<List<object>> networkTable, string pourpoint, string huc = "")
+        public Dictionary<string, object> generateOrderAndSources(ref List<List<object>> networkTable, string pourpoint, string huc = "")
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
+            string query1 = "SELECT HUC12 FROM HUC12_PU_COMIDs_CONUS WHERE COMID=" + pourpoint;
+            Dictionary<string, string> aoiHUCq = Utilities.SQLite.GetData(dbPath, query1);
+            string aoiHUC = (aoiHUCq.ContainsKey("HUC12")) ? aoiHUCq["HUC12"] : "";
+
+            string query2 = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12='" + aoiHUC + "'";
+            Dictionary<string, string> aoiCOMIDSq = Utilities.SQLite.GetData(dbPath, query2);
+            List<string> aoiCOMIDs = (aoiCOMIDSq.ContainsKey("COMID")) ? aoiCOMIDSq["COMID"].Split(",").ToList<string>() : new List<string>();
+            // TODO: Get pourpoints HUC12 from database, then get all the catchments for that HUC12 from the database, use that as the filter, and trim the network table
             huc = (huc == null) ? "" : huc;
             List<int> networkHydro = new List<int>();
             Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
             Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();
             Dictionary<int, string> hydroComid = new Dictionary<int, string>();
             List<int> outOfNetwork = new List<int>();
-            string networkHuc = networkTable[1][7].ToString();
-
+            //string networkHuc = networkTable[1][7].ToString();
+            List<List<object>> filteredNetworkTable = new List<List<object>>()
+            {
+                { networkTable[0] }
+            };
+            int j = 1;
             for(int i = 1; i < networkTable.Count; i++)
             {
                 string comid = networkTable[i][0].ToString();
                 int hydro = Int32.Parse(networkTable[i][1].ToString());
                 string huc12 = networkTable[i][7].ToString();
-                if (huc.Equals("12") && !huc12.Equals(networkHuc))
+                if (huc.Equals("12") && !aoiCOMIDs.Contains(comid))
                 {
                     outOfNetwork.Add(hydro);
                 }
@@ -359,6 +371,9 @@ namespace Web.Services.Models
                 {
                     networkHydro.Add(hydro);
                     sources.Add(comid, new List<string>());
+                    filteredNetworkTable.Add(networkTable[i]);
+                    filteredNetworkTable[j][7] = aoiHUC;
+                    j += 1;
                 }
                 hydroMapping.Add(hydro, networkTable[i]);
                 hydroComid.Add(hydro, comid);
@@ -366,6 +381,7 @@ namespace Web.Services.Models
             List<int> edges = new List<int>();
             List<string> headwaters = new List<string>();
             List<string> outNetwork = new List<string>();
+            networkTable = filteredNetworkTable;
 
             for (int i = 1; i < networkTable.Count; i++)
             {
