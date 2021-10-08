@@ -512,8 +512,9 @@ namespace AQUATOX.AQTSegment
         }
 
         public void TakeDerivative(int Step)
-        {   // commment
-            if ((UseLoadsRecAsDriver)||(Location.SiteType == SiteTypes.TribInput)) // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
+        {   
+            if  (((UseLoadsRecAsDriver)||(Location.SiteType == SiteTypes.TribInput))  // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
+              || ((AQTSeg.WaterVolZero)&&(NState != AllVariables.Volume)))            // if "water vol zero" integrate water volume variable only
             {
                 State = LoadsRec.ReturnLoad(AQTSeg.TPresent);
                 StepRes[Step] = 0;
@@ -1180,6 +1181,10 @@ namespace AQUATOX.AQTSegment
 
         [JsonIgnore] public DateTime ModelStartTime;     // Start of model run
         [JsonIgnore] public int YearNum_PrevStep = 0;     // The year number during the previous step of the model run; used to determine when a year has passed
+
+        [JsonIgnore] public double Last_Non_Zero_Vol;     // Used in dilute/conc to ensure no problems when volume is too small or a stream with zero flow
+        [JsonIgnore] public bool Water_Was_Zero;
+        [JsonIgnore] public bool WaterVolZero;            //  Is Water Volume "Zero", or a stream with zero flow?  No integration will take place.
 
         [JsonIgnore] public DateTime LastPctEmbedCalc = DateTime.MinValue;
         [JsonIgnore] public double PercentEmbedded = 0;
@@ -1885,6 +1890,7 @@ namespace AQUATOX.AQTSegment
             // Zero_Utility_Variables();  animal trophic level only
 
             CalculateAllLoads(TPresent);      // Calculate loads and ensure Morphometry is up-to-date
+
             if (Step == 1) CalculateSOD(); //  If Sed Diagenesis Model is attached, calculate SOD First
             CalculateSumPrey();
             NormDiff(Step);
@@ -2693,20 +2699,21 @@ namespace AQUATOX.AQTSegment
             VolInitCond = TV.InitialCond;
             NewVolume = TV.State;
 
-            //// Check for Water Volume Zero and Move On
-            //if (NewVolume <= VolInitCond * Location.Locale.Min_Vol_Frac.Val)
-            //    {
-            //        WaterVolZero = true;
-            //        Water_Was_Zero = true;
-            //        Volume_Last_Step = GetState(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
-            //        return;
-            //    }
+            // Check for Water Volume Zero and Move On
+            if ((NewVolume <= VolInitCond * Location.Locale.Min_Vol_Frac.Val) ||
+                ((Location.SiteType == SiteTypes.Stream) && (Location.Morph.InflowH2O < Consts.Tiny)))
+            {
+                WaterVolZero = true;
+                Water_Was_Zero = true;
+                Volume_Last_Step = GetState(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+                return;
+            }
 
-            //if (Water_Was_Zero)  { Volume_Last_Step = Last_Non_Zero_Vol;  }
+            if (Water_Was_Zero)  { Volume_Last_Step = Last_Non_Zero_Vol;  }
 
-            // // Recover from Water Volume Zero State
-            // Water_Was_Zero = false;
-            // WaterVolZero = false;
+            // Recover from Water Volume Zero State
+            Water_Was_Zero = false;
+            WaterVolZero = false;
 
             Vol_Prev_Step = Volume_Last_Step;
 
