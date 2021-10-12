@@ -343,31 +343,40 @@ namespace Web.Services.Models
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
+            // Get the HUC12 of the pourpoint from the NHDPlus V2.1 db
             string query1 = "SELECT HUC12 FROM HUC12_PU_COMIDs_CONUS WHERE COMID=" + pourpoint;
             Dictionary<string, string> aoiHUCq = Utilities.SQLite.GetData(dbPath, query1);
             string aoiHUC = (aoiHUCq.ContainsKey("HUC12")) ? aoiHUCq["HUC12"] : "";
-
+            // Get all comids for the aoiHUC from the NHDPlus V2.1 db
             string query2 = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12='" + aoiHUC + "'";
             Dictionary<string, string> aoiCOMIDSq = Utilities.SQLite.GetData(dbPath, query2);
             List<string> aoiCOMIDs = (aoiCOMIDSq.ContainsKey("COMID")) ? aoiCOMIDSq["COMID"].Split(",").ToList<string>() : new List<string>();
+            string pourpointHUC = networkTable[1][7].ToString();
+            // If the aoiHUC does not match with the EPA Water
+            if (pourpointHUC != aoiHUC)
+            {
+                string fileName = "HUC12_mismatch.txt";
+                string header = "COMID, NHDPlusV2.1 HUC12, EPA Waters HUC12";
+                string huclog = pourpoint + ", " + aoiHUC + ", " + pourpointHUC;
+                Utilities.Logger.WriteToFile(fileName, huclog, false, header);
+            }
 
             huc = (huc == null) ? "" : huc;
             List<int> networkHydro = new List<int>();
-            Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();
-            Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();
-            Dictionary<int, string> hydroComid = new Dictionary<int, string>();
+            Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();      // Sources dictionary (COMID)
+            Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();       // Hydroseq to networkTable info mapping dict
+            Dictionary<int, string> hydroComid = new Dictionary<int, string>();                     // Hydroseq to comid mapping
             List<int> outOfNetwork = new List<int>();
-            //string networkHuc = networkTable[1][7].ToString();
             List<List<object>> filteredNetworkTable = new List<List<object>>()
             {
                 { networkTable[0] }
             };
             int j = 1;
+            // Initialize the outOfNetwork segments, the set of hydroseq (networkHydro), the sources dictionary (sources), and the filteredNetworkTable which replaces the network table 
             for(int i = 1; i < networkTable.Count; i++)
             {
                 string comid = networkTable[i][0].ToString();
                 int hydro = Int32.Parse(networkTable[i][1].ToString());
-                string huc12 = networkTable[i][7].ToString();
                 if (huc.Equals("12") && !aoiCOMIDs.Contains(comid))
                 {
                     outOfNetwork.Add(hydro);
