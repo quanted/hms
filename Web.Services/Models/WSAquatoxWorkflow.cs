@@ -304,7 +304,7 @@ namespace Web.Services.Models
                     string error = sim.Instantiate(json);
                     if (error != "")
                     {
-                        return $"Invalid simulation output. Error: " + error;
+                        return $"Invalid simulation output. Error: " + error + ", comids: " + String.Join(",", comids.ToArray());
                     }
 
                     // Archive the simulation to the inherited property: archive
