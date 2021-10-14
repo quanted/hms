@@ -6,15 +6,24 @@ using System;
 using Web.Services.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Data;
 
 namespace Web.Services.Controllers
 {
-    ///
-    public class LoadingsInput 
+    public class LoadingsInput
     {
         public Dictionary<string, bool> Flags { get; set; }
-        public TimeSeriesOutput Loadings { get; set; }
+        public List<LoadingsObject> Loadings { get; set; }
+    }
+
+    public class LoadingsObject
+    {
+        public string Param { get; set; }
+        public int LoadingType { get; set; }
+        public bool UseConstant { get; set; }
+        public double Constant { get; set; }
+        public SortedList<DateTime, double> TimeSeries { get; set; }
+        public double multiplier { get; set; }
+        public Dictionary<string, string> Metadata { get; set; }
     }
 
     /// <summary>
@@ -38,10 +47,10 @@ namespace Web.Services.Controllers
         }
     }
 
-     /// <summary>
+    /// <summary>
     /// Aquatox insert loadings with constant input example. 
     /// </summary>
-    public class WSAquatoxInputBuilderControllerLoadingsConstantsInputExample : IExamplesProvider<LoadingsInput>
+    public class WSAquatoxInputBuilderControllerLoadingsInputExample : IExamplesProvider<LoadingsInput>
     {
         /// <summary>
         /// Get Example.
@@ -54,18 +63,25 @@ namespace Web.Services.Controllers
                 Flags = new Dictionary<string, bool>()
                 {
                     ["Nitrogen"] = true,
-                    ["Phosphorus"] = false,
-                    ["Organic Matter"] = false
+                    ["Phosphorus"] = true,
+                    ["Organic Matter"] = true
                 },
-                Loadings = new TimeSeriesOutput()
+                Loadings = new List<LoadingsObject>()
                 {
-                    Data = new Dictionary<string, List<string>>()
+                    new LoadingsObject()
                     {
-                        ["TNH4Obj"] = new List<string>()
+                        Param = "TNO3Obj",
+                        LoadingType = -1,
+                        UseConstant = true,
+                        Constant = 0.1,
+                        TimeSeries = new SortedList<DateTime, double>()
                         {
-                            "-1",
-                            "1.0",
-                            "0.791"
+                            [new DateTime(2019, 1, 1)] = 0.1,
+                        },
+                        multiplier = 1.0,
+                        Metadata = new Dictionary<string, string>()
+                        {
+                            ["TN_NPS"] = "true",
                         }
                     }
                 }
@@ -74,59 +90,6 @@ namespace Web.Services.Controllers
         }
     }
 
-    /// <summary>
-    /// Aquatox insert loadings with time series input example. 
-    /// </summary>
-    public class WSAquatoxInputBuilderControllerLoadingsTimeSeriesInputExample : IExamplesProvider<LoadingsInput>
-    {
-        /// <summary>
-        /// Get Example.
-        /// </summary>
-        /// <returns></returns>
-        public LoadingsInput GetExamples()
-        {
-            LoadingsInput example = new LoadingsInput()
-            {
-                Flags = new Dictionary<string, bool>()
-                {
-                    ["Nitrogen"] = true,
-                    ["Phosphorus"] = false,
-                    ["Organic Matter"] = false
-                },
-                Loadings = new TimeSeriesOutput()
-                {
-                    Metadata = new Dictionary<string, string>()
-                    {
-                        ["column_1"] = "TNH4Obj",
-                        ["column_1_type"] = "0",
-                        ["column_1_multldg"] = "1.0",
-                        ["column_2"] = "TNO3Obj",
-                        ["column_2_type"] = "0",
-                        ["column_2_multldg"] = "1.0"
-                    },
-                    Data = new Dictionary<string, List<string>>()
-                    {
-                        ["2013-01-01 00"] = new List<string>()
-                        {
-                            "0.791",
-                            "0.549"
-                        },
-                        ["2013-01-01 01"] = new List<string>()
-                        {
-                            "1.101",
-                            "0.856"
-                        },
-                        ["2013-01-01 02"] = new List<string>()
-                        {
-                            "1.265",
-                            "1.159"
-                        }
-                    }
-                }
-            };
-            return example;
-        }
-    }
 
     /// <summary>
     /// API controller for handling requests for Aquatox inputs. 
@@ -156,7 +119,7 @@ namespace Web.Services.Controllers
         [HttpPost]
         [ProducesResponseType(200)]
         [Route("base-json/flags")]
-        [SwaggerRequestExample(typeof(Dictionary<string, bool> ), typeof(WSAquatoxInputBuilderControllerGetBaseJsonInputExample))]
+        [SwaggerRequestExample(typeof(Dictionary<string, bool>), typeof(WSAquatoxInputBuilderControllerGetBaseJsonInputExample))]
         public async Task<IActionResult> PostBaseJsonFlags([FromBody] Dictionary<string, bool> flags)
         {
             try
@@ -178,59 +141,34 @@ namespace Web.Services.Controllers
         [ProducesResponseType(200)]
         [Route("loadings/types")]
         public IActionResult GetLoadings()
-        {   
+        {
             return Ok(new Dictionary<string, int>()
-                {
-                    ["Inflow Load"] = -1,
-                    ["Point-source"] = 0,
-                    ["Direct Precipitation"] = 1,
-                    ["Nonpoint-source"] = 2
-                });
+            {
+                ["Inflow Load"] = -1,
+                ["Point-source"] = 0,
+                ["Direct Precipitation"] = 1,
+                ["Nonpoint-source"] = 2
+            });
         }
 
         /// <summary>
         /// POST method for inserting state variable loadings into Aquatox base json.
         /// </summary>
-        /// <param name="input">Object of flags and TimeSeriesOutput of loadings</param>
-        /// <returns>Base json for aquatox simulation with SV contaminants updated.</returns>
+        /// <param name="input">Object of flags and list of LoadingsObjects</param>
+        /// <returns>Updated "SV" contaminants.</returns>
         [HttpPost]
         [ProducesResponseType(200)]
-        [Route("loadings/insert-constants")]
-        [SwaggerRequestExample(typeof(LoadingsInput), typeof(WSAquatoxInputBuilderControllerLoadingsConstantsInputExample))]
-        public async Task<IActionResult> PostConstantLoadings([FromBody] LoadingsInput input)
+        [Route("loadings/insert")]
+        [SwaggerRequestExample(typeof(LoadingsInput), typeof(WSAquatoxInputBuilderControllerLoadingsInputExample))]
+        public async Task<IActionResult> PostLoadings([FromBody] LoadingsInput input)
         {
-            try 
+            try
             {
                 // Get template from flags
                 string json = await WSAquatoxInputBuilder.GetBaseJson(input.Flags);
                 // Insert loadings into template and return 
-                json = await WSAquatoxInputBuilder.InsertConstantLoadings(json, input);
-                return Ok(JsonConvert.DeserializeObject<JObject>(json));
-            }
-            catch (Exception ex)
-            {
-                return Utilities.Logger.LogAPIException(ex, input);
-            }
-        }
-
-        /// <summary>
-        /// POST method for inserting state variable loadings into Aquatox base json.
-        /// </summary>
-        /// <param name="input">Object of flags and dictionary of loadings</param>
-        /// <returns>Base json for aquatox simulation with SV contaminants updated.</returns>
-        [HttpPost]
-        [ProducesResponseType(200)]
-        [Route("loadings/insert-time-series")]
-        [SwaggerRequestExample(typeof(LoadingsInput), typeof(WSAquatoxInputBuilderControllerLoadingsTimeSeriesInputExample))]
-        public async Task<IActionResult> PostTimeSeriesLoadings([FromBody] LoadingsInput input)
-        {
-            try 
-            {
-                // Get template from flags
-                string json = await WSAquatoxInputBuilder.GetBaseJson(input.Flags);
-                // Insert loadings into template and return 
-                json = await WSAquatoxInputBuilder.InsertTimeSeriesLoadings(json, input);
-                return Ok(JsonConvert.DeserializeObject<JObject>(json));
+                json = await WSAquatoxInputBuilder.InsertLoadings(json, input);
+                return Ok(JsonConvert.DeserializeObject<JObject>(json)["AQTSeg"]["SV"]);
             }
             catch (Exception ex)
             {
