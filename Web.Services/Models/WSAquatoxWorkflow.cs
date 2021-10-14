@@ -62,7 +62,7 @@ namespace Web.Services.Models
             errormsg = ArchiveUpstreamOutputs(comids);
             if (errormsg != "") {
                 var exceptionLog = Log.ForContext("Type", "exception");
-                exceptionLog.Fatal("task_id: " + task_id + ", COMID: " + json);
+                exceptionLog.Fatal("task_id: " + task_id);
                 return; 
             }
 
