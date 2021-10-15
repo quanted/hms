@@ -36,6 +36,7 @@ public class TDetritus : TRemineralize
             // User Input Percentage of Refractory or Particulate
 
             TDissRefrDetr TDRD = (TDissRefrDetr) AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            if (TDRD == null) return 0;
             DetritalInputRecordType PInputRec = TDRD.InputRecord;
 
             if ((NState==AllVariables.SedmRefrDetr)|| (NState == AllVariables.SedmLabDetr))

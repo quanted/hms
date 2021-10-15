@@ -149,8 +149,11 @@ namespace AQUATOX.Nutrients
             AllVariables nsloop;
             double DetrAltLdg;
             TDetritus TDetr;
-            DetritalInputRecordType PInputRec; 
-            PInputRec = ((AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr).InputRecord;
+
+            DetritalInputRecordType PInputRec;
+            TDissRefrDetr TDRD = (AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol)) as TDissRefrDetr;
+            if (TDRD == null) return;
+            PInputRec = TDRD.InputRecord;
 
             CNutrient = AddLoad;
 

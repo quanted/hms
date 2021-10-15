@@ -1,10 +1,6 @@
 {"$type": "AQTSim", "AQTSeg":{
-  "Comment": "JSON Export from AQUATOX 3.2",
   "$type": "AQUATOXSegment",
-  "VersionWrite": "3.97      ",
-  "FileName": "MS_OM.json",
-  "LastRun": "1899-12-29T00:00:00",
-  "ControlRun": "1899-12-29T00:00:00",
+  "FileName": "MS_Nutrients.json",
   "StudyName": "Multi-Seg OM Base",
   "SV": [
     {
