@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Collections.Specialized;
+using Globals;
 using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
+using AQUATOX.OrgMatter;
+using AQUATOX.Nutrients;
 using System.Threading.Tasks;
 using System.IO;
-using System.Linq;
 using Web.Services.Controllers;
-using System.Globalization;
+using System.Linq;
 
 namespace Web.Services.Models
 {
@@ -104,69 +106,57 @@ namespace Web.Services.Models
         /// <summary>
         /// Method to insert constant loadings into an Aquatox simulation. 
         /// </summary>
-        public static Task<string> InsertConstantLoadings(string json, LoadingsInput input)
+        public static Task<string> InsertLoadings(string json, LoadingsInput input)
         {
-            AQTSim sim = new AQTSim();
-            foreach (KeyValuePair<string, List<string>> item in input.Loadings.Data)
-            {
-                try
-                {
-                    // Insert loading and assign result over original input
-                    json = sim.InsertLoadings(json, item.Key, int.Parse(item.Value[0]),
-                        double.Parse(item.Value[2]), double.Parse(item.Value[1]));
-                }
-                catch (Exception ex)
-                {
-                    return Task.FromResult("Invalid loadings input.");
-                }
-            }
-            return Task.FromResult(json);
-        }
-
-        /// <summary>
-        /// Method to insert time series loadings into an Aquatox simulation. 
-        /// </summary>
-        public static Task<string> InsertTimeSeriesLoadings(string json, LoadingsInput input)
-        {
-            AQTSim sim = new AQTSim();
             try
             {
-                // Get length of data in a single timeseries unit
-                int length = input.Loadings.Data.First().Value.Count;
-
-                // Split TimeSeriesOutput into array of SortedLists with length
-                SortedList<DateTime, double>[] data = new SortedList<DateTime, double>[length];
-                for (int i = 0; i < length; i++)
+                // Iterate and insert all loadings
+                AQTSim sim = new AQTSim();
+                foreach (LoadingsObject loading in input.Loadings)
                 {
-                    data[i] = new SortedList<DateTime, double>();
-                }
-                foreach (KeyValuePair<string, List<string>> item in input.Loadings.Data)
-                {
-                    for (int i = 0; i < length; i++)
+                    if (loading.UseConstant)
                     {
-                        // Example: 
-                        // [
-                        //     [ "2013-01-01 00" : 0.3242],
-                        // ]
-                        data[i].Add(DateTime.ParseExact(item.Key, "yyyy-MM-dd HH", CultureInfo.InvariantCulture), double.Parse(item.Value[i]));
+                        json = sim.InsertLoadings(json, loading.Param, loading.LoadingType,
+                        loading.Constant, loading.multiplier);
+                    }
+                    else
+                    {
+                        json = sim.InsertLoadings(json, loading.Param, loading.LoadingType,
+                        loading.TimeSeries, loading.multiplier);
                     }
                 }
 
-                // Iterate over length of list array, get loading types, and call insert method
-                for (int i = 0; i < length; i++)
+                //Iterate again to insert all loadings metadata
+                foreach (LoadingsObject loading in input.Loadings)
                 {
-                    // Get loading column info
-                    string name = input.Loadings.Metadata[$"column_{i + 1}"];
-                    int type = int.Parse(input.Loadings.Metadata[$"column_{i + 1}_type"]);
-                    double multldg = double.Parse(input.Loadings.Metadata[$"column_{i + 1}_multldg"]);
-
-                    // Insert loading and assign result over original input
-                    json = sim.InsertLoadings(json, name, type, data[i], multldg);
+                    if (loading.Metadata != null && loading.Metadata.Count > 0)
+                    {
+                        sim.Instantiate(json);
+                        TStateVariable TSV = null;
+                        switch (loading.Metadata.Keys.First())
+                        {
+                            case "DataType":
+                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+                                ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
+                                break;
+                            case "TP_NPS":
+                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+                                ((TPO4Obj)TSV).TP_NPS = bool.Parse(loading.Metadata["TP_NPS"]);
+                                break;
+                            case "TN_NPS":
+                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+                                ((TNO3Obj)TSV).TN_NPS = bool.Parse(loading.Metadata["TN_NPS"]);
+                                break;
+                            default:
+                                break;
+                        }
+                        sim.SaveJSON(ref json);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                return Task.FromResult("Invalid time series.");
+                return Task.FromResult("Invalid loadings input.");
             }
             return Task.FromResult(json);
         }

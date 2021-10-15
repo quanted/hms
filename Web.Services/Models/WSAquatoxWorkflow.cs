@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace Web.Services.Models
 {
@@ -59,7 +60,11 @@ namespace Web.Services.Models
 
             // Get upstream outputs and archive them
             errormsg = ArchiveUpstreamOutputs(comids);
-            if (errormsg != "") { return; }
+            if (errormsg != "") {
+                var exceptionLog = Log.ForContext("Type", "exception");
+                exceptionLog.Fatal("task_id: " + task_id);
+                return; 
+            }
 
             // Pass data from upstream to current simulation
             Pass_Data(sim, comids);
@@ -304,7 +309,9 @@ namespace Web.Services.Models
                     string error = sim.Instantiate(json);
                     if (error != "")
                     {
-                        return $"Invalid simulation output.";
+                        var exceptionLog = Log.ForContext("Type", "exception");
+                        exceptionLog.Fatal("Error Instantiating AQTSim, Upstream COMIDS: " + String.Join(",", comids.ToArray()));
+                        return $"Invalid simulation output. Error: " + error;
                     }
 
                     // Archive the simulation to the inherited property: archive

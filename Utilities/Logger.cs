@@ -4,6 +4,7 @@ using Serilog;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Text.Json;
+using System.IO;
 
 namespace Utilities
 {
@@ -65,6 +66,51 @@ namespace Utilities
             {
                 Thread.Sleep(1000);
                 WriteToFile(taskID, log);
+            }
+        }
+
+        public static void WriteToFile(string fileName, string log, bool overwrite = false, string header = null)
+        {
+            string filePath = Path.Combine("App_Data", fileName);
+            bool exists = System.IO.File.Exists(filePath);
+            if (overwrite)
+            {
+                using (System.IO.StreamWriter file = new StreamWriter(filePath, false))
+                {
+                    if (!String.IsNullOrEmpty(header) && !exists)
+                    {
+                        file.WriteLine(header);
+                    }
+                    file.WriteLine(log);
+                }
+            }
+            else
+            {
+                bool newLog = true;
+                if (exists)
+                {
+                    using (System.IO.StreamReader file = new StreamReader(filePath))
+                    {
+                        while (!file.EndOfStream)
+                        {
+                            if (file.ReadLine() == log)
+                            {
+                                newLog = false;
+                            }
+                        }
+                    }
+                }
+                if (newLog)
+                {
+                    using (System.IO.StreamWriter file = new StreamWriter(filePath, true))
+                    {
+                        if (!String.IsNullOrEmpty(header) && !exists)
+                        {
+                            file.WriteLine(header);
+                        }
+                        file.WriteLine(log);
+                    }
+                }
             }
         }
     }

@@ -49,6 +49,15 @@ namespace Utilities
                     dbData.Add(kv.Key, kv.Value);
                 }
             }
+            string query4 = "SELECT * FROM HUC12_PU_COMIDs_CONUS WHERE COMID=" + comid.ToString();
+            Dictionary<string, string> dbData4 = Utilities.SQLite.GetData(dbPath, query4);
+            foreach (KeyValuePair<string, string> kv in dbData4)
+            {
+                if (!dbData.ContainsKey(kv.Key))
+                {
+                    dbData.Add(kv.Key, kv.Value);
+                }
+            }
             return dbData;
         }
 
