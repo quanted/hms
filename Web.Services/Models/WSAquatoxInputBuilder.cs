@@ -141,11 +141,11 @@ namespace Web.Services.Models
                                 break;
                             case "TP_NPS":
                                 TSV = sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-                                ((TPO4Obj)TSV).TP_NPS = true;
+                                ((TPO4Obj)TSV).TP_NPS = bool.Parse(loading.Metadata["TP_NPS"]);
                                 break;
                             case "TN_NPS":
                                 TSV = sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-                                ((TNO3Obj)TSV).TN_NPS = true;
+                                ((TNO3Obj)TSV).TN_NPS = bool.Parse(loading.Metadata["TN_NPS"]);
                                 break;
                             default:
                                 break;
