@@ -114,43 +114,37 @@ namespace Web.Services.Models
                 AQTSim sim = new AQTSim();
                 foreach (LoadingsObject loading in input.Loadings)
                 {
+                    string sv = loading.Param;
+                    // Get loading metadata to assign for sv
+                    switch (loading.Metadata.Keys.First())
+                    {
+                        case "DataType":
+                            // Can't assign DataType property inside AQTSegment.InsertLoadings
+                            // without breaking desktop version.
+                            sim.Instantiate(json);
+                            TStateVariable TSV =
+                                sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+                            ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
+                            sim.SaveJSON(ref json);
+                            break;
+                        case "TP_NPS":
+                            sv = bool.Parse(loading.Metadata["TP_NPS"]) ? "TP" : loading.Param;
+                            break;
+                        case "TN_NPS":
+                            sv = bool.Parse(loading.Metadata["TN_NPS"]) ? "TN" : loading.Param;
+                            break;
+                        default:
+                            break;
+                    }
                     if (loading.UseConstant)
                     {
-                        json = sim.InsertLoadings(json, loading.Param, loading.LoadingType,
+                        json = sim.InsertLoadings(json, sv, loading.LoadingType,
                         loading.Constant, loading.multiplier);
                     }
                     else
                     {
-                        json = sim.InsertLoadings(json, loading.Param, loading.LoadingType,
+                        json = sim.InsertLoadings(json, sv, loading.LoadingType,
                         loading.TimeSeries, loading.multiplier);
-                    }
-                }
-
-                //Iterate again to insert all loadings metadata
-                foreach (LoadingsObject loading in input.Loadings)
-                {
-                    if (loading.Metadata != null && loading.Metadata.Count > 0)
-                    {
-                        sim.Instantiate(json);
-                        TStateVariable TSV = null;
-                        switch (loading.Metadata.Keys.First())
-                        {
-                            case "DataType":
-                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-                                ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
-                                break;
-                            case "TP_NPS":
-                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-                                ((TPO4Obj)TSV).TP_NPS = bool.Parse(loading.Metadata["TP_NPS"]);
-                                break;
-                            case "TN_NPS":
-                                TSV = sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-                                ((TNO3Obj)TSV).TN_NPS = bool.Parse(loading.Metadata["TN_NPS"]);
-                                break;
-                            default:
-                                break;
-                        }
-                        sim.SaveJSON(ref json);
                     }
                 }
             }
