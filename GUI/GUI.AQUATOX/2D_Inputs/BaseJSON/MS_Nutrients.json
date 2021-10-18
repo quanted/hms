@@ -17,7 +17,7 @@
           "$type": "TLoadings",
           "NoUserLoad": false,
           "UseConstant": true,
-          "ConstLoad": 0.045,
+          "ConstLoad": 0.0,
           "MultLdg": 1
         },
         "Alt_Loadings": [
@@ -65,7 +65,7 @@
           "$type": "TLoadings",
           "NoUserLoad": false,
           "UseConstant": true,
-          "ConstLoad": 0.222,
+          "ConstLoad": 0.0,
           "MultLdg": 1
         },
         "Alt_Loadings": [
@@ -117,7 +117,7 @@
           "$type": "TLoadings",
           "NoUserLoad": false,
           "UseConstant": true,
-          "ConstLoad": 0.08,
+          "ConstLoad": 0.0,
           "MultLdg": 1
         },
         "Alt_Loadings": [

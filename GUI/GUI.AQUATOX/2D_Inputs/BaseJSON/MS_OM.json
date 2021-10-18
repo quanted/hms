@@ -361,7 +361,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 0.045,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -444,7 +444,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 0.222,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -537,7 +537,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 0.08,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -960,7 +960,7 @@
 								"$type": "SortedList`2"
 							},
 							"Hourly": false,
-							"ConstLoad": 5.0,
+							"ConstLoad": 0.0,
 							"UseConstant": true,
 							"NoUserLoad": false,
 							"MultLdg": 1.0,
@@ -1021,7 +1021,7 @@
 								"$type": "SortedList`2"
 							},
 							"Hourly": false,
-							"ConstLoad": 5.74,
+							"ConstLoad": 6.0,
 							"UseConstant": true,
 							"NoUserLoad": false,
 							"MultLdg": 1.0,
@@ -1036,7 +1036,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 5.74,
+								"ConstLoad": 6.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1050,7 +1050,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 5.74,
+								"ConstLoad": 6.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1064,7 +1064,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 5.74,
+								"ConstLoad": 6.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1097,7 +1097,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 50.0,
+								"ConstLoad": 60.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1111,7 +1111,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 50.0,
+								"ConstLoad": 60.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1125,7 +1125,7 @@
 									"$type": "SortedList`2"
 								},
 								"Hourly": false,
-								"ConstLoad": 50.0,
+								"ConstLoad": 60.0,
 								"UseConstant": true,
 								"NoUserLoad": false,
 								"MultLdg": 1.0,
@@ -1135,50 +1135,6 @@
 							}
 						]
 					},
-					"ToxInitCond": [
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0,
-						0.0
-					],
-					"ToxLoad": [
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null,
-						null
-					]
 				},
 				"DF_Mort_Link": null,
 				"DF_Excr_Link": null,
@@ -1199,7 +1155,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 10.7904135,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -1281,7 +1237,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 10.7904135,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -1364,7 +1320,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 0.6570865,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
@@ -1447,7 +1403,7 @@
 							"$type": "SortedList`2"
 						},
 						"Hourly": false,
-						"ConstLoad": 0.6570865,
+						"ConstLoad": 0.0,
 						"UseConstant": true,
 						"NoUserLoad": false,
 						"MultLdg": 1.0,
