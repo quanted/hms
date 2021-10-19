@@ -1642,7 +1642,7 @@
 			},
 			"SaveBRates": {
 				"$type": "TBoolParam",
-				"Val": true,
+				"Val": false,
 				"Comment": ""
 			},
 			"ChemsDrivingVars": {
