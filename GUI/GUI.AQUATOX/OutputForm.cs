@@ -16,7 +16,25 @@ namespace GUI.AQUATOX
 {
     public partial class OutputForm : Form
     {
-        private Chart chart1 = new Chart();
+
+        public class OChart : Chart
+        {
+            protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+            {
+                try
+                {
+                    base.OnPaint(e);
+                }
+                catch (Exception ex)
+                {
+                    ChartAreas[0].AxisY.IsLogarithmic = false;
+                    System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
+                    base.OnPaint(e);
+                }
+            }
+        }
+
+        private OChart chart1 = new OChart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         Series series1 = new Series();
@@ -41,11 +59,15 @@ namespace GUI.AQUATOX
             chartArea1.Name = "ChartArea1";
             chart1.ChartAreas.Add(chartArea1);
 
+            Graphics graphics = this.CreateGraphics();
+            double ScaleX = graphics.DpiX / 96;
+            double ScaleY = graphics.DpiY / 96;
+
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(30, 70);
+            chart1.Location = new System.Drawing.Point(Convert.ToInt32(30 * ScaleX), Convert.ToInt32(70 * ScaleY));
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(720, 410);
+            this.chart1.Size = new System.Drawing.Size(Convert.ToInt32(750 * ScaleX), Convert.ToInt32(330 * ScaleY));
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
@@ -57,6 +79,16 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
 
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = true;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = true;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
+
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -64,6 +96,8 @@ namespace GUI.AQUATOX
             InitializeComponent();
 
         }
+
+
 
         public void ShowOutput(AQTSim aQ)
         {
@@ -96,16 +130,29 @@ namespace GUI.AQUATOX
                     Series selectedSeries = (Series)legendItem.Tag;
                     if (selectedSeries != null)
                         selectedSeries.Enabled = !selectedSeries.Enabled;
-                    chart1.ChartAreas[0].RecalculateAxesScale();
+
+                    try
+                    {
+                        chart1.ChartAreas[0].RecalculateAxesScale();
+                    }
+                    catch (Exception ex)
+                    {
+                        chart1.ChartAreas[0].AxisY.IsLogarithmic = false;
+                        System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
+                        chart1.ChartAreas[0].RecalculateAxesScale();
+                    }
                 }
 
-                string msgstr = resultExplode.Series.Name;
-                if (resultExplode.PointIndex > 0)
+                if (e.Button == MouseButtons.Right)
                 {
-                    msgstr = msgstr + ": " +
-                    resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
-                    System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
-                    System.Windows.Forms.MessageBox.Show(msgstr);
+                    string msgstr = resultExplode.Series.Name;
+                    if (resultExplode.PointIndex > 0)
+                    {
+                        msgstr = msgstr + ": " +
+                        resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
+                        System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
+                        System.Windows.Forms.MessageBox.Show(msgstr);
+                    }
                 }
             }
         }
@@ -168,9 +215,9 @@ namespace GUI.AQUATOX
         public void DisplayGraph()
 
         {
-
             chart1.Series.Clear();
             int sercnt = 0;
+            unZoom();
 
             if (graphBox.SelectedIndex < 0) return;
 
@@ -266,6 +313,22 @@ namespace GUI.AQUATOX
                 string CSVstring = outSeg.ResultsToCSV();
                 File.WriteAllText(saveFileDialog1.FileName, CSVstring);
             }
+        }
+
+        private void toggleLog_Click(object sender, EventArgs e)
+        {
+            chart1.ChartAreas[0].AxisY.IsLogarithmic = !(chart1.ChartAreas[0].AxisY.IsLogarithmic);
+        }
+
+        private void unZoom()
+        {
+            chart1.ChartAreas [0].AxisX.ScaleView.ZoomReset(0);
+            chart1.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+        }
+
+        private void resetZoom_Click(object sender, EventArgs e)
+        {
+            unZoom();
         }
     }
 }

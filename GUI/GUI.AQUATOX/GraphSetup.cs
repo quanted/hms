@@ -32,11 +32,27 @@ namespace GUI.AQUATOX
             this.PerformLayout();
         }
 
+        public bool NameInList(string st)
+        {
+            foreach(TGraphSetup TG in outSeg.Graphs.GList) 
+            {
+                if (TG.GraphName == st) return true;
+            }
+            return false;
+        }
+
         public bool EditGraph(AQUATOXSegment oS, int gIndx)
         {
             outSeg = oS;
             if (gIndx > -1) Graph = outSeg.Graphs.GList[gIndx];
-            else Graph = new TGraphSetup();
+            
+            else
+            {
+                int iter = 1;
+                string graphname = "Graph 1";
+                while (NameInList(graphname)) { graphname = "Graph " + (iter++); }
+                Graph = new TGraphSetup(graphname);
+            }
 
             listBox2.Items.Clear();
             textBox1.Text = Graph.GraphName;

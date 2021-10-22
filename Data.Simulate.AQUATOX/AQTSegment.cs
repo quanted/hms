@@ -1086,8 +1086,10 @@ namespace AQUATOX.AQTSegment
     }
 
     public class TGraphSetup
+    
+    
     {
-        public string GraphName = "New Graph";
+        public string GraphName ;
         public List<SeriesID> YItems = new List<SeriesID>();
         public string Y1Label;
 
@@ -1107,6 +1109,12 @@ namespace AQUATOX.AQTSegment
         //public bool Use2Scales;
         //public double XMin;
         //public double XMax;
+
+        public TGraphSetup(string st)
+        {
+            GraphName = st;
+        }
+
     }
 
 

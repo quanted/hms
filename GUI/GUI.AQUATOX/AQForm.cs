@@ -28,6 +28,8 @@ namespace GUI.AQUATOX
         public AQTSim aQTS = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
+        private System.Drawing.Graphics graphics; 
+
 
         public AQTTestForm()
         {
@@ -36,6 +38,7 @@ namespace GUI.AQUATOX
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
+            graphics = this.CreateGraphics();
         }
 
         private void AQTTestForm_Load(object sender, EventArgs e)
@@ -119,35 +122,48 @@ namespace GUI.AQUATOX
             }
         }
 
-        private static DialogResult ShowInputDialog(ref string input)
+        private int ScaleX(int x)
         {
-            System.Drawing.Size size = new System.Drawing.Size(400, 70);
-            Form inputBox = new Form();
+            double ScaleX = graphics.DpiX / 96;
+            return Convert.ToInt32(x * ScaleX);
+        }
 
+        private int ScaleY(int y)
+        {
+            double ScaleY = graphics.DpiY / 96;
+            return Convert.ToInt32(y * ScaleY);
+        }
+
+
+        private DialogResult ShowInputDialog(ref string input)
+        {
+            System.Drawing.Size size = new System.Drawing.Size(ScaleX(400),ScaleY(70));
+            
+            Form inputBox = new Form();
             inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             inputBox.ClientSize = size;
             inputBox.Text = "Enter an ID for this simulation (optional)";
 
             System.Windows.Forms.TextBox textBox = new TextBox();
-            textBox.Size = new System.Drawing.Size(size.Width - 40, 23);
-            textBox.Location = new System.Drawing.Point(25, 5);
+            textBox.Size = new System.Drawing.Size(size.Width - ScaleX(40), ScaleY(23));
+            textBox.Location = new System.Drawing.Point(ScaleX(25), ScaleY(5));
             textBox.Text = input;
             inputBox.Controls.Add(textBox);
 
             Button okButton = new Button();
             okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             okButton.Name = "okButton";
-            okButton.Size = new System.Drawing.Size(75, 23);
+            okButton.Size = new System.Drawing.Size(ScaleX(75), ScaleY(23));
             okButton.Text = "&OK";
-            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, 39);
+            okButton.Location = new System.Drawing.Point(size.Width - ScaleX(160) , ScaleY(39));
             inputBox.Controls.Add(okButton);
 
             Button cancelButton = new Button();
             cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             cancelButton.Name = "cancelButton";
-            cancelButton.Size = new System.Drawing.Size(75, 23);
+            cancelButton.Size = new System.Drawing.Size(ScaleX(75), ScaleY(23));
             cancelButton.Text = "&Cancel";
-            cancelButton.Location = new System.Drawing.Point(size.Width - 80, 39);
+            cancelButton.Location = new System.Drawing.Point(size.Width - ScaleX(80), ScaleY(39));
             inputBox.Controls.Add(cancelButton);
 
             inputBox.AcceptButton = okButton;
@@ -176,7 +192,9 @@ namespace GUI.AQUATOX
                 if (SimName != "") SimName = SimName + ": ";
                 aQTS.AQTSeg.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
+                modelRunningLabel.Visible = true;
                 progressBar1.Visible = true;
+
                 Worker.RunWorkerAsync();
             }
         }
@@ -194,8 +212,6 @@ namespace GUI.AQUATOX
 
         private void Worker_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // progressBar1.Visible = false;
-
             progressBar1.Update();
             if (e.Error != null) MessageBox.Show("Error Raised: " + e.Error.Message);
             else if (errmessage == "")
@@ -204,9 +220,12 @@ namespace GUI.AQUATOX
                 Application.DoEvents();
                 graph_Click(null, null);
                 ShowStudyInfo();
-                progressBar1.Visible = false;
             }
             else MessageBox.Show(errmessage);
+
+            modelRunningLabel.Visible = false;
+            progressBar1.Visible = false;
+
         }
 
 
@@ -214,7 +233,7 @@ namespace GUI.AQUATOX
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             if (e.ProgressPercentage < 100) progressBar1.Value = (e.ProgressPercentage + 1);  // workaround of animation bug
-            progressBar1.Value = (e.ProgressPercentage);
+            progressBar1.Value = Math.Max(e.ProgressPercentage,1);    //always show a little bit of green in progress bar
         }
 
 

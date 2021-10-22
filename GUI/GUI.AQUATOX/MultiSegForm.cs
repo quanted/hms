@@ -30,6 +30,19 @@ namespace GUI.AQUATOX
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         DataTable OverlandTable = null;
+        private System.Drawing.Graphics graphics;
+
+        private int ScaleX(int x)
+        {
+            double ScaleX = graphics.DpiX / 96;
+            return Convert.ToInt32(x * ScaleX);
+        }
+
+        private int ScaleY(int y)
+        {
+            double ScaleY = graphics.DpiY / 96;
+            return Convert.ToInt32(y * ScaleY);
+        }
 
         public MultiSegForm()
         {
@@ -45,6 +58,7 @@ namespace GUI.AQUATOX
             // 
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             SuspendLayout();
+            graphics = this.CreateGraphics();
 
             this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
@@ -56,9 +70,9 @@ namespace GUI.AQUATOX
 
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(306, 59);
+            chart1.Location = new System.Drawing.Point(ScaleX(306), ScaleY(59));
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(520, 405);
+            this.chart1.Size = new System.Drawing.Size(ScaleX(520), ScaleY(405));
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();

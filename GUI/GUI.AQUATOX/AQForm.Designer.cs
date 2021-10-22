@@ -63,6 +63,7 @@ namespace GUI.AQUATOX
             this.DeleteButton = new System.Windows.Forms.Button();
             this.MultiSegButton = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
+            this.modelRunningLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -93,7 +94,7 @@ namespace GUI.AQUATOX
             this.integrate.Name = "integrate";
             this.integrate.Size = new System.Drawing.Size(87, 25);
             this.integrate.TabIndex = 1;
-            this.integrate.Text = "Integrate";
+            this.integrate.Text = "Run";
             this.integrate.UseVisualStyleBackColor = true;
             this.integrate.Visible = false;
             this.integrate.Click += new System.EventHandler(this.integrate_Click);
@@ -103,12 +104,13 @@ namespace GUI.AQUATOX
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(146, 72);
+            this.progressBar1.Location = new System.Drawing.Point(146, 74);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(659, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
+            this.progressBar1.Value = 1;
             this.progressBar1.Visible = false;
             // 
             // outputbutton
@@ -412,6 +414,16 @@ namespace GUI.AQUATOX
             this.HelpButton.UseVisualStyleBackColor = true;
             this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
             // 
+            // modelRunningLabel
+            // 
+            this.modelRunningLabel.AutoSize = true;
+            this.modelRunningLabel.Location = new System.Drawing.Point(145, 58);
+            this.modelRunningLabel.Name = "modelRunningLabel";
+            this.modelRunningLabel.Size = new System.Drawing.Size(100, 15);
+            this.modelRunningLabel.TabIndex = 24;
+            this.modelRunningLabel.Text = "Model is Running";
+            this.modelRunningLabel.Visible = false;
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -434,6 +446,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.integrate);
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
+            this.Controls.Add(this.modelRunningLabel);
             this.MinimumSize = new System.Drawing.Size(828, 465);
             this.Name = "AQTTestForm";
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
@@ -478,6 +491,7 @@ namespace GUI.AQUATOX
         private Button FoodWebButton;
         private Button MultiSegButton;
         private Button HelpButton;
+        private Label modelRunningLabel;
     }
 
 

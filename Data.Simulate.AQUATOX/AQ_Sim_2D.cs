@@ -281,7 +281,7 @@ namespace AQUATOX.AQSim_2D
 
         private TimeSeriesInput TSI = new TimeSeriesInput()
         {
-            Source = "nwis",
+            Source = "nwm",
             DateTimeSpan = new DateTimeSpan()
             {
                 StartDate = new DateTime(2015, 01, 01),  // overwritten below

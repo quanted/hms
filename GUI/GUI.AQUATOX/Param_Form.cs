@@ -42,6 +42,7 @@ namespace GUI.AQUATOX
         CheckBox[] booledits;
         ComboBox[] dropboxes;
 
+        private System.Drawing.Graphics graphics;
 
         /// <summary>
         /// An application sends the WM_SETREDRAW message to a window to allow changes in that 
@@ -83,6 +84,19 @@ namespace GUI.AQUATOX
         {
             AutoScroll = true;
             InitializeComponent();
+            graphics = this.CreateGraphics();
+        }
+
+        private int ScaleX(int x)
+        {
+            double ScaleX = graphics.DpiX / 96;
+            return Convert.ToInt32(x * ScaleX);
+        }
+
+        private int ScaleY(int y)
+        {
+            double ScaleY = graphics.DpiY / 96;
+            return Convert.ToInt32(y * ScaleY);
         }
 
         public void AdjustVals(TParameter Param, int index)
@@ -111,34 +125,34 @@ namespace GUI.AQUATOX
 
             if (Param is TBoolParam)
             {
-                booledits[index].Location = new Point(AX + 30, top + 12 + AY);
+                booledits[index].Location = new Point(ScaleX(AX + 30),ScaleY( top + 12 + AY));
                 booledits[index].Visible = !suppressing;
                 return;
             }
 
             if (Param is TSubheading)
             {
-                labels[index].Location = new Point(AX + 12, top - 2 + AY);
+                labels[index].Location = new Point(ScaleX(AX + 12), ScaleY(top - 2 + AY));
 
                 if (index > 0)
                 {
                     suppressing = !(((TSubheading)Param).expanded);
                     int left = 330;
                     if (Spacing == 28) left = 330;
-                    buttons[index].Location = new Point(AX + left, top + 8 + AY);
+                    buttons[index].Location = new Point(ScaleX(AX + left), ScaleY(top + 8 + AY));
 
                     if (!SuppressComment)  //no subheading info on narrow parameter forms
-                        units[index].Location = new Point(AX + 395, top - 1 + AY);
+                        units[index].Location = new Point(ScaleX(AX + 395),ScaleY( top - 1 + AY));
                 }
                 return;
             }
 
-            labels[index].Location = new Point(AX + 12, top + AY);
+            labels[index].Location = new Point(ScaleX(AX + 12),ScaleY( top + AY));
             labels[index].Visible = !suppressing;
 
             if (Param is TDropDownParam)
             {
-                dropboxes[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
+                dropboxes[index].Location = new Point(ScaleX(AX + labelwidth + 22),ScaleY( top + 9 + AY));
                 dropboxes[index].Visible = !suppressing;
                 return;
             }
@@ -146,20 +160,20 @@ namespace GUI.AQUATOX
 
             if (Param is TDateParam)
             {
-                dateedits[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
+                dateedits[index].Location = new Point(ScaleX(AX + labelwidth + 22),ScaleY( top + 9 + AY));
                 dateedits[index].Visible = !suppressing;
                 return;
             }
 
-            edits[index].Location = new Point(AX + labelwidth + 22, top + 9 + AY);
+            edits[index].Location = new Point(ScaleX(AX + labelwidth + 22),ScaleY( top + 9 + AY));
             edits[index].Visible = !suppressing;
 
-            units[index].Location = new Point(AX + labelwidth + 115, top + AY);
+            units[index].Location = new Point(ScaleX(AX + labelwidth + 115),ScaleY( top + AY));
             units[index].Visible = !suppressing;
 
             if (!(SuppressComment || (Param is TStringParam) || (Param is TDropDownParam)))
             {
-                references[index].Location = new Point(labelwidth + 190, top + 9 + AY);
+                references[index].Location = new Point(ScaleX(labelwidth + 190),ScaleY( top + 9 + AY));
                 references[index].Visible = !suppressing;
             }
         }
@@ -175,8 +189,8 @@ namespace GUI.AQUATOX
             {
                 booledits[index] = new CheckBox();
                 booledits[index].FlatAppearance.BorderSize = 2;
-                booledits[index].Location = new Point(30, top + 12);
-                booledits[index].Size = new Size(390, 19);
+                booledits[index].Location = new Point(ScaleX(30),ScaleY( top + 12));
+                booledits[index].Size = new Size(ScaleX(390),ScaleY( 19));
                 booledits[index].TabIndex = 0 + (2 * index);
                 booledits[index].Text = Param.Name;
                 new ToolTip().SetToolTip(booledits[index], Param.Name);
@@ -190,8 +204,8 @@ namespace GUI.AQUATOX
             if (Param is TSubheading)
             {
                 labels[index].Text = ((TSubheading)Param).Val;
-                labels[index].Location = new Point(12, top - 2);
-                labels[index].Size = new Size(360, 39);
+                labels[index].Location = new Point(ScaleX(12),ScaleY( top - 2));
+                labels[index].Size = new Size(ScaleX(360),ScaleY( 39));
                 labels[index].Font = new Font(labels[index].Font.FontFamily, 12, FontStyle.Bold);
                 labels[index].TextAlign = ContentAlignment.MiddleLeft;
 
@@ -204,10 +218,10 @@ namespace GUI.AQUATOX
 
                     int left = 330;
                     if (Spacing == 28) left = 330;
-                    buttons[index].Location = new Point(left, top + 8);
+                    buttons[index].Location = new Point(ScaleX(left),ScaleY( top + 8));
                     buttons[index].Font = new Font(buttons[index].Font.FontFamily, 8);
 
-                    buttons[index].Size = new Size(60, 20);
+                    buttons[index].Size = new Size(ScaleX(60),ScaleY( 20));
                     buttons[index].Click += new EventHandler(NewButton_Click);
                     buttons[index].Tag = index;
 
@@ -216,8 +230,8 @@ namespace GUI.AQUATOX
                     if (!SuppressComment)  //no subheading info on narrow parameter forms
                     {
                         units[index] = new Label();  // Borrow "units" labels to add information about the subheading
-                        units[index].Location = new Point(395, top - 1);
-                        units[index].Size = new Size(500, 39);
+                        units[index].Location = new Point(ScaleX(395),ScaleY( top - 1));
+                        units[index].Size = new Size(ScaleX(500),ScaleY( 39));
                         units[index].Text = Param.Comment;
                         units[index].Font = new Font(labels[index].Font.FontFamily, 9, FontStyle.Italic);
                         units[index].TextAlign = ContentAlignment.MiddleLeft;
@@ -229,8 +243,8 @@ namespace GUI.AQUATOX
                 return;
             }
 
-            labels[index].Location = new Point(12, top);
-            labels[index].Size = new Size(labelwidth, 39);
+            labels[index].Location = new Point(ScaleX(12),ScaleY( top));
+            labels[index].Size = new Size(ScaleX(labelwidth),ScaleY( 39));
             labels[index].TextAlign = ContentAlignment.MiddleRight;
 
             if (SuppressSymbol || (Param is TStringParam) || (Param is TDropDownParam)) textstr = Param.Name;
@@ -247,8 +261,8 @@ namespace GUI.AQUATOX
                 dropboxes[index].DropDownStyle = ComboBoxStyle.DropDown;
                 if (((TDropDownParam)Param).ValList != null)
                     dropboxes[index].Items.AddRange(((TDropDownParam)Param).ValList);
-                dropboxes[index].Location = new Point(labelwidth + 22, top + 9);
-                dropboxes[index].Size = new Size(120, 23);
+                dropboxes[index].Location = new Point(ScaleX(labelwidth + 22),ScaleY( top + 9));
+                dropboxes[index].Size = new Size(ScaleX(120),ScaleY( 23));
                 dropboxes[index].TabIndex = 0 + (2 * index);
                 dropboxes[index].Text = ((TDropDownParam)Param).Val;
                 dropboxes[index].Visible = !suppressing;
@@ -262,8 +276,8 @@ namespace GUI.AQUATOX
                 dateedits[index] = new DateTimePicker();
                 dateedits[index].CustomFormat = "MM/dd/yyyy";
                 dateedits[index].Format = DateTimePickerFormat.Custom;
-                dateedits[index].Location = new Point(labelwidth + 22, top + 9);
-                dateedits[index].Size = new Size(95, 23);
+                dateedits[index].Location = new Point(ScaleX(labelwidth + 22),ScaleY( top + 9));
+                dateedits[index].Size = new Size(ScaleX(95),ScaleY( 23));
                 dateedits[index].TabIndex = 0 + (2 * index);
                 dateedits[index].Value = ((TDateParam)Param).Val;
                 dateedits[index].Visible = !suppressing;
@@ -272,25 +286,25 @@ namespace GUI.AQUATOX
             }
 
             edits[index] = new TextBox();
-            edits[index].Location = new Point(labelwidth + 22, top + 9);
+            edits[index].Location = new Point(ScaleX(labelwidth + 22),ScaleY( top + 9));
             edits[index].TabIndex = 0 + (2 * index);
 
             if (Param is TStringParam)
             {
-                edits[index].Size = new Size(200, 23);
+                edits[index].Size = new Size(ScaleX(200),ScaleY( 23));
                 edits[index].Text = ((TStringParam)Param).Val;
             }
             else
             {
-                edits[index].Size = new Size(90, 23);
+                edits[index].Size = new Size(ScaleX(90),ScaleY( 23));
                 edits[index].Text = Param.Val.ToString();
             }
             edits[index].Visible = !suppressing;
             Controls.Add(edits[index]);
 
             units[index] = new Label();
-            units[index].Location = new Point(labelwidth + 115, top);
-            units[index].Size = new Size(68, 39);
+            units[index].Location = new Point(ScaleX(labelwidth + 115),ScaleY( top));
+            units[index].Size = new Size(ScaleX(68),ScaleY( 39));
             units[index].Text = Param.Units;
             units[index].TextAlign = ContentAlignment.MiddleLeft;
             units[index].Visible = !suppressing;
@@ -300,9 +314,9 @@ namespace GUI.AQUATOX
             {
                 references[index] = new TextBox();
                 references[index].Anchor = ((AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right)));
-                references[index].Location = new Point(labelwidth + 190, top + 9);
+                references[index].Location = new Point(ScaleX(labelwidth + 190),ScaleY( top + 9));
                 references[index].TabIndex = 1 + (2 * index);
-                references[index].Size = new Size(720 - labelwidth, 23);
+                references[index].Size = new Size(ScaleX(720 - labelwidth),ScaleY( 23));
                 references[index].Text = Param.Comment;
                 references[index].Visible = !suppressing;
                 Controls.Add(references[index]);
@@ -439,10 +453,10 @@ namespace GUI.AQUATOX
         public void ResizeScreen()
         {
             // Adjust height and width of box to be appropriate for number of edits
-            this.Height = Spacing * nRendered + 100;
+            this.Height = ScaleX(Spacing * nRendered + 100);
             int wah = Screen.GetWorkingArea(this).Height;
             if (this.Height > wah) this.Height = wah;
-            if (SuppressComment) this.Width = 440;
+            if (SuppressComment) this.Width = ScaleX(440);
 
         }
 

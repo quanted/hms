@@ -29,6 +29,7 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.OutputBox = new System.Windows.Forms.ComboBox();
             this.graphBox = new System.Windows.Forms.ComboBox();
             this.DelRunButton = new System.Windows.Forms.Button();
@@ -38,6 +39,9 @@ namespace GUI.AQUATOX
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.ExportButton = new System.Windows.Forms.Button();
+            this.toggleLog = new System.Windows.Forms.Button();
+            this.resetZoom = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // OutputBox
@@ -132,11 +136,47 @@ namespace GUI.AQUATOX
             this.ExportButton.UseVisualStyleBackColor = true;
             this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
+            // toggleLog
+            // 
+            this.toggleLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.toggleLog.Location = new System.Drawing.Point(654, 404);
+            this.toggleLog.Name = "toggleLog";
+            this.toggleLog.Size = new System.Drawing.Size(114, 24);
+            this.toggleLog.TabIndex = 15;
+            this.toggleLog.Text = "Toggle Log Scale";
+            this.toggleLog.UseVisualStyleBackColor = true;
+            this.toggleLog.Click += new System.EventHandler(this.toggleLog_Click);
+            // 
+            // resetZoom
+            // 
+            this.resetZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.resetZoom.Location = new System.Drawing.Point(543, 404);
+            this.resetZoom.Name = "resetZoom";
+            this.resetZoom.Size = new System.Drawing.Size(95, 24);
+            this.resetZoom.TabIndex = 16;
+            this.resetZoom.Text = "Reset Zoom";
+            this.resetZoom.UseVisualStyleBackColor = true;
+            this.resetZoom.Click += new System.EventHandler(this.resetZoom_Click);
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(40, 409);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(388, 15);
+            this.label3.TabIndex = 17;
+            this.label3.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
+            // 
             // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(872, 512);
+            this.ClientSize = new System.Drawing.Size(812, 431);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.resetZoom);
+            this.Controls.Add(this.toggleLog);
             this.Controls.Add(this.ExportButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -146,6 +186,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.DelRunButton);
             this.Controls.Add(this.graphBox);
             this.Controls.Add(this.OutputBox);
+            this.MinimumSize = new System.Drawing.Size(828, 470);
             this.Name = "OutputForm";
             this.Text = "Output";
             this.ResumeLayout(false);
@@ -164,5 +205,8 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button ExportButton;
+        private System.Windows.Forms.Button toggleLog;
+        private System.Windows.Forms.Button resetZoom;
+        private System.Windows.Forms.Label label3;
     }
 }
