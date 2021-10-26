@@ -104,7 +104,7 @@ namespace Web.Services.Models
         }
 
         /// <summary>
-        /// Method to insert constant loadings into an Aquatox simulation. 
+        /// Method to insert loadings into an Aquatox simulation. 
         /// </summary>
         public static Task<string> InsertLoadings(string json, LoadingsInput input)
         {
@@ -116,25 +116,28 @@ namespace Web.Services.Models
                 {
                     string sv = loading.Param;
                     // Get loading metadata to assign for sv
-                    switch (loading.Metadata.Keys.First())
+                    if (loading.Metadata != null && loading.Metadata.Count > 0)
                     {
-                        case "DataType":
-                            // Can't assign DataType property inside AQTSegment.InsertLoadings
-                            // without breaking desktop version.
-                            sim.Instantiate(json);
-                            TStateVariable TSV =
-                                sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
-                            ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
-                            sim.SaveJSON(ref json);
-                            break;
-                        case "TP_NPS":
-                            sv = bool.Parse(loading.Metadata["TP_NPS"]) ? "TP" : loading.Param;
-                            break;
-                        case "TN_NPS":
-                            sv = bool.Parse(loading.Metadata["TN_NPS"]) ? "TN" : loading.Param;
-                            break;
-                        default:
-                            break;
+                        switch (loading.Metadata.Keys.First())
+                        {
+                            case "DataType":
+                                // Can't assign DataType property inside AQTSegment.InsertLoadings
+                                // without breaking desktop version.
+                                sim.Instantiate(json);
+                                TStateVariable TSV =
+                                    sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+                                ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
+                                sim.SaveJSON(ref json);
+                                break;
+                            case "TP_NPS":
+                                sv = bool.Parse(loading.Metadata["TP_NPS"]) ? "TP" : loading.Param;
+                                break;
+                            case "TN_NPS":
+                                sv = bool.Parse(loading.Metadata["TN_NPS"]) ? "TN" : loading.Param;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                     if (loading.UseConstant)
                     {
