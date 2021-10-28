@@ -33,9 +33,9 @@ namespace Utilities
             Dictionary<string, string> dbData = Utilities.SQLite.GetData(dbPath, query);
             string query2 = "SELECT * FROM PlusFlowlineVAA WHERE ComID =" + comid.ToString();
             Dictionary<string, string> dbData2 = Utilities.SQLite.GetData(dbPath, query2);
-            foreach(KeyValuePair<string, string> kv in dbData2)
+            foreach (KeyValuePair<string, string> kv in dbData2)
             {
-                if(!dbData.ContainsKey(kv.Key))
+                if (!dbData.ContainsKey(kv.Key))
                 {
                     dbData.Add(kv.Key, kv.Value);
                 }
@@ -58,6 +58,18 @@ namespace Utilities
                     dbData.Add(kv.Key, kv.Value);
                 }
             }
+
+            // Get and loop bankfull_conus
+            string query5 = "SELECT * FROM bankfull_conus WHERE COMID=" + comid.ToString();
+            Dictionary<string, string> dbData5 = Utilities.SQLite.GetData(dbPath, query5);
+            foreach (KeyValuePair<string, string> kv in dbData5)
+            {
+                if (!dbData.ContainsKey(kv.Key))
+                {
+                    dbData.Add(kv.Key, kv.Value);
+                }
+            }
+
             return dbData;
         }
 
