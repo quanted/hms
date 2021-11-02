@@ -126,7 +126,7 @@ namespace GUI.AQUATOX
             // 
             // AnimalDB
             // 
-            this.AnimalDB.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.AnimalDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.AnimalDB.Location = new System.Drawing.Point(76, 21);
             this.AnimalDB.Name = "AnimalDB";
             this.AnimalDB.Size = new System.Drawing.Size(60, 25);
@@ -137,7 +137,7 @@ namespace GUI.AQUATOX
             // 
             // ReminDB
             // 
-            this.ReminDB.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.ReminDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.ReminDB.Location = new System.Drawing.Point(142, 21);
             this.ReminDB.Name = "ReminDB";
             this.ReminDB.Size = new System.Drawing.Size(60, 25);
@@ -148,7 +148,7 @@ namespace GUI.AQUATOX
             // 
             // ChemDB
             // 
-            this.ChemDB.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.ChemDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.ChemDB.Location = new System.Drawing.Point(208, 20);
             this.ChemDB.Name = "ChemDB";
             this.ChemDB.Size = new System.Drawing.Size(60, 25);
@@ -159,7 +159,7 @@ namespace GUI.AQUATOX
             // 
             // SiteDB
             // 
-            this.SiteDB.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.SiteDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.SiteDB.Location = new System.Drawing.Point(10, 21);
             this.SiteDB.Name = "SiteDB";
             this.SiteDB.Size = new System.Drawing.Size(60, 25);
@@ -170,7 +170,7 @@ namespace GUI.AQUATOX
             // 
             // PlantsDB
             // 
-            this.PlantsDB.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.PlantsDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.PlantsDB.Location = new System.Drawing.Point(274, 20);
             this.PlantsDB.Name = "PlantsDB";
             this.PlantsDB.Size = new System.Drawing.Size(60, 25);

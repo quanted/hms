@@ -207,6 +207,8 @@ namespace GUI.AQUATOX
             AddToProcessLog(" BaseDir = " + BaseDir);
 
             File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
+            AddToProcessLog("Finished reading stream network" + Environment.NewLine);
+
         }
 
         private bool VerifyStreamNetwork()
@@ -276,6 +278,9 @@ namespace GUI.AQUATOX
                 foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
                 AddToProcessLog(bnote);
             }
+
+            AddToProcessLog("Finished creating linked inputs" + Environment.NewLine);
+
         }
 
 

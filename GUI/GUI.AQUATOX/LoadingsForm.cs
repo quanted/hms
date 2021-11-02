@@ -172,6 +172,10 @@ namespace GUI.AQUATOX
             if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
             else if (LTBox.SelectedIndex < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
 
+            ToxIC.Visible = false;
+            ToxICLabel.Visible = false;
+            ToxICUnitLabel.Visible = false;
+
             if (DetritusScreen) //special case suspended & dissolved detr -- quick implementation, move this logic to .NET later
             {   // pull-down list is "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved/Particulate", "Labile/Refractory"  special case for detritus
                 DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
@@ -183,11 +187,17 @@ namespace GUI.AQUATOX
                     case 3: LoadShown = DIR.Percent_Part.Loadings; break;
                     case 4: LoadShown = DIR.Percent_Refr.Loadings; break;
                 }
+
+                if (LTBox.SelectedIndex > 2)
+                {
+                    ToxIC.Visible = true;
+                    ToxICLabel.Visible = true;
+                    ToxICUnitLabel.Visible = true;
+                    if (LTBox.SelectedIndex ==3) ToxIC.Text = DIR.Percent_PartIC.ToString("G9");
+                    else ToxIC.Text = DIR.Percent_RefrIC.ToString("G9");
+                }
             }
 
-            ToxIC.Visible = false;
-            ToxICLabel.Visible = false;
-            ToxICUnitLabel.Visible = false;
             if (LTBox.SelectedIndex > SV.nontoxloadings-1)  //then toxicant selected
             {
                 int chemint = 1 + LTBox.SelectedIndex - SV.nontoxloadings;
@@ -603,10 +613,20 @@ namespace GUI.AQUATOX
 
         private void ToxIC_TextChanged(object sender, EventArgs e)
         {
-            try
+            try   
             {
-                TT.InitialCond = double.Parse(ToxIC.Text);
+                if (TT == null)
+                {
+                    DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
+                    if (LTBox.SelectedIndex == 3) DIR.Percent_PartIC = double.Parse(ToxIC.Text);
+                    else DIR.Percent_RefrIC = double.Parse(ToxIC.Text);
+                }
+                else
+                {
+                    TT.InitialCond = double.Parse(ToxIC.Text);
+                }
                 ToxIC.BackColor = Color.White;
+
             }
             catch
             {
