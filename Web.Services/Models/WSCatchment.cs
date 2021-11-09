@@ -1,4 +1,5 @@
 ﻿using Data;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -18,24 +19,25 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="comid"></param>
         /// <returns></returns>
-        public async Task<Dictionary<string, object>> Get(string comid, bool streamcat=true, bool geometry=true, bool nwis=true, bool streamGeometry=false, bool cn=false, bool network=false)
+        public async Task<Dictionary<string, object>> Get(string comid, bool streamcat = false, bool geometry = false, bool nwis = false, bool streamGeometry = false, bool cn = false, bool network = false)
         {
             string errorMsg = "";
-            
+
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
 
             // Check comid
-            if(comid is null) { return this.Error("ERROR: comid input is not valid."); }
+            if (comid is null) { return this.Error("ERROR: comid input is not valid."); }
 
-            GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid, geometry);
+            bool auto = nwis || geometry;
+            GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid, auto);
 
             Dictionary<string, string> metadata = Utilities.COMID.GetDbData(Convert.ToInt32(comid), out errorMsg);
             PointCoordinate centroid = Utilities.COMID.GetCentroid(Convert.ToInt32(comid), out errorMsg);
 
             Dictionary<string, object> result = new Dictionary<string, object>();
             Dictionary<string, Dictionary<string, string>> nwisGauges;
-            if(errorMsg != "")
+            if (errorMsg != "")
             {
                 return this.Error(errorMsg);
             }
@@ -43,10 +45,14 @@ namespace Web.Services.Models
             if (nwis)
             {
                 Dictionary<string, object> comidGages = Utilities.COMID.GetGageID(Convert.ToInt32(comid), out errorMsg);
-                if (comidGages != null) {
+                if (comidGages.Count > 0)
+                {
                     Data.Source.StreamGauge sg = new Data.Source.StreamGauge();
                     nwisGauges = sg.StationLookup(Convert.ToInt32(comidGages["GAGEID"]));
-                    nwisGauges.Add("metadata", Utilities.Converter.ConvertDict(comidGages));
+                    if (nwisGauges != null)
+                    {
+                        nwisGauges.Add("metadata", Utilities.Converter.ConvertDict(comidGages));
+                    }
                 }
                 else
                 {
@@ -58,10 +64,15 @@ namespace Web.Services.Models
                     {
                         nwisGauges = catchment.GetNWISGauges();
                     }
-                    nwisGauges.Add("metadata", new Dictionary<string, string>()
+
+
+                    if (nwisGauges != null)
+                    {
+                        nwisGauges.Add("metadata", new Dictionary<string, string>()
                         {
                             {"NWIS_GAGE_NOTE", "Direct linkage between NWIS gage ID and NHDPlus catchment COMID was not found, gage determined from expanding bounds of catchment." }
-                        });                   
+                        });
+                    }
                 }
                 if (nwisGauges != null) { result.Add("nwisGauges", nwisGauges); }
             }
@@ -73,7 +84,7 @@ namespace Web.Services.Models
                 }
                 else
                 {
-                    result.Add("nhdplus", catchment.data); 
+                    result.Add("nhdplus", catchment.data);
                 }
             }
             if (streamcat)
@@ -98,7 +109,7 @@ namespace Web.Services.Models
                 {
                     DateTime dt = new DateTime(2000, 1, 1);
                     Dictionary<string, string> cnData = new Dictionary<string, string>();
-                    foreach (KeyValuePair<int, double> kv in cnValues) 
+                    foreach (KeyValuePair<int, double> kv in cnValues)
                     {
                         cnData.Add(dt.ToString("MM-dd"), kv.Value.ToString());
                         dt = dt.AddDays(16);
@@ -118,7 +129,7 @@ namespace Web.Services.Models
             // Weather Station
             // URLS to data sources (NLDAS, GLDAS), local or outside
             // Add NWM short term forecast, from Time of Travel.
-            
+
             return result;
         }
 

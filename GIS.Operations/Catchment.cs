@@ -29,7 +29,7 @@ namespace GIS.Operations
     {
         public string type { get; set; }
         public Dictionary<string, object> crs { get; set; }
-        
+
         public List<Feature> features { get; set; }
     }
 
@@ -48,7 +48,7 @@ namespace GIS.Operations
         public EPAWaters data;
 
 
-        public Catchment(string comid, bool auto=true)
+        public Catchment(string comid, bool auto = true)
         {
             this.comid = comid;
             this.url = this.BuildURL();
@@ -92,19 +92,19 @@ namespace GIS.Operations
 
             foreach (List<double> point in this.data.features[0].geometry.coordinates[0])
             {
-                if(point[0] > maxLng)
+                if (point[0] > maxLng)
                 {
                     maxLng = point[0];
                 }
-                if(point[0] < minLng)
+                if (point[0] < minLng)
                 {
                     minLng = point[0];
                 }
-                if(point[1] > maxLat)
+                if (point[1] > maxLat)
                 {
                     maxLat = point[1];
                 }
-                if(point[1] < minLat)
+                if (point[1] < minLat)
                 {
                     minLat = point[1];
                 }
@@ -144,7 +144,7 @@ namespace GIS.Operations
                 Method = HttpMethod.Get,
                 RequestUri = new Uri(url)
             };
-            if(requestData != null)
+            if (requestData != null)
             {
                 HttpContent content = JsonContent.Create(requestData);
                 rm.Content = content;
@@ -238,7 +238,7 @@ namespace GIS.Operations
             };
             string dataRequest = JsonSerializer.Serialize<Dictionary<string, object>>(dataDict);
             StringBuilder queryUrl = new StringBuilder(url + "?");
-            foreach(KeyValuePair<string, object> kv in dataDict)
+            foreach (KeyValuePair<string, object> kv in dataDict)
             {
                 queryUrl.Append(kv.Key + "=" + kv.Value.ToString() + "&");
             }

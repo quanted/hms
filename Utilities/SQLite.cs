@@ -17,9 +17,9 @@ namespace Utilities
         /// <returns></returns>
         public static Dictionary<string, string> GetData(string dbPath, string query)
         {
-            if (query.Substring(0,6).ToUpper() != "SELECT")
+            if (query.Substring(0, 6).ToUpper() != "SELECT")
             {
-                return null;
+                return new Dictionary<string, string>();
             }
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
             string cwd = Directory.GetCurrentDirectory();
@@ -80,7 +80,7 @@ namespace Utilities
                 }
                 return data;
             }
-            catch(SQLiteException ex)
+            catch (SQLiteException ex)
             {
                 Log.Warning(ex, "Error querying sqlite database.");
                 return data;
