@@ -82,5 +82,17 @@ namespace GUI.AQUATOX.Properties {
                 this["UpSpan"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BrowserExe {
+            get {
+                return ((string)(this["BrowserExe"]));
+            }
+            set {
+                this["BrowserExe"] = value;
+            }
+        }
     }
 }

@@ -677,7 +677,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
         {
             if (iButton == 0) InputRecord.DataType = DetrDataType.Org_Matt;
             if (iButton == 1) InputRecord.DataType = DetrDataType.Org_Carb;
-            InputRecord.DataType = DetrDataType.CBOD;
+            if (iButton == 2) InputRecord.DataType = DetrDataType.CBOD;
         }
 
         // -------------------------------------------------------------------------------------------------------

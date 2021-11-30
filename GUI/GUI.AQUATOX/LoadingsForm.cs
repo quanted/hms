@@ -29,6 +29,7 @@ namespace GUI.AQUATOX
         private bool GridChanged = false;
         private bool DetritusScreen = false; //special case where the four suspended and dissolved detritus inputs are governed by one input
         private string Displayname;
+        private System.Drawing.Graphics graphics;
 
         TimeSeriesOutput ATSO;
         // string taskID = null;
@@ -53,9 +54,23 @@ namespace GUI.AQUATOX
             OutputFormat = "json"
         };
 
+        private int ScaleX(int x)
+        {
+            double ScaleX = graphics.DpiX / 96;
+            return Convert.ToInt32(x * ScaleX);
+        }
+
+        private int ScaleY(int y)
+        {
+            double ScaleY = graphics.DpiY / 96;
+            return Convert.ToInt32(y * ScaleY);
+        }
+
+
         public LoadingsForm()
         {
             InitializeComponent();
+            graphics = this.CreateGraphics();
         }
 
         private void GridForm_Load(object sender, EventArgs e)
@@ -133,6 +148,7 @@ namespace GUI.AQUATOX
                 if (RBList.Count > 3) RB3.Text = RBList[3];
                 if (RBChecked == 3) RB3.Checked = true;
             }  //end radio button code
+            else LTPanel.Top = ScaleX(13);  // move up LoadingType Panel to fill blank space
 
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
 
@@ -224,6 +240,8 @@ namespace GUI.AQUATOX
             dataGridView1.Enabled = !LoadShown.UseConstant;
             ConstLoadBox.Enabled = LoadShown.UseConstant;
             CLUnit.Enabled = LoadShown.UseConstant;
+            timeSeriesLabel.Enabled = !LoadShown.UseConstant;
+            timeSeriesLabel.Text = "Time Series \"" + LTBox.Text + "\" " + CLUnit.Text;
 
             ConstLoadBox.Text = LoadShown.ConstLoad.ToString("G9");
             MultLoadBox.Text = LoadShown.MultLdg.ToString("G9");
@@ -250,6 +268,7 @@ namespace GUI.AQUATOX
                 LoadTable.Rows.Add(row);
             }
 
+            dataGridView1.DataSource = null;
             dataGridView1.DataSource = LoadTable;
             if (LoadShown.UseConstant) dataGridView1.ForeColor = Color.Gray;
             else dataGridView1.ForeColor = Color.Black;

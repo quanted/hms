@@ -35,6 +35,7 @@ namespace GUI.AQUATOX
             HelpTopic = HelpContext;
             gridChange = false;
             UserCanceled = false;
+            dataGridView1.DataSource = null;  // 11/29/2021
             dataGridView1.DataSource = table;
             dataGridView1.Columns[0].ReadOnly = LockLeftColumn;
             dataGridView1.Columns[0].Frozen = true;
@@ -58,6 +59,7 @@ namespace GUI.AQUATOX
         private void CancelButt_Click(object sender, EventArgs e)
         {
             if (gridChange)
+            {
                 if (MessageBox.Show("Cancel your changes to the data matrix?", "Confirm",
                      MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                      MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
@@ -65,6 +67,13 @@ namespace GUI.AQUATOX
                     UserCanceled = true;
                     this.Close();
                 }
+            }
+            else
+            {
+                UserCanceled = true;
+                this.Close();
+            }
+
         }
 
         private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -88,6 +97,11 @@ namespace GUI.AQUATOX
         private void HelpButton_Click(object sender, EventArgs e)
         {
             AQTTestForm.OpenUrl(HelpTopic);
+        }
+
+        private void changedLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

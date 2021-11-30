@@ -17,6 +17,7 @@ namespace GUI.AQUATOX
 
         public int SelectFromList(List<string> InList)
         {
+            listBox1.DataSource = null;
             listBox1.DataSource = InList;
             if (ShowDialog()== DialogResult.Cancel) return -1;
             return listBox1.SelectedIndex;

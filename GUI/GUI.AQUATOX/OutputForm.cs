@@ -94,6 +94,7 @@ namespace GUI.AQUATOX
             this.PerformLayout();
 
             InitializeComponent();
+            this.chart1.Size = new System.Drawing.Size(this.Width-2* Convert.ToInt32(this.chart1.Left*ScaleX), Convert.ToInt32(330 * ScaleY));
 
         }
 

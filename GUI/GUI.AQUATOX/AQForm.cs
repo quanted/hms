@@ -20,10 +20,12 @@ using System.Windows.Forms;
 namespace GUI.AQUATOX
 {
 
+
     public partial class AQTTestForm : Form
     {
         private BackgroundWorker Worker = new BackgroundWorker();
         private string errmessage;
+        static private string defaultBrowser;
 
         public AQTSim aQTS = null;
         private List<string> SVList = null;
@@ -39,6 +41,7 @@ namespace GUI.AQUATOX
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
             graphics = this.CreateGraphics();
+            defaultBrowser = Properties.Settings.Default.BrowserExe;
         }
 
         private void AQTTestForm_Load(object sender, EventArgs e)
@@ -92,7 +95,6 @@ namespace GUI.AQUATOX
                 EditButton.Visible = true;
 
                 integrate.Visible = true;
-
 
                 aQTS.ArchiveSimulation();
                 ShowStudyInfo();
@@ -993,22 +995,49 @@ namespace GUI.AQUATOX
 
         }
 
+        public static List<string> BrowserNames = new List<string> { "Chrome", "Firefox", "Internet Explorer", "Microsoft Edge", "Safari", "Other" };
+        public static string[] BrowserExe =   { "chrome.exe", "firefox.exe", "iexplore.exe", "msedge.exe", "safari.exe", "" };
+
+        static public string SelectDefaultBrowser()
+        {
+            ListForm LF = new ListForm();
+            LF.Text = "Select Default Browser";
+            int index = LF.SelectFromList(BrowserNames);
+            if (index < 0) return "";
+            string bExe = BrowserExe[index];
+            if (bExe == "") 
+            {
+                OpenFileDialog openFileDialog1 = new OpenFileDialog();
+                openFileDialog1.Filter = "Browser EXE|*.exe";
+                openFileDialog1.Title = "Select Default Browser EXE";
+                openFileDialog1.ShowDialog();
+                bExe = Path.GetFileName(openFileDialog1.FileName);
+            }
+            return bExe;
+        }
+
         static public void OpenUrl(string bookmark)
         {
             string url = "file:"+Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
             url = Uri.UnescapeDataString(url +"#"+bookmark);
             try
             {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = false });  //true opens default browser, but not at bookmark
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = false });  //true opens default browser, but not at context-sensitive bookmark
             }
             catch
             {
                 // hack because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    if (defaultBrowser == "")
+                    {
+                        defaultBrowser = SelectDefaultBrowser();
+                        Properties.Settings.Default.BrowserExe = defaultBrowser;
+                    }
+
                     url = url.Replace("&", "^&");
                     // string args = $"/c start {url}";
-                    string args = $"/c start iexplore.exe {url}";  // force internet explorer for now
+                    string args = $"/c start {defaultBrowser} {url}";  
 
                     Process.Start(new ProcessStartInfo("cmd", args) { CreateNoWindow = true});
                 }
@@ -1032,6 +1061,12 @@ namespace GUI.AQUATOX
         {
             string target = "_Toc77252201";
             OpenUrl(target);
+        }
+
+        private void browserButton_Click(object sender, EventArgs e)
+        {
+            defaultBrowser = SelectDefaultBrowser();
+            Properties.Settings.Default.BrowserExe = defaultBrowser;
         }
     }
 }

@@ -103,7 +103,7 @@ namespace AQUATOX.AQSite
                             new TSubheading("Temperature, Light, Reaeration","Important if 'mean range' option is chosen for temperature or light, or oxygen calibration is required."),
                             TempMean,TempRange,Latitude,
                             Altitude,LightMean,LightRange,EnclWallArea,MeanEvap,UseCovar,EnteredKReaer,
-                            new TSubheading("Water Clarify Parameters","Default may be used unless secchi depth requires calibration"),
+                            new TSubheading("Water Clarity Parameters","Default may be used unless secchi depth requires calibration"),
                             ECoeffWater,ECoeffSed,ECoeffDOM,ECoeffPOM,BasePercentEmbed,
                             new TSubheading("Phytoplankton/Zooplankton Retention","Optional model for 0-D models of short stream reaches"),
                             UsePhytoRetention,EnterTotalLength,TotalLength,WaterShedArea,

@@ -34,6 +34,7 @@ namespace GUI.AQUATOX
         {
             AQS = AQTS;
             tbl = table;
+            dataGridView1.DataSource = null;
             dataGridView1.DataSource = table[0];
             gridChange = false;
             UserCanceled = false;
@@ -103,6 +104,7 @@ namespace GUI.AQUATOX
         private void RenormalizeButton_Click(object sender, EventArgs e)
         {
             AQS.Normalize_Trophint_Table(ref tbl[0]);
+            dataGridView1.DataSource = null;
             dataGridView1.DataSource = tbl[0];
             ToggleLabel.Text = "Showing Feeding Preferences";
         }
@@ -114,6 +116,7 @@ namespace GUI.AQUATOX
             if (iTable == 0) ToggleLabel.Text = "Showing Feeding Preferences";
               else if (iTable == 1) ToggleLabel.Text = "Showing Egestion Coefficients";
               else ToggleLabel.Text = "Showing Comments/References";
+            dataGridView1.DataSource = null;
             dataGridView1.DataSource = tbl[iTable];
 
         }

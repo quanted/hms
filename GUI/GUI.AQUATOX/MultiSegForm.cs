@@ -317,6 +317,7 @@ namespace GUI.AQUATOX
             }
 
             BindingSource bs = new BindingSource();
+            bs.DataSource = null;
             bs.DataSource = AQT2D.SVList;
             SVBox.DataSource = bs;   //update state variable list for graphing, CSV
 

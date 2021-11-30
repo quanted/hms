@@ -17,6 +17,7 @@ namespace GUI.AQUATOX
 
         public List<bool> SelectFromBoxes(List<string> InList)
         {
+            checkedListBox1.DataSource = null;
             checkedListBox1.DataSource = InList;
             if (ShowDialog()== DialogResult.Cancel) return null;
             List<bool> retlist = new List<bool>();

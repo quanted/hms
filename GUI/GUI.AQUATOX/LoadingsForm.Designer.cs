@@ -41,7 +41,7 @@ namespace GUI.AQUATOX
             this.RB1 = new System.Windows.Forms.RadioButton();
             this.RB0 = new System.Windows.Forms.RadioButton();
             this.RBLabel = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.LTPanel = new System.Windows.Forms.Panel();
             this.ToxICUnitLabel = new System.Windows.Forms.Label();
             this.ToxICLabel = new System.Windows.Forms.Label();
             this.ToxIC = new System.Windows.Forms.TextBox();
@@ -66,9 +66,10 @@ namespace GUI.AQUATOX
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
+            this.timeSeriesLabel = new System.Windows.Forms.Label();
             this.LoadingsPanel.SuspendLayout();
             this.RBPanel.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.LTPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -126,15 +127,16 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LoadingsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LoadingsPanel.Controls.Add(this.timeSeriesLabel);
             this.LoadingsPanel.Controls.Add(this.RBPanel);
-            this.LoadingsPanel.Controls.Add(this.panel1);
+            this.LoadingsPanel.Controls.Add(this.LTPanel);
             this.LoadingsPanel.Controls.Add(this.HMS_Button);
             this.LoadingsPanel.Controls.Add(this.label2);
             this.LoadingsPanel.Controls.Add(this.File_Import);
             this.LoadingsPanel.Controls.Add(this.dataGridView1);
             this.LoadingsPanel.Location = new System.Drawing.Point(12, 101);
             this.LoadingsPanel.Name = "LoadingsPanel";
-            this.LoadingsPanel.Size = new System.Drawing.Size(652, 333);
+            this.LoadingsPanel.Size = new System.Drawing.Size(652, 339);
             this.LoadingsPanel.TabIndex = 21;
             this.LoadingsPanel.Visible = false;
             this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
@@ -210,28 +212,28 @@ namespace GUI.AQUATOX
             this.RBLabel.TabIndex = 17;
             this.RBLabel.Text = "Volume Options";
             // 
-            // panel1
+            // LTPanel
             // 
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.ToxICUnitLabel);
-            this.panel1.Controls.Add(this.ToxICLabel);
-            this.panel1.Controls.Add(this.ToxIC);
-            this.panel1.Controls.Add(this.TSUnit);
-            this.panel1.Controls.Add(this.LTLabel);
-            this.panel1.Controls.Add(this.LTBox);
-            this.panel1.Controls.Add(this.UseTimeSeriesRadio);
-            this.panel1.Controls.Add(this.UseConstRadio);
-            this.panel1.Controls.Add(this.label5);
-            this.panel1.Controls.Add(this.MultLoadBox);
-            this.panel1.Controls.Add(this.CLUnit);
-            this.panel1.Controls.Add(this.ConstLoadBox);
-            this.panel1.Controls.Add(this.NotesEdit2);
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.NotesEdit);
-            this.panel1.Location = new System.Drawing.Point(13, 158);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(345, 247);
-            this.panel1.TabIndex = 32;
+            this.LTPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.LTPanel.Controls.Add(this.ToxICUnitLabel);
+            this.LTPanel.Controls.Add(this.ToxICLabel);
+            this.LTPanel.Controls.Add(this.ToxIC);
+            this.LTPanel.Controls.Add(this.TSUnit);
+            this.LTPanel.Controls.Add(this.LTLabel);
+            this.LTPanel.Controls.Add(this.LTBox);
+            this.LTPanel.Controls.Add(this.UseTimeSeriesRadio);
+            this.LTPanel.Controls.Add(this.UseConstRadio);
+            this.LTPanel.Controls.Add(this.label5);
+            this.LTPanel.Controls.Add(this.MultLoadBox);
+            this.LTPanel.Controls.Add(this.CLUnit);
+            this.LTPanel.Controls.Add(this.ConstLoadBox);
+            this.LTPanel.Controls.Add(this.NotesEdit2);
+            this.LTPanel.Controls.Add(this.label1);
+            this.LTPanel.Controls.Add(this.NotesEdit);
+            this.LTPanel.Location = new System.Drawing.Point(13, 158);
+            this.LTPanel.Name = "LTPanel";
+            this.LTPanel.Size = new System.Drawing.Size(345, 247);
+            this.LTPanel.TabIndex = 32;
             // 
             // ToxICUnitLabel
             // 
@@ -376,7 +378,7 @@ namespace GUI.AQUATOX
             // 
             this.HMS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.HMS_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.HMS_Button.Location = new System.Drawing.Point(536, 300);
+            this.HMS_Button.Location = new System.Drawing.Point(536, 306);
             this.HMS_Button.Name = "HMS_Button";
             this.HMS_Button.Size = new System.Drawing.Size(57, 23);
             this.HMS_Button.TabIndex = 30;
@@ -388,7 +390,7 @@ namespace GUI.AQUATOX
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(373, 304);
+            this.label2.Location = new System.Drawing.Point(373, 310);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 15);
             this.label2.TabIndex = 29;
@@ -398,7 +400,7 @@ namespace GUI.AQUATOX
             // 
             this.File_Import.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.File_Import.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.File_Import.Location = new System.Drawing.Point(462, 300);
+            this.File_Import.Location = new System.Drawing.Point(462, 306);
             this.File_Import.Name = "File_Import";
             this.File_Import.Size = new System.Drawing.Size(57, 23);
             this.File_Import.TabIndex = 28;
@@ -412,10 +414,10 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(371, 13);
+            this.dataGridView1.Location = new System.Drawing.Point(371, 22);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(260, 279);
+            this.dataGridView1.Size = new System.Drawing.Size(260, 276);
             this.dataGridView1.TabIndex = 1;
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
             this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
@@ -480,11 +482,20 @@ namespace GUI.AQUATOX
             this.HelpButton.UseVisualStyleBackColor = true;
             this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
             // 
+            // timeSeriesLabel
+            // 
+            this.timeSeriesLabel.AutoSize = true;
+            this.timeSeriesLabel.Location = new System.Drawing.Point(373, 4);
+            this.timeSeriesLabel.Name = "timeSeriesLabel";
+            this.timeSeriesLabel.Size = new System.Drawing.Size(97, 15);
+            this.timeSeriesLabel.TabIndex = 34;
+            this.timeSeriesLabel.Text = "Time Series Input";
+            // 
             // LoadingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(676, 446);
+            this.ClientSize = new System.Drawing.Size(676, 452);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.AmmoniaDriveLabel);
             this.Controls.Add(this.OKButton);
@@ -504,8 +515,8 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.PerformLayout();
             this.RBPanel.ResumeLayout(false);
             this.RBPanel.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.LTPanel.ResumeLayout(false);
+            this.LTPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -532,7 +543,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.RadioButton RB1;
         private System.Windows.Forms.RadioButton RB0;
         private System.Windows.Forms.Label RBLabel;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel LTPanel;
         private System.Windows.Forms.Label TSUnit;
         private System.Windows.Forms.Label LTLabel;
         private System.Windows.Forms.ComboBox LTBox;
@@ -550,5 +561,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label ToxICLabel;
         private System.Windows.Forms.TextBox ToxIC;
         private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Label timeSeriesLabel;
     }
 }

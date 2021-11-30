@@ -50,6 +50,7 @@ namespace GUI.AQUATOX
             ParameterButton.Visible = true;
             LoadingsPanel.Visible = true;
 
+            LTBox.DataSource = null;
             LTBox.DataSource = new List<string>(new string[] { "Velocity (cm/s)", "Mean Depth (m)", "Evaporation", "Shade (fraction)" });  //special case 
             LTBox.SelectedIndex = 0;
 
@@ -142,7 +143,7 @@ namespace GUI.AQUATOX
                 row[1] = (LoadShown.list.Values[i]);
                 LoadTable.Rows.Add(row);
             }
-
+            dataGridView1.DataSource = null;
             dataGridView1.DataSource = LoadTable;
             if (LoadShown.UseConstant) dataGridView1.ForeColor = Color.Gray;
             else dataGridView1.ForeColor = Color.Black;

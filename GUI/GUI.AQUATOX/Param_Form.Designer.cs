@@ -84,15 +84,17 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(960, 497);
+            this.ClientSize = new System.Drawing.Size(962, 497);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.DB_Button);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.CancelButt);
+            this.MinimumSize = new System.Drawing.Size(978, 385);
             this.Name = "Param_Form";
             this.Text = "Param_Form";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Param_Form_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Param_Form_FormClosed);
+            this.Load += new System.EventHandler(this.Param_Form_Load);
             this.ResumeLayout(false);
 
         }

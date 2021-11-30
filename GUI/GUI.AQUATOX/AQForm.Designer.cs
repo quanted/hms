@@ -64,6 +64,7 @@ namespace GUI.AQUATOX
             this.MultiSegButton = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.modelRunningLabel = new System.Windows.Forms.Label();
+            this.browserButton = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
@@ -115,7 +116,7 @@ namespace GUI.AQUATOX
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 253);
+            this.outputbutton.Location = new System.Drawing.Point(26, 271);
             this.outputbutton.Name = "outputbutton";
             this.outputbutton.Size = new System.Drawing.Size(87, 25);
             this.outputbutton.TabIndex = 1;
@@ -424,11 +425,25 @@ namespace GUI.AQUATOX
             this.modelRunningLabel.Text = "Model is Running";
             this.modelRunningLabel.Visible = false;
             // 
+            // browserButton
+            // 
+            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.browserButton.ForeColor = System.Drawing.Color.Black;
+            this.browserButton.Location = new System.Drawing.Point(26, 222);
+            this.browserButton.Margin = new System.Windows.Forms.Padding(0);
+            this.browserButton.Name = "browserButton";
+            this.browserButton.Size = new System.Drawing.Size(87, 23);
+            this.browserButton.TabIndex = 25;
+            this.browserButton.Text = "Select Browser";
+            this.browserButton.UseVisualStyleBackColor = true;
+            this.browserButton.Click += new System.EventHandler(this.browserButton_Click);
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 428);
+            this.Controls.Add(this.browserButton);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.MultiSegButton);
             this.Controls.Add(this.AddButton);
@@ -492,6 +507,7 @@ namespace GUI.AQUATOX
         private Button MultiSegButton;
         private Button HelpButton;
         private Label modelRunningLabel;
+        private Button browserButton;
     }
 
 

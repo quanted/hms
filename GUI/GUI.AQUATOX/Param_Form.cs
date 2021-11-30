@@ -456,7 +456,12 @@ namespace GUI.AQUATOX
             this.Height = ScaleX(Spacing * nRendered + 100);
             int wah = Screen.GetWorkingArea(this).Height;
             if (this.Height > wah) this.Height = wah;
-            if (SuppressComment) this.Width = ScaleX(440);
+            if (SuppressComment)
+            {
+                this.MinimumSize = new Size(ScaleX(440),ScaleY(100));
+                this.Width = ScaleX(440);
+            }
+
 
         }
 
@@ -625,6 +630,11 @@ namespace GUI.AQUATOX
         private void HelpButton_Click(object sender, EventArgs e)
         {
             AQTTestForm.OpenUrl(HelpTopic);
+        }
+
+        private void Param_Form_Load(object sender, EventArgs e)
+        {
+
         }
 
         public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense, string DefaultDB, string HelpContext)
