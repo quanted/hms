@@ -57,3 +57,12 @@ Unit Tests:
       - /app/artifacts/Stream.Hydrology.AQUATOX.UnitTests-test-result.xml
       - /app/artifacts/Utilities.Tests-test-result.xml
       - /app/artifacts/Web.Services.Tests-test-result.xml
+
+Prisma:
+  stage: Image Scan
+  tags:
+    - twistcli
+  when: manual
+  script:
+    - /public/server/apps/twistcli images scan --details --address https://prismacloud.gitlab-prod.aws.epa.gov $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
+
