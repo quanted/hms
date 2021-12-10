@@ -35,6 +35,7 @@ namespace GUI.AQUATOX
             this.ICUnit = new System.Windows.Forms.Label();
             this.IgnoreLoadingsBox = new System.Windows.Forms.CheckBox();
             this.LoadingsPanel = new System.Windows.Forms.Panel();
+            this.timeSeriesLabel = new System.Windows.Forms.Label();
             this.RBPanel = new System.Windows.Forms.Panel();
             this.RB3 = new System.Windows.Forms.RadioButton();
             this.RB2 = new System.Windows.Forms.RadioButton();
@@ -66,7 +67,7 @@ namespace GUI.AQUATOX
             this.CancelButt = new System.Windows.Forms.Button();
             this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
-            this.timeSeriesLabel = new System.Windows.Forms.Label();
+            this.ToxicityButton = new System.Windows.Forms.Button();
             this.LoadingsPanel.SuspendLayout();
             this.RBPanel.SuspendLayout();
             this.LTPanel.SuspendLayout();
@@ -139,7 +140,15 @@ namespace GUI.AQUATOX
             this.LoadingsPanel.Size = new System.Drawing.Size(652, 339);
             this.LoadingsPanel.TabIndex = 21;
             this.LoadingsPanel.Visible = false;
-            this.LoadingsPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.ButtonPanel_Paint);
+            // 
+            // timeSeriesLabel
+            // 
+            this.timeSeriesLabel.AutoSize = true;
+            this.timeSeriesLabel.Location = new System.Drawing.Point(373, 4);
+            this.timeSeriesLabel.Name = "timeSeriesLabel";
+            this.timeSeriesLabel.Size = new System.Drawing.Size(97, 15);
+            this.timeSeriesLabel.TabIndex = 34;
+            this.timeSeriesLabel.Text = "Time Series Input";
             // 
             // RBPanel
             // 
@@ -463,7 +472,7 @@ namespace GUI.AQUATOX
             this.AmmoniaDriveLabel.AutoSize = true;
             this.AmmoniaDriveLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.AmmoniaDriveLabel.ForeColor = System.Drawing.Color.DarkRed;
-            this.AmmoniaDriveLabel.Location = new System.Drawing.Point(284, 71);
+            this.AmmoniaDriveLabel.Location = new System.Drawing.Point(284, 75);
             this.AmmoniaDriveLabel.Name = "AmmoniaDriveLabel";
             this.AmmoniaDriveLabel.Size = new System.Drawing.Size(346, 15);
             this.AmmoniaDriveLabel.TabIndex = 25;
@@ -482,20 +491,25 @@ namespace GUI.AQUATOX
             this.HelpButton.UseVisualStyleBackColor = true;
             this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
             // 
-            // timeSeriesLabel
+            // ToxicityButton
             // 
-            this.timeSeriesLabel.AutoSize = true;
-            this.timeSeriesLabel.Location = new System.Drawing.Point(373, 4);
-            this.timeSeriesLabel.Name = "timeSeriesLabel";
-            this.timeSeriesLabel.Size = new System.Drawing.Size(97, 15);
-            this.timeSeriesLabel.TabIndex = 34;
-            this.timeSeriesLabel.Text = "Time Series Input";
+            this.ToxicityButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ToxicityButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.ToxicityButton.Location = new System.Drawing.Point(414, 41);
+            this.ToxicityButton.Name = "ToxicityButton";
+            this.ToxicityButton.Size = new System.Drawing.Size(184, 23);
+            this.ToxicityButton.TabIndex = 27;
+            this.ToxicityButton.Text = "Toxicity and Bioaccumulation";
+            this.ToxicityButton.UseVisualStyleBackColor = true;
+            this.ToxicityButton.Visible = false;
+            this.ToxicityButton.Click += new System.EventHandler(this.button1_Click);
             // 
             // LoadingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(676, 452);
+            this.Controls.Add(this.ToxicityButton);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.AmmoniaDriveLabel);
             this.Controls.Add(this.OKButton);
@@ -562,5 +576,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.TextBox ToxIC;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.Label timeSeriesLabel;
+        private System.Windows.Forms.Button ToxicityButton;
     }
 }

@@ -32,6 +32,7 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AQTTestForm));
             this.loadJSON = new System.Windows.Forms.Button();
             this.saveJSON = new System.Windows.Forms.Button();
             this.integrate = new System.Windows.Forms.Button();
@@ -71,7 +72,7 @@ namespace GUI.AQUATOX
             // 
             // loadJSON
             // 
-            this.loadJSON.Location = new System.Drawing.Point(26, 13);
+            this.loadJSON.Location = new System.Drawing.Point(26, 11);
             this.loadJSON.Name = "loadJSON";
             this.loadJSON.Size = new System.Drawing.Size(87, 24);
             this.loadJSON.TabIndex = 0;
@@ -81,7 +82,7 @@ namespace GUI.AQUATOX
             // 
             // saveJSON
             // 
-            this.saveJSON.Location = new System.Drawing.Point(26, 51);
+            this.saveJSON.Location = new System.Drawing.Point(26, 43);
             this.saveJSON.Name = "saveJSON";
             this.saveJSON.Size = new System.Drawing.Size(87, 24);
             this.saveJSON.TabIndex = 0;
@@ -91,7 +92,7 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(26, 91);
+            this.integrate.Location = new System.Drawing.Point(26, 88);
             this.integrate.Name = "integrate";
             this.integrate.Size = new System.Drawing.Size(87, 25);
             this.integrate.TabIndex = 1;
@@ -105,7 +106,7 @@ namespace GUI.AQUATOX
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(146, 74);
+            this.progressBar1.Location = new System.Drawing.Point(146, 76);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(659, 23);
             this.progressBar1.Step = 1;
@@ -187,7 +188,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SVListBox.FormattingEnabled = true;
             this.SVListBox.ItemHeight = 15;
-            this.SVListBox.Location = new System.Drawing.Point(459, 110);
+            this.SVListBox.Location = new System.Drawing.Point(459, 111);
             this.SVListBox.Name = "SVListBox";
             this.SVListBox.Size = new System.Drawing.Size(346, 259);
             this.SVListBox.TabIndex = 9;
@@ -347,7 +348,7 @@ namespace GUI.AQUATOX
             // RunStatusLabel
             // 
             this.RunStatusLabel.AutoSize = true;
-            this.RunStatusLabel.Location = new System.Drawing.Point(26, 141);
+            this.RunStatusLabel.Location = new System.Drawing.Point(28, 122);
             this.RunStatusLabel.Name = "RunStatusLabel";
             this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
             this.RunStatusLabel.TabIndex = 18;
@@ -407,7 +408,7 @@ namespace GUI.AQUATOX
             // 
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(26, 191);
+            this.HelpButton.Location = new System.Drawing.Point(26, 190);
             this.HelpButton.Name = "HelpButton";
             this.HelpButton.Size = new System.Drawing.Size(87, 28);
             this.HelpButton.TabIndex = 23;
@@ -418,7 +419,7 @@ namespace GUI.AQUATOX
             // modelRunningLabel
             // 
             this.modelRunningLabel.AutoSize = true;
-            this.modelRunningLabel.Location = new System.Drawing.Point(145, 58);
+            this.modelRunningLabel.Location = new System.Drawing.Point(145, 60);
             this.modelRunningLabel.Name = "modelRunningLabel";
             this.modelRunningLabel.Size = new System.Drawing.Size(100, 15);
             this.modelRunningLabel.TabIndex = 24;
@@ -462,8 +463,10 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
             this.Controls.Add(this.modelRunningLabel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(828, 465);
             this.Name = "AQTTestForm";
+            this.Text = "AQUATOX.NET 1.0.0 ";
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

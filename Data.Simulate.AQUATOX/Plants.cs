@@ -147,7 +147,7 @@ namespace AQUATOX.Plants
 
 
 
-        public class TPlantToxRecord
+    public class TPlantToxRecord
     {
         public string Plant_name = String.Empty;
         public double EC50_photo = 0;
@@ -165,6 +165,7 @@ namespace AQUATOX.Plants
         public double LC50_Slope = 0;        // 12/14/2016 specific to plant/chemical combination
         public double EC50_Photo_Slope = 0;  // 4/5/2017  specific to plant/chemical/effect combination 
     }
+
 
     public class MortRatesRecord   // HMS not yet utilized as partial rates not yet implemented
     {
@@ -228,7 +229,6 @@ namespace AQUATOX.Plants
         public override void SetToInitCond()
         {
             Assign_Plant_Tox();
-
 
             base.SetToInitCond();
             SinkToHypo = 0;

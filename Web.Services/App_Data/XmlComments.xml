@@ -4,6 +4,475 @@
         <name>Web.Services</name>
     </assembly>
     <members>
+        <member name="T:Web.Services.Controllers.AQTAnimalsInputExample">
+            <summary>
+            AQUATOX Animals input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTAnimalsInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTAnimalsController">
+            <summary>
+            AQUATOX animals controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTAnimalsController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Animals.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTAnimalsController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Animals.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTAnimalsController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Animals.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTBioaccumulationInputExample">
+            <summary>
+            AQUATOX Bioaccumulation input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTBioaccumulationInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTBioaccumulationController">
+            <summary>
+            AQUATOX Bioaccumulation controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTBioaccumulationController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Bioaccumulation.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTBioaccumulationController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Bioaccumulation.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTBioaccumulationController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Bioaccumulation.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTChemicalsInputExample">
+            <summary>
+            AQUATOX Bioaccumulation input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTChemicalsInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTChemicalsController">
+            <summary>
+            AQUATOX chemicals controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTChemicalsController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Chemicals.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTChemicalsController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Chemicals.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTChemicalsController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Chemicals.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTDiagenesisInputExample">
+            <summary>
+            AQUATOX Diagenesis input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTDiagenesisInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTDiagenesisController">
+            <summary>
+            AQUATOX Diagenesis controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTDiagenesisController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Diagenesis.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTDiagenesisController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Diagenesis.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTDiagenesisController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Diagenesis.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTEcotoxicologyInputExample">
+            <summary>
+            AQUATOX Ecotoxicology input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTEcotoxicologyInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTEcotoxicologyController">
+            <summary>
+            AQUATOX Ecotoxicology controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTEcotoxicologyController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Ecotoxicology.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTEcotoxicologyController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Ecotoxicology.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTEcotoxicologyController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Ecotoxicology.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAquatoxInputBuilderControllerGetBaseJsonInputExample">
+            <summary>
+            Aquatox workflow get base jsons input example. 
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderControllerGetBaseJsonInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAquatoxInputBuilderControllerLoadingsInputExample">
+            <summary>
+            Aquatox insert loadings with constant input example. 
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderControllerLoadingsInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAquatoxInputBuilderController">
+            <summary>
+            API controller for handling requests for Aquatox inputs. 
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderController.GetBaseJsonFlags">
+            <summary>
+            GET method for returning the Aquatox base json flags.
+            </summary>
+            <returns>List of Aquatox base json flag names.</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderController.PostBaseJsonFlags(System.Collections.Generic.Dictionary{System.String,System.Boolean})">
+            <summary>
+            POST method for returning the Aquatox workflow base json based on set flags.
+            </summary>
+            <param name="flags">A dictionary of [flag_name : bool]</param>
+            <returns>Base json for aquatox simulation.</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderController.GetLoadings">
+            <summary>
+            GET method that returns dictionary of loading types and values
+            </summary>
+            -1 = inflow load,  0 = point-source, 1 = direct precipitation (maybe irrelevant), 2 = nonpoint-source
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxInputBuilderController.PostLoadings(Web.Services.Controllers.LoadingsInput)">
+            <summary>
+            POST method for inserting state variable loadings into Aquatox base json.
+            </summary>
+            <param name="input">Object of flags and list of LoadingsObjects</param>
+            <returns>Updated "SV" contaminants.</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTNutrientsInputExample">
+            <summary>
+            AQUATOX Nutrients input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTNutrientsInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTNutrientsController">
+            <summary>
+            AQUATOX nutrients controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTNutrientsController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Nutrients.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTNutrientsController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Nutrients.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTNutrientsController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Nutrients.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTOrgMatterInputExample">
+            <summary>
+            AQUATOX Organic Matter input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTOrgMatterInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTOrgMatterController">
+            <summary>
+            AQUATOX organic matter controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTOrgMatterController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Organic Matter.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTOrgMatterController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Organic Matter.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTOrgMatterController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Organic Matter.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTPlantInputExample">
+            <summary>
+            AQUATOX Plants input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTPlantInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTPlantController">
+            <summary>
+            AQUATOX plants controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTPlantController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Plants.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTPlantController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Plants.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTPlantController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Plants.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.AQTStreamHydrologyInputExample">
+            <summary>
+            AQUATOX Stream Hydrology input example.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.AQTStreamHydrologyInputExample.GetExamples">
+            <summary>
+            Get Example.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAQTStreamHydrologyController">
+            <summary>
+            AQUATOX stream hydrology controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTStreamHydrologyController.POST(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            POST method for running AQUATOX Stream Hydrology.
+            </summary>
+            <param name="json"></param>
+            <returns>IActionResult</returns>
+            
+            Note: The POST method attempts to map the body of the request to an object.
+                  Without an object it can map to, the value obtained will be null. Newtonsoft
+                  provides a generic JObject class that this function is able to map a generic JSON
+                  object to. 
+                  
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTStreamHydrologyController.GetExampleString">
+            <summary>
+            GET request of an example JSON string for AQUATOX Stream Hydrology.
+            </summary>
+            <returns>IActionResult</returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAQTStreamHydrologyController.GetExampleFile">
+            <summary>
+            GET request of example JSON file for AQUATOX Stream Hydrology.
+            </summary>
+            <returns>FileResult</returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSAquatoxWorkflowController">
+            <summary>
+            AQUATOX workflow controller class.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxWorkflowController.GET(System.String)">
+            <summary>
+            GET method for calling the AQUATOX workflow.
+            </summary>
+            <param name="task_id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSAquatoxWorkflowController.GetArchivedOutput(System.String)">
+            <summary>
+            Given the task_id for a single comid, returns the archived results of 
+            the state variables outputs.
+            </summary>
+            <param name="task_id"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSCatchmentController">
+            <summary>
+            HMS API controller for retrieving catchment data.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSCatchmentController.GETDefaultOutput(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.CoastalInputExample">
+            <summary>
+            Swashbuckle Coastal POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.CoastalInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSCoastalController">
+            <summary>
+            API controller for handling requests for coastal data.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Web.Services.Controllers.WSCoastalController.GetCoastalData(Data.TimeSeriesInput)" -->
         <member name="T:Web.Services.Controllers.ContaminantLoaderInput">
             <summary>
             ContaminantLoader Input that implements TimeSeriesInput object
@@ -28,7 +497,16 @@
         <!-- Badly formed XML comment ignored for member "M:Web.Services.Controllers.WSContaminantLoaderController.POST(Web.Services.Controllers.ContaminantLoaderInput)" -->
         <member name="T:Web.Services.Controllers.DewPointInput">
             <summary>
-            Dew Point Input that implements TimeSeriesInput object
+            Label: Dew Point
+            Description: Dew Point Input that implements TimeSeriesInput object;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.DewPointInput.Source">
+            <summary>
+            Description: DewPoint data source;
+            Default: "prism";
+            Options: ["prism"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.DewPointInputExample">
@@ -169,12 +647,24 @@
         </member>
         <member name="T:Web.Services.Controllers.HumidityInput">
             <summary>
-            Humidity Input that implements TimeSeriesInput object
+            Label: Humidity;
+            Description: Humidity input;
             </summary>
         </member>
         <member name="P:Web.Services.Controllers.HumidityInput.Relative">
             <summary>
-            Relative or Specific Humidity
+            Description: Relative or Specific Humidity. Only relative humidity implemented.;
+            Default: True;
+            Options: True;
+            Required: True;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.HumidityInput.Source">
+            <summary>
+            Description: Humidity data source;
+            Default: "prism";
+            Options: ["prism"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.HumidityInputExample">
@@ -202,7 +692,16 @@
         </member>
         <member name="T:Web.Services.Controllers.PrecipitationInput">
             <summary>
-            Precipitation Input that implements TimeSeriesInput object.
+            Label: Precipitation;
+            Description: Precipitation Input that implements TimeSeriesInput object.;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PrecipitationInput.Source">
+            <summary>
+            Description: Precipitation data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.PrecipitationInputExample">
@@ -230,7 +729,16 @@
         </member>
         <member name="T:Web.Services.Controllers.PressureInput">
             <summary>
-            Pressure Input that implements TimeSeriesInput object
+            Label: Pressue
+            Description: Surface air pressure input that implements TimeSeriesInput object
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.PressureInput.Source">
+            <summary>
+            Description: Pressue data source;
+            Default: "gldas";
+            Options: ["gldas"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.PressureInputExample">
@@ -258,7 +766,16 @@
         </member>
         <member name="T:Web.Services.Controllers.RadiationInput">
             <summary>
-            Radiation Input that implements TimeSeriesInput object
+            Label: Solar Radiation;
+            Description: High and short wave radiation that reaches the ground.
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.RadiationInput.Source">
+            <summary>
+            Description: Radiation data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "daymet"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.RadiationInputExample">
@@ -286,12 +803,24 @@
         </member>
         <member name="T:Web.Services.Controllers.SoilMoistureInput">
             <summary>
-            SoilMoisture Input that implements TimeSeriesInput object
+            Label: Soil Moiture;
+            Description: Soil moisture content for specified layer depths;
             </summary>
         </member>
         <member name="P:Web.Services.Controllers.SoilMoistureInput.Layers">
             <summary>
-            List of requested soil moisture layers
+            Description: List of requested soil moisture layers;
+            Default: None;
+            Options: ["0-10", "10-40", "40-100", "100-200", "0-100", "0-200"];
+            Required: True;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.SoilMoistureInput.Source">
+            <summary>
+            Description: Soil moisture data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.SoilMoistureInputExample">
@@ -314,7 +843,7 @@
             <summary>
             POST method for submitting a request for soil moisture data.
             </summary>
-            <param name="evapoInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
+            <param name="smInput">Parameters for retrieving SoilMoisture data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
         <member name="T:Web.Services.Controllers.SolarInput">
@@ -394,14 +923,64 @@
             <param name="i"></param>
             <returns></returns>
         </member>
+        <member name="T:Web.Services.Controllers.WSStreamController">
+            <summary>
+            HMS API controller for retrieving stream data.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSStreamController.GETDefaultOutput(System.String,System.String,System.Double,System.String,System.String)">
+            <summary>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.StreamflowInput">
+            <summary>
+            Streamflow Input that implements TimeSeriesInput object.
+            </summary>
+        </member>
+        <member name="T:Web.Services.Controllers.StreamflowInputExample">
+            <summary>
+            Swashbuckle Streamflow POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.StreamflowInputExample.GetExamples">
+            <summary>
+            Get example function.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSStreamflowController">
+            <summary>
+            Streamflow controller for HMS.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSStreamflowController.POST(Web.Services.Controllers.StreamflowInput)">
+            <summary>
+            POST method for submitting a request for precipitation data.
+            </summary>
+            <param name="sfInput">Parameters for retrieving streamflow data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.GeometryMetadata.gaugestation, Source</param>
+            <returns>ITimeSeries</returns>
+        </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInput">
             <summary>
-            SubSurfaceFlow Input that implements TimeSeriesInput object
+            Label: Sub-Surface Flow;
+            Description: Sub-surface water flow (baseflow).;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.SubSurfaceFlowInput.Source">
+            <summary>
+            Description: Subsurface flow data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "curvenumber"];
+            Required: True;
             </summary>
         </member>
         <member name="P:Web.Services.Controllers.SubSurfaceFlowInput.PrecipSource">
             <summary>
-            OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+            Description: Precipitation data source for Curve Number.;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+            Required: False;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.SubSurfaceFlowInputExample">
@@ -429,12 +1008,24 @@
         </member>
         <member name="T:Web.Services.Controllers.SurfaceRunoffInput">
             <summary>
-            SurfaceRunoff Input that implements TimeSeriesInput object
+            Label: Surface Runoff;
+            Description: Surface rainfall runoff.;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.SurfaceRunoffInput.Source">
+            <summary>
+            Description: Surface runoff data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "curvenumber"];
+            Required: True;
             </summary>
         </member>
         <member name="P:Web.Services.Controllers.SurfaceRunoffInput.PrecipSource">
             <summary>
-            OPTIONAL: Precipitation data source for Curve Number (NLDAS, GLDAS, NCDC, DAYMET, PRISM, WGEN)
+            Description: Precipitation data source for Curve Number.;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "ncei", "daymet", "prism", "trmm"];
+            Required: False;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.SurfaceRunoffInputExample">
@@ -462,7 +1053,16 @@
         </member>
         <member name="T:Web.Services.Controllers.TemperatureInput">
             <summary>
-            Temperature Input that implements TimeSeriesInput object
+            Label: Temperature;
+            Description: Near-ground air temperature.;
+            </summary>
+        </member>
+        <member name="P:Web.Services.Controllers.TemperatureInput.Source">
+            <summary>
+            Description: Temperature data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas", "ncei", "daymet", "prism"];
+            Required: True;
             </summary>
         </member>
         <member name="T:Web.Services.Controllers.TemperatureInputExample">
@@ -607,15 +1207,19 @@
         </member>
         <member name="T:Web.Services.Controllers.WindInput">
             <summary>
-            Wind Input that implements TimeSeriesInput object
+            Label: Wind;
+            Description: Near-ground wind.;
             </summary>
         </member>
-        <member name="F:Web.Services.Controllers.WindInput.Component">
-            Wind component
-            User request for U, V values and/or speed, direction. All input is made upper case for comparison.
-            Valid values: U/V, SPEED/DIR (SPEED/DIRECTION), ALL
-            Defaults: ALL 
+        <member name="P:Web.Services.Controllers.WindInput.Source">
+            <summary>
+            Description: Wind data source;
+            Default: "nldas";
+            Options: ["nldas", "gldas"];
+            Required: True;
+            </summary>
         </member>
+        <!-- Badly formed XML comment ignored for member "F:Web.Services.Controllers.WindInput.Component" -->
         <member name="T:Web.Services.Controllers.WindInputExample">
             <summary>
             Swashbuckle Wind POST request example
@@ -768,6 +1372,397 @@
             <param name="waterqualityInput"></param>
             <returns>ITimeSeries</returns>
         </member>
+        <member name="T:Web.Services.Models.WSAquatoxAnimals">
+            <summary>
+            Pass through model object for calling AQTAnimals.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxAnimals.RunAQTAnimals(System.String@,System.String@)">
+            <summary>
+            Calls AQTAnimals and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxAnimals.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxAnimals.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Animals.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxAnimals.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxBioaccumulation">
+            <summary>
+            Pass through model object for calling AQTBioaccumulationModel.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxBioaccumulation.RunAQTBioaccumulation(System.String@,System.String@)">
+            <summary>
+            Calls AQTBioaccumulationModel and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxBioaccumulation.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxBioaccumulation.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Bioaccumulation.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxBioaccumulation.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxChemicals">
+            <summary>
+            Pass through model object for calling AQTChemicalModel.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxChemicals.RunAQTChemicals(System.String@,System.String@)">
+            <summary>
+            Calls AQTChemicalModel and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxChemicals.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxChemicals.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Chemicals.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxChemicals.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxDiagenesis">
+            <summary>
+            Pass through model object for calling AQTDiagenesisModel.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxDiagenesis.RunAQTDiagenesis(System.String@,System.String@)">
+            <summary>
+            Calls AQTDiagenesisModel and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxDiagenesis.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxDiagenesis.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Diagenesis.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxDiagenesis.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxEcotoxicology">
+            <summary>
+            Pass through model object for calling AQTEcotoxicologyModel.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxEcotoxicology.RunAQTEcotoxicology(System.String@,System.String@)">
+            <summary>
+            Calls AQTAnimals and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxEcotoxicology.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxEcotoxicology.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Ecotoxicology.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxEcotoxicology.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxInputBuilder">
+             <summary>
+            
+             </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxInputBuilder.GetBaseJsonFlags">
+            <summary>
+            Returns the types of flags for getting a base simulation json.
+            </summary>
+            <returns>List of flag options</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxInputBuilder.GetBaseJson(System.Collections.Generic.Dictionary{System.String,System.Boolean})">
+            <summary>
+            Returns a base simulation json from file based on set flags.
+            Defaults to whatever file is returned as if all parameters are false.
+            </summary>
+            <param name="flags">Dictionary of flag names and values</param>
+            <returns>Base json string from file</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxInputBuilder.GetBaseJsonHelper(System.Collections.Generic.List{System.Boolean})">
+            <summary>
+            Helper for returning file from GetBaseJson. Made in an attempt to make code 
+            modular and more readable.
+            </summary>
+            <param name="flagOptions">List of flags</param>
+            <returns>Base json string from file</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxInputBuilder.InsertLoadings(System.String,Web.Services.Controllers.LoadingsInput)">
+            <summary>
+            Method to insert loadings into an Aquatox simulation. 
+            </summary>
+        </member>
+        <member name="T:Web.Services.Models.AQTNutrients">
+            <summary>
+            Pass through model object for calling AQTNutrient Model.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTNutrients.RunAQTNutrients(System.String@,System.String@)">
+            <summary>
+            Calls AQTNutrients Model and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTNutrients.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTNutrients.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Nutrients.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTNutrients.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.AQTOrgMatter">
+            <summary>
+            Pass through model object for calling AQTOrganicMatter Model.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTOrgMatter.RunAQTOrgMatter(System.String@,System.String@)">
+            <summary>
+            Calls AQTOrganicMatter Model and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTOrgMatter.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTOrgMatter.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Organic Matter.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTOrgMatter.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.AQTPlant">
+            <summary>
+            Pass through model object for calling AQTPlants Model.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTPlant.RunAQTPlants(System.String@,System.String@)">
+            <summary>
+            Calls AQTPlants Model and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTPlant.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTPlant.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Plants.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTPlant.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.AQTStreamHydrology">
+            <summary>
+            Pass through model object for calling AQTStreamHydrology Model.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTStreamHydrology.RunAQTStreamHydrology(System.String@,System.String@)">
+            <summary>
+            Calls AQTStreamHydrology and runs simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.AQTStreamHydrology.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error after running a simulation.
+            </summary>
+            <returns>ITimeSeriesOutput</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTStreamHydrology.GetValidJsonExampleFile">
+            <summary>
+            Returns the json example file for AQUATOX Stream Hydrology.
+            </summary>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Web.Services.Models.AQTStreamHydrology.GetValidJsonExampleString">
+            <summary>
+            Returns the json as a string from valid text file.
+            </summary>
+            <returns>string</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxWorkflow">
+            <summary>
+            Web.Services model class for running an Aquatox simulation.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.Run(System.String,System.String@,System.String@)">
+            <summary>
+            Gets output from upstream segments from mongodb and merges them to
+            the input of the current segment simulation.
+            </summary>
+            <param name="task_id">Task ID of current simulation in database.</param>
+            <param name="json">Stringified sim output.</param>
+            <param name="errormsg">Error message or empty string.</param>
+            <returns>Serialized json string of the AQUATOX simulation output.</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.GetCurrentSim(System.String)">
+            <summary>
+            Using the given task ID, get the simulation json, upstream dictionary, and dependencies dictionary
+            from the mongodb. 
+            </summary>
+            <param name="task_id">Task ID for current simulation in database.</param>
+            <returns>Error message or empty string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.CheckDependencies(AQUATOX.AQTSegment.AQTSim)">
+            <summary>
+             Iterates over dictionary of dependencies and performs the appropriate action.
+            </summary>
+            <param name="sim">Current segment simulation</param>
+            <returns>Error message or empty string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ConvertUpstreamToInt(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32}@)">
+            <summary>
+            Iterate over each comid and convert to int.
+            </summary>
+            <param name="upstream">List of comids as strings</param>
+            <param name="comids">List of comids converted to ints</param>
+            <returns>Error message or empty string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.Pass_Data(AQUATOX.AQTSegment.AQTSim,System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Auxiliary function to mimic how data is passed in AQSim_2D.executeModel()
+            </summary>
+            <param name="sim">The current simulation to pass data to.</param>
+            <param name="comids">List of comids</param>
+        </member>
+        <member name="T:Web.Services.Models.WSAquatoxWorkflow.ConvertedArchive">
+            <summary>
+            Class that has the archived state variable data converted to a dictionary
+            of strings and values.
+            </summary>
+        </member>
+        <member name="F:Web.Services.Models.WSAquatoxWorkflow.ConvertedArchive.Data">
+            Dictionary of State Variables and associated values.
+            g/m3 or mg/m3 depending on state var
+            ex: { "Total Ammonia as N (mg/L)" : [0.08408, 0.0480355, ...] }
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ArchiveOutput(System.String,System.String@)">
+            <summary>
+            Gets the output from database given a task ID and returns the archived results.
+            </summary>
+            <param name="task_id">Task ID in database.</param>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ArchiveUpstreamOutputs(System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Iterate over each comid and generate the archive results for each.
+            </summary>
+            <param name="comids">List of comids</param>
+            <returns>Error message or empty string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ConvertArchive(AQUATOX.AQTSegment.AQTSim)">
+            <summary>   
+            Convert the archived results to a dictionary
+            </summary>
+            <param name="sim">Current segment simulation</param>
+            <returns>Converted archive</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.CheckForErrors(System.String)">
+            <summary>
+            Utility function to check for error by API controller.
+            </summary>
+            <param name="errorMsg">Error message</param>
+            <returns>ITimeSeriesOutput with error</returns>
+        </member>
+        <member name="T:Web.Services.Models.WSCatchment">
+            <summary>
+            HMS Web Service Catchment Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSCatchment.Get(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Gets catchment data for a provided comid
+            </summary>
+            <param name="comid"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSCoastal">
+            <summary>
+            Web Services Model object class for all Coastal requests.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSCoastal.GetCoastal(Data.TimeSeriesInput)">
+            <summary>
+            Gets coastal data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input">ITimeSeriesInput</param>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Models.WSContaminantLoader">
             <summary>
             HMS Web Service ContaminantLoader Model
@@ -785,7 +1780,7 @@
             HMS Web Service Dew Point Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSDewPoint.GetDewPoint(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSDewPoint.GetDewPoint(Web.Services.Controllers.DewPointInput)">
             <summary>
             Gets dew point temperature data using the given TimeSeriesInput parameters.
             </summary>
@@ -862,10 +1857,10 @@
         </member>
         <member name="T:Web.Services.Models.WSPrecipitation">
             <summary>
-            HMS Web Service Precipitation Model
+            HMS Web Service S Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSPrecipitation.GetPrecipitation(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSPrecipitation.GetPrecipitation(Web.Services.Controllers.PrecipitationInput)">
             <summary>
             Gets precipitation data using the given TimeSeriesInput parameters.
             </summary>
@@ -962,12 +1957,36 @@
             <param name="input"></param>
             <returns></returns>
         </member>
+        <member name="T:Web.Services.Models.WSStream">
+            <summary>
+            HMS Web Service Stream Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSStream.Get(System.String,System.String,System.String,System.Double,System.Boolean)">
+            <summary>
+            Gets stream network data for a provided comid
+            </summary>
+            <param name="comid"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSStreamflow">
+            <summary>
+            HMS Web Service Streamflow Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSStreamflow.GetStreamflow(Data.ITimeSeriesInput)">
+            <summary>
+            Gets streamflow data using the given TimeSeriesInput parameters.
+            </summary>
+            <param name="input">ITimeSeriesInput</param>
+            <returns></returns>
+        </member>
         <member name="T:Web.Services.Models.WSSubSurfaceFlow">
             <summary>
             HMS Web Service SubSurfaceFlow Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSSubSurfaceFlow.GetSubSurfaceFlow(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSSubSurfaceFlow.GetSubSurfaceFlow(Web.Services.Controllers.SubSurfaceFlowInput)">
             <summary>
             Gets subsurfaceflow data using the given TimeSeriesInput parameters.
             </summary>
@@ -986,7 +2005,7 @@
             HMS Web Service SurfaceRunoff Model
             </summary>
         </member>
-        <member name="M:Web.Services.Models.WSSurfaceRunoff.GetSurfaceRunoff(Data.ITimeSeriesInput)">
+        <member name="M:Web.Services.Models.WSSurfaceRunoff.GetSurfaceRunoff(Web.Services.Controllers.SurfaceRunoffInput)">
             <summary>
             Gets SurfaceRunoff data using the given TimeSeriesInput parameters.
             </summary>

@@ -8,5 +8,17 @@
     <Setting Name="MS_Directory" Type="System.String" Scope="User">
       <Value Profile="(Default)">..\..\..\2D_Inputs\TestDir1\</Value>
     </Setting>
+    <Setting Name="COMID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">23398915</Value>
+    </Setting>
+    <Setting Name="EndCOMID" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="UpSpan" Type="System.String" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="BrowserExe" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

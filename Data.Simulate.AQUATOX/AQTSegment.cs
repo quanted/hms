@@ -596,6 +596,7 @@ namespace AQUATOX.AQTSegment
 
             nontoxloadings = outList.Count;
             AQTSeg.AssignChemRecs();
+            if (NState != AllVariables.H2OTox)
             for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // add tox exposures
             {
                 TToxics TT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TToxics;

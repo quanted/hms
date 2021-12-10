@@ -271,7 +271,7 @@ namespace GUI.AQUATOX
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
             SetupForm.EditParams(ref SS, "Simulation Setup", true,"", "_Toc77252221");
-
+            ShowStudyInfo();
         }
 
         private void Diagensis(object sender, EventArgs e)
@@ -334,9 +334,11 @@ namespace GUI.AQUATOX
                         {
                             TPlant TP = TSV as TPlant;
                             TP.PAlgalRec = PlantDB2[nplt];
+                            TP.ChangeData();
+                            TP.UpdateName();
                             nplt++;
                         }
-
+                    ShowStudyInfo();
                 }
             }
         }
@@ -381,8 +383,10 @@ namespace GUI.AQUATOX
                     TParameter[] PPS = CR.InputArray();
 
                     Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON", "ChemData");
+                    TC.UpdateName();
                     nchm++;
                 }
+            ShowStudyInfo();
         }
 
         private void Sites(object sender, EventArgs e)
@@ -391,6 +395,7 @@ namespace GUI.AQUATOX
 
             SiteForm SF = new SiteForm();
             SF.EditSiteInfo(aQTS);
+            ShowStudyInfo();
         }
 
         private void Remin(object sender, EventArgs e)
@@ -404,6 +409,7 @@ namespace GUI.AQUATOX
             TParameter[] PPS = RR.InputArray();
 
             Reminform.EditParams(ref PPS, "Remineralization Parameters", false, "ReminLib.JSON", "Remineralization");
+            ShowStudyInfo();
         }
 
 
@@ -415,7 +421,7 @@ namespace GUI.AQUATOX
 
             column = new DataColumn();
             column.ColumnName = Param.Symbol;
-            if (table.Columns.Count == 0) column.Unique = true;
+            // if (table.Columns.Count == 0) column.Unique = true;
             if (Param.Symbol == "") column.ColumnName = Param.Name;
 
             if (Param.GetType() == typeof(TParameter))
@@ -672,9 +678,11 @@ namespace GUI.AQUATOX
                         {
                             TAnimal TA = TSV as TAnimal;
                             TA.PAnimalData = AnimalDB2[nanm];
+                            TA.ChangeData();
+                            TA.UpdateName();
                             nanm++;
                         }
-
+                    ShowStudyInfo();
                 }
             }
         }

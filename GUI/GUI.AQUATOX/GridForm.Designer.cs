@@ -43,12 +43,11 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(26, 61);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.dataGridView1.Location = new System.Drawing.Point(23, 46);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(853, 631);
+            this.dataGridView1.Size = new System.Drawing.Size(746, 466);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
@@ -57,10 +56,9 @@ namespace GUI.AQUATOX
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(736, 16);
-            this.OKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.OKButton.Location = new System.Drawing.Point(644, 12);
             this.OKButton.Name = "OKButton";
-            this.OKButton.Size = new System.Drawing.Size(70, 31);
+            this.OKButton.Size = new System.Drawing.Size(61, 23);
             this.OKButton.TabIndex = 25;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
@@ -69,10 +67,9 @@ namespace GUI.AQUATOX
             // CancelButt
             // 
             this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(813, 16);
-            this.CancelButt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.CancelButt.Location = new System.Drawing.Point(711, 12);
             this.CancelButt.Name = "CancelButt";
-            this.CancelButt.Size = new System.Drawing.Size(70, 31);
+            this.CancelButt.Size = new System.Drawing.Size(61, 23);
             this.CancelButt.TabIndex = 26;
             this.CancelButt.Text = "Cancel";
             this.CancelButt.UseVisualStyleBackColor = true;
@@ -82,23 +79,21 @@ namespace GUI.AQUATOX
             // 
             this.changedLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.changedLabel.AutoSize = true;
-            this.changedLabel.Location = new System.Drawing.Point(656, 21);
+            this.changedLabel.Location = new System.Drawing.Point(574, 16);
             this.changedLabel.Name = "changedLabel";
-            this.changedLabel.Size = new System.Drawing.Size(66, 20);
+            this.changedLabel.Size = new System.Drawing.Size(53, 15);
             this.changedLabel.TabIndex = 27;
             this.changedLabel.Text = "changed";
             this.changedLabel.Visible = false;
-            this.changedLabel.Click += new System.EventHandler(this.changedLabel_Click);
             // 
             // HelpButton
             // 
             this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(521, 13);
-            this.HelpButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.HelpButton.Location = new System.Drawing.Point(456, 10);
             this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(99, 36);
+            this.HelpButton.Size = new System.Drawing.Size(87, 27);
             this.HelpButton.TabIndex = 28;
             this.HelpButton.Text = "  Help";
             this.HelpButton.UseVisualStyleBackColor = true;
@@ -106,15 +101,14 @@ namespace GUI.AQUATOX
             // 
             // GridForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(907, 713);
+            this.ClientSize = new System.Drawing.Size(794, 535);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.changedLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.dataGridView1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "GridForm";
             this.Text = "Matrix Data Entry";
             this.Load += new System.EventHandler(this.GridForm_Load);

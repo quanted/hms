@@ -151,6 +151,7 @@ namespace GUI.AQUATOX
             else LTPanel.Top = ScaleX(13);  // move up LoadingType Panel to fill blank space
 
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
+            ToxicityButton.Visible = (SV.NState == AllVariables.H2OTox);
 
             AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
 
@@ -314,15 +315,11 @@ namespace GUI.AQUATOX
                 chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON","ChemData");
             }
 
-            
             SV.UpdateName();
             UpdateScreen();
         }
 
-        private void ButtonPanel_Paint(object sender, PaintEventArgs e)
-        {
 
-        }
 
         private void IgnoreLoadingsBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -673,6 +670,21 @@ namespace GUI.AQUATOX
                 default : AQTTestForm.OpenUrl("ICandLoadings"); break;
 
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            TToxics TC = SV as TToxics;
+            DataTable AT = TC.ATR_Table();
+            DataTable PT = TC.PTR_Table();
+
+            ChemToxForm ctf = new ChemToxForm();
+            if (ctf.ShowGrids(AT,PT, ref TC.Anim_Method, ref TC.Plant_Method))
+                if (ctf.gridChange)
+                {
+                    TC.SetPTR(PT);
+                    TC.SetATR(AT);
+                }
         }
     }
 }

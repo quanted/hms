@@ -10,6 +10,8 @@ using AQUATOX.Organisms;
 using AQUATOX.Plants;
 using Newtonsoft.Json;
 using Globals;
+using System.Data;
+
 
 namespace AQUATOX.Chemicals
 {
@@ -187,6 +189,95 @@ namespace AQUATOX.Chemicals
 
         }
 
+        public DataTable PTR_Table()
+        {
+            if (Chem_Plant_Tox == null) return null;
+
+            var properties = typeof(TPlantToxRecord).GetFields();
+
+            var dataTable = new DataTable("Plant_Tox_Table");
+            foreach (var info in properties)
+                dataTable.Columns.Add(info.Name, Nullable.GetUnderlyingType(info.FieldType)
+                   ?? info.FieldType);
+
+            for (int indx = 0; indx < Chem_Plant_Tox.Count; indx++)
+            {
+                DataRow row = dataTable.NewRow();
+                int col = 0;
+                foreach (var info in properties)
+                {
+                    row[col] = info.GetValue(Chem_Plant_Tox[indx]);
+                    col++;
+                }
+                dataTable.Rows.Add(row);
+            }
+            return dataTable;
+        }
+
+        public void SetPTR(DataTable inTable)
+        {
+            Chem_Plant_Tox.Clear();
+            var properties = typeof(TPlantToxRecord).GetFields();
+
+            foreach (DataRow row in inTable.Rows)
+            {
+                TPlantToxRecord PTR = new TPlantToxRecord();
+                int col = 0;
+                foreach (var info in properties)
+                {
+                    if (row[col] != DBNull.Value)
+                       info.SetValue(PTR,row[col]);
+                    col++;
+                }
+
+                Chem_Plant_Tox.Add(PTR);
+            }
+        }
+
+        public DataTable ATR_Table()
+        {
+            if (Chem_Anim_Tox == null) return null;
+
+            var properties = typeof(TAnimalToxRecord).GetFields();
+
+            var dataTable = new DataTable("Anim_Tox_Table");
+            foreach (var info in properties)
+                dataTable.Columns.Add(info.Name, Nullable.GetUnderlyingType(info.FieldType)
+                   ?? info.FieldType);
+
+            for (int indx = 0; indx < Chem_Anim_Tox.Count; indx++)
+            {
+                DataRow row = dataTable.NewRow();
+                int col = 0;
+                foreach (var info in properties)
+                {
+                    row[col] = info.GetValue(Chem_Anim_Tox[indx]);
+                    col++;
+                }
+                dataTable.Rows.Add(row);
+            }
+            return dataTable;
+        }
+
+        public void SetATR(DataTable inTable)
+        {
+            Chem_Anim_Tox.Clear();
+            var properties = typeof(TAnimalToxRecord).GetFields();
+
+            foreach (DataRow row in inTable.Rows)
+            {
+                TAnimalToxRecord PTR = new TAnimalToxRecord();
+                int col = 0;
+                foreach (var info in properties)
+                {
+                    if (row[col] != DBNull.Value)
+                        info.SetValue(PTR, row[col]);
+                    col++;
+                }
+
+                Chem_Anim_Tox.Add(PTR);
+            }
+        }
 
         // ==================================================
         // chemical and microbial degradation

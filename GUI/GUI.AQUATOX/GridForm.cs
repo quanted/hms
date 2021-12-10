@@ -99,9 +99,5 @@ namespace GUI.AQUATOX
             AQTTestForm.OpenUrl(HelpTopic);
         }
 
-        private void changedLabel_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
