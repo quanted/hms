@@ -2,10 +2,9 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>GUI.AQUATOX.Program</StartupObject>
-    <ApplicationIcon>aquatox_Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

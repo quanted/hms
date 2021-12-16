@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netcoreapp3.1\Chemicals.AQUATOX.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\net5.0\Chemicals.AQUATOX.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DocumentationFile>bin\Debug\netcoreapp3.1\Chemicals.AQUATOX.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\net5.0\Chemicals.AQUATOX.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
