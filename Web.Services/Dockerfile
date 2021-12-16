@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:3.1 AS base
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS base
 #WORKDIR /app
 EXPOSE 80
 
@@ -16,5 +16,5 @@ WORKDIR /app
 #COPY . /app
 #COPY --from=publish /app .
 RUN ls /app/App_Data
-RUN mkdir -p /src/Web.Services.Tests/bin/Release/netcoreapp3.1
+RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
 ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "http://0.0.0.0:80"]
