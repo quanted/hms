@@ -58,11 +58,19 @@ Unit Tests:
       - /app/artifacts/Utilities.Tests-test-result.xml
       - /app/artifacts/Web.Services.Tests-test-result.xml
 
-Prisma:
+prisma-cloud-compute-scan:
   stage: Image Scan
+  extends:
+    - .pcs_compute_scan
   tags:
     - twistcli
   when: manual
+  allow_failure: false
+  variables:
+      prisma_cloud_scan_image: "registry.epa.gov/qed/hms/hms_dotnetcore:dev"
+      prisma_cloud_compute_url: "https://prismacloud.gitlab-prod.aws.epa.gov"
+      GIT_STRATEGY: clone
   script:
-    - /public/server/apps/twistcli images scan --details --address https://prismacloud.gitlab-prod.aws.epa.gov $CI_REGISTRY_IMAGE/hms_dotnetcore:$CI_COMMIT_REF_NAME
-
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD registry.epa.gov
+    - docker pull $prisma_cloud_scan_image
+    - ./image_scan.sh  
