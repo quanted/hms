@@ -48,7 +48,7 @@ namespace GUI.AQUATOX
             this.NetCDF = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.DBPanel = new System.Windows.Forms.Panel();
             this.ButtonPanel = new System.Windows.Forms.Panel();
             this.FoodWebButton = new System.Windows.Forms.Button();
             this.ReminButton = new System.Windows.Forms.Button();
@@ -57,7 +57,7 @@ namespace GUI.AQUATOX
             this.AnimButton = new System.Windows.Forms.Button();
             this.PlantsButton = new System.Windows.Forms.Button();
             this.Diagenesis = new System.Windows.Forms.Button();
-            this.ParamsButton = new System.Windows.Forms.Button();
+            this.SetupButton = new System.Windows.Forms.Button();
             this.RunStatusLabel = new System.Windows.Forms.Label();
             this.AddButton = new System.Windows.Forms.Button();
             this.EditButton = new System.Windows.Forms.Button();
@@ -66,7 +66,7 @@ namespace GUI.AQUATOX
             this.HelpButton = new System.Windows.Forms.Button();
             this.modelRunningLabel = new System.Windows.Forms.Label();
             this.browserButton = new System.Windows.Forms.Button();
-            this.panel1.SuspendLayout();
+            this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -234,19 +234,19 @@ namespace GUI.AQUATOX
             this.label3.TabIndex = 15;
             this.label3.Text = "Databases of Parameter Values";
             // 
-            // panel1
+            // DBPanel
             // 
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.PlantsDB);
-            this.panel1.Controls.Add(this.SiteDB);
-            this.panel1.Controls.Add(this.ChemDB);
-            this.panel1.Controls.Add(this.ReminDB);
-            this.panel1.Controls.Add(this.AnimalDB);
-            this.panel1.Location = new System.Drawing.Point(463, 9);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(343, 55);
-            this.panel1.TabIndex = 16;
+            this.DBPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.DBPanel.Controls.Add(this.label3);
+            this.DBPanel.Controls.Add(this.PlantsDB);
+            this.DBPanel.Controls.Add(this.SiteDB);
+            this.DBPanel.Controls.Add(this.ChemDB);
+            this.DBPanel.Controls.Add(this.ReminDB);
+            this.DBPanel.Controls.Add(this.AnimalDB);
+            this.DBPanel.Location = new System.Drawing.Point(463, 9);
+            this.DBPanel.Name = "DBPanel";
+            this.DBPanel.Size = new System.Drawing.Size(343, 55);
+            this.DBPanel.TabIndex = 16;
             // 
             // ButtonPanel
             // 
@@ -258,7 +258,7 @@ namespace GUI.AQUATOX
             this.ButtonPanel.Controls.Add(this.AnimButton);
             this.ButtonPanel.Controls.Add(this.PlantsButton);
             this.ButtonPanel.Controls.Add(this.Diagenesis);
-            this.ButtonPanel.Controls.Add(this.ParamsButton);
+            this.ButtonPanel.Controls.Add(this.SetupButton);
             this.ButtonPanel.Location = new System.Drawing.Point(191, 110);
             this.ButtonPanel.Name = "ButtonPanel";
             this.ButtonPanel.Size = new System.Drawing.Size(244, 259);
@@ -335,15 +335,15 @@ namespace GUI.AQUATOX
             this.Diagenesis.UseVisualStyleBackColor = true;
             this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
             // 
-            // ParamsButton
+            // SetupButton
             // 
-            this.ParamsButton.Location = new System.Drawing.Point(22, 20);
-            this.ParamsButton.Name = "ParamsButton";
-            this.ParamsButton.Size = new System.Drawing.Size(91, 25);
-            this.ParamsButton.TabIndex = 1;
-            this.ParamsButton.Text = "Edit Setup";
-            this.ParamsButton.UseVisualStyleBackColor = true;
-            this.ParamsButton.Click += new System.EventHandler(this.Setup_Click);
+            this.SetupButton.Location = new System.Drawing.Point(22, 20);
+            this.SetupButton.Name = "SetupButton";
+            this.SetupButton.Size = new System.Drawing.Size(91, 25);
+            this.SetupButton.TabIndex = 1;
+            this.SetupButton.Text = "Edit Setup";
+            this.SetupButton.UseVisualStyleBackColor = true;
+            this.SetupButton.Click += new System.EventHandler(this.Setup_Click);
             // 
             // RunStatusLabel
             // 
@@ -452,7 +452,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.DeleteButton);
             this.Controls.Add(this.RunStatusLabel);
             this.Controls.Add(this.ButtonPanel);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.DBPanel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.NetCDF);
             this.Controls.Add(this.StudyNameBox);
@@ -468,8 +468,8 @@ namespace GUI.AQUATOX
             this.Name = "AQTTestForm";
             this.Text = "AQUATOX.NET 1.0.0 ";
             this.Load += new System.EventHandler(this.AQTTestForm_Load);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.DBPanel.ResumeLayout(false);
+            this.DBPanel.PerformLayout();
             this.ButtonPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -493,7 +493,7 @@ namespace GUI.AQUATOX
         private Button NetCDF;
         private Label label1;
         private Label label3;
-        private Panel panel1;
+        private Panel DBPanel;
         private Panel ButtonPanel;
         private Button ReminButton;
         private Button SiteButton;
@@ -501,7 +501,7 @@ namespace GUI.AQUATOX
         private Button AnimButton;
         private Button PlantsButton;
         private Button Diagenesis;
-        private Button ParamsButton;
+        private Button SetupButton;
         private Label RunStatusLabel;
         private Button AddButton;
         private Button EditButton;

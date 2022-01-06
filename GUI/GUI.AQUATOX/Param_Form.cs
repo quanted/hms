@@ -420,6 +420,7 @@ namespace GUI.AQUATOX
 
         private void Param_Form_FormClosing(object sender, FormClosingEventArgs e)
         {
+            e.Cancel = false;  //12/11/2021
             if (UserCanceled) return;
 
             if (!ValidInputs())

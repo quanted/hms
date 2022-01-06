@@ -27,6 +27,7 @@ namespace GUI.AQUATOX
         private string errmessage;
         static private string defaultBrowser;
 
+        private bool MultiSegmentInput = false;
         public AQTSim aQTS = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
@@ -69,6 +70,17 @@ namespace GUI.AQUATOX
         //    return json;
         //}
 
+        private bool LoadJSON(string json)
+        {
+            AQTSim Sim = new AQTSim();
+            string err = Sim.Instantiate(json);
+            if (err != "") { MessageBox.Show(err); return false; }
+
+            aQTS = Sim;
+            aQTS.AQTSeg.SetMemLocRec();
+            return true;
+        }
+
         private void loadJSON_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -80,14 +92,9 @@ namespace GUI.AQUATOX
             {
                 string json = File.ReadAllText(openFileDialog1.FileName);
 
-               // json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
+                // json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
 
-                AQTSim Sim = new AQTSim();
-                string err = Sim.Instantiate(json);
-                if (err != "") { MessageBox.Show(err); return; }
-
-                aQTS = Sim;
-                aQTS.AQTSeg.SetMemLocRec();
+                if (!LoadJSON(json)) return;
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
                 ButtonPanel.Visible = true;
                 AddButton.Visible = true;
@@ -353,8 +360,12 @@ namespace GUI.AQUATOX
             Diagenesis.Enabled = aQTS.AQTSeg.Diagenesis_Included();
             ChemButton.Enabled = aQTS.AQTSeg.Has_Chemicals();
 
-            if (!aQTS.HasResults()) RunStatusLabel.Text = "No Saved Runs";
-            else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
+            if (MultiSegmentInput) RunStatusLabel.Text = "Input for Multi-Segment Run";
+            else
+            {
+                if (!aQTS.HasResults()) RunStatusLabel.Text = "No Saved Runs";
+                else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
+            }
 
             aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
             SVListBox.Visible = true;
@@ -866,6 +877,8 @@ namespace GUI.AQUATOX
             
         }
 
+
+
         private void SVListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -1076,5 +1089,29 @@ namespace GUI.AQUATOX
             defaultBrowser = SelectDefaultBrowser();
             Properties.Settings.Default.BrowserExe = defaultBrowser;
         }
+
+
+        public bool EditLinkedInput(ref string json)
+        {
+            if (!LoadJSON(json)) return false;
+
+            MultiSegmentInput = true;
+            ButtonPanel.Visible = true;
+            SetupButton.Visible = false;
+            MultiSegButton.Visible = false;
+            DBPanel.Visible = false;
+            loadJSON.Visible = false;
+            saveJSON.Visible = false;
+
+            ShowStudyInfo();
+
+            ShowDialog();
+
+            string errmessage = aQTS.SaveJSON(ref json);
+            if (errmessage != "") MessageBox.Show("Error creating json string: " + errmessage);
+            return (errmessage == "");
+        }
+
+
     }
 }

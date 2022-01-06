@@ -34,6 +34,7 @@ namespace AQUATOX.AQSim_2D
             public string[][] network;
             public int[][] order;
             public Dictionary<string, int[]> sources;
+            public Dictionary<string, int[]> boundary;
         }
 
         /// <summary>
@@ -251,6 +252,34 @@ namespace AQUATOX.AQSim_2D
 
 
         /// <summary>
+        /// Reads the GeoJSON for a comid from web services
+        /// </summary>
+        /// <param name="comid">comid</param>
+        /// <returns>JSON or error message</returns>
+        /// 
+        public string ReadGeoJSON(string comid)
+        {
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string component = "info";
+            string dataset = "catchment";
+
+            try
+            {
+                string rurl = requestURL + "" + component + "/" + dataset + "?streamGeometry=true&comid=" + comid;
+                var request = (HttpWebRequest)WebRequest.Create(rurl);
+                var response = (HttpWebResponse)request.GetResponse();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+       }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+
+
+        /// <summary>
         /// Reads the stream network data structure from web services
         /// </summary>
         /// <param name="comid">Primary comid</param>
@@ -358,6 +387,8 @@ namespace AQUATOX.AQSim_2D
 
             Sim.AQTSeg.SetMemLocRec();
 
+            Sim.AQTSeg.StudyName = "COMID: " + comid;
+            Sim.AQTSeg.FileName = "AQT_2D_" + comid + ".JSON";
             Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
             Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
 
@@ -459,7 +490,6 @@ namespace AQUATOX.AQSim_2D
                 }
             }
                 
-
             int nSources = 0;
             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
                 foreach (int SrcID in Sources)
