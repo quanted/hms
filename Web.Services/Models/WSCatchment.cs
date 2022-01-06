@@ -95,7 +95,8 @@ namespace Web.Services.Models
             }
             if (streamGeometry && centroid != null)
             {
-                result.Add("stream_geometry", catchment.GetStreamGeometry(centroid.Latitude, centroid.Longitude));
+                result.Add("stream_geometry", catchment.GetStreamGeometryV2(comid));
+                //result.Add("stream_geometry", catchment.GetStreamGeometry(centroid.Latitude, centroid.Longitude));
             }
             if (cn)
             {

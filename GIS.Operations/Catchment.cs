@@ -248,5 +248,38 @@ namespace GIS.Operations
             return streamData;
         }
 
+        public object GetStreamGeometryV2(string comid)
+        {
+            string url = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/0/query";
+            Dictionary<string, object> dataDict = new Dictionary<string, object>()
+            {
+                {"where", "COMID%3D" + comid + "+"},
+                {"geometryType", "esriGeometryEnvelope" },
+                {"spatialRel", "esriSpatialRelIntersects" },
+                {"units", "esriSRUnit_Foot" },
+                {"outFields", "*"},
+                {"returnGeometry", "true"},
+                {"returnTrueCurves", "false" },
+                {"returnIdsOnly", "false" },
+                {"returnCountOnly", "false" },
+                {"returnZ", "false" },
+                {"returnM", "false" },
+                {"returnDistinctValues", "false" },
+                {"returnExtentOnly", "false" },
+                {"featureEncoding", "esriDefault" },
+                {"f", "geojson" }
+            };
+            string dataRequest = JsonSerializer.Serialize<Dictionary<string, object>>(dataDict);
+            StringBuilder queryUrl = new StringBuilder(url + "?");
+            foreach (KeyValuePair<string, object> kv in dataDict)
+            {
+                queryUrl.Append(kv.Key + "=" + kv.Value.ToString() + "&");
+            }
+            queryUrl.Remove(queryUrl.Length - 1, 1);
+            string data = this.DownloadData(queryUrl.ToString(), 5, null).Result;
+            object streamData = JsonSerializer.Deserialize<object>(data);
+            return streamData;
+        }
+
     }
 }
