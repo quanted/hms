@@ -165,8 +165,7 @@ namespace AQUATOX.AQTSegment
 
                 AQTSeg.SVsToInitConds();
                 Setup_Record PS = AQTSeg.PSetup;
-                AQTSeg.Integrate(PS.FirstDay.Val, PS.LastDay.Val, PS.RelativeError.Val, PS.MinStepSize.Val, PS.StoreStepSize.Val);
-                return "";
+                return AQTSeg.Integrate(PS.FirstDay.Val, PS.LastDay.Val, PS.RelativeError.Val, PS.MinStepSize.Val, PS.StoreStepSize.Val);
             }
             catch (Exception e)
             {
@@ -1382,11 +1381,25 @@ namespace AQUATOX.AQTSegment
             return P;
         }
 
+        public void DeleteVar(TStateVariable PSV)
+        {
+            for (int i = 0; i < SV.Count; i++)
+                if (SV[i] == PSV) { DeleteVar(i); return; }
+        }
+
+
         public void DeleteVar(int index)
         {
             SV.RemoveAt(index);
             SetMemLocRec();
         }
+
+        public void RemoveSV(int index)
+        {
+            SV.RemoveAt(index);
+            SetMemLocRec();
+        }
+
 
         public void RemoveOrgToxStateVariable(int index)
         {
@@ -2655,6 +2668,12 @@ namespace AQUATOX.AQTSegment
                     int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
                     if (progint == lastprog) ProgWorker.ReportProgress(progint);
                     lastprog = progint;
+
+                    if (ProgWorker.CancellationPending)
+                    {
+                        SimulationDate = DateTime.MinValue;
+                        return ("User Canceled");
+                    }
                 }
 
                 Integrate_CheckZeroStateAllSVs();

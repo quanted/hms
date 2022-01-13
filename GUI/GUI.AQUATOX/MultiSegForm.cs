@@ -59,10 +59,9 @@ namespace GUI.AQUATOX
         {
             AutoScroll = true;
             InitializeComponent();
-            //Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
-            //Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
-            //Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
-            //Worker.WorkerReportsProgress = true;
+
+            this.MapPanel.MouseWheel += MapPanel_MouseWheel;
+
 
             // 
             // chart1
@@ -104,6 +103,23 @@ namespace GUI.AQUATOX
             this.ResumeLayout(false);
             this.PerformLayout();
             
+        }
+
+        private void MapPanel_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (!MapPanel.Visible) return;
+            if (!VerifyStreamNetwork()) return;
+
+            double xchange = (xmax - xmin) * 0.001 * e.Delta;
+            double ychange = (ymax - ymin) * 0.001 * e.Delta;
+
+            xmin = (float) (xmin + xchange);
+            ymin = (float) (ymin + ychange);
+
+            xmax = (float)(xmax - xchange);
+            ymax = (float)(ymax - ychange);
+
+            DrawMapPanel();
         }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
@@ -193,6 +209,8 @@ namespace GUI.AQUATOX
 
         private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
+            ConsoleButton.Checked = true;
+
             if (AQT2D == null) AQT2D = new AQSim_2D();
 
             AddToProcessLog("Please wait, reading stream network from web service");
@@ -816,7 +834,7 @@ namespace GUI.AQUATOX
                 if (ShowCOMIDs)
                 {
                     RectangleF rectf = gpath.GetBounds();
-                    Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2));
+                    Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2)+6);
                     Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
                     Rectangle rect = new Rectangle(Location, sizeOfText);
                     g.FillRectangle(Brushes.White, rect);
@@ -895,7 +913,7 @@ namespace GUI.AQUATOX
 
             public void Draw(Graphics g, bool ShowCOMIDs)
             {
-                DrawArrow(g, PlotPoint1, PlotPoint2, LineColor, 2, 1);
+                DrawArrow(g, PlotPoint2, PlotPoint1, LineColor, 2, 1);
 
                 //                    Pen pen = new Pen(LineColor, LineWidth);  // older draw line, arrowheads too small
                 // pen.StartCap = LineCap.ArrowAnchor;
@@ -1083,17 +1101,13 @@ namespace GUI.AQUATOX
         }
         public class StreamGeometry
         {
-            public SGOutput output { get; set; }
+            public Feature[] features { get; set; }
         }
-        public class SGOutput
+        public class Feature
         {
-            public Flowlines[] ary_flowlines { get; set; }
+            public Geometry geometry { get; set; }
         }
-        public class Flowlines
-        {
-            public riverShape shape { get; set; }
-        }
-        public class riverShape
+        public class Geometry
         {
             public string type { get; set; }
             public double[][] coordinates { get; set; }
@@ -1126,7 +1140,15 @@ namespace GUI.AQUATOX
                     }
 
                     GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                    polyline = coords.stream_geometry.output.ary_flowlines[0].shape.coordinates;
+                    try 
+                    {
+                        polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                    }
+                    catch
+                    {
+                        AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
+                    }
+
 
                     List<PointF> startpoints = new List<PointF>();
                     List<PointF> endpoints = new List<PointF>();
@@ -1137,7 +1159,7 @@ namespace GUI.AQUATOX
                         endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
                     }
                     Drawing.Add(new PolyLine(startpoints, endpoints, CString));
-                }
+                    }
 
             return true;
         }
@@ -1191,7 +1213,6 @@ namespace GUI.AQUATOX
                     yBuffer = (MapPanel.Size.Height - yScale) / 2;
                 }
             }
-
         }
 
         private void DrawMapPanel()
@@ -1212,12 +1233,17 @@ namespace GUI.AQUATOX
         {
             if (!MapPanel.Visible) return;
             if (!VerifyStreamNetwork()) return;
-            RedrawShapes();  // optimize
-           //DrawMapPanel();
+            // RedrawShapes();  // optimize
+            DrawMapPanel();
         }
+
+        private Point clickPosition;
 
         private void MapPanel_MouseDown(object sender, MouseEventArgs e)
         {
+            clickPosition.X = e.X;
+            clickPosition.Y = e.Y;
+
             for (var i = Drawing.Count - 1; i >= 0; i--)
                 if (Drawing[i].HitTest(e.Location)) { EditCOMID(Drawing[i].ID); }; 
                         // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
@@ -1256,6 +1282,36 @@ namespace GUI.AQUATOX
                 else { MessageBox.Show("COMID: " + CString+ ".  Linked input for this COMID not yet generated."); };
         }
 
-        
+        private void MapPanel_MouseHover(object sender, EventArgs e)
+        {
+            MapPanel.Focus();
+        }
+
+
+        private void MapPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+           if (e.Button == MouseButtons.Left)
+           {
+                if ((Math.Abs(e.X - clickPosition.X)<3)&&(Math.Abs(e.Y - clickPosition.Y) < 3)) return;
+                
+                float DeltaX = ((float) (clickPosition.X - e.X) / (float) MapPanel.Width) * (xmax - xmin);
+                float DeltaY = ((float) (e.Y - clickPosition.Y) / (float) MapPanel.Height) * (ymax - ymin);
+
+                if ((DeltaX == 0)&&(DeltaY == 0)) return;
+
+                xmin = xmin + DeltaX; 
+                xmax = xmax + DeltaX;
+                ymin = ymin + DeltaY;
+                ymax = ymax + DeltaY;
+
+                if (!VerifyStreamNetwork()) return;
+                DrawMapPanel();
+
+                clickPosition.X = e.X;
+                clickPosition.Y = e.Y;
+
+
+            }
+        }
     }
 }

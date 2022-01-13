@@ -42,11 +42,11 @@ namespace GUI.AQUATOX
             this.AK2Only = new System.Windows.Forms.RadioButton();
             this.RBLabel = new System.Windows.Forms.Label();
             this.PlantBioPanel = new System.Windows.Forms.Panel();
+            this.PCalcK1 = new System.Windows.Forms.RadioButton();
             this.PCalcK2 = new System.Windows.Forms.RadioButton();
             this.PCalcBCF = new System.Windows.Forms.RadioButton();
             this.PK2Only = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
-            this.PCalcK1 = new System.Windows.Forms.RadioButton();
             this.WetvsDrylabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
@@ -217,6 +217,18 @@ namespace GUI.AQUATOX
             this.PlantBioPanel.Size = new System.Drawing.Size(756, 21);
             this.PlantBioPanel.TabIndex = 35;
             // 
+            // PCalcK1
+            // 
+            this.PCalcK1.AutoSize = true;
+            this.PCalcK1.Location = new System.Drawing.Point(581, -1);
+            this.PCalcK1.Name = "PCalcK1";
+            this.PCalcK1.Size = new System.Drawing.Size(164, 19);
+            this.PCalcK1.TabIndex = 22;
+            this.PCalcK1.TabStop = true;
+            this.PCalcK1.Text = "Calc K1 (from K2 and BCF)";
+            this.PCalcK1.UseVisualStyleBackColor = true;
+            this.PCalcK1.Click += new System.EventHandler(this.RB_Click);
+            // 
             // PCalcK2
             // 
             this.PCalcK2.AutoSize = true;
@@ -259,21 +271,9 @@ namespace GUI.AQUATOX
             this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label1.Location = new System.Drawing.Point(8, 1);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(53, 15);
+            this.label1.Size = new System.Drawing.Size(43, 15);
             this.label1.TabIndex = 17;
-            this.label1.Text = "Animals:";
-            // 
-            // PCalcK1
-            // 
-            this.PCalcK1.AutoSize = true;
-            this.PCalcK1.Location = new System.Drawing.Point(581, -1);
-            this.PCalcK1.Name = "PCalcK1";
-            this.PCalcK1.Size = new System.Drawing.Size(164, 19);
-            this.PCalcK1.TabIndex = 22;
-            this.PCalcK1.TabStop = true;
-            this.PCalcK1.Text = "Calc K1 (from K2 and BCF)";
-            this.PCalcK1.UseVisualStyleBackColor = true;
-            this.PCalcK1.Click += new System.EventHandler(this.RB_Click);
+            this.label1.Text = "Plants:";
             // 
             // WetvsDrylabel
             // 

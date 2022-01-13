@@ -45,7 +45,6 @@ namespace GUI.AQUATOX
             this.PlantsDB = new System.Windows.Forms.Button();
             this.SVListBox = new System.Windows.Forms.ListBox();
             this.StudyNameBox = new System.Windows.Forms.TextBox();
-            this.NetCDF = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.DBPanel = new System.Windows.Forms.Panel();
@@ -57,7 +56,6 @@ namespace GUI.AQUATOX
             this.AnimButton = new System.Windows.Forms.Button();
             this.PlantsButton = new System.Windows.Forms.Button();
             this.Diagenesis = new System.Windows.Forms.Button();
-            this.SetupButton = new System.Windows.Forms.Button();
             this.RunStatusLabel = new System.Windows.Forms.Label();
             this.AddButton = new System.Windows.Forms.Button();
             this.EditButton = new System.Windows.Forms.Button();
@@ -66,8 +64,14 @@ namespace GUI.AQUATOX
             this.HelpButton = new System.Windows.Forms.Button();
             this.modelRunningLabel = new System.Windows.Forms.Label();
             this.browserButton = new System.Windows.Forms.Button();
+            this.ParametersLabel = new System.Windows.Forms.Label();
+            this.StateVarLabel = new System.Windows.Forms.Label();
+            this.CancelButton = new System.Windows.Forms.Button();
+            this.SetupButton = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // loadJSON
@@ -82,6 +86,7 @@ namespace GUI.AQUATOX
             // 
             // saveJSON
             // 
+            this.saveJSON.Enabled = false;
             this.saveJSON.Location = new System.Drawing.Point(26, 43);
             this.saveJSON.Name = "saveJSON";
             this.saveJSON.Size = new System.Drawing.Size(87, 24);
@@ -92,7 +97,7 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(26, 88);
+            this.integrate.Location = new System.Drawing.Point(26, 152);
             this.integrate.Name = "integrate";
             this.integrate.Size = new System.Drawing.Size(87, 25);
             this.integrate.TabIndex = 1;
@@ -108,7 +113,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(146, 76);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(659, 23);
+            this.progressBar1.Size = new System.Drawing.Size(579, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -117,7 +122,7 @@ namespace GUI.AQUATOX
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 271);
+            this.outputbutton.Location = new System.Drawing.Point(26, 321);
             this.outputbutton.Name = "outputbutton";
             this.outputbutton.Size = new System.Drawing.Size(87, 25);
             this.outputbutton.TabIndex = 1;
@@ -188,9 +193,9 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SVListBox.FormattingEnabled = true;
             this.SVListBox.ItemHeight = 15;
-            this.SVListBox.Location = new System.Drawing.Point(459, 111);
+            this.SVListBox.Location = new System.Drawing.Point(440, 126);
             this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(346, 259);
+            this.SVListBox.Size = new System.Drawing.Size(356, 319);
             this.SVListBox.TabIndex = 9;
             this.SVListBox.Visible = false;
             this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
@@ -198,23 +203,11 @@ namespace GUI.AQUATOX
             // 
             // StudyNameBox
             // 
-            this.StudyNameBox.Location = new System.Drawing.Point(146, 30);
+            this.StudyNameBox.Location = new System.Drawing.Point(146, 27);
             this.StudyNameBox.Name = "StudyNameBox";
             this.StudyNameBox.Size = new System.Drawing.Size(287, 23);
             this.StudyNameBox.TabIndex = 10;
             this.StudyNameBox.TextChanged += new System.EventHandler(this.StudyNameBox_TextChanged);
-            // 
-            // NetCDF
-            // 
-            this.NetCDF.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.NetCDF.Location = new System.Drawing.Point(357, 381);
-            this.NetCDF.Name = "NetCDF";
-            this.NetCDF.Size = new System.Drawing.Size(56, 25);
-            this.NetCDF.TabIndex = 11;
-            this.NetCDF.Text = "NetCDF";
-            this.NetCDF.UseVisualStyleBackColor = true;
-            this.NetCDF.Visible = false;
-            this.NetCDF.Click += new System.EventHandler(this.NetCDF_Click);
             // 
             // label1
             // 
@@ -243,7 +236,7 @@ namespace GUI.AQUATOX
             this.DBPanel.Controls.Add(this.ChemDB);
             this.DBPanel.Controls.Add(this.ReminDB);
             this.DBPanel.Controls.Add(this.AnimalDB);
-            this.DBPanel.Location = new System.Drawing.Point(463, 9);
+            this.DBPanel.Location = new System.Drawing.Point(452, 9);
             this.DBPanel.Name = "DBPanel";
             this.DBPanel.Size = new System.Drawing.Size(343, 55);
             this.DBPanel.TabIndex = 16;
@@ -258,16 +251,15 @@ namespace GUI.AQUATOX
             this.ButtonPanel.Controls.Add(this.AnimButton);
             this.ButtonPanel.Controls.Add(this.PlantsButton);
             this.ButtonPanel.Controls.Add(this.Diagenesis);
-            this.ButtonPanel.Controls.Add(this.SetupButton);
-            this.ButtonPanel.Location = new System.Drawing.Point(191, 110);
+            this.ButtonPanel.Location = new System.Drawing.Point(163, 127);
             this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(244, 259);
+            this.ButtonPanel.Size = new System.Drawing.Size(244, 182);
             this.ButtonPanel.TabIndex = 17;
             this.ButtonPanel.Visible = false;
             // 
             // FoodWebButton
             // 
-            this.FoodWebButton.Location = new System.Drawing.Point(22, 203);
+            this.FoodWebButton.Location = new System.Drawing.Point(66, 130);
             this.FoodWebButton.Name = "FoodWebButton";
             this.FoodWebButton.Size = new System.Drawing.Size(92, 25);
             this.FoodWebButton.TabIndex = 8;
@@ -277,7 +269,7 @@ namespace GUI.AQUATOX
             // 
             // ReminButton
             // 
-            this.ReminButton.Location = new System.Drawing.Point(130, 70);
+            this.ReminButton.Location = new System.Drawing.Point(127, 14);
             this.ReminButton.Name = "ReminButton";
             this.ReminButton.Size = new System.Drawing.Size(92, 25);
             this.ReminButton.TabIndex = 2;
@@ -287,7 +279,7 @@ namespace GUI.AQUATOX
             // 
             // SiteButton
             // 
-            this.SiteButton.Location = new System.Drawing.Point(22, 70);
+            this.SiteButton.Location = new System.Drawing.Point(19, 14);
             this.SiteButton.Name = "SiteButton";
             this.SiteButton.Size = new System.Drawing.Size(92, 25);
             this.SiteButton.TabIndex = 3;
@@ -297,7 +289,7 @@ namespace GUI.AQUATOX
             // 
             // ChemButton
             // 
-            this.ChemButton.Location = new System.Drawing.Point(129, 106);
+            this.ChemButton.Location = new System.Drawing.Point(126, 50);
             this.ChemButton.Name = "ChemButton";
             this.ChemButton.Size = new System.Drawing.Size(92, 25);
             this.ChemButton.TabIndex = 4;
@@ -307,7 +299,7 @@ namespace GUI.AQUATOX
             // 
             // AnimButton
             // 
-            this.AnimButton.Location = new System.Drawing.Point(22, 142);
+            this.AnimButton.Location = new System.Drawing.Point(19, 86);
             this.AnimButton.Name = "AnimButton";
             this.AnimButton.Size = new System.Drawing.Size(92, 25);
             this.AnimButton.TabIndex = 5;
@@ -317,7 +309,7 @@ namespace GUI.AQUATOX
             // 
             // PlantsButton
             // 
-            this.PlantsButton.Location = new System.Drawing.Point(22, 106);
+            this.PlantsButton.Location = new System.Drawing.Point(19, 50);
             this.PlantsButton.Name = "PlantsButton";
             this.PlantsButton.Size = new System.Drawing.Size(92, 25);
             this.PlantsButton.TabIndex = 6;
@@ -327,7 +319,7 @@ namespace GUI.AQUATOX
             // 
             // Diagenesis
             // 
-            this.Diagenesis.Location = new System.Drawing.Point(130, 142);
+            this.Diagenesis.Location = new System.Drawing.Point(127, 86);
             this.Diagenesis.Name = "Diagenesis";
             this.Diagenesis.Size = new System.Drawing.Size(91, 25);
             this.Diagenesis.TabIndex = 7;
@@ -335,20 +327,10 @@ namespace GUI.AQUATOX
             this.Diagenesis.UseVisualStyleBackColor = true;
             this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
             // 
-            // SetupButton
-            // 
-            this.SetupButton.Location = new System.Drawing.Point(22, 20);
-            this.SetupButton.Name = "SetupButton";
-            this.SetupButton.Size = new System.Drawing.Size(91, 25);
-            this.SetupButton.TabIndex = 1;
-            this.SetupButton.Text = "Edit Setup";
-            this.SetupButton.UseVisualStyleBackColor = true;
-            this.SetupButton.Click += new System.EventHandler(this.Setup_Click);
-            // 
             // RunStatusLabel
             // 
             this.RunStatusLabel.AutoSize = true;
-            this.RunStatusLabel.Location = new System.Drawing.Point(28, 122);
+            this.RunStatusLabel.Location = new System.Drawing.Point(28, 187);
             this.RunStatusLabel.Name = "RunStatusLabel";
             this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
             this.RunStatusLabel.TabIndex = 18;
@@ -357,8 +339,8 @@ namespace GUI.AQUATOX
             // AddButton
             // 
             this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.AddButton.Location = new System.Drawing.Point(462, 382);
+            this.AddButton.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.AddButton.Location = new System.Drawing.Point(444, 450);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(60, 25);
             this.AddButton.TabIndex = 21;
@@ -370,8 +352,8 @@ namespace GUI.AQUATOX
             // EditButton
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.EditButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditButton.Location = new System.Drawing.Point(602, 382);
+            this.EditButton.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.EditButton.Location = new System.Drawing.Point(584, 450);
             this.EditButton.Name = "EditButton";
             this.EditButton.Size = new System.Drawing.Size(60, 25);
             this.EditButton.TabIndex = 20;
@@ -383,8 +365,8 @@ namespace GUI.AQUATOX
             // DeleteButton
             // 
             this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteButton.Location = new System.Drawing.Point(532, 382);
+            this.DeleteButton.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.DeleteButton.Location = new System.Drawing.Point(514, 450);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(60, 25);
             this.DeleteButton.TabIndex = 19;
@@ -396,7 +378,7 @@ namespace GUI.AQUATOX
             // MultiSegButton
             // 
             this.MultiSegButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.MultiSegButton.Location = new System.Drawing.Point(26, 381);
+            this.MultiSegButton.Location = new System.Drawing.Point(26, 445);
             this.MultiSegButton.Name = "MultiSegButton";
             this.MultiSegButton.Size = new System.Drawing.Size(138, 24);
             this.MultiSegButton.TabIndex = 22;
@@ -408,7 +390,7 @@ namespace GUI.AQUATOX
             // 
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(26, 190);
+            this.HelpButton.Location = new System.Drawing.Point(26, 240);
             this.HelpButton.Name = "HelpButton";
             this.HelpButton.Size = new System.Drawing.Size(87, 28);
             this.HelpButton.TabIndex = 23;
@@ -430,7 +412,7 @@ namespace GUI.AQUATOX
             // 
             this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(26, 222);
+            this.browserButton.Location = new System.Drawing.Point(26, 272);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
             this.browserButton.Size = new System.Drawing.Size(87, 23);
@@ -439,11 +421,69 @@ namespace GUI.AQUATOX
             this.browserButton.UseVisualStyleBackColor = true;
             this.browserButton.Click += new System.EventHandler(this.browserButton_Click);
             // 
+            // ParametersLabel
+            // 
+            this.ParametersLabel.AutoSize = true;
+            this.ParametersLabel.Location = new System.Drawing.Point(163, 110);
+            this.ParametersLabel.Name = "ParametersLabel";
+            this.ParametersLabel.Size = new System.Drawing.Size(103, 15);
+            this.ParametersLabel.TabIndex = 26;
+            this.ParametersLabel.Text = "Model Parameters";
+            this.ParametersLabel.Visible = false;
+            // 
+            // StateVarLabel
+            // 
+            this.StateVarLabel.AutoSize = true;
+            this.StateVarLabel.Location = new System.Drawing.Point(441, 108);
+            this.StateVarLabel.Name = "StateVarLabel";
+            this.StateVarLabel.Size = new System.Drawing.Size(193, 15);
+            this.StateVarLabel.TabIndex = 27;
+            this.StateVarLabel.Text = "Model State Variables and Loadings";
+            this.StateVarLabel.Visible = false;
+            // 
+            // CancelButton
+            // 
+            this.CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.CancelButton.ForeColor = System.Drawing.Color.Black;
+            this.CancelButton.Location = new System.Drawing.Point(727, 75);
+            this.CancelButton.Margin = new System.Windows.Forms.Padding(0);
+            this.CancelButton.Name = "CancelButton";
+            this.CancelButton.Size = new System.Drawing.Size(68, 25);
+            this.CancelButton.TabIndex = 28;
+            this.CancelButton.Text = "Cancel";
+            this.CancelButton.UseVisualStyleBackColor = true;
+            this.CancelButton.Visible = false;
+            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // SetupButton
+            // 
+            this.SetupButton.Location = new System.Drawing.Point(22, 98);
+            this.SetupButton.Name = "SetupButton";
+            this.SetupButton.Size = new System.Drawing.Size(91, 25);
+            this.SetupButton.TabIndex = 29;
+            this.SetupButton.Text = "Edit Setup";
+            this.SetupButton.UseVisualStyleBackColor = true;
+            this.SetupButton.Visible = false;
+            this.SetupButton.Click += new System.EventHandler(this.Setup_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(220, 116);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(468, 288);
+            this.pictureBox1.TabIndex = 30;
+            this.pictureBox1.TabStop = false;
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(822, 428);
+            this.ClientSize = new System.Drawing.Size(813, 490);
+            this.Controls.Add(this.SetupButton);
+            this.Controls.Add(this.CancelButton);
+            this.Controls.Add(this.StateVarLabel);
+            this.Controls.Add(this.ParametersLabel);
             this.Controls.Add(this.browserButton);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.MultiSegButton);
@@ -454,7 +494,6 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.ButtonPanel);
             this.Controls.Add(this.DBPanel);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.NetCDF);
             this.Controls.Add(this.StudyNameBox);
             this.Controls.Add(this.SVListBox);
             this.Controls.Add(this.outputbutton);
@@ -463,6 +502,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.loadJSON);
             this.Controls.Add(this.saveJSON);
             this.Controls.Add(this.modelRunningLabel);
+            this.Controls.Add(this.pictureBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(828, 465);
             this.Name = "AQTTestForm";
@@ -471,6 +511,7 @@ namespace GUI.AQUATOX
             this.DBPanel.ResumeLayout(false);
             this.DBPanel.PerformLayout();
             this.ButtonPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -490,7 +531,6 @@ namespace GUI.AQUATOX
         private Button PlantsDB;
         private ListBox SVListBox;
         private TextBox StudyNameBox;
-        private Button NetCDF;
         private Label label1;
         private Label label3;
         private Panel DBPanel;
@@ -501,7 +541,6 @@ namespace GUI.AQUATOX
         private Button AnimButton;
         private Button PlantsButton;
         private Button Diagenesis;
-        private Button SetupButton;
         private Label RunStatusLabel;
         private Button AddButton;
         private Button EditButton;
@@ -511,6 +550,11 @@ namespace GUI.AQUATOX
         private Button HelpButton;
         private Label modelRunningLabel;
         private Button browserButton;
+        private Label ParametersLabel;
+        private Label StateVarLabel;
+        private Button CancelButton;
+        private Button SetupButton;
+        private PictureBox pictureBox1;
     }
 
 

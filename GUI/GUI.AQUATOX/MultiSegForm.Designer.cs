@@ -59,7 +59,6 @@
             this.button3 = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.MapPanel = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
             this.PlotButton = new System.Windows.Forms.Button();
             this.mapButton = new System.Windows.Forms.RadioButton();
             this.flowchartButton = new System.Windows.Forms.RadioButton();
@@ -70,14 +69,13 @@
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.OutputPanel.SuspendLayout();
-            this.MapPanel.SuspendLayout();
             this.TogglePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(908, 12);
+            this.button1.Location = new System.Drawing.Point(926, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -113,7 +111,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(663, 532);
+            this.ProcessLog.Size = new System.Drawing.Size(681, 421);
             this.ProcessLog.TabIndex = 6;
             // 
             // label5
@@ -378,20 +376,14 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MapPanel.BackColor = System.Drawing.Color.White;
-            this.MapPanel.Controls.Add(this.panel3);
             this.MapPanel.Location = new System.Drawing.Point(305, 66);
             this.MapPanel.Name = "MapPanel";
-            this.MapPanel.Size = new System.Drawing.Size(663, 532);
+            this.MapPanel.Size = new System.Drawing.Size(681, 421);
             this.MapPanel.TabIndex = 31;
             this.MapPanel.Visible = false;
             this.MapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
-            // 
-            // panel3
-            // 
-            this.panel3.Location = new System.Drawing.Point(4, 535);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(228, 21);
-            this.panel3.TabIndex = 0;
+            this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
+            this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
             // 
             // PlotButton
             // 
@@ -445,7 +437,7 @@
             this.TogglePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 599);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 490);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(204, 23);
             this.TogglePanel.TabIndex = 36;
@@ -478,7 +470,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1001, 630);
+            this.ClientSize = new System.Drawing.Size(1019, 519);
             this.Controls.Add(this.TogglePanel);
             this.Controls.Add(this.showCOMIDsBox);
             this.Controls.Add(this.flowchartButton);
@@ -510,7 +502,6 @@
             this.panel2.PerformLayout();
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
-            this.MapPanel.ResumeLayout(false);
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
             this.ResumeLayout(false);

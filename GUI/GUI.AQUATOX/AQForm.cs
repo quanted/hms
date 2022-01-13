@@ -41,6 +41,7 @@ namespace GUI.AQUATOX
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
+            Worker.WorkerSupportsCancellation = true;
             graphics = this.CreateGraphics();
             defaultBrowser = Properties.Settings.Default.BrowserExe;
         }
@@ -96,21 +97,23 @@ namespace GUI.AQUATOX
 
                 if (!LoadJSON(json)) return;
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
+                ShowStudyInfo();
+
                 ButtonPanel.Visible = true;
                 AddButton.Visible = true;
                 DeleteButton.Visible = true;
                 EditButton.Visible = true;
-
                 integrate.Visible = true;
 
                 aQTS.ArchiveSimulation();
-                ShowStudyInfo();
+
 
             }
         }
 
         private void saveJSON_Click(object sender, EventArgs e)
         {
+            if (aQTS == null) return;
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "JSON File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
@@ -201,8 +204,19 @@ namespace GUI.AQUATOX
                 if (SimName != "") SimName = SimName + ": ";
                 aQTS.AQTSeg.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
+
                 modelRunningLabel.Visible = true;
+
+                foreach (Control c in Controls)  // disable all buttons
+                  {
+                    c.Enabled = false;
+                }
+
+                CancelButton.Enabled = true;
+                CancelButton.Visible = true;
+                progressBar1.Enabled = true;
                 progressBar1.Visible = true;
+                modelRunningLabel.Enabled = true;
 
                 Worker.RunWorkerAsync();
             }
@@ -223,17 +237,24 @@ namespace GUI.AQUATOX
         {
             progressBar1.Update();
             if (e.Error != null) MessageBox.Show("Error Raised: " + e.Error.Message);
-            else if (errmessage == "")
+            if ((!e.Cancelled)&&(errmessage == ""))
             {
                 // textBox1.Text = "Run Completed.";
                 Application.DoEvents();
                 graph_Click(null, null);
                 ShowStudyInfo();
-            }
-            else MessageBox.Show(errmessage);
+            };
+
+            if ((errmessage != "")&&(errmessage != "User Canceled")) MessageBox.Show(errmessage);
 
             modelRunningLabel.Visible = false;
+            foreach (Control c in Controls)  // enable all buttons
+            {
+                c.Enabled = true;
+            }
+            CancelButton.Visible = false;
             progressBar1.Visible = false;
+            ShowStudyInfo();
 
         }
 
@@ -354,13 +375,18 @@ namespace GUI.AQUATOX
         {
             if (aQTS == null) return;
 
+            saveJSON.Enabled = true;
+            pictureBox1.Visible = false;
+            Refresh();
+            Application.DoEvents();
+
             this.Text = aQTS.AQTSeg.FileName;
             StudyNameBox.Text = aQTS.AQTSeg.StudyName;
             outputbutton.Visible = aQTS.HasResults();
             Diagenesis.Enabled = aQTS.AQTSeg.Diagenesis_Included();
             ChemButton.Enabled = aQTS.AQTSeg.Has_Chemicals();
 
-            if (MultiSegmentInput) RunStatusLabel.Text = "Input for Multi-Segment Run";
+            if (MultiSegmentInput) RunStatusLabel.Visible = false;
             else
             {
                 if (!aQTS.HasResults()) RunStatusLabel.Text = "No Saved Runs";
@@ -368,7 +394,11 @@ namespace GUI.AQUATOX
             }
 
             aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
+
+            ParametersLabel.Visible = true;
+            StateVarLabel.Visible = true;
             SVListBox.Visible = true;
+            SetupButton.Visible = (!MultiSegmentInput);
             SVListBox.DataSource = null;
             SVListBox.DataSource = SVList;
 
@@ -377,26 +407,50 @@ namespace GUI.AQUATOX
 
         private void Chems(object sender, EventArgs e)
         {
-            string[] Chemnames = new string[20];
+            void EditChemical(int chemindex)
+            {
+                Param_Form Chemform = new Param_Form();
+                TStateVariable TSV = aQTS.AQTSeg.SV[chemindex];
+                TToxics TC = TSV as TToxics;
+                Chemform = new Param_Form();
+                ChemicalRecord CR = TC.ChemRec; CR.Setup();
+                TParameter[] PPS = CR.InputArray();
+                Chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON", "ChemData");
+                TC.UpdateName();
+            }
+            // ------------------------------------------------------------------
+
+            List<string> ChemNames = new List<string>();
             int[] cindices = new int[20];
-            Param_Form[] Chemforms = new Param_Form[20];
 
             if (aQTS == null) return;
 
             int nchm = 0;
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+            for (int j = 0; j < aQTS.AQTSeg.SV.Count; j++)
+            {
+                TStateVariable TSV = aQTS.AQTSeg.SV[j];
                 if (TSV.NState == AllVariables.H2OTox)
                 {
-                    TToxics TC = TSV as TToxics;
-                    Chemforms[nchm] = new Param_Form();
-
-                    ChemicalRecord CR = TC.ChemRec; CR.Setup();
-                    TParameter[] PPS = CR.InputArray();
-
-                    Chemforms[nchm].EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON", "ChemData");
-                    TC.UpdateName();
+                    ChemNames.Add(TSV.PName);
+                    cindices[nchm] = j;
                     nchm++;
                 }
+            }
+
+            if (nchm == 0)
+            {
+                MessageBox.Show("There are no chemicals in the current simulation");
+                return;
+            }
+
+            if (nchm == 1) EditChemical(cindices[0]);
+            else
+            {
+                ListForm LF = new ListForm();
+                int index = LF.SelectFromList(ChemNames);
+                if (index >= 0) EditChemical(index);
+            }
+
             ShowStudyInfo();
         }
 
@@ -997,6 +1051,23 @@ namespace GUI.AQUATOX
             ShowStudyInfo();
         }
 
+        public void DeleteStateVariable(int index) // Deletes the variable identified by DeleteVar and all associated toxicants
+        {
+
+            TStateVariable T = aQTS.AQTSeg.SV[index];
+            aQTS.AQTSeg.DeleteVar(index);
+
+            T_SVType ToxLoop;  // Delete associated toxicant records if they exist,  Also Internal Nutrient records
+
+            for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= T_SVType.PIntrnl; ToxLoop++)
+            {
+               TStateVariable TSV = aQTS.AQTSeg.GetStatePointer(T.NState, ToxLoop, T_SVLayer.WaterCol);
+               if (TSV!= null) aQTS.AQTSeg.DeleteVar(TSV);
+            }
+
+            // in the future zero out reciprocal same species record
+        }
+
         private void DeleteButton_Click(object sender, EventArgs e)
         {
             if (SVListBox.SelectedIndex == -1) { MessageBox.Show("No State Variable is Selected."); return; }
@@ -1005,12 +1076,16 @@ namespace GUI.AQUATOX
             int index = -1;
             for (int i=0; i< aQTS.AQTSeg.SV.Count; i++)
             {
-                if (ns == aQTS.AQTSeg.SV[i].NState) index = i;
+                if ((ns == aQTS.AQTSeg.SV[i].NState) && ((aQTS.AQTSeg.SV[i].SVType == T_SVType.StV) || (ns == AllVariables.H2OTox)))  { index = i; break; }
             }
+
+            if (MessageBox.Show("Delete the state variable: '" + aQTS.AQTSeg.SV[index].PName + "'?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
             if (ns == AllVariables.H2OTox) 
               aQTS.AQTSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
-            else aQTS.AQTSeg.DeleteVar(index);
+            else DeleteStateVariable(index);
 
             ShowStudyInfo();
 
@@ -1095,6 +1170,16 @@ namespace GUI.AQUATOX
         {
             if (!LoadJSON(json)) return false;
 
+            SVListBox.Top = ScaleY(78);
+            StateVarLabel.Top = ScaleY(60);
+            SVListBox.Height = ScaleY(390);
+                        
+            HelpButton.Top = ScaleY(78);
+            browserButton.Top = ScaleY(110);
+
+            ButtonPanel.Top = ScaleY(78);
+            ParametersLabel.Top = ScaleY(60);
+
             MultiSegmentInput = true;
             ButtonPanel.Visible = true;
             SetupButton.Visible = false;
@@ -1112,6 +1197,10 @@ namespace GUI.AQUATOX
             return (errmessage == "");
         }
 
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            Worker.CancelAsync();
+        }
 
     }
 }

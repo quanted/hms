@@ -20,7 +20,7 @@ w\:* {behavior:url(#default#VML);}
 .shape {behavior:url(#default#VML);}
 </style>
 <![endif]-->
-<title>AQUATOX.NET Users Manual</title>
+<title>Title Pages</title>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>Jonathan Clough</o:Author>
@@ -3220,7 +3220,7 @@ ol
 	{margin-bottom:0in;}
 ul
 	{margin-bottom:0in;}
-html {	background-color: #999999;}body {	width: 6.5in;	background-color: #FFFFFF;	float: none;	margin: auto;	padding-right: 1in;	padding-left: 1in;}-->
+-->
 </style>
 <!--[if gte mso 10]>
 <style>

@@ -13,7 +13,7 @@ namespace GUI.AQUATOX
     {
         public bool gridChange;
         bool UserCanceled;
-        string HelpTopic = "";
+        string HelpTopic = "ChemTox";
         UptakeCalcMethodType LocalAM;
         UptakeCalcMethodType LocalPM;
 
