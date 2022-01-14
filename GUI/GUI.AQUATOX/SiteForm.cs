@@ -161,7 +161,7 @@ namespace GUI.AQUATOX
             SiteRecord SR = Sim.AQTSeg.Location.Locale;
             SR.Setup();
             TParameter[] PPS = SR.InputArray();
-            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON", "_Toc77252216");
+            Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON", "SiteScreen");
             
             UpdateScreen();
         }

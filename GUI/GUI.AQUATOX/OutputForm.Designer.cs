@@ -29,7 +29,6 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.OutputBox = new System.Windows.Forms.ComboBox();
             this.graphBox = new System.Windows.Forms.ComboBox();
             this.DelRunButton = new System.Windows.Forms.Button();
@@ -42,6 +41,7 @@ namespace GUI.AQUATOX
             this.toggleLog = new System.Windows.Forms.Button();
             this.resetZoom = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.HelpButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // OutputBox
@@ -164,16 +164,31 @@ namespace GUI.AQUATOX
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(40, 409);
+            this.label3.Location = new System.Drawing.Point(119, 409);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(388, 15);
             this.label3.TabIndex = 17;
             this.label3.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
             // 
+            // HelpButton
+            // 
+            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton.Location = new System.Drawing.Point(8, 403);
+            this.HelpButton.Name = "HelpButton";
+            this.HelpButton.Size = new System.Drawing.Size(87, 24);
+            this.HelpButton.TabIndex = 29;
+            this.HelpButton.Text = "  Help";
+            this.HelpButton.UseVisualStyleBackColor = true;
+            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            // 
             // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(812, 431);
+            this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.resetZoom);
             this.Controls.Add(this.toggleLog);
@@ -208,5 +223,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button toggleLog;
         private System.Windows.Forms.Button resetZoom;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button HelpButton;
     }
 }

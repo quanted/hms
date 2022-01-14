@@ -119,7 +119,7 @@ namespace GUI.AQUATOX
             xmax = (float)(xmax - xchange);
             ymax = (float)(ymax - ychange);
 
-            DrawMapPanel();
+            DrawMapPanel(false);
         }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
@@ -320,7 +320,6 @@ namespace GUI.AQUATOX
                             iS.LineColor = Color.Red;
                             iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
                             iS.Draw(MPG, showCOMIDsBox.Checked);
-
                         }
                     }
                     return;
@@ -526,7 +525,7 @@ namespace GUI.AQUATOX
                 Param_Form SetupForm = new Param_Form();
                 SetupForm.SuppressComment = true;
                 SetupForm.SuppressSymbol = true;
-                SetupForm.EditParams(ref SS, "Simulation Setup", true, "SiteLib.JSON", "_Toc77252216");
+                SetupForm.EditParams(ref SS, "Simulation Setup", true, "", "SetupWindow");
 
                 string msfilen = basedirBox.Text + "MasterSetup.json";
                 string msr = JsonConvert.SerializeObject(SR);
@@ -699,7 +698,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            string target = "_Toc77252249";
+            string target = "Multi_Segment_Runs";
             AQTTestForm.OpenUrl(target);
         }
 
@@ -765,7 +764,7 @@ namespace GUI.AQUATOX
                 Center = new Point(Center.X + d.X, Center.Y + d.Y);
             }
 
-            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xmin xmax based on shape xy
+            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xymin xymax based on shape xy
             {
                 Center = new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (Center.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (Center.Y - yMn) / (yMx - yMn)));
             }
@@ -1178,19 +1177,17 @@ namespace GUI.AQUATOX
             xmin = 1000000;
             ymin = 1000000;
 
-            if (DrawMap)
-            { if (PlotCOMIDMap()) DrawMapPanel(); }
+            if (DrawMap)  { if (PlotCOMIDMap()) DrawMapPanel(true); }
             else
             {
                 int EndID = AQT2D.SN.order[AQT2D.SN.order.Length - 1][0];
-                if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawMapPanel();
+                if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawMapPanel(true);
             }
 
         }
 
         private void RescaleMap()
         {
-            MPG = MapPanel.CreateGraphics();
             xBuffer = 80;
             yBuffer = 10;
             if (DrawMap) xBuffer = 10;
@@ -1200,7 +1197,7 @@ namespace GUI.AQUATOX
 
             if (DrawMap)  // resize and buffer to preserve map's aspect ratio
             {
-                double XoverY = ((double)(xmax - xmin) / (double)(ymax - ymin));
+                double XoverY = (double)(xmax - xmin) / (double)(ymax - ymin);
                 double aspectratio = ((double)xScale / (double)yScale) / XoverY;
                 if (aspectratio > 1)
                 {
@@ -1215,9 +1212,10 @@ namespace GUI.AQUATOX
             }
         }
 
-        private void DrawMapPanel()
+        private void DrawMapPanel(bool UpdateAspect)
         {
-            RescaleMap();
+            MPG = MapPanel.CreateGraphics();
+            if (UpdateAspect) RescaleMap();
             MapButton2.Checked = true;
             MapPanel.Visible = true;
             MPG.Clear(Color.White);
@@ -1234,7 +1232,7 @@ namespace GUI.AQUATOX
             if (!MapPanel.Visible) return;
             if (!VerifyStreamNetwork()) return;
             // RedrawShapes();  // optimize
-            DrawMapPanel();
+            DrawMapPanel(true);
         }
 
         private Point clickPosition;
@@ -1294,8 +1292,8 @@ namespace GUI.AQUATOX
            {
                 if ((Math.Abs(e.X - clickPosition.X)<3)&&(Math.Abs(e.Y - clickPosition.Y) < 3)) return;
                 
-                float DeltaX = ((float) (clickPosition.X - e.X) / (float) MapPanel.Width) * (xmax - xmin);
-                float DeltaY = ((float) (e.Y - clickPosition.Y) / (float) MapPanel.Height) * (ymax - ymin);
+                float DeltaX = ((float) (clickPosition.X - e.X) / (float) xScale) * (xmax - xmin); // (float) MapPanel.Width) * (xmax - xmin); 
+                float DeltaY = ((float) (e.Y - clickPosition.Y) / (float) yScale) * (ymax - ymin); // (float) MapPanel.Height) * (ymax - ymin);
 
                 if ((DeltaX == 0)&&(DeltaY == 0)) return;
 
@@ -1305,7 +1303,7 @@ namespace GUI.AQUATOX
                 ymax = ymax + DeltaY;
 
                 if (!VerifyStreamNetwork()) return;
-                DrawMapPanel();
+                DrawMapPanel(false);
 
                 clickPosition.X = e.X;
                 clickPosition.Y = e.Y;

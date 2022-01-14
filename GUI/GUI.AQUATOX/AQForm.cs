@@ -298,7 +298,7 @@ namespace GUI.AQUATOX
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS, "Simulation Setup", true,"", "_Toc77252221");
+            SetupForm.EditParams(ref SS, "Simulation Setup", true,"", "SetupWindow");
             ShowStudyInfo();
         }
 
@@ -864,7 +864,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "_Toc77252216"))
+            if (gf.ShowGrid(table, false, true, "Site"))
             {
                 if (gf.gridChange)
                 {
@@ -1155,7 +1155,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            string target = "_Toc77252201";
+            string target = "MainScreen";
             OpenUrl(target);
         }
 

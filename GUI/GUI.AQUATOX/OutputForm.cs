@@ -34,6 +34,7 @@ namespace GUI.AQUATOX
             }
         }
 
+        string HelpTopic = "OutputScreen";
         private OChart chart1 = new OChart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
@@ -330,6 +331,11 @@ namespace GUI.AQUATOX
         private void resetZoom_Click(object sender, EventArgs e)
         {
             unZoom();
+        }
+
+        private void HelpButton_Click(object sender, EventArgs e)
+        {
+            AQTTestForm.OpenUrl(HelpTopic);
         }
     }
 }
