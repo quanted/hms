@@ -35,7 +35,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.BaseJSONBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.button2 = new System.Windows.Forms.Button();
+            this.StatusLabel = new System.Windows.Forms.Label();
+            this.FlowsButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
             this.executeButton = new System.Windows.Forms.Button();
             this.createButton = new System.Windows.Forms.Button();
@@ -59,17 +60,23 @@
             this.button3 = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.MapPanel = new System.Windows.Forms.Panel();
-            this.PlotButton = new System.Windows.Forms.Button();
-            this.mapButton = new System.Windows.Forms.RadioButton();
-            this.flowchartButton = new System.Windows.Forms.RadioButton();
-            this.showCOMIDsBox = new System.Windows.Forms.CheckBox();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.MapButton2 = new System.Windows.Forms.RadioButton();
             this.ConsoleButton = new System.Windows.Forms.RadioButton();
+            this.browserButton = new System.Windows.Forms.Button();
+            this.PlotPanel = new System.Windows.Forms.Panel();
+            this.outputjump = new System.Windows.Forms.CheckBox();
+            this.showCOMIDsBox = new System.Windows.Forms.CheckBox();
+            this.flowchartButton = new System.Windows.Forms.RadioButton();
+            this.mapButton = new System.Windows.Forms.RadioButton();
+            this.PlotButton = new System.Windows.Forms.Button();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.GraphButton = new System.Windows.Forms.RadioButton();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.OutputPanel.SuspendLayout();
             this.TogglePanel.SuspendLayout();
+            this.PlotPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -85,12 +92,13 @@
             // 
             // basedirBox
             // 
-            this.basedirBox.Location = new System.Drawing.Point(79, 48);
+            this.basedirBox.Location = new System.Drawing.Point(78, 48);
             this.basedirBox.Name = "basedirBox";
-            this.basedirBox.Size = new System.Drawing.Size(183, 23);
+            this.basedirBox.Size = new System.Drawing.Size(172, 23);
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
+            this.basedirBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.basedirBox.Leave += new System.EventHandler(this.basedirBox_Leave);
             // 
             // label2
@@ -126,7 +134,7 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(80, 10);
+            this.BaseJSONBox.Location = new System.Drawing.Point(78, 10);
             this.BaseJSONBox.Name = "BaseJSONBox";
             this.BaseJSONBox.Size = new System.Drawing.Size(327, 23);
             this.BaseJSONBox.TabIndex = 16;
@@ -136,24 +144,34 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.button2);
+            this.panel1.Controls.Add(this.StatusLabel);
+            this.panel1.Controls.Add(this.FlowsButton);
             this.panel1.Controls.Add(this.SetupButton);
             this.panel1.Controls.Add(this.executeButton);
             this.panel1.Controls.Add(this.createButton);
             this.panel1.Location = new System.Drawing.Point(25, 253);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 129);
+            this.panel1.Size = new System.Drawing.Size(259, 157);
             this.panel1.TabIndex = 23;
             // 
-            // button2
+            // StatusLabel
             // 
-            this.button2.Location = new System.Drawing.Point(58, 67);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(127, 23);
-            this.button2.TabIndex = 23;
-            this.button2.Text = "Overland Flows";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.OverlandFlow_Click);
+            this.StatusLabel.Location = new System.Drawing.Point(11, 127);
+            this.StatusLabel.Name = "StatusLabel";
+            this.StatusLabel.Size = new System.Drawing.Size(235, 15);
+            this.StatusLabel.TabIndex = 26;
+            this.StatusLabel.Text = "Model Status Label";
+            this.StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // FlowsButton
+            // 
+            this.FlowsButton.Location = new System.Drawing.Point(58, 67);
+            this.FlowsButton.Name = "FlowsButton";
+            this.FlowsButton.Size = new System.Drawing.Size(127, 23);
+            this.FlowsButton.TabIndex = 23;
+            this.FlowsButton.Text = "Overland Flows";
+            this.FlowsButton.UseVisualStyleBackColor = true;
+            this.FlowsButton.Click += new System.EventHandler(this.OverlandFlow_Click);
             // 
             // SetupButton
             // 
@@ -278,7 +296,7 @@
             this.OutputPanel.Controls.Add(this.label3);
             this.OutputPanel.Controls.Add(this.CSVButton);
             this.OutputPanel.Enabled = false;
-            this.OutputPanel.Location = new System.Drawing.Point(25, 392);
+            this.OutputPanel.Location = new System.Drawing.Point(25, 426);
             this.OutputPanel.Name = "OutputPanel";
             this.OutputPanel.Size = new System.Drawing.Size(259, 81);
             this.OutputPanel.TabIndex = 25;
@@ -342,7 +360,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(54, 385);
+            this.label9.Location = new System.Drawing.Point(54, 419);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(78, 15);
             this.label9.TabIndex = 28;
@@ -385,67 +403,21 @@
             this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
             this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
             // 
-            // PlotButton
-            // 
-            this.PlotButton.Location = new System.Drawing.Point(306, 45);
-            this.PlotButton.Name = "PlotButton";
-            this.PlotButton.Size = new System.Drawing.Size(99, 21);
-            this.PlotButton.TabIndex = 32;
-            this.PlotButton.Text = "Plot Network";
-            this.PlotButton.UseVisualStyleBackColor = true;
-            this.PlotButton.Click += new System.EventHandler(this.PlotButton_Click);
-            // 
-            // mapButton
-            // 
-            this.mapButton.AutoSize = true;
-            this.mapButton.Checked = true;
-            this.mapButton.Location = new System.Drawing.Point(411, 46);
-            this.mapButton.Name = "mapButton";
-            this.mapButton.Size = new System.Drawing.Size(49, 19);
-            this.mapButton.TabIndex = 33;
-            this.mapButton.TabStop = true;
-            this.mapButton.Text = "map";
-            this.mapButton.UseVisualStyleBackColor = true;
-            this.mapButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
-            // 
-            // flowchartButton
-            // 
-            this.flowchartButton.AutoSize = true;
-            this.flowchartButton.Location = new System.Drawing.Point(463, 46);
-            this.flowchartButton.Name = "flowchartButton";
-            this.flowchartButton.Size = new System.Drawing.Size(75, 19);
-            this.flowchartButton.TabIndex = 34;
-            this.flowchartButton.Text = "flowchart";
-            this.flowchartButton.UseVisualStyleBackColor = true;
-            this.flowchartButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
-            // 
-            // showCOMIDsBox
-            // 
-            this.showCOMIDsBox.AutoSize = true;
-            this.showCOMIDsBox.Checked = true;
-            this.showCOMIDsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showCOMIDsBox.Location = new System.Drawing.Point(544, 47);
-            this.showCOMIDsBox.Name = "showCOMIDsBox";
-            this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
-            this.showCOMIDsBox.TabIndex = 35;
-            this.showCOMIDsBox.Text = "Label COMIDs";
-            this.showCOMIDsBox.UseVisualStyleBackColor = true;
-            this.showCOMIDsBox.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
-            // 
             // TogglePanel
             // 
             this.TogglePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
             this.TogglePanel.Location = new System.Drawing.Point(305, 490);
             this.TogglePanel.Name = "TogglePanel";
-            this.TogglePanel.Size = new System.Drawing.Size(204, 23);
+            this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
             // 
             // MapButton2
             // 
             this.MapButton2.AutoSize = true;
-            this.MapButton2.Location = new System.Drawing.Point(109, 3);
+            this.MapButton2.Location = new System.Drawing.Point(95, 3);
             this.MapButton2.Name = "MapButton2";
             this.MapButton2.Size = new System.Drawing.Size(81, 19);
             this.MapButton2.TabIndex = 1;
@@ -466,16 +438,124 @@
             this.ConsoleButton.UseVisualStyleBackColor = true;
             this.ConsoleButton.CheckedChanged += new System.EventHandler(this.ConsoleButton_CheckedChanged);
             // 
+            // browserButton
+            // 
+            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.browserButton.ForeColor = System.Drawing.Color.Black;
+            this.browserButton.Location = new System.Drawing.Point(251, 48);
+            this.browserButton.Margin = new System.Windows.Forms.Padding(0);
+            this.browserButton.Name = "browserButton";
+            this.browserButton.Size = new System.Drawing.Size(47, 23);
+            this.browserButton.TabIndex = 37;
+            this.browserButton.Text = "Browse";
+            this.browserButton.UseVisualStyleBackColor = true;
+            this.browserButton.Click += new System.EventHandler(this.browserButton_Click);
+            // 
+            // PlotPanel
+            // 
+            this.PlotPanel.Controls.Add(this.outputjump);
+            this.PlotPanel.Controls.Add(this.showCOMIDsBox);
+            this.PlotPanel.Controls.Add(this.flowchartButton);
+            this.PlotPanel.Controls.Add(this.mapButton);
+            this.PlotPanel.Controls.Add(this.PlotButton);
+            this.PlotPanel.Location = new System.Drawing.Point(305, 42);
+            this.PlotPanel.Name = "PlotPanel";
+            this.PlotPanel.Size = new System.Drawing.Size(497, 23);
+            this.PlotPanel.TabIndex = 38;
+            // 
+            // outputjump
+            // 
+            this.outputjump.AutoSize = true;
+            this.outputjump.Checked = true;
+            this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.outputjump.Enabled = false;
+            this.outputjump.Location = new System.Drawing.Point(357, 3);
+            this.outputjump.Name = "outputjump";
+            this.outputjump.Size = new System.Drawing.Size(112, 19);
+            this.outputjump.TabIndex = 40;
+            this.outputjump.Text = "Click to Outputs";
+            this.outputjump.UseVisualStyleBackColor = true;
+            this.outputjump.Click += new System.EventHandler(this.mapButton_CheckedChanged);
+            // 
+            // showCOMIDsBox
+            // 
+            this.showCOMIDsBox.AutoSize = true;
+            this.showCOMIDsBox.Checked = true;
+            this.showCOMIDsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showCOMIDsBox.Location = new System.Drawing.Point(243, 3);
+            this.showCOMIDsBox.Name = "showCOMIDsBox";
+            this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
+            this.showCOMIDsBox.TabIndex = 39;
+            this.showCOMIDsBox.Text = "Label COMIDs";
+            this.showCOMIDsBox.UseVisualStyleBackColor = true;
+            this.showCOMIDsBox.Click += new System.EventHandler(this.mapButton_CheckedChanged);
+            // 
+            // flowchartButton
+            // 
+            this.flowchartButton.AutoSize = true;
+            this.flowchartButton.Location = new System.Drawing.Point(162, 2);
+            this.flowchartButton.Name = "flowchartButton";
+            this.flowchartButton.Size = new System.Drawing.Size(75, 19);
+            this.flowchartButton.TabIndex = 38;
+            this.flowchartButton.Text = "flowchart";
+            this.flowchartButton.UseVisualStyleBackColor = true;
+            this.flowchartButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
+            // 
+            // mapButton
+            // 
+            this.mapButton.AutoSize = true;
+            this.mapButton.Checked = true;
+            this.mapButton.Location = new System.Drawing.Point(110, 2);
+            this.mapButton.Name = "mapButton";
+            this.mapButton.Size = new System.Drawing.Size(49, 19);
+            this.mapButton.TabIndex = 37;
+            this.mapButton.TabStop = true;
+            this.mapButton.Text = "map";
+            this.mapButton.UseVisualStyleBackColor = true;
+            this.mapButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
+            // 
+            // PlotButton
+            // 
+            this.PlotButton.Location = new System.Drawing.Point(5, 1);
+            this.PlotButton.Name = "PlotButton";
+            this.PlotButton.Size = new System.Drawing.Size(99, 21);
+            this.PlotButton.TabIndex = 36;
+            this.PlotButton.Text = "Plot Network";
+            this.PlotButton.UseVisualStyleBackColor = true;
+            this.PlotButton.Click += new System.EventHandler(this.PlotButton_Click);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
+            this.progressBar1.Location = new System.Drawing.Point(28, 381);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(252, 23);
+            this.progressBar1.Step = 1;
+            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar1.TabIndex = 27;
+            this.progressBar1.Value = 1;
+            this.progressBar1.Visible = false;
+            // 
+            // GraphButton
+            // 
+            this.GraphButton.AutoSize = true;
+            this.GraphButton.Location = new System.Drawing.Point(186, 2);
+            this.GraphButton.Name = "GraphButton";
+            this.GraphButton.Size = new System.Drawing.Size(89, 19);
+            this.GraphButton.TabIndex = 2;
+            this.GraphButton.Text = "Show Graph";
+            this.GraphButton.UseVisualStyleBackColor = true;
+            this.GraphButton.CheckedChanged += new System.EventHandler(this.ConsoleButton_CheckedChanged);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1019, 519);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.PlotPanel);
+            this.Controls.Add(this.browserButton);
             this.Controls.Add(this.TogglePanel);
-            this.Controls.Add(this.showCOMIDsBox);
-            this.Controls.Add(this.flowchartButton);
-            this.Controls.Add(this.mapButton);
-            this.Controls.Add(this.PlotButton);
             this.Controls.Add(this.MapPanel);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.button3);
@@ -497,6 +577,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);
             this.Shown += new System.EventHandler(this.MultiSegForm_Shown);
             this.ResizeEnd += new System.EventHandler(this.MultiSegForm_ResizeEnd);
+            this.Resize += new System.EventHandler(this.MultiSegForm_Resize);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
@@ -504,6 +585,8 @@
             this.OutputPanel.PerformLayout();
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
+            this.PlotPanel.ResumeLayout(false);
+            this.PlotPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -517,7 +600,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox BaseJSONBox;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button FlowsButton;
         private System.Windows.Forms.Button SetupButton;
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Button createButton;
@@ -541,13 +624,19 @@
         private System.Windows.Forms.Panel OutputPanel;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.Panel MapPanel;
-        private System.Windows.Forms.Button PlotButton;
-        private System.Windows.Forms.RadioButton mapButton;
-        private System.Windows.Forms.RadioButton flowchartButton;
-        private System.Windows.Forms.CheckBox showCOMIDsBox;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel TogglePanel;
         private System.Windows.Forms.RadioButton MapButton2;
         private System.Windows.Forms.RadioButton ConsoleButton;
+        private System.Windows.Forms.Label StatusLabel;
+        private System.Windows.Forms.Button browserButton;
+        private System.Windows.Forms.Panel PlotPanel;
+        private System.Windows.Forms.CheckBox showCOMIDsBox;
+        private System.Windows.Forms.RadioButton flowchartButton;
+        private System.Windows.Forms.RadioButton mapButton;
+        private System.Windows.Forms.Button PlotButton;
+        private System.Windows.Forms.CheckBox outputjump;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.RadioButton GraphButton;
     }
 }
