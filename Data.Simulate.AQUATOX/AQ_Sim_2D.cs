@@ -486,7 +486,7 @@ namespace AQUATOX.AQSim_2D
                 SVList = new List<string>();
                 foreach (TStateVariable SV in Sim.AQTSeg.SV)
                 {
-                    SVList.Add(SV.PName);   //save list of SVs for output
+                    SVList.Add(SV.PName+" ("+SV.StateUnit+")");   //save list of SVs for output
                 }
             }
                 

@@ -1188,9 +1188,12 @@ namespace GUI.AQUATOX
             loadJSON.Visible = false;
             saveJSON.Visible = false;
 
+            OKButton.Visible = true;
+            CancelButt.Visible = true;
+
             ShowStudyInfo();
 
-            ShowDialog();
+            if (ShowDialog() == DialogResult.Cancel) return false;
 
             string errmessage = aQTS.SaveJSON(ref json);
             if (errmessage != "") MessageBox.Show("Error creating json string: " + errmessage);
@@ -1202,5 +1205,12 @@ namespace GUI.AQUATOX
             Worker.CancelAsync();
         }
 
+        private void CancelButt_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Discard all edits made to this linked segment?", "Confirm",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1) == DialogResult.Yes) this.DialogResult = DialogResult.Cancel;
+
+        }
     }
 }

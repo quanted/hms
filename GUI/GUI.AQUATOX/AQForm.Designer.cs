@@ -69,6 +69,8 @@ namespace GUI.AQUATOX
             this.CancelButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.OKButton = new System.Windows.Forms.Button();
+            this.CancelButt = new System.Windows.Forms.Button();
             this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -236,7 +238,7 @@ namespace GUI.AQUATOX
             this.DBPanel.Controls.Add(this.ChemDB);
             this.DBPanel.Controls.Add(this.ReminDB);
             this.DBPanel.Controls.Add(this.AnimalDB);
-            this.DBPanel.Location = new System.Drawing.Point(452, 9);
+            this.DBPanel.Location = new System.Drawing.Point(453, 9);
             this.DBPanel.Name = "DBPanel";
             this.DBPanel.Size = new System.Drawing.Size(343, 55);
             this.DBPanel.TabIndex = 16;
@@ -475,11 +477,37 @@ namespace GUI.AQUATOX
             this.pictureBox1.TabIndex = 30;
             this.pictureBox1.TabStop = false;
             // 
+            // OKButton
+            // 
+            this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.OKButton.Location = new System.Drawing.Point(659, 11);
+            this.OKButton.Name = "OKButton";
+            this.OKButton.Size = new System.Drawing.Size(61, 23);
+            this.OKButton.TabIndex = 35;
+            this.OKButton.Text = "OK";
+            this.OKButton.UseVisualStyleBackColor = true;
+            this.OKButton.Visible = false;
+            // 
+            // CancelButt
+            // 
+            this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.CancelButt.Location = new System.Drawing.Point(735, 11);
+            this.CancelButt.Name = "CancelButt";
+            this.CancelButt.Size = new System.Drawing.Size(61, 23);
+            this.CancelButt.TabIndex = 36;
+            this.CancelButt.Text = "Cancel";
+            this.CancelButt.UseVisualStyleBackColor = true;
+            this.CancelButt.Visible = false;
+            this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(813, 490);
+            this.Controls.Add(this.OKButton);
+            this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.SetupButton);
             this.Controls.Add(this.CancelButton);
             this.Controls.Add(this.StateVarLabel);
@@ -555,6 +583,8 @@ namespace GUI.AQUATOX
         private Button CancelButton;
         private Button SetupButton;
         private PictureBox pictureBox1;
+        private Button OKButton;
+        private Button CancelButt;
     }
 
 

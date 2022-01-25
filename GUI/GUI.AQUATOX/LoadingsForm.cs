@@ -536,7 +536,13 @@ namespace GUI.AQUATOX
             for (int i = 0; i < LoadTable.Rows.Count; i++)
             {
                 DataRow row = LoadTable.Rows[i];
-                LoadShown.list.Add(row.Field<DateTime>(0), row.Field<double>(1));
+                try 
+                {
+                    LoadShown.list.Add(row.Field<DateTime>(0), row.Field<double>(1));
+                }
+                catch
+                { }
+
             }
             
         }

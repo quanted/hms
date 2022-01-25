@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MultiSegForm));
             this.button1 = new System.Windows.Forms.Button();
             this.basedirBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -60,7 +61,9 @@
             this.button3 = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.MapPanel = new System.Windows.Forms.Panel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TogglePanel = new System.Windows.Forms.Panel();
+            this.GraphButton = new System.Windows.Forms.RadioButton();
             this.MapButton2 = new System.Windows.Forms.RadioButton();
             this.ConsoleButton = new System.Windows.Forms.RadioButton();
             this.browserButton = new System.Windows.Forms.Button();
@@ -71,10 +74,13 @@
             this.mapButton = new System.Windows.Forms.RadioButton();
             this.PlotButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.GraphButton = new System.Windows.Forms.RadioButton();
+            this.infolabel1 = new System.Windows.Forms.Label();
+            this.infolabel2 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.OutputPanel.SuspendLayout();
+            this.MapPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.TogglePanel.SuspendLayout();
             this.PlotPanel.SuspendLayout();
             this.SuspendLayout();
@@ -82,7 +88,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(926, 12);
+            this.button1.Location = new System.Drawing.Point(892, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -119,7 +125,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(681, 421);
+            this.ProcessLog.Size = new System.Drawing.Size(647, 400);
             this.ProcessLog.TabIndex = 6;
             // 
             // label5
@@ -140,6 +146,8 @@
             this.BaseJSONBox.TabIndex = 16;
             this.BaseJSONBox.Tag = "";
             this.BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\LBR Glenwood 4.JSON";
+            this.BaseJSONBox.Enter += new System.EventHandler(this.BaseJSONBox_Enter);
+            this.BaseJSONBox.Leave += new System.EventHandler(this.BaseJSONBox_Leave);
             // 
             // panel1
             // 
@@ -318,7 +326,7 @@
             this.SVBox.Name = "SVBox";
             this.SVBox.Size = new System.Drawing.Size(178, 23);
             this.SVBox.TabIndex = 22;
-            this.SVBox.SelectedIndexChanged += new System.EventHandler(this.SVBox_SelectedIndexChanged);
+            this.SVBox.SelectionChangeCommitted += new System.EventHandler(this.SVBox_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -394,14 +402,26 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MapPanel.BackColor = System.Drawing.Color.White;
+            this.MapPanel.Controls.Add(this.pictureBox1);
             this.MapPanel.Location = new System.Drawing.Point(305, 66);
             this.MapPanel.Name = "MapPanel";
-            this.MapPanel.Size = new System.Drawing.Size(681, 421);
+            this.MapPanel.Size = new System.Drawing.Size(647, 400);
             this.MapPanel.TabIndex = 31;
             this.MapPanel.Visible = false;
             this.MapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
             this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
             this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(296, 333);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(346, 63);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Visible = false;
             // 
             // TogglePanel
             // 
@@ -409,10 +429,21 @@
             this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 490);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 471);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
+            // 
+            // GraphButton
+            // 
+            this.GraphButton.AutoSize = true;
+            this.GraphButton.Location = new System.Drawing.Point(186, 2);
+            this.GraphButton.Name = "GraphButton";
+            this.GraphButton.Size = new System.Drawing.Size(89, 19);
+            this.GraphButton.TabIndex = 2;
+            this.GraphButton.Text = "Show Graph";
+            this.GraphButton.UseVisualStyleBackColor = true;
+            this.GraphButton.CheckedChanged += new System.EventHandler(this.ConsoleButton_CheckedChanged);
             // 
             // MapButton2
             // 
@@ -475,7 +506,7 @@
             this.outputjump.TabIndex = 40;
             this.outputjump.Text = "Click to Outputs";
             this.outputjump.UseVisualStyleBackColor = true;
-            this.outputjump.Click += new System.EventHandler(this.mapButton_CheckedChanged);
+            this.outputjump.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
             // 
             // showCOMIDsBox
             // 
@@ -488,7 +519,7 @@
             this.showCOMIDsBox.TabIndex = 39;
             this.showCOMIDsBox.Text = "Label COMIDs";
             this.showCOMIDsBox.UseVisualStyleBackColor = true;
-            this.showCOMIDsBox.Click += new System.EventHandler(this.mapButton_CheckedChanged);
+            this.showCOMIDsBox.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
             // 
             // flowchartButton
             // 
@@ -536,22 +567,35 @@
             this.progressBar1.Value = 1;
             this.progressBar1.Visible = false;
             // 
-            // GraphButton
+            // infolabel1
             // 
-            this.GraphButton.AutoSize = true;
-            this.GraphButton.Location = new System.Drawing.Point(186, 2);
-            this.GraphButton.Name = "GraphButton";
-            this.GraphButton.Size = new System.Drawing.Size(89, 19);
-            this.GraphButton.TabIndex = 2;
-            this.GraphButton.Text = "Show Graph";
-            this.GraphButton.UseVisualStyleBackColor = true;
-            this.GraphButton.CheckedChanged += new System.EventHandler(this.ConsoleButton_CheckedChanged);
+            this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.infolabel1.AutoSize = true;
+            this.infolabel1.Location = new System.Drawing.Point(619, 473);
+            this.infolabel1.Name = "infolabel1";
+            this.infolabel1.Size = new System.Drawing.Size(361, 15);
+            this.infolabel1.TabIndex = 39;
+            this.infolabel1.Text = "Click on a COMID to view/edit model inputs (or outputs if relevant)";
+            this.infolabel1.Visible = false;
+            // 
+            // infolabel2
+            // 
+            this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.infolabel2.AutoSize = true;
+            this.infolabel2.Location = new System.Drawing.Point(619, 492);
+            this.infolabel2.Name = "infolabel2";
+            this.infolabel2.Size = new System.Drawing.Size(244, 15);
+            this.infolabel2.TabIndex = 40;
+            this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
+            this.infolabel2.Visible = false;
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1019, 519);
+            this.ClientSize = new System.Drawing.Size(985, 518);
+            this.Controls.Add(this.infolabel2);
+            this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.PlotPanel);
             this.Controls.Add(this.browserButton);
@@ -583,6 +627,8 @@
             this.panel2.PerformLayout();
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
+            this.MapPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
             this.PlotPanel.ResumeLayout(false);
@@ -638,5 +684,8 @@
         private System.Windows.Forms.CheckBox outputjump;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.RadioButton GraphButton;
+        private System.Windows.Forms.Label infolabel1;
+        private System.Windows.Forms.Label infolabel2;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

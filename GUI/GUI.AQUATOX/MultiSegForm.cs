@@ -106,6 +106,13 @@ namespace GUI.AQUATOX
             
         }
 
+        protected override void WndProc(ref Message m)  
+        {
+            // Suppress the WM_UPDATEUISTATE message
+            if (m.Msg == 0x128) return;
+            base.WndProc(ref m);
+            // https://stackoverflow.com/questions/8848203/alt-key-causes-form-to-redraw
+        }
 
         private void UpdateScreen()
         {
@@ -123,6 +130,7 @@ namespace GUI.AQUATOX
                     modelrun = ModelRunDate();
                 }
             }
+            else Drawing.Clear(); 
 
             if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
             else if (inputsegs) StatusLabel.Text = "Linked Input Segments Created";
@@ -289,7 +297,7 @@ namespace GUI.AQUATOX
             string comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
             string FileN = BaseDir + "AQT_Run_" + comid.ToString() + ".JSON";
             if (!ValidFilen(FileN, false)) return DateTime.MinValue;
-            return File.GetCreationTime(FileN);
+            return File.GetLastWriteTime(FileN);
         }
 
         private bool ArchivedOutput()
@@ -335,7 +343,7 @@ namespace GUI.AQUATOX
                 {
                     if (!ValidFilen(BaseDir + "StreamNetwork.JSON", false))
                     {
-                        AddToProcessLog("Cannot find stream network file " + BaseDir + "StreamNetwork.JSON");
+                        // AddToProcessLog("Cannot find stream network file " + BaseDir + "StreamNetwork.JSON");
                         return false;
                     }
                     string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);
@@ -477,16 +485,18 @@ namespace GUI.AQUATOX
                     if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
                         File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
 
-                 /*   foreach (IShape iS in Drawing)   not threadsafe
+                    foreach (IShape iS in Drawing)   
                     {
                         if (iS.ID == runID.ToString())
                         {
                             iS.LineColor = Color.Green;
                             iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                            iS.Draw(MPG, showCOMIDsBox.Checked);
-                            
+                            BeginInvoke((MethodInvoker)delegate()  //make draw threadsafe 
+                            {
+                                iS.Draw(MPG, showCOMIDsBox.Checked);
+                            });
                         }
-                    }  */
+                    }  
 
                     TSafeAddToProcessLog(strout);  //write update to status log
                 });
@@ -535,11 +545,13 @@ namespace GUI.AQUATOX
             if (AQT2D.archive == null) return;
 
             int SVIndex = SVBox.SelectedIndex;
-            string csv = "";
+            string csv = SVBox.Text += Environment.NewLine;
+
 
             int NDates = 0;
             int[] comids = new int[AQT2D.archive.Count];
             int i = 0;
+
 
             foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
             {
@@ -561,6 +573,21 @@ namespace GUI.AQUATOX
             }
 
             ProcessLog.Text = csv;
+
+            if (MessageBox.Show("Save CSV to text?", "Confirm",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "CSV File|*.CSV";
+            saveFileDialog1.Title = "Save to Comma-Separated Text";
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                File.WriteAllText(saveFileDialog1.FileName, csv);
+            }
+
+
         }
 
         private void ChartButtonClick(object sender, EventArgs e)   //produce graphics from archived results given selected state variable in dropdown box
@@ -571,7 +598,11 @@ namespace GUI.AQUATOX
             {
                 int SVIndex = SVBox.SelectedIndex;
 
+                GraphButton.Checked = true;
                 chart1.Series.Clear();
+                chart1.Titles.Clear();
+                chart1.Titles.Add(SVBox.Text);
+
                 chart1.BringToFront();
                 int sercnt = 0;
 
@@ -651,6 +682,9 @@ namespace GUI.AQUATOX
                 Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
 
                 SR.Setup(false);
+                DateTime firstday = SR.FirstDay.Val;
+                DateTime lastday = SR.LastDay.Val;
+
                 TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
                 SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
                 new TSubheading("Biota Modeling Options",""),SR.NFix_UseRatio,SR.NtoPRatio,
@@ -659,6 +693,9 @@ namespace GUI.AQUATOX
                 SetupForm.SuppressComment = true;
                 SetupForm.SuppressSymbol = true;
                 SetupForm.EditParams(ref SS, "Simulation Setup", true, "", "SetupWindow");
+
+                if ((firstday != SR.FirstDay.Val) || (lastday != SR.LastDay.Val))
+                    if (SegmentsCreated()) MessageBox.Show("The dates of the simulation have been changed.  Note that water flows from the National Water Model will not be updated with the new date range and applied to the linked system until 'Create Linked Inputs' is selected, overwriting the existing linked system.");  
 
                 string msfilen = basedirBox.Text + "MasterSetup.json";
                 string msr = JsonConvert.SerializeObject(SR);
@@ -672,7 +709,8 @@ namespace GUI.AQUATOX
 
         private void SVBox_SelectedIndexChanged(object sender, EventArgs e)  //update chart when dropdown changes
         {
-            ChartButtonClick(sender, e);
+            if (GraphButton.Checked) ChartButtonClick(sender, e);
+            if (ConsoleButton.Checked) CSVButton_Click(sender, e);
         }
 
         private void OverlandFlow_Click(object sender, EventArgs e)
@@ -752,7 +790,7 @@ namespace GUI.AQUATOX
 
             GridForm gf = new GridForm();
             gf.Text = "Add Non-Point Source (Overland) Inputs";
-            if (!gf.ShowGrid(OverlandTable, true, false, "")) return;
+            if (!gf.ShowGrid(OverlandTable, true, false, "Overland_Flows")) return;
 
             for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
             {
@@ -799,7 +837,10 @@ namespace GUI.AQUATOX
             string filen = AQSim_2D.MultiSegSimName(BoolList);
 
             BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + filen;
-            MessageBox.Show("Selected Template File: " + filen);
+
+            string warning = "";
+            if (SegmentsCreated()) warning = ".  Note: This template will not be applied to the linked system until 'Create Linked Inputs' is selected, overwriting the existing linked system.";
+            MessageBox.Show("Selected Template File: " + filen+ warning);
         }
 
         private void basedirBox_Leave(object sender, EventArgs e)
@@ -855,13 +896,14 @@ namespace GUI.AQUATOX
             void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx);  //scale into the border bxmin bxmax based on shape xy and max/min shape xy
             public string ID { get; set; }
         }
+
         public class Circle : IShape
         {
             public string ID { get; set; }
             public Color LineColor { get; set; }
-            public Circle() { FillColor = Color.Navy; }
+            public Circle() { FillColor = Color.Chartreuse; }
             public Circle(int x1, int y1, string inID) {
-                FillColor = Color.Navy;
+                FillColor = Color.Chartreuse;
                 Center = new Point(x1, y1);
                 Radius = 3;
                 ID = inID;
@@ -1058,14 +1100,14 @@ namespace GUI.AQUATOX
                 DrawArrow(g, PlotPoint2, PlotPoint1, LineColor, 2, 1);
 
                 //                    Pen pen = new Pen(LineColor, LineWidth);  // older draw line, arrowheads too small
-                // pen.StartCap = LineCap.ArrowAnchor;
+                //                    pen.StartCap = LineCap.ArrowAnchor;
                 //                    using (var path = GetPath())
                 //                    using (pen)
                 //                    g.DrawPath(pen, path);
 
                 if (ShowCOMIDs)
                 {
-                    Point Location = new Point(5 + (PlotPoint1.X + PlotPoint2.X) / 2, -5 + (PlotPoint2.Y + PlotPoint2.Y) / 2);
+                    Point Location = new Point(5 + (PlotPoint1.X + PlotPoint2.X) / 2, -5 + (PlotPoint1.Y + PlotPoint2.Y) / 2);
                     Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
                     Rectangle rect = new Rectangle(Location, sizeOfText);
                     g.FillRectangle(Brushes.White, rect);
@@ -1202,7 +1244,30 @@ namespace GUI.AQUATOX
 
         }
 
-        bool PlotCOMIDArrow(int COMID, int x1, int y1, int x2, int y2, int maxX)
+        private void MoveLowerBranchesRight(int xlevel)
+        {
+
+            foreach (IShape iS in Drawing)
+                if (iS is Arrow)
+                {
+                    Arrow Ar = iS as Arrow;
+                    int P1X = Ar.Point1.X;
+                    int P2X = Ar.Point2.X;
+                    bool moveit = false;
+
+                    if (Ar.Point1.X >= xlevel) { P1X = Ar.Point1.X + 1; moveit = true; if (xmax < P1X) xmax = P1X; }
+                    if (Ar.Point2.X >= xlevel) { P2X = Ar.Point2.X + 1; moveit = true; if (xmax < P2X) xmax = P2X; }
+
+                    if (moveit)
+                    {
+                        Ar.Point1 = new Point(P1X, Ar.Point1.Y);
+                        Ar.Point2 = new Point(P2X, Ar.Point2.Y);
+                    }
+                }
+        }
+
+        int maxX = 0;
+        bool PlotCOMIDArrow(int COMID, int x1, int y1, int x2, int y2)
         {
             string CString = COMID.ToString();
 
@@ -1240,9 +1305,10 @@ namespace GUI.AQUATOX
                         else 
                         {
                             int xplot = x2 + nSources;
-                            if ((nSources >0) && (xplot <= maxX)) xplot = maxX + 1;
+                            if ((nSources > 0) && (xplot <= maxX)) xplot = maxX+1;
+                                // MoveLowerBranchesRight(xplot);
                             if (xplot > maxX) maxX = xplot;
-                            if (PlotCOMIDArrow(SrcID, x2, y2, xplot, y2 + 1,maxX)) nSources++; 
+                            if (PlotCOMIDArrow(SrcID, x2, y2, xplot, y2 + 1)) nSources++; 
                         }
                     }
                 };
@@ -1271,6 +1337,7 @@ namespace GUI.AQUATOX
 
         bool PlotCOMIDMap()
         {
+            pictureBox1.Visible = false;
             string BaseDir = basedirBox.Text;
             string GeoJSON = "";
             double[][] polyline;
@@ -1284,38 +1351,48 @@ namespace GUI.AQUATOX
                     else
                     {
                         MapPanel.Visible = false;
-                        AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID "+CString);
+                        AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
                         GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
                         if (GeoJSON.IndexOf("ERROR") >= 0)
                         {
                             AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
                             // show process log 
-                            return false;
+                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk
+                            continue;
+                            // return false;
                         }
                         System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
                     }
 
-                    GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                    try 
+                    if (GeoJSON == "{}") polyline = null;
+                    else
                     {
-                        polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                    }
-                    catch
-                    {
-                        AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
+                        GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
+                        try
+                        {
+                            polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                        }
+                        catch
+                        {
+                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
+                        }
                     }
 
 
                     List<PointF> startpoints = new List<PointF>();
                     List<PointF> endpoints = new List<PointF>();
 
-                    for (int k = 0; k < polyline.Length - 1; k++)
+                    if (polyline != null)
                     {
-                        startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
-                        endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
+                        for (int k = 0; k < polyline.Length - 1; k++)
+                        {
+                            startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
+                            endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
+                        }
+                        Drawing.Add(new PolyLine(startpoints, endpoints, CString));
                     }
-                    Drawing.Add(new PolyLine(startpoints, endpoints, CString));
-                    }
+                }   
+
             MapPanel.Visible = true;
             chart1.Visible = false;
 
@@ -1340,7 +1417,9 @@ namespace GUI.AQUATOX
             else
             {
                 int EndID = AQT2D.SN.order[AQT2D.SN.order.Length - 1][0];
-                if (PlotCOMIDArrow(EndID, 0, 0, 0, 1,0)) DrawMapPanel(true);
+                maxX = 0;
+                pictureBox1.Visible = true;
+                if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawMapPanel(true);
             }
 
         }
@@ -1393,7 +1472,6 @@ namespace GUI.AQUATOX
             if (chart1.Visible) return;
             if (!MapPanel.Visible) return;
             if (!VerifyStreamNetwork()) return;
-            // RedrawShapes();  // optimize
             DrawMapPanel(true);
         }
 
@@ -1412,7 +1490,7 @@ namespace GUI.AQUATOX
                     else EditCOMID(Drawing[i].ID); 
                 
                 }; 
-                        // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
+            // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
 
             base.OnMouseDown(e);
         }
@@ -1428,16 +1506,24 @@ namespace GUI.AQUATOX
         {
             if (GraphButton.Checked)
             {
+                pictureBox1.Visible = false;
                 chart1.Visible = true;
                 chart1.BringToFront();
+                infolabel1.Visible = false;
+                infolabel2.Visible = false;
             }
             else if (ConsoleButton.Checked)
             {
+                pictureBox1.Visible = false;
                 chart1.Visible = false;
                 MapPanel.Visible = false;
+                infolabel1.Visible = false;
+                infolabel2.Visible = false;
             }
             else
             {
+                infolabel1.Visible = true;
+                infolabel2.Visible = true;
                 chart1.Visible = false;
                 MapPanel.Visible = true;
                 if (!VerifyStreamNetwork()) return;
@@ -1460,8 +1546,11 @@ namespace GUI.AQUATOX
 
         private void ViewOutput(string CString)
         {
+            string graphjson = "";
             string BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Run_" + CString + ".JSON";
+            string graphfilen = BaseDir + "OutputGraphs"+ ".JSON";
+
             if (ValidFilen(filen, false))
             {
                 string json = File.ReadAllText(filen);  //read one segment of executed multi-seg model
@@ -1471,10 +1560,21 @@ namespace GUI.AQUATOX
                 Sim.AQTSeg.SetMemLocRec();
                 Sim.ArchiveSimulation();
                 OutputForm OutForm = new OutputForm();
+                OutForm.Text = "Multi-Segment output from " + "AQT_Run_" + CString + ".JSON";
+
+                if (ValidFilen(graphfilen, false))
+                {
+                    graphjson = File.ReadAllText(graphfilen);  //read user generated graphs
+                    Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs> (graphjson);  
+                }
+
                 OutForm.ShowOutput(Sim);
 
+                graphjson = JsonConvert.SerializeObject(Sim.SavedRuns.Values.Last().Graphs);
+                File.WriteAllText(graphfilen, graphjson);
+
             }
-                else { MessageBox.Show("COMID: " + CString+ ".  Linked output for this COMID not available."); };
+            else { MessageBox.Show("COMID: " + CString+ ".  Linked output for this COMID not available."); };
         }
 
         private void MapPanel_MouseHover(object sender, EventArgs e)
@@ -1504,8 +1604,6 @@ namespace GUI.AQUATOX
 
                 clickPosition.X = e.X;
                 clickPosition.Y = e.Y;
-
-
             }
         }
 
@@ -1521,7 +1619,6 @@ namespace GUI.AQUATOX
                     UpdateScreen();
                 }
             }
-
         }
 
         private void MultiSegForm_Resize(object sender, EventArgs e)
@@ -1533,6 +1630,26 @@ namespace GUI.AQUATOX
                 MultiSegForm_ResizeEnd(sender, e);
             }
 
+        }
+
+        private void showCOMIDsBox_CheckedChanged(object sender, EventArgs e)
+        {
+            MultiSegForm_ResizeEnd(sender, e);
+        }
+
+
+        string templatestring = "";
+        private void BaseJSONBox_Leave(object sender, EventArgs e)
+        {
+            if (BaseJSONBox.Text == templatestring) return;
+            if (!ValidFilen(BaseJSONBox.Text, true)) return;
+            if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");  
+
+        }
+
+        private void BaseJSONBox_Enter(object sender, EventArgs e)
+        {
+            templatestring = BaseJSONBox.Text;
         }
     }
 }
