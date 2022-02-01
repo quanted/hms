@@ -39,12 +39,26 @@ namespace GUI.AQUATOX
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
         Series series1 = new Series();
+        Graphics graphics = null; 
 
         public AQTSim aQTS = null;
         public AQUATOXSegment outSeg = null;
 
+        private int ScaleX(int x)
+        {
+            double ScaleX = graphics.DpiX / 96;
+            return Convert.ToInt32(x * ScaleX);
+        }
+
+        private int ScaleY(int y)
+        {
+            double ScaleY = graphics.DpiY / 96;
+            return Convert.ToInt32(y * ScaleY);
+        }
+
         public OutputForm()
         {
+            InitializeComponent();
 
             // 
             // chart1
@@ -59,16 +73,13 @@ namespace GUI.AQUATOX
             this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             chartArea1.Name = "ChartArea1";
             chart1.ChartAreas.Add(chartArea1);
-
-            Graphics graphics = this.CreateGraphics();
-            double ScaleX = graphics.DpiX / 96;
-            double ScaleY = graphics.DpiY / 96;
+            graphics = this.CreateGraphics();
 
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(Convert.ToInt32(30 * ScaleX), Convert.ToInt32(70 * ScaleY));
+            chart1.Location = new System.Drawing.Point(30, 70);
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(Convert.ToInt32(750 * ScaleX), Convert.ToInt32(330 * ScaleY));
+            this.chart1.Size = new System.Drawing.Size(750, 330);
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
@@ -94,9 +105,8 @@ namespace GUI.AQUATOX
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            InitializeComponent();
-            this.chart1.Size = new System.Drawing.Size(this.Width-2* Convert.ToInt32(this.chart1.Left*ScaleX), Convert.ToInt32(330 * ScaleY));
-
+            chart1.Location = new System.Drawing.Point(pictureBox1.Left, pictureBox1.Top);
+            chart1.Size = new System.Drawing.Size(pictureBox1.Width, pictureBox1.Height);
         }
 
 

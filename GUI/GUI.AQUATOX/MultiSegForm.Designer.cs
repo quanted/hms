@@ -88,7 +88,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(892, 12);
+            this.button1.Location = new System.Drawing.Point(894, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -98,7 +98,7 @@
             // 
             // basedirBox
             // 
-            this.basedirBox.Location = new System.Drawing.Point(78, 48);
+            this.basedirBox.Location = new System.Drawing.Point(79, 48);
             this.basedirBox.Name = "basedirBox";
             this.basedirBox.Size = new System.Drawing.Size(172, 23);
             this.basedirBox.TabIndex = 2;
@@ -110,7 +110,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 51);
+            this.label2.Location = new System.Drawing.Point(10, 51);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(63, 15);
             this.label2.TabIndex = 4;
@@ -125,13 +125,13 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(647, 400);
+            this.ProcessLog.Size = new System.Drawing.Size(649, 396);
             this.ProcessLog.TabIndex = 6;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 12);
+            this.label5.Location = new System.Drawing.Point(11, 13);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
             this.label5.TabIndex = 17;
@@ -140,7 +140,7 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(78, 10);
+            this.BaseJSONBox.Location = new System.Drawing.Point(80, 10);
             this.BaseJSONBox.Name = "BaseJSONBox";
             this.BaseJSONBox.Size = new System.Drawing.Size(327, 23);
             this.BaseJSONBox.TabIndex = 16;
@@ -266,7 +266,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(2, 50);
+            this.label4.Location = new System.Drawing.Point(1, 50);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(119, 15);
             this.label4.TabIndex = 25;
@@ -405,7 +405,7 @@
             this.MapPanel.Controls.Add(this.pictureBox1);
             this.MapPanel.Location = new System.Drawing.Point(305, 66);
             this.MapPanel.Name = "MapPanel";
-            this.MapPanel.Size = new System.Drawing.Size(647, 400);
+            this.MapPanel.Size = new System.Drawing.Size(650, 396);
             this.MapPanel.TabIndex = 31;
             this.MapPanel.Visible = false;
             this.MapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
@@ -416,7 +416,7 @@
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(296, 333);
+            this.pictureBox1.Location = new System.Drawing.Point(299, 329);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(346, 63);
             this.pictureBox1.TabIndex = 0;
@@ -429,7 +429,7 @@
             this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 471);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 467);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
@@ -571,7 +571,7 @@
             // 
             this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel1.AutoSize = true;
-            this.infolabel1.Location = new System.Drawing.Point(619, 473);
+            this.infolabel1.Location = new System.Drawing.Point(619, 469);
             this.infolabel1.Name = "infolabel1";
             this.infolabel1.Size = new System.Drawing.Size(361, 15);
             this.infolabel1.TabIndex = 39;
@@ -582,7 +582,7 @@
             // 
             this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel2.AutoSize = true;
-            this.infolabel2.Location = new System.Drawing.Point(619, 492);
+            this.infolabel2.Location = new System.Drawing.Point(619, 488);
             this.infolabel2.Name = "infolabel2";
             this.infolabel2.Size = new System.Drawing.Size(244, 15);
             this.infolabel2.TabIndex = 40;
@@ -593,7 +593,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(985, 518);
+            this.ClientSize = new System.Drawing.Size(987, 514);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
@@ -615,7 +615,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.basedirBox);
             this.Controls.Add(this.button1);
-            this.MinimumSize = new System.Drawing.Size(861, 524);
+            this.MinimumSize = new System.Drawing.Size(1003, 553);
             this.Name = "MultiSegForm";
             this.Text = "MultiSegForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);

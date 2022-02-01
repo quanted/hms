@@ -81,7 +81,7 @@ namespace GUI.AQUATOX
 
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(ScaleX(305), ScaleY(66));
+            chart1.Location = new System.Drawing.Point(ScaleX(MapPanel.Left), ScaleY(MapPanel.Top));
             chart1.Name = "chart1";
             this.chart1.Size = new System.Drawing.Size(ScaleX(MapPanel.Width), ScaleY(MapPanel.Height));
             chart1.TabIndex = 3;
@@ -103,7 +103,10 @@ namespace GUI.AQUATOX
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-            
+
+            chart1.Location = new System.Drawing.Point(MapPanel.Left, MapPanel.Top);
+            chart1.Size = new System.Drawing.Size(MapPanel.Width, MapPanel.Height);
+
         }
 
         protected override void WndProc(ref Message m)  
@@ -130,9 +133,15 @@ namespace GUI.AQUATOX
                     modelrun = ModelRunDate();
                 }
             }
-            else Drawing.Clear(); 
+            else
+            {
+                ConsoleButton.Checked = true;
+                Drawing.Clear();
+                MapPanel.Visible = false;
+                chart1.Visible = false;
+            }
 
-            if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
+                if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
             else if (inputsegs) StatusLabel.Text = "Linked Input Segments Created";
             else if (streamnetwork) StatusLabel.Text = "Stream Network Created";
             else if (validDirectory) StatusLabel.Text = "Model Not Initiated";
@@ -848,6 +857,11 @@ namespace GUI.AQUATOX
             if (!basedirBox.Text.EndsWith("\\")) basedirBox.Text = basedirBox.Text + "\\";
             AQT2D = null;
             UpdateScreen();
+            if (PlotPanel.Enabled)
+            {
+                MapButton2.Checked = true;
+                mapButton_CheckedChanged(sender, e);
+            }
         }
 
         private void MultiSegForm_FormClosing(object sender, FormClosingEventArgs e)
