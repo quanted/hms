@@ -338,10 +338,109 @@ namespace Web.Services.Models
             }
         }
 
+        private bool divergentCheck(string segmentComid)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT Divergence FROM PlusFlowlineVAA WHERE ComID=" + segmentComid;
+            Dictionary<string, string> results = Utilities.SQLite.GetData(dbPath, query);
+            if (results.Count > 0)
+            {
+                // Divergence is defined as a value not equal to 0 or 1, where 1 is the primary path parallel to a divergent path
+                if(Int32.Parse(results["Divergence"]) >= 2)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        private Dictionary<string, string> segmentDetails(string segmentHydroseq)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE Hydroseq=" + segmentHydroseq;
+            return Utilities.SQLite.GetData(dbPath, query);
+        }
+
+        private Dictionary<string, object> traverseDivergence(string pourpoint)
+        {
+            Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();      // Sources dictionary (COMID)
+            List<List<string>> order = new List<List<string>>();
+            List<string> divComids = new List<string>();
+
+            string iSegment = pourpoint;
+            string pseudoPourpoint = "";
+            Dictionary<string, string> iDetails = this.segmentDetails(iSegment);
+            Dictionary<string, string> jDetails = new Dictionary<string, string>();
+
+            bool divergent = true;
+            while(divergent)
+            {
+                
+                string upHydro = iDetails["UpHydroseq"];
+
+                jDetails = this.segmentDetails(upHydro);
+                sources.Add(iDetails["ComID"], new List<string>() { jDetails["ComID"] });
+                order = order.Prepend(new List<string>() { iDetails["ComID"] }).ToList();
+
+                if(Int32.Parse(jDetails["Divergence"]) == 0)
+                {
+                    divergent = false;
+                    pseudoPourpoint = jDetails["ComID"];
+                }
+                else
+                {
+                    iDetails = jDetails;
+                }
+            }
+
+            Dictionary<string, string> pSegment = this.segmentDetails(jDetails["DnHydroseq"]);
+            Dictionary<string, List<string>> divParallel = new Dictionary<string, List<string>>();
+            divParallel.Add(iDetails["ComID"], new List<string>()
+            {
+                pSegment["ComID"]
+            });
+
+            return new Dictionary<string, object>()
+            {
+                { "pseudo-pourpoint",  pseudoPourpoint},
+                { "sources", sources },
+                { "order", order },
+                { "boundary", new Dictionary<string, object>(){{"divergence", divComids } } },
+                { "divergent-paths", divParallel}
+            };
+        }
+
+        private string getParallelSegment(string hydroseq)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT ComID FROM PlusFlowlineVAA WHERE Hydroseq=(SELECT DnHydroseq FROM PlusFlowlineVAA WHERE Hydroseq=" + hydroseq + ")";
+            Dictionary<string, string> qResults = Utilities.SQLite.GetData(dbPath, query);
+            return qResults["ComID"];
+        }
+
 
         public Dictionary<string, object> generateOrderAndSources(ref List<List<object>> networkTable, string pourpoint, string huc = "")
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+
+            // Check if pourpoint is along a divergent path, non-mainstem path
+            // If true, traverse upstream of the provided pourpoint until segment is not on divergent path set that segment as pseudopourpoint
+            Dictionary<string, object> dResults = new Dictionary<string, object>();
+            string dPourpoint = pourpoint;
+            bool divergent = false;
+            if (this.divergentCheck(pourpoint))
+            {
+                dResults = traverseDivergence(networkTable[1][1].ToString());
+                pourpoint = dResults["pseudo-pourpoint"].ToString();
+                divergent = true;
+            }
 
             // Get the HUC12 of the pourpoint from the NHDPlus V2.1 db
             string query1 = "SELECT HUC12 FROM HUC12_PU_COMIDs_CONUS WHERE COMID=" + pourpoint;
@@ -457,6 +556,11 @@ namespace Web.Services.Models
             List<List<string>> order = new List<List<string>>();
             List<int> diffEdges = new List<int>();
             List<string> divComids = new List<string>();
+            if (divergent)
+            {
+                divComids.Add(dPourpoint);
+            }
+            Dictionary<string, List<string>> divParallel = new Dictionary<string, List<string>>();
             if (networkHydro.Count == 1)
             {
                 order.Add(new List<string>() { networkTable[1][0].ToString() });
@@ -485,7 +589,9 @@ namespace Web.Services.Models
                         }
                     }
                 }
-                while(networkHydro.Count > traversed.Count+1)
+                bool notFound = false;
+                int nTraversed = 0;
+                while(networkHydro.Count > traversed.Count+1 && !notFound)
                 {
                     List<int> diff = new List<int>();
                     diffEdges = new List<int>();
@@ -502,6 +608,9 @@ namespace Web.Services.Models
                         if (traversed.Contains(upHydro))
                         {
                             diffEdges.Add(diff[i]);
+                            string pSeg = this.getParallelSegment(diff[i].ToString());
+                            divParallel.Add(hydroComid[diff[i]], new List<string>() { pSeg });
+                            divParallel.Add(pSeg, new List<string>() { hydroComid[diff[i]] });
                             if (!divComids.Contains(hydroComid[diff[i]]))
                             {
                                 divComids.Add(hydroComid[diff[i]]);
@@ -536,16 +645,58 @@ namespace Web.Services.Models
                             }
                         }
                     }
+                    if(traversed.Count + 1 == nTraversed)
+                    {
+                        notFound = true;
+                    }
+                    nTraversed = traversed.Count + 1;
                 }
             }
             networkTable = filteredNetworkTable;
+
+            //if pourpoint is divergent, merge divergent path results with pseudo-pourpoint results
+            if (divergent)
+            {
+                foreach(KeyValuePair<string, List<string>> divSource in dResults["sources"] as Dictionary<string, List<string>>)
+                {
+                    if (!sources.ContainsKey(divSource.Key))
+                    {
+                        sources.Add(divSource.Key, divSource.Value);
+                    }
+                    else
+                    {
+                        sources[divSource.Key].Union(divSource.Value);
+                    }
+                }
+                foreach(List<string> dOrder in dResults["order"] as List<List<string>>)
+                {
+                    order.Add(dOrder);
+                }
+                foreach(KeyValuePair<string, List<string>> divPar in dResults["divergent-paths"] as Dictionary<string, List<string>>)
+                {
+                    if (!divParallel.ContainsKey(divPar.Key))
+                    {
+                        divParallel.Add(divPar.Key, divPar.Value);
+                    }
+                    else
+                    {
+                        foreach(string pV in divPar.Value)
+                        {
+                            if (!divParallel[divPar.Key].Contains(pV))
+                            {
+                                divParallel[divPar.Key].Add(pV);
+                            }
+                        }
+                    }
+                }
+            }
 
             return new Dictionary<string, object>()
             {
                 { "sources", sources },
                 { "order", order },
-                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork}, {"divergence", divComids } }
-                }
+                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork}, {"divergence", divComids } } },
+                { "divergent-paths", divParallel}
             };
 
         }
