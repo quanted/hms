@@ -338,26 +338,19 @@ namespace Web.Services.Models
             }
         }
 
-        private bool divergentCheck(string segmentComid)
+        private int divergentCheck(string segmentComid)
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
             string query = "SELECT Divergence FROM PlusFlowlineVAA WHERE ComID=" + segmentComid;
             Dictionary<string, string> results = Utilities.SQLite.GetData(dbPath, query);
             if (results.Count > 0)
             {
-                // Divergence is defined as a value not equal to 0 or 1, where 1 is the primary path parallel to a divergent path
-                if(Int32.Parse(results["Divergence"]) >= 2)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                // Divergence is defined as a value of 0, the mainstem path of a divergence is 1, and >1 are the divergent paths
+                return Int32.Parse(results["Divergence"]);
             }
             else
             {
-                return true;
+                return -1;
             }
         }
 
@@ -365,6 +358,13 @@ namespace Web.Services.Models
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
             string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE Hydroseq=" + segmentHydroseq;
+            return Utilities.SQLite.GetData(dbPath, query);
+        }
+
+        private Dictionary<string, string> divergenceDetails(string segmentHydroseq)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE UpHydroseq=" + segmentHydroseq + " AND Divergence=2";
             return Utilities.SQLite.GetData(dbPath, query);
         }
 
@@ -425,6 +425,34 @@ namespace Web.Services.Models
             return qResults["ComID"];
         }
 
+        private Dictionary<string, string> getDivSegment(string hydroseq)
+        {
+            Dictionary<string, string> iDetails = this.segmentDetails(hydroseq);
+            Dictionary<string, string> jDetails = new Dictionary<string, string>();
+
+            string divSource = "";
+            bool div1 = true;
+            while (div1)
+            {
+                string upHydro = iDetails["UpHydroseq"];
+                int div = Int32.Parse(iDetails["Divergence"]);
+                if (div == 0)
+                {
+                    divSource = iDetails["Hydroseq"];
+                    div1 = false;
+                }
+                else
+                {
+                    jDetails = iDetails;
+                    iDetails = this.segmentDetails(upHydro);
+                }
+            }
+            Dictionary<string, string> divDetails = this.divergenceDetails(divSource);
+            return new Dictionary<string, string>(){
+                { "divergence", divDetails["ComID"] },
+                { "mainstem",jDetails["ComID"]}
+            };
+        }
 
         public Dictionary<string, object> generateOrderAndSources(ref List<List<object>> networkTable, string pourpoint, string huc = "")
         {
@@ -435,11 +463,20 @@ namespace Web.Services.Models
             Dictionary<string, object> dResults = new Dictionary<string, object>();
             string dPourpoint = pourpoint;
             bool divergent = false;
-            if (this.divergentCheck(pourpoint))
+            bool divergentUp = false;
+            Dictionary<string, string> divSegment = new Dictionary<string, string>();
+            int pourDivergence = this.divergentCheck(pourpoint);
+            
+            if (pourDivergence > 1)                 // Pourpoint is on a divergent path
             {
-                dResults = traverseDivergence(networkTable[1][1].ToString());
+                dResults = this.traverseDivergence(networkTable[1][1].ToString());
                 pourpoint = dResults["pseudo-pourpoint"].ToString();
                 divergent = true;
+            }
+            else if(pourDivergence == 1)            // Pourpoint is on the mainstem where an upstream segment diverges
+            {
+                divSegment = this.getDivSegment(networkTable[1][1].ToString());
+                divergentUp = true;
             }
 
             // Get the HUC12 of the pourpoint from the NHDPlus V2.1 db
@@ -689,6 +726,10 @@ namespace Web.Services.Models
                         }
                     }
                 }
+            }
+            else if (divergentUp)
+            {
+                divParallel[divSegment["mainstem"]] = new List<string>() { divSegment["divergence"] };
             }
 
             return new Dictionary<string, object>()
