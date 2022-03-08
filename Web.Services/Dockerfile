@@ -1,20 +1,25 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS base
-#WORKDIR /app
+WORKDIR /app
 EXPOSE 80
 
-#FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
 RUN dotnet build -c Release -o /app
 
-#FROM build AS publish
+FROM build AS publish
 RUN dotnet publish -c Release -o /app
 
-#FROM base AS final
+FROM base AS final
 WORKDIR /app
-#COPY . /app
-#COPY --from=publish /app .
+
+COPY --from=publish /app .
 RUN ls /app/App_Data
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
+
+ENV APP_USER app_user
+RUN useradd -r $APP_USER
+USER $APP_USER
+
 ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "http://0.0.0.0:80"]
