@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine3.15 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine3.15 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
@@ -18,8 +18,9 @@ COPY --from=publish /app .
 RUN ls /app/App_Data
 RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
 
-ENV APP_USER app_user
-RUN useradd -r $APP_USER
+ENV APP_USER hms_user
+ENV APP_GROUP hms_app
+RUN addgroup -S $APP_GROUP && adduser -S $APP_USER -G $APP_GROUP
 USER $APP_USER
 
 ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "http://0.0.0.0:80"]
