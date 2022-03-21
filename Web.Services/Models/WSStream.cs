@@ -417,10 +417,11 @@ namespace Web.Services.Models
             };
         }
 
-        private string getParallelSegment(string hydroseq)
+        private string getParallelSegment(string hydroseq, string uphydroseq)
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT ComID FROM PlusFlowlineVAA WHERE Hydroseq=(SELECT DnHydroseq FROM PlusFlowlineVAA WHERE Hydroseq=" + hydroseq + ")";
+            //string query = "SELECT ComID FROM PlusFlowlineVAA WHERE Hydroseq=(SELECT DnHydroseq FROM PlusFlowlineVAA WHERE Hydroseq=" + hydroseq + ")";
+            string query = "SELECT ComID FROM PlusFlowlineVAA WHERE UpHydroseq=" + uphydroseq + " AND Hydroseq!=" + hydroseq;
             Dictionary<string, string> qResults = Utilities.SQLite.GetData(dbPath, query);
             return qResults["ComID"];
         }
@@ -645,7 +646,8 @@ namespace Web.Services.Models
                         if (traversed.Contains(upHydro))
                         {
                             diffEdges.Add(diff[i]);
-                            string pSeg = this.getParallelSegment(diff[i].ToString());
+                            //string pSeg = this.getParallelSegment(diff[i].ToString());
+                            string pSeg = this.getParallelSegment(diff[i].ToString(), upHydro.ToString());
                             divParallel.Add(hydroComid[diff[i]], new List<string>() { pSeg });
                             divParallel.Add(pSeg, new List<string>() { hydroComid[diff[i]] });
                             if (!divComids.Contains(hydroComid[diff[i]]))

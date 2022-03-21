@@ -67,6 +67,7 @@ namespace Web.Services.Models
             }
 
             // Pass data from upstream to current simulation
+            // TODO: Check and pass in parallel segment streamflow time-series to calculate divergent volume ratio for appropriately distributing masses downstream.
             Pass_Data(sim, comids);
 
             // Execute simulation
