@@ -1,5 +1,6 @@
 ﻿using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
+using AQUATOX.Loadings;
 using AQUATOX.OrgMatter;
 using AQUATOX.Volume;
 using Data;
@@ -484,31 +485,59 @@ namespace GUI.AQUATOX
             for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
             {
                 Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
+//                foreach (int runID in AQT2D.SN.order[ordr])
                 {
                     string strout = "";
                     string BaseDir = basedirBox.Text;
                     string FileN = BaseDir + "AQT_2D_" + runID.ToString() + ".JSON";
-                    if (!ValidFilen(FileN, false)) { TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
-                        progressBar1.Visible = false; return; }
+                    if (!ValidFilen(FileN, false))
+                    {
+                        TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
+                        progressBar1.Visible = false; return;
+                    }
                     string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
-                    if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json))   //run one segment of 2D model
+
+
+                    List<ITimeSeriesOutput> divergence_flows = null;
+
+                    if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
+                        foreach (int ID in Divg)
+                        {
+                            TimeSeriesOutput ITSO = null;
+                            string DivSeg = File.ReadAllText(BaseDir + "AQT_2D_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
+                            AQTSim DivSim = new AQTSim();
+                            string outstr = DivSim.Instantiate(DivSeg);
+                            if (outstr == "")
+                            {
+                                if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput>();
+                                DivSim.AQTSeg.SetMemLocRec();
+                                TVolume tvol = DivSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                                TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
+                                ITSO = InflowLoad.TimeSeriesAsTSOutput("Divergence Flows", "COMID " + ID.ToString(), 1.0 / 86400.0);  // output flows as m2/s
+                            }
+                            divergence_flows.Add(ITSO);  
+                        }
+
+                    if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows))   //run one segment of 2D model
                         File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
 
-                    foreach (IShape iS in Drawing)   
+                    foreach (IShape iS in Drawing)
                     {
                         if (iS.ID == runID.ToString())
                         {
                             iS.LineColor = Color.Green;
                             iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                            BeginInvoke((MethodInvoker)delegate()  //make draw threadsafe 
+                            BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
                             {
                                 iS.Draw(MPG, showCOMIDsBox.Checked);
                             });
                         }
-                    }  
+                    }
 
                     TSafeAddToProcessLog(strout);  //write update to status log
-                });
+
+                // }  // non-parallel foreach format for debugging
+                });  // parallel foreach format
 
                 int Prog = (int)((float)ordr / (float)AQT2D.SN.order.Length * 100.0);
                 if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
@@ -554,34 +583,41 @@ namespace GUI.AQUATOX
             if (AQT2D.archive == null) return;
 
             int SVIndex = SVBox.SelectedIndex;
-            string csv = SVBox.Text += Environment.NewLine;
-
+            StringBuilder csv = new StringBuilder(SVBox.Text + Environment.NewLine + "Date,");
 
             int NDates = 0;
-            int[] comids = new int[AQT2D.archive.Count];
+            double[][] outputs = new double[AQT2D.archive.Count][];
             int i = 0;
 
+            DateTime[] dateList = null;
 
             foreach (KeyValuePair<int, AQSim_2D.archived_results> entry in AQT2D.archive)
             {
-                csv += (entry.Key) + ",";
-                if (i == 0) NDates = entry.Value.dates.Count();
-                comids[i] = entry.Key;
+                csv.Append((entry.Key) + ",");
+                if (i == 0)
+                {
+                    NDates = entry.Value.dates.Count();
+                    dateList = entry.Value.dates;
+                }
+
+                outputs[i] = entry.Value.concs[SVIndex];
+
                 i++;
             }
-            csv += Environment.NewLine;
+            csv.Append(Environment.NewLine);
 
-            for (i = 0; i < NDates; i++)
+
+            for (int j = 0; j < NDates; j++)
             {
-                for (int j = 0; j < AQT2D.archive.Count; j++)
+                csv.Append(dateList[j].ToShortDateString()+" "+ dateList[j].ToShortTimeString()+",");
+                for (i = 0; i < outputs.GetLength(0); i++)
                 {
-                    AQT2D.archive.TryGetValue(comids[j], out AQSim_2D.archived_results val);
-                    csv += (val.concs[SVIndex][i]) + ",";
+                    csv.Append((outputs[i][j]) + ",");
                 }
-                csv += Environment.NewLine;
+                csv.Append(Environment.NewLine);
             }
 
-            ProcessLog.Text = csv;
+            ProcessLog.Text = csv.ToString();
 
             if (MessageBox.Show("Save CSV to text?", "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
@@ -593,7 +629,7 @@ namespace GUI.AQUATOX
 
             if (saveFileDialog1.FileName != "")
             {
-                File.WriteAllText(saveFileDialog1.FileName, csv);
+                File.WriteAllText(saveFileDialog1.FileName, csv.ToString());
             }
 
 
@@ -623,6 +659,7 @@ namespace GUI.AQUATOX
                     ser.MarkerStyle = MarkerStyle.Diamond;
                     ser.Enabled = true;
                     sercnt++;
+                    if (sercnt > 20) ser.Enabled = false;
 
                     for (int i = 0; i < entry.Value.dates.Count(); i++)
                     {
@@ -916,22 +953,23 @@ namespace GUI.AQUATOX
             public string ID { get; set; }
             public Color LineColor { get; set; }
             public Circle() { FillColor = Color.Chartreuse; }
-            public Circle(int x1, int y1, string inID) {
-                FillColor = Color.Chartreuse;
-                Center = new Point(x1, y1);
-                Radius = 3;
+            public Circle(float x1, float y1, string inID, Color fill) {
+                FillColor = fill;
+                Center = new PointF(x1, y1);
+                Radius = 4;
                 ID = inID;
             }
 
             public Color FillColor { get; set; }
-            public Point Center { get; set; }
+            public PointF Center { get; set; }
             public Point PlotCenter { get; set; }
             public int Radius { get; set; }
             public GraphicsPath GetPath()
             {
                 var path = new GraphicsPath();
                 var p = PlotCenter;
-                p.Offset(-Radius, -Radius);
+                p.X -= Radius;
+                p.Y -= Radius;
                 path.AddEllipse(p.X, p.Y, 2 * Radius, 2 * Radius);
                 return path;
             }
@@ -960,7 +998,7 @@ namespace GUI.AQUATOX
             }
             public void Move(Point d)
             {
-                Center = new Point(Center.X + d.X, Center.Y + d.Y);
+                Center = new PointF(Center.X + d.X, Center.Y + d.Y);
             }
 
             public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xymin xymax based on shape xy
@@ -1315,7 +1353,7 @@ namespace GUI.AQUATOX
                 {
                     if (SrcID != COMID)  // don't plot if set to itself in boundaries 
                     {
-                        if (boundaries.Contains(SrcID)) Drawing.Add(new Circle(x2, y2, COMID.ToString()));
+                        if (boundaries.Contains(SrcID)) Drawing.Add(new Circle(x2, y2, COMID.ToString(), Color.Chartreuse));
                         else 
                         {
                             int xplot = x2 + nSources;
@@ -1351,15 +1389,22 @@ namespace GUI.AQUATOX
 
         bool PlotCOMIDMap()
         {
-            pictureBox1.Visible = false;
+            pictureBox1.Visible = false;  // flow-chart legend
+            pictureBox2.Visible = true;  // map legend
+            loclabel.Visible = true;  // lat long label
+
             string BaseDir = basedirBox.Text;
             string GeoJSON = "";
             double[][] polyline;
 
+            int[] boundaries;
+            AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                 {
-                    string CString = AQT2D.SN.order[i][j].ToString();
+                    int COMID = AQT2D.SN.order[i][j];
+                    string CString = COMID.ToString();
                     if (File.Exists(BaseDir + CString + ".GeoJSON"))
                     { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
                     else
@@ -1404,6 +1449,19 @@ namespace GUI.AQUATOX
                             endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
                         }
                         Drawing.Add(new PolyLine(startpoints, endpoints, CString));
+
+                        if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                            foreach (int SrcID in Sources)
+                                if (boundaries.Contains(SrcID))
+                                {
+                                    Drawing.Add(new Circle((float) polyline[0][0], (float) polyline[0][1], COMID.ToString(), Color.Chartreuse));
+                                }
+
+                        if (i == AQT2D.SN.order.Length-1) //ID pour point
+                        {
+                            Drawing.Add(new Circle((float)polyline[polyline.Length-1][0], (float)polyline[polyline.Length - 1][1], COMID.ToString(), Color.Red));
+                        }
+
                     }
                 }   
 
@@ -1432,7 +1490,9 @@ namespace GUI.AQUATOX
             {
                 int EndID = AQT2D.SN.order[AQT2D.SN.order.Length - 1][0];
                 maxX = 0;
-                pictureBox1.Visible = true;
+                pictureBox1.Visible = true;  // flow chart legend
+                pictureBox2.Visible = false; // map legend
+                loclabel.Visible = false;  // lat long label
                 if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawMapPanel(true);
             }
 
@@ -1493,34 +1553,49 @@ namespace GUI.AQUATOX
 
         private void MapPanel_MouseDown(object sender, MouseEventArgs e)
         {
-            clickPosition.X = e.X;
-            clickPosition.Y = e.Y;
+            if (e.Button == MouseButtons.Left)
+            {
+                clickPosition.X = e.X;
+                clickPosition.Y = e.Y;
 
-            for (var i = Drawing.Count - 1; i >= 0; i--)
-                if (Drawing[i].HitTest(e.Location)) 
-                { 
-                    if ((outputjump.Enabled) && (outputjump.Checked))
-                        ViewOutput(Drawing[i].ID);
-                    else EditCOMID(Drawing[i].ID); 
-                
-                }; 
-            // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
+                for (var i = Drawing.Count - 1; i >= 0; i--)
+                    if (Drawing[i].HitTest(e.Location))
+                    {
+                        if ((outputjump.Enabled) && (outputjump.Checked))
+                            ViewOutput(Drawing[i].ID);
+                        else EditCOMID(Drawing[i].ID);
 
-            base.OnMouseDown(e);
+                    };
+                // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
+
+                base.OnMouseDown(e);
+            }
+            else
+                try
+                { Clipboard.SetText(loclabel.Text); }
+                catch
+                { AddToProcessLog("Clipboard Error.  Cannot copy: " + loclabel.Text); return; }
+            
         }
 
         private void mapButton_CheckedChanged(object sender, EventArgs e)
         {
             if (!VerifyStreamNetwork()) return;
             DrawMap = mapButton.Checked;
-            RedrawShapes();
+            RedrawShapes(); 
         }
 
         private void ConsoleButton_CheckedChanged(object sender, EventArgs e)
         {
+            if (!(sender as RadioButton).Checked) return;
+
             if (GraphButton.Checked)
             {
-                pictureBox1.Visible = false;
+                pictureBox1.Visible = false; 
+                pictureBox2.Visible = false; // legends
+                loclabel.Visible = false;  // lat long label
+
+
                 chart1.Visible = true;
                 chart1.BringToFront();
                 infolabel1.Visible = false;
@@ -1529,6 +1604,9 @@ namespace GUI.AQUATOX
             else if (ConsoleButton.Checked)
             {
                 pictureBox1.Visible = false;
+                pictureBox2.Visible = false; // legends
+                loclabel.Visible = false;  // lat long label
+
                 chart1.Visible = false;
                 MapPanel.Visible = false;
                 infolabel1.Visible = false;
@@ -1599,6 +1677,7 @@ namespace GUI.AQUATOX
 
         private void MapPanel_MouseMove(object sender, MouseEventArgs e)
         {
+  
            if (e.Button == MouseButtons.Left)
            {
                 if ((Math.Abs(e.X - clickPosition.X)<3)&&(Math.Abs(e.Y - clickPosition.Y) < 3)) return;
@@ -1619,6 +1698,16 @@ namespace GUI.AQUATOX
                 clickPosition.X = e.X;
                 clickPosition.Y = e.Y;
             }
+            else 
+            {
+                float lat = xmin + ((float) e.Location.X / (float) MapPanel.Width) * (xmax - xmin);
+                float lon = ymin + ((float) (MapPanel.Height-e.Location.Y) / (float) MapPanel.Height) * (ymax - ymin);
+
+                loclabel.Text = lon.ToString()+", "+ lat.ToString();
+                loclabel.Visible = true;
+                  
+            }
+
         }
 
 

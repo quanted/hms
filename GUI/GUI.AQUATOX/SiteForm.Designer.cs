@@ -344,8 +344,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.RadioButton RBLake;
         private System.Windows.Forms.RadioButton RBPond;
         private System.Windows.Forms.Label RBLabel;
-        private System.Windows.Forms.Label TSUnit;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.RadioButton RBRes;
         private System.Windows.Forms.RadioButton RBMarine;

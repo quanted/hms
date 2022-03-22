@@ -61,6 +61,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.MapPanel = new System.Windows.Forms.Panel();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.GraphButton = new System.Windows.Forms.RadioButton();
@@ -76,10 +77,12 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
+            this.loclabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.OutputPanel.SuspendLayout();
             this.MapPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.TogglePanel.SuspendLayout();
             this.PlotPanel.SuspendLayout();
@@ -127,6 +130,7 @@
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.ProcessLog.Size = new System.Drawing.Size(649, 396);
             this.ProcessLog.TabIndex = 6;
+            this.ProcessLog.WordWrap = false;
             // 
             // label5
             // 
@@ -402,6 +406,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MapPanel.BackColor = System.Drawing.Color.White;
+            this.MapPanel.Controls.Add(this.pictureBox2);
             this.MapPanel.Controls.Add(this.pictureBox1);
             this.MapPanel.Location = new System.Drawing.Point(305, 66);
             this.MapPanel.Name = "MapPanel";
@@ -412,9 +417,22 @@
             this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
             this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
             // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(289, 348);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(356, 44);
+            this.pictureBox2.TabIndex = 1;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Visible = false;
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(299, 329);
             this.pictureBox1.Name = "pictureBox1";
@@ -530,7 +548,6 @@
             this.flowchartButton.TabIndex = 38;
             this.flowchartButton.Text = "flowchart";
             this.flowchartButton.UseVisualStyleBackColor = true;
-            this.flowchartButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
             // 
             // mapButton
             // 
@@ -589,11 +606,22 @@
             this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
             this.infolabel2.Visible = false;
             // 
+            // loclabel
+            // 
+            this.loclabel.AutoSize = true;
+            this.loclabel.Location = new System.Drawing.Point(824, 46);
+            this.loclabel.Name = "loclabel";
+            this.loclabel.Size = new System.Drawing.Size(53, 15);
+            this.loclabel.TabIndex = 41;
+            this.loclabel.Text = "Lat Long";
+            this.loclabel.Visible = false;
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(987, 514);
+            this.Controls.Add(this.loclabel);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
@@ -628,6 +656,7 @@
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
             this.MapPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
@@ -687,5 +716,7 @@
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label loclabel;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }

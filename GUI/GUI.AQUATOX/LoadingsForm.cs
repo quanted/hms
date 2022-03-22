@@ -490,7 +490,17 @@ namespace GUI.AQUATOX
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
 
-                    string[] csvRows = System.IO.File.ReadAllLines(filePath, Encoding.Default);
+                    string[] csvRows;
+                    try
+                    {
+                        csvRows = System.IO.File.ReadAllLines(filePath, Encoding.Default);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error reading CSV: " + ex.Message);
+                        return;
+                    }
+
                     int errcount = 0;
 
                     foreach (var row in csvRows)
@@ -509,7 +519,7 @@ namespace GUI.AQUATOX
                             errcount++;
                             if (errcount > 1)  // header line error is OK
                             {
-                                MessageBox.Show("Unexpected format.  A two column input file with [DATE, LOADING] expected.", "Error",
+                                MessageBox.Show("Unexpected format.  A two column input file with [DATETIME, LOADING] expected.", "Error",
                                                 MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
                                 return;
                             }

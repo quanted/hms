@@ -5,7 +5,180 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>GUI.AQUATOX.Program</StartupObject>
+    <ApplicationIcon>aquatox_Icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Studies\NoResults\**" />
+    <Compile Remove="Studies\Omit\**" />
+    <Compile Remove="Studies\Strat\**" />
+    <Compile Remove="Studies\TooBig\**" />
+    <EmbeddedResource Remove="Studies\NoResults\**" />
+    <EmbeddedResource Remove="Studies\Omit\**" />
+    <EmbeddedResource Remove="Studies\Strat\**" />
+    <EmbeddedResource Remove="Studies\TooBig\**" />
+    <None Remove="Studies\NoResults\**" />
+    <None Remove="Studies\Omit\**" />
+    <None Remove="Studies\Strat\**" />
+    <None Remove="Studies\TooBig\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="2D_Inputs\BaseJSON\MS_Nitrogen.json" />
+    <None Remove="2D_Inputs\BaseJSON\MS_Nutrients.json" />
+    <None Remove="2D_Inputs\BaseJSON\MS_OM.json" />
+    <None Remove="2D_Inputs\BaseJSON\MS_OM_NoP.json" />
+    <None Remove="2D_Inputs\BaseJSON\MS_Phosphorus.json" />
+    <None Remove="DB\AnimalLib.JSON" />
+    <None Remove="DB\ChemLib.JSON" />
+    <None Remove="DB\PlantLib.JSON" />
+    <None Remove="DB\ReminLib.JSON" />
+    <None Remove="DB\SiteLib.JSON" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN.htm" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN.pdf" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_1-31-2022.docx" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\colorschememapping.xml" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\filelist.xml" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\header.htm" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image001.gif" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image002.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image003.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image004.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image005.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image006.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image007.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image008.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image009.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image010.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image011.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image012.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image013.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image014.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image015.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image016.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image017.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image018.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image019.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image020.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image021.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image022.png" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\image023.jpg" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\item0001.xml" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\oledata.mso" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\props002.xml" />
+    <None Remove="Docs\AQUATOX.NET_1.0_UMAN_files\themedata.thmx" />
+    <None Remove="Docs\AQUATOX_TECH_DOC_3.2.pdf" />
+    <None Remove="Studies\AQUATOX_Sed_Bed_Inputs.xls" />
+    <None Remove="Studies\Blue Earth R.MN BMP Criteria.JSON" />
+    <None Remove="Studies\Blue Earth R.MN.JSON" />
+    <None Remove="Studies\Cahaba R AL X2 TSS.JSON" />
+    <None Remove="Studies\Cahaba R AL.JSON" />
+    <None Remove="Studies\Cheney Res KS.JSON" />
+    <None Remove="Studies\Clear Lake CA Fluridone.JSON" />
+    <None Remove="Studies\Coralville Res IA Dieldrin.JSON" />
+    <None Remove="Studies\Crow Wing R. MN.JSON" />
+    <None Remove="Studies\East Fork Poplar Creek TN PCBs.JSON" />
+    <None Remove="Studies\Evers Res FL.JSON" />
+    <None Remove="Studies\Expr Stream Esfenval.JSON" />
+    <None Remove="Studies\Farm Pond MO Esfenval.JSON" />
+    <None Remove="Studies\Farm Pond MO.JSON" />
+    <None Remove="Studies\Hancock Marsh Edge.JSON" />
+    <None Remove="Studies\HCB Tank.JSON" />
+    <None Remove="Studies\Lake Jesup FL.JSON" />
+    <None Remove="Studies\Lake Pyhajarvi Finland.JSON" />
+    <None Remove="Studies\MS_Sound Exposed Beach.JSON" />
+    <None Remove="Studies\MS_Sound_Soft_Bottom.JSON" />
+    <None Remove="Studies\Nockamixon Res PA.JSON" />
+    <None Remove="Studies\Ohio stream Chlorpyrifos constant.JSON" />
+    <None Remove="Studies\Ohio stream Chlorpyrifos pulsed.JSON" />
+    <None Remove="Studies\Pass Marianne Reef, MS.JSON" />
+    <None Remove="Studies\Rum R MN.JSON" />
+    <None Remove="Studies\Skensved Denmark Atrazine.JSON" />
+    <None Remove="Studies\Skensved Denmark TCE.JSON" />
+    <None Remove="Studies\Study_descriptions_Release_3.2.pdf" />
+    <None Remove="Studies\Zollner Creek OR w chlorpyr dieldrin-pulse.JSON" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="2D_Inputs\BaseJSON\MS_Nitrogen.json" />
+    <Content Include="2D_Inputs\BaseJSON\MS_Nutrients.json" />
+    <Content Include="2D_Inputs\BaseJSON\MS_OM.json" />
+    <Content Include="2D_Inputs\BaseJSON\MS_OM_NoP.json" />
+    <Content Include="2D_Inputs\BaseJSON\MS_Phosphorus.json" />
+    <Content Include="DB\AnimalLib.JSON" />
+    <Content Include="DB\ChemLib.JSON" />
+    <Content Include="DB\PlantLib.JSON" />
+    <Content Include="DB\ReminLib.JSON" />
+    <Content Include="DB\SiteLib.JSON" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN.htm" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN.pdf" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_1-31-2022.docx" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\colorschememapping.xml" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\filelist.xml" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\header.htm" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image001.gif" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image002.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image003.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image004.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image005.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image006.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image007.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image008.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image009.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image010.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image011.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image012.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image013.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image014.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image015.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image016.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image017.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image018.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image019.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image020.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image021.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image022.png" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\image023.jpg" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\item0001.xml" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\oledata.mso" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\props002.xml" />
+    <Content Include="Docs\AQUATOX.NET_1.0_UMAN_files\themedata.thmx" />
+    <Content Include="Docs\AQUATOX_TECH_DOC_3.2.pdf" />
+    <Content Include="Studies\AQUATOX_Sed_Bed_Inputs.xls" />
+    <Content Include="Studies\Blue Earth R.MN BMP Criteria.JSON" />
+    <Content Include="Studies\Blue Earth R.MN.JSON" />
+    <Content Include="Studies\Cahaba R AL X2 TSS.JSON" />
+    <Content Include="Studies\Cahaba R AL.JSON" />
+    <Content Include="Studies\Cheney Res KS.JSON" />
+    <Content Include="Studies\Clear Lake CA Fluridone.JSON" />
+    <Content Include="Studies\Coralville Res IA Dieldrin.JSON" />
+    <Content Include="Studies\Crow Wing R. MN.JSON" />
+    <Content Include="Studies\East Fork Poplar Creek TN PCBs.JSON" />
+    <Content Include="Studies\Evers Res FL.JSON" />
+    <Content Include="Studies\Expr Stream Esfenval.JSON" />
+    <Content Include="Studies\Farm Pond MO Esfenval.JSON" />
+    <Content Include="Studies\Farm Pond MO.JSON" />
+    <Content Include="Studies\Hancock Marsh Edge.JSON" />
+    <Content Include="Studies\HCB Tank.JSON" />
+    <Content Include="Studies\Lake Jesup FL.JSON" />
+    <Content Include="Studies\Lake Pyhajarvi Finland.JSON" />
+    <Content Include="Studies\MS_Sound Exposed Beach.JSON" />
+    <Content Include="Studies\MS_Sound_Soft_Bottom.JSON" />
+    <Content Include="Studies\Nockamixon Res PA.JSON" />
+    <Content Include="Studies\Ohio stream Chlorpyrifos constant.JSON" />
+    <Content Include="Studies\Ohio stream Chlorpyrifos pulsed.JSON" />
+    <Content Include="Studies\Pass Marianne Reef, MS.JSON" />
+    <Content Include="Studies\Rum R MN.JSON" />
+    <Content Include="Studies\Skensved Denmark Atrazine.JSON" />
+    <Content Include="Studies\Skensved Denmark TCE.JSON" />
+    <Content Include="Studies\Study_descriptions_Release_3.2.pdf" />
+    <Content Include="Studies\Zollner Creek OR w chlorpyr dieldrin-pulse.JSON" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Data.SqlClient" Version="4.8.0-preview1.19504.10" />
