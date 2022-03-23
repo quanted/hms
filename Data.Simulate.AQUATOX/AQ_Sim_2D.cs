@@ -483,9 +483,10 @@ namespace AQUATOX.AQSim_2D
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="outstr">information about the status of the run for the user's log</param>
         /// <param name="jsonstring">the completed simulation with results </param>
-        /// <returns>boolean: true if the run was completed successfully</returns>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
-        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput> divergence_flows = null)   
+        /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
+        /// <returns>boolean: true if the run was completed successfully</returns>/// 
+        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = new AQTSim();
             outstr = Sim.Instantiate(jsonstring);
@@ -508,7 +509,7 @@ namespace AQUATOX.AQSim_2D
             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
                 foreach (int SrcID in Sources)
                 {
-                    if (SrcID != comid)  // set to itself in boundaries 
+                    if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                     {
                         nSources++;
                         Pass_Data(Sim, SrcID, nSources, null, divergence_flows);

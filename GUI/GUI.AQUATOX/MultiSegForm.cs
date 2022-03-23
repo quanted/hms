@@ -22,6 +22,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 //using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
+
 {
     public partial class MultiSegForm : Form
     {
@@ -35,6 +36,7 @@ namespace GUI.AQUATOX
         DataTable OverlandTable = null;
         private System.Drawing.Graphics graphics;
         private bool DrawMap = true;
+        private ScreenSettings ScrSettings = new();
 
         static float xmax = -1000000;
         static float ymax = -1000000;
@@ -44,6 +46,13 @@ namespace GUI.AQUATOX
         int xBuffer;
         int yBuffer;
 
+        public class ScreenSettings
+        {
+            public string BaseJSONstr = "";
+            public string COMIDstr = "";
+            public string EndCOMIDstr = "";
+            public string UpSpanStr = "";
+        }
 
         private int ScaleX(int x)
         {
@@ -118,6 +127,49 @@ namespace GUI.AQUATOX
             // https://stackoverflow.com/questions/8848203/alt-key-causes-form-to-redraw
         }
 
+        private void SaveScreenSettings()
+        {
+            try
+            {
+                if (!VerifyBaseDir()) return;
+                string BaseDir = basedirBox.Text;
+                string ScrString = JsonConvert.SerializeObject(ScrSettings); 
+                File.WriteAllText(BaseDir + "ScreenSettings.JSON", ScrString);
+            }
+            catch (Exception ex)
+            {
+                ProcessLog.Text = "Error saving Screen Settings: " + ex.Message;
+                MessageBox.Show(ex.Message);
+                return;
+            }
+        }
+
+        private void LoadScreenSettings()
+        {
+            ScrSettings.BaseJSONstr = "";
+            ScrSettings.COMIDstr = "";
+            ScrSettings.EndCOMIDstr = "";
+            ScrSettings.UpSpanStr = "";
+
+            try
+            {
+                if (!VerifyBaseDir()) return;
+                string BaseDir = basedirBox.Text;
+                if (!File.Exists((BaseDir + "ScreenSettings.JSON"))) return;
+                string ScrString = File.ReadAllText(BaseDir + "ScreenSettings.JSON");
+                ScrSettings = JsonConvert.DeserializeObject<ScreenSettings>(ScrString);
+
+            }
+            catch (Exception ex)
+            {
+                ProcessLog.Text = "Error loading Screen Settings: " + ex.Message;
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+        }
+
+
         private void UpdateScreen()
         {
             bool validDirectory = VerifyBaseDir();
@@ -142,12 +194,20 @@ namespace GUI.AQUATOX
                 chart1.Visible = false;
             }
 
-                if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
+            comidBox.Text = ScrSettings.COMIDstr;
+            EndCOMIDBox.Text = ScrSettings.EndCOMIDstr;
+            spanBox.Text = ScrSettings.UpSpanStr;
+            BaseJSONBox.Text = ScrSettings.BaseJSONstr;
+
+            if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
             else if (inputsegs) StatusLabel.Text = "Linked Input Segments Created";
             else if (streamnetwork) StatusLabel.Text = "Stream Network Created";
             else if (validDirectory) StatusLabel.Text = "Model Not Initiated";
             else StatusLabel.Text = "Invalid Directory Specified";
 
+            BaseJSONBox.Enabled = validDirectory;
+            ChooseTemplateButton.Enabled = validDirectory;
+            ReadNetworkPanel.Enabled = validDirectory;
             PlotPanel.Enabled = streamnetwork; 
             TogglePanel.Enabled = streamnetwork;
             SetupButton.Enabled = validDirectory;
@@ -266,7 +326,7 @@ namespace GUI.AQUATOX
             if (AQT2D == null) AQT2D = new AQSim_2D();
 
             AddToProcessLog("Please wait, reading stream network from web service");
-            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+            string SNJSON = AQT2D.ReadStreamNetwork(ScrSettings.COMIDstr,  ScrSettings.EndCOMIDstr, ScrSettings.UpSpanStr);
             if (SNJSON == "")
             {
                 AddToProcessLog("Error: web service returned empty JSON."); return;
@@ -281,8 +341,9 @@ namespace GUI.AQUATOX
             { AddToProcessLog("Error converting JSON:" + SNJSON); return; }
 
             AddToProcessLog("System has " + AQT2D.nSegs.ToString() + " segments");
-            string BaseFileN = BaseJSONBox.Text;
-            AddToProcessLog(" Basefile = " + BaseFileN);
+
+            //string BaseFileN = BaseJSONBox.Text;
+            //AddToProcessLog(" Basefile = " + BaseFileN);
 
             AddToProcessLog(" BaseDir = " + BaseDir);
 
@@ -482,67 +543,80 @@ namespace GUI.AQUATOX
             UseWaitCursor = true;
             progressBar1.Visible = true;
 
-            for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
+            int[] outofnetwork;
+            AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
+
+            try
             {
-                Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
-//                foreach (int runID in AQT2D.SN.order[ordr])
+
+                for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
                 {
-                    string strout = "";
-                    string BaseDir = basedirBox.Text;
-                    string FileN = BaseDir + "AQT_2D_" + runID.ToString() + ".JSON";
-                    if (!ValidFilen(FileN, false))
+                    Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
+                    //                foreach (int runID in AQT2D.SN.order[ordr])
                     {
-                        TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
-                        progressBar1.Visible = false; return;
-                    }
-                    string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
+                        string strout = "";
+                        string BaseDir = basedirBox.Text;
+                        string FileN = BaseDir + "AQT_2D_" + runID.ToString() + ".JSON";
+                        if (!ValidFilen(FileN, false))
+                        {
+                            TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
+                            progressBar1.Visible = false; return;
+                        }
+                        string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
 
 
                     List<ITimeSeriesOutput> divergence_flows = null;
 
-                    if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
-                        foreach (int ID in Divg)
-                        {
-                            TimeSeriesOutput ITSO = null;
-                            string DivSeg = File.ReadAllText(BaseDir + "AQT_2D_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
-                            AQTSim DivSim = new AQTSim();
-                            string outstr = DivSim.Instantiate(DivSeg);
-                            if (outstr == "")
+                        if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
+                            foreach (int ID in Divg)
                             {
-                                if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput>();
-                                DivSim.AQTSeg.SetMemLocRec();
-                                TVolume tvol = DivSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-                                TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
-                                ITSO = InflowLoad.TimeSeriesAsTSOutput("Divergence Flows", "COMID " + ID.ToString(), 1.0 / 86400.0);  // output flows as m2/s
+                                TimeSeriesOutput ITSO = null;
+                                string DivSeg = File.ReadAllText(BaseDir + "AQT_2D_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
+                            AQTSim DivSim = new AQTSim();
+                                string outstr = DivSim.Instantiate(DivSeg);
+                                if (outstr == "")
+                                {
+                                    if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput>();
+                                    DivSim.AQTSeg.SetMemLocRec();
+                                    TVolume tvol = DivSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                                    TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
+                                    ITSO = InflowLoad.TimeSeriesAsTSOutput("Divergence Flows", "COMID " + ID.ToString(), 1.0 / 86400.0);  // output flows as m2/s
                             }
-                            divergence_flows.Add(ITSO);  
-                        }
+                                divergence_flows.Add(ITSO);
+                            }
 
-                    if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows))   //run one segment of 2D model
+                        if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
                         File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
 
-                    foreach (IShape iS in Drawing)
-                    {
-                        if (iS.ID == runID.ToString())
+                        foreach (IShape iS in Drawing)
                         {
-                            iS.LineColor = Color.Green;
-                            iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                            BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
+                            if (iS.ID == runID.ToString())
                             {
-                                iS.Draw(MPG, showCOMIDsBox.Checked);
-                            });
+                                iS.LineColor = Color.Green;
+                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
+                                BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
+                                {
+                                    iS.Draw(MPG, showCOMIDsBox.Checked);
+                                });
+                            }
                         }
-                    }
 
-                    TSafeAddToProcessLog(strout);  //write update to status log
+                        TSafeAddToProcessLog(strout);  //write update to status log
 
-                // }  // non-parallel foreach format for debugging
+                    // }  // non-parallel foreach format for debugging
                 });  // parallel foreach format
 
-                int Prog = (int)((float)ordr / (float)AQT2D.SN.order.Length * 100.0);
-                if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
-                progressBar1.Value = Math.Max(Prog, 1);
-                Application.DoEvents();
+                    int Prog = (int)((float)ordr / (float)AQT2D.SN.order.Length * 100.0);
+                    if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
+                    progressBar1.Value = Math.Max(Prog, 1);
+                    Application.DoEvents();
+                }
+            }
+            catch (Exception ex)
+            {
+                ProcessLog.Text = "Error running linked segments: " + ex.Message;
+                MessageBox.Show(ex.Message);
+                return;
             }
 
 
@@ -678,6 +752,7 @@ namespace GUI.AQUATOX
 
         private bool ValidFilen(string filen, bool Showmessage)
         {
+            if (filen == "") return false;
             if (!File.Exists(filen))
             {
                 if (Showmessage) MessageBox.Show("Cannot find file " + Path.GetFullPath(filen));
@@ -884,42 +959,44 @@ namespace GUI.AQUATOX
 
             BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + filen;
 
-            string warning = "";
-            if (SegmentsCreated()) warning = ".  Note: This template will not be applied to the linked system until 'Create Linked Inputs' is selected, overwriting the existing linked system.";
-            MessageBox.Show("Selected Template File: " + filen+ warning);
+            // string warning = "";
+            // if (SegmentsCreated()) warning = ".  Note: This template will not be applied to the linked system until 'Create Linked Inputs' is selected, overwriting the existing linked system.";
+            // MessageBox.Show("Selected Template File: " + filen+ warning);
+            BaseJSONBox_Leave(sender, e);
         }
 
         private void basedirBox_Leave(object sender, EventArgs e)
         {
             if (!basedirBox.Text.EndsWith("\\")) basedirBox.Text = basedirBox.Text + "\\";
             AQT2D = null;
+            LoadScreenSettings();
             UpdateScreen();
             if (PlotPanel.Enabled)
             {
                 MapButton2.Checked = true;
                 mapButton_CheckedChanged(sender, e);
             }
+            SaveBaseDir();
+        }
+
+        private void SaveBaseDir()
+        {
+            if (Properties.Settings.Default.MS_Directory == basedirBox.Text) return;
+            Properties.Settings.Default.MS_Directory = basedirBox.Text;
+            Properties.Settings.Default.Save();
         }
 
         private void MultiSegForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Settings.Default.BaseJSON = BaseJSONBox.Text;
-            Properties.Settings.Default.MS_Directory = basedirBox.Text;
-            Properties.Settings.Default.COMID = comidBox.Text;
-            Properties.Settings.Default.EndCOMID = EndCOMIDBox.Text;
-            Properties.Settings.Default.UpSpan = spanBox.Text;
+            SaveScreenSettings();
+            SaveBaseDir();
 
-            Properties.Settings.Default.Save();
         }
 
         private void MultiSegForm_Shown(object sender, EventArgs e)
         {
-            BaseJSONBox.Text = Properties.Settings.Default.BaseJSON;     // default is "..\..\..\2D_Inputs\LBR Glenwood 4.JSON"
-            basedirBox.Text = Properties.Settings.Default.MS_Directory;  // default is "..\..\..\2D_Inputs\TestDir1\"
-
-            comidBox.Text = Properties.Settings.Default.COMID;
-            EndCOMIDBox.Text = Properties.Settings.Default.EndCOMID;
-            spanBox.Text = Properties.Settings.Default.UpSpan;
+            basedirBox.Text = Properties.Settings.Default.MS_Directory;
+            LoadScreenSettings();
 
             UpdateScreen();
             if (PlotPanel.Enabled) MapButton2.Checked = true;
@@ -1700,8 +1777,8 @@ namespace GUI.AQUATOX
             }
             else 
             {
-                float lat = xmin + ((float) e.Location.X / (float) MapPanel.Width) * (xmax - xmin);
-                float lon = ymin + ((float) (MapPanel.Height-e.Location.Y) / (float) MapPanel.Height) * (ymax - ymin);
+                float lat = xmin + ((float) (e.Location.X - xBuffer) / (float) (MapPanel.Width-(2*xBuffer)) ) * (xmax - xmin);
+                float lon = ymin + ((float) ((MapPanel.Height-e.Location.Y)-yBuffer) / (float)(MapPanel.Height - (2 * yBuffer))) * (ymax - ymin);
 
                 loclabel.Text = lon.ToString()+", "+ lat.ToString();
                 loclabel.Visible = true;
@@ -1719,8 +1796,8 @@ namespace GUI.AQUATOX
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
                     basedirBox.Text = fbd.SelectedPath;
-                    UpdateScreen();
-                }
+                    basedirBox_Leave(sender, e);
+                }    
             }
         }
 
@@ -1745,14 +1822,35 @@ namespace GUI.AQUATOX
         private void BaseJSONBox_Leave(object sender, EventArgs e)
         {
             if (BaseJSONBox.Text == templatestring) return;
-            if (!ValidFilen(BaseJSONBox.Text, true)) return;
-            if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");  
 
+            ScrSettings.BaseJSONstr = BaseJSONBox.Text;
+            if (!ValidFilen(BaseJSONBox.Text, true)) return;
+            if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");
+            SaveScreenSettings();
         }
 
         private void BaseJSONBox_Enter(object sender, EventArgs e)
         {
             templatestring = BaseJSONBox.Text;
+        }
+
+        private void comidBox_Leave(object sender, EventArgs e)
+        {
+            ScrSettings.COMIDstr = comidBox.Text;
+            ScrSettings.EndCOMIDstr = EndCOMIDBox.Text;
+            ScrSettings.UpSpanStr = spanBox.Text;
+
+            SaveScreenSettings();
+        }
+
+        private void basedirBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                basedirBox_Leave(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
     }
 }
