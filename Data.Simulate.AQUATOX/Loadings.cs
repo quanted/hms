@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
+using Globals;
 
 namespace AQUATOX.Loadings
 {
@@ -65,12 +66,46 @@ namespace AQUATOX.Loadings
 
         public bool ExternalLink = false;
         public string ExternalFile = "";
-        [JsonIgnore] bool File_Translated = false;
 
         public TimeSeriesInput ITSI = null;
         [JsonIgnore] bool ITSI_Translated = false;
         [JsonIgnore] int lastindexread = -1;
 
+        /// <summary>
+        /// Export time series loadings in AQUATOX format TLoadings.list to TimeSeriesOutput 
+        /// </summary>
+        /// <param name="DataSetName">Description for the variable in the list.</param>
+        /// <param name="DataSourceName">Description for source of variable</param>
+        /// <param name="multiplier">optional multiplier, default is 1.0</param>
+        /// <returns>TimeSeriesOutput holding the list timeseries</returns>
+        public TimeSeriesOutput TimeSeriesAsTSOutput(string DataSetName, string DataSourceName, double multiplier)
+        {
+            TimeSeriesOutput TSO = new();
+            TSO.Dataset = DataSetName;
+            TSO.DataSource = DataSourceName;
+            TSO.Metadata = new Dictionary<string, string>()
+                    {
+                        {"Export Method", "AsITSOutput"},
+                        {"LoadingDate Format", (Consts.DateFormatString)},
+
+                    };
+
+            TSO.Data = new Dictionary<string, List<string>>();
+            List<string> vallist = new List<string>();
+            
+            TSO.Metadata.Add("Name_1", DataSetName);
+
+            for (int i = 0; i <= list.Count()-1; i++)
+            {
+                vallist = new List<string>();
+                DateTime steptime = list.Keys[i];
+                vallist.Add((list.Values[i]*multiplier*MultLdg).ToString(Consts.ValFormatString));  //export time series loadings to 
+
+                TSO.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
+            }
+        
+            return TSO;
+        }
 
         public void Translate_ITimeSeriesInput(int column, double minVal)   
         {

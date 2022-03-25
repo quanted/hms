@@ -85,8 +85,8 @@ public class TDetritus : TRemineralize
             if ((!AQTSeg.PSetup.UseDetrInputRecInflow.Val)||((NState == AllVariables.SedmRefrDetr) || (NState == AllVariables.SedmLabDetr)))
             {
                 // TStateVariable
-                // This function is for Susp&Diss Detritus Only
-                base.GetInflowLoad(TimeIndex);
+                // The current function is for Susp&Diss Detritus Only
+                result = base.GetInflowLoad(TimeIndex);
             }
             else
             {

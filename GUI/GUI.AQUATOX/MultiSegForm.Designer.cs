@@ -41,7 +41,7 @@
             this.SetupButton = new System.Windows.Forms.Button();
             this.executeButton = new System.Windows.Forms.Button();
             this.createButton = new System.Windows.Forms.Button();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.ReadNetworkPanel = new System.Windows.Forms.Panel();
             this.ReadSNButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.spanLabel = new System.Windows.Forms.Label();
@@ -58,9 +58,10 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.button3 = new System.Windows.Forms.Button();
+            this.ChooseTemplateButton = new System.Windows.Forms.Button();
             this.HelpButton = new System.Windows.Forms.Button();
             this.MapPanel = new System.Windows.Forms.Panel();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.GraphButton = new System.Windows.Forms.RadioButton();
@@ -76,10 +77,12 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
+            this.loclabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
             this.MapPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.TogglePanel.SuspendLayout();
             this.PlotPanel.SuspendLayout();
@@ -105,16 +108,18 @@
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
             this.basedirBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.basedirBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.basedirBox_KeyDown);
             this.basedirBox.Leave += new System.EventHandler(this.basedirBox_Leave);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label2.Location = new System.Drawing.Point(10, 51);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(63, 15);
+            this.label2.Size = new System.Drawing.Size(67, 15);
             this.label2.TabIndex = 4;
-            this.label2.Text = "Output Dir";
+            this.label2.Text = "Project Dir";
             // 
             // ProcessLog
             // 
@@ -127,6 +132,7 @@
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.ProcessLog.Size = new System.Drawing.Size(649, 396);
             this.ProcessLog.TabIndex = 6;
+            this.ProcessLog.WordWrap = false;
             // 
             // label5
             // 
@@ -211,21 +217,21 @@
             this.createButton.UseVisualStyleBackColor = true;
             this.createButton.Click += new System.EventHandler(this.createButton_Click);
             // 
-            // panel2
+            // ReadNetworkPanel
             // 
-            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.ReadSNButton);
-            this.panel2.Controls.Add(this.label6);
-            this.panel2.Controls.Add(this.spanLabel);
-            this.panel2.Controls.Add(this.spanBox);
-            this.panel2.Controls.Add(this.label4);
-            this.panel2.Controls.Add(this.EndCOMIDBox);
-            this.panel2.Controls.Add(this.label1);
-            this.panel2.Controls.Add(this.comidBox);
-            this.panel2.Location = new System.Drawing.Point(25, 93);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(259, 145);
-            this.panel2.TabIndex = 24;
+            this.ReadNetworkPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ReadNetworkPanel.Controls.Add(this.ReadSNButton);
+            this.ReadNetworkPanel.Controls.Add(this.label6);
+            this.ReadNetworkPanel.Controls.Add(this.spanLabel);
+            this.ReadNetworkPanel.Controls.Add(this.spanBox);
+            this.ReadNetworkPanel.Controls.Add(this.label4);
+            this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
+            this.ReadNetworkPanel.Controls.Add(this.label1);
+            this.ReadNetworkPanel.Controls.Add(this.comidBox);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 93);
+            this.ReadNetworkPanel.Name = "ReadNetworkPanel";
+            this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 145);
+            this.ReadNetworkPanel.TabIndex = 24;
             // 
             // ReadSNButton
             // 
@@ -262,6 +268,7 @@
             this.spanBox.Size = new System.Drawing.Size(71, 23);
             this.spanBox.TabIndex = 26;
             this.spanBox.Text = "5";
+            this.spanBox.Leave += new System.EventHandler(this.comidBox_Leave);
             // 
             // label4
             // 
@@ -278,6 +285,7 @@
             this.EndCOMIDBox.Name = "EndCOMIDBox";
             this.EndCOMIDBox.Size = new System.Drawing.Size(71, 23);
             this.EndCOMIDBox.TabIndex = 24;
+            this.EndCOMIDBox.Leave += new System.EventHandler(this.comidBox_Leave);
             // 
             // label1
             // 
@@ -295,6 +303,7 @@
             this.comidBox.Size = new System.Drawing.Size(71, 23);
             this.comidBox.TabIndex = 22;
             this.comidBox.Text = "23398915";
+            this.comidBox.Leave += new System.EventHandler(this.comidBox_Leave);
             // 
             // OutputPanel
             // 
@@ -374,15 +383,15 @@
             this.label9.TabIndex = 28;
             this.label9.Text = "View Outputs";
             // 
-            // button3
+            // ChooseTemplateButton
             // 
-            this.button3.Location = new System.Drawing.Point(419, 10);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(117, 23);
-            this.button3.TabIndex = 29;
-            this.button3.Text = "Choose Template";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.Choose_from_Template_Click);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(419, 10);
+            this.ChooseTemplateButton.Name = "ChooseTemplateButton";
+            this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
+            this.ChooseTemplateButton.TabIndex = 29;
+            this.ChooseTemplateButton.Text = "Choose Template";
+            this.ChooseTemplateButton.UseVisualStyleBackColor = true;
+            this.ChooseTemplateButton.Click += new System.EventHandler(this.Choose_from_Template_Click);
             // 
             // HelpButton
             // 
@@ -402,6 +411,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.MapPanel.BackColor = System.Drawing.Color.White;
+            this.MapPanel.Controls.Add(this.pictureBox2);
             this.MapPanel.Controls.Add(this.pictureBox1);
             this.MapPanel.Location = new System.Drawing.Point(305, 66);
             this.MapPanel.Name = "MapPanel";
@@ -412,9 +422,22 @@
             this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
             this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
             // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(289, 348);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(356, 44);
+            this.pictureBox2.TabIndex = 1;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Visible = false;
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(299, 329);
             this.pictureBox1.Name = "pictureBox1";
@@ -530,7 +553,6 @@
             this.flowchartButton.TabIndex = 38;
             this.flowchartButton.Text = "flowchart";
             this.flowchartButton.UseVisualStyleBackColor = true;
-            this.flowchartButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
             // 
             // mapButton
             // 
@@ -589,11 +611,22 @@
             this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
             this.infolabel2.Visible = false;
             // 
+            // loclabel
+            // 
+            this.loclabel.AutoSize = true;
+            this.loclabel.Location = new System.Drawing.Point(824, 46);
+            this.loclabel.Name = "loclabel";
+            this.loclabel.Size = new System.Drawing.Size(53, 15);
+            this.loclabel.TabIndex = 41;
+            this.loclabel.Text = "Lat Long";
+            this.loclabel.Visible = false;
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(987, 514);
+            this.Controls.Add(this.loclabel);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
@@ -602,12 +635,12 @@
             this.Controls.Add(this.TogglePanel);
             this.Controls.Add(this.MapPanel);
             this.Controls.Add(this.HelpButton);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.ChooseTemplateButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.OutputPanel);
-            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.ReadNetworkPanel);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.BaseJSONBox);
@@ -623,11 +656,12 @@
             this.ResizeEnd += new System.EventHandler(this.MultiSegForm_ResizeEnd);
             this.Resize += new System.EventHandler(this.MultiSegForm_Resize);
             this.panel1.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.ReadNetworkPanel.ResumeLayout(false);
+            this.ReadNetworkPanel.PerformLayout();
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
             this.MapPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
@@ -650,7 +684,7 @@
         private System.Windows.Forms.Button SetupButton;
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Button createButton;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel ReadNetworkPanel;
         private System.Windows.Forms.Button ReadSNButton;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label spanLabel;
@@ -666,7 +700,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button ChooseTemplateButton;
         private System.Windows.Forms.Panel OutputPanel;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.Panel MapPanel;
@@ -687,5 +721,7 @@
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label loclabel;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }

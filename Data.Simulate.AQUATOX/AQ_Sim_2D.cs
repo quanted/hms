@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Globals;
-using AQUATOX.AQSite;
 using AQUATOX.AQTSegment;
 using AQUATOX.Volume;
 using AQUATOX.Loadings;
 
-using System.Threading;
-using System.Threading.Tasks;
-
 using System.Linq;
 using Newtonsoft.Json;
 using Data;
-using System.ComponentModel;
 using System.IO;
-using System.Data;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
 using System.Net;
@@ -35,6 +29,7 @@ namespace AQUATOX.AQSim_2D
             public int[][] order;
             public Dictionary<string, int[]> sources;
             public Dictionary<string, int[]> boundary;
+            [JsonProperty("divergent-paths")] public Dictionary<string, int[]> divergentpaths;
         }
 
         /// <summary>
@@ -51,7 +46,6 @@ namespace AQUATOX.AQSim_2D
         /// JSON string holds the base AQUATOX simulation that is propagated to create a 2D network
         /// </summary>
         public string baseSimJSON = "";
-
 
         /// <summary>
         /// list of state variables in simulation for summarizing output and verifying the list has not changed
@@ -73,7 +67,6 @@ namespace AQUATOX.AQSim_2D
             public double[] washout;  // m3
             public double[][] concs; // g/m3 or mg/m3 depending on state var
         }
-
 
         /// <summary>
         /// converts stream network json string into SN variable and saves number of segments
@@ -101,6 +94,7 @@ namespace AQUATOX.AQSim_2D
 
         public void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput ATSO, bool useVelocity)  // time series output must currently be in m3/s
         {
+
             if (useVelocity)
             {
                 TVol.Calc_Method = VolumeMethType.KnownVal;
@@ -416,7 +410,15 @@ namespace AQUATOX.AQSim_2D
             return errmessage;
         }
 
-        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null)
+        /// <summary>
+        /// After up-stream segments have been run, this procedure apportions masses of state variables flowing into the current stream segment from one identified upstream segment 
+        /// </summary>
+        /// <param name="Sim">The AQUATOX segment that is having data passed to it</param>
+        /// <param name="SrcID">COMID of the upstream segments from which data is being passed</param>
+        /// <param name="ninputs">Number of upstream inputs</param>
+        /// <param name="AR">Data structure of archived inputs from which to gather model results</param>
+        /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
+        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput> divergence_flows = null )  
         {
             //archived_results AR;
             if (AR == null)    // (AR.Equals(null)) crashed
@@ -431,7 +433,7 @@ namespace AQUATOX.AQSim_2D
             {
                 TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
 
-                if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState < AllVariables.TSS)) ||   
+                if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState < AllVariables.TSS)) ||    // Select which state variables move from segment to segment
                     ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || 
                     ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
                     ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
@@ -444,12 +446,23 @@ namespace AQUATOX.AQSim_2D
 
                     for (int i = 0; i < ndates; i++)
                     {
-                        double OutVol = AR.washout[i];  // out volume from upstream segment
+                        double OutVol = AR.washout[i];  // out volume to this segment from upstream segment
+
+                        double frac_this_segment = 1.0;
+                        double totOutVol = OutVol;
+                        if (divergence_flows != null)
+                            foreach (ITimeSeriesOutput its in divergence_flows)
+                            {
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;    
+                                // m3/d      m3/d                                         m3/s               s/d
+                                frac_this_segment = OutVol / totOutVol;
+                            }
+
                         double InVol = InflowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
 
                         if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
-                        else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol));  // first or only input
-                        else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol));  //adding second or third inputs
+                        else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol)* frac_this_segment);  // first or only input
+                        else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  //adding second or third inputs
 
                     }
 
@@ -470,8 +483,10 @@ namespace AQUATOX.AQSim_2D
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="outstr">information about the status of the run for the user's log</param>
         /// <param name="jsonstring">the completed simulation with results </param>
-        /// <returns>boolean: true if the run was completed successfully</returns>
-        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring)  
+        /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
+        /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
+        /// <returns>boolean: true if the run was completed successfully</returns>/// 
+        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = new AQTSim();
             outstr = Sim.Instantiate(jsonstring);
@@ -494,10 +509,10 @@ namespace AQUATOX.AQSim_2D
             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
                 foreach (int SrcID in Sources)
                 {
-                    if (SrcID != comid)  // set to itself in boundaries 
+                    if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                     {
                         nSources++;
-                        Pass_Data(Sim, SrcID, nSources);
+                        Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
                         outstr = outstr + "Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
                     }
                 };
@@ -524,7 +539,9 @@ namespace AQUATOX.AQSim_2D
             return true;
         }
 
+
     }
+
 
 }
 
