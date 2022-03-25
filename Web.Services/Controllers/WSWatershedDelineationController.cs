@@ -45,29 +45,13 @@ namespace Web.Services.Controllers
         {
             WatershedDelineationInput example = new WatershedDelineationInput()
             {
-                Source = "nldas",
-                DateTimeSpan = new DateTimeSpan()
-                {
-                    StartDate = new DateTime(2015, 01, 01),
-                    EndDate = new DateTime(2015, 01, 08),
-                    DateTimeFormat = "yyyy-MM-dd HH"
-                },
+                inflowSource = "National Water Model",
                 Geometry = new TimeSeriesGeometry()
                 {
-                    HucID = "030502040102",
-                    StationID = null,
-                    Description = "EPA Athens Office",
-                    Point = new PointCoordinate()
-                    {
-                        Latitude = 33.925673,
-                        Longitude = -83.355723
-                    },
                     GeometryMetadata = new Dictionary<string, string>()
                     {
-                        { "City", "Athens" },
-                        { "State", "Georgia"},
-                        { "Country", "United States" },
-                        { "huc_12_num", "030502040102" }
+                        { "startCOMID", "6277141" },
+                        { "endCOMID", "6275977"}
                     },
                     Timezone = null
                 },
