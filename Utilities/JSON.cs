@@ -230,5 +230,43 @@ namespace Utilities
                 writer.WriteStringValue(value);
             }
         }
+
+        public class DateTimeConverterNS : Newtonsoft.Json.Converters.DateTimeConverterBase
+        {
+            public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type objectType, object existingValue, Newtonsoft.Json.JsonSerializer serializer)
+            {
+                DateTime date = new DateTime();
+                string dateString = reader.Value.ToString();
+                if (DateTime.TryParse(dateString, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "yyyy-MM-dd H", CultureInfo.InvariantCulture,
+    DateTimeStyles.None, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "MM/dd/yyyy H", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "yyyy-MM-dd HH", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date))
+                {
+                }
+                else if (DateTime.TryParseExact(dateString, "MM/dd/yyyy HH", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out date))
+                {
+                }
+                else
+                {
+                    throw new FormatException();
+                }
+                return date;
+            }
+
+            public override void WriteJson(Newtonsoft.Json.JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
+            {
+                writer.WriteValue(value.ToString());
+            }
+        }
     }
 }

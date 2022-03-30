@@ -64,6 +64,7 @@ namespace WatershedDelineation
                 status = "";
                 taskData = "";
                 bool success = false;
+                Console.WriteLine("Requesting NWM data with url: " + url + ", and jobID: " + jobID);
                 while (retries > 0 && !success && !jobID.Equals(""))
                 {
                     Thread.Sleep(6000);

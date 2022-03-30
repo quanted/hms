@@ -40,7 +40,10 @@ namespace Web.Services
             });
 
             // Add support for JObjects
-            services.AddControllers().AddNewtonsoftJson();
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new Utilities.JSON.DateTimeConverterNS());
+            });
 
             services.AddLogging();
 
