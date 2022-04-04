@@ -16,7 +16,9 @@ WORKDIR /app
 
 COPY --from=publish /app .
 RUN ls /app/App_Data
-RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
+#RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
+
+COPY ./GUI /app/GUI
 
 ENV APP_USER hms_user
 
