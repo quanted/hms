@@ -76,10 +76,10 @@ namespace Web.Services.Models
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
             }
             // Check for docker file path 
-            else if (File.Exists(Path.Combine("app", "GUI",
+            else if (File.Exists(Path.Combine("/app", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions))))
             {
-                return File.ReadAllText(Path.Combine("app", "GUI",
+                return File.ReadAllText(Path.Combine("/app", "GUI",
                 "GUI.AQUATOX", "2D_Inputs", "BaseJSON", AQSim_2D.MultiSegSimName(flagOptions)));
             }
             // Check for docker file path - 2
@@ -99,7 +99,7 @@ namespace Web.Services.Models
             // Error 
             else
             {
-                return "{\"Error\" : \"Base json file could not be found.\"}";
+                return "{\"Error\" : \"Base json file could not be found. File: " + AQSim_2D.MultiSegSimName(flagOptions) + "\"}";
             }
         }
 

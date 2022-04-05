@@ -26,7 +26,7 @@ RUN adduser \
   --disabled-password \
   --home /app \
   --gecos '' $APP_USER \
-  && chown -R $APP_USER /app
-USER $APP_USER
+  && chown -R $APP_USER:$APP_USER /app
+USER $APP_USER:$APP_USER
 
 ENTRYPOINT ["dotnet", "Web.Services.dll", "--urls", "http://0.0.0.0:8080"]
