@@ -272,6 +272,7 @@ namespace WatershedDelineation
             {
                 // Point to point traversal
                 requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + this.startCOMID + "&pStopComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
+
             }
             else
             {

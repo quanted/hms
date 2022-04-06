@@ -34,6 +34,7 @@ namespace Web.Services.Models
             var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
             List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, null);
             List<List<int>> segOrder = new List<List<int>>();
+
             if (mainstem)
             {
                 string switchedComid = null;
@@ -44,9 +45,14 @@ namespace Web.Services.Models
                 segOrder = this.generateMainstemOrder(networkTable, switchedComid);
 
             }
+            else if (!String.IsNullOrEmpty(endComid))
+            {
+                result = this.generateOrderAndSourcesPP(ref networkTable, comid, huc);
+                result.Add("network", networkTable);
+                return result;
+            }
             else
             {
-                //segOrder = this.generateOrder(networkTable);
                 result = this.generateOrderAndSources(ref networkTable, comid, huc);
                 result.Add("network", networkTable);
                 return result;
@@ -59,7 +65,6 @@ namespace Web.Services.Models
 
             result.Add("network", networkTable);
             result.Add("order", segOrder);
-            //result.Add("sources", sourceComIDs);
             return result;
         }
 
@@ -417,6 +422,13 @@ namespace Web.Services.Models
             };
         }
 
+        private Dictionary<string, string> getSegmentSources(string segmentHydroseq)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            string query = "SELECT ComID FROM PlusFlowlineVAA WHERE DnHydroseq=" + segmentHydroseq;
+            return Utilities.SQLite.GetData(dbPath, query);
+        }
+
         private string getParallelSegment(string hydroseq, string uphydroseq)
         {
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
@@ -720,6 +732,254 @@ namespace Web.Services.Models
                     else
                     {
                         foreach(string pV in divPar.Value)
+                        {
+                            if (!divParallel[divPar.Key].Contains(pV))
+                            {
+                                divParallel[divPar.Key].Add(pV);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (divergentUp)
+            {
+                divParallel[divSegment["mainstem"]] = new List<string>() { divSegment["divergence"] };
+            }
+
+            return new Dictionary<string, object>()
+            {
+                { "sources", sources },
+                { "order", order },
+                { "boundary", new Dictionary<string, object>(){ {"headwater", headwaters}, {"out-of-network", outNetwork}, {"divergence", divComids } } },
+                { "divergent-paths", divParallel}
+            };
+
+        }
+
+        public Dictionary<string, object> generateOrderAndSourcesPP(ref List<List<object>> networkTable, string pourpoint, string huc = "")
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+
+            // Check if pourpoint is along a divergent path, non-mainstem path
+            // If true, traverse upstream of the provided pourpoint until segment is not on divergent path set that segment as pseudopourpoint
+            Dictionary<string, object> dResults = new Dictionary<string, object>();
+            string dPourpoint = pourpoint;
+            bool divergent = false;
+            bool divergentUp = false;
+            Dictionary<string, string> divSegment = new Dictionary<string, string>();
+            int pourDivergence = this.divergentCheck(pourpoint);
+
+            if (pourDivergence > 1)                 // Pourpoint is on a divergent path
+            {
+                dResults = this.traverseDivergence(networkTable[1][1].ToString());
+                pourpoint = dResults["pseudo-pourpoint"].ToString();
+                divergent = true;
+            }
+            else if (pourDivergence == 1)            // Pourpoint is on the mainstem where an upstream segment diverges
+            {
+                divSegment = this.getDivSegment(networkTable[1][1].ToString());
+                divergentUp = true;
+            }
+
+            // Get the HUC12 of the pourpoint from the NHDPlus V2.1 db
+            string query1 = "SELECT HUC12 FROM HUC12_PU_COMIDs_CONUS WHERE COMID=" + pourpoint;
+            Dictionary<string, string> aoiHUCq = Utilities.SQLite.GetData(dbPath, query1);
+            string aoiHUC = (aoiHUCq.ContainsKey("HUC12")) ? aoiHUCq["HUC12"] : "";
+            // Get all comids for the aoiHUC from the NHDPlus V2.1 db
+            string query2 = "SELECT COMID FROM HUC12_PU_COMIDs_CONUS WHERE HUC12='" + aoiHUC + "'";
+            Dictionary<string, string> aoiCOMIDSq = Utilities.SQLite.GetData(dbPath, query2);
+            List<string> aoiCOMIDs = (aoiCOMIDSq.ContainsKey("COMID")) ? aoiCOMIDSq["COMID"].Split(",").ToList<string>() : new List<string>();
+            string pourpointHUC = networkTable[1][7].ToString();
+            // If the aoiHUC does not match with the EPA Water
+            if (pourpointHUC != aoiHUC)
+            {
+                string fileName = "HUC12_mismatch.txt";
+                string header = "COMID, NHDPlusV2.1 HUC12, EPA Waters HUC12";
+                string huclog = pourpoint + ", " + aoiHUC + ", " + pourpointHUC;
+                Utilities.Logger.WriteToFile(fileName, huclog, false, header);
+            }
+
+            huc = (huc == null) ? "" : huc;
+            List<int> networkHydro = new List<int>();
+            Dictionary<string, List<string>> sources = new Dictionary<string, List<string>>();      // Sources dictionary (COMID)
+            Dictionary<int, List<object>> hydroMapping = new Dictionary<int, List<object>>();       // Hydroseq to networkTable info mapping dict
+            Dictionary<int, string> hydroComid = new Dictionary<int, string>();                     // Hydroseq to comid mapping
+            List<int> outOfNetwork = new List<int>();
+            List<List<object>> filteredNetworkTable = new List<List<object>>()
+            {
+                { networkTable[0] }
+            };
+            int j = 1;
+            // Initialize the outOfNetwork segments, the set of hydroseq (networkHydro), the sources dictionary (sources), and the filteredNetworkTable which replaces the network table 
+            for (int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                int hydro = Int32.Parse(networkTable[i][1].ToString());
+                if (huc.Equals("12") && !aoiCOMIDs.Contains(comid))
+                {
+                    outOfNetwork.Add(hydro);
+                }
+                else
+                {
+                    networkHydro.Add(hydro);
+                    sources.Add(comid, new List<string>());
+                    filteredNetworkTable.Add(networkTable[i]);
+                    filteredNetworkTable[j][7] = aoiHUC;
+                    j += 1;
+                }
+                hydroMapping.Add(hydro, networkTable[i]);
+                hydroComid.Add(hydro, comid);
+            }
+            List<int> edges = new List<int>();
+            List<string> headwaters = new List<string>();
+            List<string> outNetwork = new List<string>();
+
+            for (int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                int hydro = Int32.Parse(networkTable[i][1].ToString());
+                int uphydro = Int32.Parse(networkTable[i][2].ToString());
+                if (outOfNetwork.Contains(hydro))
+                {
+                    int dnhydro = Int32.Parse(networkTable[i][3].ToString());
+                    if (!outOfNetwork.Contains(dnhydro) && hydroMapping.ContainsKey(dnhydro))
+                    {
+                        string dnCOMID = hydroMapping[dnhydro][0].ToString();
+                        if (!sources[dnCOMID].Contains(comid))
+                        {
+                            sources[hydroMapping[dnhydro][0].ToString()].Add(comid);
+                        }
+                        if (!outNetwork.Contains(comid))
+                        {
+                            outNetwork.Add(comid);
+                        }
+                    }
+                }
+                else if (uphydro == 0)
+                {
+                    headwaters.Add(comid);
+                    edges.Add(hydro);
+                }
+                else if (!networkHydro.Contains(uphydro) && comid != pourpoint)
+                {
+                    edges.Add(hydro);
+                    bool addToOut = false;
+                    if (hydroMapping.ContainsKey(uphydro))
+                    {
+                        string srcComid = hydroMapping[uphydro][0].ToString();
+                        if (!outNetwork.Contains(srcComid))
+                        {
+                            outNetwork.Add(srcComid);
+                        }
+                    }
+                    else
+                    {
+                        addToOut = true;
+                    }
+
+                    string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
+                    Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
+                    if (sourceComid.ContainsKey("ComID"))
+                    {
+                        if (!sources[comid].Contains(sourceComid["ComID"]))
+                        {
+                            sources[comid].Add(sourceComid["ComID"]);
+                        }
+                        if (addToOut)
+                        {
+                            outNetwork.Add(sourceComid["ComID"]);
+                        }
+                    }
+                }
+            }
+            List<int> traversed = new List<int>();
+            List<List<string>> order = new List<List<string>>();
+            List<int> diffEdges = new List<int>();
+            List<string> divComids = new List<string>();
+            if (divergent)
+            {
+                divComids.Add(dPourpoint);
+            }
+            Dictionary<string, List<string>> divParallel = new Dictionary<string, List<string>>();
+            if (networkHydro.Count == 1)
+            {
+                order.Add(new List<string>() { networkTable[1][0].ToString() });
+            }
+            else
+            {
+                for (int i = 0; i < edges.Count; i++)
+                {
+                    traversed.Add(edges[i]);
+                    List<string> sequence = new List<string>();
+                    sequence.Add(hydroComid[edges[i]]);
+                    int dnHydro = Int32.Parse(hydroMapping[edges[i]][3].ToString());
+                    recTraverse(dnHydro, hydroComid[edges[i]], pourpoint, ref sequence, ref traversed, ref sources, hydroComid, hydroMapping);
+                    if (!sequence.Contains("-1"))
+                    {
+                        ReorderSequence(ref order, sequence);
+                    }
+                    else
+                    {
+                        foreach (string s in sequence)
+                        {
+                            if (s != "-1")
+                            {
+                                sources.Remove(s);
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                string hydro = networkTable[i][1].ToString();
+                Dictionary<string, string> segSources = this.getSegmentSources(hydro);
+                if (segSources.ContainsKey("ComID"))
+                {
+                    List<string> segSourceList = segSources["ComID"].Split(",").ToList();
+                    foreach (string s in segSourceList)
+                    {
+                        if (!sources[comid].Contains(s))
+                        {
+                            sources[comid].Add(s);
+                        }
+                        if (!outNetwork.Contains(s) && !aoiCOMIDs.Contains(s))
+                        {
+                            outNetwork.Add(s);
+                        }
+                    }
+                }
+            }
+            networkTable = filteredNetworkTable;
+
+            //if pourpoint is divergent, merge divergent path results with pseudo-pourpoint results
+            if (divergent)
+            {
+                foreach (KeyValuePair<string, List<string>> divSource in dResults["sources"] as Dictionary<string, List<string>>)
+                {
+                    if (!sources.ContainsKey(divSource.Key))
+                    {
+                        sources.Add(divSource.Key, divSource.Value);
+                    }
+                    else
+                    {
+                        sources[divSource.Key].Union(divSource.Value);
+                    }
+                }
+                foreach (List<string> dOrder in dResults["order"] as List<List<string>>)
+                {
+                    order.Add(dOrder);
+                }
+                foreach (KeyValuePair<string, List<string>> divPar in dResults["divergent-paths"] as Dictionary<string, List<string>>)
+                {
+                    if (!divParallel.ContainsKey(divPar.Key))
+                    {
+                        divParallel.Add(divPar.Key, divPar.Value);
+                    }
+                    else
+                    {
+                        foreach (string pV in divPar.Value)
                         {
                             if (!divParallel[divPar.Key].Contains(pV))
                             {
