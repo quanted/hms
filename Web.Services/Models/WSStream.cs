@@ -944,7 +944,7 @@ namespace Web.Services.Models
                         {
                             sources[comid].Add(s);
                         }
-                        if (!outNetwork.Contains(s) && !aoiCOMIDs.Contains(s))
+                        if (!outNetwork.Contains(s) && !sources.ContainsKey(s))
                         {
                             outNetwork.Add(s);
                         }
