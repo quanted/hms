@@ -58,13 +58,16 @@ namespace Utilities
                         {
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
+                                var k = reader.GetName(i);
+                                string v = null;
                                 if (reader.IsDBNull(i))
                                 {
-                                    return data;
+                                    v = "NA";
                                 }
-                                var k = reader.GetName(i);
-                                var v = reader.GetValue(i).ToString();
-
+                                else
+                                {
+                                    v = reader.GetValue(i).ToString();
+                                }
                                 if (!data.ContainsKey(k))
                                 {
                                     data.Add(k, v);
@@ -73,6 +76,7 @@ namespace Utilities
                                 {
                                     data[k] = data[k] + "," + v;
                                 }
+                                
                             }
                         }
                     }
@@ -136,16 +140,24 @@ namespace Utilities
                         {
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
+                                var k = reader.GetName(i);
+                                object v = "";
+
                                 if (reader.IsDBNull(i))
                                 {
-                                    return data;
+                                    v = "NA";
                                 }
-                                var k = reader.GetName(i);
-                                var v = reader.GetValue(i);
-
+                                else
+                                {
+                                    v = reader.GetValue(i);
+                                }
                                 if (!data.ContainsKey(k))
                                 {
                                     data.Add(k, v);
+                                }
+                                else
+                                {
+                                    data[k] = data[k] + "," + v;
                                 }
                             }
                         }

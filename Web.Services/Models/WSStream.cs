@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using WatershedDelineation;
 
@@ -43,28 +44,26 @@ namespace Web.Services.Models
                     switchedComid = comid;
                 }
                 segOrder = this.generateMainstemOrder(networkTable, switchedComid);
+                if (!String.IsNullOrEmpty(endComid))
+                {
+                    networkTable = this.purgeTable(networkTable, segOrder);
+                }
+                result = this.getSourceComids(segOrder, networkTable);
+                result.Add("order", segOrder);
 
             }
             else if (!String.IsNullOrEmpty(endComid))
             {
                 result = this.generateOrderAndSourcesPP(ref networkTable, comid, huc);
-                result.Add("network", networkTable);
-                return result;
             }
             else
             {
                 result = this.generateOrderAndSources(ref networkTable, comid, huc);
-                result.Add("network", networkTable);
-                return result;
             }
-            if (!String.IsNullOrEmpty(endComid))
-            {
-                networkTable = this.purgeTable(networkTable, segOrder);
-            }
-            result = this.getSourceComids(segOrder, networkTable);
-
             result.Add("network", networkTable);
-            result.Add("order", segOrder);
+            List<string> sourcesList = (result["sources"] as Dictionary<string, List<string>>).Keys.ToList();
+            result.Add("waterbodies", this.checkWaterbodies(sourcesList));
+
             return result;
         }
 
@@ -1004,6 +1003,96 @@ namespace Web.Services.Models
 
         }
 
+        public Dictionary<string, object> checkWaterbodies(List<string> comids)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
+            Dictionary<string, object> waterbodies = new Dictionary<string, object>();
+            StringBuilder sb = new StringBuilder();
+            Dictionary<string, object> tableMap = new Dictionary<string, object>();
+            List<string> wbFields = new List<string>() { "GNIS_NAME", "AREASQKM", "ELEVATION", "REACHCODE", "FTYPE", "FCODE", "MeanDepth", "LakeVolume" };
+            List<string> wbFieldTypes = new List<string>() { "string", "string", "double", "double", "int", "string", "int", "double", "double" };
+            for(int i = 0; i < comids.Count; i++)
+            {
+                string comid = comids[i];
+                sb.Append("\"");
+                sb.Append(comid);
+                sb.Append("\"");
+                if(i < comids.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+            string comidsStr = sb.ToString();
+            string query1 = "SELECT ComID, WBAREACOMI FROM PlusFlowlineVAA WHERE COMID IN (" + comidsStr + ") AND WBAREACOMI IS NOT NULL";
+            Dictionary<string, string> aoiHUCq = Utilities.SQLite.GetData(dbPath, query1);
+            List<List<object>> wbTable = new List<List<object>>();
+            if (aoiHUCq.Count > 0) {
+                List<string> catComids = aoiHUCq["ComID"].Split(",").ToList<string>();
+                List<string> wbComids = aoiHUCq["WBAREACOMI"].Split(",").ToList<string>();
+
+                StringBuilder wbsb = new StringBuilder();
+                for (int i = 0; i < wbComids.Count; i++)
+                {
+                    waterbodies.Add(catComids[i], wbComids[i]);
+                    string comid = wbComids[i];
+                    //wbsb.Append("\"");
+                    wbsb.Append(comid);
+                    //wbsb.Append("\"");
+                    if (i < wbComids.Count - 1)
+                    {
+                        wbsb.Append(", ");
+                    }
+                }
+
+                string query2 = "SELECT ComID, " + String.Join(", ", wbFields) + " FROM Waterbodies WHERE COMID IN (" + wbsb.ToString() + ")";
+                Dictionary<string, object> wbParams = Utilities.SQLite.GetDataObject(dbPath, query2);
+                wbTable.Add(wbParams.Keys.ToList<object>());
+
+                bool initialized = false;
+                int m = 0;
+                foreach(KeyValuePair<string, object> kv in wbParams)
+                {
+                    List<string> values = kv.Value.ToString().Split(",").ToList();
+                    if (!initialized)
+                    {
+                        for (int i = 0; i < values.Count; i++)
+                        {
+                            wbTable.Add(new List<object>());
+                        }
+                        initialized = true;
+                    }
+                    int n = 1;
+                    for (int j = 0; j < values.Count; j++)
+                    {
+                        wbTable[n].Add(this.convertType(values[j], m, wbFieldTypes));
+                        n++;
+                    }
+                    m++;
+                }
+            }
+            return new Dictionary<string, object>{
+                {"comid-wbcomid", waterbodies },
+                {"waterbody-table", wbTable }
+            };
+
+        }
+
+        private object convertType(object value, int typeI, List<string> typeList)
+        {
+            switch (typeList[typeI])
+            {
+                default:
+                case "string":
+                    return value.ToString();
+                case "int":
+                    return Int64.Parse(value.ToString());
+                case "double":
+                    return Double.Parse(value.ToString());
+                case "bool":
+                    return Boolean.Parse(value.ToString());
+            }
+
+        }
     }
 }
