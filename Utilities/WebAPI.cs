@@ -17,13 +17,14 @@ namespace Utilities
         /// <param name="errorMsg"></param>
         /// <param name="queryString"></param>
         /// <returns></returns>
-        public static async Task<T> RequestData<T>(string queryString, int pings = 100)
+        public static async Task<T> RequestData<T>(string queryString, int pings = 100, string flaskURL = null, string dataURL = null)
         {
-            string flaskURL = Environment.GetEnvironmentVariable("FLASK_SERVER");
-            if (flaskURL == null)
+            flaskURL = flaskURL is null ? Environment.GetEnvironmentVariable("FLASK_SERVER") : flaskURL;
+            if(flaskURL == null)
             {
-                flaskURL = "http://localhost:7777";
+                flaskURL = "localhost:7777";
             }
+
             JsonSerializerOptions options = new JsonSerializerOptions()
             {
                 AllowTrailingCommas = true,
@@ -31,7 +32,7 @@ namespace Utilities
                 IgnoreNullValues = true
             };
             string requestURL = flaskURL + queryString;
-            string dataURL = flaskURL + "/hms/data?job_id=";
+            dataURL = dataURL is null ? flaskURL + "/hms/data?job_id=" : dataURL + "?job_id=";
             string data = "";
 
             HttpClient hc = new HttpClient();

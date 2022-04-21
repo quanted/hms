@@ -24,6 +24,15 @@ namespace Streamflow
             dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
 
             FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000).Result;
+            
+            // Remote request test
+            // string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
+            // dataRequest = "dataset=streamflow&comid=" + comids;
+            // dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
+            // dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+            // string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
+            // FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
+
             output = results.data;
             if (input.TemporalResolution.ToLower() == "daily") {
                 output.Data = output.ToDaily(input.DateTimeSpan.DateTimeFormat, input, true, false);
