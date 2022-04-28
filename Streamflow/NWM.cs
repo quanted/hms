@@ -19,19 +19,26 @@ namespace Streamflow
             }
             output.Metadata.Add("comids", comids);
 
+            string waterbody = "false";
+            if (input.Geometry.GeometryMetadata.ContainsKey("waterbody"))
+            {
+                waterbody = input.Geometry.GeometryMetadata["waterbody"];
+            }
+
             string dataRequest = "/hms/nwm/data/?dataset=streamflow&comid=" + comids;
             dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
             dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+            dataRequest += "&waterbody=" + waterbody;
 
             FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000).Result;
             
             // Remote request test
-            // string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
-            // dataRequest = "dataset=streamflow&comid=" + comids;
-            // dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
-            // dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
-            // string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
-            // FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
+            //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
+            //dataRequest = "dataset=streamflow&comid=" + comids;
+            //dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
+            //dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+            //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
+            //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
 
             output = results.data;
             if (input.TemporalResolution.ToLower() == "daily") {
