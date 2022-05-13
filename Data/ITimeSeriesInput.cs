@@ -165,7 +165,7 @@ namespace Data
         /// Options: None;
         /// Required: False;
         /// </summary>
-        public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }
+        public Dictionary<string, TimeSeriesOutput> InputTimeSeries { get; set; }  // JSC -- eventually change to Dictionary<string, TimeSeriesOutput<List<double>> ?
 
         /// <summary>
         /// Creates a new ITimeSeriesInput from the current object.

@@ -65,7 +65,7 @@ namespace GUI.AQUATOX
             this.ParameterButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
-            this.AmmoniaDriveLabel = new System.Windows.Forms.Label();
+            this.WarningLabel = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
             this.ToxicityButton = new System.Windows.Forms.Button();
             this.LoadingsPanel.SuspendLayout();
@@ -467,16 +467,16 @@ namespace GUI.AQUATOX
             this.CancelButt.UseVisualStyleBackColor = true;
             this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
             // 
-            // AmmoniaDriveLabel
+            // WarningLabel
             // 
-            this.AmmoniaDriveLabel.AutoSize = true;
-            this.AmmoniaDriveLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.AmmoniaDriveLabel.ForeColor = System.Drawing.Color.DarkRed;
-            this.AmmoniaDriveLabel.Location = new System.Drawing.Point(284, 75);
-            this.AmmoniaDriveLabel.Name = "AmmoniaDriveLabel";
-            this.AmmoniaDriveLabel.Size = new System.Drawing.Size(346, 15);
-            this.AmmoniaDriveLabel.TabIndex = 25;
-            this.AmmoniaDriveLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
+            this.WarningLabel.AutoSize = true;
+            this.WarningLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.WarningLabel.ForeColor = System.Drawing.Color.DarkRed;
+            this.WarningLabel.Location = new System.Drawing.Point(284, 75);
+            this.WarningLabel.Name = "WarningLabel";
+            this.WarningLabel.Size = new System.Drawing.Size(346, 15);
+            this.WarningLabel.TabIndex = 25;
+            this.WarningLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             // 
             // HelpButton
             // 
@@ -511,7 +511,7 @@ namespace GUI.AQUATOX
             this.ClientSize = new System.Drawing.Size(676, 452);
             this.Controls.Add(this.ToxicityButton);
             this.Controls.Add(this.HelpButton);
-            this.Controls.Add(this.AmmoniaDriveLabel);
+            this.Controls.Add(this.WarningLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.ParameterButton);
@@ -548,7 +548,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button ParameterButton;
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button CancelButt;
-        private System.Windows.Forms.Label AmmoniaDriveLabel;
+        private System.Windows.Forms.Label WarningLabel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button File_Import;
         private System.Windows.Forms.Button HMS_Button;

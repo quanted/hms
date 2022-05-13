@@ -78,6 +78,7 @@
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
             this.loclabel = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -534,8 +535,6 @@
             // showCOMIDsBox
             // 
             this.showCOMIDsBox.AutoSize = true;
-            this.showCOMIDsBox.Checked = true;
-            this.showCOMIDsBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showCOMIDsBox.Location = new System.Drawing.Point(243, 3);
             this.showCOMIDsBox.Name = "showCOMIDsBox";
             this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
@@ -621,11 +620,22 @@
             this.loclabel.Text = "Lat Long";
             this.loclabel.Visible = false;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(773, 12);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 42;
+            this.button2.Text = "Step 0";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(987, 514);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.loclabel);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
@@ -723,5 +733,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label loclabel;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Button button2;
     }
 }

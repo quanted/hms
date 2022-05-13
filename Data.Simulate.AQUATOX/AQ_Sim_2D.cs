@@ -13,6 +13,7 @@ using AQUATOX.Plants;
 using AQUATOX.Animals;
 using System.Net;
 using System.Text;
+using Utilities;
 
 namespace AQUATOX.AQSim_2D
 
@@ -30,6 +31,13 @@ namespace AQUATOX.AQSim_2D
             public Dictionary<string, int[]> sources;
             public Dictionary<string, int[]> boundary;
             [JsonProperty("divergent-paths")] public Dictionary<string, int[]> divergentpaths;
+            public cWaterbodies waterbodies;
+        }
+
+        public class cWaterbodies
+        {
+            [JsonProperty("comid-wbcomid")] public Dictionary<int, int> comid_wb;
+            [JsonProperty("waterbody-table")] public string[][] wb_table;
         }
 
         /// <summary>
@@ -92,7 +100,7 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-        public void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput ATSO, bool useVelocity)  // time series output must currently be in m3/s
+        public void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO, bool useVelocity)  // time series output must currently be in m3/s
         {
 
             if (useVelocity)
@@ -110,7 +118,7 @@ namespace AQUATOX.AQSim_2D
                     InflowLoad.ITSI = input;
                 }
 
-                InflowLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+                InflowLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
 
                 KnownValLoad.UseConstant = false;
                 KnownValLoad.MultLdg = 1;
@@ -167,7 +175,7 @@ namespace AQUATOX.AQSim_2D
                     VelocityLoad.ITSI = input;
                 }
 
-                VelocityLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+                VelocityLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 VelocityLoad.Translate_ITimeSeriesInput(1,0);  //bank 1 for velocity;  minimum velocity of zero
                 VelocityLoad.MultLdg = 100;  // m/s to cm/s
                 VelocityLoad.Hourly = true;
@@ -189,7 +197,7 @@ namespace AQUATOX.AQSim_2D
                     DischargeLoad.ITSI = input;
                 }
 
-                DischargeLoad.ITSI.InputTimeSeries.Add("input", ATSO);
+                DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 DischargeLoad.Translate_ITimeSeriesInput(0,1000/86400);  //default minimum flow of 1000 cu m /d for now
                 DischargeLoad.MultLdg = 86400;  // seconds per day
                 DischargeLoad.Hourly = true;
@@ -272,6 +280,30 @@ namespace AQUATOX.AQSim_2D
         }
 
 
+        /// <summary>
+        /// Reads the GeoJSON for a waterbody comid from web services
+        /// </summary>
+        /// <param name="comid">comid</param>
+        /// <returns>JSON or error message</returns>
+        /// 
+        public string ReadWBGeoJSON(string WBcomid)
+        {
+            string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
+          // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
+
+            try
+            {
+                string rurl = requestURL + "?f=geojson&where=COMID%3D" + WBcomid;
+                var request = (HttpWebRequest)WebRequest.Create(rurl);
+                var response = (HttpWebResponse)request.GetResponse();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
 
         /// <summary>
         /// Reads the stream network data structure from web services
@@ -324,37 +356,55 @@ namespace AQUATOX.AQSim_2D
         };
 
 
+        // Remote request test
+        //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
+        //dataRequest = "dataset=streamflow&comid=" + comids;
+        //dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
+        //dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+        //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
+        //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
+
+
         /// <summary>
         /// Submit POST request to HMS web API for stream flow
         /// </summary>
-        private TimeSeriesOutput submitHydrologyRequest(string comid, out string errmsg)  
+        private TimeSeriesOutput<List<double>> submitHydrologyRequest(string comid, out string errmsg)  
         {
 
-            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
+            string dataRequest = "dataset=streamflow&comid=" + comid;
+            dataRequest += "&startDate=" + TSI.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
+            dataRequest += "&endDate=" + TSI.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
+            string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
+            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1,flaskURL,dataURL ).Result;  
+            errmsg = "";  // error output?
+            return results.data;
+
+            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             //string requestURL = "https://qed.epa.gov/hms/rest/api/";
-            string component = "hydrology";
-            string dataset = "streamflow";
-            errmsg = "";
+            //string component = "hydrology";
+            //string dataset = "streamflow";
+            //errmsg = "";
 
-            var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
-            string json = JsonConvert.SerializeObject(TSI);
-            var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            request.ContentLength = data.Length;
+            //var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
+            //string json = JsonConvert.SerializeObject(TSI);
+            //var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
+            //request.Method = "POST";
+            //request.ContentType = "application/json";
+            //request.ContentLength = data.Length;
 
-            using (var stream = request.GetRequestStream())
-            {
-                stream.Write(data, 0, data.Length);
-            }
-            var response = (HttpWebResponse)request.GetResponse();
-            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            if (rstring.IndexOf("ERROR") >= 0)
-            {
-                errmsg = "Error from web service returned: " + rstring; 
-                return null;
-            }
-            return JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+            //using (var stream = request.GetRequestStream())
+            //{
+            //    stream.Write(data, 0, data.Length);
+            //}
+            //var response = (HttpWebResponse)request.GetResponse();
+            //string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            //if (rstring.IndexOf("ERROR") >= 0)
+            //{
+            //    errmsg = "Error from web service returned: " + rstring; 
+            //    return null;
+            //}
+            //return JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
         }
 
         /// <summary>
@@ -394,7 +444,7 @@ namespace AQUATOX.AQSim_2D
 
             try
             {
-                TimeSeriesOutput TSO = submitHydrologyRequest(comid, out string errstr);
+                TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(comid, out string errstr);
                 if (errstr != "") return errstr;
                 FlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
                 // Could add to Log -- "Imported Flow Data for " + comid 
@@ -418,7 +468,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="ninputs">Number of upstream inputs</param>
         /// <param name="AR">Data structure of archived inputs from which to gather model results</param>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
-        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput> divergence_flows = null )  
+        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null )  
         {
             //archived_results AR;
             if (AR == null)    // (AR.Equals(null)) crashed
@@ -486,7 +536,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
         /// <returns>boolean: true if the run was completed successfully</returns>/// 
-        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput> divergence_flows = null, int[] outofnetwork = null)         
+        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = new AQTSim();
             outstr = Sim.Instantiate(jsonstring);

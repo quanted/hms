@@ -146,7 +146,7 @@ namespace Web.Services.Models
                         Task<BsonDocument> output = Utilities.MongoDB.FindByTaskIDAsync("hms_workflows", "data", item.Value);
                         output.Wait();
                         // Get result as string and deserialize to time series output 
-                        TimeSeriesOutput TSO = new TimeSeriesOutput();
+                        TimeSeriesOutput<List<double>> TSO = new();
                         try
                         {
                             BsonObjectId key;
@@ -160,7 +160,7 @@ namespace Web.Services.Models
                                 key = new BsonObjectId(new ObjectId(outputKey.AsString));
                             }
                             string outputJson = Utilities.MongoDB.FindInGridFS("hms_workflows", key);
-                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(outputJson);
+                            TSO = JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(outputJson);
                         }
                         catch (Exception ex)
                         {
@@ -168,7 +168,7 @@ namespace Web.Services.Models
                             return "Invalid Time Series Output.";
                         }
                         // Update stream discharge for current segment simulation
-                        FlowsFromNWM(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO, true);  //JSC 7/1/2021
+                        FlowsFromNWM(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO, true);  //JSC 7/1/2021.
                         break;
                     default:
                         return "Unrecognized dependency: " + item.Key;

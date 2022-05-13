@@ -28,6 +28,7 @@ namespace GUI.AQUATOX
         static private string defaultBrowser;
 
         private bool MultiSegmentInput = false;
+        private bool isBoundarySegment = true;
         public AQTSim aQTS = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
@@ -923,7 +924,7 @@ namespace GUI.AQUATOX
             TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
 
             LoadingsForm LF = new LoadingsForm();
-            LF.EditSV(ref TSV, aQTS);
+            LF.EditSV(ref TSV, aQTS, isBoundarySegment);
 
             // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
 
@@ -1166,7 +1167,7 @@ namespace GUI.AQUATOX
         }
 
 
-        public bool EditLinkedInput(ref string json)
+        public bool EditLinkedInput(ref string json, bool isBoundary)
         {
             if (!LoadJSON(json)) return false;
 
@@ -1180,6 +1181,7 @@ namespace GUI.AQUATOX
             ButtonPanel.Top = ScaleY(78);
             ParametersLabel.Top = ScaleY(60);
 
+            isBoundarySegment = isBoundary;
             MultiSegmentInput = true;
             ButtonPanel.Visible = true;
             SetupButton.Visible = false;

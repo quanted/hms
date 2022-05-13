@@ -78,9 +78,9 @@ namespace AQUATOX.Loadings
         /// <param name="DataSourceName">Description for source of variable</param>
         /// <param name="multiplier">optional multiplier, default is 1.0</param>
         /// <returns>TimeSeriesOutput holding the list timeseries</returns>
-        public TimeSeriesOutput TimeSeriesAsTSOutput(string DataSetName, string DataSourceName, double multiplier)
+        public TimeSeriesOutput<List<double>> TimeSeriesAsTSOutput(string DataSetName, string DataSourceName, double multiplier)
         {
-            TimeSeriesOutput TSO = new();
+            TimeSeriesOutput<List<double>> TSO = new();
             TSO.Dataset = DataSetName;
             TSO.DataSource = DataSourceName;
             TSO.Metadata = new Dictionary<string, string>()
@@ -90,16 +90,16 @@ namespace AQUATOX.Loadings
 
                     };
 
-            TSO.Data = new Dictionary<string, List<string>>();
-            List<string> vallist = new List<string>();
+            TSO.Data = new Dictionary<string, List<double>>();
+            List<double> vallist;
             
             TSO.Metadata.Add("Name_1", DataSetName);
 
             for (int i = 0; i <= list.Count()-1; i++)
             {
-                vallist = new List<string>();
+                vallist = new List<double>();
                 DateTime steptime = list.Keys[i];
-                vallist.Add((list.Values[i]*multiplier*MultLdg).ToString(Consts.ValFormatString));  //export time series loadings to 
+                vallist.Add((list.Values[i]*multiplier*MultLdg));  //export time series loadings to TSO<list<double>>
 
                 TSO.Data.Add(steptime.ToString(Consts.DateFormatString), vallist);
             }
@@ -168,6 +168,7 @@ namespace AQUATOX.Loadings
                 bool foundopt = false;
                 if ((list != null)&&(list.Count!=0))
                 {
+                    if (lastindexread > list.Keys.Count-1) lastindexread = -1;
                     if (lastindexread > -1)
                     {
                         if (list.Keys[lastindexread] == TimeIndex) { RetLoad = list.Values[lastindexread]; foundopt = true; }

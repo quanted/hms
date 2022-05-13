@@ -37,6 +37,7 @@ namespace GUI.AQUATOX
         private System.Drawing.Graphics graphics;
         private bool DrawMap = true;
         private ScreenSettings ScrSettings = new();
+        private List<int> executed = new List<int>(); // list of comids that have been asked to execute
 
         static float xmax = -1000000;
         static float ymax = -1000000;
@@ -460,6 +461,15 @@ namespace GUI.AQUATOX
                 string comid = AQT2D.SN.network[iSeg][0];
                 string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
 
+                bool in_waterbody = false;
+                if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
+                if (in_waterbody)
+                {
+                    TSafeAddToProcessLog(comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
+                    continue;
+                }
+
+
                 string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
                 if (errmessage == "")
@@ -564,24 +574,23 @@ namespace GUI.AQUATOX
                         }
                         string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
 
-
-                    List<ITimeSeriesOutput> divergence_flows = null;
+                        List<ITimeSeriesOutput<List<double>>> divergence_flows = null;
 
                         if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
                             foreach (int ID in Divg)
                             {
-                                TimeSeriesOutput ITSO = null;
+                                TimeSeriesOutput<List<double>> ITSO = null;
                                 string DivSeg = File.ReadAllText(BaseDir + "AQT_2D_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
-                            AQTSim DivSim = new AQTSim();
+                                AQTSim DivSim = new AQTSim();
                                 string outstr = DivSim.Instantiate(DivSeg);
                                 if (outstr == "")
                                 {
-                                    if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput>();
+                                    if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput<List<double>>>();
                                     DivSim.AQTSeg.SetMemLocRec();
                                     TVolume tvol = DivSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                                     TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
                                     ITSO = InflowLoad.TimeSeriesAsTSOutput("Divergence Flows", "COMID " + ID.ToString(), 1.0 / 86400.0);  // output flows as m2/s
-                            }
+                                }
                                 divergence_flows.Add(ITSO);
                             }
 
@@ -1023,6 +1032,7 @@ namespace GUI.AQUATOX
             void Move(Point d);
             void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx);  //scale into the border bxmin bxmax based on shape xy and max/min shape xy
             public string ID { get; set; }
+            Color FillColor { get; set; }
         }
 
         public class Circle : IShape
@@ -1085,10 +1095,104 @@ namespace GUI.AQUATOX
 
         }
 
+        public class Polygon : IShape
+        {
+            public string ID { get; set; }
+            public Color LineColor { get; set; }
+            public Color FillColor { get; set; }
+            public PointF[] Points { get; set; }
+            private PointF[] PlotPoints { get; set; }
+            public int LineWidth { get; set; }
+
+
+            public Polygon() { LineWidth = 1; LineColor = Color.Black; FillColor = Color.LightBlue; }
+
+            private void CheckMinMax(PointF pt)
+            {
+                if (pt.X > xmax) xmax = pt.X;
+                if (pt.Y > ymax) ymax = pt.Y;
+                if (pt.X < xmin) xmin = pt.X;
+                if (pt.Y < ymin) ymin = pt.Y;
+            }
+
+            public Polygon(PointF[] Pts, string inID)
+            {
+                LineWidth = 1;
+                LineColor = Color.Black;
+                FillColor = Color.LightBlue;
+                Points = Pts;
+                ID = inID;
+
+                foreach (PointF pt in Points) CheckMinMax(pt);
+            }
+
+            public PointF[] GetPoints()
+            {
+                return PlotPoints;
+            }
+
+            public GraphicsPath GetPath()
+            {
+                var path = new GraphicsPath();
+                path.AddPolygon(PlotPoints);
+                return path;
+            }
+
+            public bool HitTest(Point p)
+            {
+                var result = false;
+                using (var path = GetPath())
+                   result = path.IsVisible(p);
+                return result; 
+            }
+
+            public void Draw(Graphics g, bool ShowCOMIDs)
+            {
+                var gpath = GetPoints();
+                SolidBrush brush = new SolidBrush(FillColor);
+                g.FillPolygon(brush, gpath);
+
+                Pen pen = new Pen(LineColor, LineWidth);
+                g.DrawPolygon(pen, gpath);
+
+                //if (ShowCOMIDs)
+                //{
+                //    RectangleF rectf = gpath.GetBounds();
+                //    Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2)+6);
+                //    Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
+                //    Rectangle rect = new Rectangle(Location, sizeOfText);
+                //    g.FillRectangle(Brushes.White, rect);
+                //    g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
+                //}
+
+            }
+
+            public void Move(Point d)
+            {
+            }
+
+
+            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xmin xmax based on shape xy
+            {
+                Point rsc(PointF pt)
+                {
+                    return new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (pt.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (pt.Y - yMn) / (yMx - yMn)));
+                }
+
+                PlotPoints = new PointF[Points.Length];
+                for (int i = 0; i < Points.Length; i++)
+                {
+                    PlotPoints[i] = rsc(Points[i]);
+                }
+            }
+        }
+
+
         public class PolyLine : IShape
         {
             public string ID { get; set; }
             public Color LineColor { get; set; }
+            public Color FillColor { get; set; }
             public List<PointF> StartPoints { get; set; }
             public List<PointF> EndPoints { get; set; }
             private List<Point> PlotStartPoints { get; set; }
@@ -1106,10 +1210,10 @@ namespace GUI.AQUATOX
                 if (pt.Y < ymin) ymin = pt.Y;
             }
 
-            public PolyLine(List<PointF> sPts, List<PointF> ePts, string inID)
+            public PolyLine(List<PointF> sPts, List<PointF> ePts, string inID, Color lcolor, int width)
             {
-                LineWidth = 2;
-                LineColor = Color.Black;
+                LineWidth = width;
+                LineColor = lcolor;
                 StartPoints = sPts;
                 EndPoints = ePts;
                 ID = inID;
@@ -1146,12 +1250,16 @@ namespace GUI.AQUATOX
 
                 if (ShowCOMIDs)
                 {
-                    RectangleF rectf = gpath.GetBounds();
-                    Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2)+6);
-                    Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
-                    Rectangle rect = new Rectangle(Location, sizeOfText);
-                    g.FillRectangle(Brushes.White, rect);
-                    g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
+                     RectangleF rectf = gpath.GetBounds();
+                    if ((rectf.Width > 0)&&(rectf.Height > 0))
+                    {
+                        Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2) + 6);
+                        Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
+                        Rectangle rect = new Rectangle(Location, sizeOfText);
+                        g.FillRectangle(Brushes.White, rect);
+                        g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
+
+                    }
                 }
 
             }
@@ -1179,6 +1287,7 @@ namespace GUI.AQUATOX
         }
 
 
+
         public class Arrow : IShape
         {
             public string ID { get; set; }
@@ -1204,6 +1313,7 @@ namespace GUI.AQUATOX
             }
             public int LineWidth { get; set; }
             public Color LineColor { get; set; }
+            public Color FillColor { get; set; }
             public Point Point1 { get; set; }
             public Point Point2 { get; set; }
             public Point PlotPoint1 { get; set; }
@@ -1366,9 +1476,6 @@ namespace GUI.AQUATOX
 
                 //draw the outline
                 g.DrawPolygon(p, arrowPoints);
-
-                //fill the polygon
-                // g.FillPolygon(new SolidBrush(ArrowColor), arrowPoints);
             }
 
         }
@@ -1455,13 +1562,27 @@ namespace GUI.AQUATOX
         }
         public class Feature
         {
-            public Geometry geometry { get; set; }
+            public LineStringGeometry geometry { get; set; }
         }
-        public class Geometry
+        public class LineStringGeometry
         {
             public string type { get; set; }
             public double[][] coordinates { get; set; }
         }
+        public class LakeGeometry
+        {
+            public LakeFeature[] features { get; set; }
+        }
+        public class LakeFeature
+        {
+            public PolygonGeometry geometry { get; set; }
+        }
+        public class PolygonGeometry
+        {
+            public string type { get; set; }
+            public double[][][] coordinates { get; set; }
+        }
+
 
 
         bool PlotCOMIDMap()
@@ -1476,6 +1597,60 @@ namespace GUI.AQUATOX
 
             int[] boundaries;
             AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+
+            if (AQT2D.SN.waterbodies != null)
+              for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+              {
+                string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
+                int WBID = int.Parse(WBString);
+                if (WBID != -9998)
+                {
+                    if (File.Exists(BaseDir + WBString + ".GeoJSON"))
+                    { GeoJSON = System.IO.File.ReadAllText(BaseDir + WBString + ".GeoJSON"); }
+                    else
+                    {
+                        MapPanel.Visible = false;
+                        AddToProcessLog("Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
+                        GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
+
+                        if (GeoJSON.IndexOf("ERROR") >= 0)
+                        {
+                            AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
+                            // show process log 
+                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", "{}");  //  write to disk
+                            continue;
+                            // return false;
+                        }
+                        System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", GeoJSON);  //  write to disk
+                    }
+
+                    if (GeoJSON == "{}") polyline = null;
+                    else
+                    {
+                        LakeGeometry coords = JsonConvert.DeserializeObject<LakeGeometry>(GeoJSON);
+                        try
+                        {
+                            polyline = coords.features[0].geometry.coordinates[0];  // fixme handle case of multiple polygons
+                        }
+                        catch
+                        {
+                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + WBString + ".GeoJSON"); continue;
+                        }
+                    }
+
+                    PointF[] polypoints = new PointF[polyline.Length];
+
+                    if (polyline != null)
+                    {
+                        for (int k = 0; k < polyline.Length; k++)
+                        {
+                            polypoints[k]= new PointF((float)polyline[k][0], (float)polyline[k][1]);
+                        }
+                        Drawing.Add(new Polygon(polypoints, WBString));
+                    }
+
+                }
+              }
 
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
@@ -1493,9 +1668,9 @@ namespace GUI.AQUATOX
                         {
                             AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
                             // show process log 
-                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk
+                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk 
+                            if (GeoJSON.IndexOf("unknown error") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk to avoid re-query
                             continue;
-                            // return false;
                         }
                         System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
                     }
@@ -1514,9 +1689,19 @@ namespace GUI.AQUATOX
                         }
                     }
 
-
                     List<PointF> startpoints = new List<PointF>();
                     List<PointF> endpoints = new List<PointF>();
+
+                    bool in_waterbody = false;
+                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
+
+                    Color lcolor = Color.Black;
+                    int lwidth = 2;
+                    if (in_waterbody)
+                    {
+                        lcolor = Color.Blue;
+                        lwidth = 1;
+                    }
 
                     if (polyline != null)
                     {
@@ -1525,24 +1710,88 @@ namespace GUI.AQUATOX
                             startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
                             endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
                         }
-                        Drawing.Add(new PolyLine(startpoints, endpoints, CString));
+                        Drawing.Add(new PolyLine(startpoints, endpoints, CString,lcolor,lwidth));
 
                         if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                             foreach (int SrcID in Sources)
-                                if (boundaries.Contains(SrcID))
+                                if (boundaries.Contains(SrcID))  //ID inflow points with green circles
                                 {
                                     Drawing.Add(new Circle((float) polyline[0][0], (float) polyline[0][1], COMID.ToString(), Color.Chartreuse));
                                 }
 
-                        if (i == AQT2D.SN.order.Length-1) //ID pour point
+                        if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
                         {
                             Drawing.Add(new Circle((float)polyline[polyline.Length-1][0], (float)polyline[polyline.Length - 1][1], COMID.ToString(), Color.Red));
                         }
 
                     }
-                }   
+                }
 
-            MapPanel.Visible = true;
+
+
+
+
+
+
+
+                //// ----------test code here, draw boundaries in orange
+                //for (int i = 0; i < boundaries.Length; i++)
+                //    {
+                //        int COMID = boundaries[i];
+                //        string CString = COMID.ToString();
+                //        if (File.Exists(BaseDir + CString + ".GeoJSON"))
+                //        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
+                //        else
+                //        {
+                //            MapPanel.Visible = false;
+                //            AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
+                //            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
+                //            if (GeoJSON.IndexOf("ERROR") >= 0)
+                //            {
+                //                AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
+                //                // show process log 
+                //                if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk
+                //                continue;
+                //                // return false;
+                //            }
+                //            System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
+                //        }
+
+                //        if (GeoJSON == "{}") polyline = null;
+                //        else
+                //        {
+                //            GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
+                //            try
+                //            {
+                //                polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                //            }
+                //            catch
+                //            {
+                //                AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
+                //            }
+                //        }
+
+
+                //        List<PointF> startpoints = new List<PointF>();
+                //        List<PointF> endpoints = new List<PointF>();
+
+                //        if (polyline != null)
+                //        {
+                //            for (int k = 0; k < polyline.Length - 1; k++)
+                //            {
+                //                startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
+                //                endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
+                //            }
+                //            PolyLine pline = new PolyLine(startpoints, endpoints, CString);
+                //            pline.LineColor = Color.Orange;
+
+                //            Drawing.Add(pline);
+
+                //        }
+                //    }
+                //// ----------test code here , draw boundaries in orange
+
+                MapPanel.Visible = true;
             chart1.Visible = false;
 
             return true;
@@ -1702,13 +1951,21 @@ namespace GUI.AQUATOX
 
         private void EditCOMID(string CString)
         {
+            int COMID = Int32.Parse(CString);
             string BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_2D_" + CString + ".JSON";
             if (ValidFilen(filen, false))
             {
                 string json = File.ReadAllText(filen);  //read one segment of multi-seg model
                 AQTTestForm AQForm = new AQTTestForm();
-                if (AQForm.EditLinkedInput(ref json)) File.WriteAllText(filen, json);
+
+                bool isBoundarySeg = false;
+                AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries);
+                if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                    foreach (int SrcID in Sources)
+                        if (boundaries.Contains(SrcID)) isBoundarySeg = true;
+
+                if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
             }
             else { MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated."); };
         }
@@ -1843,6 +2100,23 @@ namespace GUI.AQUATOX
             SaveScreenSettings();
         }
 
+                
+        private int ExecuteComidWithinLake(int runID)
+        {
+            executed.Add(runID);  // add comid to list that is ready to run
+
+            int WBcomid;
+            if (!AQT2D.SN.waterbodies.comid_wb.TryGetValue(runID, out WBcomid)) return -9999;
+            for (int i = 0; i < AQT2D.SN.waterbodies.comid_wb.Count; i++)
+            {
+                if (AQT2D.SN.waterbodies.comid_wb.Values.ElementAt(i) == WBcomid)
+                    if (!executed.Contains(AQT2D.SN.waterbodies.comid_wb.Keys.ElementAt(i)))
+                        return -9999;
+            }
+
+            return WBcomid;  
+        }
+
         private void basedirBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -1852,5 +2126,89 @@ namespace GUI.AQUATOX
                 e.SuppressKeyPress = true;
             }
         }
+
+        int Step = 0;
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            chart1.Visible = false;
+
+            if (AQT2D == null) AQT2D = new AQSim_2D();
+            if (AQT2D.SN == null)
+            {
+                string BaseDir = basedirBox.Text;
+                if (!ValidFilen(BaseDir + "StreamNetwork.JSON", true)) return;
+                string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
+                AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
+                AddToProcessLog("Read stream network from " + BaseDir + "StreamNetwork.JSON");
+            }
+
+            int[] outofnetwork;
+            AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
+
+            Step++;
+            if (Step > AQT2D.SN.order.Length)
+            {
+                Step = 0;
+                foreach (IShape iS in Drawing)
+                {
+                    iS.LineColor = Color.Gray;
+                    iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
+                    BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
+                    {
+                        iS.Draw(MPG, showCOMIDsBox.Checked);
+                    });
+                    executed = new List<int>();
+
+                }
+                return;
+            }
+
+
+                    try
+            {
+                    foreach (int runID in AQT2D.SN.order[Step-1])  // step through each COMID in this "order" 
+                    {
+                    bool in_waterbody = false;
+                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+
+                    int IDtoRun = runID;
+                    if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
+                    
+
+                    Color lineColor = Color.Red;
+                    if (IDtoRun == -9999) { IDtoRun = runID; lineColor = Color.White; }
+                    foreach (IShape iS in Drawing)
+                        {
+                            if (iS.ID == IDtoRun.ToString())
+                            {
+                                iS.LineColor = lineColor;
+                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
+                                BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
+                                {
+                                    iS.Draw(MPG, showCOMIDsBox.Checked);
+                                });
+                            }
+                        }
+
+
+                     }  // non-parallel foreach format for debugging
+
+            }
+            catch (Exception ex)
+            {
+                ProcessLog.Text = "Error Updating Drawing: " + ex.Message;
+                MessageBox.Show(ex.Message);
+                return;
+            }
+
+
+            button2.Text = "Step " + Step.ToString();
+
+            UpdateScreen();
+
+        }
+
     }
 }
+

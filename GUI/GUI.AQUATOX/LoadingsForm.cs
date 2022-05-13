@@ -25,6 +25,7 @@ namespace GUI.AQUATOX
     public partial class LoadingsForm : Form
     {
         public TStateVariable SV;
+        private bool isInternalSeg = false;
         public int RBReturn = -1;
         private bool GridChanged = false;
         private bool DetritusScreen = false; //special case where the four suspended and dissolved detritus inputs are governed by one input
@@ -78,12 +79,13 @@ namespace GUI.AQUATOX
 
         }
 
-        public bool EditSV(ref TStateVariable IncomingS, AQTSim AQS)
+        public bool EditSV(ref TStateVariable IncomingS, AQTSim AQS, bool isBoundary)
         {
 
             string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings());
 
             SV = IncomingS;
+            isInternalSeg = !isBoundary;
             UpdateScreen();
 
             if (ShowDialog() == DialogResult.Cancel)
@@ -153,7 +155,18 @@ namespace GUI.AQUATOX
             ParameterButton.Visible = ((SV.IsPlant()) || (SV.IsAnimal()) || (SV.NState == AllVariables.H2OTox));
             ToxicityButton.Visible = (SV.NState == AllVariables.H2OTox);
 
-            AmmoniaDriveLabel.Visible = (SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val);
+            WarningLabel.Visible = false;
+            if ((SV.NState == AllVariables.Ammonia) && (SV.AQTSeg.PSetup.AmmoniaIsDriving.Val))
+            {
+                WarningLabel.Visible = true;
+                WarningLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
+            }
+            if (isInternalSeg)
+            {
+                WarningLabel.Visible = true;
+                WarningLabel.Text = "Inflow Loadings not relevant.";
+            }
+
 
             NotesEdit.Text = SV.LoadNotes1;
             NotesEdit2.Text = SV.LoadNotes2;
@@ -180,7 +193,6 @@ namespace GUI.AQUATOX
 
         private TLoadings LoadShown;
         private TToxics TT = null;
-
 
         public void ShowGrid()
         {
