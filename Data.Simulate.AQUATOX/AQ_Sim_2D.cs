@@ -355,7 +355,6 @@ namespace AQUATOX.AQSim_2D
             OutputFormat = "json"
         };
 
-
         // Remote request test
         //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
         //dataRequest = "dataset=streamflow&comid=" + comids;
@@ -376,7 +375,7 @@ namespace AQUATOX.AQSim_2D
             dataRequest += "&startDate=" + TSI.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
             dataRequest += "&endDate=" + TSI.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
             string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
-            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1,flaskURL,dataURL ).Result;  
+            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 100,flaskURL,dataURL ).Result;  
             errmsg = "";  // error output?
             return results.data;
 

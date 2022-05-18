@@ -433,97 +433,109 @@ namespace GUI.AQUATOX
 
         private void createButton_Click(object sender, EventArgs e)  //create a set of 0D jsons for stream network given AQT2D "SN" object
         {
-            ConsoleButton.Checked = true;
-            chart1.Visible = false;
-            string BaseDir = basedirBox.Text;
-
-            if (!VerifyStreamNetwork()) return;
-
-            if (SegmentsCreated())
-                if (MessageBox.Show("Overwrite the existing stream network and any edits made to the inputs?", "Confirm",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
-
-            AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
-
-            string BaseFileN = BaseJSONBox.Text;
-            if (!ValidFilen(BaseJSONBox.Text, true)) return;
-            AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
-            string msj = MasterSetupJson();
-
-            //   Parallel.For(1, AQT2D.nSegs+1 , iSeg =>  
-
-            UseWaitCursor = true;
-            progressBar1.Visible = true;
-            Application.DoEvents();
-
-            for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
+            try
             {
-                string comid = AQT2D.SN.network[iSeg][0];
-                string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
+                ConsoleButton.Checked = true;
+                chart1.Visible = false;
+                string BaseDir = basedirBox.Text;
 
-                bool in_waterbody = false;
-                if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
-                if (in_waterbody)
+                if (!VerifyStreamNetwork()) return;
+
+                if (SegmentsCreated())
+                    if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+
+                AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
+
+                string BaseFileN = BaseJSONBox.Text;
+                if (!ValidFilen(BaseJSONBox.Text, true)) return;
+                AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
+                string msj = MasterSetupJson();
+
+                //   Parallel.For(1, AQT2D.nSegs+1 , iSeg =>  
+
+                UseWaitCursor = true;
+                progressBar1.Visible = true;
+                Application.DoEvents();
+
+                for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
                 {
-                    TSafeAddToProcessLog(comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
-                    continue;
-                }
+                    string comid = AQT2D.SN.network[iSeg][0];
+                    string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
 
-
-                string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
-
-                if (errmessage == "")
-                {
-                    File.WriteAllText(filen, jsondata);
-
-                    foreach (IShape iS in Drawing)
+                    bool in_waterbody = false;
+                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
+                    if (in_waterbody)
                     {
-                        if (iS.ID == comid)
-                        {
-                            iS.LineColor = Color.Blue;
-                            iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                            iS.Draw(MPG, showCOMIDsBox.Checked);
-
-                        }
+                        TSafeAddToProcessLog(comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
+                        continue;
                     }
 
-                    TSafeAddToProcessLog("Read Flows and Saved JSON for " + comid);
-                    int Prog = (int)((float) iSeg / (float) AQT2D.nSegs * 100.0);
-                    if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
-                    progressBar1.Value = Math.Max(Prog, 1);
 
-                    Application.DoEvents();
-                }
-                else
-                {
-                    TSafeAddToProcessLog(errmessage);
-                    UseWaitCursor = false;
-                    foreach (IShape iS in Drawing)
+                    string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
+
+                    if (errmessage == "")
                     {
-                        if (iS.ID == comid)
+                        File.WriteAllText(filen, jsondata);
+
+                        foreach (IShape iS in Drawing)
                         {
-                            iS.LineColor = Color.Red;
-                            iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                            iS.Draw(MPG, showCOMIDsBox.Checked);
+                            if (iS.ID == comid)
+                            {
+                                iS.LineColor = Color.Blue;
+                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
+                                iS.Draw(MPG, showCOMIDsBox.Checked);
+
+                            }
                         }
+
+                        TSafeAddToProcessLog("Read Flows and Saved JSON for " + comid);
+                        int Prog = (int)((float)iSeg / (float)AQT2D.nSegs * 100.0);
+                        if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
+                        progressBar1.Value = Math.Max(Prog, 1);
+
+                        Application.DoEvents();
                     }
-                    progressBar1.Visible = false;
-                    return;
+                    else
+                    {
+                        TSafeAddToProcessLog(errmessage);
+                        UseWaitCursor = false;
+                        foreach (IShape iS in Drawing)
+                        {
+                            if (iS.ID == comid)
+                            {
+                                iS.LineColor = Color.Red;
+                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
+                                iS.Draw(MPG, showCOMIDsBox.Checked);
+                            }
+                        }
+                        progressBar1.Visible = false;
+                        return;
+                    }
                 }
+
+                AddToProcessLog("");
+                if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
+                {
+                    string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
+                    foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
+                    AddToProcessLog(bnote);
+                }
+
+                progressBar1.Visible = false;
+                UseWaitCursor = false;
+                AddToProcessLog("Finished creating linked inputs" + Environment.NewLine);
+                UpdateScreen();
             }
 
-            AddToProcessLog("");
-            if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
+            catch (Exception ex)
             {
-                string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
-                AddToProcessLog(bnote);
+                ProcessLog.Text = "Error creating segments: " + ex.Message;
+                MessageBox.Show(ex.Message);
+                return;
             }
 
-            progressBar1.Visible = false;
-            UseWaitCursor = false;
-            AddToProcessLog("Finished creating linked inputs" + Environment.NewLine);
-            UpdateScreen();
+
 
         }
 

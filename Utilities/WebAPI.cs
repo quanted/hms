@@ -46,7 +46,7 @@ namespace Utilities
 
                 while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    wm = await hc.GetAsync(requestURL);
+                    wm = await hc.GetAsync(requestURL).ConfigureAwait(false);   //JSC 5/16/2022 add ConfigureAwait(false) see https://devblogs.microsoft.com/dotnet/configureawait-faq/
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();
