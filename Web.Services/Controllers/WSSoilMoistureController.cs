@@ -81,7 +81,7 @@ namespace Web.Services.Controllers
     /// </summary>
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/soilmoisture")]    
-    public class WSSoilMoistureController : Controller
+    public class WSSoilMoistureController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for soil moisture data.

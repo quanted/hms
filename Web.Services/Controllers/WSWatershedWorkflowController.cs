@@ -127,7 +127,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/watershed")]
     [Produces("application/json")]
-    public class WSWatershedWorkflowController : Controller
+    public class WSWatershedWorkflowController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for getting workflow compare data.

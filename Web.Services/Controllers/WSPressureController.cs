@@ -70,7 +70,7 @@ namespace Web.Services.Controllers
     [Route("api/meteorology/pressure")]
     [Produces("application/json")]
 
-    public class WSPressureController : Controller
+    public class WSPressureController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for pressure data.

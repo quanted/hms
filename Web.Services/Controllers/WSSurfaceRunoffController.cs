@@ -78,7 +78,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/hydrology/surfacerunoff/")]
     [Produces("application/json")]
-    public class WSSurfaceRunoffController : Controller
+    public class WSSurfaceRunoffController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for surface runoff data.

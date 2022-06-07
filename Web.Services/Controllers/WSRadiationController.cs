@@ -68,7 +68,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/radiation")]
     [Produces("application/json")]
-    public class WSRadiationController : Controller
+    public class WSRadiationController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for radiation data.

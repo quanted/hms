@@ -19,7 +19,7 @@ namespace Web.Services.Controllers
     /// </summary>
     [Route("api/info/streamnetwork")]
     [Produces("application/json")]
-    public class WSStreamController : Controller
+    public class WSStreamController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// </summary>

@@ -19,7 +19,7 @@ namespace Web.Services.Controllers
     /// </summary>
     [Route("api/info/catchment")]
     [Produces("application/json")]
-    public class WSCatchmentController : Controller
+    public class WSCatchmentController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// </summary>

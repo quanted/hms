@@ -76,7 +76,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/wind")]
     [Produces("application/json")]
-    public class WSWindController : Controller
+    public class WSWindController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for wind data.

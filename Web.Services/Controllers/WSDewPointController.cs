@@ -68,7 +68,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/dewpoint")]
     [Produces("application/json")]
-    public class WSDewPointController : Controller
+    public class WSDewPointController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for dew point temperature data.

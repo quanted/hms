@@ -141,7 +141,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/")]
     [Produces("application/json")]
-    public class WSWorkflowPrecipController : Controller
+    public class WSWorkflowPrecipController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for precip comparison data.

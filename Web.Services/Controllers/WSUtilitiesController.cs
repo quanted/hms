@@ -12,7 +12,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api")]                  // Default endpoints
     [Produces("application/json")]
-    public class WSUtilitiesController : Controller
+    public class WSUtilitiesController : Microsoft.AspNetCore.Mvc.Controller
     {
 
         /// <summary>

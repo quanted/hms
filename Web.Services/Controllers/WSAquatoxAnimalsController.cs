@@ -48,7 +48,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/aquatox/animals")]
     [Produces("application/json")]
-    public class WSAQTAnimalsController : Controller
+    public class WSAQTAnimalsController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Animals.
@@ -123,7 +123,7 @@ namespace Web.Services.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [Route("input/example/file")]
-        public async Task<FileResult> GetExampleFile()
+        public async Task<Microsoft.AspNetCore.Mvc.FileResult> GetExampleFile()
         {
             WSAquatoxAnimals a = new WSAquatoxAnimals();
             byte[] bytes = null;

@@ -15,7 +15,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/aquatox/workflow")]
     [Produces("application/json")]
-    public class WSAquatoxWorkflowController : Controller
+    public class WSAquatoxWorkflowController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// GET method for calling the AQUATOX workflow.

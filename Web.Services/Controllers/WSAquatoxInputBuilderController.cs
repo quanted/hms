@@ -97,7 +97,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/aquatox/input-builder")]
     [Produces("application/json")]
-    public class WSAquatoxInputBuilderController : Controller
+    public class WSAquatoxInputBuilderController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// GET method for returning the Aquatox base json flags.

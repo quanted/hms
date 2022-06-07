@@ -48,7 +48,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/aquatox/plants")]
     [Produces("application/json")]
-    public class WSAQTPlantController : Controller
+    public class WSAQTPlantController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Plants.
@@ -123,7 +123,7 @@ namespace Web.Services.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [Route("input/example/file")]
-        public async Task<FileResult> GetExampleFile()
+        public async Task<Microsoft.AspNetCore.Mvc.FileResult> GetExampleFile()
         {
             AQTPlant p = new AQTPlant();
             byte[] bytes = null;

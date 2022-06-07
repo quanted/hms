@@ -76,7 +76,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/subsurfaceflow")]
     [Produces("application/json")]
-    public class WSSubSurfaceFlowController : Controller
+    public class WSSubSurfaceFlowController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for subsurface flow data.

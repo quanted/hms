@@ -123,7 +123,7 @@ namespace Web.Services.Controllers
     /// </summary>
     [Route("api/water-quality/solar")]                      // Default endpoint
     [Produces("application/json")]
-    public class WSSolarController : Controller
+    public class WSSolarController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// GET request for retrieving the default output values for the GCSolar module, 
@@ -290,7 +290,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/solar")]
     [Produces("application/json")]
-    public class WSMeteorologySolarController : Controller
+    public class WSMeteorologySolarController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// NOAA Solar Calculator 

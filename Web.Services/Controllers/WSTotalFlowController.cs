@@ -44,7 +44,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/totalflow")]
     [Produces("application/json")]
-    public class WSTotalFlowController : Controller
+    public class WSTotalFlowController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for total flow data.

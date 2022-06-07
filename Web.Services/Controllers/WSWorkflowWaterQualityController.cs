@@ -74,7 +74,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/waterquality")]
     [Produces("application/json")]
-    public class WSWorkflowWaterQualityController : Controller
+    public class WSWorkflowWaterQualityController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method to submit a request for water quality data.

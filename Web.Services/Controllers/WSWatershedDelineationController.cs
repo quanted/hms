@@ -73,7 +73,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/workflow/timeoftravel")]//[Route("api/hydrology/delineation/")]
     [Produces("application/json")]
-    public class WSWatershedDelineationController : Controller
+    public class WSWatershedDelineationController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for delineation compare data.

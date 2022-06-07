@@ -48,7 +48,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]
     [Route("api/aquatox/diagenesis")]
     [Produces("application/json")]
-    public class WSAQTDiagenesisController : Controller
+    public class WSAQTDiagenesisController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for running AQUATOX Diagenesis.
@@ -123,7 +123,7 @@ namespace Web.Services.Controllers
         [HttpGet]
         [ProducesResponseType(200)]
         [Route("input/example/file")]
-        public async Task<FileResult> GetExampleFile()
+        public async Task<Microsoft.AspNetCore.Mvc.FileResult> GetExampleFile()
         {
             WSAquatoxDiagenesis d = new WSAquatoxDiagenesis();
             byte[] bytes = null;

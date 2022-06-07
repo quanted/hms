@@ -70,7 +70,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/temperature")]
     [Produces("application/json")]
-    public class WSTemperatureController : Controller
+    public class WSTemperatureController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for evapotranspiration data.

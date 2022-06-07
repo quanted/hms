@@ -65,7 +65,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/hydrology/streamflow")]
     [Produces("application/json")]
-    public class WSStreamflowController : Controller
+    public class WSStreamflowController : Microsoft.AspNetCore.Mvc.Controller
     {
         readonly IDiagnosticContext _diagnosticContext;
 

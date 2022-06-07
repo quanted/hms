@@ -75,7 +75,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/precipitation")]
     [Produces("application/json")]
-    public class WSPrecipitationController : Controller
+    public class WSPrecipitationController : Microsoft.AspNetCore.Mvc.Controller
     {
         readonly IDiagnosticContext _diagnosticContext;
 

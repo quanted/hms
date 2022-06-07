@@ -77,7 +77,7 @@ namespace Web.Services.Controllers
     [ApiVersion("0.1")]             // Version 0.1 endpoint
     [Route("api/meteorology/humidity")]
     [Produces("application/json")]
-    public class WSHumidityController : Controller
+    public class WSHumidityController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for humidity data.

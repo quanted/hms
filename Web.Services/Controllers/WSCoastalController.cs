@@ -59,7 +59,7 @@ namespace Web.Services.Controllers
     /// </summary>
     [Route("api/coastal")]
     [Produces("application/json")]
-    public class WSCoastalController : Controller
+    public class WSCoastalController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
         /// POST method for submitting a request for coastal data.
