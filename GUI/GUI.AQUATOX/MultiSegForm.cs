@@ -565,8 +565,9 @@ namespace GUI.AQUATOX
             UseWaitCursor = true;
             progressBar1.Visible = true;
 
-            int[] outofnetwork;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
+            int[] outofnetwork = new int[0];
+            if (AQT2D.SN.boundary != null)
+                AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
             try
             {
@@ -582,13 +583,14 @@ namespace GUI.AQUATOX
                         if (!ValidFilen(FileN, false))
                         {
                             TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
-                            progressBar1.Visible = false; return;
+                            progressBar1.Visible = false; return;  // FIXME, progressbar visible is not thread safe
                         }
                         string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
 
                         List<ITimeSeriesOutput<List<double>>> divergence_flows = null;
 
-                        if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
+                        if (AQT2D.SN.divergentpaths != null)
+                         if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
                             foreach (int ID in Divg)
                             {
                                 TimeSeriesOutput<List<double>> ITSO = null;
@@ -1520,13 +1522,15 @@ namespace GUI.AQUATOX
             string CString = COMID.ToString();
 
             Drawing.Add(new Arrow(x1, y1, x2, y2, COMID.ToString()));
-            int[] boundaries;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries) ;
-            int[] headwaters;
-            AQT2D.SN.boundary.TryGetValue("headwater", out headwaters);
-            int[] divergences;
-            AQT2D.SN.boundary.TryGetValue("divergence", out divergences);
-
+            int[] boundaries = new int[0];
+            int[] headwaters = new int[0];
+            int[] divergences = new int[0];
+            if (AQT2D.SN.boundary != null)
+            {
+                AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                AQT2D.SN.boundary.TryGetValue("headwater", out headwaters);
+                AQT2D.SN.boundary.TryGetValue("divergence", out divergences);
+            }
 
             int iSeg = -1;
             for (int i = 0; i < AQT2D.SN.network.GetLength(0); i++)
@@ -1607,8 +1611,8 @@ namespace GUI.AQUATOX
             string GeoJSON = "";
             double[][] polyline;
 
-            int[] boundaries;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+            int[] boundaries = new int[0];
+            if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
 
             if (AQT2D.SN.waterbodies != null)
               for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
@@ -1817,6 +1821,8 @@ namespace GUI.AQUATOX
 
         private void RedrawShapes()
         {
+            // if AQT2D = null return;  fixme
+            
             Drawing.Clear();
             xmax = -1000000;
             ymax = -1000000;
@@ -2094,7 +2100,11 @@ namespace GUI.AQUATOX
 
             ScrSettings.BaseJSONstr = BaseJSONBox.Text;
             if (!ValidFilen(BaseJSONBox.Text, true)) return;
-            if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");
+
+            if (VerifyStreamNetwork())
+            {
+                if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");
+            }
             SaveScreenSettings();
         }
 
