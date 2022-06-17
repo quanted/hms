@@ -25,7 +25,7 @@ namespace GUI.AQUATOX
                 {
                     base.OnPaint(e);
                 }
-                catch (Exception ex)
+                catch 
                 {
                     ChartAreas[0].AxisY.IsLogarithmic = false;
                     System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");

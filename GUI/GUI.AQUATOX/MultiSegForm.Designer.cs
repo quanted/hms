@@ -59,10 +59,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.ChooseTemplateButton = new System.Windows.Forms.Button();
-            this.HelpButton = new System.Windows.Forms.Button();
-            this.MapPanel = new System.Windows.Forms.Panel();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.HelpButton2 = new System.Windows.Forms.Button();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.GraphButton = new System.Windows.Forms.RadioButton();
             this.MapButton2 = new System.Windows.Forms.RadioButton();
@@ -71,28 +68,25 @@
             this.PlotPanel = new System.Windows.Forms.Panel();
             this.outputjump = new System.Windows.Forms.CheckBox();
             this.showCOMIDsBox = new System.Windows.Forms.CheckBox();
-            this.flowchartButton = new System.Windows.Forms.RadioButton();
             this.mapButton = new System.Windows.Forms.RadioButton();
             this.PlotButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
-            this.loclabel = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
+            this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
-            this.MapPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.TogglePanel.SuspendLayout();
             this.PlotPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(894, 12);
+            this.button1.Location = new System.Drawing.Point(1047, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -131,7 +125,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(649, 396);
+            this.ProcessLog.Size = new System.Drawing.Size(802, 502);
             this.ProcessLog.TabIndex = 6;
             this.ProcessLog.WordWrap = false;
             // 
@@ -394,58 +388,17 @@
             this.ChooseTemplateButton.UseVisualStyleBackColor = true;
             this.ChooseTemplateButton.Click += new System.EventHandler(this.Choose_from_Template_Click);
             // 
-            // HelpButton
+            // HelpButton2
             // 
-            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(662, 9);
-            this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(78, 28);
-            this.HelpButton.TabIndex = 30;
-            this.HelpButton.Text = "   Help";
-            this.HelpButton.UseVisualStyleBackColor = true;
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
-            // 
-            // MapPanel
-            // 
-            this.MapPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.MapPanel.BackColor = System.Drawing.Color.White;
-            this.MapPanel.Controls.Add(this.pictureBox2);
-            this.MapPanel.Controls.Add(this.pictureBox1);
-            this.MapPanel.Location = new System.Drawing.Point(305, 66);
-            this.MapPanel.Name = "MapPanel";
-            this.MapPanel.Size = new System.Drawing.Size(650, 396);
-            this.MapPanel.TabIndex = 31;
-            this.MapPanel.Visible = false;
-            this.MapPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseDown);
-            this.MapPanel.MouseHover += new System.EventHandler(this.MapPanel_MouseHover);
-            this.MapPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MapPanel_MouseMove);
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(289, 348);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(356, 44);
-            this.pictureBox2.TabIndex = 1;
-            this.pictureBox2.TabStop = false;
-            this.pictureBox2.Visible = false;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(299, 329);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(346, 63);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
+            this.HelpButton2.Image = ((System.Drawing.Image)(resources.GetObject("HelpButton2.Image")));
+            this.HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.HelpButton2.Location = new System.Drawing.Point(662, 9);
+            this.HelpButton2.Name = "HelpButton2";
+            this.HelpButton2.Size = new System.Drawing.Size(78, 28);
+            this.HelpButton2.TabIndex = 30;
+            this.HelpButton2.Text = "   Help";
+            this.HelpButton2.UseVisualStyleBackColor = true;
+            this.HelpButton2.Click += new System.EventHandler(this.HelpButton2_Click);
             // 
             // TogglePanel
             // 
@@ -453,7 +406,7 @@
             this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 467);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 573);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
@@ -510,7 +463,6 @@
             // 
             this.PlotPanel.Controls.Add(this.outputjump);
             this.PlotPanel.Controls.Add(this.showCOMIDsBox);
-            this.PlotPanel.Controls.Add(this.flowchartButton);
             this.PlotPanel.Controls.Add(this.mapButton);
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 42);
@@ -524,7 +476,7 @@
             this.outputjump.Checked = true;
             this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputjump.Enabled = false;
-            this.outputjump.Location = new System.Drawing.Point(357, 3);
+            this.outputjump.Location = new System.Drawing.Point(287, 3);
             this.outputjump.Name = "outputjump";
             this.outputjump.Size = new System.Drawing.Size(112, 19);
             this.outputjump.TabIndex = 40;
@@ -535,23 +487,13 @@
             // showCOMIDsBox
             // 
             this.showCOMIDsBox.AutoSize = true;
-            this.showCOMIDsBox.Location = new System.Drawing.Point(243, 3);
+            this.showCOMIDsBox.Location = new System.Drawing.Point(173, 3);
             this.showCOMIDsBox.Name = "showCOMIDsBox";
             this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
             this.showCOMIDsBox.TabIndex = 39;
             this.showCOMIDsBox.Text = "Label COMIDs";
             this.showCOMIDsBox.UseVisualStyleBackColor = true;
             this.showCOMIDsBox.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
-            // 
-            // flowchartButton
-            // 
-            this.flowchartButton.AutoSize = true;
-            this.flowchartButton.Location = new System.Drawing.Point(162, 2);
-            this.flowchartButton.Name = "flowchartButton";
-            this.flowchartButton.Size = new System.Drawing.Size(75, 19);
-            this.flowchartButton.TabIndex = 38;
-            this.flowchartButton.Text = "flowchart";
-            this.flowchartButton.UseVisualStyleBackColor = true;
             // 
             // mapButton
             // 
@@ -592,7 +534,7 @@
             // 
             this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel1.AutoSize = true;
-            this.infolabel1.Location = new System.Drawing.Point(619, 469);
+            this.infolabel1.Location = new System.Drawing.Point(619, 575);
             this.infolabel1.Name = "infolabel1";
             this.infolabel1.Size = new System.Drawing.Size(361, 15);
             this.infolabel1.TabIndex = 39;
@@ -603,22 +545,12 @@
             // 
             this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel2.AutoSize = true;
-            this.infolabel2.Location = new System.Drawing.Point(619, 488);
+            this.infolabel2.Location = new System.Drawing.Point(619, 594);
             this.infolabel2.Name = "infolabel2";
             this.infolabel2.Size = new System.Drawing.Size(244, 15);
             this.infolabel2.TabIndex = 40;
             this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
             this.infolabel2.Visible = false;
-            // 
-            // loclabel
-            // 
-            this.loclabel.AutoSize = true;
-            this.loclabel.Location = new System.Drawing.Point(824, 46);
-            this.loclabel.Name = "loclabel";
-            this.loclabel.Size = new System.Drawing.Size(53, 15);
-            this.loclabel.TabIndex = 41;
-            this.loclabel.Text = "Lat Long";
-            this.loclabel.Visible = false;
             // 
             // button2
             // 
@@ -628,23 +560,38 @@
             this.button2.TabIndex = 42;
             this.button2.Text = "Step 0";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // webView
+            // 
+            this.webView.AllowExternalDrop = true;
+            this.webView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.webView.CreationProperties = null;
+            this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
+            this.webView.Location = new System.Drawing.Point(305, 66);
+            this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.webView.Name = "webView";
+            this.webView.Size = new System.Drawing.Size(822, 503);
+            this.webView.TabIndex = 43;
+            this.webView.ZoomFactor = 1D;
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(987, 514);
+            this.ClientSize = new System.Drawing.Size(1140, 620);
+            this.Controls.Add(this.webView);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.loclabel);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.PlotPanel);
             this.Controls.Add(this.browserButton);
             this.Controls.Add(this.TogglePanel);
-            this.Controls.Add(this.MapPanel);
-            this.Controls.Add(this.HelpButton);
+            this.Controls.Add(this.HelpButton2);
             this.Controls.Add(this.ChooseTemplateButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
@@ -670,13 +617,11 @@
             this.ReadNetworkPanel.PerformLayout();
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
-            this.MapPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.TogglePanel.ResumeLayout(false);
             this.TogglePanel.PerformLayout();
             this.PlotPanel.ResumeLayout(false);
             this.PlotPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.webView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -712,9 +657,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button ChooseTemplateButton;
         private System.Windows.Forms.Panel OutputPanel;
-        private System.Windows.Forms.Button HelpButton;
-        private System.Windows.Forms.Panel MapPanel;
-        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Button HelpButton2;
         private System.Windows.Forms.Panel TogglePanel;
         private System.Windows.Forms.RadioButton MapButton2;
         private System.Windows.Forms.RadioButton ConsoleButton;
@@ -730,9 +673,7 @@
         private System.Windows.Forms.RadioButton GraphButton;
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label loclabel;
-        private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.Button button2;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
     }
 }

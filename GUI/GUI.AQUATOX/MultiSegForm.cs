@@ -19,6 +19,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using Microsoft.Web.WebView2.Core;
 //using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
@@ -43,9 +44,6 @@ namespace GUI.AQUATOX
         static float ymax = -1000000;
         static float xmin = 1000000;
         static float ymin = 1000000;
-        Graphics MPG;
-        int xBuffer;
-        int yBuffer;
 
         public class ScreenSettings
         {
@@ -72,8 +70,11 @@ namespace GUI.AQUATOX
             AutoScroll = true;
             InitializeComponent();
 
-            this.MapPanel.MouseWheel += MapPanel_MouseWheel;
+            this.Resize += new System.EventHandler(this.FormResize);
+            
+            InitializeAsync();
 
+            webView.Source = new Uri(Path.Combine(Environment.CurrentDirectory, @"html\leafletMap.html"));
 
             // 
             // chart1
@@ -92,9 +93,9 @@ namespace GUI.AQUATOX
 
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(ScaleX(MapPanel.Left), ScaleY(MapPanel.Top));
+            chart1.Location = new System.Drawing.Point(ScaleX(webView.Left), ScaleY(webView.Top));
             chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(ScaleX(MapPanel.Width), ScaleY(MapPanel.Height));
+            this.chart1.Size = new System.Drawing.Size(ScaleX(webView.Width), ScaleY(webView.Height));
             chart1.TabIndex = 3;
             this.chart1.Text = "chart1";
             chart1.Series.Clear();
@@ -115,9 +116,33 @@ namespace GUI.AQUATOX
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            chart1.Location = new System.Drawing.Point(MapPanel.Left, MapPanel.Top);
-            chart1.Size = new System.Drawing.Size(MapPanel.Width, MapPanel.Height);
+            chart1.Location = new System.Drawing.Point(webView.Left, webView.Top);
+            chart1.Size = new System.Drawing.Size(webView.Width, webView.Height);
 
+        }
+
+        private void FormResize(object sender, EventArgs e)
+        {
+        }
+
+        async void InitializeAsync()
+        {
+            await webView.EnsureCoreWebView2Async();
+            webView.CoreWebView2.WebMessageReceived += MessageReceived;
+        }
+
+        private void SendMessage(object sender, EventArgs e)
+        {
+            if (webView != null && webView.CoreWebView2 != null)
+            {
+                webView.CoreWebView2.PostWebMessageAsString("Message from Dotnet buttton");
+            }
+        }
+
+        void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
+        {
+            String content = args.TryGetWebMessageAsString();
+            MessageBox.Show(content);
         }
 
         protected override void WndProc(ref Message m)  
@@ -190,8 +215,7 @@ namespace GUI.AQUATOX
             else
             {
                 ConsoleButton.Checked = true;
-                Drawing.Clear();
-                MapPanel.Visible = false;
+                webView.Visible = false;
                 chart1.Visible = false;
             }
 
@@ -219,22 +243,7 @@ namespace GUI.AQUATOX
             outputjump.Enabled = (modelrun != DateTime.MinValue);
         }
 
-        private void MapPanel_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (!MapPanel.Visible) return;
-            if (!VerifyStreamNetwork()) return;
 
-            double xchange = (xmax - xmin) * 0.001 * e.Delta;
-            double ychange = (ymax - ymin) * 0.001 * e.Delta;
-
-            xmin = (float) (xmin + xchange);
-            ymin = (float) (ymin + ychange);
-
-            xmax = (float)(xmax - xchange);
-            ymax = (float)(ymax - ychange);
-
-            DrawMapPanel(false);
-        }
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
         {
@@ -478,17 +487,6 @@ namespace GUI.AQUATOX
                     {
                         File.WriteAllText(filen, jsondata);
 
-                        foreach (IShape iS in Drawing)
-                        {
-                            if (iS.ID == comid)
-                            {
-                                iS.LineColor = Color.Blue;
-                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                                iS.Draw(MPG, showCOMIDsBox.Checked);
-
-                            }
-                        }
-
                         TSafeAddToProcessLog("Read Flows and Saved JSON for " + comid);
                         int Prog = (int)((float)iSeg / (float)AQT2D.nSegs * 100.0);
                         if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
@@ -500,16 +498,8 @@ namespace GUI.AQUATOX
                     {
                         TSafeAddToProcessLog(errmessage);
                         UseWaitCursor = false;
-                        foreach (IShape iS in Drawing)
-                        {
-                            if (iS.ID == comid)
-                            {
-                                iS.LineColor = Color.Red;
-                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                                iS.Draw(MPG, showCOMIDsBox.Checked);
-                            }
-                        }
-                        progressBar1.Visible = false;
+                        // Fixme draw COMID shape in red
+                        progressBar1.Visible = false;  // fixme not thread safe
                         return;
                     }
                 }
@@ -565,8 +555,9 @@ namespace GUI.AQUATOX
             UseWaitCursor = true;
             progressBar1.Visible = true;
 
-            int[] outofnetwork;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
+            int[] outofnetwork = new int[0];
+            if (AQT2D.SN.boundary != null)
+                AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
             try
             {
@@ -582,13 +573,14 @@ namespace GUI.AQUATOX
                         if (!ValidFilen(FileN, false))
                         {
                             TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
-                            progressBar1.Visible = false; return;
+                            progressBar1.Visible = false; return;  // FIXME, progressbar visible is not thread safe
                         }
                         string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
 
                         List<ITimeSeriesOutput<List<double>>> divergence_flows = null;
 
-                        if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
+                        if (AQT2D.SN.divergentpaths != null)
+                         if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
                             foreach (int ID in Divg)
                             {
                                 TimeSeriesOutput<List<double>> ITSO = null;
@@ -609,18 +601,7 @@ namespace GUI.AQUATOX
                         if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
                         File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
 
-                        foreach (IShape iS in Drawing)
-                        {
-                            if (iS.ID == runID.ToString())
-                            {
-                                iS.LineColor = Color.Green;
-                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                                BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
-                                {
-                                    iS.Draw(MPG, showCOMIDsBox.Checked);
-                                });
-                            }
-                        }
+                        // fixme draw COMID shape in green
 
                         TSafeAddToProcessLog(strout);  //write update to status log
 
@@ -1024,591 +1005,25 @@ namespace GUI.AQUATOX
 
         }
 
-        private void HelpButton_Click(object sender, EventArgs e)
+        private void HelpButton2_Click(object sender, EventArgs e)
         {
             string target = "Multi_Segment_Runs";
             AQTTestForm.OpenUrl(target);
-        }
-
-        int xScale;
-        int yScale;
-
-        List<IShape> Drawing = new List<IShape>();
-
-        public interface IShape
-        {
-            GraphicsPath GetPath();
-            public Color LineColor { get; set; }
-            bool HitTest(Point p);
-            void Draw(Graphics g, bool showLabel);
-            void Move(Point d);
-            void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx);  //scale into the border bxmin bxmax based on shape xy and max/min shape xy
-            public string ID { get; set; }
-            Color FillColor { get; set; }
-        }
-
-        public class Circle : IShape
-        {
-            public string ID { get; set; }
-            public Color LineColor { get; set; }
-            public Circle() { FillColor = Color.Chartreuse; }
-            public Circle(float x1, float y1, string inID, Color fill) {
-                FillColor = fill;
-                Center = new PointF(x1, y1);
-                Radius = 4;
-                ID = inID;
-            }
-
-            public Color FillColor { get; set; }
-            public PointF Center { get; set; }
-            public Point PlotCenter { get; set; }
-            public int Radius { get; set; }
-            public GraphicsPath GetPath()
-            {
-                var path = new GraphicsPath();
-                var p = PlotCenter;
-                p.X -= Radius;
-                p.Y -= Radius;
-                path.AddEllipse(p.X, p.Y, 2 * Radius, 2 * Radius);
-                return path;
-            }
-
-            public bool HitTest(Point p)
-            {
-                return false;  // suppress clicking on boundary conditions
-
-                // var result = false; 
-
-                //using (var path = GetPath())
-                    //result = path.IsVisible(p);
-                //return result;
-            }
-
-            public void Draw(Graphics g, bool showLabel)
-            {
-                using (var path = GetPath())
-                {
-                    using (var brush = new SolidBrush(FillColor))
-                        g.FillPath(brush, path);
-                    using (var pen = new Pen(Color.Black))
-                        g.DrawPath(pen, path);
-                }
-
-            }
-            public void Move(Point d)
-            {
-                Center = new PointF(Center.X + d.X, Center.Y + d.Y);
-            }
-
-            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xymin xymax based on shape xy
-            {
-                PlotCenter = new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (Center.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (Center.Y - yMn) / (yMx - yMn)));
-            }
-
-        }
-
-        public class Polygon : IShape
-        {
-            public string ID { get; set; }
-            public Color LineColor { get; set; }
-            public Color FillColor { get; set; }
-            public PointF[] Points { get; set; }
-            private PointF[] PlotPoints { get; set; }
-            public int LineWidth { get; set; }
-
-
-            public Polygon() { LineWidth = 1; LineColor = Color.Black; FillColor = Color.LightBlue; }
-
-            private void CheckMinMax(PointF pt)
-            {
-                if (pt.X > xmax) xmax = pt.X;
-                if (pt.Y > ymax) ymax = pt.Y;
-                if (pt.X < xmin) xmin = pt.X;
-                if (pt.Y < ymin) ymin = pt.Y;
-            }
-
-            public Polygon(PointF[] Pts, string inID)
-            {
-                LineWidth = 1;
-                LineColor = Color.Black;
-                FillColor = Color.LightBlue;
-                Points = Pts;
-                ID = inID;
-
-                foreach (PointF pt in Points) CheckMinMax(pt);
-            }
-
-            public PointF[] GetPoints()
-            {
-                return PlotPoints;
-            }
-
-            public GraphicsPath GetPath()
-            {
-                var path = new GraphicsPath();
-                path.AddPolygon(PlotPoints);
-                return path;
-            }
-
-            public bool HitTest(Point p)
-            {
-                var result = false;
-                using (var path = GetPath())
-                   result = path.IsVisible(p);
-                return result; 
-            }
-
-            public void Draw(Graphics g, bool ShowCOMIDs)
-            {
-                var gpath = GetPoints();
-                SolidBrush brush = new SolidBrush(FillColor);
-                g.FillPolygon(brush, gpath);
-
-                Pen pen = new Pen(LineColor, LineWidth);
-                g.DrawPolygon(pen, gpath);
-
-                //if (ShowCOMIDs)
-                //{
-                //    RectangleF rectf = gpath.GetBounds();
-                //    Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2)+6);
-                //    Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
-                //    Rectangle rect = new Rectangle(Location, sizeOfText);
-                //    g.FillRectangle(Brushes.White, rect);
-                //    g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
-                //}
-
-            }
-
-            public void Move(Point d)
-            {
-            }
-
-
-            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xmin xmax based on shape xy
-            {
-                Point rsc(PointF pt)
-                {
-                    return new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (pt.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (pt.Y - yMn) / (yMx - yMn)));
-                }
-
-                PlotPoints = new PointF[Points.Length];
-                for (int i = 0; i < Points.Length; i++)
-                {
-                    PlotPoints[i] = rsc(Points[i]);
-                }
-            }
-        }
-
-
-        public class PolyLine : IShape
-        {
-            public string ID { get; set; }
-            public Color LineColor { get; set; }
-            public Color FillColor { get; set; }
-            public List<PointF> StartPoints { get; set; }
-            public List<PointF> EndPoints { get; set; }
-            private List<Point> PlotStartPoints { get; set; }
-            private List<Point> PlotEndPoints { get; set; }
-            public int LineWidth { get; set; }
-
-
-            public PolyLine() { LineWidth = 2; LineColor = Color.Black; }
-
-            private void CheckMinMax(PointF pt)
-            {
-                if (pt.X > xmax) xmax = pt.X;
-                if (pt.Y > ymax) ymax = pt.Y;
-                if (pt.X < xmin) xmin = pt.X;
-                if (pt.Y < ymin) ymin = pt.Y;
-            }
-
-            public PolyLine(List<PointF> sPts, List<PointF> ePts, string inID, Color lcolor, int width)
-            {
-                LineWidth = width;
-                LineColor = lcolor;
-                StartPoints = sPts;
-                EndPoints = ePts;
-                ID = inID;
-
-                foreach (PointF pt in StartPoints) CheckMinMax(pt);
-                foreach (PointF pt in EndPoints) CheckMinMax(pt);
-            }
-
-            public GraphicsPath GetPath()
-            {
-                var path = new GraphicsPath();
-                for (int i = 0; i < PlotStartPoints.Count; i++)
-                    path.AddLine(PlotStartPoints[i], PlotEndPoints[i]);
-
-                return path;
-            }
-
-            public bool HitTest(Point p)
-            {
-                var result = false;
-                using (var path = GetPath())
-                using (var pen = new Pen(LineColor, LineWidth + 2))
-                    result = path.IsOutlineVisible(p, pen);
-                return result;
-            }
-
-            public void Draw(Graphics g, bool ShowCOMIDs)
-            {
-                Pen pen = new Pen(LineColor, LineWidth);  // older draw line, arrowheads too small
-                                                          // pen.StartCap = LineCap.ArrowAnchor;
-                var gpath = GetPath();
-                using (pen)
-                    g.DrawPath(pen, gpath);
-
-                if (ShowCOMIDs)
-                {
-                     RectangleF rectf = gpath.GetBounds();
-                    if ((rectf.Width > 0)&&(rectf.Height > 0))
-                    {
-                        Point Location = new Point((int)Math.Round(rectf.X + rectf.Width / 2), (int)Math.Round(rectf.Y + rectf.Height / 2) + 6);
-                        Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
-                        Rectangle rect = new Rectangle(Location, sizeOfText);
-                        g.FillRectangle(Brushes.White, rect);
-                        g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
-
-                    }
-                }
-
-            }
-
-            public void Move(Point d)
-            {
-            }
-
-
-            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xmin xmax based on shape xy
-            {
-                Point rsc(PointF pt)
-                {
-                    return new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (pt.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (pt.Y - yMn) / (yMx - yMn)));
-                }
-
-                PlotStartPoints = new List<Point>();
-                PlotEndPoints = new List<Point>();
-                for (int i = 0; i < StartPoints.Count; i++)
-                {
-                    PlotStartPoints.Add(rsc(StartPoints[i]));
-                    PlotEndPoints.Add(rsc(EndPoints[i]));
-                }
-            }
-        }
-
-
-
-        public class Arrow : IShape
-        {
-            public string ID { get; set; }
-            public Arrow() { LineWidth = 3; LineColor = Color.Black; }
-            public Arrow(int x1, int y1, int x2, int y2, string inID)
-            {
-                LineWidth = 3;
-                LineColor = Color.Black;
-                Point1 = new Point(x1, y1);
-                Point2 = new Point(x2, y2);
-                ID = inID;
-
-                if (x1 > xmax) xmax = x1;
-                if (y1 > ymax) ymax = y1;
-                if (x1 < xmin) xmin = x1;
-                if (y1 < ymin) ymin = y1;
-
-                if (x2 > xmax) xmax = x2;
-                if (y2 > ymax) ymax = y2;
-                if (x2 < xmin) xmin = x2;
-                if (y2 < ymin) ymin = y2;
-
-            }
-            public int LineWidth { get; set; }
-            public Color LineColor { get; set; }
-            public Color FillColor { get; set; }
-            public Point Point1 { get; set; }
-            public Point Point2 { get; set; }
-            public Point PlotPoint1 { get; set; }
-            public Point PlotPoint2 { get; set; }
-
-            public GraphicsPath GetPath()
-            {
-                var path = new GraphicsPath();
-                path.AddLine(PlotPoint1, PlotPoint2);
-                return path;
-            }
-            public bool HitTest(Point p)
-            {
-                var result = false;
-                using (var path = GetPath())
-                using (var pen = new Pen(LineColor, LineWidth + 2))
-                    result = path.IsOutlineVisible(p, pen);
-                return result;
-            }
-
-            public void Draw(Graphics g, bool ShowCOMIDs)
-            {
-                DrawArrow(g, PlotPoint2, PlotPoint1, LineColor, 2, 1);
-
-                //                    Pen pen = new Pen(LineColor, LineWidth);  // older draw line, arrowheads too small
-                //                    pen.StartCap = LineCap.ArrowAnchor;
-                //                    using (var path = GetPath())
-                //                    using (pen)
-                //                    g.DrawPath(pen, path);
-
-                if (ShowCOMIDs)
-                {
-                    Point Location = new Point(5 + (PlotPoint1.X + PlotPoint2.X) / 2, -5 + (PlotPoint1.Y + PlotPoint2.Y) / 2);
-                    Size sizeOfText = TextRenderer.MeasureText(ID, new Font("Arial", 8));
-                    Rectangle rect = new Rectangle(Location, sizeOfText);
-                    g.FillRectangle(Brushes.White, rect);
-                    g.DrawString(ID, new Font("Arial", 8), new SolidBrush(Color.Navy), Location);
-
-                }
-
-            }
-
-            public void Move(Point d)
-            {
-                Point1 = new Point(Point1.X + d.X, Point1.Y + d.Y);
-                Point2 = new Point(Point2.X + d.X, Point2.Y + d.Y);
-            }
-
-
-            public void Rescale(int bxmin, int bxmax, int bymin, int bymax, float xMn, float xMx, float yMn, float yMx)  //scale into the border xmin xmax based on shape xy
-            {
-                PlotPoint1 = new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (Point1.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (Point1.Y - yMn) / (yMx - yMn)));
-                PlotPoint2 = new Point((int)Math.Round(bxmin + (bxmax - bxmin) * (Point2.X - xMn) / (xMx - xMn)), (int)Math.Round(bymax - (bymax - bymin) * (Point2.Y - yMn) / (yMx - yMn)));
-            }
-
-            private void DrawArrow(Graphics g, PointF ArrowStart, PointF ArrowEnd, Color ArrowColor, int LineWidth, int ArrowMultiplier)
-            {
-                //create the pen
-                Pen p = new Pen(ArrowColor, LineWidth);
-
-                //draw the line
-                g.DrawLine(p, ArrowStart, ArrowEnd);
-
-                //determine the coords for the arrow point
-
-                //tip of the arrow
-                PointF arrowPoint = ArrowEnd;
-
-                //determine line length
-                double arrowLength = Math.Sqrt(Math.Pow(Math.Abs(ArrowStart.X - ArrowEnd.X), 2) +
-                                               Math.Pow(Math.Abs(ArrowStart.Y - ArrowEnd.Y), 2));
-
-                //determine line angle
-                double arrowAngle = Math.Atan2(Math.Abs(ArrowStart.Y - ArrowEnd.Y), Math.Abs(ArrowStart.X - ArrowEnd.X));
-
-                //get the x,y of the back of the point
-
-                //to change from an arrow to a diamond, change the 3
-                //in the next if/else blocks to 6
-
-                double pointX, pointY;
-                if (ArrowStart.X > ArrowEnd.X)
-                {
-                    pointX = ArrowStart.X - (Math.Cos(arrowAngle) * (arrowLength - (3 * ArrowMultiplier)));
-                }
-                else
-                {
-                    pointX = Math.Cos(arrowAngle) * (arrowLength - (3 * ArrowMultiplier)) + ArrowStart.X;
-                }
-
-                if (ArrowStart.Y > ArrowEnd.Y)
-                {
-                    pointY = ArrowStart.Y - (Math.Sin(arrowAngle) * (arrowLength - (3 * ArrowMultiplier)));
-                }
-                else
-                {
-                    pointY = (Math.Sin(arrowAngle) * (arrowLength - (3 * ArrowMultiplier))) + ArrowStart.Y;
-                }
-
-                PointF arrowPointBack = new PointF((float)pointX, (float)pointY);
-
-                //get the secondary angle of the left tip
-                double angleB = Math.Atan2((3 * ArrowMultiplier), (arrowLength - (3 * ArrowMultiplier)));
-
-                double angleC = Math.PI * (90 - (arrowAngle * (180 / Math.PI)) - (angleB * (180 / Math.PI))) / 180;
-
-                //get the secondary length
-                double secondaryLength = (3 * ArrowMultiplier) / Math.Sin(angleB);
-
-                if (ArrowStart.X > ArrowEnd.X)
-                {
-                    pointX = ArrowStart.X - (Math.Sin(angleC) * secondaryLength);
-                }
-                else
-                {
-                    pointX = (Math.Sin(angleC) * secondaryLength) + ArrowStart.X;
-                }
-
-                if (ArrowStart.Y > ArrowEnd.Y)
-                {
-                    pointY = ArrowStart.Y - (Math.Cos(angleC) * secondaryLength);
-                }
-                else
-                {
-                    pointY = (Math.Cos(angleC) * secondaryLength) + ArrowStart.Y;
-                }
-
-                //get the left point
-                PointF arrowPointLeft = new PointF((float)pointX, (float)pointY);
-
-                //move to the right point
-                angleC = arrowAngle - angleB;
-
-                if (ArrowStart.X > ArrowEnd.X)
-                {
-                    pointX = ArrowStart.X - (Math.Cos(angleC) * secondaryLength);
-                }
-                else
-                {
-                    pointX = (Math.Cos(angleC) * secondaryLength) + ArrowStart.X;
-                }
-
-                if (ArrowStart.Y > ArrowEnd.Y)
-                {
-                    pointY = ArrowStart.Y - (Math.Sin(angleC) * secondaryLength);
-                }
-                else
-                {
-                    pointY = (Math.Sin(angleC) * secondaryLength) + ArrowStart.Y;
-                }
-
-                PointF arrowPointRight = new PointF((float)pointX, (float)pointY);
-
-                //create the point list
-                PointF[] arrowPoints = new PointF[4];
-                arrowPoints[0] = arrowPoint;
-                arrowPoints[1] = arrowPointLeft;
-                arrowPoints[2] = arrowPointBack;
-                arrowPoints[3] = arrowPointRight;
-
-                //draw the outline
-                g.DrawPolygon(p, arrowPoints);
-            }
-
-        }
-
-        private void MoveLowerBranchesRight(int xlevel)
-        {
-
-            foreach (IShape iS in Drawing)
-                if (iS is Arrow)
-                {
-                    Arrow Ar = iS as Arrow;
-                    int P1X = Ar.Point1.X;
-                    int P2X = Ar.Point2.X;
-                    bool moveit = false;
-
-                    if (Ar.Point1.X >= xlevel) { P1X = Ar.Point1.X + 1; moveit = true; if (xmax < P1X) xmax = P1X; }
-                    if (Ar.Point2.X >= xlevel) { P2X = Ar.Point2.X + 1; moveit = true; if (xmax < P2X) xmax = P2X; }
-
-                    if (moveit)
-                    {
-                        Ar.Point1 = new Point(P1X, Ar.Point1.Y);
-                        Ar.Point2 = new Point(P2X, Ar.Point2.Y);
-                    }
-                }
-        }
-
-        int maxX = 0;
-        bool PlotCOMIDArrow(int COMID, int x1, int y1, int x2, int y2)
-        {
-            string CString = COMID.ToString();
-
-            Drawing.Add(new Arrow(x1, y1, x2, y2, COMID.ToString()));
-            int[] boundaries;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries) ;
-            int[] headwaters;
-            AQT2D.SN.boundary.TryGetValue("headwater", out headwaters);
-            int[] divergences;
-            AQT2D.SN.boundary.TryGetValue("divergence", out divergences);
-
-
-            int iSeg = -1;
-            for (int i = 0; i < AQT2D.SN.network.GetLength(0); i++)
-                if (AQT2D.SN.network[i][0] == CString)
-                {
-                    iSeg = i;
-                    break;
-                }
-
-            if (iSeg <= 0) return false;
-
-            double lenkm = double.Parse(AQT2D.SN.network[iSeg][4]);
-            // AddToProcessLog(COMID + " " + x1.ToString() + "," + y1.ToString() + "|" + x2.ToString() + "," + y2.ToString() + " length " + lenkm.ToString());  debugging info
-
-            if (divergences.Contains(COMID)) return true;  //don't plot sources in this case
-
-            int nSources = 0;
-            if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                foreach (int SrcID in Sources)
-                {
-                    if (SrcID != COMID)  // don't plot if set to itself in boundaries 
-                    {
-                        if (boundaries.Contains(SrcID)) Drawing.Add(new Circle(x2, y2, COMID.ToString(), Color.Chartreuse));
-                        else 
-                        {
-                            int xplot = x2 + nSources;
-                            if ((nSources > 0) && (xplot <= maxX)) xplot = maxX+1;
-                                // MoveLowerBranchesRight(xplot);
-                            if (xplot > maxX) maxX = xplot;
-                            if (PlotCOMIDArrow(SrcID, x2, y2, xplot, y2 + 1)) nSources++; 
-                        }
-                    }
-                };
-
-            return true;
-        }
-
-        public class GeoJSonType
-        {
-            public StreamGeometry stream_geometry { get; set; }
-        }
-        public class StreamGeometry
-        {
-            public Feature[] features { get; set; }
-        }
-        public class Feature
-        {
-            public LineStringGeometry geometry { get; set; }
-        }
-        public class LineStringGeometry
-        {
-            public string type { get; set; }
-            public double[][] coordinates { get; set; }
-        }
-        public class LakeGeometry
-        {
-            public LakeFeature[] features { get; set; }
-        }
-        public class LakeFeature
-        {
-            public PolygonGeometry geometry { get; set; }
-        }
-        public class PolygonGeometry
-        {
-            public string type { get; set; }
-            public double[][][] coordinates { get; set; }
         }
 
 
 
         bool PlotCOMIDMap()
         {
-            pictureBox1.Visible = false;  // flow-chart legend
-            pictureBox2.Visible = true;  // map legend
-            loclabel.Visible = true;  // lat long label
+            //pictureBox1.Visible = false;  // flow-chart legend
+            //pictureBox2.Visible = true;  // map legend
 
             string BaseDir = basedirBox.Text;
             string GeoJSON = "";
             double[][] polyline;
 
-            int[] boundaries;
-            AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+            int[] boundaries = new int[0];
+            if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
 
             if (AQT2D.SN.waterbodies != null)
               for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
@@ -1621,7 +1036,7 @@ namespace GUI.AQUATOX
                     { GeoJSON = System.IO.File.ReadAllText(BaseDir + WBString + ".GeoJSON"); }
                     else
                     {
-                        MapPanel.Visible = false;
+                        webView.Visible = false;
                         AddToProcessLog("Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
                         GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
 
@@ -1636,33 +1051,37 @@ namespace GUI.AQUATOX
                         System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", GeoJSON);  //  write to disk
                     }
 
-                    if (GeoJSON == "{}") polyline = null;
-                    else
-                    {
-                        LakeGeometry coords = JsonConvert.DeserializeObject<LakeGeometry>(GeoJSON);
-                        try
-                        {
-                            polyline = coords.features[0].geometry.coordinates[0];  // fixme handle case of multiple polygons
-                        }
-                        catch
-                        {
-                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + WBString + ".GeoJSON"); continue;
-                        }
+       
+
+                        //if (GeoJSON == "{}") polyline = null;
+                        //else
+                        //{
+                        // //   LakeGeometry coords = JsonConvert.DeserializeObject<LakeGeometry>(GeoJSON);
+                        //    try
+                        //    {
+                        //        polyline = coords.features[0].geometry.coordinates[0];  // fixme handle case of multiple polygons
+                        //    }
+                        //    catch
+                        //    {
+                        //        AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + WBString + ".GeoJSON"); continue;
+                        //    }
+                        //}
+
+                        // PointF[] polypoints = new PointF[polyline.Length];
+
+                        //if (polyline != null)
+                        //{
+                        //    for (int k = 0; k < polyline.Length; k++)
+                        //    {
+                        //        polypoints[k]= new PointF((float)polyline[k][0], (float)polyline[k][1]);
+                        //    }
+                        //    // Drawing.Add(new Polygon(polypoints, WBString));
+                        //}
+
                     }
-
-                    PointF[] polypoints = new PointF[polyline.Length];
-
-                    if (polyline != null)
-                    {
-                        for (int k = 0; k < polyline.Length; k++)
-                        {
-                            polypoints[k]= new PointF((float)polyline[k][0], (float)polyline[k][1]);
-                        }
-                        Drawing.Add(new Polygon(polypoints, WBString));
-                    }
-
-                }
               }
+
+
 
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
@@ -1673,7 +1092,7 @@ namespace GUI.AQUATOX
                     { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
                     else
                     {
-                        MapPanel.Visible = false;
+                        webView.Visible = false;
                         AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
                         GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
                         if (GeoJSON.IndexOf("ERROR") >= 0)
@@ -1687,19 +1106,25 @@ namespace GUI.AQUATOX
                         System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
                     }
 
-                    if (GeoJSON == "{}") polyline = null;
-                    else
+                    if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                     {
-                        GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                        try
-                        {
-                            polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                        }
-                        catch
-                        {
-                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
-                        }
+                        webView.CoreWebView2.PostWebMessageAsString("ADD|"+GeoJSON);
                     }
+
+
+                    //if (GeoJSON == "{}") polyline = null;
+                    //else
+                    //{
+                    //    GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
+                    //    try
+                    //    {
+                    //        polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                    //    }
+                    //    catch
+                    //    {
+                    //        AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
+                    //    }
+                    //}
 
                     List<PointF> startpoints = new List<PointF>();
                     List<PointF> endpoints = new List<PointF>();
@@ -1715,95 +1140,32 @@ namespace GUI.AQUATOX
                         lwidth = 1;
                     }
 
-                    if (polyline != null)
-                    {
-                        for (int k = 0; k < polyline.Length - 1; k++)
-                        {
-                            startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
-                            endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
-                        }
-                        Drawing.Add(new PolyLine(startpoints, endpoints, CString,lcolor,lwidth));
+                    //if (polyline != null)
+                    //{
+                    //    for (int k = 0; k < polyline.Length - 1; k++)
+                    //    {
+                    //        startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
+                    //        endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
+                    //    }
+                    //    Drawing.Add(new PolyLine(startpoints, endpoints, CString,lcolor,lwidth));
 
-                        if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                            foreach (int SrcID in Sources)
-                                if (boundaries.Contains(SrcID))  //ID inflow points with green circles
-                                {
-                                    Drawing.Add(new Circle((float) polyline[0][0], (float) polyline[0][1], COMID.ToString(), Color.Chartreuse));
-                                }
+                    //    if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                    //        foreach (int SrcID in Sources)
+                    //            if (boundaries.Contains(SrcID))  //ID inflow points with green circles
+                    //            {
+                    //                Drawing.Add(new Circle((float) polyline[0][0], (float) polyline[0][1], COMID.ToString(), Color.Chartreuse));
+                    //            }
 
-                        if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
-                        {
-                            Drawing.Add(new Circle((float)polyline[polyline.Length-1][0], (float)polyline[polyline.Length - 1][1], COMID.ToString(), Color.Red));
-                        }
+                    //    if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
+                    //    {
+                    //        Drawing.Add(new Circle((float)polyline[polyline.Length-1][0], (float)polyline[polyline.Length - 1][1], COMID.ToString(), Color.Red));
+                    //    }
 
-                    }
+                    //}
                 }
 
-
-
-
-
-
-
-
-                //// ----------test code here, draw boundaries in orange
-                //for (int i = 0; i < boundaries.Length; i++)
-                //    {
-                //        int COMID = boundaries[i];
-                //        string CString = COMID.ToString();
-                //        if (File.Exists(BaseDir + CString + ".GeoJSON"))
-                //        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
-                //        else
-                //        {
-                //            MapPanel.Visible = false;
-                //            AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
-                //            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
-                //            if (GeoJSON.IndexOf("ERROR") >= 0)
-                //            {
-                //                AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
-                //                // show process log 
-                //                if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk
-                //                continue;
-                //                // return false;
-                //            }
-                //            System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
-                //        }
-
-                //        if (GeoJSON == "{}") polyline = null;
-                //        else
-                //        {
-                //            GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                //            try
-                //            {
-                //                polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                //            }
-                //            catch
-                //            {
-                //                AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
-                //            }
-                //        }
-
-
-                //        List<PointF> startpoints = new List<PointF>();
-                //        List<PointF> endpoints = new List<PointF>();
-
-                //        if (polyline != null)
-                //        {
-                //            for (int k = 0; k < polyline.Length - 1; k++)
-                //            {
-                //                startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
-                //                endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
-                //            }
-                //            PolyLine pline = new PolyLine(startpoints, endpoints, CString);
-                //            pline.LineColor = Color.Orange;
-
-                //            Drawing.Add(pline);
-
-                //        }
-                //    }
-                //// ----------test code here , draw boundaries in orange
-
-                MapPanel.Visible = true;
+            webView.CoreWebView2.PostWebMessageAsString("RENDER");
+            webView.Visible = true;
             chart1.Visible = false;
 
             return true;
@@ -1817,102 +1179,57 @@ namespace GUI.AQUATOX
 
         private void RedrawShapes()
         {
-            Drawing.Clear();
+            // if AQT2D = null return;  fixme
+            
+            //Drawing.Clear();
             xmax = -1000000;
             ymax = -1000000;
             xmin = 1000000;
             ymin = 1000000;
 
-            if (DrawMap)  { if (PlotCOMIDMap()) DrawMapPanel(true); }
+            if (DrawMap)  { if (PlotCOMIDMap()) DrawwebView(true); }
             else
             {
-                int EndID = AQT2D.SN.order[AQT2D.SN.order.Length - 1][0];
-                maxX = 0;
-                pictureBox1.Visible = true;  // flow chart legend
-                pictureBox2.Visible = false; // map legend
-                loclabel.Visible = false;  // lat long label
-                if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawMapPanel(true);
+                //int EndID = AQT2D.SN.order[AQT2D.SN.order.Length - 1][0];
+                //maxX = 0;
+                //if (PlotCOMIDArrow(EndID, 0, 0, 0, 1)) DrawwebView(true);
             }
 
         }
 
-        private void RescaleMap()
+
+        private void DrawwebView(bool UpdateAspect)
         {
-            if (xmax == xmin) { xmax = xmin + 1; xmin = xmin - 1; };
-            xBuffer = 80;
-            yBuffer = 10;
-            if (DrawMap) xBuffer = 10;
 
-            yScale = MapPanel.Size.Height - 2 * yBuffer;
-            xScale = MapPanel.Size.Width - 2 * xBuffer;
-
-            if (DrawMap)  // resize and buffer to preserve map's aspect ratio
-            {
-                double XoverY = (double)(xmax - xmin) / (double)(ymax - ymin);
-                double aspectratio = ((double)xScale / (double)yScale) / XoverY;
-                if (aspectratio > 1)
-                {
-                    xScale = (int)Math.Round(xScale / aspectratio);
-                    xBuffer = (MapPanel.Size.Width - xScale) / 2;
-                }
-                else
-                {
-                    yScale = (int)Math.Round(yScale * aspectratio);
-                    yBuffer = (MapPanel.Size.Height - yScale) / 2;
-                }
-            }
-        }
-
-        private void DrawMapPanel(bool UpdateAspect)
-        {
-            MPG = MapPanel.CreateGraphics();
-            if (UpdateAspect) RescaleMap();
-            MapButton2.Checked = true;
-            MapPanel.Visible = true;
-            chart1.Visible = false;
-            MPG.Clear(Color.White);
-
-            foreach (IShape iS in Drawing)
-            {
-                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                iS.Draw(MPG, showCOMIDsBox.Checked);
-            }
         }
 
         private void MultiSegForm_ResizeEnd(object sender, EventArgs e)
         {
-            if (chart1.Visible) return;
-            if (!MapPanel.Visible) return;
-            if (!VerifyStreamNetwork()) return;
-            DrawMapPanel(true);
         }
 
         private Point clickPosition;
 
-        private void MapPanel_MouseDown(object sender, MouseEventArgs e)
+        private void webView_MouseDown(object sender, MouseEventArgs e)
         {
+            //FIXME WORKHERE
             if (e.Button == MouseButtons.Left)
+
             {
-                clickPosition.X = e.X;
-                clickPosition.Y = e.Y;
+                //clickPosition.X = e.X;
+                //clickPosition.Y = e.Y;
 
-                for (var i = Drawing.Count - 1; i >= 0; i--)
-                    if (Drawing[i].HitTest(e.Location))
-                    {
-                        if ((outputjump.Enabled) && (outputjump.Checked))
-                            ViewOutput(Drawing[i].ID);
-                        else EditCOMID(Drawing[i].ID);
+                //for (var i = Drawing.Count - 1; i >= 0; i--)
+                //    if (Drawing[i].HitTest(e.Location))
+                //    {
+                //        if ((outputjump.Enabled) && (outputjump.Checked))
+                //            ViewOutput(Drawing[i].ID);
+                //        else EditCOMID(Drawing[i].ID);
 
-                    };
+                //    };
                 // MessageBox.Show("COMID: " + Drawing[i].ID); }; 
 
                 base.OnMouseDown(e);
             }
-            else
-                try
-                { Clipboard.SetText(loclabel.Text); }
-                catch
-                { AddToProcessLog("Clipboard Error.  Cannot copy: " + loclabel.Text); return; }
             
         }
 
@@ -1920,7 +1237,7 @@ namespace GUI.AQUATOX
         {
             if (!VerifyStreamNetwork()) return;
             DrawMap = mapButton.Checked;
-            RedrawShapes(); 
+         //   RedrawShapes(); 
         }
 
         private void ConsoleButton_CheckedChanged(object sender, EventArgs e)
@@ -1929,10 +1246,6 @@ namespace GUI.AQUATOX
 
             if (GraphButton.Checked)
             {
-                pictureBox1.Visible = false; 
-                pictureBox2.Visible = false; // legends
-                loclabel.Visible = false;  // lat long label
-
 
                 chart1.Visible = true;
                 chart1.BringToFront();
@@ -1941,12 +1254,8 @@ namespace GUI.AQUATOX
             }
             else if (ConsoleButton.Checked)
             {
-                pictureBox1.Visible = false;
-                pictureBox2.Visible = false; // legends
-                loclabel.Visible = false;  // lat long label
-
                 chart1.Visible = false;
-                MapPanel.Visible = false;
+                webView.Visible = false;
                 infolabel1.Visible = false;
                 infolabel2.Visible = false;
             }
@@ -1955,9 +1264,9 @@ namespace GUI.AQUATOX
                 infolabel1.Visible = true;
                 infolabel2.Visible = true;
                 chart1.Visible = false;
-                MapPanel.Visible = true;
+                webView.Visible = true;
                 if (!VerifyStreamNetwork()) return;
-                RedrawShapes();
+               // RedrawShapes();
             }
         }
 
@@ -2015,45 +1324,9 @@ namespace GUI.AQUATOX
             else { MessageBox.Show("COMID: " + CString+ ".  Linked output for this COMID not available."); };
         }
 
-        private void MapPanel_MouseHover(object sender, EventArgs e)
+        private void webView_MouseHover(object sender, EventArgs e)
         {
-            MapPanel.Focus();
-        }
-
-
-        private void MapPanel_MouseMove(object sender, MouseEventArgs e)
-        {
-  
-           if (e.Button == MouseButtons.Left)
-           {
-                if ((Math.Abs(e.X - clickPosition.X)<3)&&(Math.Abs(e.Y - clickPosition.Y) < 3)) return;
-                
-                float DeltaX = ((float) (clickPosition.X - e.X) / (float) xScale) * (xmax - xmin); // (float) MapPanel.Width) * (xmax - xmin); 
-                float DeltaY = ((float) (e.Y - clickPosition.Y) / (float) yScale) * (ymax - ymin); // (float) MapPanel.Height) * (ymax - ymin);
-
-                if ((DeltaX == 0)&&(DeltaY == 0)) return;
-
-                xmin = xmin + DeltaX; 
-                xmax = xmax + DeltaX;
-                ymin = ymin + DeltaY;
-                ymax = ymax + DeltaY;
-
-                if (!VerifyStreamNetwork()) return;
-                DrawMapPanel(false);
-
-                clickPosition.X = e.X;
-                clickPosition.Y = e.Y;
-            }
-            else 
-            {
-                float lat = xmin + ((float) (e.Location.X - xBuffer) / (float) (MapPanel.Width-(2*xBuffer)) ) * (xmax - xmin);
-                float lon = ymin + ((float) ((MapPanel.Height-e.Location.Y)-yBuffer) / (float)(MapPanel.Height - (2 * yBuffer))) * (ymax - ymin);
-
-                loclabel.Text = lon.ToString()+", "+ lat.ToString();
-                loclabel.Visible = true;
-                  
-            }
-
+            webView.Focus();
         }
 
 
@@ -2094,7 +1367,11 @@ namespace GUI.AQUATOX
 
             ScrSettings.BaseJSONstr = BaseJSONBox.Text;
             if (!ValidFilen(BaseJSONBox.Text, true)) return;
-            if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");
+
+            if (VerifyStreamNetwork())
+            {
+                if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until 'Create Linked Inputs' is selected, overwriting the existing linked system.");
+            }
             SaveScreenSettings();
         }
 
@@ -2162,17 +1439,7 @@ namespace GUI.AQUATOX
             if (Step > AQT2D.SN.order.Length)
             {
                 Step = 0;
-                foreach (IShape iS in Drawing)
-                {
-                    iS.LineColor = Color.Gray;
-                    iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                    BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
-                    {
-                        iS.Draw(MPG, showCOMIDsBox.Checked);
-                    });
-                    executed = new List<int>();
-
-                }
+                // Fixme draw all shapes in gray
                 return;
             }
 
@@ -2190,18 +1457,7 @@ namespace GUI.AQUATOX
 
                     Color lineColor = Color.Red;
                     if (IDtoRun == -9999) { IDtoRun = runID; lineColor = Color.White; }
-                    foreach (IShape iS in Drawing)
-                        {
-                            if (iS.ID == IDtoRun.ToString())
-                            {
-                                iS.LineColor = lineColor;
-                                iS.Rescale(xBuffer, xBuffer + xScale, yBuffer, yBuffer + yScale, xmin, xmax, ymin, ymax);
-                                BeginInvoke((MethodInvoker)delegate ()  //make draw threadsafe 
-                                {
-                                    iS.Draw(MPG, showCOMIDsBox.Checked);
-                                });
-                            }
-                        }
+                    // fixme draw selected ID in linecolor
 
 
                      }  // non-parallel foreach format for debugging

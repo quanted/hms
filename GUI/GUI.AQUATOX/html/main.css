@@ -1,0 +1,21 @@
+﻿body {
+    background-color: white;
+}
+
+#map {
+    height: 95vh;
+    background-color: grey;
+    border: 2px solid;
+}
+
+.messages {
+    margin-top: 0.5rem;
+    display: grid;
+    grid-gap: 0.5rem;
+    grid-template-columns: 1fr auto;
+}
+
+#message-bar {
+    border: 1px solid gray;
+    background-color: white;
+}

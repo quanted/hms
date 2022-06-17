@@ -429,7 +429,7 @@ namespace GUI.AQUATOX
             string component = "hydrology";
             string dataset = "streamflow";
 
-            var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
+            var request = (HttpWebRequest) WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");  //fixme deprecated
             var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(TSI));  //StreamFlowInput previously initialized
             request.Method = "POST";
             request.ContentType = "application/json";
