@@ -1,34 +1,22 @@
 ﻿<!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="x-ua-compatible" content="ie=edge" />
-        <title>Leaflet-WebView2 test</title>
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, shrink-to-fit=no"
-        />
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Leaflet-WebView2 test</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <link rel="stylesheet" href="main.css" />
-        <!-- Leaflet stuff -->
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
-            integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-            crossorigin=""
-        />
-        <script
-            src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
-            integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
-            crossorigin=""
-        ></script>
-        <script
-            src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
+    <link rel="stylesheet" href="main.css" />
+    <!-- Leaflet stuff -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+    <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
             integrity="sha512-YZ6b5bXRVwipfqul5krehD9qlbJzc6KOGXYsDjU9HHXW2gK57xmWl2gU6nAegiErAqFXhygKIsWPKbjLPXVb2g=="
-            crossorigin=""
-        ></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/1.1.0/leaflet.ajax.js"></script>
-    </head>
+            crossorigin=""></script>
+
+</head>
 
     <body>
         <div id="map_container">
@@ -41,7 +29,7 @@
             const DEFAULT_LNG = -83.383333;
             const DEFAULT_ZOOM = 13;
             var allShapes = null;
-            var geoLayer = null;
+            var geoLayer;
 
             // catchments
             const URL_NP21_CATCHMENTS =
@@ -124,10 +112,10 @@
 
             // app interaction
             function handleMapClick(e) {
-                const LAT_LNG = e.latlng;
-                sendMessageToDotnet(
-                    `Message from map click lat: ${LAT_LNG.lat}, lng: ${LAT_LNG.lng}`
-                );
+          //      const LAT_LNG = e.latlng;
+          //      sendMessageToDotnet(
+          //          `Message from map click lat: ${LAT_LNG.lat}, lng: ${LAT_LNG.lng}`
+          //      );
             }
             MAP.on("click", handleMapClick);
 
@@ -140,19 +128,43 @@
 
             // app interaction
             function AddGeoJSON(gstr) {
-                
-                flowline = JSON.parse(gstr).stream_geometry;
+                flowline = JSON.parse(gstr).stream_geometry;  //stream segments only
                 if (allShapes == null) allShapes = flowline
                 else allShapes = concatGeoJSON(allShapes, flowline);
                 // sendMessageToDotnet(gstr);
             }
 
+            function AddWBGeoJSON(gstr) {
+                flowline = JSON.parse(gstr); 
+                if (allShapes == null) allShapes = flowline
+                else allShapes = concatGeoJSON(allShapes, flowline);
+            }
+
+            function onEachFeature(feature, layer) {
+                layer.on('click', function(e) {
+                    sendMessageToDotnet(layer.feature.id.toString());  });
+            }
             function renderGeoJSON() {
                 if (allShapes != null) {
-                    geoLayer = L.geoJSON(allShapes);
+                    geoLayer = L.geoJSON(allShapes,
+                        { onEachFeature: onEachFeature });
                     geoLayer.addTo(MAP);
+                    
                     MAP.fitBounds(geoLayer.getBounds());  
                 }
+            }
+
+            function ColorGeoJSON(COMID, linecolor) {
+                geoLayer.eachLayer(function (layer) {
+                    if (layer.feature.id == COMID) {
+                        layer.setStyle({ color: linecolor });
+                    }
+                })
+            }
+
+            function eraseGeoJSON() {
+                allShapes = null;
+                geoLayer = new L.geoJSON;
             }
 
 
@@ -160,8 +172,10 @@
             window.chrome.webview.addEventListener("message", (event) => {
                 var messageArr = event.data.split("|");
                 if (messageArr[0] == "ADD") AddGeoJSON(messageArr[1]);
+                if (messageArr[0] == "ADDWB") AddWBGeoJSON(messageArr[1]);
                 if (messageArr[0] == "RENDER") renderGeoJSON();
-
+                if (messageArr[0] == "ERASE") eraseGeoJSON();
+                if (messageArr[0] == "COLOR") ColorGeoJSON(parseInt(messageArr[1]),messageArr[2]);
 //                console.log(`message from dotnet: ${event.data}`);
 //                this.document.getElementById("message-bar").innerHTML =
 //                    event.data;

@@ -999,7 +999,7 @@ namespace GUI.AQUATOX
         private void MultiSegButton_Click(object sender, EventArgs e)
         {
             MultiSegForm MSForm = new MultiSegForm();
-            MSForm.ShowDialog();
+            MSForm.Show(); // ShowDialog();
 
         }
 

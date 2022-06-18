@@ -68,7 +68,6 @@
             this.PlotPanel = new System.Windows.Forms.Panel();
             this.outputjump = new System.Windows.Forms.CheckBox();
             this.showCOMIDsBox = new System.Windows.Forms.CheckBox();
-            this.mapButton = new System.Windows.Forms.RadioButton();
             this.PlotButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
@@ -463,7 +462,6 @@
             // 
             this.PlotPanel.Controls.Add(this.outputjump);
             this.PlotPanel.Controls.Add(this.showCOMIDsBox);
-            this.PlotPanel.Controls.Add(this.mapButton);
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 42);
             this.PlotPanel.Name = "PlotPanel";
@@ -476,7 +474,7 @@
             this.outputjump.Checked = true;
             this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputjump.Enabled = false;
-            this.outputjump.Location = new System.Drawing.Point(287, 3);
+            this.outputjump.Location = new System.Drawing.Point(239, 3);
             this.outputjump.Name = "outputjump";
             this.outputjump.Size = new System.Drawing.Size(112, 19);
             this.outputjump.TabIndex = 40;
@@ -487,26 +485,13 @@
             // showCOMIDsBox
             // 
             this.showCOMIDsBox.AutoSize = true;
-            this.showCOMIDsBox.Location = new System.Drawing.Point(173, 3);
+            this.showCOMIDsBox.Location = new System.Drawing.Point(125, 3);
             this.showCOMIDsBox.Name = "showCOMIDsBox";
             this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
             this.showCOMIDsBox.TabIndex = 39;
             this.showCOMIDsBox.Text = "Label COMIDs";
             this.showCOMIDsBox.UseVisualStyleBackColor = true;
             this.showCOMIDsBox.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
-            // 
-            // mapButton
-            // 
-            this.mapButton.AutoSize = true;
-            this.mapButton.Checked = true;
-            this.mapButton.Location = new System.Drawing.Point(110, 2);
-            this.mapButton.Name = "mapButton";
-            this.mapButton.Size = new System.Drawing.Size(49, 19);
-            this.mapButton.TabIndex = 37;
-            this.mapButton.TabStop = true;
-            this.mapButton.Text = "map";
-            this.mapButton.UseVisualStyleBackColor = true;
-            this.mapButton.CheckedChanged += new System.EventHandler(this.mapButton_CheckedChanged);
             // 
             // PlotButton
             // 
@@ -666,7 +651,6 @@
         private System.Windows.Forms.Panel PlotPanel;
         private System.Windows.Forms.CheckBox showCOMIDsBox;
         private System.Windows.Forms.RadioButton flowchartButton;
-        private System.Windows.Forms.RadioButton mapButton;
         private System.Windows.Forms.Button PlotButton;
         private System.Windows.Forms.CheckBox outputjump;
         private System.Windows.Forms.ProgressBar progressBar1;
