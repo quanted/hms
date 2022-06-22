@@ -175,7 +175,7 @@
     <Content Include="Studies\Zollner Creek OR w chlorpyr dieldrin-pulse.JSON" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1248-prerelease" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1245.22" />
     <PackageReference Include="SDSLite" Version="2.0.3" />
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.326103">
       <PrivateAssets>all</PrivateAssets>

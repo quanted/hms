@@ -147,7 +147,7 @@ namespace GUI.AQUATOX
                     {
                         chart1.ChartAreas[0].RecalculateAxesScale();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         chart1.ChartAreas[0].AxisY.IsLogarithmic = false;
                         System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
@@ -239,8 +239,9 @@ namespace GUI.AQUATOX
             foreach (SeriesID SID in Graph.YItems)
             {
                 TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
-                if (TSV != null)
-                {
+                if (TSV != null) 
+                 if (SID.indx< TSV.SVoutput.Data.Values.ElementAt(0).Count)
+                 {
                     List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
                     Series ser = chart1.Series.Add(SID.nm);
 
@@ -257,7 +258,7 @@ namespace GUI.AQUATOX
                         Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx - 1]);
                         ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
                     }
-                }
+                 }
             }
         }
 

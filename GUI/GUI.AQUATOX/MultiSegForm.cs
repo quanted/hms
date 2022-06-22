@@ -59,14 +59,19 @@ namespace GUI.AQUATOX
             return Convert.ToInt32(y * ScaleY);
         }
 
+        Task webviewready;
+        TaskCompletionSource tcs = new TaskCompletionSource();
+        Task mapReadyForRender; // JScript signals when map is ready to render
+
         public MultiSegForm()
         {
             AutoScroll = true;
             InitializeComponent();
 
             this.Resize += new System.EventHandler(this.FormResize);
-            
-            InitializeAsync();
+
+            mapReadyForRender = tcs.Task;
+            webviewready = InitializeAsync();
 
             webView.Source = new Uri(Path.Combine(Environment.CurrentDirectory, @"html\leafletMap.html"));
 
@@ -112,17 +117,22 @@ namespace GUI.AQUATOX
 
             chart1.Location = new System.Drawing.Point(webView.Left, webView.Top);
             chart1.Size = new System.Drawing.Size(webView.Width, webView.Height);
-
         }
 
         private void FormResize(object sender, EventArgs e)
         {
         }
 
-        async void InitializeAsync()
+        private Task InitializeAsync()
+        {
+            return InitializeAsync(webView);
+        }
+
+        async Task InitializeAsync(Microsoft.Web.WebView2.WinForms.WebView2 webView)
         {
             await webView.EnsureCoreWebView2Async();
             webView.CoreWebView2.WebMessageReceived += MessageReceived;
+            webView.CoreWebView2.ProcessFailed += WebView_ProcessFailed;
         }
 
         private void SendMessage(object sender, EventArgs e)
@@ -133,11 +143,22 @@ namespace GUI.AQUATOX
             }
         }
 
+        void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
+        {
+             MessageBox.Show("WebView Process Failed"); 
+        }
+
+
         void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             String content = args.TryGetWebMessageAsString();
-            webView_MouseDown(content);
-            // MessageBox.Show(content); debug
+
+            if (content == "DOMContentLoaded")
+            {  
+                tcs.SetResult();  //set mapreadyforrender as complete
+            }
+              
+            else webView_MouseDown(content);
         }
 
         protected override void WndProc(ref Message m)  
@@ -305,12 +326,21 @@ namespace GUI.AQUATOX
         {
 
             if (InvokeRequired)
-                ProcessLog.BeginInvoke((MethodInvoker)delegate ()
+                ProcessLog.BeginInvoke((MethodInvoker)delegate()
                 {
                     ProcessLog.AppendText(msg + Environment.NewLine);
                 });
             else AddToProcessLog(msg);
         }
+
+        private void TSafeHideProgBar()  //thread safe hide progress bar
+        {
+            progressBar1.BeginInvoke((MethodInvoker)delegate()
+                {
+                    progressBar1.Visible = false;
+                });
+        }
+
 
         private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
@@ -356,7 +386,7 @@ namespace GUI.AQUATOX
             AddToProcessLog("Finished reading stream network" + Environment.NewLine);
 
             UpdateScreen();
-
+            if (MapButton2.Checked) PlotCOMIDMap();
         }
 
         private bool SegmentsCreated()
@@ -475,7 +505,6 @@ namespace GUI.AQUATOX
                         continue;
                     }
 
-
                     string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
                     if (errmessage == "")
@@ -493,8 +522,8 @@ namespace GUI.AQUATOX
                     {
                         TSafeAddToProcessLog(errmessage);
                         UseWaitCursor = false;
-                        // Fixme draw COMID shape in red
-                        progressBar1.Visible = false;  // fixme not thread safe
+                        webView.CoreWebView2.PostWebMessageAsString("COLOR|" + comid + "|red");
+                        TSafeHideProgBar();
                         return;
                     }
                 }
@@ -564,18 +593,20 @@ namespace GUI.AQUATOX
                     {
                         string strout = "";
                         string BaseDir = basedirBox.Text;
-                        string FileN = BaseDir + "AQT_2D_" + runID.ToString() + ".JSON";
+                        string runIDstr = runID.ToString();
+                        string FileN = BaseDir + "AQT_2D_" + runIDstr + ".JSON";
                         if (!ValidFilen(FileN, false))
                         {
                             TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
-                            progressBar1.Visible = false; return;  // FIXME, progressbar visible is not thread safe
+                            TSafeHideProgBar();
+                            return;  
                         }
-                        string json = File.ReadAllText(BaseDir + "AQT_2D_" + runID.ToString() + ".JSON");  //read one segment of 2D model
+                        string json = File.ReadAllText(BaseDir + "AQT_2D_" + runIDstr + ".JSON");  //read one segment of 2D model
 
                         List<ITimeSeriesOutput<List<double>>> divergence_flows = null;
 
                         if (AQT2D.SN.divergentpaths != null)
-                         if (AQT2D.SN.divergentpaths.TryGetValue(runID.ToString(), out int[] Divg))
+                         if (AQT2D.SN.divergentpaths.TryGetValue(runIDstr, out int[] Divg))
                             foreach (int ID in Divg)
                             {
                                 TimeSeriesOutput<List<double>> ITSO = null;
@@ -594,9 +625,8 @@ namespace GUI.AQUATOX
                             }
 
                         if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
-                        File.WriteAllText(BaseDir + "AQT_Run_" + runID.ToString() + ".JSON", json);
-
-                        // fixme draw COMID shape in green
+                        File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);
+                        webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runIDstr + "|'green'");  // draw COMID shape in green after execute
 
                         TSafeAddToProcessLog(strout);  //write update to status log
 
@@ -970,7 +1000,7 @@ namespace GUI.AQUATOX
             UpdateScreen();
             if (PlotPanel.Enabled)
             {
-                MapButton2.Checked = true;                
+                RedrawShapes();
             }
             SaveBaseDir();
         }
@@ -1005,12 +1035,21 @@ namespace GUI.AQUATOX
             AQTTestForm.OpenUrl(target);
         }
 
-
-
-        bool PlotCOMIDMap()
+        async void PlotCOMIDMap()
         {
+            // ViewOutput("23399441");  show modal prior to webview2 as a test of crash.
+
             string BaseDir = basedirBox.Text;
             string GeoJSON;
+
+            await mapReadyForRender; // segments can't render until page is loaded
+
+//          if (webView.CoreWebView2 == null)
+//          { await webviewready; } //ensure webview initialized
+//          await webView.CoreWebView2.DOMContentLoaded(null);
+//          MessageBox.Show("Rendering Now");
+
+            webView.Visible = true;
             webView.CoreWebView2.PostWebMessageAsString("ERASE");
 
             int[] boundaries = new int[0];
@@ -1044,6 +1083,12 @@ namespace GUI.AQUATOX
 
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
+                            int IDIndex = GeoJSON.IndexOf("\"COMID\":");
+                            if (IDIndex == -1) { 
+                                int IDLoc = GeoJSON.IndexOf("\"GNIS_NAME\"");
+                                if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":"+WBString+",");
+                            } 
+
                             webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
                         }
                     } 
@@ -1127,12 +1172,9 @@ namespace GUI.AQUATOX
 
             webView.CoreWebView2.PostWebMessageAsString("RENDER");
 
-            // webView.CoreWebView2.PostWebMessageAsString("COLOR|" + "2648392" + "|red");  this was a test
-
             webView.Visible = true;
             chart1.Visible = false;
-
-            return true;
+            
         }
 
         private void PlotButton_Click(object sender, EventArgs e)
@@ -1171,7 +1213,6 @@ namespace GUI.AQUATOX
 
             if (GraphButton.Checked)
             {
-
                 chart1.Visible = true;
                 chart1.BringToFront();
                 infolabel1.Visible = false;
@@ -1191,12 +1232,13 @@ namespace GUI.AQUATOX
                 chart1.Visible = false;
                 webView.Visible = true;
                 if (!VerifyStreamNetwork()) return;
-                //RedrawShapes();
+                RedrawShapes();  
             }
         }
 
         private void EditCOMID(string CString)
         {
+
             int COMID = Int32.Parse(CString);
             string BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_2D_" + CString + ".JSON";
@@ -1206,7 +1248,10 @@ namespace GUI.AQUATOX
                 AQTTestForm AQForm = new AQTTestForm();
 
                 bool isBoundarySeg = false;
-                AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries);
+                int[] boundaries = new int[0];
+                if (AQT2D.SN.boundary != null)
+                    AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+
                 if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                     foreach (int SrcID in Sources)
                         if (boundaries.Contains(SrcID)) isBoundarySeg = true;
@@ -1364,29 +1409,35 @@ namespace GUI.AQUATOX
             if (Step > AQT2D.SN.order.Length)
             {
                 Step = 0;
-                // Fixme draw all shapes in gray
+              
+                for(int s2=0;s2<AQT2D.SN.order.Length;s2++)
+                 foreach (int runID in AQT2D.SN.order[s2])
+                   webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runID.ToString() + "|grey");
+                if (AQT2D.SN.waterbodies != null)
+                 foreach (string[] WBID in AQT2D.SN.waterbodies.wb_table)
+                   webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBID[0] + "|grey");
+                executed.Clear();
+
+                // draw all shapes in gray
                 return;
             }
 
-
-                    try
+            try
             {
                     foreach (int runID in AQT2D.SN.order[Step-1])  // step through each COMID in this "order" 
                     {
-                    bool in_waterbody = false;
-                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+                        bool in_waterbody = false;
+                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
 
-                    int IDtoRun = runID;
-                    if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
+                        int IDtoRun = runID;
+                        if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
+
+                        string lineColor = "red";
+                        if (IDtoRun == -9999) { IDtoRun = runID; lineColor = "white"; }
+                        webView.CoreWebView2.PostWebMessageAsString("COLOR|"+ IDtoRun.ToString() +"|"+ lineColor);
+
+                     }  
                     
-
-                    Color lineColor = Color.Red;
-                    if (IDtoRun == -9999) { IDtoRun = runID; lineColor = Color.White; }
-                    // fixme draw selected ID in linecolor
-
-
-                     }  // non-parallel foreach format for debugging
-
             }
             catch (Exception ex)
             {

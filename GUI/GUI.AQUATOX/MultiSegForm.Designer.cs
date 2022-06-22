@@ -67,13 +67,14 @@
             this.browserButton = new System.Windows.Forms.Button();
             this.PlotPanel = new System.Windows.Forms.Panel();
             this.outputjump = new System.Windows.Forms.CheckBox();
-            this.showCOMIDsBox = new System.Windows.Forms.CheckBox();
             this.PlotButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            this.RecentLabel = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -95,9 +96,9 @@
             // 
             // basedirBox
             // 
-            this.basedirBox.Location = new System.Drawing.Point(79, 48);
+            this.basedirBox.Location = new System.Drawing.Point(79, 9);
             this.basedirBox.Name = "basedirBox";
-            this.basedirBox.Size = new System.Drawing.Size(172, 23);
+            this.basedirBox.Size = new System.Drawing.Size(258, 23);
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
@@ -109,7 +110,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(10, 51);
+            this.label2.Location = new System.Drawing.Point(10, 12);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 15);
             this.label2.TabIndex = 4;
@@ -131,7 +132,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(11, 13);
+            this.label5.Location = new System.Drawing.Point(15, 93);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
             this.label5.TabIndex = 17;
@@ -140,9 +141,9 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(80, 10);
+            this.BaseJSONBox.Location = new System.Drawing.Point(84, 90);
             this.BaseJSONBox.Name = "BaseJSONBox";
-            this.BaseJSONBox.Size = new System.Drawing.Size(327, 23);
+            this.BaseJSONBox.Size = new System.Drawing.Size(200, 23);
             this.BaseJSONBox.TabIndex = 16;
             this.BaseJSONBox.Tag = "";
             this.BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\LBR Glenwood 4.JSON";
@@ -157,7 +158,7 @@
             this.panel1.Controls.Add(this.SetupButton);
             this.panel1.Controls.Add(this.executeButton);
             this.panel1.Controls.Add(this.createButton);
-            this.panel1.Location = new System.Drawing.Point(25, 253);
+            this.panel1.Location = new System.Drawing.Point(25, 303);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(259, 157);
             this.panel1.TabIndex = 23;
@@ -222,7 +223,7 @@
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
             this.ReadNetworkPanel.Controls.Add(this.label1);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
-            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 93);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 143);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
             this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 145);
             this.ReadNetworkPanel.TabIndex = 24;
@@ -307,7 +308,7 @@
             this.OutputPanel.Controls.Add(this.label3);
             this.OutputPanel.Controls.Add(this.CSVButton);
             this.OutputPanel.Enabled = false;
-            this.OutputPanel.Location = new System.Drawing.Point(25, 426);
+            this.OutputPanel.Location = new System.Drawing.Point(25, 476);
             this.OutputPanel.Name = "OutputPanel";
             this.OutputPanel.Size = new System.Drawing.Size(259, 81);
             this.OutputPanel.TabIndex = 25;
@@ -353,7 +354,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(54, 87);
+            this.label7.Location = new System.Drawing.Point(54, 137);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(121, 15);
             this.label7.TabIndex = 26;
@@ -362,7 +363,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(54, 243);
+            this.label8.Location = new System.Drawing.Point(54, 293);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(152, 15);
             this.label8.TabIndex = 27;
@@ -371,7 +372,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(54, 419);
+            this.label9.Location = new System.Drawing.Point(54, 469);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(78, 15);
             this.label9.TabIndex = 28;
@@ -379,11 +380,12 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(419, 10);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(82, 112);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
-            this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
+            this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 22);
             this.ChooseTemplateButton.TabIndex = 29;
             this.ChooseTemplateButton.Text = "Choose Template";
+            this.ChooseTemplateButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.ChooseTemplateButton.UseVisualStyleBackColor = true;
             this.ChooseTemplateButton.Click += new System.EventHandler(this.Choose_from_Template_Click);
             // 
@@ -449,7 +451,7 @@
             // 
             this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(251, 48);
+            this.browserButton.Location = new System.Drawing.Point(338, 7);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
             this.browserButton.Size = new System.Drawing.Size(47, 23);
@@ -461,7 +463,6 @@
             // PlotPanel
             // 
             this.PlotPanel.Controls.Add(this.outputjump);
-            this.PlotPanel.Controls.Add(this.showCOMIDsBox);
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 42);
             this.PlotPanel.Name = "PlotPanel";
@@ -474,24 +475,13 @@
             this.outputjump.Checked = true;
             this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputjump.Enabled = false;
-            this.outputjump.Location = new System.Drawing.Point(239, 3);
+            this.outputjump.Location = new System.Drawing.Point(114, 3);
             this.outputjump.Name = "outputjump";
             this.outputjump.Size = new System.Drawing.Size(112, 19);
             this.outputjump.TabIndex = 40;
             this.outputjump.Text = "Click to Outputs";
             this.outputjump.UseVisualStyleBackColor = true;
             this.outputjump.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
-            // 
-            // showCOMIDsBox
-            // 
-            this.showCOMIDsBox.AutoSize = true;
-            this.showCOMIDsBox.Location = new System.Drawing.Point(125, 3);
-            this.showCOMIDsBox.Name = "showCOMIDsBox";
-            this.showCOMIDsBox.Size = new System.Drawing.Size(101, 19);
-            this.showCOMIDsBox.TabIndex = 39;
-            this.showCOMIDsBox.Text = "Label COMIDs";
-            this.showCOMIDsBox.UseVisualStyleBackColor = true;
-            this.showCOMIDsBox.CheckedChanged += new System.EventHandler(this.showCOMIDsBox_CheckedChanged);
             // 
             // PlotButton
             // 
@@ -506,7 +496,7 @@
             // progressBar1
             // 
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            this.progressBar1.Location = new System.Drawing.Point(28, 381);
+            this.progressBar1.Location = new System.Drawing.Point(28, 431);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(252, 23);
             this.progressBar1.Step = 1;
@@ -545,7 +535,6 @@
             this.button2.TabIndex = 42;
             this.button2.Text = "Step 0";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // webView
@@ -563,11 +552,31 @@
             this.webView.TabIndex = 43;
             this.webView.ZoomFactor = 1D;
             // 
+            // RecentLabel
+            // 
+            this.RecentLabel.AutoSize = true;
+            this.RecentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.RecentLabel.Location = new System.Drawing.Point(10, 39);
+            this.RecentLabel.Name = "RecentLabel";
+            this.RecentLabel.Size = new System.Drawing.Size(95, 15);
+            this.RecentLabel.TabIndex = 44;
+            this.RecentLabel.Text = "Recent Projects";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(111, 36);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(173, 23);
+            this.comboBox1.TabIndex = 45;
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 620);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.RecentLabel);
             this.Controls.Add(this.webView);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.infolabel2);
@@ -659,5 +668,7 @@
         private System.Windows.Forms.Label infolabel2;
         private System.Windows.Forms.Button button2;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
+        private System.Windows.Forms.Label RecentLabel;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }
