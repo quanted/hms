@@ -74,7 +74,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.RecentLabel = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.RecentFilesBox = new System.Windows.Forms.ComboBox();
+            this.ShowBoundBox = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -98,11 +99,10 @@
             // 
             this.basedirBox.Location = new System.Drawing.Point(79, 9);
             this.basedirBox.Name = "basedirBox";
-            this.basedirBox.Size = new System.Drawing.Size(258, 23);
+            this.basedirBox.Size = new System.Drawing.Size(427, 23);
             this.basedirBox.TabIndex = 2;
             this.basedirBox.Tag = "";
             this.basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
-            this.basedirBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.basedirBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.basedirBox_KeyDown);
             this.basedirBox.Leave += new System.EventHandler(this.basedirBox_Leave);
             // 
@@ -132,7 +132,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(15, 93);
+            this.label5.Location = new System.Drawing.Point(15, 84);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
             this.label5.TabIndex = 17;
@@ -141,7 +141,7 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(84, 90);
+            this.BaseJSONBox.Location = new System.Drawing.Point(84, 81);
             this.BaseJSONBox.Name = "BaseJSONBox";
             this.BaseJSONBox.Size = new System.Drawing.Size(200, 23);
             this.BaseJSONBox.TabIndex = 16;
@@ -380,7 +380,7 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(82, 112);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(168, 104);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 22);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -451,7 +451,7 @@
             // 
             this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(338, 7);
+            this.browserButton.Location = new System.Drawing.Point(509, 8);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
             this.browserButton.Size = new System.Drawing.Size(47, 23);
@@ -462,6 +462,7 @@
             // 
             // PlotPanel
             // 
+            this.PlotPanel.Controls.Add(this.ShowBoundBox);
             this.PlotPanel.Controls.Add(this.outputjump);
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 42);
@@ -562,20 +563,35 @@
             this.RecentLabel.TabIndex = 44;
             this.RecentLabel.Text = "Recent Projects";
             // 
-            // comboBox1
+            // RecentFilesBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(111, 36);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(173, 23);
-            this.comboBox1.TabIndex = 45;
+            this.RecentFilesBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.RecentFilesBox.FormattingEnabled = true;
+            this.RecentFilesBox.Location = new System.Drawing.Point(111, 36);
+            this.RecentFilesBox.Name = "RecentFilesBox";
+            this.RecentFilesBox.Size = new System.Drawing.Size(173, 23);
+            this.RecentFilesBox.TabIndex = 45;
+            this.RecentFilesBox.SelectionChangeCommitted += new System.EventHandler(this.RecentFilesBox_SelectionChangeCommitted);
+            // 
+            // ShowBoundBox
+            // 
+            this.ShowBoundBox.AutoSize = true;
+            this.ShowBoundBox.Checked = true;
+            this.ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ShowBoundBox.Location = new System.Drawing.Point(252, 3);
+            this.ShowBoundBox.Name = "ShowBoundBox";
+            this.ShowBoundBox.Size = new System.Drawing.Size(170, 19);
+            this.ShowBoundBox.TabIndex = 41;
+            this.ShowBoundBox.Text = "Show Boundary Conditions";
+            this.ShowBoundBox.UseVisualStyleBackColor = true;
+            this.ShowBoundBox.CheckedChanged += new System.EventHandler(this.ShowBoundBox_CheckedChanged);
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 620);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.RecentFilesBox);
             this.Controls.Add(this.RecentLabel);
             this.Controls.Add(this.webView);
             this.Controls.Add(this.button2);
@@ -669,6 +685,7 @@
         private System.Windows.Forms.Button button2;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private System.Windows.Forms.Label RecentLabel;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox RecentFilesBox;
+        private System.Windows.Forms.CheckBox ShowBoundBox;
     }
 }

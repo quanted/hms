@@ -30,7 +30,7 @@ namespace GUI.AQUATOX
         private bool GridChanged = false;
         private bool DetritusScreen = false; //special case where the four suspended and dissolved detritus inputs are governed by one input
         private string Displayname;
-        private System.Drawing.Graphics graphics;
+        readonly private System.Drawing.Graphics graphics;
 
         TimeSeriesOutput ATSO;
         // string taskID = null;
@@ -82,7 +82,7 @@ namespace GUI.AQUATOX
         public bool EditSV(ref TStateVariable IncomingS, AQTSim AQS, bool isBoundary)
         {
 
-            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQS.AQTJSONSettings());
+            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(IncomingS, AQTSim.AQTJSONSettings());
 
             SV = IncomingS;
             isInternalSeg = !isBoundary;
@@ -90,7 +90,7 @@ namespace GUI.AQUATOX
 
             if (ShowDialog() == DialogResult.Cancel)
             {
-                Newtonsoft.Json.JsonConvert.PopulateObject(backup, IncomingS, AQS.AQTJSONSettings());
+                Newtonsoft.Json.JsonConvert.PopulateObject(backup, IncomingS, AQTSim.AQTJSONSettings());
                 return false;
             }
             else return true;

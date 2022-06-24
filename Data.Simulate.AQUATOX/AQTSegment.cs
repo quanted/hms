@@ -57,7 +57,7 @@ namespace AQUATOX.AQTSegment
             }
         }
 
-        public JsonSerializerSettings AQTJSONSettings()
+        static public JsonSerializerSettings AQTJSONSettings()
         {
             AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
             return new JsonSerializerSettings()

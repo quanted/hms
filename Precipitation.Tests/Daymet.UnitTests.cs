@@ -37,7 +37,7 @@ namespace Precipitation.Tests
                 Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(inputObject),
                 Output = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesOutput>(outputObject)
             };
-            string errorMsg = "";
+            string errorMsg;
             Daymet daymet = new Daymet();
             precip.Input.TemporalResolution = aggregation;
             precip.Output = daymet.TemporalAggregation(out errorMsg, precip.Output, precip.Input);
@@ -66,7 +66,7 @@ namespace Precipitation.Tests
                 Input = Newtonsoft.Json.JsonConvert.DeserializeObject<TimeSeriesInput>(input),
                 Output = null
             };
-            string error = "";
+            string error;
             Daymet daymet = new Daymet();
             precip.Output = daymet.GetData(out error, precip.Output, precip.Input);
             Assert.Contains(errorMsg, error);

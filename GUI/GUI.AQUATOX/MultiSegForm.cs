@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.Web.WebView2.Core;
+using System.Runtime.InteropServices;
+using System.Collections.Specialized;
 //using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
@@ -37,6 +39,7 @@ namespace GUI.AQUATOX
         DataTable OverlandTable = null;
         private System.Drawing.Graphics graphics;
         private ScreenSettings ScrSettings = new();
+        private StringCollection ShortDirNames = new();
         private List<int> executed = new List<int>(); // list of comids that have been asked to execute
 
         public class ScreenSettings
@@ -157,8 +160,10 @@ namespace GUI.AQUATOX
             {  
                 tcs.SetResult();  //set mapreadyforrender as complete
             }
-              
-            else webView_MouseDown(content);
+
+            else System.Threading.SynchronizationContext.Current.Post((_) => {
+                webView_MouseDown(content);
+            }, null); 
         }
 
         protected override void WndProc(ref Message m)  
@@ -169,6 +174,47 @@ namespace GUI.AQUATOX
             // https://stackoverflow.com/questions/8848203/alt-key-causes-form-to-redraw
         }
 
+        [DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
+        static extern bool PathCompactPathEx([Out] StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
+
+        static string PathShortener(string path, int length)
+        {
+            StringBuilder sb = new StringBuilder();
+            PathCompactPathEx(sb, path, length, 0);
+            return sb.ToString();
+        }
+
+        private void UpdateShortDirNames()
+        {
+            ShortDirNames.Clear();
+            foreach (string str in Properties.Settings.Default.MS_Recent)
+                ShortDirNames.Add(PathShortener(str, 28));
+        }
+
+        private void UpdateRecentFiles(string BDir)
+        {
+            if (Properties.Settings.Default == null) return;
+            if (Properties.Settings.Default.MS_Recent == null) Properties.Settings.Default.MS_Recent = new();
+            int indx = Properties.Settings.Default.MS_Recent.IndexOf(BDir);
+            if (indx == -1)
+            {
+                Properties.Settings.Default.MS_Recent.Insert(0, BDir);
+                if (Properties.Settings.Default.MS_Recent.Count > 10)
+                    Properties.Settings.Default.MS_Recent.RemoveAt(10);
+            }
+            else
+            {
+                Properties.Settings.Default.MS_Recent.RemoveAt(indx);
+                Properties.Settings.Default.MS_Recent.Insert(0, BDir);  //move to top
+            }
+
+            UpdateShortDirNames();
+            Properties.Settings.Default.Save();
+
+            RecentFilesBox.DataSource = null;
+            RecentFilesBox.DataSource = ShortDirNames;
+        }
+
         private void SaveScreenSettings()
         {
             try
@@ -177,6 +223,7 @@ namespace GUI.AQUATOX
                 string BaseDir = basedirBox.Text;
                 string ScrString = JsonConvert.SerializeObject(ScrSettings); 
                 File.WriteAllText(BaseDir + "ScreenSettings.JSON", ScrString);
+                UpdateRecentFiles(BaseDir);
             }
             catch (Exception ex)
             {
@@ -222,6 +269,7 @@ namespace GUI.AQUATOX
 
             if (streamnetwork)
             {
+                UpdateRecentFiles(basedirBox.Text);
                 inputsegs = SegmentsCreated();
                 if (inputsegs)
                 {
@@ -1004,6 +1052,7 @@ namespace GUI.AQUATOX
             }
             SaveBaseDir();
         }
+              
 
         private void SaveBaseDir()
         {
@@ -1035,12 +1084,33 @@ namespace GUI.AQUATOX
             AQTTestForm.OpenUrl(target);
         }
 
+
+        public class GeoJSonType
+        {
+            public StreamGeometry stream_geometry { get; set; }
+        }
+        public class StreamGeometry
+        {
+            public Feature[] features { get; set; }
+        }
+        public class Feature
+        {
+            public LineStringGeometry geometry { get; set; }
+        }
+        public class LineStringGeometry
+        {
+            public string type { get; set; }
+            public double[][] coordinates { get; set; }
+        }
+
         async void PlotCOMIDMap()
         {
             // ViewOutput("23399441");  show modal prior to webview2 as a test of crash.
 
             string BaseDir = basedirBox.Text;
             string GeoJSON;
+            double[][] polyline;
+
 
             await mapReadyForRender; // segments can't render until page is loaded
 
@@ -1123,20 +1193,19 @@ namespace GUI.AQUATOX
                         webView.CoreWebView2.PostWebMessageAsString("ADD|"+GeoJSON);
                     }
 
-
-                    //if (GeoJSON == "{}") polyline = null;
-                    //else
-                    //{
-                    //    GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                    //    try
-                    //    {
-                    //        polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                    //    }
-                    //    catch
-                    //    {
-                    //        AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return false;
-                    //    }
-                    //}
+                    if (GeoJSON == "{}") polyline = null;
+                    else
+                    {
+                        GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
+                        try
+                        {
+                            polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                        }
+                        catch
+                        {
+                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return;
+                        }
+                    }
 
                     List<PointF> startpoints = new List<PointF>();
                     List<PointF> endpoints = new List<PointF>();
@@ -1144,33 +1213,26 @@ namespace GUI.AQUATOX
                     bool in_waterbody = false;
                     if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
 
+                    if (polyline != null)
+                    {
+                        if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                            foreach (int SrcID in Sources)
+                                if (boundaries.Contains(SrcID))  //ID inflow points with green circles
+                                {
+                                    webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1]+ "|boundry condition inflow from "+SrcID);
+                                }
 
+                        if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
+                        {
+                            webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" +polyline[polyline.Length - 1][1] + "|pour point");
+                        }
 
-                    //if (polyline != null)
-                    //{
-                    //    for (int k = 0; k < polyline.Length - 1; k++)
-                    //    {
-                    //        startpoints.Add(new PointF((float)polyline[k][0], (float)polyline[k][1]));
-                    //        endpoints.Add(new PointF((float)polyline[k + 1][0], (float)polyline[k + 1][1]));
-                    //    }
-                    //    Drawing.Add(new PolyLine(startpoints, endpoints, CString,lcolor,lwidth));
-
-                    //    if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                    //        foreach (int SrcID in Sources)
-                    //            if (boundaries.Contains(SrcID))  //ID inflow points with green circles
-                    //            {
-                    //                Drawing.Add(new Circle((float) polyline[0][0], (float) polyline[0][1], COMID.ToString(), Color.Chartreuse));
-                    //            }
-
-                    //    if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
-                    //    {
-                    //        Drawing.Add(new Circle((float)polyline[polyline.Length-1][0], (float)polyline[polyline.Length - 1][1], COMID.ToString(), Color.Red));
-                    //    }
-
-                    //}
+                    }
                 }
 
             webView.CoreWebView2.PostWebMessageAsString("RENDER");
+
+            if (!ShowBoundBox.Checked) ShowBoundBox.Checked = true;
 
             webView.Visible = true;
             chart1.Visible = false;
@@ -1453,6 +1515,19 @@ namespace GUI.AQUATOX
 
         }
 
+
+        private void RecentFilesBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            basedirBox.Text = Properties.Settings.Default.MS_Recent[RecentFilesBox.SelectedIndex];
+            basedirBox_Leave(sender, e);
+        }
+
+        private void ShowBoundBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (webView.CoreWebView2 == null) return;
+
+            webView.CoreWebView2.PostWebMessageAsString("BOUNDS|"+ShowBoundBox.Checked.ToString());
+        }
     }
 }
 

@@ -29,6 +29,8 @@
             var geoLayer;
 
             // catchments
+            const URL_NWS_WB =
+                "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS/NWM_Lakes_and_Reservoirs/MapServer/0";
             const URL_NP21_CATCHMENTS =
                 "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/Catchments_NP21_Simplified/MapServer/0";
             // WBD - HUC_8
@@ -44,12 +46,34 @@
                 [23.73, -69.05]
             ]);
 
+            var markers = L.layerGroup();
+
+            const CenterBox = L.Control.extend({
+                options: {
+                    position: 'bottomright'
+                },
+                onAdd: function (MAP) {
+                    return L.DomUtil.create('div', 'center-box');
+                },
+                setContent: function (content) {
+                    this.getContainer().innerHTML = 'Map Center: ' + content;
+                }
+            });
+
+            var centerBox = new CenterBox().addTo(MAP);           
+
+            function LatLngToArrayString(ll) {
+                return "[" + ll.lat.toFixed(5) + ", " + ll.lng.toFixed(5) + "]";
+            }
 
             MAP.on("layeradd", function (event) {
                 if (geoLayer != null) { geoLayer.bringToFront(); }
             });
 
-           
+            MAP.on('moveend', function () {
+                centerBox.setContent(LatLngToArrayString(MAP.getCenter()));
+            });
+
             const STAMEN_TONER = L.tileLayer("https://stamen-tiles-{s}.a.ssl.fastly.net/{variant}/{z}/{x}/{y}{r}.{ext}", {
                 attribution:
                     'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
@@ -88,6 +112,18 @@
             //BASE_OPTIONS.addTo(MAP);
 
 
+            const WB_LAYER = L.esri
+                .featureLayer({
+                    url: URL_NWS_WB,
+                    onEachFeature: WBonEachFeature }
+                );
+
+            function WBonEachFeature(feature, layer) {
+                if (layer.feature.properties.GNIS_NAME != null) {
+                    var str = layer.feature.properties.GNIS_NAME.toString();
+                    if (str != ' ') { layer.bindTooltip(str, { opacity: 1.0 }); };
+                };
+            };
             
             // build map layers
 //            const CATCHMENTS_LAYER = L.esri
@@ -128,6 +164,7 @@
                 "HUC8 Boundaries": BOUNDARIES_LAYER,
 //                Catchments: CATCHMENTS_LAYER,
                 "Flow Lines": FLOWLINES_LAYER,
+                "NWS Lake/Res": WB_LAYER,
             };
             const LAYER_OPTIONS = L.control.layers(Base_Maps, OVERLAY_MAPS);
             LAYER_OPTIONS.addTo(MAP);
@@ -177,7 +214,8 @@
             function renderGeoJSON() {
                 if (allShapes != null) {
                     geoLayer = L.geoJSON(allShapes,
-                        { onEachFeature: onEachFeature });
+                        { onEachFeature: onEachFeature 
+                            });
                     geoLayer.setStyle({ weight: 2 });
                     geoLayer.eachLayer(function (layer) {
                         if (layer.feature.geometry.type == 'Polygon') {
@@ -185,6 +223,7 @@
                         }
                     });
                     geoLayer.addTo(MAP);
+                    MAP.addLayer(markers);
                     
                     MAP.fitBounds(geoLayer.getBounds());  
                 }
@@ -200,8 +239,39 @@
 
             function eraseGeoJSON() {
                 if (geoLayer != null) MAP.removeLayer(geoLayer);
+                markers.clearLayers();
                 allShapes = null;
                 geoLayer = null; // new L.geoJSON;
+            }
+
+            var greenIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [15, 25],
+                iconAnchor: [6, 25],
+                popupAnchor: [1, -25],
+                shadowSize: [25, 25]
+            });
+            var redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [15, 25],
+                iconAnchor: [6, 25],
+                popupAnchor: [1, -25],
+                shadowSize: [25, 25]
+            });
+
+            function AddMarker(mcolor, long, lat, msg) {
+                var marker;
+                if (mcolor == "green") marker = L.marker([lat, long], { icon: greenIcon });
+                else marker = L.marker([lat, long], { icon: redIcon });
+                marker.bindTooltip(msg);
+                markers.addLayer(marker);
+            }
+
+            function Bounds(showstr) {
+                if (showstr == "True") MAP.addLayer(markers);
+                else MAP.removeLayer(markers);
             }
 
 
@@ -216,7 +286,10 @@
                 if (messageArr[0] == "ADDWB") AddWBGeoJSON(messageArr[1]);
                 if (messageArr[0] == "RENDER") renderGeoJSON();
                 if (messageArr[0] == "ERASE") eraseGeoJSON();
-                if (messageArr[0] == "COLOR") ColorGeoJSON(parseInt(messageArr[1]),messageArr[2]);
+                if (messageArr[0] == "COLOR") ColorGeoJSON(parseInt(messageArr[1]), messageArr[2]);
+                if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
+                if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
+
 //                console.log(`message from dotnet: ${event.data}`);
 //                this.document.getElementById("message-bar").innerHTML =
 //                    event.data;

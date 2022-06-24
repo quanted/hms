@@ -1092,8 +1092,8 @@ namespace GUI.AQUATOX
 
         }
 
-        public static List<string> BrowserNames = new List<string> { "Chrome", "Firefox", "Internet Explorer", "Microsoft Edge", "Safari", "Other" };
-        public static string[] BrowserExe =   { "chrome.exe", "firefox.exe", "iexplore.exe", "msedge.exe", "safari.exe", "" };
+        private static List<string> BrowserNames = new List<string> { "Chrome", "Firefox", "Internet Explorer", "Microsoft Edge", "Safari", "Other" };
+        private static string[] BrowserExe =   { "chrome.exe", "firefox.exe", "iexplore.exe", "msedge.exe", "safari.exe", "" };
 
         static public string SelectDefaultBrowser()
         {

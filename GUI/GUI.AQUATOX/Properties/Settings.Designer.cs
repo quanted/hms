@@ -12,7 +12,7 @@ namespace GUI.AQUATOX.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,18 +20,6 @@ namespace GUI.AQUATOX.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\2D_Inputs\\LBR Glenwood 4.JSON")]
-        public string BaseJSON {
-            get {
-                return ((string)(this["BaseJSON"]));
-            }
-            set {
-                this["BaseJSON"] = value;
             }
         }
         
@@ -49,42 +37,6 @@ namespace GUI.AQUATOX.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("23398915")]
-        public string COMID {
-            get {
-                return ((string)(this["COMID"]));
-            }
-            set {
-                this["COMID"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string EndCOMID {
-            get {
-                return ((string)(this["EndCOMID"]));
-            }
-            set {
-                this["EndCOMID"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public string UpSpan {
-            get {
-                return ((string)(this["UpSpan"]));
-            }
-            set {
-                this["UpSpan"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string BrowserExe {
             get {
@@ -92,6 +44,17 @@ namespace GUI.AQUATOX.Properties {
             }
             set {
                 this["BrowserExe"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection MS_Recent {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["MS_Recent"]));
+            }
+            set {
+                this["MS_Recent"] = value;
             }
         }
     }

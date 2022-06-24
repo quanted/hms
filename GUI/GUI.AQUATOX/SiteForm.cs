@@ -30,13 +30,13 @@ namespace GUI.AQUATOX
         {
 
             Sim = AQS;
-            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(AQS.AQTSeg, AQS.AQTJSONSettings());
+            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(AQS.AQTSeg, AQTSim.AQTJSONSettings());
 
             UpdateScreen();
 
             if (ShowDialog() == DialogResult.Cancel)
             {
-                Newtonsoft.Json.JsonConvert.PopulateObject(backup, AQS.AQTSeg, AQS.AQTJSONSettings());
+                Newtonsoft.Json.JsonConvert.PopulateObject(backup, AQS.AQTSeg, AQTSim.AQTJSONSettings());
                 return false;
             }
             else return true;
