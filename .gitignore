@@ -25,6 +25,15 @@ TestResults/
 
 *.suo
 
+#Testing and development
+2D_Inputs/
+GUI/GUI.AQUATOX/Docs/Older/ 
+GUI/GUI.AQUATOX/Studies/APS/
+GUI/GUI.AQUATOX/Studies/NoResults/
+GUI/GUI.AQUATOX/Studies/Omit/
+GUI/GUI.AQUATOX/Studies/Strat/
+GUI/GUI.AQUATOX/Studies/TooBig/
+
 # Database files
 *.db
 *.sqlite3

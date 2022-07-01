@@ -11,14 +11,17 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Studies\APS\**" />
     <Compile Remove="Studies\NoResults\**" />
     <Compile Remove="Studies\Omit\**" />
     <Compile Remove="Studies\Strat\**" />
     <Compile Remove="Studies\TooBig\**" />
+    <EmbeddedResource Remove="Studies\APS\**" />
     <EmbeddedResource Remove="Studies\NoResults\**" />
     <EmbeddedResource Remove="Studies\Omit\**" />
     <EmbeddedResource Remove="Studies\Strat\**" />
     <EmbeddedResource Remove="Studies\TooBig\**" />
+    <None Remove="Studies\APS\**" />
     <None Remove="Studies\NoResults\**" />
     <None Remove="Studies\Omit\**" />
     <None Remove="Studies\Strat\**" />
@@ -189,6 +192,9 @@
     <ProjectReference Include="..\..\Web.Services\Web.Services.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="RadioButtonForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="GraphSetup.cs" />
     <Compile Update="ListForm.cs">
       <SubType>Form</SubType>
@@ -218,7 +224,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Update="html\leaflet-search.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="html\leafletMap.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="html\newSimMap.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="html\main.css">

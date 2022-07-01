@@ -406,6 +406,10 @@ namespace AQUATOX.AQSim_2D
             //return JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
         }
 
+        public string PopulateLakeRes(int WBComid, string setupjson, out string jsondata)
+        { jsondata = "FIXME, work here";
+            return "FIXME, work here"; }
+
         /// <summary>
         /// After the SN streamnetwork object has been initialized, this method is iterated through for each segment 
         /// to read physical parameters from the streamnetwork, read updated flow data from web services, and save the
@@ -431,7 +435,7 @@ namespace AQUATOX.AQSim_2D
             Sim.AQTSeg.SetMemLocRec();
 
             Sim.AQTSeg.StudyName = "COMID: " + comid;
-            Sim.AQTSeg.FileName = "AQT_2D_" + comid + ".JSON";
+            Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
             Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
             Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
 

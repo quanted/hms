@@ -66,6 +66,7 @@
             this.ConsoleButton = new System.Windows.Forms.RadioButton();
             this.browserButton = new System.Windows.Forms.Button();
             this.PlotPanel = new System.Windows.Forms.Panel();
+            this.ShowBoundBox = new System.Windows.Forms.CheckBox();
             this.outputjump = new System.Windows.Forms.CheckBox();
             this.PlotButton = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -75,7 +76,7 @@
             this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.RecentLabel = new System.Windows.Forms.Label();
             this.RecentFilesBox = new System.Windows.Forms.ComboBox();
-            this.ShowBoundBox = new System.Windows.Forms.CheckBox();
+            this.NewProject = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -87,7 +88,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(1047, 12);
+            this.button1.Location = new System.Drawing.Point(1047, 10);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(61, 23);
             this.button1.TabIndex = 0;
@@ -223,13 +224,14 @@
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
             this.ReadNetworkPanel.Controls.Add(this.label1);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
-            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 143);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 145);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
-            this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 145);
+            this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             this.ReadNetworkPanel.TabIndex = 24;
             // 
             // ReadSNButton
             // 
+            this.ReadSNButton.Enabled = false;
             this.ReadSNButton.Location = new System.Drawing.Point(126, 107);
             this.ReadSNButton.Name = "ReadSNButton";
             this.ReadSNButton.Size = new System.Drawing.Size(99, 23);
@@ -250,6 +252,7 @@
             // spanLabel
             // 
             this.spanLabel.AutoSize = true;
+            this.spanLabel.Enabled = false;
             this.spanLabel.Location = new System.Drawing.Point(41, 76);
             this.spanLabel.Name = "spanLabel";
             this.spanLabel.Size = new System.Drawing.Size(79, 15);
@@ -258,6 +261,7 @@
             // 
             // spanBox
             // 
+            this.spanBox.Enabled = false;
             this.spanBox.Location = new System.Drawing.Point(127, 73);
             this.spanBox.Name = "spanBox";
             this.spanBox.Size = new System.Drawing.Size(71, 23);
@@ -268,6 +272,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
+            this.label4.Enabled = false;
             this.label4.Location = new System.Drawing.Point(1, 50);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(119, 15);
@@ -276,6 +281,7 @@
             // 
             // EndCOMIDBox
             // 
+            this.EndCOMIDBox.Enabled = false;
             this.EndCOMIDBox.Location = new System.Drawing.Point(127, 47);
             this.EndCOMIDBox.Name = "EndCOMIDBox";
             this.EndCOMIDBox.Size = new System.Drawing.Size(71, 23);
@@ -285,6 +291,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.Enabled = false;
             this.label1.Location = new System.Drawing.Point(76, 22);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 15);
@@ -293,6 +300,7 @@
             // 
             // comidBox
             // 
+            this.comidBox.Enabled = false;
             this.comidBox.Location = new System.Drawing.Point(127, 19);
             this.comidBox.Name = "comidBox";
             this.comidBox.Size = new System.Drawing.Size(71, 23);
@@ -393,7 +401,7 @@
             // 
             this.HelpButton2.Image = ((System.Drawing.Image)(resources.GetObject("HelpButton2.Image")));
             this.HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton2.Location = new System.Drawing.Point(662, 9);
+            this.HelpButton2.Location = new System.Drawing.Point(705, 9);
             this.HelpButton2.Name = "HelpButton2";
             this.HelpButton2.Size = new System.Drawing.Size(78, 28);
             this.HelpButton2.TabIndex = 30;
@@ -449,12 +457,12 @@
             // 
             // browserButton
             // 
-            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(509, 8);
+            this.browserButton.Location = new System.Drawing.Point(507, 8);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
-            this.browserButton.Size = new System.Drawing.Size(47, 23);
+            this.browserButton.Size = new System.Drawing.Size(56, 23);
             this.browserButton.TabIndex = 37;
             this.browserButton.Text = "Browse";
             this.browserButton.UseVisualStyleBackColor = true;
@@ -469,6 +477,19 @@
             this.PlotPanel.Name = "PlotPanel";
             this.PlotPanel.Size = new System.Drawing.Size(497, 23);
             this.PlotPanel.TabIndex = 38;
+            // 
+            // ShowBoundBox
+            // 
+            this.ShowBoundBox.AutoSize = true;
+            this.ShowBoundBox.Checked = true;
+            this.ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ShowBoundBox.Location = new System.Drawing.Point(252, 3);
+            this.ShowBoundBox.Name = "ShowBoundBox";
+            this.ShowBoundBox.Size = new System.Drawing.Size(170, 19);
+            this.ShowBoundBox.TabIndex = 41;
+            this.ShowBoundBox.Text = "Show Boundary Conditions";
+            this.ShowBoundBox.UseVisualStyleBackColor = true;
+            this.ShowBoundBox.CheckedChanged += new System.EventHandler(this.ShowBoundBox_CheckedChanged);
             // 
             // outputjump
             // 
@@ -530,12 +551,13 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(773, 12);
+            this.button2.Location = new System.Drawing.Point(798, 10);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 42;
             this.button2.Text = "Step 0";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // webView
@@ -573,24 +595,25 @@
             this.RecentFilesBox.TabIndex = 45;
             this.RecentFilesBox.SelectionChangeCommitted += new System.EventHandler(this.RecentFilesBox_SelectionChangeCommitted);
             // 
-            // ShowBoundBox
+            // NewProject
             // 
-            this.ShowBoundBox.AutoSize = true;
-            this.ShowBoundBox.Checked = true;
-            this.ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ShowBoundBox.Location = new System.Drawing.Point(252, 3);
-            this.ShowBoundBox.Name = "ShowBoundBox";
-            this.ShowBoundBox.Size = new System.Drawing.Size(170, 19);
-            this.ShowBoundBox.TabIndex = 41;
-            this.ShowBoundBox.Text = "Show Boundary Conditions";
-            this.ShowBoundBox.UseVisualStyleBackColor = true;
-            this.ShowBoundBox.CheckedChanged += new System.EventHandler(this.ShowBoundBox_CheckedChanged);
+            this.NewProject.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.NewProject.ForeColor = System.Drawing.Color.Black;
+            this.NewProject.Location = new System.Drawing.Point(580, 8);
+            this.NewProject.Margin = new System.Windows.Forms.Padding(0);
+            this.NewProject.Name = "NewProject";
+            this.NewProject.Size = new System.Drawing.Size(77, 23);
+            this.NewProject.TabIndex = 46;
+            this.NewProject.Text = "New Project";
+            this.NewProject.UseVisualStyleBackColor = true;
+            this.NewProject.Click += new System.EventHandler(this.NewProject_Click);
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1140, 620);
+            this.Controls.Add(this.NewProject);
             this.Controls.Add(this.RecentFilesBox);
             this.Controls.Add(this.RecentLabel);
             this.Controls.Add(this.webView);
@@ -687,5 +710,6 @@
         private System.Windows.Forms.Label RecentLabel;
         private System.Windows.Forms.ComboBox RecentFilesBox;
         private System.Windows.Forms.CheckBox ShowBoundBox;
+        private System.Windows.Forms.Button NewProject;
     }
 }

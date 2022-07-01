@@ -31,6 +31,7 @@ namespace GUI.AQUATOX
     {
         // private BackgroundWorker Worker = new BackgroundWorker();  potentially to be added, to report progress
         private AQSim_2D AQT2D = null;
+        private int Lake0D = 0;
 
         private FormWindowState LastWindowState = FormWindowState.Minimized;
         private Chart chart1 = new Chart();
@@ -440,8 +441,13 @@ namespace GUI.AQUATOX
         private bool SegmentsCreated()
         {
             string BaseDir = basedirBox.Text;
-            string comid = AQT2D.SN.network[AQT2D.SN.network.Length-1][0];  //check last segment
-            string FileN = BaseDir + "AQT_2D_" + comid.ToString() + ".JSON";
+            string FileN = "";
+            if (Lake0D > 0) FileN = BaseDir + "AQT_Input_" + Lake0D.ToString() + ".JSON";
+            else
+            {
+                string comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];  //check last segment
+                FileN = BaseDir + "AQT_Input_" + comid.ToString() + ".JSON";
+            }
             return (ValidFilen(FileN, false));
         }
 
@@ -493,6 +499,7 @@ namespace GUI.AQUATOX
             if (AQT2D == null) AQT2D = new AQSim_2D();
             if (AQT2D.SN == null)
             {
+                Lake0D = 0;
                 try
                 {
                     if (!ValidFilen(BaseDir + "StreamNetwork.JSON", false))
@@ -501,7 +508,11 @@ namespace GUI.AQUATOX
                         return false;
                     }
                     string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);
-                    AQT2D.CreateStreamNetwork(SNJSON);
+                    if (SNJSON.Substring(0, 12) == "{\"WBComid\": ") { 
+                        string intstr = SNJSON.Substring(12, SNJSON.Length - 13);
+                        Int32.TryParse(intstr, out Lake0D); 
+                        }
+                        else AQT2D.CreateStreamNetwork(SNJSON);
                 }
                 catch
                 {
@@ -543,15 +554,16 @@ namespace GUI.AQUATOX
                 for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
                 {
                     string comid = AQT2D.SN.network[iSeg][0];
-                    string filen = BaseDir + "AQT_2D_" + comid + ".JSON";
+                    string filen = BaseDir + "AQT_Input_" + comid + ".JSON";
 
                     bool in_waterbody = false;
-                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
+                    if (AQT2D.SN.waterbodies != null)
+                        if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
                     if (in_waterbody)
                     {
                         TSafeAddToProcessLog(comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
                         continue;
-                    }
+                    }   //fixme check for NWM data, case where lake/res returns null
 
                     string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
@@ -576,12 +588,22 @@ namespace GUI.AQUATOX
                     }
                 }
 
-                AddToProcessLog("");
-                if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
+                if (Lake0D == 0)
                 {
-                    string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                    foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
-                    AddToProcessLog(bnote);
+                    AddToProcessLog("");
+                    if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
+                    {
+                        string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
+                        foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
+                        AddToProcessLog(bnote);
+                    }
+                }
+
+                // fixme step through lake/res
+
+                if (Lake0D > 0)
+                {
+                    string errmessage = AQT2D.PopulateLakeRes(Lake0D, msj, out string jsondata);
                 }
 
                 progressBar1.Visible = false;
@@ -642,14 +664,14 @@ namespace GUI.AQUATOX
                         string strout = "";
                         string BaseDir = basedirBox.Text;
                         string runIDstr = runID.ToString();
-                        string FileN = BaseDir + "AQT_2D_" + runIDstr + ".JSON";
+                        string FileN = BaseDir + "AQT_Input_" + runIDstr + ".JSON";
                         if (!ValidFilen(FileN, false))
                         {
                             TSafeAddToProcessLog("Error File Missing " + FileN); UseWaitCursor = false;
                             TSafeHideProgBar();
                             return;  
                         }
-                        string json = File.ReadAllText(BaseDir + "AQT_2D_" + runIDstr + ".JSON");  //read one segment of 2D model
+                        string json = File.ReadAllText(BaseDir + "AQT_Input_" + runIDstr + ".JSON");  //read one segment of 2D model
 
                         List<ITimeSeriesOutput<List<double>>> divergence_flows = null;
 
@@ -658,7 +680,7 @@ namespace GUI.AQUATOX
                             foreach (int ID in Divg)
                             {
                                 TimeSeriesOutput<List<double>> ITSO = null;
-                                string DivSeg = File.ReadAllText(BaseDir + "AQT_2D_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
+                                string DivSeg = File.ReadAllText(BaseDir + "AQT_Input_" + ID.ToString() + ".JSON");  //read the divergent segment of 2D model 
                                 AQTSim DivSim = new AQTSim();
                                 string outstr = DivSim.Instantiate(DivSeg);
                                 if (outstr == "")
@@ -952,7 +974,7 @@ namespace GUI.AQUATOX
                     string comid = AQT2D.SN.network[iSeg][0];
                     row[0] = comid;
 
-                    string FileN = BaseDir + "AQT_2D_" + comid.ToString() + ".JSON";
+                    string FileN = BaseDir + "AQT_Input_" + comid.ToString() + ".JSON";
                     if (!ValidFilen(FileN, false))
                     {
                         AddToProcessLog("Cannot Find File " + FileN + ".  Create Linked Inputs before specifying overland flows");
@@ -994,7 +1016,7 @@ namespace GUI.AQUATOX
                 DataRow row = OverlandTable.Rows[iSeg - 1];
                 string comid = AQT2D.SN.network[iSeg][0];
                 string BaseDir = basedirBox.Text;
-                string FileN = BaseDir + "AQT_2D_" + comid + ".JSON";
+                string FileN = BaseDir + "AQT_Input_" + comid + ".JSON";
                 if (!ValidFilen(FileN, false)) { AddToProcessLog("Error File Missing " + FileN); return; }
 
                 string JSON = System.IO.File.ReadAllText(FileN);
@@ -1103,12 +1125,52 @@ namespace GUI.AQUATOX
             public double[][] coordinates { get; set; }
         }
 
+        string BaseDir;
+        string GeoJSON;
+
+        bool PlotWBCOMID(string WBString)
+        {
+            BaseDir = basedirBox.Text;
+            int WBID = int.Parse(WBString);
+            if (WBID == -9998) return false;
+            else
+            {
+                if (File.Exists(BaseDir + WBString + ".GeoJSON"))
+                { GeoJSON = System.IO.File.ReadAllText(BaseDir + WBString + ".GeoJSON"); }
+                else
+                {
+                    webView.Visible = false;
+                    AddToProcessLog("Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
+                    GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
+
+                    if (GeoJSON.IndexOf("ERROR") >= 0)
+                    {
+                        AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
+                        // show process log 
+                        if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", "{}");  //  write to disk
+                        return false;
+                    }
+                    System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", GeoJSON);  //  write to disk
+                }
+
+                if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
+                {
+                    int IDIndex = GeoJSON.IndexOf("\"COMID\":");
+                    if (IDIndex == -1)
+                    {
+                        int IDLoc = GeoJSON.IndexOf("\"GNIS_NAME\"");
+                        if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":" + WBString + ",");
+                    }
+
+                    webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
+                }
+                return true;
+            }
+        }
+
         async void PlotCOMIDMap()
         {
-            // ViewOutput("23399441");  show modal prior to webview2 as a test of crash.
 
-            string BaseDir = basedirBox.Text;
-            string GeoJSON;
             double[][] polyline;
 
 
@@ -1123,112 +1185,85 @@ namespace GUI.AQUATOX
             webView.CoreWebView2.PostWebMessageAsString("ERASE");
 
             int[] boundaries = new int[0];
-            if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
 
-            if (AQT2D.SN.waterbodies != null)
-              for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
-              {
-                string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
-                int WBID = int.Parse(WBString);
-                    if (WBID != -9998)
+            if (Lake0D > 0) PlotWBCOMID(Lake0D.ToString());
+            else
+            {
+                if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+
+                if (AQT2D.SN.waterbodies != null)
+                    for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
                     {
-                        if (File.Exists(BaseDir + WBString + ".GeoJSON"))
-                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + WBString + ".GeoJSON"); }
+                        string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
+                        PlotWBCOMID(WBString);
+                    }
+
+
+                for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                    for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                    {
+                        int COMID = AQT2D.SN.order[i][j];
+                        string CString = COMID.ToString();
+                        if (File.Exists(BaseDir + CString + ".GeoJSON"))
+                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
                         else
                         {
                             webView.Visible = false;
-                            AddToProcessLog("Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
-                            GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
-
+                            AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
+                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
                             if (GeoJSON.IndexOf("ERROR") >= 0)
                             {
                                 AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
                                 // show process log 
-                                if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", "{}");  //  write to disk
+                                if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk 
+                                if (GeoJSON.IndexOf("unknown error") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk to avoid re-query
                                 continue;
-                                // return false;
                             }
-                            System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", GeoJSON);  //  write to disk
+                            System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
                         }
 
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
-                            int IDIndex = GeoJSON.IndexOf("\"COMID\":");
-                            if (IDIndex == -1) { 
-                                int IDLoc = GeoJSON.IndexOf("\"GNIS_NAME\"");
-                                if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":"+WBString+",");
-                            } 
-
-                            webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
+                            webView.CoreWebView2.PostWebMessageAsString("ADD|" + GeoJSON);
                         }
-                    } 
-              }
 
-
-            for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
-                {
-                    int COMID = AQT2D.SN.order[i][j];
-                    string CString = COMID.ToString();
-                    if (File.Exists(BaseDir + CString + ".GeoJSON"))
-                    { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
-                    else
-                    {
-                        webView.Visible = false;
-                        AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
-                        GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
-                        if (GeoJSON.IndexOf("ERROR") >= 0)
+                        if (GeoJSON == "{}") polyline = null;
+                        else
                         {
-                            AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
-                            // show process log 
-                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk 
-                            if (GeoJSON.IndexOf("unknown error") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk to avoid re-query
-                            continue;
+                            GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
+                            try
+                            {
+                                polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                            }
+                            catch
+                            {
+                                AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return;
+                            }
                         }
-                        System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
-                    }
 
-                    if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
-                    {
-                        webView.CoreWebView2.PostWebMessageAsString("ADD|"+GeoJSON);
-                    }
+                        List<PointF> startpoints = new List<PointF>();
+                        List<PointF> endpoints = new List<PointF>();
 
-                    if (GeoJSON == "{}") polyline = null;
-                    else
-                    {
-                        GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                        try
+                        bool in_waterbody = false;
+                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
+
+                        if (polyline != null)
                         {
-                            polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                        }
-                        catch
-                        {
-                            AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return;
+                            if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                                foreach (int SrcID in Sources)
+                                    if (boundaries.Contains(SrcID))  //ID inflow points with green circles
+                                    {
+                                        webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
+                                    }
+
+                            if (i == AQT2D.SN.order.Length - 1) //ID pour point with red circle
+                            {
+                                webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
+                            }
+
                         }
                     }
-
-                    List<PointF> startpoints = new List<PointF>();
-                    List<PointF> endpoints = new List<PointF>();
-
-                    bool in_waterbody = false;
-                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
-
-                    if (polyline != null)
-                    {
-                        if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                            foreach (int SrcID in Sources)
-                                if (boundaries.Contains(SrcID))  //ID inflow points with green circles
-                                {
-                                    webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1]+ "|boundry condition inflow from "+SrcID);
-                                }
-
-                        if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
-                        {
-                            webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" +polyline[polyline.Length - 1][1] + "|pour point");
-                        }
-
-                    }
-                }
+            }
 
             webView.CoreWebView2.PostWebMessageAsString("RENDER");
 
@@ -1250,7 +1285,6 @@ namespace GUI.AQUATOX
             if (AQT2D == null) return; 
 
             PlotCOMIDMap(); 
-
         }
 
 
@@ -1303,7 +1337,7 @@ namespace GUI.AQUATOX
 
             int COMID = Int32.Parse(CString);
             string BaseDir = basedirBox.Text;
-            string filen = BaseDir + "AQT_2D_" + CString + ".JSON";
+            string filen = BaseDir + "AQT_Input_" + CString + ".JSON";
             if (ValidFilen(filen, false))
             {
                 string json = File.ReadAllText(filen);  //read one segment of multi-seg model
@@ -1527,6 +1561,52 @@ namespace GUI.AQUATOX
             if (webView.CoreWebView2 == null) return;
 
             webView.CoreWebView2.PostWebMessageAsString("BOUNDS|"+ShowBoundBox.Checked.ToString());
+        }
+
+        private void NewProject_Click(object sender, EventArgs e)
+        {
+            var lst = new List<string>() { "Lake/Reservoir", "Stream Network", "Estuary" };
+            int typeIndex = -1;
+
+            RadioButtonForm dlg = new RadioButtonForm(lst);
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                string selected = dlg.selectedString;
+                typeIndex = lst.IndexOf(selected);
+            }
+            else return;
+
+            NewSimForm NSForm = new NewSimForm();
+            NSForm.SimType = typeIndex;
+            if (NSForm.ShowDialog() == DialogResult.OK) 
+              if (NSForm.WBCOMID != "")
+              {
+                    using (var fbd = new FolderBrowserDialog())
+                    {
+                        if (fbd.ShowDialog() == DialogResult.OK)
+                        {
+                            ScrSettings.UpSpanStr = "";
+                            ScrSettings.EndCOMIDstr = "";
+
+                            string fullBaseJSON = "..\\..\\..\\Studies\\"+ NSForm.BaseJSON;
+                            ScrSettings.BaseJSONstr = fullBaseJSON;
+                            BaseJSONBox.Text = fullBaseJSON;
+
+                            ScrSettings.COMIDstr = NSForm.WBCOMID; 
+                            comidBox.Text = NSForm.WBCOMID;
+
+                            ScrSettings.BaseJSONstr = fullBaseJSON;
+                            basedirBox.Text = fbd.SelectedPath + "\\";
+
+                            string SNJSON = "{\"WBComid\": "+NSForm.WBCOMID+"}";
+                            File.WriteAllText(basedirBox.Text + "StreamNetwork.JSON", SNJSON);
+
+                            SaveScreenSettings();
+                            basedirBox_Leave(sender, e);
+                        
+                        }
+                    }
+              }
         }
     }
 }
