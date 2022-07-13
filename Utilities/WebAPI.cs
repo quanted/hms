@@ -85,7 +85,7 @@ namespace Utilities
                     data = await wm.Content.ReadAsStringAsync();
                     retries += 1;
                     taskData = JsonSerializer.Deserialize<T>(data, options);
-                    if (taskData.status == "SUCCESS" && taskData.data != null)
+                    if (taskData.status == "SUCCESS")
                     {
                         success = true;
                     }
