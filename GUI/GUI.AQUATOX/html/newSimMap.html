@@ -129,9 +129,11 @@
 
                 layer.on('click', function (e) {
                     if (layer.feature.properties.feature_id != null) {
-                        var str = layer.feature.properties.feature_id.toString();
-                        if (layer.feature.properties.GNIS_NAME != null) str = str + "|" + layer.feature.properties.GNIS_NAME.toString();
+                        var str = "INFO|"+layer.feature.properties.feature_id.toString();
+                        if (layer.feature.properties.GNIS_NAME != null) str = str + "|" + layer.feature.properties.GNIS_NAME.toString() + "|";
                         MAP.fitBounds(layer.getBounds());
+                        sendMessageToDotnet(str);
+                        str = layer.toGeoJSON();
                         sendMessageToDotnet(str);
                     };
                 });

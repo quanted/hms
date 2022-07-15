@@ -14,6 +14,7 @@ using AQUATOX.Animals;
 using System.Net;
 using System.Text;
 using Utilities;
+using Streamflow;
 
 namespace AQUATOX.AQSim_2D
 
@@ -100,7 +101,64 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-        public void FlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO, bool useVelocity)  // time series output must currently be in m3/s
+        public void LakeFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO)  // time series output must currently be in m3/s
+        {
+            TVol.Calc_Method = VolumeMethType.KnownVal;
+
+            TLoadings KnownValLoad = TVol.LoadsRec.Loadings;
+            TLoadings InflowLoad = TVol.LoadsRec.Alt_Loadings[0];  // array slot [0] is "inflow" in this case (TVolume)
+
+            if (InflowLoad.ITSI == null)
+            {
+                TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+                TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+                input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+                InflowLoad.ITSI = input;
+            }
+
+            InflowLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
+
+            KnownValLoad.UseConstant = false;
+            KnownValLoad.MultLdg = 1;
+            KnownValLoad.NoUserLoad = false;
+            KnownValLoad.Hourly = true;
+
+            ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
+
+            KnownValLoad.list.Clear();
+            KnownValLoad.list.Capacity = TSO.Data.Count;
+
+            bool firstvol = true;
+            foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
+            {
+                string dateString = entry.Key + ":00"; //  (entry.Key.Count() == 13) ? entry.Key.Split(" ")[0] : entry.Key; make flexible?
+                if (!(DateTime.TryParse(dateString, out DateTime date)))
+                    throw new ArgumentException("Cannot convert '" + entry.Key + "' to TDateTime");
+                if (!(Double.TryParse(entry.Value[0], out double flow)))
+                    throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+                if (!(Double.TryParse(entry.Value[3], out double volume)))
+                    throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+
+                if (volume < Consts.Tiny) volume = TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000; //default minimum volume (length * XSec 1 m2) for now
+                KnownValLoad.list.Add(date, volume);
+                if (firstvol) TVol.InitialCond = volume;
+                firstvol = false;
+            }
+
+            InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
+            InflowLoad.MultLdg = 86400;  // seconds per day
+            InflowLoad.Hourly = true;
+            InflowLoad.UseConstant = false;
+
+            TVol.LoadNotes1 = "Volumes from NWM in m3";
+            TVol.LoadNotes2 = "NWM inflow converted from m3/s using multiplier";
+            InflowLoad.ITSI = null;
+
+            TVol.AQTSeg.CalcVelocity = true;
+        }
+
+
+        public void StreamFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO, bool useVelocity)  // time series output must currently be in m3/s
         {
 
             if (useVelocity)
@@ -334,81 +392,138 @@ namespace AQUATOX.AQSim_2D
             }
         }
 
-        private TimeSeriesInput TSI = new TimeSeriesInput()
+        private class HydrologyTSI : TimeSeriesInput
         {
-            Source = "nwm",
-            DateTimeSpan = new DateTimeSpan()
+            public HydrologyTSI()
             {
-                StartDate = new DateTime(2015, 01, 01),  // overwritten below
-                EndDate = new DateTime(2015, 12, 31),
-                DateTimeFormat = "yyyy-MM-dd HH"
-            },
-            Geometry = new TimeSeriesGeometry()
-            {
-                GeometryMetadata = new Dictionary<string, string>()
+                Source = "nwm";
+                DateTimeSpan = new DateTimeSpan()
                 {
-                }
-            },
-            DataValueFormat = "E3",
-            TemporalResolution = "hourly",
-            Units = "metric",
-            OutputFormat = "json"
+                    StartDate = new DateTime(2015, 01, 01),  // overwritten below
+                    EndDate = new DateTime(2015, 12, 31),
+                    DateTimeFormat = "yyyy-MM-dd HH"
+                };
+                Geometry = new TimeSeriesGeometry()
+                {
+                    GeometryMetadata = new Dictionary<string, string>()
+                    {
+                        ["waterbody"] = "false"
+                    }
+                };
+                DataValueFormat = "E3";
+                TemporalResolution = "hourly";
+                Units = "metric";
+                OutputFormat = "json";
+            }
         };
 
-        // Remote request test
-        //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
-        //dataRequest = "dataset=streamflow&comid=" + comids;
-        //dataRequest += "&startDate=" + input.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
-        //dataRequest += "&endDate=" + input.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
-        //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
-        //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
+ 
+        private AQTSim JSON_to_AQTSim(string baseJSON, string setupjson, string comid, double lenkm, out string err)
+        {
+            AQTSim Sim = new AQTSim();
+            err = Sim.Instantiate(baseSimJSON);
 
+            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
+
+            if (err != "") { return null; }
+
+            Sim.AQTSeg.SetMemLocRec();
+
+            Sim.AQTSeg.StudyName = "COMID: " + comid;
+            Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
+            if (lenkm > 0) Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
+            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
+            return Sim;
+        }
 
         /// <summary>
         /// Submit POST request to HMS web API for stream flow
         /// </summary>
-        private TimeSeriesOutput<List<double>> submitHydrologyRequest(string comid, out string errmsg)  
+        private TimeSeriesOutput<List<double>> submitHydrologyRequest(HydrologyTSI TSI, out string errmsg)  
         {
+            //Environment.SetEnvironmentVariable("FLASK_SERVER","https://ceamdev.ceeopdev.net/hms/rest/api/v2");
+            //TSI.BaseURL = new List<string> { "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?" };
+            //TimeSeriesOutput<List<double>> output = new TimeSeriesOutput<List<double>>();
 
-            string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
-            string dataRequest = "dataset=streamflow&comid=" + comid;
-            dataRequest += "&startDate=" + TSI.DateTimeSpan.StartDate.ToString("yyyy-MM-dd");
-            dataRequest += "&endDate=" + TSI.DateTimeSpan.EndDate.ToString("yyyy-MM-dd");
-            string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
-            FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 100,flaskURL,dataURL ).Result;  
-            errmsg = "";  // error output?
-            return results.data;
+            //Streamflow.Streamflow sf = new();
+            //ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+            //sf.Input = iFactory.SetTimeSeriesInput(TSI, new List<string>() { "streamflow" }, out errmsg);
 
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
-            //string component = "hydrology";
-            //string dataset = "streamflow";
-            //errmsg = "";
+            //// If error occurs in input validation and setup, errormsg is returned as out, and object is returned as null
+            //if (errmsg.Contains("ERROR")) { return null; }
+            //return (TimeSeriesOutput<List<double>>) sf.GetData(out errmsg);
 
-            //var request = (HttpWebRequest)WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");
-            //string json = JsonConvert.SerializeObject(TSI);
-            //var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
-            //request.Method = "POST";
-            //request.ContentType = "application/json";
-            //request.ContentLength = data.Length;
 
-            //using (var stream = request.GetRequestStream())
-            //{
-            //    stream.Write(data, 0, data.Length);
-            //}
-            //var response = (HttpWebResponse)request.GetResponse();
-            //string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            //if (rstring.IndexOf("ERROR") >= 0)
-            //{
-            //    errmsg = "Error from web service returned: " + rstring; 
-            //    return null;
-            //}
-            //return JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+            //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
+            //string dataRequest = "source=nwm&dataset=streamflow&comid=" + comid;
+            //dataRequest += "&startDate=" + dates.StartDate.ToString("yyyy-MM-dd");
+            //dataRequest += "&endDate=" + dates.EndDate.ToString("yyyy-MM-dd");
+            //dataRequest += "&waterbody=" + isWaterbody.ToString();
+
+            //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
+            //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 100,flaskURL,dataURL).Result;
+            //if (results.status != "SUCCESS") errmsg = results.status;
+            //  else errmsg = "";  
+            //return results.data;
+
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            string component = "hydrology";
+            string dataset = "streamflow";
+            errmsg = "";
+
+            var request = (HttpWebRequest)WebRequest.Create(requestURL + component + "/" + dataset + "/");
+            string json = JsonConvert.SerializeObject(TSI);
+            var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            request.ContentLength = data.Length;
+
+            using (var stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+            var response = (HttpWebResponse)request.GetResponse();
+            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            if (rstring.IndexOf("ERROR") >= 0)
+            {
+                errmsg = "Error from web service returned: " + rstring;
+                return null;
+            }
+            return JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(rstring);
         }
 
         public string PopulateLakeRes(int WBComid, string setupjson, out string jsondata)
-        { jsondata = "FIXME, work here";
-            return "FIXME, work here"; }
+        {
+            jsondata = "";
+            string WBCstr = WBComid.ToString();
+
+            string err;
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, WBCstr, -9999, out err);
+            if (err != "") { return err; }
+
+            HydrologyTSI TSI = new();
+            TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
+            TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
+            TSI.Geometry.ComID = WBComid;
+            TSI.Geometry.GeometryMetadata["waterbody"] = "true";
+            TSI.Source = "nwm";
+
+            try
+            {
+                TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
+                if (errstr != "") return errstr;
+                LakeFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO); 
+                // Could add to Log -- "Imported Flow Data for " + comid 
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+            jsondata = "";
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            return errmessage;
+        }
 
         /// <summary>
         /// After the SN streamnetwork object has been initialized, this method is iterated through for each segment 
@@ -425,32 +540,22 @@ namespace AQUATOX.AQSim_2D
             string comid = SN.network[iSeg][0];
             double lenkm = double.Parse(SN.network[iSeg][4]);
 
-            AQTSim Sim = new AQTSim();
-            string err = Sim.Instantiate(baseSimJSON);
-
-            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
-
+            string err;
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, comid, lenkm, out err);
             if (err != "") { return err; }
 
-            Sim.AQTSeg.SetMemLocRec();
-
-            Sim.AQTSeg.StudyName = "COMID: " + comid;
-            Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
-            Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
-
-            // create a new itimeseries
+            HydrologyTSI TSI = new();
             TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
             TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
             TSI.Geometry.ComID = int.Parse(comid);
-            TSI.Source = "nwm"; //  "test";
+            TSI.Geometry.GeometryMetadata["waterbody"] ="false"; 
+            TSI.Source = "nwm"; 
 
             try
             {
-                TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(comid, out string errstr);
+                TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
-                FlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
-                // Could add to Log -- "Imported Flow Data for " + comid 
+                StreamFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
             }
             catch (Exception ex)
             {
@@ -559,7 +664,8 @@ namespace AQUATOX.AQSim_2D
             }
                 
             int nSources = 0;
-            if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
+            if (SN.sources != null)
+             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
                 foreach (int SrcID in Sources)
                 {
                     if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
@@ -570,7 +676,7 @@ namespace AQUATOX.AQSim_2D
                     }
                 };
 
-            Sim.AQTSeg.RunID = "2D Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();
             if (errmessage == "")
             {

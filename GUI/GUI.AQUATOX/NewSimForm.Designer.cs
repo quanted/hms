@@ -88,7 +88,7 @@
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
             this.ReadNetworkPanel.Controls.Add(this.label1);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
-            this.ReadNetworkPanel.Location = new System.Drawing.Point(354, 594);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(321, 612);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
             this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             this.ReadNetworkPanel.TabIndex = 24;

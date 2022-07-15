@@ -34,6 +34,7 @@ namespace GUI.AQUATOX
 
         public int SimType;
         public string WBCOMID = "";
+        public string GeoJSON = "";
         public string SimName = "";
         public string BaseJSON = "Default Lake.JSON";
 
@@ -143,14 +144,6 @@ namespace GUI.AQUATOX
             webView.CoreWebView2.ProcessFailed += WebView_ProcessFailed;
         }
 
-        private void SendMessage(object sender, EventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null)
-            {
-                webView.CoreWebView2.PostWebMessageAsString("Message from Dotnet buttton");
-            }
-        }
-
         void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
         {
              MessageBox.Show("WebView Process Failed"); 
@@ -159,16 +152,19 @@ namespace GUI.AQUATOX
 
         void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
-            String content = args.TryGetWebMessageAsString();
+            String content = args.WebMessageAsJson; //  TryGetWebMessageAsString();
 
-            if (content == "DOMContentLoaded")
-            {  
+            if (content == "\"DOMContentLoaded\"")
+            {
                 tcs.SetResult();  //set mapreadyforrender as complete
             }
-
-            else System.Threading.SynchronizationContext.Current.Post((_) => {
-                webView_MouseDown(content);
-            }, null); 
+            else if (content.StartsWith("\"INFO|"))
+            {
+                System.Threading.SynchronizationContext.Current.Post((_) => {
+                    webView_MouseDown(content.Trim('"')); }, null);
+            }
+            else GeoJSON = content; 
+                
         }
 
         protected override void WndProc(ref Message m)  
@@ -525,9 +521,9 @@ namespace GUI.AQUATOX
             
         {
             string[] msg = COMIDstr.Split('|');
-            WBCOMID = msg[0];
+            WBCOMID = msg[1];
 
-            if (msg.Length > 1) SimName = msg[1];
+            if (msg.Length > 2) SimName = msg[2];
             else SimName = "WBCOMID: " + WBCOMID;
             if (SimName == " ") SimName = "WBCOMID: " + WBCOMID;
 

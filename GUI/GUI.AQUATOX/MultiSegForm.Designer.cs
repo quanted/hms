@@ -568,7 +568,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView.CreationProperties = null;
             this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView.Location = new System.Drawing.Point(305, 66);
+            this.webView.Location = new System.Drawing.Point(306, 66);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
             this.webView.Size = new System.Drawing.Size(822, 503);

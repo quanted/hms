@@ -17,7 +17,6 @@ namespace Streamflow
             {
                 comids = comids + "," + input.Geometry.GeometryMetadata["comids"];
             }
-            output.Metadata.Add("comids", comids);
 
             string waterbody = "false";
             if (input.Geometry.GeometryMetadata.ContainsKey("waterbody"))
@@ -41,6 +40,7 @@ namespace Streamflow
             //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
 
             output = results.data;
+            output.Metadata.Add("comids", comids);
             if (input.TemporalResolution.ToLower() == "daily") {
                 output.Data = output.ToDaily(input.DateTimeSpan.DateTimeFormat, input, true, false);
                 output.Metadata.Add("temporal_timestep", "daily");

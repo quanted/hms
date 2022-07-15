@@ -8,10 +8,8 @@ using Globals;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -454,7 +452,9 @@ namespace GUI.AQUATOX
         private DateTime ModelRunDate()
         {
             string BaseDir = basedirBox.Text;
-            string comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
+            string comid;
+            if (Lake0D > 0) comid = Lake0D.ToString();
+              else comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
             string FileN = BaseDir + "AQT_Run_" + comid.ToString() + ".JSON";
             if (!ValidFilen(FileN, false)) return DateTime.MinValue;
             return File.GetLastWriteTime(FileN);
@@ -603,7 +603,28 @@ namespace GUI.AQUATOX
 
                 if (Lake0D > 0)
                 {
+                    string WBComid = Lake0D.ToString();
+                    string filen = BaseDir + "AQT_Input_" + WBComid + ".JSON";
                     string errmessage = AQT2D.PopulateLakeRes(Lake0D, msj, out string jsondata);
+                    if (errmessage == "")
+                    {
+                        File.WriteAllText(filen, jsondata);
+
+                        TSafeAddToProcessLog("Read Flows and Saved JSON for " + WBComid);
+                        //int Prog = (int)((float)iSeg / (float)AQT2D.nSegs * 100.0);
+                        //if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
+                        //progressBar1.Value = Math.Max(Prog, 1);
+
+                        Application.DoEvents();
+                    }
+                    else
+                    {
+                        TSafeAddToProcessLog(errmessage);
+                        UseWaitCursor = false;
+                        webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBComid + "|red");
+                        TSafeHideProgBar();
+                        return;
+                    }
                 }
 
                 progressBar1.Visible = false;
@@ -618,8 +639,6 @@ namespace GUI.AQUATOX
                 MessageBox.Show(ex.Message);
                 return;
             }
-
-
 
         }
 
@@ -648,6 +667,17 @@ namespace GUI.AQUATOX
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
+
+            if (AQT2D.SN.network == null)  //0D Lake/Res
+                {
+                string strout = "";
+                string json = File.ReadAllText(BaseDir + "AQT_Input_" + Lake0D.ToString() + ".JSON");  //read 0D Segment
+                if (AQT2D.executeModel(Lake0D, MasterSetupJson(), ref strout, ref json, null, null))   //run one segment of 2D model
+                    File.WriteAllText(BaseDir + "AQT_Run_" + Lake0D.ToString() + ".JSON", json);
+
+                TSafeAddToProcessLog(strout);  //write update to status log
+                return;
+               }
 
             int[] outofnetwork = new int[0];
             if (AQT2D.SN.boundary != null)
@@ -695,7 +725,7 @@ namespace GUI.AQUATOX
                             }
 
                         if (AQT2D.executeModel(runID, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
-                        File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);
+                              File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);  
                         webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runIDstr + "|'green'");  // draw COMID shape in green after execute
 
                         TSafeAddToProcessLog(strout);  //write update to status log
@@ -1340,17 +1370,21 @@ namespace GUI.AQUATOX
             string filen = BaseDir + "AQT_Input_" + CString + ".JSON";
             if (ValidFilen(filen, false))
             {
-                string json = File.ReadAllText(filen);  //read one segment of multi-seg model
+                string json = File.ReadAllText(filen);  //read one segment 
                 AQTTestForm AQForm = new AQTTestForm();
 
-                bool isBoundarySeg = false;
-                int[] boundaries = new int[0];
-                if (AQT2D.SN.boundary != null)
-                    AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                bool isBoundarySeg = true;
+                if (Lake0D==0)
+                {
+                    isBoundarySeg = false;
+                    int[] boundaries = new int[0];
+                    if (AQT2D.SN.boundary != null)
+                        AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
 
-                if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                    foreach (int SrcID in Sources)
-                        if (boundaries.Contains(SrcID)) isBoundarySeg = true;
+                    if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                        foreach (int SrcID in Sources)
+                            if (boundaries.Contains(SrcID)) isBoundarySeg = true;
+                }
 
                 if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
             }
@@ -1600,6 +1634,8 @@ namespace GUI.AQUATOX
 
                             string SNJSON = "{\"WBComid\": "+NSForm.WBCOMID+"}";
                             File.WriteAllText(basedirBox.Text + "StreamNetwork.JSON", SNJSON);
+
+                            if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.WBCOMID + ".GeoJSON", NSForm.GeoJSON);
 
                             SaveScreenSettings();
                             basedirBox_Leave(sender, e);
