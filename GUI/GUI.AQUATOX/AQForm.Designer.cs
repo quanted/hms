@@ -135,7 +135,6 @@ namespace GUI.AQUATOX
             // 
             // AnimalDB
             // 
-            this.AnimalDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.AnimalDB.Location = new System.Drawing.Point(76, 21);
             this.AnimalDB.Name = "AnimalDB";
             this.AnimalDB.Size = new System.Drawing.Size(60, 25);
@@ -146,7 +145,6 @@ namespace GUI.AQUATOX
             // 
             // ReminDB
             // 
-            this.ReminDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.ReminDB.Location = new System.Drawing.Point(142, 21);
             this.ReminDB.Name = "ReminDB";
             this.ReminDB.Size = new System.Drawing.Size(60, 25);
@@ -157,7 +155,6 @@ namespace GUI.AQUATOX
             // 
             // ChemDB
             // 
-            this.ChemDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.ChemDB.Location = new System.Drawing.Point(208, 20);
             this.ChemDB.Name = "ChemDB";
             this.ChemDB.Size = new System.Drawing.Size(60, 25);
@@ -168,7 +165,6 @@ namespace GUI.AQUATOX
             // 
             // SiteDB
             // 
-            this.SiteDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.SiteDB.Location = new System.Drawing.Point(10, 21);
             this.SiteDB.Name = "SiteDB";
             this.SiteDB.Size = new System.Drawing.Size(60, 25);
@@ -179,7 +175,6 @@ namespace GUI.AQUATOX
             // 
             // PlantsDB
             // 
-            this.PlantsDB.Cursor = System.Windows.Forms.Cursors.Default;
             this.PlantsDB.Location = new System.Drawing.Point(274, 20);
             this.PlantsDB.Name = "PlantsDB";
             this.PlantsDB.Size = new System.Drawing.Size(60, 25);
@@ -341,7 +336,6 @@ namespace GUI.AQUATOX
             // AddButton
             // 
             this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddButton.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.AddButton.Location = new System.Drawing.Point(444, 450);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(60, 25);
@@ -354,7 +348,6 @@ namespace GUI.AQUATOX
             // EditButton
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.EditButton.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.EditButton.Location = new System.Drawing.Point(584, 450);
             this.EditButton.Name = "EditButton";
             this.EditButton.Size = new System.Drawing.Size(60, 25);
@@ -367,7 +360,6 @@ namespace GUI.AQUATOX
             // DeleteButton
             // 
             this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteButton.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.DeleteButton.Location = new System.Drawing.Point(514, 450);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(60, 25);
@@ -384,7 +376,7 @@ namespace GUI.AQUATOX
             this.MultiSegButton.Name = "MultiSegButton";
             this.MultiSegButton.Size = new System.Drawing.Size(138, 24);
             this.MultiSegButton.TabIndex = 22;
-            this.MultiSegButton.Text = "Multi-Segment Runs";
+            this.MultiSegButton.Text = "NWM-Linked Runs";
             this.MultiSegButton.UseVisualStyleBackColor = true;
             this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
             // 

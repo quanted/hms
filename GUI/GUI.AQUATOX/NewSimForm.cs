@@ -307,37 +307,41 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        public static string ChooseLakeTemplate(out string lakename)
+        {
+            lakename = "";
+            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json");
+            if (!File.Exists(fileN)) return "";
+            string json = File.ReadAllText(fileN);
+
+            DataTable table = JsonConvert.DeserializeObject<DataTable>(json);
+
+            GridForm gf = new GridForm();
+
+            if (gf.SelectRow(table, "SurrogateLakes"))
+            {
+                lakename = gf.chosenlake;
+                return gf.chosenfileN;
+            }
+            else return "";
+        }
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
-            var lst = new List<string>() { "Default Lake", "Cheney Reservoir, KS", "Clear Lake, CA",
-                "Coralville Reservoir, IA", "Evers Reservoir, FL", "Farm Pond, MO", "Lake George, NY",
-                "Lake Jesup, FL", "Lake Pyhajarvi Finland", "Nockamixon Reservoir, PA"};
-            var jsons = new List<string>() { "Default Lake.JSON", "Cheney Res KS.JSON", "Clear Lake CA.JSON",
-                "Coralville Res IA.JSON", "Evers Res FL.JSON", "Farm Pond MO.JSON", "Lake George NY.JSON",
-                "Lake Jesup FL.JSON", "Lake Pyhajarvi Finland.JSON", "Nockamixon Res PA.JSON" };
+            string lakename;
+            string lakefilen = ChooseLakeTemplate(out lakename);    
+            if (lakefilen == "") return;
 
-            int typeIndex = -1;
-
-            string selected = "";
-            RadioButtonForm dlg = new RadioButtonForm(lst);
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                selected = dlg.selectedString;
-                typeIndex = lst.IndexOf(selected);
-            }
-            else return;
-            if (typeIndex == -1) return;
-
-            SimBaseLabel.Text = "Simulation Base: "+selected;
-            BaseJSON = jsons[typeIndex];
+            SimBaseLabel.Text = "Simulation Base: "+lakename;
+            BaseJSON = lakefilen;
             SimJSONLabel.Text = "\"" + BaseJSON + "\"";
         }
-              
+
         private void NewSimForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-           // SaveScreenSettings();
-           // SaveBaseDir();
+            // SaveScreenSettings();
+            // SaveBaseDir();
+
 
         }
 

@@ -29,18 +29,18 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MultiSegForm));
-            this.button1 = new System.Windows.Forms.Button();
             this.basedirBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.ProcessLog = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.BaseJSONBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.CancelButton = new System.Windows.Forms.Button();
             this.StatusLabel = new System.Windows.Forms.Label();
             this.FlowsButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
             this.executeButton = new System.Windows.Forms.Button();
-            this.createButton = new System.Windows.Forms.Button();
+            this.CreateButton = new System.Windows.Forms.Button();
             this.ReadNetworkPanel = new System.Windows.Forms.Panel();
             this.ReadSNButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
@@ -55,16 +55,16 @@
             this.SVBox = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.CSVButton = new System.Windows.Forms.Button();
+            this.viewOutputButton = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
             this.ChooseTemplateButton = new System.Windows.Forms.Button();
             this.HelpButton2 = new System.Windows.Forms.Button();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.GraphButton = new System.Windows.Forms.RadioButton();
             this.MapButton2 = new System.Windows.Forms.RadioButton();
             this.ConsoleButton = new System.Windows.Forms.RadioButton();
-            this.browserButton = new System.Windows.Forms.Button();
+            this.browseButton = new System.Windows.Forms.Button();
             this.PlotPanel = new System.Windows.Forms.Panel();
             this.ShowBoundBox = new System.Windows.Forms.CheckBox();
             this.outputjump = new System.Windows.Forms.CheckBox();
@@ -77,6 +77,8 @@
             this.RecentLabel = new System.Windows.Forms.Label();
             this.RecentFilesBox = new System.Windows.Forms.ComboBox();
             this.NewProject = new System.Windows.Forms.Button();
+            this.Separator = new System.Windows.Forms.Label();
+            this.OutputLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -84,17 +86,6 @@
             this.PlotPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView)).BeginInit();
             this.SuspendLayout();
-            // 
-            // button1
-            // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(1047, 10);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(61, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.OK_click);
             // 
             // basedirBox
             // 
@@ -122,18 +113,18 @@
             this.ProcessLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProcessLog.Location = new System.Drawing.Point(306, 66);
+            this.ProcessLog.Location = new System.Drawing.Point(306, 80);
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(802, 502);
+            this.ProcessLog.Size = new System.Drawing.Size(818, 454);
             this.ProcessLog.TabIndex = 6;
             this.ProcessLog.WordWrap = false;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(15, 84);
+            this.label5.Location = new System.Drawing.Point(14, 72);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(62, 15);
             this.label5.TabIndex = 17;
@@ -142,7 +133,7 @@
             // BaseJSONBox
             // 
             this.BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.BaseJSONBox.Location = new System.Drawing.Point(84, 81);
+            this.BaseJSONBox.Location = new System.Drawing.Point(83, 69);
             this.BaseJSONBox.Name = "BaseJSONBox";
             this.BaseJSONBox.Size = new System.Drawing.Size(200, 23);
             this.BaseJSONBox.TabIndex = 16;
@@ -154,15 +145,29 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.CancelButton);
             this.panel1.Controls.Add(this.StatusLabel);
             this.panel1.Controls.Add(this.FlowsButton);
             this.panel1.Controls.Add(this.SetupButton);
             this.panel1.Controls.Add(this.executeButton);
-            this.panel1.Controls.Add(this.createButton);
-            this.panel1.Location = new System.Drawing.Point(25, 303);
+            this.panel1.Controls.Add(this.CreateButton);
+            this.panel1.Location = new System.Drawing.Point(24, 291);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 157);
+            this.panel1.Size = new System.Drawing.Size(259, 178);
             this.panel1.TabIndex = 23;
+            // 
+            // CancelButton
+            // 
+            this.CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.CancelButton.ForeColor = System.Drawing.Color.Black;
+            this.CancelButton.Location = new System.Drawing.Point(87, 151);
+            this.CancelButton.Margin = new System.Windows.Forms.Padding(0);
+            this.CancelButton.Name = "CancelButton";
+            this.CancelButton.Size = new System.Drawing.Size(68, 24);
+            this.CancelButton.TabIndex = 50;
+            this.CancelButton.Text = "Cancel";
+            this.CancelButton.UseVisualStyleBackColor = true;
+            this.CancelButton.Visible = false;
             // 
             // StatusLabel
             // 
@@ -203,15 +208,15 @@
             this.executeButton.UseVisualStyleBackColor = true;
             this.executeButton.Click += new System.EventHandler(this.executeButton_Click);
             // 
-            // createButton
+            // CreateButton
             // 
-            this.createButton.Location = new System.Drawing.Point(58, 40);
-            this.createButton.Name = "createButton";
-            this.createButton.Size = new System.Drawing.Size(127, 23);
-            this.createButton.TabIndex = 8;
-            this.createButton.Text = "Create Linked Inputs";
-            this.createButton.UseVisualStyleBackColor = true;
-            this.createButton.Click += new System.EventHandler(this.createButton_Click);
+            this.CreateButton.Location = new System.Drawing.Point(58, 40);
+            this.CreateButton.Name = "CreateButton";
+            this.CreateButton.Size = new System.Drawing.Size(127, 23);
+            this.CreateButton.TabIndex = 8;
+            this.CreateButton.Text = "Create Linked Inputs";
+            this.CreateButton.UseVisualStyleBackColor = true;
+            this.CreateButton.Click += new System.EventHandler(this.createButton_Click);
             // 
             // ReadNetworkPanel
             // 
@@ -224,7 +229,7 @@
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
             this.ReadNetworkPanel.Controls.Add(this.label1);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
-            this.ReadNetworkPanel.Location = new System.Drawing.Point(25, 145);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(24, 133);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
             this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             this.ReadNetworkPanel.TabIndex = 24;
@@ -316,7 +321,7 @@
             this.OutputPanel.Controls.Add(this.label3);
             this.OutputPanel.Controls.Add(this.CSVButton);
             this.OutputPanel.Enabled = false;
-            this.OutputPanel.Location = new System.Drawing.Point(25, 476);
+            this.OutputPanel.Location = new System.Drawing.Point(24, 481);
             this.OutputPanel.Name = "OutputPanel";
             this.OutputPanel.Size = new System.Drawing.Size(259, 81);
             this.OutputPanel.TabIndex = 25;
@@ -359,10 +364,20 @@
             this.CSVButton.UseVisualStyleBackColor = true;
             this.CSVButton.Click += new System.EventHandler(this.CSVButton_Click);
             // 
+            // viewOutputButton
+            // 
+            this.viewOutputButton.Location = new System.Drawing.Point(83, 485);
+            this.viewOutputButton.Name = "viewOutputButton";
+            this.viewOutputButton.Size = new System.Drawing.Size(127, 23);
+            this.viewOutputButton.TabIndex = 49;
+            this.viewOutputButton.Text = "View Outputs";
+            this.viewOutputButton.UseVisualStyleBackColor = true;
+            this.viewOutputButton.Click += new System.EventHandler(this.viewOutputButton_Click);
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(54, 137);
+            this.label7.Location = new System.Drawing.Point(53, 125);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(121, 15);
             this.label7.TabIndex = 26;
@@ -371,24 +386,15 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(54, 293);
+            this.label8.Location = new System.Drawing.Point(53, 282);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(152, 15);
             this.label8.TabIndex = 27;
             this.label8.Text = "Model Setup and Execution";
             // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(54, 469);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(78, 15);
-            this.label9.TabIndex = 28;
-            this.label9.Text = "View Outputs";
-            // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(168, 104);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(167, 92);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 22);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -401,7 +407,7 @@
             // 
             this.HelpButton2.Image = ((System.Drawing.Image)(resources.GetObject("HelpButton2.Image")));
             this.HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton2.Location = new System.Drawing.Point(705, 9);
+            this.HelpButton2.Location = new System.Drawing.Point(1045, 8);
             this.HelpButton2.Name = "HelpButton2";
             this.HelpButton2.Size = new System.Drawing.Size(78, 28);
             this.HelpButton2.TabIndex = 30;
@@ -415,7 +421,7 @@
             this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 573);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 539);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
@@ -455,25 +461,25 @@
             this.ConsoleButton.UseVisualStyleBackColor = true;
             this.ConsoleButton.CheckedChanged += new System.EventHandler(this.ConsoleButton_CheckedChanged);
             // 
-            // browserButton
+            // browseButton
             // 
-            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(507, 8);
-            this.browserButton.Margin = new System.Windows.Forms.Padding(0);
-            this.browserButton.Name = "browserButton";
-            this.browserButton.Size = new System.Drawing.Size(56, 23);
-            this.browserButton.TabIndex = 37;
-            this.browserButton.Text = "Browse";
-            this.browserButton.UseVisualStyleBackColor = true;
-            this.browserButton.Click += new System.EventHandler(this.browserButton_Click);
+            this.browseButton.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.browseButton.ForeColor = System.Drawing.Color.Black;
+            this.browseButton.Location = new System.Drawing.Point(506, 8);
+            this.browseButton.Margin = new System.Windows.Forms.Padding(0);
+            this.browseButton.Name = "browseButton";
+            this.browseButton.Size = new System.Drawing.Size(56, 25);
+            this.browseButton.TabIndex = 37;
+            this.browseButton.Text = "Browse";
+            this.browseButton.UseVisualStyleBackColor = true;
+            this.browseButton.Click += new System.EventHandler(this.browserButton_Click);
             // 
             // PlotPanel
             // 
             this.PlotPanel.Controls.Add(this.ShowBoundBox);
             this.PlotPanel.Controls.Add(this.outputjump);
             this.PlotPanel.Controls.Add(this.PlotButton);
-            this.PlotPanel.Location = new System.Drawing.Point(305, 42);
+            this.PlotPanel.Location = new System.Drawing.Point(305, 52);
             this.PlotPanel.Name = "PlotPanel";
             this.PlotPanel.Size = new System.Drawing.Size(497, 23);
             this.PlotPanel.TabIndex = 38;
@@ -518,7 +524,7 @@
             // progressBar1
             // 
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            this.progressBar1.Location = new System.Drawing.Point(28, 431);
+            this.progressBar1.Location = new System.Drawing.Point(27, 419);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(252, 23);
             this.progressBar1.Step = 1;
@@ -531,7 +537,7 @@
             // 
             this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel1.AutoSize = true;
-            this.infolabel1.Location = new System.Drawing.Point(619, 575);
+            this.infolabel1.Location = new System.Drawing.Point(619, 541);
             this.infolabel1.Name = "infolabel1";
             this.infolabel1.Size = new System.Drawing.Size(361, 15);
             this.infolabel1.TabIndex = 39;
@@ -542,7 +548,7 @@
             // 
             this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel2.AutoSize = true;
-            this.infolabel2.Location = new System.Drawing.Point(619, 594);
+            this.infolabel2.Location = new System.Drawing.Point(619, 560);
             this.infolabel2.Name = "infolabel2";
             this.infolabel2.Size = new System.Drawing.Size(244, 15);
             this.infolabel2.TabIndex = 40;
@@ -551,7 +557,8 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(798, 10);
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(1045, 51);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 42;
@@ -568,10 +575,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView.CreationProperties = null;
             this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView.Location = new System.Drawing.Point(306, 66);
+            this.webView.Location = new System.Drawing.Point(306, 80);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
-            this.webView.Size = new System.Drawing.Size(822, 503);
+            this.webView.Size = new System.Drawing.Size(818, 454);
             this.webView.TabIndex = 43;
             this.webView.ZoomFactor = 1D;
             // 
@@ -579,7 +586,7 @@
             // 
             this.RecentLabel.AutoSize = true;
             this.RecentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.RecentLabel.Location = new System.Drawing.Point(10, 39);
+            this.RecentLabel.Location = new System.Drawing.Point(699, 14);
             this.RecentLabel.Name = "RecentLabel";
             this.RecentLabel.Size = new System.Drawing.Size(95, 15);
             this.RecentLabel.TabIndex = 44;
@@ -589,30 +596,52 @@
             // 
             this.RecentFilesBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RecentFilesBox.FormattingEnabled = true;
-            this.RecentFilesBox.Location = new System.Drawing.Point(111, 36);
+            this.RecentFilesBox.Location = new System.Drawing.Point(794, 9);
             this.RecentFilesBox.Name = "RecentFilesBox";
-            this.RecentFilesBox.Size = new System.Drawing.Size(173, 23);
+            this.RecentFilesBox.Size = new System.Drawing.Size(201, 23);
             this.RecentFilesBox.TabIndex = 45;
             this.RecentFilesBox.SelectionChangeCommitted += new System.EventHandler(this.RecentFilesBox_SelectionChangeCommitted);
             // 
             // NewProject
             // 
-            this.NewProject.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.NewProject.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.NewProject.ForeColor = System.Drawing.Color.Black;
-            this.NewProject.Location = new System.Drawing.Point(580, 8);
+            this.NewProject.Location = new System.Drawing.Point(582, 7);
             this.NewProject.Margin = new System.Windows.Forms.Padding(0);
             this.NewProject.Name = "NewProject";
-            this.NewProject.Size = new System.Drawing.Size(77, 23);
+            this.NewProject.Size = new System.Drawing.Size(86, 25);
             this.NewProject.TabIndex = 46;
             this.NewProject.Text = "New Project";
             this.NewProject.UseVisualStyleBackColor = true;
             this.NewProject.Click += new System.EventHandler(this.NewProject_Click);
             // 
+            // Separator
+            // 
+            this.Separator.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Separator.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.Separator.Enabled = false;
+            this.Separator.Location = new System.Drawing.Point(1, 41);
+            this.Separator.Name = "Separator";
+            this.Separator.Size = new System.Drawing.Size(1136, 2);
+            this.Separator.TabIndex = 47;
+            // 
+            // OutputLabel
+            // 
+            this.OutputLabel.AutoSize = true;
+            this.OutputLabel.Location = new System.Drawing.Point(54, 472);
+            this.OutputLabel.Name = "OutputLabel";
+            this.OutputLabel.Size = new System.Drawing.Size(126, 15);
+            this.OutputLabel.TabIndex = 48;
+            this.OutputLabel.Text = "View Network Outputs";
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1140, 620);
+            this.ClientSize = new System.Drawing.Size(1136, 586);
+            this.Controls.Add(this.OutputLabel);
+            this.Controls.Add(this.Separator);
             this.Controls.Add(this.NewProject);
             this.Controls.Add(this.RecentFilesBox);
             this.Controls.Add(this.RecentLabel);
@@ -622,11 +651,10 @@
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.PlotPanel);
-            this.Controls.Add(this.browserButton);
+            this.Controls.Add(this.browseButton);
             this.Controls.Add(this.TogglePanel);
             this.Controls.Add(this.HelpButton2);
             this.Controls.Add(this.ChooseTemplateButton);
-            this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.OutputPanel);
@@ -637,8 +665,8 @@
             this.Controls.Add(this.ProcessLog);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.basedirBox);
-            this.Controls.Add(this.button1);
-            this.MinimumSize = new System.Drawing.Size(1003, 553);
+            this.Controls.Add(this.viewOutputButton);
+            this.MinimumSize = new System.Drawing.Size(1077, 553);
             this.Name = "MultiSegForm";
             this.Text = "MultiSegForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);
@@ -661,7 +689,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox basedirBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox ProcessLog;
@@ -671,7 +698,7 @@
         private System.Windows.Forms.Button FlowsButton;
         private System.Windows.Forms.Button SetupButton;
         private System.Windows.Forms.Button executeButton;
-        private System.Windows.Forms.Button createButton;
+        private System.Windows.Forms.Button CreateButton;
         private System.Windows.Forms.Panel ReadNetworkPanel;
         private System.Windows.Forms.Button ReadSNButton;
         private System.Windows.Forms.Label label6;
@@ -687,7 +714,6 @@
         private System.Windows.Forms.Button CSVButton;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button ChooseTemplateButton;
         private System.Windows.Forms.Panel OutputPanel;
         private System.Windows.Forms.Button HelpButton2;
@@ -695,7 +721,7 @@
         private System.Windows.Forms.RadioButton MapButton2;
         private System.Windows.Forms.RadioButton ConsoleButton;
         private System.Windows.Forms.Label StatusLabel;
-        private System.Windows.Forms.Button browserButton;
+        private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.Panel PlotPanel;
         private System.Windows.Forms.CheckBox showCOMIDsBox;
         private System.Windows.Forms.RadioButton flowchartButton;
@@ -711,5 +737,9 @@
         private System.Windows.Forms.ComboBox RecentFilesBox;
         private System.Windows.Forms.CheckBox ShowBoundBox;
         private System.Windows.Forms.Button NewProject;
+        private System.Windows.Forms.Label Separator;
+        private System.Windows.Forms.Label OutputLabel;
+        private System.Windows.Forms.Button viewOutputButton;
+        private System.Windows.Forms.Button CancelButton;
     }
 }

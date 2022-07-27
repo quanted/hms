@@ -15,6 +15,7 @@ using System.Net;
 using System.Text;
 using Utilities;
 using Streamflow;
+using System.Threading.Tasks;
 
 namespace AQUATOX.AQSim_2D
 
@@ -76,6 +77,8 @@ namespace AQUATOX.AQSim_2D
             public double[] washout;  // m3
             public double[][] concs; // g/m3 or mg/m3 depending on state var
         }
+
+        [JsonIgnore] public IProgress<int> ProgHandle = null;  // report individual simulation progress (Task.Run)
 
         /// <summary>
         /// converts stream network json string into SN variable and saves number of segments
@@ -441,19 +444,23 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         private TimeSeriesOutput<List<double>> submitHydrologyRequest(HydrologyTSI TSI, out string errmsg)  
         {
-            //Environment.SetEnvironmentVariable("FLASK_SERVER","https://ceamdev.ceeopdev.net/hms/rest/api/v2");
-            //TSI.BaseURL = new List<string> { "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?" };
-            //TimeSeriesOutput<List<double>> output = new TimeSeriesOutput<List<double>>();
+            // ------- Use Streamflow.Streamflow for Flask Request ------- 
+            Environment.SetEnvironmentVariable("FLASK_SERVER", "https://ceamdev.ceeopdev.net/hms/rest/api/v2");
+            TSI.BaseURL = new List<string> { "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?" };
 
-            //Streamflow.Streamflow sf = new();
-            //ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
-            //sf.Input = iFactory.SetTimeSeriesInput(TSI, new List<string>() { "streamflow" }, out errmsg);
+            Streamflow.Streamflow sf = new();
+            ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
+            sf.Input = iFactory.SetTimeSeriesInput(TSI, new List<string>() { "streamflow" }, out errmsg);
 
-            //// If error occurs in input validation and setup, errormsg is returned as out, and object is returned as null
-            //if (errmsg.Contains("ERROR")) { return null; }
-            //return (TimeSeriesOutput<List<double>>) sf.GetData(out errmsg);
+            // If error occurs in input validation and setup, errormsg is returned as out, and object is returned as null
+            if (errmsg.Contains("ERROR")) { return null; };
 
+            TimeSeriesOutput<List<double>> TSO = (TimeSeriesOutput <List<double>>) sf.GetData(out errmsg);
+            return TSO;
 
+            // ------- Older code below as temporary reference/archive ------- 
+
+            // ------- Manual Flask Request ------- 
             //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
             //string dataRequest = "source=nwm&dataset=streamflow&comid=" + comid;
             //dataRequest += "&startDate=" + dates.StartDate.ToString("yyyy-MM-dd");
@@ -461,35 +468,36 @@ namespace AQUATOX.AQSim_2D
             //dataRequest += "&waterbody=" + isWaterbody.ToString();
 
             //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
-            //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 100,flaskURL,dataURL).Result;
+            //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 100, flaskURL, dataURL).Result;
             //if (results.status != "SUCCESS") errmsg = results.status;
-            //  else errmsg = "";  
+            //else errmsg = "";
             //return results.data;
 
-            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            string component = "hydrology";
-            string dataset = "streamflow";
-            errmsg = "";
+            // -------  Non Flask Request ------- 
+            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            //string component = "hydrology";
+            //string dataset = "streamflow";
+            //errmsg = "";
 
-            var request = (HttpWebRequest)WebRequest.Create(requestURL + component + "/" + dataset + "/");
-            string json = JsonConvert.SerializeObject(TSI);
-            var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            request.ContentLength = data.Length;
+            //var request = (HttpWebRequest)WebRequest.Create(requestURL + component + "/" + dataset + "/");
+            //string json = JsonConvert.SerializeObject(TSI);
+            //var data = Encoding.ASCII.GetBytes(json);  //StreamFlowInput previously initialized
+            //request.Method = "POST";
+            //request.ContentType = "application/json";
+            //request.ContentLength = data.Length;
 
-            using (var stream = request.GetRequestStream())
-            {
-                stream.Write(data, 0, data.Length);
-            }
-            var response = (HttpWebResponse)request.GetResponse();
-            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            if (rstring.IndexOf("ERROR") >= 0)
-            {
-                errmsg = "Error from web service returned: " + rstring;
-                return null;
-            }
-            return JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(rstring);
+            //using (var stream = request.GetRequestStream())
+            //{
+            //    stream.Write(data, 0, data.Length);
+            //}
+            //var response = (HttpWebResponse)request.GetResponse();
+            //string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            //if (rstring.IndexOf("ERROR") >= 0)
+            //{
+            //    errmsg = "Error from web service returned: " + rstring;
+            //    return null;
+            //}
+            //return JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(rstring);
         }
 
         public string PopulateLakeRes(int WBComid, string setupjson, out string jsondata)
@@ -512,6 +520,7 @@ namespace AQUATOX.AQSim_2D
             {
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
+                if (TSO.Data.Count == 0) return "ERROR: No data records were returned.  Your date range may be outside available NWM data.";
                 LakeFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO); 
                 // Could add to Log -- "Imported Flow Data for " + comid 
             }
@@ -633,6 +642,25 @@ namespace AQUATOX.AQSim_2D
         }
 
         /// <summary>
+        /// Instantiates a json but overwrites the setup with the master setup record.
+        /// </summary>
+        /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="errstr">string holding info about an error if present</param>
+        /// <param name="jsonstring">the input json </param>
+        public AQTSim Instantiate_with_setup(string setupjson, ref string outstr, string jsonstring)
+        {
+            AQTSim Sim = new AQTSim();
+            outstr = Sim.Instantiate(jsonstring);
+
+            if (outstr != "") return null;
+            Sim.AQTSeg.SetMemLocRec();
+
+            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
+            return Sim;
+
+        }
+
+        /// <summary>
         /// Runs one segment of the 2D simulation given the comid.  Reads loadings from upstream reach prior to execution.
         /// Segments must be executed in the order and with the parallel processing specified within SN streamnetwork object.
         /// Results of the simulation are passed back in a json and stored in the archive Dictionary.
@@ -646,13 +674,8 @@ namespace AQUATOX.AQSim_2D
         /// <returns>boolean: true if the run was completed successfully</returns>/// 
         public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
         {
-            AQTSim Sim = new AQTSim();
-            outstr = Sim.Instantiate(jsonstring);
-
-            if (outstr != "")  return false; 
-            Sim.AQTSeg.SetMemLocRec();
-
-            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);   
+            AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
+            Sim.AQTSeg.ProgHandle = this.ProgHandle;
 
             if (SVList == null)
             {

@@ -240,7 +240,6 @@ namespace GUI.AQUATOX
             if (e.Error != null) MessageBox.Show("Error Raised: " + e.Error.Message);
             if ((!e.Cancelled)&&(errmessage == ""))
             {
-                // textBox1.Text = "Run Completed.";
                 Application.DoEvents();
                 graph_Click(null, null);
                 ShowStudyInfo();
@@ -1000,7 +999,6 @@ namespace GUI.AQUATOX
         {
             MultiSegForm MSForm = new MultiSegForm();
             MSForm.ShowDialog();
-
         }
 
         private void AddButton_Click(object sender, EventArgs e)

@@ -1175,7 +1175,8 @@ namespace AQUATOX.AQTSegment
         public Loadings.TLoadings BenthicBiomass_Link = null; // optional linkage for diagenesis simulations when benthos not directly simulated, g/m2
         public Loadings.TLoadings AnimalDef_Link = null; // optional linkage to sediment from animal defecation for diagenesis simulations when animals not directly simulated, g/m2
 
-        [JsonIgnore] public BackgroundWorker ProgWorker = null;  // report progress
+        [JsonIgnore] public BackgroundWorker ProgWorker = null;  // report progress (BackgroundWorker)
+        [JsonIgnore] public IProgress<int> ProgHandle = null;  // report progress (Task.Run)
 
         [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
@@ -2663,17 +2664,23 @@ namespace AQUATOX.AQTSegment
                     h = hnext;
                 }
 
-                if (ProgWorker != null)
+                if ((ProgWorker != null)||(ProgHandle != null))
                 {
                     int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
-                    if (progint == lastprog) ProgWorker.ReportProgress(progint);
+                    if (progint == lastprog)
+                    {
+                        if (ProgWorker != null) ProgWorker.ReportProgress(progint);
+                        else ProgHandle.Report(progint);
+                    };
+
                     lastprog = progint;
 
-                    if (ProgWorker.CancellationPending)
-                    {
-                        SimulationDate = DateTime.MinValue;
-                        return ("User Canceled");
-                    }
+                    if (ProgWorker != null) 
+                        if (ProgWorker.CancellationPending)
+                        {
+                            SimulationDate = DateTime.MinValue;
+                            return ("User Canceled");
+                        }
                 }
 
                 Integrate_CheckZeroStateAllSVs();

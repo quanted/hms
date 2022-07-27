@@ -13,6 +13,9 @@ namespace GUI.AQUATOX
         public bool gridChange;
         bool UserCanceled;
         string HelpTopic = "";
+        bool selectinglake = false;
+        public string chosenlake = "";
+        public string chosenfileN = "";
 
         public GridForm()
         {
@@ -31,7 +34,6 @@ namespace GUI.AQUATOX
 
         public bool ShowGrid(DataTable table, bool LockLeftColumn, bool addrows, string HelpContext)
         {
-
             HelpTopic = HelpContext;
             gridChange = false;
             UserCanceled = false;
@@ -43,6 +45,40 @@ namespace GUI.AQUATOX
             ShowDialog();
             return !UserCanceled;
         }
+
+        private void AutosizeCol(int col)
+        {
+            dataGridView1.Columns[col].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+            dataGridView1.Columns[col].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+        }
+
+        public bool SelectRow(DataTable table, string HelpContext)
+        {
+            HelpTopic = HelpContext;
+            gridChange = false;
+            UserCanceled = false;
+            dataGridView1.DataSource = null;  // 11/29/2021
+            dataGridView1.DataSource = table;
+            dataGridView1.Columns[0].ReadOnly = true;
+            dataGridView1.Columns[0].Frozen = true;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView1.ReadOnly = true;
+
+            AutosizeCol(0);
+            AutosizeCol(2);
+            AutosizeCol(3);
+            AutosizeCol(4);
+            AutosizeCol(5);
+            AutosizeCol(6);
+            Width = 1400; Height = 800;
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            selectinglake = true;
+            ShowDialog();
+            return !UserCanceled;
+        }
+
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
@@ -58,6 +94,9 @@ namespace GUI.AQUATOX
 
         private void CancelButt_Click(object sender, EventArgs e)
         {
+            chosenlake = "";
+            chosenfileN = "";
+
             if (gridChange)
             {
                 if (MessageBox.Show("Cancel your changes to the data matrix?", "Confirm",
@@ -99,5 +138,13 @@ namespace GUI.AQUATOX
             AQTTestForm.OpenUrl(HelpTopic);
         }
 
-    }
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (!selectinglake) return;
+            if (e.RowIndex < 0) return;
+            DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+            chosenlake = row.Cells[0].Value.ToString();
+            chosenfileN = row.Cells[6].Value.ToString();
+        }
+}
 }
