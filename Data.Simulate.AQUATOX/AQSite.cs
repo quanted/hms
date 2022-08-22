@@ -99,7 +99,7 @@ namespace AQUATOX.AQSite
         public TParameter[] InputArray()
         {
             return new TParameter[] {new TSubheading("Site Parameters",""),
-                            SiteName, SiteLength, Volume, Min_Vol_Frac, UseBathymetry, ICZMean, ZMax,
+                            SiteName, SiteLength, SurfArea, Volume, Min_Vol_Frac, UseBathymetry, ICZMean, ZMax,
                             new TSubheading("Temperature, Light, Reaeration","Important if 'mean range' option is chosen for temperature or light, or oxygen calibration is required."),
                             TempMean,TempRange,Latitude,
                             Altitude,LightMean,LightRange,EnclWallArea,MeanEvap,UseCovar,EnteredKReaer,

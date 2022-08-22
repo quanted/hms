@@ -20,14 +20,14 @@ using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
-//using Web.Services.Controllers;
+using System.Threading;
 
 namespace GUI.AQUATOX
 
 {
     public partial class MultiSegForm : Form
     {
-        // private BackgroundWorker Worker = new BackgroundWorker();  potentially to be added, to report progress
+        private CancellationTokenSource _cts;
         private AQSim_2D AQT2D = null;
         private int Lake0D = 0;
 
@@ -572,8 +572,9 @@ namespace GUI.AQUATOX
 
                 AddToProcessLog("Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
 
-                string BaseFileN = BaseJSONBox.Text;
-                if (!ValidFilen(BaseJSONBox.Text, true)) return;
+                string BaseFileN = FullBaseJSONName();
+                if (BaseFileN == "") return;
+
                 AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
                 string msj = MasterSetupJson();
 
@@ -696,6 +697,15 @@ namespace GUI.AQUATOX
             browseButton.Enabled = !busy;
         }
 
+        private void reset_interface_after_run()
+        {
+            UseWaitCursor = false;
+            progressBar1.Visible = false;
+            CancelButton.Visible=false;
+            SetInterfaceBusy(false);
+            UpdateScreen();
+        }
+
         async private void executeButton_Click(object sender, EventArgs e)  //execute the full model run given initialized AQT2D
         {
             chart1.Visible = false;
@@ -737,6 +747,9 @@ namespace GUI.AQUATOX
                 var progress = progressHandler as IProgress<int>;
                 AQT2D.ProgHandle = progress;
 
+                _cts = new CancellationTokenSource();
+                AQT2D.CancelToken = _cts.Token;
+
                 await Task.Run(() =>
                 {
                     success = (AQT2D.executeModel(Lake0D, MasterSetupJson(), ref strout, ref json, null, null));   //run one segment of 2D model
@@ -746,43 +759,13 @@ namespace GUI.AQUATOX
                         File.WriteAllText(BaseDir + "AQT_Run_" + Lake0D.ToString() + ".JSON", json);
                         TSafeAddToProcessLog(strout);  //write update to status log
                         TSafeAddToProcessLog("Run saved as " + "AQT_Run_" + Lake0D.ToString() + ".JSON");
-
-                        // workoncancel
-
-                        BeginInvoke((Action)(() =>
-                        {
-                            UseWaitCursor = false;
-                            progressBar1.Visible = false;
-                            SetInterfaceBusy(false);
-                            UpdateScreen();
-                        }));
                     }
+                                        
+                    BeginInvoke((Action)(() =>  //reset GUI following run
+                    {
+                        reset_interface_after_run();
+                    }));
                 });
-
-
-                //AQTTestForm AQForm = new AQTTestForm();
-                //AQForm.aQTS = AQT2D.Instantiate_with_setup(MasterSetupJson(), ref strout, json);
-                //if (strout != "") {  
-                //    TSafeAddToProcessLog(strout);
-                //    ConsoleButton.Checked= true;
-                //    return;  
-                //};
-
-                //DateTime LastRun = AQForm.aQTS.AQTSeg.SimulationDate;
-                //AQForm.Show();
-                //AQForm.integrate_Click(sender, e);
-
-                //if (AQForm.aQTS.AQTSeg.SimulationDate > LastRun) 
-                //{
-                //    string errmessage = AQForm.aQTS.SaveJSON(ref json);
-                //    if (errmessage != "") TSafeAddToProcessLog(errmessage);
-                //    else
-                //    {
-                //        File.WriteAllText(BaseDir + "AQT_Run_" + Lake0D.ToString() + ".JSON", json);
-                //        TSafeAddToProcessLog("Run completed and saved as "+ "AQT_Run_" + Lake0D.ToString() + ".JSON");
-                //    }
-
-                //}
 
                 return;
                }
@@ -996,8 +979,10 @@ namespace GUI.AQUATOX
 
         private AQTSim InstantiateBaseJSON()
         {
-            if (!ValidFilen(BaseJSONBox.Text, true)) { MessageBox.Show("Specify Valid File in Base JSON"); return null; }
-            string json = File.ReadAllText(BaseJSONBox.Text);
+            string BaseJSONFilen = FullBaseJSONName();
+            if (BaseJSONFilen == "") return null;
+
+            string json = File.ReadAllText(BaseJSONFilen);
 
             AQTSim Sim = new AQTSim();
             string err = Sim.Instantiate(json);
@@ -1193,13 +1178,16 @@ namespace GUI.AQUATOX
         {
             string filen = "";
             string lakename = "";
+            AQTSim BSim = null;
 
             if (Lake0D > 0)
             {
-                filen = NewSimForm.ChooseLakeTemplate(out lakename);
+                filen = NewSimForm.ChooseLakeTemplate(out lakename, out BSim);
 
                 if (filen == "") return;
-                BaseJSONBox.Text = "..\\..\\..\\Studies\\" + filen;
+                BaseJSONBox.Text = filen;
+                string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
+                File.WriteAllText(basedirBox.Text + filen, BFJSON);    // save back as JSON in project directory
             }
             else
             {
@@ -1582,14 +1570,20 @@ namespace GUI.AQUATOX
             MultiSegForm_ResizeEnd(sender, e);
         }
 
+        string FullBaseJSONName()
+        {
+            if (ValidFilen(BaseJSONBox.Text, false)) return BaseJSONBox.Text;
+            if (ValidFilen(basedirBox.Text + BaseJSONBox.Text, true)) return basedirBox.Text + BaseJSONBox.Text;
+            return "";
+        }
 
-        string templatestring = "";
+        string templatestring = "";  //used to test if BaseJSONBox has changed
         private void BaseJSONBox_Leave(object sender, EventArgs e)
         {
             if (BaseJSONBox.Text == templatestring) return;
 
             ScrSettings.BaseJSONstr = BaseJSONBox.Text;
-            if (!ValidFilen(BaseJSONBox.Text, true)) return;
+            if (FullBaseJSONName() == "") return;
 
             if (VerifyStreamNetwork())
             {
@@ -1726,40 +1720,95 @@ namespace GUI.AQUATOX
             var lst = new List<string>() { "Lake/Reservoir", "Stream Network", "Estuary" };
             int typeIndex = -1;
 
-            RadioButtonForm dlg = new RadioButtonForm(lst);
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                string selected = dlg.selectedString;
-                typeIndex = lst.IndexOf(selected);
-            }
-            else return;
+            //RadioButtonForm dlg = new RadioButtonForm(lst);
+            //if (dlg.ShowDialog() == DialogResult.OK)
+            //{
+            //    string selected = dlg.selectedString;
+            //    typeIndex = lst.IndexOf(selected);
+            //}
+            //else return;
 
             NewSimForm NSForm = new NewSimForm();
             NSForm.SimType = typeIndex;
             if (NSForm.ShowDialog() == DialogResult.OK) 
               if (NSForm.WBCOMID != "")
               {
+                    string oldbasedir = basedirBox.Text;
                     using (var fbd = new FolderBrowserDialog())
                     {
-                        if (fbd.ShowDialog() == DialogResult.OK)
+                        bool fbd_canceled = false;
+                        bool fbd_done = false;
+
+                        while (!fbd_done)
+                        {  if (fbd.ShowDialog() == DialogResult.OK)
+                            {
+                                
+                                basedirBox.Text = fbd.SelectedPath + "\\";
+                                if (VerifyStreamNetwork())
+                                {
+                                    if (MessageBox.Show("Directory is not empty, overwrite existing JSON files?", "Confirm",
+                                      MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                                    {
+                                        string BaseDir = basedirBox.Text;
+
+                                        string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
+                                        foreach (string directoryFile in directoryFiles)
+                                        {
+                                            System.IO.File.Delete(directoryFile);
+                                        }
+                                        fbd_done = true;
+                                    }
+                                }
+                                else fbd_done = true; // empty directory
+                            }
+                          else 
+                            {
+                                fbd_done = true;
+                                fbd_canceled = true;
+                                basedirBox.Text = oldbasedir;
+                            }
+                        }
+                        
+                        if (!fbd_canceled)
                         {
                             ScrSettings.UpSpanStr = "";
                             ScrSettings.EndCOMIDstr = "";
 
-                            string fullBaseJSON = "..\\..\\..\\Studies\\"+ NSForm.BaseJSON;
-                            ScrSettings.BaseJSONstr = fullBaseJSON;
-                            BaseJSONBox.Text = fullBaseJSON;
+                            string BaseJSONFileN = NSForm.BaseJSON_FileN; 
+                            ScrSettings.BaseJSONstr = BaseJSONFileN;
+                            BaseJSONBox.Text = BaseJSONFileN;
 
                             ScrSettings.COMIDstr = NSForm.WBCOMID; 
                             comidBox.Text = NSForm.WBCOMID;
 
-                            ScrSettings.BaseJSONstr = fullBaseJSON;
+                            ScrSettings.BaseJSONstr = BaseJSONFileN;
                             basedirBox.Text = fbd.SelectedPath + "\\";
+                            BaseDir = basedirBox.Text;
 
                             string SNJSON = "{\"WBComid\": "+NSForm.WBCOMID+"}";
-                            File.WriteAllText(basedirBox.Text + "StreamNetwork.JSON", SNJSON);
+                            File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
 
                             if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.WBCOMID + ".GeoJSON", NSForm.GeoJSON);
+
+                            if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json"); 
+                            AQTSim BSim = NSForm.BSim;
+                            if (BSim == null)
+                            {
+                                BSim = new AQTSim();
+                                BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                            }
+                            
+
+                            BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
+                            BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+
+                            if (NSForm.SArea > 0) {
+                                BSim.AQTSeg.Location.Locale.SurfArea.Val = NSForm.SArea;  //AQUATOX units are m2
+                                BSim.AQTSeg.Location.Locale.SurfArea.Comment = "Estimate from NWM_Lakes_and_Reservoirs web service";
+                                    }
+
+                            string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
+                            File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
 
                             SaveScreenSettings();
                             basedirBox_Leave(sender, e);
@@ -1773,6 +1822,28 @@ namespace GUI.AQUATOX
         {
             if (Lake0D > 0)
                 ViewOutput(Lake0D.ToString());
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            if (_cts != null)
+                _cts.Cancel();
+
+            reset_interface_after_run();
+        }
+
+        private void BrowseJSON_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text File|*.txt;*.json";
+            openFileDialog1.Title = "Open a JSON File";
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+
+            if (openFileDialog1.FileName != "")
+            {
+                BaseJSONBox.Text = openFileDialog1.FileName;
+                BaseJSONBox_Leave(sender, e);
+            }
         }
     }
 }

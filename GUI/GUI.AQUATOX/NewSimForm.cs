@@ -36,7 +36,13 @@ namespace GUI.AQUATOX
         public string WBCOMID = "";
         public string GeoJSON = "";
         public string SimName = "";
-        public string BaseJSON = "Default Lake.JSON";
+        public double SArea = -9999;  // surface area in square meters as taken from waterbodies object
+        public string BaseJSON_FileN = "Default Lake.JSON";
+        public AQTSim BSim = null;
+        public DateTime StartDT;  // start and end simulation time 
+        public DateTime EndDT;
+
+        static Lake_Surrogates LS = null;
 
         private FormWindowState LastWindowState = FormWindowState.Minimized;
         private Chart chart1 = new Chart();
@@ -45,8 +51,19 @@ namespace GUI.AQUATOX
         private System.Drawing.Graphics graphics;
         private ScreenSettings ScrSettings = new();
         private StringCollection ShortDirNames = new();
-        private List<int> executed = new List<int>(); // list of comids that have been asked to execute
         private string BaseDir;
+
+
+        static public JsonSerializerSettings LSJSONSettings()
+        {
+            LSKnownTypesBinder LSBinder = new LSKnownTypesBinder();
+            return new JsonSerializerSettings()
+            {
+                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                TypeNameHandling = TypeNameHandling.Objects,
+                SerializationBinder = LSBinder
+            };
+        }
 
         public class ScreenSettings
         {
@@ -307,21 +324,59 @@ namespace GUI.AQUATOX
             return true;
         }
 
-        public static string ChooseLakeTemplate(out string lakename)
-        {
-            lakename = "";
-            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json");
-            if (!File.Exists(fileN)) return "";
-            string json = File.ReadAllText(fileN);
 
-            DataTable table = JsonConvert.DeserializeObject<DataTable>(json);
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // code to create and write Lake_Surrogates object
+            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
+            string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
+            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json", json);
+            return;
+
+        }
+
+        private static bool ReadLakeSurrogates()
+        {
+            if (LS != null) return true;  // don't need to re-read already in memory
+
+            double LSVersionNum = 0;
+            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json");
+
+            if (File.Exists(fileN))
+            {
+                string json = File.ReadAllText(fileN);
+                LS = JsonConvert.DeserializeObject<Lake_Surrogates>(json, LSJSONSettings());
+                LSVersionNum = LS.VersionNum;
+            }
+
+            // Add code to update file from EPA server here
+
+            if (LSVersionNum == 0)
+            {
+                MessageBox.Show("Cannot find required file " + fileN, "Information",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button1);
+
+                return false;
+            }
+            else return true;
+
+        }
+
+
+        public static string ChooseLakeTemplate(out string lakename, out AQTSim BaseSim)
+        {
+            BaseSim = null;
+            lakename = "";
+            if (!ReadLakeSurrogates()) return "";
 
             GridForm gf = new GridForm();
 
-            if (gf.SelectRow(table, "SurrogateLakes"))
+            if (gf.SelectRow(LS.table, "SurrogateLakes"))
             {
                 lakename = gf.chosenlake;
-                return gf.chosenfileN;
+                if (LS.Sims.TryGetValue(gf.chosenfileN, out BaseSim)) return gf.chosenfileN;
+                   else return "";
             }
             else return "";
         }
@@ -329,19 +384,28 @@ namespace GUI.AQUATOX
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
             string lakename;
-            string lakefilen = ChooseLakeTemplate(out lakename);    
+            string lakefilen = ChooseLakeTemplate(out lakename, out BSim);    
             if (lakefilen == "") return;
 
             SimBaseLabel.Text = "Simulation Base: "+lakename;
-            BaseJSON = lakefilen;
-            SimJSONLabel.Text = "\"" + BaseJSON + "\"";
+            BaseJSON_FileN = lakefilen;
+            SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\"";
         }
 
         private void NewSimForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // SaveScreenSettings();
-            // SaveBaseDir();
 
+            e.Cancel = false;  //12/11/2021
+            StartDT = StartDate.Value;
+            EndDT = EndDate.Value;
+
+            if (StartDate.Value>=EndDate.Value)
+            {
+                MessageBox.Show("End date must be after start date.", "Information",
+                   MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                   MessageBoxDefaultButton.Button1);
+                e.Cancel = true;
+            }
 
         }
 
@@ -350,6 +414,8 @@ namespace GUI.AQUATOX
             //basedirBox.Text = Properties.Settings.Default.MS_Directory;
             UpdateScreen();
         }
+
+
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
@@ -531,6 +597,13 @@ namespace GUI.AQUATOX
             else SimName = "WBCOMID: " + WBCOMID;
             if (SimName == " ") SimName = "WBCOMID: " + WBCOMID;
 
+            if (msg.Length > 3) if (!double.TryParse(msg[3],out SArea)) SArea = -9999;
+            if (SArea > 0)
+            {
+                SAreaLabel.Visible = true;
+                SAreaLabel.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
+            }
+            else SAreaLabel.Visible = false;
 
             SimNameEdit.Text = SimName;
             WBCLabel.Text = "WBCOMID: "+ WBCOMID;
@@ -573,7 +646,7 @@ namespace GUI.AQUATOX
 
             //SaveScreenSettings();
         }
-               
+
 
 
     }

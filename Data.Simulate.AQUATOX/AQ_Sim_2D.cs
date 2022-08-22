@@ -16,6 +16,8 @@ using System.Text;
 using Utilities;
 using Streamflow;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Data;
 
 namespace AQUATOX.AQSim_2D
 
@@ -79,6 +81,7 @@ namespace AQUATOX.AQSim_2D
         }
 
         [JsonIgnore] public IProgress<int> ProgHandle = null;  // report individual simulation progress (Task.Run)
+        [JsonIgnore] public CancellationToken CancelToken;  // report individual simulation progress (Task.Run)
 
         /// <summary>
         /// converts stream network json string into SN variable and saves number of segments
@@ -434,8 +437,11 @@ namespace AQUATOX.AQSim_2D
 
             Sim.AQTSeg.StudyName = "COMID: " + comid;
             Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
-            if (lenkm > 0) Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-            Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
+            if (lenkm > 0)
+            {
+                Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
+                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
+            }
             return Sim;
         }
 
@@ -521,7 +527,9 @@ namespace AQUATOX.AQSim_2D
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
                 if (TSO.Data.Count == 0) return "ERROR: No data records were returned.  Your date range may be outside available NWM data.";
-                LakeFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO); 
+                TStateVariable TSV = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+                TVolume TVol = TSV as TVolume;
+                LakeFlowsFromNWM(TVol, TSO); 
                 // Could add to Log -- "Imported Flow Data for " + comid 
             }
             catch (Exception ex)
@@ -676,6 +684,7 @@ namespace AQUATOX.AQSim_2D
         {
             AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
             Sim.AQTSeg.ProgHandle = this.ProgHandle;
+            Sim.AQTSeg._ct = this.CancelToken;
 
             if (SVList == null)
             {
@@ -724,6 +733,40 @@ namespace AQUATOX.AQSim_2D
 
     }
 
+    public class Lake_Surrogates
+    {
+        public double VersionNum = 1.0;
+        public DataTable table;
+        public Dictionary<string, AQTSim> Sims;
+
+        public Lake_Surrogates(string tablefilen, string jsonDir)
+        {
+            if (!File.Exists(tablefilen)) return;
+            string json = File.ReadAllText(tablefilen);
+            table = JsonConvert.DeserializeObject<DataTable>(json);
+            Sims = new Dictionary<string, AQTSim>();
+            foreach (DataRow row in table.Rows)
+            {
+                string fileN = row.Field<string>("Filename");
+                if (!File.Exists(jsonDir+fileN)) continue;
+                json = File.ReadAllText(jsonDir+fileN);
+                AQTSim sim = JsonConvert.DeserializeObject<AQTSim>(json, AQTSim.AQTJSONSettings());
+                sim.SavedRuns = null;
+                sim.AQTSeg.ClearResults();
+                Sims.Add(fileN,sim);
+            }
+        }
+    }
+
+    public class LSKnownTypesBinder : AQTKnownTypesBinder
+    {
+        public LSKnownTypesBinder(): base()
+        {
+            KnownTypes.Add(typeof(Lake_Surrogates));
+            KnownTypes.Remove(typeof(Dictionary<string, AQUATOXSegment>));   //duplicate dictionaries confuse the binder
+            KnownTypes.Add(typeof(Dictionary<string, AQTSim>)); 
+        }
+    }
 
 }
 

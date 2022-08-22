@@ -129,8 +129,10 @@
 
                 layer.on('click', function (e) {
                     if (layer.feature.properties.feature_id != null) {
-                        var str = "INFO|"+layer.feature.properties.feature_id.toString();
-                        if (layer.feature.properties.GNIS_NAME != null) str = str + "|" + layer.feature.properties.GNIS_NAME.toString() + "|";
+                        var str = "INFO|" + layer.feature.properties.feature_id.toString() + "|";
+                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                        str = str + "|";
+                        if (layer.feature.properties.Shape_Area != null) str = str + layer.feature.properties.Shape_Area.toString() + "|";
                         MAP.fitBounds(layer.getBounds());
                         sendMessageToDotnet(str);
                         str = layer.toGeoJSON();

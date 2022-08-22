@@ -98,7 +98,6 @@ namespace GUI.AQUATOX
 
                 if (!LoadJSON(json)) return;
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
-                ShowStudyInfo();
 
                 ButtonPanel.Visible = true;
                 AddButton.Visible = true;
@@ -107,6 +106,8 @@ namespace GUI.AQUATOX
                 integrate.Visible = true;
 
                 aQTS.ArchiveSimulation();
+
+                ShowStudyInfo();
 
 
             }

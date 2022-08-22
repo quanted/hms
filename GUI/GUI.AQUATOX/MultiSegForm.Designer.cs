@@ -79,6 +79,7 @@
             this.NewProject = new System.Windows.Forms.Button();
             this.Separator = new System.Windows.Forms.Label();
             this.OutputLabel = new System.Windows.Forms.Label();
+            this.BrowseJSON = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -168,6 +169,7 @@
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
             this.CancelButton.Visible = false;
+            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
             // StatusLabel
             // 
@@ -394,7 +396,7 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(167, 92);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(79, 92);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 22);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -503,7 +505,7 @@
             this.outputjump.Checked = true;
             this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputjump.Enabled = false;
-            this.outputjump.Location = new System.Drawing.Point(114, 3);
+            this.outputjump.Location = new System.Drawing.Point(120, 3);
             this.outputjump.Name = "outputjump";
             this.outputjump.Size = new System.Drawing.Size(112, 19);
             this.outputjump.TabIndex = 40;
@@ -513,11 +515,11 @@
             // 
             // PlotButton
             // 
-            this.PlotButton.Location = new System.Drawing.Point(5, 1);
+            this.PlotButton.Location = new System.Drawing.Point(3, 0);
             this.PlotButton.Name = "PlotButton";
-            this.PlotButton.Size = new System.Drawing.Size(99, 21);
+            this.PlotButton.Size = new System.Drawing.Size(99, 23);
             this.PlotButton.TabIndex = 36;
-            this.PlotButton.Text = "Plot Network";
+            this.PlotButton.Text = "Reset Map";
             this.PlotButton.UseVisualStyleBackColor = true;
             this.PlotButton.Click += new System.EventHandler(this.PlotButton_Click);
             // 
@@ -635,11 +637,25 @@
             this.OutputLabel.TabIndex = 48;
             this.OutputLabel.Text = "View Network Outputs";
             // 
+            // BrowseJSON
+            // 
+            this.BrowseJSON.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.BrowseJSON.ForeColor = System.Drawing.Color.Black;
+            this.BrowseJSON.Location = new System.Drawing.Point(227, 90);
+            this.BrowseJSON.Margin = new System.Windows.Forms.Padding(0);
+            this.BrowseJSON.Name = "BrowseJSON";
+            this.BrowseJSON.Size = new System.Drawing.Size(56, 25);
+            this.BrowseJSON.TabIndex = 50;
+            this.BrowseJSON.Text = "Browse";
+            this.BrowseJSON.UseVisualStyleBackColor = true;
+            this.BrowseJSON.Click += new System.EventHandler(this.BrowseJSON_Click);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1136, 586);
+            this.Controls.Add(this.BrowseJSON);
             this.Controls.Add(this.OutputLabel);
             this.Controls.Add(this.Separator);
             this.Controls.Add(this.NewProject);
@@ -741,5 +757,6 @@
         private System.Windows.Forms.Label OutputLabel;
         private System.Windows.Forms.Button viewOutputButton;
         private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button BrowseJSON;
     }
 }

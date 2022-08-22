@@ -51,6 +51,12 @@
             this.label2 = new System.Windows.Forms.Label();
             this.WBCLabel = new System.Windows.Forms.Label();
             this.SimJSONLabel = new System.Windows.Forms.Label();
+            this.StartDate = new System.Windows.Forms.DateTimePicker();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.EndDate = new System.Windows.Forms.DateTimePicker();
+            this.button2 = new System.Windows.Forms.Button();
+            this.SAreaLabel = new System.Windows.Forms.Label();
             this.ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView)).BeginInit();
             this.SuspendLayout();
@@ -59,9 +65,9 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button1.Location = new System.Drawing.Point(973, 9);
+            this.button1.Location = new System.Drawing.Point(973, 11);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(61, 23);
+            this.button1.Size = new System.Drawing.Size(61, 24);
             this.button1.TabIndex = 0;
             this.button1.Text = "OK";
             this.button1.UseVisualStyleBackColor = true;
@@ -71,7 +77,7 @@
             // 
             this.SimBaseLabel.AutoSize = true;
             this.SimBaseLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.SimBaseLabel.Location = new System.Drawing.Point(17, 98);
+            this.SimBaseLabel.Location = new System.Drawing.Point(29, 167);
             this.SimBaseLabel.Name = "SimBaseLabel";
             this.SimBaseLabel.Size = new System.Drawing.Size(175, 15);
             this.SimBaseLabel.TabIndex = 17;
@@ -88,7 +94,7 @@
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
             this.ReadNetworkPanel.Controls.Add(this.label1);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
-            this.ReadNetworkPanel.Location = new System.Drawing.Point(321, 612);
+            this.ReadNetworkPanel.Location = new System.Drawing.Point(314, 606);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
             this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             this.ReadNetworkPanel.TabIndex = 24;
@@ -169,7 +175,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(356, 576);
+            this.label7.Location = new System.Drawing.Point(368, 588);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(121, 15);
             this.label7.TabIndex = 26;
@@ -178,7 +184,7 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(124, 138);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(136, 207);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -204,7 +210,7 @@
             // 
             this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel1.AutoSize = true;
-            this.infolabel1.Location = new System.Drawing.Point(619, 575);
+            this.infolabel1.Location = new System.Drawing.Point(619, 531);
             this.infolabel1.Name = "infolabel1";
             this.infolabel1.Size = new System.Drawing.Size(187, 15);
             this.infolabel1.TabIndex = 39;
@@ -214,7 +220,7 @@
             // 
             this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel2.AutoSize = true;
-            this.infolabel2.Location = new System.Drawing.Point(619, 594);
+            this.infolabel2.Location = new System.Drawing.Point(619, 550);
             this.infolabel2.Name = "infolabel2";
             this.infolabel2.Size = new System.Drawing.Size(244, 15);
             this.infolabel2.TabIndex = 40;
@@ -228,10 +234,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView.CreationProperties = null;
             this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView.Location = new System.Drawing.Point(297, 55);
+            this.webView.Location = new System.Drawing.Point(297, 62);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
-            this.webView.Size = new System.Drawing.Size(830, 517);
+            this.webView.Size = new System.Drawing.Size(830, 459);
             this.webView.TabIndex = 43;
             this.webView.ZoomFactor = 1D;
             // 
@@ -239,9 +245,9 @@
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button3.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button3.Location = new System.Drawing.Point(1066, 10);
+            this.button3.Location = new System.Drawing.Point(1066, 12);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(61, 23);
+            this.button3.Size = new System.Drawing.Size(61, 24);
             this.button3.TabIndex = 46;
             this.button3.Text = "Cancel";
             this.button3.UseVisualStyleBackColor = true;
@@ -269,7 +275,7 @@
             // 
             this.WBCLabel.AutoSize = true;
             this.WBCLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.WBCLabel.Location = new System.Drawing.Point(17, 57);
+            this.WBCLabel.Location = new System.Drawing.Point(17, 44);
             this.WBCLabel.Name = "WBCLabel";
             this.WBCLabel.Size = new System.Drawing.Size(148, 15);
             this.WBCLabel.TabIndex = 49;
@@ -280,17 +286,84 @@
             this.SimJSONLabel.AutoSize = true;
             this.SimJSONLabel.Cursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.SimJSONLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SimJSONLabel.Location = new System.Drawing.Point(17, 118);
+            this.SimJSONLabel.Location = new System.Drawing.Point(29, 187);
             this.SimJSONLabel.Name = "SimJSONLabel";
             this.SimJSONLabel.Size = new System.Drawing.Size(113, 15);
             this.SimJSONLabel.TabIndex = 50;
             this.SimJSONLabel.Text = "\"Default Lake.JSON\"";
             // 
+            // StartDate
+            // 
+            this.StartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.StartDate.Location = new System.Drawing.Point(124, 305);
+            this.StartDate.Name = "StartDate";
+            this.StartDate.Size = new System.Drawing.Size(103, 23);
+            this.StartDate.TabIndex = 51;
+            this.StartDate.Value = new System.DateTime(2010, 1, 1, 0, 0, 0, 0);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label3.Location = new System.Drawing.Point(52, 310);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(65, 15);
+            this.label3.TabIndex = 52;
+            this.label3.Text = "Start Date";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label5.Location = new System.Drawing.Point(59, 341);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(57, 15);
+            this.label5.TabIndex = 54;
+            this.label5.Text = "End Date";
+            // 
+            // EndDate
+            // 
+            this.EndDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.EndDate.Location = new System.Drawing.Point(124, 337);
+            this.EndDate.Name = "EndDate";
+            this.EndDate.Size = new System.Drawing.Size(103, 23);
+            this.EndDate.TabIndex = 53;
+            this.EndDate.Value = new System.DateTime(2011, 1, 1, 0, 0, 0, 0);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(540, 12);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(117, 23);
+            this.button2.TabIndex = 55;
+            this.button2.Text = "Create LS JSON";
+            this.button2.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Visible = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // SAreaLabel
+            // 
+            this.SAreaLabel.AutoSize = true;
+            this.SAreaLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.SAreaLabel.Location = new System.Drawing.Point(17, 71);
+            this.SAreaLabel.Name = "SAreaLabel";
+            this.SAreaLabel.Size = new System.Drawing.Size(129, 15);
+            this.SAreaLabel.TabIndex = 56;
+            this.SAreaLabel.Text = "Surface Area (sq. km):";
+            this.SAreaLabel.Visible = false;
+            // 
             // NewSimForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1140, 620);
+            this.ClientSize = new System.Drawing.Size(1140, 576);
+            this.Controls.Add(this.SAreaLabel);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.EndDate);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.StartDate);
             this.Controls.Add(this.SimJSONLabel);
             this.Controls.Add(this.WBCLabel);
             this.Controls.Add(this.label2);
@@ -345,5 +418,11 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label WBCLabel;
         private System.Windows.Forms.Label SimJSONLabel;
+        private System.Windows.Forms.DateTimePicker StartDate;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.DateTimePicker EndDate;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label SAreaLabel;
     }
 }

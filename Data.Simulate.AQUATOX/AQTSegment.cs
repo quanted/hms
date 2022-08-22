@@ -1175,8 +1175,9 @@ namespace AQUATOX.AQTSegment
         public Loadings.TLoadings BenthicBiomass_Link = null; // optional linkage for diagenesis simulations when benthos not directly simulated, g/m2
         public Loadings.TLoadings AnimalDef_Link = null; // optional linkage to sediment from animal defecation for diagenesis simulations when animals not directly simulated, g/m2
 
-        [JsonIgnore] public BackgroundWorker ProgWorker = null;  // report progress (BackgroundWorker)
-        [JsonIgnore] public IProgress<int> ProgHandle = null;  // report progress (Task.Run)
+        [JsonIgnore] public BackgroundWorker ProgWorker = null; // report progress and handle cancellation (BackgroundWorker)
+        [JsonIgnore] public IProgress<int> ProgHandle = null;   // report progress (Task.Run)
+        [JsonIgnore] public CancellationToken _ct = CancellationToken.None; // handle cancellation (Task.Run)
 
         [JsonIgnore] public double SOD = 0;   // SOD, calculated before derivatives
         [JsonIgnore] public int DerivStep;    // Current Derivative Step 1 to 6, Don't save in json  
@@ -1797,7 +1798,10 @@ namespace AQUATOX.AQTSegment
         {
 
             foreach (TStateVariable TSV in SV)
+            {
                 if (TSV.SVResults != null) TSV.SVResults.ClearResults();
+                TSV.SVoutput = null;
+            }
 
             if (SV.restimes != null) SV.restimes.Clear(); else SV.restimes = new List<DateTime>();
 
@@ -2681,7 +2685,15 @@ namespace AQUATOX.AQTSegment
                             SimulationDate = DateTime.MinValue;
                             return ("User Canceled");
                         }
+
+                    if (_ct != CancellationToken.None)
+                        if (_ct.IsCancellationRequested)
+                        {
+                            SimulationDate = DateTime.MinValue;
+                            return ("User Canceled");
+                        }
                 }
+
 
                 Integrate_CheckZeroStateAllSVs();
 
