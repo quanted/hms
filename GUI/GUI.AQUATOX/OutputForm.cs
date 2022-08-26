@@ -240,7 +240,7 @@ namespace GUI.AQUATOX
             {
                 TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
                 if (TSV != null) 
-                 if (SID.indx< TSV.SVoutput.Data.Values.ElementAt(0).Count)
+                 if (SID.indx<= TSV.SVoutput.Data.Values.ElementAt(0).Count)
                  {
                     List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
                     Series ser = chart1.Series.Add(SID.nm);

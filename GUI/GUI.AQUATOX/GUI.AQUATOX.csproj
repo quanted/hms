@@ -10,7 +10,10 @@
     <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+	<ItemGroup>
     <Compile Remove="Studies\APS\**" />
     <Compile Remove="Studies\NoResults\**" />
     <Compile Remove="Studies\Omit\**" />
@@ -224,6 +227,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Update="2D_Inputs\Lake_Surrogates.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="html\leaflet-search.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
