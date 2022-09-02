@@ -11,7 +11,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 	<PropertyGroup>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>   
 	</PropertyGroup>
 	<ItemGroup>
     <Compile Remove="Studies\APS\**" />

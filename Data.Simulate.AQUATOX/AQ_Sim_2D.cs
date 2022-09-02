@@ -148,6 +148,7 @@ namespace AQUATOX.AQSim_2D
                 if (volume < Consts.Tiny) volume = TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000; //default minimum volume (length * XSec 1 m2) for now
                 KnownValLoad.list.Add(date, volume);
                 if (firstvol) TVol.InitialCond = volume;
+
                 firstvol = false;
             }
 
@@ -529,7 +530,19 @@ namespace AQUATOX.AQSim_2D
                 if (TSO.Data.Count == 0) return "ERROR: No data records were returned.  Your date range may be outside available NWM data.";
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
                 TVolume TVol = TSV as TVolume;
-                LakeFlowsFromNWM(TVol, TSO); 
+                LakeFlowsFromNWM(TVol, TSO);
+
+                Sim.AQTSeg.Location.Locale.ICZMean.Val = TVol.InitialCond / Sim.AQTSeg.Location.Locale.SurfArea.Val;   // Estimate mean depth from volume & surface area
+                                                   //m                //m3               //m2
+                Sim.AQTSeg.Location.Locale.ICZMean.Comment = "Estimated from NWM based on surface area and initial volume";
+
+                Sim.AQTSeg.Location.Locale.ZMax.Val = Sim.AQTSeg.Location.Locale.ICZMean.Val * 2.0;  //approximation for now
+                Sim.AQTSeg.Location.Locale.ZMax.Comment = "Estimated as 2.0 x mean depth";
+
+                Sim.AQTSeg.Location.Locale.SiteLength.Val =  Math.Sqrt(2.0 * Sim.AQTSeg.Location.Locale.SurfArea.Val * 1e-6) ;  //approximation for now
+                                                     //km                                            // m2        // km2/m2
+                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "Rough estimate from Surface Area"; 
+
                 // Could add to Log -- "Imported Flow Data for " + comid 
             }
             catch (Exception ex)
@@ -707,6 +720,21 @@ namespace AQUATOX.AQSim_2D
                         outstr = outstr + "Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
                     }
                 };
+
+            // pass data for Waterbodies
+            if (SN.waterbodies != null)
+                if (SN.waterbodies.comid_wb.ContainsKey(comid))
+                  foreach(KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)
+                    if (entry.Value == comid)
+                    {
+                        if ((entry.Key != comid) && !outofnetwork.Contains(entry.Key))  // don't pass data from out of network segments
+                        {
+                            nSources++;
+                            Pass_Data(Sim, entry.Key, nSources, null, divergence_flows);
+                            outstr = outstr + "Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString() + Environment.NewLine;
+                        }
+                    };
+
 
             Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();

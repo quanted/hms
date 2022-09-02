@@ -19,6 +19,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DocumentationFile>App_Data\XmlComments.xml</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+</PropertyGroup>
   <ItemGroup>
     <Content Remove="App_Data\curvenumber.json" />
     <Content Remove="App_Data\curvenumber_conditions.json" />

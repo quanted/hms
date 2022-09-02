@@ -140,6 +140,17 @@
                     };
                 });
             };
+
+            function FLonEachFeature(feature, layer) {
+                if (layer.feature.properties.COMID != null) {
+                    var str = '';
+                    if (layer.feature.properties.GNIS_NAME != null)  str = ", " + layer.feature.properties.GNIS_NAME.toString(); 
+                    if (str == ' ')  str = ''; 
+                    str = layer.feature.properties.COMID.toString()+str;
+                    layer.bindTooltip(str, { opacity: 1.0 });
+                };
+            };
+
             
             // build map layers
 //            const CATCHMENTS_LAYER = L.esri
@@ -165,13 +176,13 @@
             const FLOWLINES_LAYER = L.esri
                 .featureLayer({
                     url: URL_NP21_FLOWLINES,
+                    onEachFeature: FLonEachFeature
                 });
             FLOWLINES_LAYER.setStyle({
                 color: "black",
                 fillOpacity: 0,
                 weight: 1,
             });
-
 
             const OVERLAY_MAPS = {
                 "HUC8 Boundaries": BOUNDARIES_LAYER,

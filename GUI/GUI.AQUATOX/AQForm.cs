@@ -17,6 +17,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 // using sds = Microsoft.Research.Science.Data;
 
+//TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
+
 namespace GUI.AQUATOX
 {
 
@@ -1122,7 +1124,7 @@ namespace GUI.AQUATOX
             }
             catch
             {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                // workaround because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     if (defaultBrowser == "")
