@@ -14,6 +14,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
+using Utilities;
 //using Web.Services.Controllers;
 
 namespace GUI.AQUATOX
@@ -25,7 +26,7 @@ namespace GUI.AQUATOX
         private AQSim_2D AQT2D = null;
 
         public int SimType;
-        public string WBCOMID = "";
+        public string COMID = "";
         public string GeoJSON = "";
         public string SimName = "";
         public double SArea = -9999;  // surface area in square meters as taken from waterbodies object
@@ -36,15 +37,8 @@ namespace GUI.AQUATOX
 
         static Lake_Surrogates LS = null;
 
-        private FormWindowState LastWindowState = FormWindowState.Minimized;
-        private Chart chart1 = new Chart();
-        ChartArea chartArea1 = new ChartArea();
-        Legend legend1 = new Legend();
-        private System.Drawing.Graphics graphics;
         private ScreenSettings ScrSettings = new();
         private StringCollection ShortDirNames = new();
-        private string BaseDir;
-
 
         static public JsonSerializerSettings LSJSONSettings()
         {
@@ -65,18 +59,6 @@ namespace GUI.AQUATOX
             public string UpSpanStr = "";
         }
 
-        private int ScaleX(int x)
-        {
-            double ScaleX = graphics.DpiX / 96;
-            return Convert.ToInt32(x * ScaleX);
-        }
-
-        private int ScaleY(int y)
-        {
-            double ScaleY = graphics.DpiY / 96;
-            return Convert.ToInt32(y * ScaleY);
-        }
-
         Task webviewready;
         TaskCompletionSource tcs = new TaskCompletionSource();
         Task mapReadyForRender; // JScript signals when map is ready to render
@@ -86,60 +68,18 @@ namespace GUI.AQUATOX
             AutoScroll = true;
             InitializeComponent();
 
-            this.Resize += new System.EventHandler(this.FormResize);
 
             mapReadyForRender = tcs.Task;
             webviewready = InitializeAsync();
 
             webView.Source = new Uri(Path.Combine(Environment.CurrentDirectory, @"html\newSimMap.html"));
 
-            // 
-            // chart1
-            // 
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
-            SuspendLayout();
-            graphics = this.CreateGraphics();
 
-            this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.chart1.BorderlineColor = System.Drawing.Color.Black;
-            this.chart1.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea1.Name = "ChartArea1";
-            chart1.ChartAreas.Add(chartArea1);
-
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
-            chart1.Location = new System.Drawing.Point(ScaleX(webView.Left), ScaleY(webView.Top));
-            chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(ScaleX(webView.Width), ScaleY(webView.Height));
-            chart1.TabIndex = 3;
-            this.chart1.Text = "chart1";
-            chart1.Series.Clear();
-            chart1.Visible = false;
-            this.chart1.CustomizeLegend += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.CustomizeLegendEventArgs>(this.chart1_CustomizeLegend_1);
-            this.chart1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.chart1_MouseDown);
-
-            Controls.Add(chart1);
-
-            chart1.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-            chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-
-            // 
-            // end chart1
-            // 
-
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            chart1.Location = new System.Drawing.Point(webView.Left, webView.Top);
-            chart1.Size = new System.Drawing.Size(webView.Width, webView.Height);
         }
 
-        private void FormResize(object sender, EventArgs e)
-        {
-        }
 
         private Task InitializeAsync()
         {
@@ -167,10 +107,12 @@ namespace GUI.AQUATOX
             {
                 tcs.SetResult();  //set mapreadyforrender as complete
             }
-            else if (content.StartsWith("\"INFO|"))
+            else if ((content.StartsWith("\"LAKE|"))||
+                (content.StartsWith("\"FL|")) ||
+                (content.StartsWith("\"FL2|")))
             {
                 System.Threading.SynchronizationContext.Current.Post((_) => {
-                    webView_MouseDown(content.Trim('"')); }, null);
+                    webView_MouseDown((content.StartsWith("\"LAKE|")), content.Trim('"')); }, null);
             }
             else GeoJSON = content; 
                 
@@ -226,61 +168,15 @@ namespace GUI.AQUATOX
 
         private void UpdateScreen()
         {
+            ReadNetworkPanel.Visible = StreamButton.Checked;
+            NetworkLabel.Visible = StreamButton.Checked;
+
             comidBox.Text = ScrSettings.COMIDstr;
             EndCOMIDBox.Text = ScrSettings.EndCOMIDstr;
             spanBox.Text = ScrSettings.UpSpanStr;
         }
 
 
-
-        private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
-        {
-            HitTestResult resultExplode = chart1.HitTest(e.X, e.Y);
-            if (resultExplode.Series != null)
-            {
-                if (resultExplode.Object is LegendItem)
-                {
-                    LegendItem legendItem = (LegendItem)resultExplode.Object;
-                    Series selectedSeries = (Series)legendItem.Tag;
-                    if (selectedSeries != null)
-                        selectedSeries.Enabled = !selectedSeries.Enabled;
-                    chart1.ChartAreas[0].RecalculateAxesScale();
-                }
-
-                string msgstr = resultExplode.Series.Name;
-                if (resultExplode.PointIndex > 0)
-                {
-                    msgstr = msgstr + ": " +
-                    resultExplode.Series.Points[resultExplode.PointIndex].YValues[0] + " \n " +
-                    System.DateTime.FromOADate(resultExplode.Series.Points[resultExplode.PointIndex].XValue);
-                    System.Windows.Forms.MessageBox.Show(msgstr);
-                }
-            }
-        }
-
-        private void chart1_CustomizeLegend_1(object sender, CustomizeLegendEventArgs e) // legend info for chart
-        {
-            e.LegendItems.Clear();
-            foreach (var series in this.chart1.Series)
-            {
-                var legendItem = new LegendItem();
-                legendItem.SeriesName = series.Name;
-                legendItem.ImageStyle = LegendImageStyle.Rectangle;
-                legendItem.BorderColor = Color.Transparent;
-                legendItem.Name = series.Name + "_legend_item";
-
-                int i = legendItem.Cells.Add(LegendCellType.SeriesSymbol, "", ContentAlignment.MiddleCenter);
-                legendItem.Cells.Add(LegendCellType.Text, series.Name, ContentAlignment.MiddleCenter);
-
-                if (series.Enabled)
-                { legendItem.Color = series.Color; legendItem.BorderColor = Color.Black; }
-                else
-                { legendItem.Color = Color.FromArgb(100, series.Color); legendItem.BorderColor = Color.White; }
-
-                legendItem.Tag = series;
-                e.LegendItems.Add(legendItem);
-            }
-        }
 
 
         private void OK_click(object sender, EventArgs e)
@@ -295,27 +191,8 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing stream network and any inputs and outputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-            string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
-            foreach (string directoryFile in directoryFiles)
-            {
-                System.IO.File.Delete(directoryFile);
-            }
-
             UpdateScreen();
         }
-
-
-        private bool ValidFilen(string filen, bool Showmessage)
-        {
-            if (filen == "") return false;
-            if (!File.Exists(filen))
-            {
-                if (Showmessage) MessageBox.Show("Cannot find file " + Path.GetFullPath(filen));
-                return false;
-            }
-            return true;
-        }
-
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -416,189 +293,48 @@ namespace GUI.AQUATOX
         }
 
 
-        public class GeoJSonType
-        {
-            public StreamGeometry stream_geometry { get; set; }
-        }
-        public class StreamGeometry
-        {
-            public Feature[] features { get; set; }
-        }
-        public class Feature
-        {
-            public LineStringGeometry geometry { get; set; }
-        }
-        public class LineStringGeometry
-        {
-            public string type { get; set; }
-            public double[][] coordinates { get; set; }
-        }
-
-        async void PlotCOMIDMap()
-        {
-            string GeoJSON;
-            double[][] polyline = null;
 
 
-            await mapReadyForRender; // segments can't render until page is loaded
-
-//          if (webView.CoreWebView2 == null)
-//          { await webviewready; } //ensure webview initialized
-//          await webView.CoreWebView2.DOMContentLoaded(null);
-//          MessageBox.Show("Rendering Now");
-
-            webView.Visible = true;
-            webView.CoreWebView2.PostWebMessageAsString("ERASE");
-
-            int[] boundaries = new int[0];
-            if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
-
-            if (AQT2D.SN.waterbodies != null)
-              for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
-              {
-                string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
-                int WBID = int.Parse(WBString);
-                    if (WBID != -9998)
-                    {
-                        if (File.Exists(BaseDir + WBString + ".GeoJSON"))
-                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + WBString + ".GeoJSON"); }
-                        else
-                        {
-                            webView.Visible = false;
-                            //AddToProcessLog("Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
-                            GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
-
-                            if (GeoJSON.IndexOf("ERROR") >= 0)
-                            {
-                              //  AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
-                                // show process log 
-                                if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", "{}");  //  write to disk
-                                continue;
-                                // return false;
-                            }
-                            System.IO.File.WriteAllText(BaseDir + WBString + ".GeoJSON", GeoJSON);  //  write to disk
-                        }
-
-                        if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
-                        {
-                            int IDIndex = GeoJSON.IndexOf("\"COMID\":");
-                            if (IDIndex == -1) { 
-                                int IDLoc = GeoJSON.IndexOf("\"GNIS_NAME\"");
-                                if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":"+WBString+",");
-                            } 
-
-                            webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
-                        }
-                    } 
-              }
-
-
-            for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
-                {
-                    int COMID = AQT2D.SN.order[i][j];
-                    string CString = COMID.ToString();
-                    if (File.Exists(BaseDir + CString + ".GeoJSON"))
-                    { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
-                    else
-                    {
-                        webView.Visible = false;
-                        //AddToProcessLog("Reading GEOJSON (map data) from webservice for COMID " + CString);
-                        GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
-                        if (GeoJSON.IndexOf("ERROR") >= 0)
-                        {
-                            //AddToProcessLog("Error reading GeoJSON: web service returned: " + GeoJSON);
-                            // show process log 
-                            if (GeoJSON.IndexOf("Unable to find catchment in database") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk 
-                            if (GeoJSON.IndexOf("unknown error") >= 0) System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", "{}");  //  write to disk to avoid re-query
-                            continue;
-                        }
-                        System.IO.File.WriteAllText(BaseDir + CString + ".GeoJSON", GeoJSON);  //  write to disk
-                    }
-
-                    if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
-                    {
-                        webView.CoreWebView2.PostWebMessageAsString("ADD|"+GeoJSON);
-                    }
-
-                    if (GeoJSON == "{}") polyline = null;
-                    else
-                    {
-                        GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                        try
-                        {
-                            polyline = coords.stream_geometry.features[0].geometry.coordinates;
-                        }
-                        catch
-                        {
-                            //AddToProcessLog("Error deserializing GeoJSON  " + BaseDir + CString + ".GeoJSON"); return;
-                        }
-                    } 
-
-                    List<PointF> startpoints = new List<PointF>();
-                    List<PointF> endpoints = new List<PointF>();
-
-                    bool in_waterbody = false;
-                    if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
-
-                    if (polyline != null)
-                    {
-                        if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
-                            foreach (int SrcID in Sources)
-                                if (boundaries.Contains(SrcID))  //ID inflow points with green circles
-                                {
-                                    webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1]+ "|boundry condition inflow from "+SrcID);
-                                }
-
-                        if (i == AQT2D.SN.order.Length-1) //ID pour point with red circle
-                        {
-                            webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" +polyline[polyline.Length - 1][1] + "|pour point");
-                        }
-
-                    }
-                }
-
-            webView.CoreWebView2.PostWebMessageAsString("RENDER");
-
-            webView.Visible = true;
-            chart1.Visible = false;
-           
-        }
-
-
-        private void RedrawShapes()
-        {
-            if (AQT2D == null) return; 
-
-            PlotCOMIDMap(); 
-        }
-
-
-        private void NewSimForm_ResizeEnd(object sender, EventArgs e)
-        {
-        }
-
-
-        private void webView_MouseDown(string COMIDstr)
+        private void webView_MouseDown(bool lake, string COMIDstr)
             
         {
             string[] msg = COMIDstr.Split('|');
-            WBCOMID = msg[1];
+            COMID = msg[1];
+            SArea = 0;
+            SAreaLabel.Visible = false;
 
-            if (msg.Length > 2) SimName = msg[2];
-            else SimName = "WBCOMID: " + WBCOMID;
-            if (SimName == " ") SimName = "WBCOMID: " + WBCOMID;
-
-            if (msg.Length > 3) if (!double.TryParse(msg[3],out SArea)) SArea = -9999;
-            if (SArea > 0)
+            if (lake)
             {
-                SAreaLabel.Visible = true;
-                SAreaLabel.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
-            }
-            else SAreaLabel.Visible = false;
+                if (msg.Length > 2) SimName = msg[2];
+                else SimName = "WBCOMID: " + COMID;
+                if (SimName == " ") SimName = "WBCOMID: " + COMID;
+                if (msg.Length > 3) if (!double.TryParse(msg[3], out SArea)) SArea = -9999;
 
-            SimNameEdit.Text = SimName;
-            WBCLabel.Text = "WBCOMID: "+ WBCOMID;
+                if (SArea > 0)
+                {
+                    SAreaLabel.Visible = true;
+                    SAreaLabel.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
+                }
+                else SAreaLabel.Visible = false;
+                WBCLabel.Text = "WBCOMID: " + COMID;
+                SimNameEdit.Text = SimName;
+            }
+            else  //flow lines
+            {
+                if (msg[0] == "FL")
+                {
+                    if (msg.Length > 2) SimName = msg[2];
+                    else SimName = "COMID: " + COMID;
+                    if (SimName == " ") SimName = "COMID: " + COMID;
+                    comidBox.Text = COMID;
+                    WBCLabel.Text = "Pour Point: " + COMID;
+                    SimNameEdit.Text = SimName;
+                }
+                else
+                {
+                    EndCOMIDBox.Text = COMID;
+                }
+            }
         }
 
 
@@ -608,27 +344,7 @@ namespace GUI.AQUATOX
             webView.Focus();
         }
 
-        private void NewSimForm_Resize(object sender, EventArgs e)
-        {
-            // When window state changes
-            if (WindowState != LastWindowState)
-            {
-                LastWindowState = WindowState;
-                NewSimForm_ResizeEnd(sender, e);
-            }
 
-        }
-
-        private void showCOMIDsBox_CheckedChanged(object sender, EventArgs e)
-        {
-            NewSimForm_ResizeEnd(sender, e);
-        }
-
-
-        private void BaseJSONBox_Leave(object sender, EventArgs e)
-        {
-            
-        }
 
         private void comidBox_Leave(object sender, EventArgs e)
         {
@@ -639,7 +355,17 @@ namespace GUI.AQUATOX
             //SaveScreenSettings();
         }
 
+        private void MapType_CheckChanged(object sender, EventArgs e)
+        {
+            UpdateScreen();
+            if (StreamButton.Checked)
+            {
+                webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
+                SegLoadLabel.Visible = true;
+            }
+            else webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
 
+        }
 
     }
 }

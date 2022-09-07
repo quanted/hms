@@ -27,6 +27,8 @@
         <script>
             var allShapes = null;
             var geoLayer;
+            var lastFlLayer = null;
+            var lastFl2Layer = null;
 
             // catchments
             const URL_NWS_WB =
@@ -129,7 +131,7 @@
 
                 layer.on('click', function (e) {
                     if (layer.feature.properties.feature_id != null) {
-                        var str = "INFO|" + layer.feature.properties.feature_id.toString() + "|";
+                        var str = "LAKE|" + layer.feature.properties.feature_id.toString() + "|";
                         if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
                         str = str + "|";
                         if (layer.feature.properties.Shape_Area != null) str = str + layer.feature.properties.Shape_Area.toString() + "|";
@@ -148,7 +150,30 @@
                     if (str == ' ')  str = ''; 
                     str = layer.feature.properties.COMID.toString()+str;
                     layer.bindTooltip(str, { opacity: 1.0 });
+
                 };
+
+                layer.on('click', function (e) {
+                    if (layer.feature.properties.COMID != null) {
+                        layer.setStyle({ color: "Red" });
+                        if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "Black" }); };
+                        lastFlLayer = layer;
+                        var str = "FL|" + layer.feature.properties.COMID.toString() + "|";
+                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                        sendMessageToDotnet(str);
+                    };
+                });
+
+                layer.on('contextmenu', function (e) {
+                    if (layer.feature.properties.COMID != null) {
+                        layer.setStyle({ color: "Red" });
+                        if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "Black" }); };
+                        lastFl2Layer = layer;
+                        var str = "FL2|" + layer.feature.properties.COMID.toString() + "|";
+                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                        sendMessageToDotnet(str);
+                    };
+                });
             };
 
             
@@ -298,6 +323,16 @@
                 else MAP.removeLayer(markers);
             }
 
+            function ShowStreamDefaults() {
+                MAP.addLayer(FLOWLINES_LAYER);
+                MAP.addLayer(WB_LAYER);
+            }
+
+            function ShowLakeDefaults() {
+                MAP.addLayer(WB_LAYER);
+                MAP.removeLayer(FLOWLINES_LAYER);
+            }
+
 
             // dotnet <=> js message handlers
             window.addEventListener('DOMContentLoaded', (event) => {
@@ -313,6 +348,8 @@
                 if (messageArr[0] == "COLOR") ColorGeoJSON(parseInt(messageArr[1]), messageArr[2]);
                 if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
                 if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
+                if (messageArr[0] == "STREAMMAP") ShowStreamDefaults();
+                if (messageArr[0] == "LAKEMAP") ShowLakeDefaults();
 
 //                console.log(`message from dotnet: ${event.data}`);
 //                this.document.getElementById("message-bar").innerHTML =

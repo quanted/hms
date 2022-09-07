@@ -42,14 +42,9 @@
             this.executeButton = new System.Windows.Forms.Button();
             this.CreateButton = new System.Windows.Forms.Button();
             this.ReadNetworkPanel = new System.Windows.Forms.Panel();
-            this.ReadSNButton = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.spanLabel = new System.Windows.Forms.Label();
-            this.spanBox = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.EndCOMIDBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.comidBox = new System.Windows.Forms.TextBox();
+            this.SILabel3 = new System.Windows.Forms.Label();
+            this.SILabel2 = new System.Windows.Forms.Label();
+            this.SILabel1 = new System.Windows.Forms.Label();
             this.OutputPanel = new System.Windows.Forms.Panel();
             this.chartButton = new System.Windows.Forms.Button();
             this.SVBox = new System.Windows.Forms.ComboBox();
@@ -66,6 +61,8 @@
             this.ConsoleButton = new System.Windows.Forms.RadioButton();
             this.browseButton = new System.Windows.Forms.Button();
             this.PlotPanel = new System.Windows.Forms.Panel();
+            this.NRCheckBox = new System.Windows.Forms.CheckBox();
+            this.LabelCheckBox = new System.Windows.Forms.CheckBox();
             this.ShowBoundBox = new System.Windows.Forms.CheckBox();
             this.outputjump = new System.Windows.Forms.CheckBox();
             this.PlotButton = new System.Windows.Forms.Button();
@@ -80,6 +77,9 @@
             this.Separator = new System.Windows.Forms.Label();
             this.OutputLabel = new System.Windows.Forms.Label();
             this.BrowseJSON = new System.Windows.Forms.Button();
+            this.toggleLog = new System.Windows.Forms.Button();
+            this.GraphLabel = new System.Windows.Forms.Label();
+            this.resetZoom = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -118,7 +118,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(818, 454);
+            this.ProcessLog.Size = new System.Drawing.Size(817, 454);
             this.ProcessLog.TabIndex = 6;
             this.ProcessLog.WordWrap = false;
             // 
@@ -223,97 +223,41 @@
             // ReadNetworkPanel
             // 
             this.ReadNetworkPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ReadNetworkPanel.Controls.Add(this.ReadSNButton);
-            this.ReadNetworkPanel.Controls.Add(this.label6);
-            this.ReadNetworkPanel.Controls.Add(this.spanLabel);
-            this.ReadNetworkPanel.Controls.Add(this.spanBox);
-            this.ReadNetworkPanel.Controls.Add(this.label4);
-            this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
-            this.ReadNetworkPanel.Controls.Add(this.label1);
-            this.ReadNetworkPanel.Controls.Add(this.comidBox);
+            this.ReadNetworkPanel.Controls.Add(this.SILabel3);
+            this.ReadNetworkPanel.Controls.Add(this.SILabel2);
+            this.ReadNetworkPanel.Controls.Add(this.SILabel1);
             this.ReadNetworkPanel.Location = new System.Drawing.Point(24, 133);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
             this.ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             this.ReadNetworkPanel.TabIndex = 24;
             // 
-            // ReadSNButton
+            // SILabel3
             // 
-            this.ReadSNButton.Enabled = false;
-            this.ReadSNButton.Location = new System.Drawing.Point(126, 107);
-            this.ReadSNButton.Name = "ReadSNButton";
-            this.ReadSNButton.Size = new System.Drawing.Size(99, 23);
-            this.ReadSNButton.TabIndex = 29;
-            this.ReadSNButton.Text = "Read Network";
-            this.ReadSNButton.UseVisualStyleBackColor = true;
-            this.ReadSNButton.Click += new System.EventHandler(this.ReadNetwork_Click);
+            this.SILabel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.SILabel3.Location = new System.Drawing.Point(10, 81);
+            this.SILabel3.Name = "SILabel3";
+            this.SILabel3.Size = new System.Drawing.Size(235, 48);
+            this.SILabel3.TabIndex = 56;
+            this.SILabel3.Text = "XX segments including XX lake/reservoir segments";
             // 
-            // label6
+            // SILabel2
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(204, 76);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(24, 15);
-            this.label6.TabIndex = 28;
-            this.label6.Text = "km";
+            this.SILabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.SILabel2.Location = new System.Drawing.Point(11, 41);
+            this.SILabel2.Name = "SILabel2";
+            this.SILabel2.Size = new System.Drawing.Size(235, 40);
+            this.SILabel2.TabIndex = 55;
+            this.SILabel2.Text = "Pour-Point COMID: 123457890 with a XX km up-network reach";
             // 
-            // spanLabel
+            // SILabel1
             // 
-            this.spanLabel.AutoSize = true;
-            this.spanLabel.Enabled = false;
-            this.spanLabel.Location = new System.Drawing.Point(41, 76);
-            this.spanLabel.Name = "spanLabel";
-            this.spanLabel.Size = new System.Drawing.Size(79, 15);
-            this.spanLabel.TabIndex = 27;
-            this.spanLabel.Text = "Up-river Span";
-            // 
-            // spanBox
-            // 
-            this.spanBox.Enabled = false;
-            this.spanBox.Location = new System.Drawing.Point(127, 73);
-            this.spanBox.Name = "spanBox";
-            this.spanBox.Size = new System.Drawing.Size(71, 23);
-            this.spanBox.TabIndex = 26;
-            this.spanBox.Text = "5";
-            this.spanBox.Leave += new System.EventHandler(this.comidBox_Leave);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Enabled = false;
-            this.label4.Location = new System.Drawing.Point(1, 50);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(119, 15);
-            this.label4.TabIndex = 25;
-            this.label4.Text = "(optional) endComID";
-            // 
-            // EndCOMIDBox
-            // 
-            this.EndCOMIDBox.Enabled = false;
-            this.EndCOMIDBox.Location = new System.Drawing.Point(127, 47);
-            this.EndCOMIDBox.Name = "EndCOMIDBox";
-            this.EndCOMIDBox.Size = new System.Drawing.Size(71, 23);
-            this.EndCOMIDBox.TabIndex = 24;
-            this.EndCOMIDBox.Leave += new System.EventHandler(this.comidBox_Leave);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Enabled = false;
-            this.label1.Location = new System.Drawing.Point(76, 22);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(44, 15);
-            this.label1.TabIndex = 23;
-            this.label1.Text = "ComID";
-            // 
-            // comidBox
-            // 
-            this.comidBox.Enabled = false;
-            this.comidBox.Location = new System.Drawing.Point(127, 19);
-            this.comidBox.Name = "comidBox";
-            this.comidBox.Size = new System.Drawing.Size(71, 23);
-            this.comidBox.TabIndex = 22;
-            this.comidBox.Text = "23398915";
-            this.comidBox.Leave += new System.EventHandler(this.comidBox_Leave);
+            this.SILabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.SILabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.SILabel1.Location = new System.Drawing.Point(10, 16);
+            this.SILabel1.Name = "SILabel1";
+            this.SILabel1.Size = new System.Drawing.Size(235, 19);
+            this.SILabel1.TabIndex = 54;
+            this.SILabel1.Text = "Stream Network Simulation";
             // 
             // OutputPanel
             // 
@@ -381,9 +325,9 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(53, 125);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(121, 15);
+            this.label7.Size = new System.Drawing.Size(108, 15);
             this.label7.TabIndex = 26;
-            this.label7.Text = "Read Stream Network";
+            this.label7.Text = "Spatial Information";
             // 
             // label8
             // 
@@ -478,20 +422,44 @@
             // 
             // PlotPanel
             // 
+            this.PlotPanel.Controls.Add(this.NRCheckBox);
+            this.PlotPanel.Controls.Add(this.LabelCheckBox);
             this.PlotPanel.Controls.Add(this.ShowBoundBox);
             this.PlotPanel.Controls.Add(this.outputjump);
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 52);
             this.PlotPanel.Name = "PlotPanel";
-            this.PlotPanel.Size = new System.Drawing.Size(497, 23);
+            this.PlotPanel.Size = new System.Drawing.Size(716, 23);
             this.PlotPanel.TabIndex = 38;
+            // 
+            // NRCheckBox
+            // 
+            this.NRCheckBox.AutoSize = true;
+            this.NRCheckBox.Location = new System.Drawing.Point(508, 2);
+            this.NRCheckBox.Name = "NRCheckBox";
+            this.NRCheckBox.Size = new System.Drawing.Size(162, 19);
+            this.NRCheckBox.TabIndex = 43;
+            this.NRCheckBox.Text = "Show Non-Run Segments";
+            this.NRCheckBox.UseVisualStyleBackColor = true;
+            this.NRCheckBox.CheckedChanged += new System.EventHandler(this.NRCheckBox_CheckedChanged);
+            // 
+            // LabelCheckBox
+            // 
+            this.LabelCheckBox.AutoSize = true;
+            this.LabelCheckBox.Location = new System.Drawing.Point(428, 3);
+            this.LabelCheckBox.Name = "LabelCheckBox";
+            this.LabelCheckBox.Size = new System.Drawing.Size(59, 19);
+            this.LabelCheckBox.TabIndex = 42;
+            this.LabelCheckBox.Text = "Labels";
+            this.LabelCheckBox.UseVisualStyleBackColor = true;
+            this.LabelCheckBox.CheckedChanged += new System.EventHandler(this.LabelCheckBox_CheckedChanged);
             // 
             // ShowBoundBox
             // 
             this.ShowBoundBox.AutoSize = true;
             this.ShowBoundBox.Checked = true;
             this.ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ShowBoundBox.Location = new System.Drawing.Point(252, 3);
+            this.ShowBoundBox.Location = new System.Drawing.Point(244, 3);
             this.ShowBoundBox.Name = "ShowBoundBox";
             this.ShowBoundBox.Size = new System.Drawing.Size(170, 19);
             this.ShowBoundBox.TabIndex = 41;
@@ -560,13 +528,12 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(1045, 51);
+            this.button2.Location = new System.Drawing.Point(1044, 51);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 42;
             this.button2.Text = "Step 0";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Visible = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // webView
@@ -580,7 +547,7 @@
             this.webView.Location = new System.Drawing.Point(306, 80);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
-            this.webView.Size = new System.Drawing.Size(818, 454);
+            this.webView.Size = new System.Drawing.Size(817, 454);
             this.webView.TabIndex = 43;
             this.webView.ZoomFactor = 1D;
             // 
@@ -625,7 +592,7 @@
             this.Separator.Enabled = false;
             this.Separator.Location = new System.Drawing.Point(1, 41);
             this.Separator.Name = "Separator";
-            this.Separator.Size = new System.Drawing.Size(1136, 2);
+            this.Separator.Size = new System.Drawing.Size(1135, 2);
             this.Separator.TabIndex = 47;
             // 
             // OutputLabel
@@ -650,11 +617,47 @@
             this.BrowseJSON.UseVisualStyleBackColor = true;
             this.BrowseJSON.Click += new System.EventHandler(this.BrowseJSON_Click);
             // 
+            // toggleLog
+            // 
+            this.toggleLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.toggleLog.Location = new System.Drawing.Point(1008, 542);
+            this.toggleLog.Name = "toggleLog";
+            this.toggleLog.Size = new System.Drawing.Size(114, 24);
+            this.toggleLog.TabIndex = 51;
+            this.toggleLog.Text = "Toggle Log Scale";
+            this.toggleLog.UseVisualStyleBackColor = true;
+            this.toggleLog.Click += new System.EventHandler(this.toggleLog_Click);
+            // 
+            // GraphLabel
+            // 
+            this.GraphLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.GraphLabel.Location = new System.Drawing.Point(619, 543);
+            this.GraphLabel.Name = "GraphLabel";
+            this.GraphLabel.Size = new System.Drawing.Size(262, 32);
+            this.GraphLabel.TabIndex = 53;
+            this.GraphLabel.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
+            // 
+            // resetZoom
+            // 
+            this.resetZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.resetZoom.Location = new System.Drawing.Point(907, 542);
+            this.resetZoom.Name = "resetZoom";
+            this.resetZoom.Size = new System.Drawing.Size(95, 24);
+            this.resetZoom.TabIndex = 52;
+            this.resetZoom.Text = "Reset Zoom";
+            this.resetZoom.UseVisualStyleBackColor = true;
+            this.resetZoom.Click += new System.EventHandler(this.resetZoom_Click);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1136, 586);
+            this.ClientSize = new System.Drawing.Size(1135, 586);
+            this.Controls.Add(this.GraphLabel);
+            this.Controls.Add(this.resetZoom);
+            this.Controls.Add(this.toggleLog);
             this.Controls.Add(this.BrowseJSON);
             this.Controls.Add(this.OutputLabel);
             this.Controls.Add(this.Separator);
@@ -691,7 +694,6 @@
             this.Resize += new System.EventHandler(this.MultiSegForm_Resize);
             this.panel1.ResumeLayout(false);
             this.ReadNetworkPanel.ResumeLayout(false);
-            this.ReadNetworkPanel.PerformLayout();
             this.OutputPanel.ResumeLayout(false);
             this.OutputPanel.PerformLayout();
             this.TogglePanel.ResumeLayout(false);
@@ -716,14 +718,6 @@
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Button CreateButton;
         private System.Windows.Forms.Panel ReadNetworkPanel;
-        private System.Windows.Forms.Button ReadSNButton;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label spanLabel;
-        private System.Windows.Forms.TextBox spanBox;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox EndCOMIDBox;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox comidBox;
         private System.Windows.Forms.Button chartButton;
         private System.Windows.Forms.ComboBox SVBox;
         private System.Windows.Forms.Label label3;
@@ -758,5 +752,13 @@
         private System.Windows.Forms.Button viewOutputButton;
         private System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.Button BrowseJSON;
+        private System.Windows.Forms.Button toggleLog;
+        private System.Windows.Forms.Label GraphLabel;
+        private System.Windows.Forms.Button resetZoom;
+        private System.Windows.Forms.CheckBox LabelCheckBox;
+        private System.Windows.Forms.CheckBox NRCheckBox;
+        private System.Windows.Forms.Label SILabel3;
+        private System.Windows.Forms.Label SILabel2;
+        private System.Windows.Forms.Label SILabel1;
     }
 }

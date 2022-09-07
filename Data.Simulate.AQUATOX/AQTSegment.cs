@@ -511,12 +511,16 @@ namespace AQUATOX.AQTSegment
         }
 
         public void TakeDerivative(int Step)
-        {   
-            if  (((UseLoadsRecAsDriver)||(Location.SiteType == SiteTypes.TribInput))  // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
-              || ((AQTSeg.WaterVolZero)&&(NState != AllVariables.Volume)))            // if "water vol zero" integrate water volume variable only
+        {
+            if ((UseLoadsRecAsDriver) || (Location.SiteType == SiteTypes.TribInput))    // If this is true, no integration is used; the variable is driven by time series data from "loadsrec"
             {
                 State = LoadsRec.ReturnLoad(AQTSeg.TPresent);
                 StepRes[Step] = 0;
+            }
+            else if ((AQTSeg.WaterVolZero) && (NState != AllVariables.Volume))  // if "water vol zero" integrate water volume variable only, keep this SV constant
+            {
+                StepRes[Step] = 0;
+                return;
             }
             else Derivative(ref StepRes[Step]);
         }

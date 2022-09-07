@@ -30,7 +30,11 @@ namespace Streamflow
             dataRequest += "&waterbody=" + waterbody;
 
             FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000).Result;
-            
+            if (results == null) {
+                errorMsg = "ERROR: Unable to complete Flask Data Request for " + comids;  // JSC 9/7/2022
+                return null; 
+            }
+
             // Remote request test
             //string flaskURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?";
             //dataRequest = "dataset=streamflow&comid=" + comids;

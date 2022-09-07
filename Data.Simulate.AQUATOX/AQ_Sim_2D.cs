@@ -18,6 +18,7 @@ using Streamflow;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Data;
+using System.Security.Cryptography;
 
 namespace AQUATOX.AQSim_2D
 
@@ -599,20 +600,28 @@ namespace AQUATOX.AQSim_2D
         }
 
         /// <summary>
-        /// After up-stream segments have been run, this procedure apportions masses of state variables flowing into the current stream segment from one identified upstream segment 
+        /// After up-stream segments have been run, this procedure apportions masses of state variables flowing into the current stream segment from one identified upstream segment or waterbody 
         /// </summary>
         /// <param name="Sim">The AQUATOX segment that is having data passed to it</param>
         /// <param name="SrcID">COMID of the upstream segments from which data is being passed</param>
         /// <param name="ninputs">Number of upstream inputs</param>
         /// <param name="AR">Data structure of archived inputs from which to gather model results</param>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
-        public void Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null )  
+        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null )  
         {
             //archived_results AR;
             if (AR == null)    // (AR.Equals(null)) crashed
             {
                 archive.TryGetValue(SrcID, out AR);
-                if (AR == null) return;
+                if (AR == null)
+                {  // check to see if upstream segment is null because it is actually a lake/reservoir
+                    if (SN.waterbodies.comid_wb.ContainsKey(SrcID))
+                    {
+                        SN.waterbodies.comid_wb.TryGetValue(SrcID, out SrcID);  // translate SrcID to the relevant WBCOMID
+                        archive.TryGetValue(SrcID, out AR);
+                    }
+                if (AR == null) return "WARNING: Segment "+Sim.AQTSeg.StudyName+" is missing expected linkage data from "+SrcID;
+                } 
             }
 
             Sim.AQTSeg.PSetup.UseDetrInputRecInflow.Val = false;  // 10/4/2021 inflow from upstream for detritus, not from input record
@@ -660,6 +669,7 @@ namespace AQUATOX.AQSim_2D
                     TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
                 }
             }
+            return "";
         }
 
         /// <summary>
@@ -716,25 +726,28 @@ namespace AQUATOX.AQSim_2D
                     if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                     {
                         nSources++;
-                        Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                        outstr = outstr + "Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
+                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                        if (errstr != "") outstr += errstr + Environment.NewLine;
+                            else outstr += outstr + "Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
                     }
                 };
-
-            // pass data for Waterbodies
+            
             if (SN.waterbodies != null)
-                if (SN.waterbodies.comid_wb.ContainsKey(comid))
-                  foreach(KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)
-                    if (entry.Value == comid)
-                    {
-                        if ((entry.Key != comid) && !outofnetwork.Contains(entry.Key))  // don't pass data from out of network segments
+            {   // pass data into Waterbodies from adjacent stream segments
+                if (SN.waterbodies.comid_wb.ContainsKey(comid)) 
+                    foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)
+                        if (entry.Value == comid)
                         {
-                            nSources++;
-                            Pass_Data(Sim, entry.Key, nSources, null, divergence_flows);
-                            outstr = outstr + "Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString() + Environment.NewLine;
-                        }
-                    };
-
+                            if ((entry.Key != comid) && !outofnetwork.Contains(entry.Key))  // don't pass data from out of network segments
+                            {
+                                nSources++;
+                                string errstr = Pass_Data(Sim, entry.Key, nSources, null, divergence_flows);
+                                if (errstr != "") outstr += errstr + Environment.NewLine;
+                                else
+                                    outstr = outstr + "Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString() + Environment.NewLine;
+                            }
+                        };
+            }
 
             Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();
