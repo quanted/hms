@@ -934,7 +934,7 @@ namespace GUI.AQUATOX
 
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR running linked segments: " + ex.Message;
+                ProcessLog.Text += "ERROR running linked segments: " + ex.Message;
                 MessageBox.Show(ex.Message);
                 reset_interface_after_run();
                 return;
