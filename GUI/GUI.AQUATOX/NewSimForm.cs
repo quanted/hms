@@ -2,20 +2,12 @@
 using AQUATOX.AQTSegment;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using Microsoft.Web.WebView2.Core;
-using System.Runtime.InteropServices;
 using System.Collections.Specialized;
-using Utilities;
-//using Web.Services.Controllers;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace GUI.AQUATOX
 
@@ -37,7 +29,7 @@ namespace GUI.AQUATOX
 
         static Lake_Surrogates LS = null;
 
-        private ScreenSettings ScrSettings = new();
+        private NScreenSettings NScrSettings = new();
         private StringCollection ShortDirNames = new();
 
         static public JsonSerializerSettings LSJSONSettings()
@@ -51,9 +43,8 @@ namespace GUI.AQUATOX
             };
         }
 
-        public class ScreenSettings
+        public class NScreenSettings
         {
-            public string BaseJSONstr = "";
             public string COMIDstr = "";
             public string EndCOMIDstr = "";
             public string UpSpanStr = "";
@@ -126,56 +117,15 @@ namespace GUI.AQUATOX
             // https://stackoverflow.com/questions/8848203/alt-key-causes-form-to-redraw
         }
 
-        [DllImport("shlwapi.dll", CharSet = CharSet.Auto)]
-        static extern bool PathCompactPathEx([Out] StringBuilder pszOut, string szPath, int cchMax, int dwFlags);
-
-        static string PathShortener(string path, int length)
-        {
-            StringBuilder sb = new StringBuilder();
-            PathCompactPathEx(sb, path, length, 0);
-            return sb.ToString();
-        }
-
-        private void UpdateShortDirNames()
-        {
-            ShortDirNames.Clear();
-            foreach (string str in Properties.Settings.Default.MS_Recent)
-                ShortDirNames.Add(PathShortener(str, 28));
-        }
-
-        private void UpdateRecentFiles(string BDir)
-        {
-            if (Properties.Settings.Default == null) return;
-            if (Properties.Settings.Default.MS_Recent == null) Properties.Settings.Default.MS_Recent = new();
-            int indx = Properties.Settings.Default.MS_Recent.IndexOf(BDir);
-            if (indx == -1)
-            {
-                Properties.Settings.Default.MS_Recent.Insert(0, BDir);
-                if (Properties.Settings.Default.MS_Recent.Count > 10)
-                    Properties.Settings.Default.MS_Recent.RemoveAt(10);
-            }
-            else
-            {
-                Properties.Settings.Default.MS_Recent.RemoveAt(indx);
-                Properties.Settings.Default.MS_Recent.Insert(0, BDir);  //move to top
-            }
-
-            UpdateShortDirNames();
-            Properties.Settings.Default.Save();
-
-        }
-
-
         private void UpdateScreen()
         {
             ReadNetworkPanel.Visible = StreamButton.Checked;
             NetworkLabel.Visible = StreamButton.Checked;
 
-            comidBox.Text = ScrSettings.COMIDstr;
-            EndCOMIDBox.Text = ScrSettings.EndCOMIDstr;
-            spanBox.Text = ScrSettings.UpSpanStr;
+            comidBox.Text = NScrSettings.COMIDstr;
+            EndCOMIDBox.Text = NScrSettings.EndCOMIDstr;
+            spanBox.Text = NScrSettings.UpSpanStr;
         }
-
 
 
 
@@ -187,22 +137,70 @@ namespace GUI.AQUATOX
 
         private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
-            // if (VerifyStreamNetwork())
-                if (MessageBox.Show("Overwrite the existing stream network and any inputs and outputs?", "Confirm",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+            if (!Int32.TryParse(comidBox.Text, out int COMID))
+            {
+                MessageBox.Show("Please either enter a COMID in the COMID box or click on a stream segment to select a pour point.");
+                return;
+            }
+
+            if ((!Int32.TryParse(EndCOMIDBox.Text, out int endCOMID)) && (!Int32.TryParse(spanBox.Text, out int Span)))
+            {
+                MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
+                return;
+            }
+
+            SegLoadLabel.Text = "Please Wait, Reading Stream Network...";
+            SegLoadLabel.Visible = true;
+
+            Cursor.Current = Cursors.WaitCursor;
+            Application.DoEvents();
+
+            if (AQT2D == null) AQT2D = new();
+            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+            SegLoadLabel.Visible = false;
+            Cursor.Current = Cursors.Default;
+            if (SNJSON == "")
+            {
+                MessageBox.Show("ERROR: web service returned empty JSON."); return;
+            }
+            if (SNJSON.IndexOf("ERROR") >= 0)
+            {
+                MessageBox.Show("Web service returned an error: " + SNJSON); return;
+            }
+            try
+            { AQT2D.CreateStreamNetwork(SNJSON); }
+            catch
+            {
+                Cursor.Current = Cursors.Default;
+                SegLoadLabel.Visible = false;
+                MessageBox.Show("ERROR converting JSON: " + SNJSON); 
+                return;
+            }
+
+            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+            Summary2Label.Text = AQT2D.SNStats();
+            Summary2Label.Visible = true;
+
+            //if (AQT2D.SN.waterbodies != null)
+            //    for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+
+            for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                {
+                    int CID = AQT2D.SN.order[i][j];
+                    string CString = COMID.ToString();
+                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]); // display all layers
+
+                    //bool in_waterbody = false;
+                    //if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(CID);
+                    //if (!in_waterbody) webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]);    // don't color segments that are superceded by their lake/reservoir waterbody.
+                };
+
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM"); 
 
             UpdateScreen();
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            // code to create and write Lake_Surrogates object
-            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
-            string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
-            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json", json);
-            return;
-
-        }
 
         private static bool ReadLakeSurrogates()
         {
@@ -285,7 +283,6 @@ namespace GUI.AQUATOX
         }
 
 
-
         private void HelpButton2_Click(object sender, EventArgs e)
         {
             string target = "Multi_Segment_Runs";  //fixme new help topic
@@ -301,7 +298,7 @@ namespace GUI.AQUATOX
             string[] msg = COMIDstr.Split('|');
             COMID = msg[1];
             SArea = 0;
-            SAreaLabel.Visible = false;
+            Summary2Label.Visible = false;
 
             if (lake)
             {
@@ -312,11 +309,11 @@ namespace GUI.AQUATOX
 
                 if (SArea > 0)
                 {
-                    SAreaLabel.Visible = true;
-                    SAreaLabel.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
+                    Summary2Label.Visible = true;
+                    Summary2Label.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
                 }
-                else SAreaLabel.Visible = false;
-                WBCLabel.Text = "WBCOMID: " + COMID;
+                else Summary2Label.Visible = false;
+                Summary1Label.Text = "WBCOMID: " + COMID;
                 SimNameEdit.Text = SimName;
             }
             else  //flow lines
@@ -327,12 +324,14 @@ namespace GUI.AQUATOX
                     else SimName = "COMID: " + COMID;
                     if (SimName == " ") SimName = "COMID: " + COMID;
                     comidBox.Text = COMID;
-                    WBCLabel.Text = "Pour Point: " + COMID;
+                    NScrSettings.COMIDstr = COMID;
+                    Summary1Label.Text = "Pour Point: " + COMID;
                     SimNameEdit.Text = SimName;
                 }
                 else
                 {
                     EndCOMIDBox.Text = COMID;
+                    NScrSettings.EndCOMIDstr = COMID;
                 }
             }
         }
@@ -348,11 +347,9 @@ namespace GUI.AQUATOX
 
         private void comidBox_Leave(object sender, EventArgs e)
         {
-            ScrSettings.COMIDstr = comidBox.Text;
-            ScrSettings.EndCOMIDstr = EndCOMIDBox.Text;
-            ScrSettings.UpSpanStr = spanBox.Text;
-
-            //SaveScreenSettings();
+            NScrSettings.COMIDstr = comidBox.Text;
+            NScrSettings.EndCOMIDstr = EndCOMIDBox.Text;
+            NScrSettings.UpSpanStr = spanBox.Text;
         }
 
         private void MapType_CheckChanged(object sender, EventArgs e)
@@ -361,9 +358,20 @@ namespace GUI.AQUATOX
             if (StreamButton.Checked)
             {
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
+                SegLoadLabel.Text = "Stream segments may load slowly at wide zoom.";
                 SegLoadLabel.Visible = true;
             }
             else webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
+
+        }
+
+        private void LSButton_Click(object sender, EventArgs e)
+        {
+            // private funcitonality to create and write Lake_Surrogates object
+            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
+            string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
+            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json", json);
+            return;
 
         }
 

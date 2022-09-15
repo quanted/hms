@@ -39,6 +39,7 @@ namespace GUI.AQUATOX
         private ScreenSettings ScrSettings = new();
         private StringCollection ShortDirNames = new();
         private List<int> executed = new List<int>(); // list of comids that have been asked to execute
+        private string BaseDir;
 
         public class OChart : Chart
         {
@@ -327,7 +328,7 @@ namespace GUI.AQUATOX
                     string str3;
                     if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
-                    setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr, str3);
+                    setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr +"; "+str3 , AQT2D.SNStats());
                 }
 
                 UpdateRecentFiles(basedirBox.Text);
@@ -457,7 +458,7 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing stream network and any inputs and outputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
 
             string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
             foreach (string directoryFile in directoryFiles)
@@ -1369,11 +1370,10 @@ namespace GUI.AQUATOX
             public double[][] coordinates { get; set; }
         }
 
-        string BaseDir;
-        string GeoJSON;
 
         bool PlotWBCOMID(string WBString)
         {
+            string GeoJSON;
             BaseDir = basedirBox.Text;
             int WBID = int.Parse(WBString);
             if (WBID == -9998) return false;
@@ -1414,7 +1414,7 @@ namespace GUI.AQUATOX
 
         async void PlotCOMIDMap()
         {
-
+            string GeoJSON;
             double[][] polyline;
 
             await mapReadyForRender; // segments can't render until page is loaded
@@ -1440,7 +1440,6 @@ namespace GUI.AQUATOX
                         string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
                         PlotWBCOMID(WBString);
                     }
-
 
                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
                     for (int j = 0; j < AQT2D.SN.order[i].Length; j++)

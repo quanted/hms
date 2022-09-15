@@ -66,6 +66,31 @@ namespace AQUATOX.AQSim_2D
         public List<string> SVList = null;
 
         /// <summary>
+        /// Returns a summary of stream segments and waterbodies in network
+        /// </summary>
+        public String SNStats()
+        {
+            if (SN == null) return "";
+            int WBCount = 0;
+            if (SN.waterbodies != null)
+                for (int i = 1; i < SN.waterbodies.wb_table.Length; i++) WBCount++;
+
+            int FLCount = 0;
+            for (int i = 0; i < SN.order.Length; i++)
+                for (int j = 0; j < SN.order[i].Length; j++)
+                {
+                    int COMID = SN.order[i][j];
+                    string CString = COMID.ToString();
+                    bool in_waterbody = false;
+                    if (SN.waterbodies != null) in_waterbody = SN.waterbodies.comid_wb.ContainsKey(COMID);
+                    if (!in_waterbody) FLCount++; // don't count segments that are superceded by their lake/reservoir waterbody.
+                };
+            string outstr = "A total of " + (WBCount+FLCount).ToString() + " segments";
+            if (WBCount > 0) outstr += " including " + WBCount + " lake/reservoir segments.";
+            return outstr;
+        }
+
+        /// <summary>
         /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.
         /// </summary>
         public Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
@@ -375,10 +400,10 @@ namespace AQUATOX.AQSim_2D
         /// Reads the stream network data structure from web services
         /// </summary>
         /// <param name="comid">Primary comid</param>
-        /// <param name="pourID">Optional PourID</param>
+        /// <param name="endComid">Optional PourID</param>
         /// <param name="span">Optional up-stream distance to search in km</param>
         /// <returns>JSON or error message</returns>
-        public string ReadStreamNetwork(string comid, string pourID, string span)
+        public string ReadStreamNetwork(string comid, string endComid, string span)
         {
             string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             //string requestURL = "https://qed.epa.gov/hms/rest/api/";
@@ -387,8 +412,8 @@ namespace AQUATOX.AQSim_2D
 
             try
             {
-                string rurl = requestURL + "" + component + "/" + dataset + "?mainstem=false&comid=" + comid;
-                if (pourID != "") rurl += "&endComid=" + pourID;
+                string rurl = requestURL + component + "/" + dataset + "?mainstem=false&comid=" + comid;
+                if (endComid != "") rurl += "&endComid=" + endComid;
                 if (span != "") rurl += "&maxDistance=" + span;
                 var request = (HttpWebRequest)WebRequest.Create(rurl);
                 var response = (HttpWebResponse)request.GetResponse();

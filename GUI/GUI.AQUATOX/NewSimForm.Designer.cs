@@ -48,14 +48,14 @@
             this.button3 = new System.Windows.Forms.Button();
             this.SimNameEdit = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.WBCLabel = new System.Windows.Forms.Label();
+            this.Summary1Label = new System.Windows.Forms.Label();
             this.SimJSONLabel = new System.Windows.Forms.Label();
             this.StartDate = new System.Windows.Forms.DateTimePicker();
             this.label3 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.EndDate = new System.Windows.Forms.DateTimePicker();
-            this.button2 = new System.Windows.Forms.Button();
-            this.SAreaLabel = new System.Windows.Forms.Label();
+            this.LS_Button = new System.Windows.Forms.Button();
+            this.Summary2Label = new System.Windows.Forms.Label();
             this.TogglePanel = new System.Windows.Forms.Panel();
             this.StreamButton = new System.Windows.Forms.RadioButton();
             this.LakeButton = new System.Windows.Forms.RadioButton();
@@ -269,15 +269,15 @@
             this.label2.TabIndex = 48;
             this.label2.Text = "Simulation Name";
             // 
-            // WBCLabel
+            // Summary1Label
             // 
-            this.WBCLabel.AutoSize = true;
-            this.WBCLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.WBCLabel.Location = new System.Drawing.Point(17, 44);
-            this.WBCLabel.Name = "WBCLabel";
-            this.WBCLabel.Size = new System.Drawing.Size(148, 15);
-            this.WBCLabel.TabIndex = 49;
-            this.WBCLabel.Text = "WB COMID:  (unselected)";
+            this.Summary1Label.AutoSize = true;
+            this.Summary1Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Summary1Label.Location = new System.Drawing.Point(17, 44);
+            this.Summary1Label.Name = "Summary1Label";
+            this.Summary1Label.Size = new System.Drawing.Size(148, 15);
+            this.Summary1Label.TabIndex = 49;
+            this.Summary1Label.Text = "WB COMID:  (unselected)";
             // 
             // SimJSONLabel
             // 
@@ -328,35 +328,35 @@
             this.EndDate.TabIndex = 53;
             this.EndDate.Value = new System.DateTime(2011, 1, 1, 0, 0, 0, 0);
             // 
-            // button2
+            // LS_Button
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(920, 540);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(117, 25);
-            this.button2.TabIndex = 55;
-            this.button2.Text = "Create LS JSON";
-            this.button2.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Visible = false;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.LS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LS_Button.Location = new System.Drawing.Point(920, 540);
+            this.LS_Button.Name = "LS_Button";
+            this.LS_Button.Size = new System.Drawing.Size(117, 25);
+            this.LS_Button.TabIndex = 55;
+            this.LS_Button.Text = "Create LS JSON";
+            this.LS_Button.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.LS_Button.UseVisualStyleBackColor = true;
+            this.LS_Button.Visible = false;
+            this.LS_Button.Click += new System.EventHandler(this.LSButton_Click);
             // 
-            // SAreaLabel
+            // Summary2Label
             // 
-            this.SAreaLabel.AutoSize = true;
-            this.SAreaLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.SAreaLabel.Location = new System.Drawing.Point(17, 61);
-            this.SAreaLabel.Name = "SAreaLabel";
-            this.SAreaLabel.Size = new System.Drawing.Size(129, 15);
-            this.SAreaLabel.TabIndex = 56;
-            this.SAreaLabel.Text = "Surface Area (sq. km):";
-            this.SAreaLabel.Visible = false;
+            this.Summary2Label.AutoSize = true;
+            this.Summary2Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.Summary2Label.Location = new System.Drawing.Point(17, 61);
+            this.Summary2Label.Name = "Summary2Label";
+            this.Summary2Label.Size = new System.Drawing.Size(129, 15);
+            this.Summary2Label.TabIndex = 56;
+            this.Summary2Label.Text = "Surface Area (sq. km):";
+            this.Summary2Label.Visible = false;
             // 
             // TogglePanel
             // 
             this.TogglePanel.Controls.Add(this.StreamButton);
             this.TogglePanel.Controls.Add(this.LakeButton);
-            this.TogglePanel.Location = new System.Drawing.Point(392, 11);
+            this.TogglePanel.Location = new System.Drawing.Point(388, 8);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(316, 26);
             this.TogglePanel.TabIndex = 58;
@@ -413,9 +413,10 @@
             // SegLoadLabel
             // 
             this.SegLoadLabel.AutoSize = true;
-            this.SegLoadLabel.Location = new System.Drawing.Point(404, 40);
+            this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.SegLoadLabel.Location = new System.Drawing.Point(398, 38);
             this.SegLoadLabel.Name = "SegLoadLabel";
-            this.SegLoadLabel.Size = new System.Drawing.Size(263, 15);
+            this.SegLoadLabel.Size = new System.Drawing.Size(292, 17);
             this.SegLoadLabel.TabIndex = 60;
             this.SegLoadLabel.Text = "Stream segments may load slowly at wide zoom.";
             this.SegLoadLabel.Visible = false;
@@ -429,9 +430,9 @@
             this.Controls.Add(this.SegLoadLabel);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.TogglePanel);
-            this.Controls.Add(this.SAreaLabel);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.WBCLabel);
+            this.Controls.Add(this.Summary2Label);
+            this.Controls.Add(this.LS_Button);
+            this.Controls.Add(this.Summary1Label);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.SimNameEdit);
             this.Controls.Add(this.button3);
@@ -480,14 +481,14 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.TextBox SimNameEdit;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label WBCLabel;
+        private System.Windows.Forms.Label Summary1Label;
         private System.Windows.Forms.Label SimJSONLabel;
         private System.Windows.Forms.DateTimePicker StartDate;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.DateTimePicker EndDate;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label SAreaLabel;
+        private System.Windows.Forms.Button LS_Button;
+        private System.Windows.Forms.Label Summary2Label;
         private System.Windows.Forms.Panel TogglePanel;
         private System.Windows.Forms.RadioButton StreamButton;
         private System.Windows.Forms.RadioButton LakeButton;
