@@ -1045,7 +1045,7 @@ namespace Web.Services.Models
                     }
                 }
 
-                string query2 = "SELECT ComID, " + String.Join(", ", wbFields) + " FROM Waterbodies WHERE COMID IN (" + wbsb.ToString() + ")";
+                string query2 = "SELECT ComID, " + String.Join(", ", wbFields) + " FROM Waterbodies WHERE COMID IN (" + wbsb.ToString() + ") AND NWM=1";
                 Dictionary<string, object> wbParams = Utilities.SQLite.GetDataObject(dbPath, query2);
                 wbTable.Add(wbParams.Keys.ToList<object>());
 
@@ -1086,8 +1086,16 @@ namespace Web.Services.Models
                 case "string":
                     return value.ToString();
                 case "int":
+                    if(value.Equals("NA"))
+                    {
+                        return -9998.0;
+                    } 
                     return Int64.Parse(value.ToString());
                 case "double":
+                    if (value.Equals("NA"))
+                    {
+                        return -9998.0;
+                    }
                     return Double.Parse(value.ToString());
                 case "bool":
                     return Boolean.Parse(value.ToString());
