@@ -1808,9 +1808,8 @@ namespace GUI.AQUATOX
 
         private void NewProject_Click(object sender, EventArgs e)
         {
-            var lst = new List<string>() { "Lake/Reservoir", "Stream Network", "Estuary" };
-            int typeIndex = -1;
-
+            //var lst = new List<string>() { "Lake/Reservoir", "Stream Network", "Estuary" };
+            //int typeIndex = -1;
             //RadioButtonForm dlg = new RadioButtonForm(lst);
             //if (dlg.ShowDialog() == DialogResult.OK)
             //{
@@ -1820,7 +1819,7 @@ namespace GUI.AQUATOX
             //else return;
 
             NewSimForm NSForm = new NewSimForm();
-            NSForm.SimType = typeIndex;
+            // NSForm.SimType = typeIndex;
             if (NSForm.ShowDialog() == DialogResult.OK) 
               if (NSForm.COMID != "")
               {
@@ -1868,38 +1867,59 @@ namespace GUI.AQUATOX
                             string BaseJSONFileN = NSForm.BaseJSON_FileN; 
                             ScrSettings.BaseJSONstr = BaseJSONFileN;
                             BaseJSONBox.Text = BaseJSONFileN;
-
                             ScrSettings.COMIDstr = NSForm.COMID; 
-                            // comidBox.Text = NSForm.WBCOMID;
-
                             ScrSettings.BaseJSONstr = BaseJSONFileN;
+
                             basedirBox.Text = fbd.SelectedPath + "\\";
                             BaseDir = basedirBox.Text;
 
-                            string SNJSON = "{\"WBComid\": "+NSForm.COMID+"}";
-                            File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
-
-                            if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", NSForm.GeoJSON);
-
-                            if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json"); 
-                            AQTSim BSim = NSForm.BSim;
-                            if (BSim == null)
+                            if (NSForm.LakeSelected)
                             {
-                                BSim = new AQTSim();
-                                BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                string SNJSON = "{\"WBComid\": " + NSForm.COMID + "}";
+                                File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
+
+                                if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", NSForm.GeoJSON);
+
+                                if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json");
+                                AQTSim BSim = NSForm.BSim;
+                                if (BSim == null)
+                                {
+                                    BSim = new AQTSim();
+                                    BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                }
+
+                                BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
+                                BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+
+                                if (NSForm.SArea > 0)
+                                {
+                                    BSim.AQTSeg.Location.Locale.SurfArea.Val = NSForm.SArea;  //AQUATOX units are m2
+                                    BSim.AQTSeg.Location.Locale.SurfArea.Comment = "Estimate from NWM_Lakes_and_Reservoirs web service";
+                                }
+
+                                string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
+                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
                             }
-                            
+                            else //NSForm.SNPopulated must be true
+                            {
+                                string SNJSON = NSForm.ExportSNJSON; 
+                                File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
 
-                            BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
-                            BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+                                if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json");
+                                AQTSim BSim = NSForm.BSim;
+                                if (BSim == null)
+                                {
+                                    BSim = new AQTSim();
+                                    BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));
+                                }
 
-                            if (NSForm.SArea > 0) {
-                                BSim.AQTSeg.Location.Locale.SurfArea.Val = NSForm.SArea;  //AQUATOX units are m2
-                                BSim.AQTSeg.Location.Locale.SurfArea.Comment = "Estimate from NWM_Lakes_and_Reservoirs web service";
-                                    }
+                                BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
+                                BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
 
-                            string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                            File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+                                string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
+                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+
+                            }
 
                             SaveScreenSettings();
                             basedirBox_Leave(sender, e);

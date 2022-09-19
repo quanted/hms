@@ -17,15 +17,17 @@ namespace GUI.AQUATOX
         // private BackgroundWorker Worker = new BackgroundWorker();  potentially to be added, to report progress
         private AQSim_2D AQT2D = null;
 
-        public int SimType;
         public string COMID = "";
         public string GeoJSON = "";
+        public string ExportSNJSON = "";
         public string SimName = "";
         public double SArea = -9999;  // surface area in square meters as taken from waterbodies object
         public string BaseJSON_FileN = "Default Lake.JSON";
         public AQTSim BSim = null;
         public DateTime StartDT;  // start and end simulation time 
         public DateTime EndDT;
+        public bool SNPopulated = false;
+        public bool LakeSelected = false;
 
         static Lake_Surrogates LS = null;
 
@@ -59,16 +61,13 @@ namespace GUI.AQUATOX
             AutoScroll = true;
             InitializeComponent();
 
-
             mapReadyForRender = tcs.Task;
             webviewready = InitializeAsync();
 
             webView.Source = new Uri(Path.Combine(Environment.CurrentDirectory, @"html\newSimMap.html"));
 
-
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
 
@@ -177,7 +176,12 @@ namespace GUI.AQUATOX
                 return;
             }
 
+            ExportSNJSON = SNJSON;
             webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+
+            SNPopulated = true;
+            LakeSelected = false;
+            Summary1Label.Text = "Pour Point: " + COMID;
             Summary2Label.Text = AQT2D.SNStats();
             Summary2Label.Visible = true;
 
@@ -266,6 +270,14 @@ namespace GUI.AQUATOX
             StartDT = StartDate.Value;
             EndDT = EndDate.Value;
 
+            if (!LakeSelected&&!SNPopulated)
+            {
+                string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
+                if (LakeButton.Checked) ErrStr = "To create a 0-D Lake/Reservoir simulation, you must first click on a waterbody on the map";
+                MessageBox.Show(ErrStr,"Information",MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                e.Cancel = true;
+            }
+
             if (StartDate.Value>=EndDate.Value)
             {
                 MessageBox.Show("End date must be after start date.", "Information",
@@ -315,6 +327,8 @@ namespace GUI.AQUATOX
                 else Summary2Label.Visible = false;
                 Summary1Label.Text = "WBCOMID: " + COMID;
                 SimNameEdit.Text = SimName;
+                SNPopulated = false;
+                LakeSelected = true;
             }
             else  //flow lines
             {
@@ -325,7 +339,6 @@ namespace GUI.AQUATOX
                     if (SimName == " ") SimName = "COMID: " + COMID;
                     comidBox.Text = COMID;
                     NScrSettings.COMIDstr = COMID;
-                    Summary1Label.Text = "Pour Point: " + COMID;
                     SimNameEdit.Text = SimName;
                 }
                 else
@@ -360,8 +373,17 @@ namespace GUI.AQUATOX
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
                 SegLoadLabel.Text = "Stream segments may load slowly at wide zoom.";
                 SegLoadLabel.Visible = true;
+                infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
+                infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
+                if (!LakeSelected && !SNPopulated) Summary1Label.Text = "Stream network has not been read";
             }
-            else webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
+            else
+            {
+                webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
+                infolabel1.Text = "Click on a Lake/Reservoir to Select";
+                infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+                if (!LakeSelected && !SNPopulated) Summary1Label.Text = "WB COMID:  (unselected)";
+            }
 
         }
 
@@ -374,6 +396,7 @@ namespace GUI.AQUATOX
             return;
 
         }
+
 
     }
 }

@@ -348,9 +348,9 @@
 
             function highlightFlowLine(COMID) {
                 FLOWLINES_LAYER.eachFeature(function (lyr) {
-                    redlayers.push(lyr);
                     if (lyr.feature.properties.COMID == COMID) {
                         lyr.setStyle({ color: 'Red', weight: 2 });
+                        redlayers.push(lyr);
                         return;
                     }
                 });
@@ -368,7 +368,9 @@
                 redlayers.forEach(function (item, index) {
                     item.setStyle({ color: 'blue', weight: 2 });
                 });
+                redlayers = [];
             };
+
 
             // dotnet <=> js message handlers
             window.addEventListener('DOMContentLoaded', (event) => {
