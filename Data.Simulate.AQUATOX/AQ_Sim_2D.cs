@@ -703,12 +703,15 @@ namespace AQUATOX.AQSim_2D
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="errstr">string holding info about an error if present</param>
         /// <param name="jsonstring">the input json </param>
-        public AQTSim Instantiate_with_setup(string setupjson, ref string outstr, string jsonstring)
+        public AQTSim Instantiate_with_setup(string setupjson, ref List<string> outstr, string jsonstring)
         {
             AQTSim Sim = new AQTSim();
-            outstr = Sim.Instantiate(jsonstring);
-
-            if (outstr != "") return null;
+            string errstr = Sim.Instantiate(jsonstring);
+            if (errstr != "")
+            {
+                outstr.Add("ERROR: " + errstr);
+                return null;
+            }
             Sim.AQTSeg.SetMemLocRec();
 
             Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
@@ -728,7 +731,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
         /// <returns>boolean: true if the run was completed successfully</returns>/// 
-        public bool executeModel(int comid, string setupjson, ref string outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
+        public bool executeModel(int comid, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
             Sim.AQTSeg.ProgHandle = this.ProgHandle;
@@ -752,8 +755,8 @@ namespace AQUATOX.AQSim_2D
                     {
                         nSources++;
                         string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                        if (errstr != "") outstr += errstr + Environment.NewLine;
-                            else outstr += outstr + "Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString() + Environment.NewLine;
+                        if (errstr != "") outstr.Add(errstr);
+                            else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
                     }
                 };
             
@@ -771,8 +774,8 @@ namespace AQUATOX.AQSim_2D
                                 {
                                     nSources++;
                                     string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                                    if (errstr != "") outstr += errstr + Environment.NewLine;
-                                    else outstr = outstr + "Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString() + Environment.NewLine;
+                                    if (errstr != "") outstr.Add(errstr);
+                                        else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
                                 }
                             }
             }
@@ -786,16 +789,16 @@ namespace AQUATOX.AQSim_2D
 
                 if (errmessage != "")
                 {
-                    outstr += errmessage + Environment.NewLine;
+                    outstr.Add("ERROR: " + errmessage);
                     return false;
                 }
             }
-            else { 
-                   outstr += errmessage + Environment.NewLine;
-                   return false;
+            else {
+                outstr.Add("ERROR: " + errmessage);
+                return false;
                  };
 
-            outstr += "--> Executed COMID " + comid.ToString();
+            outstr.Add("INFO: " + "--> Executed COMID " + comid.ToString());
             return true;
         }
 

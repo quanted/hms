@@ -69,7 +69,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
+            this.TestOrderButton = new System.Windows.Forms.Button();
             this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.RecentLabel = new System.Windows.Forms.Label();
             this.RecentFilesBox = new System.Windows.Forms.ComboBox();
@@ -80,12 +80,19 @@
             this.toggleLog = new System.Windows.Forms.Button();
             this.GraphLabel = new System.Windows.Forms.Label();
             this.resetZoom = new System.Windows.Forms.Button();
+            this.LogPanel = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.InfoBox = new System.Windows.Forms.CheckBox();
+            this.InputsBox = new System.Windows.Forms.CheckBox();
+            this.ErrorsBox = new System.Windows.Forms.CheckBox();
+            this.WarningsBox = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
             this.TogglePanel.SuspendLayout();
             this.PlotPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView)).BeginInit();
+            this.LogPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // basedirBox
@@ -525,16 +532,16 @@
             this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
             this.infolabel2.Visible = false;
             // 
-            // button2
+            // TestOrderButton
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(1044, 51);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 42;
-            this.button2.Text = "Step 0";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.TestOrderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.TestOrderButton.Location = new System.Drawing.Point(1044, 51);
+            this.TestOrderButton.Name = "TestOrderButton";
+            this.TestOrderButton.Size = new System.Drawing.Size(75, 23);
+            this.TestOrderButton.TabIndex = 42;
+            this.TestOrderButton.Text = "Step 0";
+            this.TestOrderButton.UseVisualStyleBackColor = true;
+            this.TestOrderButton.Click += new System.EventHandler(this.TestOrderButtonClick);
             // 
             // webView
             // 
@@ -650,11 +657,89 @@
             this.resetZoom.UseVisualStyleBackColor = true;
             this.resetZoom.Click += new System.EventHandler(this.resetZoom_Click);
             // 
+            // LogPanel
+            // 
+            this.LogPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LogPanel.Controls.Add(this.WarningsBox);
+            this.LogPanel.Controls.Add(this.label1);
+            this.LogPanel.Controls.Add(this.InfoBox);
+            this.LogPanel.Controls.Add(this.InputsBox);
+            this.LogPanel.Controls.Add(this.ErrorsBox);
+            this.LogPanel.Location = new System.Drawing.Point(602, 539);
+            this.LogPanel.Name = "LogPanel";
+            this.LogPanel.Size = new System.Drawing.Size(521, 40);
+            this.LogPanel.TabIndex = 54;
+            this.LogPanel.Visible = false;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(60, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(41, 15);
+            this.label1.TabIndex = 55;
+            this.label1.Text = "Show:";
+            // 
+            // InfoBox
+            // 
+            this.InfoBox.AutoSize = true;
+            this.InfoBox.Checked = true;
+            this.InfoBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.InfoBox.Location = new System.Drawing.Point(309, 11);
+            this.InfoBox.Name = "InfoBox";
+            this.InfoBox.Size = new System.Drawing.Size(47, 19);
+            this.InfoBox.TabIndex = 44;
+            this.InfoBox.Text = "Info";
+            this.InfoBox.UseVisualStyleBackColor = true;
+            this.InfoBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
+            // 
+            // InputsBox
+            // 
+            this.InputsBox.AutoSize = true;
+            this.InputsBox.Checked = true;
+            this.InputsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.InputsBox.Location = new System.Drawing.Point(247, 11);
+            this.InputsBox.Name = "InputsBox";
+            this.InputsBox.Size = new System.Drawing.Size(59, 19);
+            this.InputsBox.TabIndex = 43;
+            this.InputsBox.Text = "Inputs";
+            this.InputsBox.UseVisualStyleBackColor = true;
+            this.InputsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
+            // 
+            // ErrorsBox
+            // 
+            this.ErrorsBox.AutoSize = true;
+            this.ErrorsBox.Checked = true;
+            this.ErrorsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ErrorsBox.Location = new System.Drawing.Point(111, 11);
+            this.ErrorsBox.Name = "ErrorsBox";
+            this.ErrorsBox.Size = new System.Drawing.Size(56, 19);
+            this.ErrorsBox.TabIndex = 41;
+            this.ErrorsBox.Text = "Errors";
+            this.ErrorsBox.UseVisualStyleBackColor = true;
+            this.ErrorsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
+            // 
+            // WarningsBox
+            // 
+            this.WarningsBox.AutoSize = true;
+            this.WarningsBox.Checked = true;
+            this.WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.WarningsBox.Location = new System.Drawing.Point(169, 11);
+            this.WarningsBox.Name = "WarningsBox";
+            this.WarningsBox.Size = new System.Drawing.Size(76, 19);
+            this.WarningsBox.TabIndex = 56;
+            this.WarningsBox.Text = "Warnings";
+            this.WarningsBox.UseVisualStyleBackColor = true;
+            this.WarningsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
+            // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1135, 586);
+            this.Controls.Add(this.LogPanel);
             this.Controls.Add(this.GraphLabel);
             this.Controls.Add(this.resetZoom);
             this.Controls.Add(this.toggleLog);
@@ -665,7 +750,7 @@
             this.Controls.Add(this.RecentFilesBox);
             this.Controls.Add(this.RecentLabel);
             this.Controls.Add(this.webView);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.TestOrderButton);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
             this.Controls.Add(this.progressBar1);
@@ -701,6 +786,8 @@
             this.PlotPanel.ResumeLayout(false);
             this.PlotPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.webView)).EndInit();
+            this.LogPanel.ResumeLayout(false);
+            this.LogPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -741,7 +828,7 @@
         private System.Windows.Forms.RadioButton GraphButton;
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button TestOrderButton;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private System.Windows.Forms.Label RecentLabel;
         private System.Windows.Forms.ComboBox RecentFilesBox;
@@ -760,5 +847,11 @@
         private System.Windows.Forms.Label SILabel3;
         private System.Windows.Forms.Label SILabel2;
         private System.Windows.Forms.Label SILabel1;
+        private System.Windows.Forms.Panel LogPanel;
+        private System.Windows.Forms.CheckBox InfoBox;
+        private System.Windows.Forms.CheckBox InputsBox;
+        private System.Windows.Forms.CheckBox ErrorsBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox WarningsBox;
     }
 }
