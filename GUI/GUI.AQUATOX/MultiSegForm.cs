@@ -40,6 +40,7 @@ namespace GUI.AQUATOX
         private StringCollection ShortDirNames = new();
         private List<int> executed = new List<int>(); // list of comids that have been asked to execute
         private string BaseDir;
+        private string showinglog = "";
 
         public class OChart : Chart
         {
@@ -670,7 +671,7 @@ namespace GUI.AQUATOX
                     if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-                AddToProcessLog("INFO: Please wait, creating individual AQUATOX JSONS for each segment and reading flow data." + Environment.NewLine);
+                AddToProcessLog("INPUTS: Please wait, creating individual AQUATOX JSONS for each segment and reading flow data.");
 
                 UseWaitCursor = true;
                 progressBar1.Visible = true;
@@ -848,6 +849,7 @@ namespace GUI.AQUATOX
 
             if (!SetupForRun()) return;
 
+            AddToProcessLog("INPUTS:  Model Run Initiated");
             try
             {
                 if (AQT2D.SN.network == null)
@@ -958,7 +960,7 @@ namespace GUI.AQUATOX
 
                         reset_interface_after_run();
 
-                        AddToProcessLog("INFO: Model execution complete");
+                        AddToProcessLog("INPUTS: Model execution complete");
                     }
                 };
 
@@ -1344,6 +1346,7 @@ namespace GUI.AQUATOX
         {
             if (!basedirBox.Text.EndsWith("\\")) basedirBox.Text = basedirBox.Text + "\\";
             AQT2D = null;
+
             LoadScreenSettings();
             UpdateScreen();
             if (PlotPanel.Enabled)
@@ -1352,6 +1355,9 @@ namespace GUI.AQUATOX
                 else RedrawShapes();
             }
             SaveBaseDir();
+
+            showinglog = "";
+            logfilen.Visible = false;
             LogOptions_CheckChanged(sender, e);
         }
 
@@ -1459,6 +1465,7 @@ namespace GUI.AQUATOX
             //          await webView.CoreWebView2.DOMContentLoaded(null);
             //          MessageBox.Show("Rendering Now");
 
+            logfilen.Visible = false;
             webView.Visible = true;
             webView.CoreWebView2.PostWebMessageAsString("ERASE");
 
@@ -1596,6 +1603,7 @@ namespace GUI.AQUATOX
                 infolabel1.Visible = false;
                 infolabel2.Visible = false;
                 LogPanel.Visible = false;
+                logfilen.Visible = false;
             }
             else if (ConsoleButton.Checked)
             {
@@ -1604,13 +1612,14 @@ namespace GUI.AQUATOX
                 infolabel1.Visible = false;
                 infolabel2.Visible = false;
                 LogPanel.Visible = true;
-
+                logfilen.Visible = true;
             }
             else
             {
                 infolabel1.Visible = true;
                 infolabel2.Visible = true;
                 LogPanel.Visible = false;
+                logfilen.Visible = false;
                 ChartVisible(false);
                 webView.Visible = true;
                 if (!VerifyStreamNetwork()) return;
@@ -1725,12 +1734,16 @@ namespace GUI.AQUATOX
             if (BaseJSONBox.Text == templatestring) return;
 
             ScrSettings.BaseJSONstr = BaseJSONBox.Text;
+
             if (FullBaseJSONName() == "") return;
 
             if (VerifyStreamNetwork())
             {
-                if (SegmentsCreated()) MessageBox.Show("Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until '" +
-                        CreateButton.Text + "' is selected, overwriting the existing linked system.");
+                string msg = "Selected new Base JSON to use as basis for linked-segment system.  Note that this template will not be applied to the model until '" +
+                        CreateButton.Text + "' is selected, overwriting the existing linked system.";
+
+                if (SegmentsCreated()) MessageBox.Show(msg);
+                AddToProcessLog("INPUTS: " + msg);
             }
             SaveScreenSettings();
         }
@@ -2037,29 +2050,58 @@ namespace GUI.AQUATOX
                 TestOrderButton.Text = "Step " + ShowStep.ToString();
 
                 UpdateScreen();
-
             }
         }
 
         private void LogOptions_CheckChanged(object sender, EventArgs e)
         {
+            if (showinglog == "") showinglog  = TodaysLogName();
+            ShowLog();
+        }
 
+
+        private void ShowLog()
+        {
             ProcessLog.Clear();
-            
-            string logname = TodaysLogName();
-            if (!File.Exists(logname)) return;
-            string ScrString = File.ReadAllText(logname);
 
+            logfilen.Visible = true;
+            logfilen.Text = showinglog;
+            if (!File.Exists(showinglog)) return;
+
+            string ScrString = File.ReadAllText(showinglog);
             ProcessLog.Visible = false;
             using (var reader = new StringReader(ScrString))
             {
                 for (string line = reader.ReadLine(); line != null; line = reader.ReadLine())
                 {
-                    if (ShowMsg(line)) ProcessLog.AppendText(line+Environment.NewLine); 
+                    if (ShowMsg(line)) ProcessLog.AppendText(line + Environment.NewLine);
                 }
             }
             ProcessLog.Visible = true;
+        }
 
+        private void LogChange_Click(object sender, EventArgs e)
+        {
+            if (LogChange.Text == "Today's Log")
+            {
+                LogChange.Text = "Change Log";
+                showinglog = TodaysLogName(); 
+                ShowLog();
+                return;
+            }
+
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.InitialDirectory = BaseDir;
+            openFileDialog1.Filter = "Log File|*.log";
+            openFileDialog1.Title = "Open a Log File";
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+
+            LogChange.Text = "Today's Log";  // allow user to toggle back to today's log
+            if (openFileDialog1.FileName != "")
+            {
+                showinglog = openFileDialog1.FileName;
+                ShowLog();
+            }
 
         }
     }

@@ -81,11 +81,13 @@
             this.GraphLabel = new System.Windows.Forms.Label();
             this.resetZoom = new System.Windows.Forms.Button();
             this.LogPanel = new System.Windows.Forms.Panel();
+            this.LogChange = new System.Windows.Forms.Button();
+            this.WarningsBox = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.InfoBox = new System.Windows.Forms.CheckBox();
             this.InputsBox = new System.Windows.Forms.CheckBox();
             this.ErrorsBox = new System.Windows.Forms.CheckBox();
-            this.WarningsBox = new System.Windows.Forms.CheckBox();
+            this.logfilen = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.ReadNetworkPanel.SuspendLayout();
             this.OutputPanel.SuspendLayout();
@@ -121,11 +123,11 @@
             this.ProcessLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProcessLog.Location = new System.Drawing.Point(306, 80);
+            this.ProcessLog.Location = new System.Drawing.Point(306, 90);
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(817, 454);
+            this.ProcessLog.Size = new System.Drawing.Size(817, 444);
             this.ProcessLog.TabIndex = 6;
             this.ProcessLog.WordWrap = false;
             // 
@@ -551,7 +553,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webView.CreationProperties = null;
             this.webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webView.Location = new System.Drawing.Point(306, 80);
+            this.webView.Location = new System.Drawing.Point(306, 81);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
             this.webView.Size = new System.Drawing.Size(817, 454);
@@ -660,6 +662,7 @@
             // LogPanel
             // 
             this.LogPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.LogPanel.Controls.Add(this.LogChange);
             this.LogPanel.Controls.Add(this.WarningsBox);
             this.LogPanel.Controls.Add(this.label1);
             this.LogPanel.Controls.Add(this.InfoBox);
@@ -670,6 +673,32 @@
             this.LogPanel.Size = new System.Drawing.Size(521, 40);
             this.LogPanel.TabIndex = 54;
             this.LogPanel.Visible = false;
+            // 
+            // LogChange
+            // 
+            this.LogChange.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.LogChange.ForeColor = System.Drawing.Color.Black;
+            this.LogChange.Location = new System.Drawing.Point(381, 5);
+            this.LogChange.Margin = new System.Windows.Forms.Padding(0);
+            this.LogChange.Name = "LogChange";
+            this.LogChange.Size = new System.Drawing.Size(95, 25);
+            this.LogChange.TabIndex = 57;
+            this.LogChange.Text = "Change Log";
+            this.LogChange.UseVisualStyleBackColor = true;
+            this.LogChange.Click += new System.EventHandler(this.LogChange_Click);
+            // 
+            // WarningsBox
+            // 
+            this.WarningsBox.AutoSize = true;
+            this.WarningsBox.Checked = true;
+            this.WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.WarningsBox.Location = new System.Drawing.Point(169, 11);
+            this.WarningsBox.Name = "WarningsBox";
+            this.WarningsBox.Size = new System.Drawing.Size(76, 19);
+            this.WarningsBox.TabIndex = 56;
+            this.WarningsBox.Text = "Warnings";
+            this.WarningsBox.UseVisualStyleBackColor = true;
+            this.WarningsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
             // 
             // label1
             // 
@@ -721,24 +750,23 @@
             this.ErrorsBox.UseVisualStyleBackColor = true;
             this.ErrorsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
             // 
-            // WarningsBox
+            // logfilen
             // 
-            this.WarningsBox.AutoSize = true;
-            this.WarningsBox.Checked = true;
-            this.WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.WarningsBox.Location = new System.Drawing.Point(169, 11);
-            this.WarningsBox.Name = "WarningsBox";
-            this.WarningsBox.Size = new System.Drawing.Size(76, 19);
-            this.WarningsBox.TabIndex = 56;
-            this.WarningsBox.Text = "Warnings";
-            this.WarningsBox.UseVisualStyleBackColor = true;
-            this.WarningsBox.CheckedChanged += new System.EventHandler(this.LogOptions_CheckChanged);
+            this.logfilen.AutoSize = true;
+            this.logfilen.Location = new System.Drawing.Point(313, 78);
+            this.logfilen.Name = "logfilen";
+            this.logfilen.Size = new System.Drawing.Size(83, 15);
+            this.logfilen.TabIndex = 55;
+            this.logfilen.Text = "Log File Name";
+            this.logfilen.Visible = false;
             // 
             // MultiSegForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1135, 586);
+            this.Controls.Add(this.webView);
+            this.Controls.Add(this.logfilen);
             this.Controls.Add(this.LogPanel);
             this.Controls.Add(this.GraphLabel);
             this.Controls.Add(this.resetZoom);
@@ -749,7 +777,6 @@
             this.Controls.Add(this.NewProject);
             this.Controls.Add(this.RecentFilesBox);
             this.Controls.Add(this.RecentLabel);
-            this.Controls.Add(this.webView);
             this.Controls.Add(this.TestOrderButton);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
@@ -853,5 +880,7 @@
         private System.Windows.Forms.CheckBox ErrorsBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox WarningsBox;
+        private System.Windows.Forms.Button LogChange;
+        private System.Windows.Forms.Label logfilen;
     }
 }
