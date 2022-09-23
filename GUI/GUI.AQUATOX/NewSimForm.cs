@@ -270,20 +270,22 @@ namespace GUI.AQUATOX
             StartDT = StartDate.Value;
             EndDT = EndDate.Value;
 
-            if (!LakeSelected&&!SNPopulated)
-            {
-                string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
-                if (LakeButton.Checked) ErrStr = "To create a 0-D Lake/Reservoir simulation, you must first click on a waterbody on the map";
-                MessageBox.Show(ErrStr,"Information",MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
-                e.Cancel = true;
-            }
+            if (DialogResult == DialogResult.OK)  {
+                if (!LakeSelected && !SNPopulated)
+                {
+                    string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
+                    if (LakeButton.Checked) ErrStr = "To create a 0-D Lake/Reservoir simulation, you must first click on a waterbody on the map";
+                    MessageBox.Show(ErrStr, "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                    e.Cancel = true;
+                }
 
-            if (StartDate.Value>=EndDate.Value)
-            {
-                MessageBox.Show("End date must be after start date.", "Information",
-                   MessageBoxButtons.OK, MessageBoxIcon.Warning,
-                   MessageBoxDefaultButton.Button1);
-                e.Cancel = true;
+                if (StartDate.Value >= EndDate.Value)
+                {
+                    MessageBox.Show("End date must be after start date.", "Information",
+                       MessageBoxButtons.OK, MessageBoxIcon.Warning,
+                       MessageBoxDefaultButton.Button1);
+                    e.Cancel = true;
+                }
             }
 
         }

@@ -212,22 +212,28 @@
             };
 
             function FLonEachFeature(feature, layer) {
-                if (layer.feature.properties.COMID != null) {
-                    var str = '';
-                    if (layer.feature.properties.GNIS_NAME != null)  str = ", " + layer.feature.properties.GNIS_NAME.toString(); 
-                    if (str == ' ')  str = ''; 
-                    str = layer.feature.properties.COMID.toString()+str;
-                    layer.bindTooltip(str, { opacity: 1.0 });
 
+                if (feature.properties.FCODE == 56600) {
+                    layer.setStyle({ opacity: 0.0 });
+                    return;
+                };
+
+                layer.setStyle({ opacity: 1.0 });
+                if (feature.properties.COMID != null) {
+                    var str = '';
+                    if (feature.properties.GNIS_NAME != null)  str = ", " + feature.properties.GNIS_NAME.toString(); 
+                    if (str == ' ')  str = ''; 
+                    str = feature.properties.COMID.toString()+str;
+                    layer.bindTooltip(str, { opacity: 1.0 });
                 };
 
                 layer.on('click', function (e) {
-                    if ((!lakemode)&&(layer.feature.properties.COMID != null)) {
+                    if ((!lakemode)&&(feature.properties.COMID != null)) {
                         if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
                         layer.setStyle({ color: "Red", weight: 2 });
                         lastFlLayer = layer;
-                        var str = "FL|" + layer.feature.properties.COMID.toString() + "|";
-                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                        var str = "FL|" + feature.properties.COMID.toString() + "|";
+                        if (feature.properties.GNIS_NAME != null) str = str + feature.properties.GNIS_NAME.toString();
                         sendMessageToDotnet(str);
                     };
                 });

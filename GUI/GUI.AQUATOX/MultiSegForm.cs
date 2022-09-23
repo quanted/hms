@@ -1825,16 +1825,14 @@ namespace GUI.AQUATOX
                         {
                             if (fbd.ShowDialog() == DialogResult.OK)
                             {
-
                                 basedirBox.Text = fbd.SelectedPath + "\\";
-                                if (VerifyStreamNetwork())
+                                string BaseDir = basedirBox.Text;
+                                string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
+                                if (directoryFiles.Length>0) 
                                 {
                                     if (MessageBox.Show("Directory is not empty, overwrite existing JSON files?", "Confirm",
                                       MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                                     {
-                                        string BaseDir = basedirBox.Text;
-
-                                        string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
                                         foreach (string directoryFile in directoryFiles)
                                         {
                                             System.IO.File.Delete(directoryFile);
@@ -1842,7 +1840,7 @@ namespace GUI.AQUATOX
                                         fbd_done = true;
                                     }
                                 }
-                                else fbd_done = true; // empty directory
+                                else fbd_done = true; // no JSON files in directory 
                             }
                             else
                             {
