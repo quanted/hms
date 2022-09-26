@@ -3,6 +3,7 @@ using System.Data.SQLite;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using Accord.Math;
 
 namespace WatershedDelineation
 {
@@ -208,6 +209,7 @@ namespace WatershedDelineation
         {
             string serializedData = JsonSerializer.Serialize(networkData);
             JsonDocument data = JsonSerializer.Deserialize<JsonDocument>(serializedData);
+            if (data.RootElement.GetProperty("output").IsEqual(null)) { return null; }
             List<List<object>> networkTable = new List<List<object>>();
             List<object> columns = new List<object>()
             {

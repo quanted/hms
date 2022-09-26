@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Accord.Math;
+using DnsClient;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,8 +34,39 @@ namespace Web.Services.Models
             Dictionary<string, object> result = new Dictionary<string, object>();
 
             WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
-            var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
-            List<List<object>> networkTable = StreamNetwork.generateTable(streamNetwork, null);
+            List<List<object>> networkTable = new List<List<object>>();
+            int maxTries = 5;
+            int iTries = 0;
+            bool completed = false;
+            while (!completed)
+            {
+                try
+                {
+                    var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
+                    networkTable = StreamNetwork.generateTable(streamNetwork, null);
+                }
+                catch(Exception ex)
+                {
+                    
+                }
+                if (networkTable.Count == 0)
+                {
+                    iTries += 1;
+                }
+                else
+                {
+                    completed = true;
+                }
+                if (iTries == maxTries)
+                {
+                    completed = true;
+                }
+            }
+            if (networkTable.Count == 0)
+            {
+                return this.Error("Unable to obtain network data from EPA Waters.");
+            }
+
             List<List<int>> segOrder = new List<List<int>>();
 
             if (mainstem)
