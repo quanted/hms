@@ -2,6 +2,7 @@
 using DnsClient;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,7 @@ namespace Web.Services.Models
         public async Task<Dictionary<string, object>> Get(string comid, string endComid = null, string huc = null, double maxDistance = 50.0, bool mainstem = false)
         {
             string errorMsg = "";
+            Stopwatch stopWatch = new Stopwatch();
 
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
@@ -34,6 +36,7 @@ namespace Web.Services.Models
             Dictionary<string, object> result = new Dictionary<string, object>();
 
             WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
+
             List<List<object>> networkTable = new List<List<object>>();
             int maxTries = 3;
             int iTries = 0;
@@ -42,7 +45,11 @@ namespace Web.Services.Models
             {
                 try
                 {
+                    stopWatch.Start();
                     var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
+                    stopWatch.Stop();
+                    Console.WriteLine("Stream Network - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                    stopWatch.Reset();
                     networkTable = StreamNetwork.generateTable(streamNetwork, null);
                 }
                 catch(Exception ex)
@@ -67,8 +74,8 @@ namespace Web.Services.Models
                 return this.Error("Unable to obtain network data from EPA Waters.");
             }
 
+            stopWatch.Stop();
             List<List<int>> segOrder = new List<List<int>>();
-
             if (mainstem)
             {
                 string switchedComid = null;
@@ -93,10 +100,15 @@ namespace Web.Services.Models
             {
                 result = this.generateOrderAndSources(ref networkTable, comid, huc);
             }
+            stopWatch.Stop();
+            Console.WriteLine("Stream Network - GenerateOrder Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopWatch.Reset();
             result.Add("network", networkTable);
             List<string> sourcesList = (result["sources"] as Dictionary<string, List<string>>).Keys.ToList();
+            stopWatch.Start();
             result.Add("waterbodies", this.checkWaterbodies(sourcesList));
-
+            stopWatch.Stop();
+            Console.WriteLine("Stream Network - CheckWaterbodies Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
             return result;
         }
 
