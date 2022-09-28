@@ -74,7 +74,7 @@ namespace Web.Services.Models
                 return this.Error("Unable to obtain network data from EPA Waters.");
             }
 
-            stopWatch.Stop();
+            stopWatch.Start();
             List<List<int>> segOrder = new List<List<int>>();
             if (mainstem)
             {
