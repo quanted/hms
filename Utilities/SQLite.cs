@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.Data.Sqlite;
+using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
@@ -90,7 +91,6 @@ namespace Utilities
                 return data;
             }
         }
-
 
         /// <summary>
         /// Access sqlite database file, dbPath, and executes the query provided returning the query results

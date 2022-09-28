@@ -1,5 +1,6 @@
 ﻿using Accord.Math;
 using DnsClient;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,7 +49,7 @@ namespace Web.Services.Models
                     stopWatch.Start();
                     var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
                     stopWatch.Stop();
-                    Console.WriteLine("Stream Network - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                    Log.Information("Stream Network - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
                     stopWatch.Reset();
                     networkTable = StreamNetwork.generateTable(streamNetwork, null);
                 }
@@ -101,14 +102,14 @@ namespace Web.Services.Models
                 result = this.generateOrderAndSources(ref networkTable, comid, huc);
             }
             stopWatch.Stop();
-            Console.WriteLine("Stream Network - GenerateOrder Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+            Log.Information("Stream Network - GenerateOrder Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
             stopWatch.Reset();
             result.Add("network", networkTable);
             List<string> sourcesList = (result["sources"] as Dictionary<string, List<string>>).Keys.ToList();
             stopWatch.Start();
             result.Add("waterbodies", this.checkWaterbodies(sourcesList));
             stopWatch.Stop();
-            Console.WriteLine("Stream Network - CheckWaterbodies Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+            Log.Information("Stream Network - CheckWaterbodies Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
             return result;
         }
 
