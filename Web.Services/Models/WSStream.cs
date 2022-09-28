@@ -35,7 +35,7 @@ namespace Web.Services.Models
 
             WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
             List<List<object>> networkTable = new List<List<object>>();
-            int maxTries = 5;
+            int maxTries = 3;
             int iTries = 0;
             bool completed = false;
             while (!completed)
@@ -1048,9 +1048,9 @@ namespace Web.Services.Models
             for(int i = 0; i < comids.Count; i++)
             {
                 string comid = comids[i];
-                sb.Append("\"");
+                //sb.Append("");
                 sb.Append(comid);
-                sb.Append("\"");
+                //sb.Append("");
                 if(i < comids.Count - 1)
                 {
                     sb.Append(", ");
