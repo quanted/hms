@@ -44,11 +44,6 @@ namespace Utilities
             this.traversed = false;
         }
 
-        public void SetAltAttributes(Dictionary<string, object> attributes)
-        {
-            this.altAttributes = attributes;
-        }
-
         public void AddEdge(Node node, bool upNode=true)
         {
             int id = node.id;
@@ -69,30 +64,6 @@ namespace Utilities
                     this.dwnNode.Add(node);
                 }
             }
-        }
-
-        public Dictionary<string, object> getAttributes(List<string> attributeNames, bool alt = false)
-        {
-            Dictionary<string, object> results = new Dictionary<string, object>();
-            for (int i = 0; i < attributeNames.Count; i++)
-            {
-                string aName = attributeNames[i];
-                if (!alt)
-                {
-                    if (this.attributes.ContainsKey(aName))
-                    {
-                        results[aName] = this.attributes[aName];
-                    }
-                }
-                else
-                {
-                    if (this.altAttributes.ContainsKey(aName))
-                    {
-                        results[aName] = this.altAttributes[aName];
-                    }
-                }
-            }
-            return results;
         }
     }
 
@@ -223,61 +194,6 @@ namespace Utilities
                 iEdges = new List<Node>(jEdges);
             }
             this.order.Reverse();
-
-            //while (!completed)
-            //{
-            //    jEdges = new List<Node>();
-            //    List<string> level = new List<string>();
-            //    for (int i = 0; i < iEdges.Count; i++)
-            //    {
-            //        Node iNode = iEdges[i];
-            //        if (firstEdges)
-            //        {
-            //            for(int j = 0; j < iNode.dwnNode.Count; j++)
-            //            {
-            //                jEdges.Add(iNode.dwnNode[j]);
-            //            }
-            //            level.Add(iNode.name);
-            //        }
-            //        else
-            //        {
-            //            bool ready = true;
-            //            for(int j = 0; j < iNode.upNode.Count; j++)
-            //            {
-            //                if (!(iNode.upNode[j].traversed && iNode.upNode[j].inGraphNode))
-            //                {
-            //                    ready = false;
-            //                }
-            //            }
-            //            if (ready)
-            //            {
-            //                for (int j = 0; j < iNode.dwnNode.Count; j++)
-            //                {
-            //                    jEdges.Add(iNode.dwnNode[j]);
-            //                }
-            //                if (!level.Contains(iNode.name))
-            //                {
-            //                    level.Add(iNode.name);
-            //                }
-            //            }
-            //            else
-            //            {
-            //                jEdges.Add(iNode);
-            //            }
-            //        }
-            //        traversed.Add(iNode.id);
-            //    }
-            //    if(level.Count > 0)
-            //    {
-            //        this.order.Add(level);
-            //    }
-            //    if (jEdges.Count == 0 || this.prime.traversed || iEdges.Equals(jEdges))
-            //    {
-            //        completed = true;
-            //    }
-            //    iEdges = new List<Node>(jEdges);
-            //    firstEdges = false;
-            //}
         }
 
         public Dictionary<string, List<string>> GetSources()

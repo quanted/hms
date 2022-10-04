@@ -6,17 +6,16 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine3.15 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
-RUN dotnet build -c Release -o /app
+RUN dotnet build --runtime linux-musl-x64 -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish --runtime linux-musl-x64 -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
 
 COPY --from=publish /app .
 RUN ls /app/App_Data
-#RUN mkdir -p /src/Web.Services.Tests/bin/Release/net5.0
 
 COPY ./GUI /app/GUI
 
