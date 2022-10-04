@@ -18,6 +18,11 @@ namespace Web.Services.Models
     public class WSStream
     {
 
+        Dictionary<string, object> plusflowlineResults = new Dictionary<string, object>();
+        Dictionary<string, List<string>> sourceResults = new Dictionary<string, List<string>>();
+        Dictionary<string, Dictionary<string, string>> comidDetails = new Dictionary<string, Dictionary<string, string>>();
+        Dictionary<int, string> hydroComid = new Dictionary<int, string>();
+
         /// <summary>
         /// Gets stream network data for a provided comid
         /// </summary>
@@ -30,6 +35,8 @@ namespace Web.Services.Models
 
             // Constructs default error output object containing error message.
             Utilities.ErrorOutput err = new Utilities.ErrorOutput();
+
+            bool optimized = true;
 
             // Check comid
             if (comid is null) { return this.Error("ERROR: comid input is not valid."); }
@@ -74,6 +81,25 @@ namespace Web.Services.Models
             {
                 return this.Error("Unable to obtain network data from EPA Waters.");
             }
+            if (optimized)
+            {
+                stopWatch.Restart();
+                Network network = new Network(networkTable, comid);
+                stopWatch.Stop();
+                Log.Information("Stream Network - Create Network Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                stopWatch.Restart();
+                network.LoadData();
+                stopWatch.Stop();
+                Log.Information("Stream Network - Load DB Data Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                stopWatch.Restart();
+                result = network.ReturnData();
+                stopWatch.Stop();
+                Log.Information("Stream Network - Generate Output Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+
+                return result;
+            }
+
+            this.loadSQLData(networkTable);
 
             stopWatch.Start();
             List<List<int>> segOrder = new List<List<int>>();
@@ -112,6 +138,66 @@ namespace Web.Services.Models
             Log.Information("Stream Network - CheckWaterbodies Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
             return result;
         }
+
+        private void loadSQLData(List<List<object>> networkTable)
+        {
+            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+
+            StringBuilder sb = new StringBuilder();
+            List<object> fields = networkTable[0];
+            fields.Remove("comid");
+            for (int i = 1; i < networkTable.Count; i++)
+            {
+                string comid = networkTable[i][0].ToString();
+                int hydro = Int32.Parse(networkTable[i][1].ToString());
+                Dictionary<string, string> details = new Dictionary<string, string>();
+                for(int j = 1; j < fields.Count; j++)
+                {
+                    details.Add(fields[j].ToString(), networkTable[i][j].ToString());
+                }
+                this.comidDetails.Add(comid, details);
+                this.hydroComid.Add(hydro, comid);
+
+                sb.Append(comid);
+                if (i < networkTable.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+
+                string sourceQuery = "SELECT ComID FROM PlusFlowlineVAA WHERE DnHydroseq=" + hydro.ToString();
+                Dictionary<string, object> sourceResults = Utilities.SQLite.GetDataObject(dbPath, sourceQuery) as Dictionary<string, object>;
+                List<object> sourceComID = new List<object>();
+                if (sourceResults.Count > 0)
+                {
+                    sourceComID.Add(sourceResults["ComID"].ToString().Split(","));
+                }
+                this.sourceResults.Add(comid, new List<string>());
+                for (int j = 0; j < sourceComID.Count; j++)
+                {
+                    this.sourceResults[comid].Add(sourceComID[j].ToString());   
+                }
+            }
+            string comidsStr = sb.ToString();
+
+            // Obtain all comid data from PlusFlowlineVAA table
+            string divergentQuery = "Select ComID, Divergence, WBAREACOMI  From PlusFlowlineVAA WHERE Comid IN (" + comidsStr + ")";
+            Dictionary<string, object> divergentResults = Utilities.SQLite.GetDataObject(dbPath, divergentQuery) as Dictionary<string, object>;
+            List<string> resultComids = divergentResults["ComID"].ToString().Split(",").ToList<string>();
+            List<string> resultDiv = divergentResults["Divergence"].ToString().Split(",").ToList<string>();
+            List<string> resultWB = divergentResults["WBAREACOMI"].ToString().Split(",").ToList<string>();
+            for (int i = 0; i < resultComids.Count; i++)
+            {
+                this.comidDetails[resultComids[i].ToString()].Add("divergence", resultDiv[i].ToString());
+                this.comidDetails[resultComids[i].ToString()].Add("WBAREACOMI", resultWB[i].ToString());
+            }
+
+
+
+
+            string test = "";
+
+        }
+
 
         private List<List<object>> purgeTable(List<List<object>> networkTable, List<List<int>> order)
         {
@@ -186,95 +272,95 @@ namespace Web.Services.Models
             return new Dictionary<string, object>() { { "sources", sourceCOMIDs }, { "boundary", boundaries } };
         }
 
-        public List<List<int>> generateOrder(List<List<object>> networkTable)
-        {
-            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+        //public List<List<int>> generateOrder(List<List<object>> networkTable)
+        //{
+        //    string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
 
-            List<int> dag = new List<int>();
-            for (int i = networkTable.Count - 1; i > 0; i--)
-            {
-                int hydroseq = Int32.Parse(networkTable[i][1].ToString());
-                dag.Add(hydroseq);
-            }
+        //    List<int> dag = new List<int>();
+        //    for (int i = networkTable.Count - 1; i > 0; i--)
+        //    {
+        //        int hydroseq = Int32.Parse(networkTable[i][1].ToString());
+        //        dag.Add(hydroseq);
+        //    }
 
-            List<List<int>> seqOrder = new List<List<int>>();
-            seqOrder.Add(new List<int>()
-            {
-                Int32.Parse(networkTable[1][1].ToString())
-            });
-            List<List<int>> comidOrder = new List<List<int>>();
-            comidOrder.Add(new List<int>()
-            {
-                Int32.Parse(networkTable[1][0].ToString())
-            });
-            for (int i = 2; i <= dag.Count; i++)
-            {
-                seqOrder.Add(new List<int>());
-                comidOrder.Add(new List<int>());
-            }
-            for (int i = 2; i <= dag.Count; i++)
-            {
-                int comid = Int32.Parse(networkTable[i][0].ToString());
-                int hydroseq = Int32.Parse(networkTable[i][1].ToString());
-                int dnhydroseq = Int32.Parse(networkTable[i][3].ToString());
-                string query = "SELECT Hydroseq FROM PlusFlowlineVAA WHERE DnHydroseq=" + hydroseq.ToString();
-                Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
-                List<int> uphydroseq = new List<int>();
-                if (sourceComid.ContainsKey("Hydroseq"))
-                {
-                    foreach(string c in sourceComid["Hydroseq"].Split(","))
-                    {
-                        uphydroseq.Add(Int32.Parse(c));
-                    }
-                }
-                else
-                {
-                    uphydroseq.Add(Int32.Parse(networkTable[i][2].ToString()));
-                }
-                int seq_j = 0;
-                for (int j = seqOrder.Count - 1; j >= 0; j--)
-                {
-                    foreach(int up in uphydroseq)
-                    {
-                        if (seqOrder[j].Contains(up))
-                        {
-                            seq_j = j - 1;
-                            break;
-                        }
-                    }             
-                    if (seqOrder[j].Contains(dnhydroseq))
-                    {
-                        seq_j = j + 1;
-                        break;
-                    }
-                }
-                if (seq_j == -1)
-                {
-                    List<int> newOrderLevel = new List<int>();
-                    newOrderLevel.Add(comid);
-                    comidOrder = comidOrder.Prepend(newOrderLevel).ToList();
-                    List<int> newSeqLevel = new List<int>();
-                    newSeqLevel.Add(hydroseq);
-                    seqOrder = seqOrder.Prepend(newSeqLevel).ToList();
-                }
-                else
-                {
-                    comidOrder[seq_j].Add(comid);
-                    seqOrder[seq_j].Add(hydroseq);
-                }
-            }
-            int nOrder = comidOrder.Count;
-            for (int i = nOrder - 1; i >= 0; i--)
-            {
-                if (comidOrder[i].Count == 0)
-                {
-                    comidOrder.RemoveAt(i);
-                }
-            }
-            comidOrder.Reverse();
+        //    List<List<int>> seqOrder = new List<List<int>>();
+        //    seqOrder.Add(new List<int>()
+        //    {
+        //        Int32.Parse(networkTable[1][1].ToString())
+        //    });
+        //    List<List<int>> comidOrder = new List<List<int>>();
+        //    comidOrder.Add(new List<int>()
+        //    {
+        //        Int32.Parse(networkTable[1][0].ToString())
+        //    });
+        //    for (int i = 2; i <= dag.Count; i++)
+        //    {
+        //        seqOrder.Add(new List<int>());
+        //        comidOrder.Add(new List<int>());
+        //    }
+        //    for (int i = 2; i <= dag.Count; i++)
+        //    {
+        //        int comid = Int32.Parse(networkTable[i][0].ToString());
+        //        int hydroseq = Int32.Parse(networkTable[i][1].ToString());
+        //        int dnhydroseq = Int32.Parse(networkTable[i][3].ToString());
+        //        string query = "SELECT Hydroseq FROM PlusFlowlineVAA WHERE DnHydroseq=" + hydroseq.ToString();
+        //        Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
+        //        List<int> uphydroseq = new List<int>();
+        //        if (sourceComid.ContainsKey("Hydroseq"))
+        //        {
+        //            foreach(string c in sourceComid["Hydroseq"].Split(","))
+        //            {
+        //                uphydroseq.Add(Int32.Parse(c));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            uphydroseq.Add(Int32.Parse(networkTable[i][2].ToString()));
+        //        }
+        //        int seq_j = 0;
+        //        for (int j = seqOrder.Count - 1; j >= 0; j--)
+        //        {
+        //            foreach(int up in uphydroseq)
+        //            {
+        //                if (seqOrder[j].Contains(up))
+        //                {
+        //                    seq_j = j - 1;
+        //                    break;
+        //                }
+        //            }             
+        //            if (seqOrder[j].Contains(dnhydroseq))
+        //            {
+        //                seq_j = j + 1;
+        //                break;
+        //            }
+        //        }
+        //        if (seq_j == -1)
+        //        {
+        //            List<int> newOrderLevel = new List<int>();
+        //            newOrderLevel.Add(comid);
+        //            comidOrder = comidOrder.Prepend(newOrderLevel).ToList();
+        //            List<int> newSeqLevel = new List<int>();
+        //            newSeqLevel.Add(hydroseq);
+        //            seqOrder = seqOrder.Prepend(newSeqLevel).ToList();
+        //        }
+        //        else
+        //        {
+        //            comidOrder[seq_j].Add(comid);
+        //            seqOrder[seq_j].Add(hydroseq);
+        //        }
+        //    }
+        //    int nOrder = comidOrder.Count;
+        //    for (int i = nOrder - 1; i >= 0; i--)
+        //    {
+        //        if (comidOrder[i].Count == 0)
+        //        {
+        //            comidOrder.RemoveAt(i);
+        //        }
+        //    }
+        //    comidOrder.Reverse();
 
-            return comidOrder;
-        }
+        //    return comidOrder;
+        //}
 
         public List<List<int>> generateMainstemOrder(List<List<object>> networkTable, string endComid = null)
         {
@@ -390,32 +476,46 @@ namespace Web.Services.Models
 
         private int divergentCheck(string segmentComid)
         {
-            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT Divergence FROM PlusFlowlineVAA WHERE ComID=" + segmentComid;
-            Dictionary<string, string> results = Utilities.SQLite.GetData(dbPath, query);
-            if (results.Count > 0)
-            {
-                // Divergence is defined as a value of 0, the mainstem path of a divergence is 1, and >1 are the divergent paths
-                return Int32.Parse(results["Divergence"]);
-            }
-            else
-            {
-                return -1;
-            }
+            //string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+            //string query = "SELECT Divergence FROM PlusFlowlineVAA WHERE ComID=" + segmentComid;
+            //Dictionary<string, string> results = Utilities.SQLite.GetData(dbPath, query);
+            //if (results.Count > 0)
+            //{
+            //    // Divergence is defined as a value of 0, the mainstem path of a divergence is 1, and >1 are the divergent paths
+            //    return Int32.Parse(results["Divergence"]);
+            //}
+            string divStr = this.comidDetails[segmentComid]["divergence"];
+            return Int32.Parse(divStr);
         }
 
         private Dictionary<string, string> segmentDetails(string segmentHydroseq)
         {
-            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE Hydroseq=" + segmentHydroseq;
-            return Utilities.SQLite.GetData(dbPath, query);
+            int hydro = Int32.Parse(segmentHydroseq);
+            if (this.hydroComid.ContainsKey(hydro))
+            {
+                return this.comidDetails[this.hydroComid[hydro]];
+            }
+            else
+            {
+                string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+                string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE Hydroseq=" + segmentHydroseq;
+                return Utilities.SQLite.GetData(dbPath, query);
+            }
         }
 
         private Dictionary<string, string> divergenceDetails(string segmentHydroseq)
         {
-            string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE UpHydroseq=" + segmentHydroseq + " AND Divergence=2";
-            return Utilities.SQLite.GetData(dbPath, query);
+            int hydro = Int32.Parse(segmentHydroseq);
+            if (this.hydroComid.ContainsKey(hydro))
+            {
+                return this.comidDetails[this.hydroComid[hydro]];
+            }
+            else
+            {
+                string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
+                string query = "SELECT ComID, Hydroseq, UpHydroseq, DnHydroseq, Divergence FROM PlusFlowlineVAA WHERE UpHydroseq=" + segmentHydroseq + " AND Divergence=2";
+                return Utilities.SQLite.GetData(dbPath, query);
+            }
         }
 
         private Dictionary<string, object> traverseDivergence(string pourpoint)
@@ -632,7 +732,6 @@ namespace Web.Services.Models
                     {
                         addToOut = true;
                     }
-
                     string query = "SELECT COMID FROM PlusFlowlineVAA WHERE Hydroseq=" + uphydro.ToString();
                     Dictionary<string, string> sourceComid = Utilities.SQLite.GetData(dbPath, query);
                     if (sourceComid.ContainsKey("ComID")) {
