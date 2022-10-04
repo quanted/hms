@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Utilities
@@ -70,7 +72,7 @@ namespace Utilities
     public class Graph
     {
         public Node prime;                              // Stream Network: pourpoint segment
-        public Dictionary<int, Node> nodeDict;          // Stream Network: Dictionary of nodes in network by id
+        public ConcurrentDictionary<int, Node> nodeDict;          // Stream Network: Dictionary of nodes in network by id
         private List<Node> nodes;                       // Stream Network: List of nodes in network
         private List<Node> edgeNodes;                   // Stream Network: list of edge nodes in the network
         public List<List<string>> order;                // Stream Network: breadth-first search ordering by node name (ComID)
@@ -81,7 +83,7 @@ namespace Utilities
         {
             this.prime = null;
             this.nodes = new List<Node>();
-            this.nodeDict = new Dictionary<int, Node>();
+            this.nodeDict = new ConcurrentDictionary<int, Node>();
             this.edgeNodes = new List<Node>();
             this.order = new List<List<string>>();
             this.edges = new List<string>();
@@ -106,7 +108,7 @@ namespace Utilities
             {
                 this.outNodes.Add(node.name);
             }
-            this.nodeDict.Add(node.id, node);
+            this.nodeDict.TryAdd(node.id, node);
         }
 
         public void AddEdge(int edgeId, int nodeId, bool upNode = true)

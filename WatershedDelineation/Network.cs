@@ -42,10 +42,12 @@ namespace WatershedDelineation
             StringBuilder hydroSB = new StringBuilder();
 
             // Add all in-network nodes
-            for (int i = 1; i < table.Count; i++)
+            int i = 0;
+            for(i = 1; i < table.Count; i++)
             {
                 string comid = table[i][0].ToString();
-                int hydroseq = Int32.Parse(table[i][1].ToString());
+                string strHydro = table[i][1].ToString();
+                int hydroseq = Int32.Parse(strHydro);
                 this.comids.Add(comid);
                 this.comidHydro.Add(comid, hydroseq);
                 Dictionary<string, object> attributes = new Dictionary<string, object>();
@@ -58,12 +60,13 @@ namespace WatershedDelineation
 
                 comidSB.Append(comid);
                 hydroSB.Append(hydroseq);
-                if(i < table.Count - 1)
+                if (i < table.Count - 1)
                 {
                     comidSB.Append(",");
                     hydroSB.Append(",");
                 }
             }
+
             this.comidStr = comidSB.ToString();
             this.hydroStr = hydroSB.ToString();
 
@@ -74,7 +77,7 @@ namespace WatershedDelineation
             List<string> outComids = outResults["ComID"].Split(",").ToList();
             List<string> outHydro = outResults["Hydroseq"].Split(",").ToList();
             List<string> outDnHydro = outResults["DnHydroseq"].Split(",").ToList();
-            for (int i = 0; i < outComids.Count; i++)
+            for (i = 0; i < outComids.Count; i++)
             {
                 if (!this.comids.Contains(outComids[i]))
                 {
@@ -85,7 +88,8 @@ namespace WatershedDelineation
 
             // Add all edges from table
             SQLiteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
-            for (int i = 1; i < table.Count; i++)
+            i = 0;
+            Parallel.For(1, table.Count, i =>
             {
                 string comid = table[i][0].ToString();
                 int hydroseq = Int32.Parse(table[i][1].ToString());
@@ -111,7 +115,7 @@ namespace WatershedDelineation
                     }
                 }
 
-            }
+            });
             sqlConn.Close();
 
             this.networkGraph.Traverse();
