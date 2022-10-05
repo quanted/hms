@@ -87,7 +87,7 @@ namespace WatershedDelineation
             }
 
             // Add all edges from table
-            SQLiteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
+            //SQLiteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
             i = 0;
             Parallel.For(1, table.Count, i =>
             {
@@ -116,7 +116,7 @@ namespace WatershedDelineation
                 }
 
             });
-            sqlConn.Close();
+            //sqlConn.Close();
 
             this.networkGraph.Traverse();
 

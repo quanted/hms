@@ -78,16 +78,20 @@ namespace Utilities
             }
 
             Dictionary<string, string> data = new Dictionary<string, string>();
-            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
+            SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder()
+            {
+                Mode = SqliteOpenMode.ReadOnly,
+                Cache = SqliteCacheMode.Shared
+            };
             connectionStringBuilder.DataSource = absPath;
             try
             {
-                using (SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString))
+                using (SqliteConnection con = new SqliteConnection(connectionStringBuilder.ConnectionString))
                 {
                     con.Open();
-                    SQLiteCommand com = con.CreateCommand();
+                    SqliteCommand com = con.CreateCommand();
                     com.CommandText = query;
-                    using (SQLiteDataReader reader = com.ExecuteReader())
+                    using (SqliteDataReader reader = com.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -119,7 +123,7 @@ namespace Utilities
                 }
                 return data;
             }
-            catch (SQLiteException ex)
+            catch (SqliteException ex)
             {
                 Log.Warning(ex, "Error querying sqlite database.");
                 return data;
