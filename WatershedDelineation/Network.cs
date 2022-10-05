@@ -1,9 +1,11 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic;
+using Serilog;
 using Serilog.Debugging;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -42,6 +44,9 @@ namespace WatershedDelineation
             StringBuilder comidSB = new StringBuilder();
             StringBuilder hydroSB = new StringBuilder();
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             // Add all in-network nodes
             int i = 0;
             for(i = 1; i < table.Count; i++)
@@ -67,12 +72,16 @@ namespace WatershedDelineation
                     hydroSB.Append(",");
                 }
             }
+            stopwatch.Stop();
+            Log.Information("Stream Network - Add in-table nodes Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopwatch.Restart();
 
             this.comidStr = comidSB.ToString();
             this.hydroStr = hydroSB.ToString();
 
             // Load out of network nodes
-            string outSources = "SELECT ComID, Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ") AND ComID NOT IN (" + this.comidStr + ")";
+            //string outSources = "SELECT ComID, Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ") AND ComID NOT IN (" + this.comidStr + ")";
+            string outSources = "SELECT ComID, Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ")";
             Dictionary<string, string> outResults = Utilities.SQLite.GetData(this.dbPath, outSources) as Dictionary<string, string>;
 
             List<string> outComids = outResults["ComID"].Split(",").ToList();
@@ -86,9 +95,36 @@ namespace WatershedDelineation
                     this.networkGraph.AddNode(node);
                 }
             }
+            stopwatch.Stop();
+            Log.Information("Stream Network - Add out-of-table nodes Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopwatch.Restart();
+
+
+            string altUpHydroQuery = "SELECT Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ")";
+            Dictionary<string, string> altHydroEdges = Utilities.SQLite.GetData(this.dbPath, altUpHydroQuery);
+            List<string> hydroList = new List<string>();
+            List<string> dnHydroList = new List<string>();
+            Dictionary<int, List<int>> upHydroMapping = new Dictionary<int, List<int>>();
+            if (altHydroEdges.Count > 0)
+            {
+                hydroList = altHydroEdges["Hydroseq"].Split(",").ToList();
+                dnHydroList = altHydroEdges["DnHydroseq"].Split(",").ToList();
+                for(int j = 0; j < hydroList.Count; j++)
+                {
+                    int hydro = Int32.Parse(hydroList[j]);
+                    int dnHydro = Int32.Parse(dnHydroList[j]);
+                    if (upHydroMapping.ContainsKey(dnHydro))
+                    {
+                        upHydroMapping[dnHydro].Add(hydro);
+                    }
+                    else
+                    {
+                        upHydroMapping.Add(dnHydro, new List<int>() { hydro });
+                    }
+                }
+            }
 
             // Add all edges from table
-            SqliteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
             i = 0;
             Parallel.For(1, table.Count, i =>
             {
@@ -103,28 +139,37 @@ namespace WatershedDelineation
                 if (uphydroseq != 0)
                 {
                     this.networkGraph.AddEdge(uphydroseq, hydroseq, true);
-
-                    string altDnHydroQuery = "SELECT Hydroseq FROM PlusFlowlineVAA WHERE DnHydroseq=" + hydroseq + " AND Hydroseq!=" + uphydroseq;
-                    Dictionary<string, string> altHydroEdges = Utilities.SQLite.GetData(sqlConn, altDnHydroQuery);
-                    if (altHydroEdges.Count > 0)
+                    if (upHydroMapping[hydroseq].Count > 1)
                     {
-                        List<string> dnHydros = altHydroEdges["Hydroseq"].Split(",").ToList();
-                        for (int j = 0; j < dnHydros.Count; j++)
+                        for(int j = 0; j < upHydroMapping[hydroseq].Count; j++)
                         {
-                            this.networkGraph.AddEdge(Int32.Parse(dnHydros[j]), hydroseq, true);
+                            int altupHydro = upHydroMapping[hydroseq][j];
+                            if(uphydroseq != altupHydro)
+                            {
+                                this.networkGraph.AddEdge(altupHydro, hydroseq, true);
+                            }
                         }
                     }
                 }
 
             });
-            sqlConn.Close();
+            stopwatch.Stop();
+            Log.Information("Stream Network - Add graph edges Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopwatch.Restart();
 
             this.networkGraph.Traverse();
+
+            stopwatch.Stop();
+            Log.Information("Stream Network - Graph Traversal Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopwatch.Restart();
 
         }
 
         public void LoadData()
         {
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             // Load list of divergent segments
             string divergentNodesQuery = "SELECT ComID From PlusFlowlineVAA WHERE Comid IN (" + this.comidStr + ") AND Divergence>1";
             Dictionary<string, string> divergentNodeResults = Utilities.SQLite.GetData(dbPath, divergentNodesQuery) as Dictionary<string, string>;
@@ -162,6 +207,9 @@ namespace WatershedDelineation
                 }
             }
             this.divergentPaths = allDivergentPaths;
+            stopwatch.Stop();
+            Log.Information("Stream Network - Loaded Divergent Paths Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+            stopwatch.Restart();
 
             // Load waterbodies
             List<string> wbTableLabels = new List<string>
@@ -238,6 +286,9 @@ namespace WatershedDelineation
                     }
                 }
             }
+
+            stopwatch.Stop();
+            Log.Information("Stream Network - Loaded Waterbodies Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
         }
 
         public Dictionary<string, object> ReturnData()

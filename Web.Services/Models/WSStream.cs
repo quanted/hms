@@ -56,7 +56,7 @@ namespace Web.Services.Models
                     stopWatch.Start();
                     var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
                     stopWatch.Stop();
-                    Log.Information("Stream Network - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                    Log.Information("Stream Network 1 - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
                     stopWatch.Reset();
                     networkTable = StreamNetwork.generateTable(streamNetwork, null);
                 }
@@ -86,15 +86,15 @@ namespace Web.Services.Models
                 stopWatch.Restart();
                 Network network = new Network(networkTable, comid);
                 stopWatch.Stop();
-                Log.Information("Stream Network - Create Network Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                Log.Information("Stream Network 2 - Create Network Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
                 stopWatch.Restart();
                 network.LoadData();
                 stopWatch.Stop();
-                Log.Information("Stream Network - Load DB Data Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                Log.Information("Stream Network 3 - Load DB Data Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
                 stopWatch.Restart();
                 result = network.ReturnData();
                 stopWatch.Stop();
-                Log.Information("Stream Network - Generate Output Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
+                Log.Information("Stream Network 4 - Generate Output Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
 
                 return result;
             }
