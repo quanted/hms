@@ -26,7 +26,7 @@ namespace Web.Services.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200)]
-        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, string endComid=null, double maxDistance = 50.0, string mainstem="false", string huc=null)
+        public async Task<IActionResult> GETDefaultOutput([FromQuery] string comid, string endComid=null, double maxDistance = 15.0, string mainstem="false", string huc=null)
         {
             try
             {

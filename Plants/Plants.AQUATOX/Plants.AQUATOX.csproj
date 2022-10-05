@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
     <ProjectReference Include="..\..\Stream.Hydrology\AQUATOX\Stream.Hydrology.AQUATOX.csproj" />
   </ItemGroup>
