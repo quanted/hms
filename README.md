@@ -25,3 +25,4 @@ The docker container and image for HMS can be build using either the CLI for doc
 
 #### Architecture Diagram
 ![HMS Architecture Diagram](https://github.com/quanted/hms/blob/dev/hms_architecture_diagram_docker.png)
+
