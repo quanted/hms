@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.VisualBasic;
 using Serilog.Debugging;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace WatershedDelineation
             }
 
             // Add all edges from table
-            //SQLiteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
+            SqliteConnection sqlConn = Utilities.SQLite.GetConnection(this.dbPath);
             i = 0;
             Parallel.For(1, table.Count, i =>
             {
@@ -104,7 +105,7 @@ namespace WatershedDelineation
                     this.networkGraph.AddEdge(uphydroseq, hydroseq, true);
 
                     string altDnHydroQuery = "SELECT Hydroseq FROM PlusFlowlineVAA WHERE DnHydroseq=" + hydroseq + " AND Hydroseq!=" + uphydroseq;
-                    Dictionary<string, string> altHydroEdges = Utilities.SQLite.GetData(this.dbPath, altDnHydroQuery);
+                    Dictionary<string, string> altHydroEdges = Utilities.SQLite.GetData(sqlConn, altDnHydroQuery);
                     if (altHydroEdges.Count > 0)
                     {
                         List<string> dnHydros = altHydroEdges["Hydroseq"].Split(",").ToList();
@@ -116,7 +117,7 @@ namespace WatershedDelineation
                 }
 
             });
-            //sqlConn.Close();
+            sqlConn.Close();
 
             this.networkGraph.Traverse();
 

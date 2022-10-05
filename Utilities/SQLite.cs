@@ -15,7 +15,7 @@ namespace Utilities
         /// <param name="dbPath">Path to the sqlite database</param>
         /// <param name="query">Query to be executed on sqlite database</param>
         /// <returns></returns>
-        public static SQLiteConnection GetConnection(string dbPath)
+        public static SqliteConnection GetConnection(string dbPath)
         {
             // TODO: Dictionary object here is not sufficient for complete data retrieval from database.
             string cwd = Directory.GetCurrentDirectory();
@@ -38,9 +38,12 @@ namespace Utilities
                 absPath = dbPath;
             }
 
-            SQLiteConnectionStringBuilder connectionStringBuilder = new SQLiteConnectionStringBuilder();
+            SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder()
+            {
+                Mode = SqliteOpenMode.ReadOnly
+            };
             connectionStringBuilder.DataSource = absPath;
-            SQLiteConnection con = new SQLiteConnection(connectionStringBuilder.ConnectionString);
+            SqliteConnection con = new SqliteConnection(connectionStringBuilder.ConnectionString);
             return con;
         }
 
@@ -135,7 +138,7 @@ namespace Utilities
         /// <param name="dbPath">Path to the sqlite database</param>
         /// <param name="query">Query to be executed on sqlite database</param>
         /// <returns></returns>
-        public static Dictionary<string, string> GetData(SQLiteConnection dbConn, string query)
+        public static Dictionary<string, string> GetData(SqliteConnection dbConn, string query)
         {
             if (query.Substring(0, 6).ToUpper() != "SELECT")
             {
@@ -149,9 +152,9 @@ namespace Utilities
                 {
                     dbConn.Open();
                 }
-                SQLiteCommand com = dbConn.CreateCommand();
+                SqliteCommand com = dbConn.CreateCommand();
                 com.CommandText = query;
-                using (SQLiteDataReader reader = com.ExecuteReader())
+                using (SqliteDataReader reader = com.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -181,7 +184,7 @@ namespace Utilities
                 }
                 return data;
             }
-            catch (SQLiteException ex)
+            catch (SqliteException ex)
             {
                 Log.Warning(ex, "Error querying sqlite database.");
                 return data;
