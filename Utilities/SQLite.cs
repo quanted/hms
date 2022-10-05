@@ -80,8 +80,7 @@ namespace Utilities
             Dictionary<string, string> data = new Dictionary<string, string>();
             SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder()
             {
-                Mode = SqliteOpenMode.ReadOnly,
-                Cache = SqliteCacheMode.Shared
+                Mode = SqliteOpenMode.ReadOnly
             };
             connectionStringBuilder.DataSource = absPath;
             try
