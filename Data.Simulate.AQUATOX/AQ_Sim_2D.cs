@@ -352,8 +352,10 @@ namespace AQUATOX.AQSim_2D
         /// 
         public string ReadGeoJSON(string comid)
         {
-            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            string requestURL = "https://qedcloud.net/hms/rest/api/";
+            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+
             string component = "info";
             string dataset = "catchment";
 
@@ -405,7 +407,8 @@ namespace AQUATOX.AQSim_2D
         /// <returns>JSON or error message</returns>
         public string ReadStreamNetwork(string comid, string endComid, string span)
         {
-            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            string requestURL = "https://qedcloud.net/hms/rest/api/";
+            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             //string requestURL = "https://qed.epa.gov/hms/rest/api/";
             string component = "info";
             string dataset = "streamnetwork";
@@ -416,6 +419,7 @@ namespace AQUATOX.AQSim_2D
                 if (endComid != "") rurl += "&endComid=" + endComid;
                 if (span != "") rurl += "&maxDistance=" + span;
                 var request = (HttpWebRequest)WebRequest.Create(rurl);
+                request.Timeout = 600000;  //10 minutes
                 var response = (HttpWebResponse)request.GetResponse();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
             }
@@ -478,8 +482,10 @@ namespace AQUATOX.AQSim_2D
         private TimeSeriesOutput<List<double>> submitHydrologyRequest(HydrologyTSI TSI, out string errmsg)  
         {
             // ------- Use Streamflow.Streamflow for Flask Request ------- 
-            Environment.SetEnvironmentVariable("FLASK_SERVER", "https://ceamdev.ceeopdev.net/hms/rest/api/v2");
-            TSI.BaseURL = new List<string> { "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/nwm/data/?" };
+
+            Environment.SetEnvironmentVariable("FLASK_SERVER", "https://qedcloud.net/hms/rest/api/v2"); 
+            // Environment.SetEnvironmentVariable("FLASK_SERVER", "https://ceamdev.ceeopdev.net/hms/rest/api/v2");
+            TSI.BaseURL = new List<string> { "https://qedcloud.net/hms/rest/api/v2/hms/nwm/data/?" };
 
             Streamflow.Streamflow sf = new();
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
