@@ -230,7 +230,7 @@
                 layer.on('click', function (e) {
                     if ((!lakemode)&&(feature.properties.COMID != null)) {
                         if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
-                        layer.setStyle({ color: "Red", weight: 2 });
+                        layer.setStyle({ color: "Orange", weight: 2 });
                         lastFlLayer = layer;
                         var str = "FL|" + feature.properties.COMID.toString() + "|";
                         if (feature.properties.GNIS_NAME != null) str = str + feature.properties.GNIS_NAME.toString();
@@ -241,7 +241,7 @@
                 layer.on('contextmenu', function (e) {
                     if ((!lakemode) &&(layer.feature.properties.COMID != null)) {
                         if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
-                        layer.setStyle({ color: "Red", weight: 2 });
+                        layer.setStyle({ color: "Green", weight: 2 });
                         lastFl2Layer = layer;
                         var str = "FL2|" + layer.feature.properties.COMID.toString() + "|";
                         if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();

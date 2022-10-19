@@ -20,6 +20,9 @@ using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 using System.Threading;
+using Web.Services.Models;
+using static GUI.AQUATOX.MultiSegForm;
+using Utilities;
 
 namespace GUI.AQUATOX
 
@@ -1412,6 +1415,20 @@ namespace GUI.AQUATOX
         }
 
 
+        //string ReadGeoJSON(string WBcomid)
+        //{
+        //    GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(WBcomid);
+        //    object SG = catchment.GetStreamGeometryV2(WBcomid);
+        //    if (SG == null) return "null";
+        //    return "not null";
+
+        //    //return;
+        //    //WSCatchment WSC = new();
+        //    //Task<Dictionary<string, object>> rslt;
+        //    //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
+        //}
+
+
         bool PlotWBCOMID(string WBString)
         {
             string GeoJSON;
@@ -1426,7 +1443,7 @@ namespace GUI.AQUATOX
                 {
                     webView.Visible = false;
                     AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for WB_COMID " + WBString);
-                    GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service
+                    GeoJSON = AQT2D.ReadWBGeoJSON(WBString);  // read from web service  
 
                     if (GeoJSON.IndexOf("ERROR") >= 0)
                     {

@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using System.Collections.Specialized;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Drawing;
+using Accord;
 
 namespace GUI.AQUATOX
 
@@ -136,6 +138,7 @@ namespace GUI.AQUATOX
 
         private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
+                        
             if (!Int32.TryParse(comidBox.Text, out int COMID))
             {
                 MessageBox.Show("Please either enter a COMID in the COMID box or click on a stream segment to select a pour point.");
@@ -162,7 +165,7 @@ namespace GUI.AQUATOX
             {
                 MessageBox.Show("ERROR: web service returned empty JSON."); return;
             }
-            if (SNJSON.IndexOf("ERROR") >= 0)
+            if (SNJSON.IndexOf("ERROR", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 MessageBox.Show("Web service returned an error: " + SNJSON); return;
             }
@@ -178,6 +181,8 @@ namespace GUI.AQUATOX
 
             ExportSNJSON = SNJSON;
             webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+            comidLabel.ForeColor = System.Drawing.Color.Black;
+            endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
 
             SNPopulated = true;
             LakeSelected = false;
@@ -340,17 +345,19 @@ namespace GUI.AQUATOX
                     else SimName = "COMID: " + COMID;
                     if (SimName == " ") SimName = "COMID: " + COMID;
                     comidBox.Text = COMID;
+
+                    comidLabel.ForeColor =  System.Drawing.Color.DarkOrange;
                     NScrSettings.COMIDstr = COMID;
                     SimNameEdit.Text = SimName;
                 }
                 else
                 {
                     EndCOMIDBox.Text = COMID;
+                    endCOMIDLabel.ForeColor = System.Drawing.Color.Green;
                     NScrSettings.EndCOMIDstr = COMID;
                 }
             }
         }
-
 
 
         private void webView_MouseHover(object sender, EventArgs e)
@@ -398,7 +405,6 @@ namespace GUI.AQUATOX
             return;
 
         }
-
 
     }
 }

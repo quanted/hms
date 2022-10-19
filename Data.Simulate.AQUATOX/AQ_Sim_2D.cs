@@ -361,7 +361,7 @@ namespace AQUATOX.AQSim_2D
                 var request = (HttpWebRequest)WebRequest.Create(rurl);
                 var response = (HttpWebResponse)request.GetResponse();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
-       }
+            }
             catch (Exception ex)
             {
                 return ex.Message;
@@ -376,32 +376,33 @@ namespace AQUATOX.AQSim_2D
         /// <returns>JSON or error message</returns>
         /// 
         public string ReadWBGeoJSON(string WBcomid)
+    {
+
+        string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
+        // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
+
+        try
         {
-            string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
-          // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
-
-            try
-            {
-                string rurl = requestURL + "?f=geojson&where=COMID%3D" + WBcomid;
-                var request = (HttpWebRequest)WebRequest.Create(rurl);
-                var response = (HttpWebResponse)request.GetResponse();
-                return new StreamReader(response.GetResponseStream()).ReadToEnd();
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
+            string rurl = requestURL + "?f=geojson&where=COMID%3D" + WBcomid;
+            var request = (HttpWebRequest)WebRequest.Create(rurl);
+            var response = (HttpWebResponse)request.GetResponse();
+            return new StreamReader(response.GetResponseStream()).ReadToEnd();
         }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
 
 
-        /// <summary>
-        /// Reads the stream network data structure from web services
-        /// </summary>
-        /// <param name="comid">Primary comid</param>
-        /// <param name="endComid">Optional PourID</param>
-        /// <param name="span">Optional up-stream distance to search in km</param>
-        /// <returns>JSON or error message</returns>
-        public string ReadStreamNetwork(string comid, string endComid, string span)
+    /// <summary>
+    /// Reads the stream network data structure from web services
+    /// </summary>
+    /// <param name="comid">Primary comid</param>
+    /// <param name="endComid">Optional PourID</param>
+    /// <param name="span">Optional up-stream distance to search in km</param>
+    /// <returns>JSON or error message</returns>
+    public string ReadStreamNetwork(string comid, string endComid, string span)
         {
             string requestURL = "https://qedcloud.net/hms/rest/api/";
             //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";

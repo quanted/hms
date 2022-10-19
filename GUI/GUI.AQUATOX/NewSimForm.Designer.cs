@@ -36,9 +36,9 @@
             this.label6 = new System.Windows.Forms.Label();
             this.spanLabel = new System.Windows.Forms.Label();
             this.spanBox = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.endCOMIDLabel = new System.Windows.Forms.Label();
             this.EndCOMIDBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.comidLabel = new System.Windows.Forms.Label();
             this.comidBox = new System.Windows.Forms.TextBox();
             this.ChooseTemplateButton = new System.Windows.Forms.Button();
             this.HelpButton2 = new System.Windows.Forms.Button();
@@ -101,9 +101,9 @@
             this.ReadNetworkPanel.Controls.Add(this.label6);
             this.ReadNetworkPanel.Controls.Add(this.spanLabel);
             this.ReadNetworkPanel.Controls.Add(this.spanBox);
-            this.ReadNetworkPanel.Controls.Add(this.label4);
+            this.ReadNetworkPanel.Controls.Add(this.endCOMIDLabel);
             this.ReadNetworkPanel.Controls.Add(this.EndCOMIDBox);
-            this.ReadNetworkPanel.Controls.Add(this.label1);
+            this.ReadNetworkPanel.Controls.Add(this.comidLabel);
             this.ReadNetworkPanel.Controls.Add(this.comidBox);
             this.ReadNetworkPanel.Location = new System.Drawing.Point(17, 155);
             this.ReadNetworkPanel.Name = "ReadNetworkPanel";
@@ -150,12 +150,12 @@
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(1, 50);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(119, 15);
-            this.label4.TabIndex = 25;
-            this.label4.Text = "(optional) endComID";
+            this.endCOMIDLabel.AutoSize = true;
+            this.endCOMIDLabel.Location = new System.Drawing.Point(1, 50);
+            this.endCOMIDLabel.Name = "label4";
+            this.endCOMIDLabel.Size = new System.Drawing.Size(119, 15);
+            this.endCOMIDLabel.TabIndex = 25;
+            this.endCOMIDLabel.Text = "(optional) endComID";
             // 
             // EndCOMIDBox
             // 
@@ -167,15 +167,16 @@
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(76, 22);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(44, 15);
-            this.label1.TabIndex = 23;
-            this.label1.Text = "ComID";
+            this.comidLabel.AutoSize = true;
+            this.comidLabel.Location = new System.Drawing.Point(76, 22);
+            this.comidLabel.Name = "label1";
+            this.comidLabel.Size = new System.Drawing.Size(44, 15);
+            this.comidLabel.TabIndex = 23;
+            this.comidLabel.Text = "ComID";
             // 
             // comidBox
             // 
+            this.comidBox.BackColor = System.Drawing.SystemColors.Window;
             this.comidBox.Location = new System.Drawing.Point(127, 19);
             this.comidBox.Name = "comidBox";
             this.comidBox.Size = new System.Drawing.Size(71, 23);
@@ -501,9 +502,9 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label spanLabel;
         private System.Windows.Forms.TextBox spanBox;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label endCOMIDLabel;
         private System.Windows.Forms.TextBox EndCOMIDBox;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label comidLabel;
         private System.Windows.Forms.TextBox comidBox;
         private System.Windows.Forms.Button ChooseTemplateButton;
         private System.Windows.Forms.Button HelpButton2;
