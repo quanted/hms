@@ -145,7 +145,7 @@ namespace GUI.AQUATOX
                 return;
             }
 
-            if ((!Int32.TryParse(EndCOMIDBox.Text, out int endCOMID)) && (!Int32.TryParse(spanBox.Text, out int Span)))
+            if ((!Int32.TryParse(EndCOMIDBox.Text, out int endCOMID)) && (!Double.TryParse(spanBox.Text, out double Span)))
             {
                 MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
                 return;

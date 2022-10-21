@@ -164,14 +164,6 @@ namespace GUI.AQUATOX
             webView.CoreWebView2.ProcessFailed += WebView_ProcessFailed;
         }
 
-        private void SendMessage(object sender, EventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null)
-            {
-                webView.CoreWebView2.PostWebMessageAsString("Message from Dotnet buttton");
-            }
-        }
-
         void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
         {
             MessageBox.Show("WebView Process Failed");
@@ -247,7 +239,7 @@ namespace GUI.AQUATOX
             try
             {
                 if (!VerifyBaseDir()) return;
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
                 string ScrString = JsonConvert.SerializeObject(ScrSettings);
                 File.WriteAllText(BaseDir + "ScreenSettings.JSON", ScrString);
                 UpdateRecentFiles(BaseDir);
@@ -270,7 +262,7 @@ namespace GUI.AQUATOX
             try
             {
                 if (!VerifyBaseDir()) return;
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
                 if (!File.Exists((BaseDir + "ScreenSettings.JSON"))) return;
                 string ScrString = File.ReadAllText(BaseDir + "ScreenSettings.JSON");
                 ScrSettings = JsonConvert.DeserializeObject<ScreenSettings>(ScrString);
@@ -539,7 +531,7 @@ namespace GUI.AQUATOX
 
         private bool SegmentsCreated()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string FileN = "";
             if (Lake0D > 0) FileN = BaseDir + "AQT_Input_" + Lake0D.ToString() + ".JSON";
             else
@@ -552,7 +544,7 @@ namespace GUI.AQUATOX
 
         private DateTime ModelRunDate()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string comid;
             if (Lake0D > 0) comid = Lake0D.ToString();
             else comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
@@ -590,13 +582,13 @@ namespace GUI.AQUATOX
 
         private bool VerifyBaseDir()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             return Directory.Exists(BaseDir);
         }
 
         private bool VerifyStreamNetwork()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             if (AQT2D == null) AQT2D = new AQSim_2D();
             if (AQT2D.SN == null)
             {
@@ -651,7 +643,7 @@ namespace GUI.AQUATOX
             {
                 TSafeAddToProcessLog(errmessage);
                 UseWaitCursor = false;
-                // webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBComid + "|red");  Can't be called in Async
+                // PostWebviewMessage("COLOR|" + WBComid + "|red");  Can't be called in Async
                 TSafeHideProgBar();
                 ConsoleButton.Checked = true;
             }
@@ -666,7 +658,7 @@ namespace GUI.AQUATOX
             {
                 ConsoleButton.Checked = true;
                 ChartVisible(false);
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
 
                 if (!VerifyStreamNetwork()) return;
 
@@ -715,7 +707,7 @@ namespace GUI.AQUATOX
                         {
                             TSafeAddToProcessLog(errmessage);
                             UseWaitCursor = false;
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + comid + "|red");
+                            PostWebviewMessage("COLOR|" + comid + "|red");
                             TSafeHideProgBar();
                             return;
                         }
@@ -831,6 +823,14 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        private void PostWebviewMessage(string str)
+        {
+            BeginInvoke((Action)(() =>
+            {
+                webView.CoreWebView2.PostWebMessageAsString(str);
+            }));
+        }
+
         async private void executeButton_Click(object sender, EventArgs e)  //execute the full model run given initialized AQT2D
         {
             ChartVisible(false);
@@ -839,7 +839,7 @@ namespace GUI.AQUATOX
             //if (AQT2D == null) AQT2D = new AQSim_2D();
             //if (AQT2D.SN == null)
             //{
-            //    string BaseDir = basedirBox.Text;
+            //    BaseDir = basedirBox.Text;
             //    if (!ValidFilen(BaseDir + "StreamNetwork.JSON", true)) return;
             //    string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
             //    AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
@@ -893,7 +893,7 @@ namespace GUI.AQUATOX
                     //                foreach (int runID in AQT2D.SN.order[ordr])
                      {
                          List<string> strout = new();
-                         string BaseDir = basedirBox.Text;
+                         BaseDir = basedirBox.Text;
 
                          bool in_waterbody = false;
                          if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
@@ -935,10 +935,7 @@ namespace GUI.AQUATOX
                          if (AQT2D.executeModel(IDtoRun, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
                              File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);
 
-                         BeginInvoke((Action)(() =>
-                         {
-                             webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
-                         }));
+                         PostWebviewMessage("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
 
                          foreach (string msg in strout) TSafeAddToProcessLog(msg); //write update to status log
 
@@ -1202,7 +1199,7 @@ namespace GUI.AQUATOX
             bool HasP = (TTSP != null);
             bool HasOM = (TOM != null);
 
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
 
             if (OverlandTable == null)
             {   // set up input table based on base JSON specification 
@@ -1415,18 +1412,18 @@ namespace GUI.AQUATOX
         }
 
 
-        //string ReadGeoJSON(string WBcomid)
-        //{
-        //    GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(WBcomid);
-        //    object SG = catchment.GetStreamGeometryV2(WBcomid);
-        //    if (SG == null) return "null";
-        //    return "not null";
+//        string ReadGeoJSON(string comid)
+//        {
+            //GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid,true);
+            //object SG = catchment.GetStreamGeometryV2(comid);
+            //if (SG == null) return "null";
+            //return "not null";
 
-        //    //return;
-        //    //WSCatchment WSC = new();
-        //    //Task<Dictionary<string, object>> rslt;
-        //    //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
-        //}
+            //return;
+            //WSCatchment WSC = new();
+            //Task<Dictionary<string, object>> rslt;
+            //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
+//        }
 
 
         bool PlotWBCOMID(string WBString)
@@ -1464,7 +1461,7 @@ namespace GUI.AQUATOX
                         if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":" + WBString + ",");
                     }
 
-                    webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
+                    PostWebviewMessage("ADDWB|" + GeoJSON);
                 }
                 return true;
             }
@@ -1472,6 +1469,7 @@ namespace GUI.AQUATOX
 
         async void PlotCOMIDMap()
         {
+            BaseDir = basedirBox.Text;
             string GeoJSON;
             double[][] polyline;
 
@@ -1484,7 +1482,7 @@ namespace GUI.AQUATOX
 
             logfilen.Visible = false;
             webView.Visible = true;
-            webView.CoreWebView2.PostWebMessageAsString("ERASE");
+            PostWebviewMessage("ERASE");
 
             int[] boundaries = new int[0];
 
@@ -1533,7 +1531,7 @@ namespace GUI.AQUATOX
 
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
-                            webView.CoreWebView2.PostWebMessageAsString("ADD|" + GeoJSON);
+                            PostWebviewMessage("ADD|" + GeoJSON);
                         }
 
                         if (GeoJSON == "{}") polyline = null;
@@ -1556,19 +1554,19 @@ namespace GUI.AQUATOX
                                 foreach (int SrcID in Sources)
                                     if (boundaries.Contains(SrcID))  //ID inflow points with green circles
                                     {
-                                        webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
+                                        PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
                                     }
 
                             if (i == AQT2D.SN.order.Length - 1) //ID pour point with red circle
                             {
-                                webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
+                                PostWebviewMessage("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
                             }
 
                         }
                     }
             }
 
-            webView.CoreWebView2.PostWebMessageAsString("RENDER");
+            PostWebviewMessage("RENDER");
 
             LabelCheckBox_CheckedChanged(null, null);
 
@@ -1648,7 +1646,7 @@ namespace GUI.AQUATOX
         {
 
             int COMID = Int32.Parse(CString);
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Input_" + CString + ".JSON";
             if (ValidFilen(filen, false))
             {
@@ -1676,7 +1674,7 @@ namespace GUI.AQUATOX
         private void ViewOutput(string CString)
         {
             string graphjson = "";
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Run_" + CString + ".JSON";
             string graphfilen = BaseDir + "OutputGraphs" + ".JSON";
 
@@ -1812,7 +1810,7 @@ namespace GUI.AQUATOX
         {
             if (webView.CoreWebView2 == null) return;
 
-            webView.CoreWebView2.PostWebMessageAsString("BOUNDS|" + ShowBoundBox.Checked.ToString());
+            PostWebviewMessage("BOUNDS|" + ShowBoundBox.Checked.ToString());
         }
 
         private void NewProject_Click(object sender, EventArgs e)
@@ -1843,7 +1841,7 @@ namespace GUI.AQUATOX
                             if (fbd.ShowDialog() == DialogResult.OK)
                             {
                                 basedirBox.Text = fbd.SelectedPath + "\\";
-                                string BaseDir = basedirBox.Text;
+                                BaseDir = basedirBox.Text;
                                 string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
                                 if (directoryFiles.Length>0) 
                                 {
@@ -2002,7 +2000,7 @@ namespace GUI.AQUATOX
         {
             string boolstr = "False";
             if (LabelCheckBox.Checked) boolstr = "True";
-            webView.CoreWebView2.PostWebMessageAsString("LABELS|" + boolstr);
+            PostWebviewMessage("LABELS|" + boolstr);
         }
 
         private void TestOrderButtonClick(object sender, EventArgs e)
@@ -2014,7 +2012,7 @@ namespace GUI.AQUATOX
                 if (AQT2D == null) AQT2D = new AQSim_2D();
                 if (AQT2D.SN == null)
                 {
-                    string BaseDir = basedirBox.Text;
+                    BaseDir = basedirBox.Text;
                     if (!ValidFilen(BaseDir + "StreamNetwork.JSON", true)) return;
                     string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
                     AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
@@ -2029,10 +2027,10 @@ namespace GUI.AQUATOX
 
                     for (int s2 = 0; s2 < AQT2D.SN.order.Length; s2++)
                         foreach (int runID in AQT2D.SN.order[s2])
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runID.ToString() + "|grey");
+                            PostWebviewMessage("COLOR|" + runID.ToString() + "|grey");
                     if (AQT2D.SN.waterbodies != null)
                         foreach (string[] WBID in AQT2D.SN.waterbodies.wb_table)
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBID[0] + "|grey");
+                            PostWebviewMessage("COLOR|" + WBID[0] + "|grey");
                     executed.Clear();
 
                     // draw all shapes in gray
@@ -2051,7 +2049,7 @@ namespace GUI.AQUATOX
 
                         string lineColor = "red";
                         if (IDtoRun == -9999) { IDtoRun = runID; lineColor = "white"; }
-                        webView.CoreWebView2.PostWebMessageAsString("COLOR|" + IDtoRun.ToString() + "|" + lineColor);
+                        PostWebviewMessage("COLOR|" + IDtoRun.ToString() + "|" + lineColor);
                     }
 
                 }
