@@ -140,14 +140,17 @@ namespace WatershedDelineation
                 if (uphydroseq != 0)
                 {
                     this.networkGraph.AddEdge(uphydroseq, hydroseq, true);
-                    if (upHydroMapping[hydroseq].Count > 1)
+                    if (upHydroMapping.ContainsKey(hydroseq))
                     {
-                        for(int j = 0; j < upHydroMapping[hydroseq].Count; j++)
+                        if (upHydroMapping[hydroseq].Count > 1)
                         {
-                            int altupHydro = upHydroMapping[hydroseq][j];
-                            if(uphydroseq != altupHydro)
+                            for (int j = 0; j < upHydroMapping[hydroseq].Count; j++)
                             {
-                                this.networkGraph.AddEdge(altupHydro, hydroseq, true);
+                                int altupHydro = upHydroMapping[hydroseq][j];
+                                if (uphydroseq != altupHydro)
+                                {
+                                    this.networkGraph.AddEdge(altupHydro, hydroseq, true);
+                                }
                             }
                         }
                     }
