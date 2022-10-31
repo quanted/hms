@@ -71,13 +71,13 @@ namespace Utilities
 
     public class Graph
     {
-        public Node prime;                              // Stream Network: pourpoint segment
-        public ConcurrentDictionary<int, Node> nodeDict;          // Stream Network: Dictionary of nodes in network by id
-        private List<Node> nodes;                       // Stream Network: List of nodes in network
-        private List<Node> edgeNodes;                   // Stream Network: list of edge nodes in the network
-        public List<List<string>> order;                // Stream Network: breadth-first search ordering by node name (ComID)
-        public List<string> edges;                      // Stream Network: headwaters
-        public List<string> outNodes;                   // Stream Network: List of out of network nodes
+        public Node prime;                                          // Stream Network: pourpoint segment
+        public ConcurrentDictionary<int, Node> nodeDict;            // Stream Network: Dictionary of nodes in network by id
+        private List<Node> nodes;                                   // Stream Network: List of nodes in network
+        private List<Node> edgeNodes;                               // Stream Network: list of edge nodes in the network
+        public List<List<string>> order;                            // Stream Network: breadth-first search ordering by node name (ComID)
+        public List<string> edges;                                  // Stream Network: headwaters
+        public List<string> outNodes;                               // Stream Network: List of out of network nodes
 
         public Graph()
         {

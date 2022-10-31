@@ -83,22 +83,23 @@ namespace WatershedDelineation
             //string outSources = "SELECT ComID, Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ") AND ComID NOT IN (" + this.comidStr + ")";
             string outSources = "SELECT ComID, Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ")";
             Dictionary<string, string> outResults = Utilities.SQLite.GetData(this.dbPath, outSources) as Dictionary<string, string>;
-
-            List<string> outComids = outResults["ComID"].Split(",").ToList();
-            List<string> outHydro = outResults["Hydroseq"].Split(",").ToList();
-            List<string> outDnHydro = outResults["DnHydroseq"].Split(",").ToList();
-            for (i = 0; i < outComids.Count; i++)
+            if (outResults.Count > 0)
             {
-                if (!this.comids.Contains(outComids[i]))
+                List<string> outComids = outResults["ComID"].Split(",").ToList();
+                List<string> outHydro = outResults["Hydroseq"].Split(",").ToList();
+                List<string> outDnHydro = outResults["DnHydroseq"].Split(",").ToList();
+                for (i = 0; i < outComids.Count; i++)
                 {
-                    Node node = new Node(Int32.Parse(outHydro[i]), outComids[i], null, false, false, false);
-                    this.networkGraph.AddNode(node);
+                    if (!this.comids.Contains(outComids[i]))
+                    {
+                        Node node = new Node(Int32.Parse(outHydro[i]), outComids[i], null, false, false, false);
+                        this.networkGraph.AddNode(node);
+                    }
                 }
+                stopwatch.Stop();
+                Log.Information("Stream Network - Add out-of-table nodes Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
+                stopwatch.Restart();
             }
-            stopwatch.Stop();
-            Log.Information("Stream Network - Add out-of-table nodes Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
-            stopwatch.Restart();
-
 
             string altUpHydroQuery = "SELECT Hydroseq, DnHydroseq FROM PlusFlowlineVAA WHERE DnHydroseq IN (" + this.hydroStr + ")";
             Dictionary<string, string> altHydroEdges = Utilities.SQLite.GetData(this.dbPath, altUpHydroQuery);
@@ -139,14 +140,17 @@ namespace WatershedDelineation
                 if (uphydroseq != 0)
                 {
                     this.networkGraph.AddEdge(uphydroseq, hydroseq, true);
-                    if (upHydroMapping[hydroseq].Count > 1)
+                    if (upHydroMapping.ContainsKey(hydroseq))
                     {
-                        for(int j = 0; j < upHydroMapping[hydroseq].Count; j++)
+                        if (upHydroMapping[hydroseq].Count > 1)
                         {
-                            int altupHydro = upHydroMapping[hydroseq][j];
-                            if(uphydroseq != altupHydro)
+                            for (int j = 0; j < upHydroMapping[hydroseq].Count; j++)
                             {
-                                this.networkGraph.AddEdge(altupHydro, hydroseq, true);
+                                int altupHydro = upHydroMapping[hydroseq][j];
+                                if (uphydroseq != altupHydro)
+                                {
+                                    this.networkGraph.AddEdge(altupHydro, hydroseq, true);
+                                }
                             }
                         }
                     }
