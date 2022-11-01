@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Drawing;
 using Accord;
+using System.Collections.Generic;
 
 namespace GUI.AQUATOX
 
@@ -20,7 +21,7 @@ namespace GUI.AQUATOX
         private AQSim_2D AQT2D = null;
 
         public string COMID = "";
-        public string GeoJSON = "";
+        public Dictionary<string, string> GeoJSON = new();
         public string ExportSNJSON = "";
         public string SimName = "";
         public double SArea = -9999;  // surface area in square meters as taken from waterbodies object
@@ -93,20 +94,26 @@ namespace GUI.AQUATOX
 
         void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
-            String content = args.WebMessageAsJson; //  TryGetWebMessageAsString();
+            String content = (args.WebMessageAsJson).Trim('"'); //  TryGetWebMessageAsString();
 
-            if (content == "\"DOMContentLoaded\"")
+            if (content == "DOMContentLoaded")
             {
                 tcs.SetResult();  //set mapreadyforrender as complete
             }
-            else if ((content.StartsWith("\"LAKE|"))||
-                (content.StartsWith("\"FL|")) ||
-                (content.StartsWith("\"FL2|")))
+            else if ((content.StartsWith("LAKE|")) ||
+                (content.StartsWith("FL|")) ||
+                (content.StartsWith("FL2|")))
             {
-                System.Threading.SynchronizationContext.Current.Post((_) => {
-                    webView_MouseDown((content.StartsWith("\"LAKE|")), content.Trim('"')); }, null);
+                System.Threading.SynchronizationContext.Current.Post((_) =>
+                {
+                    webView_MouseDown((content.StartsWith("LAKE|")), content);
+                }, null);
             }
-            else GeoJSON = content; 
+            else
+            {
+                string[] split = content.Split('|');
+                if (!GeoJSON.ContainsKey(split[0]))  GeoJSON.Add(split[0], split[1]);
+            }
                 
         }
 
@@ -380,7 +387,7 @@ namespace GUI.AQUATOX
             if (StreamButton.Checked)
             {
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
-                SegLoadLabel.Text = "Stream segments may load slowly at wide zoom.";
+                SegLoadLabel.Text = "Zoom in to see stream segments.";
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
                 infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";

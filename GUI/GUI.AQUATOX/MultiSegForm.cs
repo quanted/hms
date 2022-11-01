@@ -23,6 +23,7 @@ using System.Threading;
 using Web.Services.Models;
 using static GUI.AQUATOX.MultiSegForm;
 using Utilities;
+using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace GUI.AQUATOX
 
@@ -326,7 +327,7 @@ namespace GUI.AQUATOX
                 else
                 {
                     string str3;
-                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
+                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";  //fixme
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
                     setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
                 }
@@ -643,7 +644,7 @@ namespace GUI.AQUATOX
             {
                 TSafeAddToProcessLog(errmessage);
                 UseWaitCursor = false;
-                // PostWebviewMessage("COLOR|" + WBComid + "|red");  Can't be called in Async
+                PostWebviewMessage("COLOR|" + WBComid + "|red");  
                 TSafeHideProgBar();
                 ConsoleButton.Checked = true;
             }
@@ -736,7 +737,7 @@ namespace GUI.AQUATOX
                          }
                     }
 
-                    BeginInvoke((Action)(() =>
+                    this.BeginInvoke((MethodInvoker)(() =>
                     {
                         SetInterfaceBusy(false);
                         progressBar1.Visible = false;
@@ -825,7 +826,7 @@ namespace GUI.AQUATOX
 
         private void PostWebviewMessage(string str)
         {
-            BeginInvoke((Action)(() =>
+            webView.BeginInvoke((MethodInvoker)(() =>
             {
                 webView.CoreWebView2.PostWebMessageAsString(str);
             }));
@@ -873,7 +874,7 @@ namespace GUI.AQUATOX
                             TSafeAddToProcessLog("INPUT: Run saved as " + "AQT_Run_" + Lake0D.ToString() + ".JSON");
                         }
 
-                        BeginInvoke((Action)(() =>  //reset GUI following run
+                        this.BeginInvoke((MethodInvoker)(() =>  //reset GUI following run
                         {
                             reset_interface_after_run();
                         }));
@@ -1475,11 +1476,6 @@ namespace GUI.AQUATOX
 
             await mapReadyForRender; // segments can't render until page is loaded
 
-            //          if (webView.CoreWebView2 == null)
-            //          { await webviewready; } //ensure webview initialized
-            //          await webView.CoreWebView2.DOMContentLoaded(null);
-            //          MessageBox.Show("Rendering Now");
-
             logfilen.Visible = false;
             webView.Visible = true;
             PostWebviewMessage("ERASE");
@@ -1511,13 +1507,15 @@ namespace GUI.AQUATOX
                             if (in_waterbody) continue;  // don't plot segments that are superceded by their lake/reservoir waterbody.
                         }
 
-                        if (File.Exists(BaseDir + CString + ".GeoJSON"))
-                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
+                        if (File.Exists(BaseDir + CString + ".GeoJSON")) 
+                         { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }   
                         else
                         {
+                            
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
-                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
+                            GeoJSON = "{}";
+                             // GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service    //FIXME make async
                             if (GeoJSON.IndexOf("ERROR") >= 0)
                             {
                                 AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
@@ -1884,7 +1882,8 @@ namespace GUI.AQUATOX
                                 string SNJSON = "{\"WBComid\": " + NSForm.COMID + "}";
                                 File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
 
-                                if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", NSForm.GeoJSON);
+                                string Geostr;
+                                if (NSForm.GeoJSON.TryGetValue(NSForm.COMID, out Geostr)) File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", Geostr);
 
                                 if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json");
                                 AQTSim BSim = NSForm.BSim;
@@ -1918,6 +1917,23 @@ namespace GUI.AQUATOX
                                     BSim = new AQTSim();
                                     BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));
                                 }
+
+                                AQT2D = null;
+                                if (VerifyStreamNetwork())
+                                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                                  for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                                  {
+                                    int COMID = AQT2D.SN.order[i][j];
+                                    string CString = COMID.ToString();
+
+                                    string Geostr;
+                                    if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
+                                            {
+                                                Geostr = Geostr.Replace(@"\", "");
+                                                Geostr = "{\"stream_geometry\":{\"type\":\"FeatureCollection\",\"features\":[" + Geostr + "]}}";
+                                                File.WriteAllText(BaseDir + CString + ".GeoJSON", Geostr);
+                                            }
+                                  }
 
                                 BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
                                 BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;

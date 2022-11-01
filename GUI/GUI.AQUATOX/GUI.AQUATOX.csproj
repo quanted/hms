@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows8.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <StartupObject>GUI.AQUATOX.Program</StartupObject>
     <ApplicationIcon>aquatox_Icon.ico</ApplicationIcon>

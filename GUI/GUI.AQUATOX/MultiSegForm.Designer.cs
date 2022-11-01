@@ -543,6 +543,7 @@
             this.TestOrderButton.TabIndex = 42;
             this.TestOrderButton.Text = "Step 0";
             this.TestOrderButton.UseVisualStyleBackColor = true;
+            this.TestOrderButton.Visible = false;
             this.TestOrderButton.Click += new System.EventHandler(this.TestOrderButtonClick);
             // 
             // webView

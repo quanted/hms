@@ -148,11 +148,11 @@
             this.spanBox.Text = "5";
             this.spanBox.Leave += new System.EventHandler(this.comidBox_Leave);
             // 
-            // label4
+            // endCOMIDLabel
             // 
             this.endCOMIDLabel.AutoSize = true;
             this.endCOMIDLabel.Location = new System.Drawing.Point(1, 50);
-            this.endCOMIDLabel.Name = "label4";
+            this.endCOMIDLabel.Name = "endCOMIDLabel";
             this.endCOMIDLabel.Size = new System.Drawing.Size(119, 15);
             this.endCOMIDLabel.TabIndex = 25;
             this.endCOMIDLabel.Text = "(optional) endComID";
@@ -165,11 +165,11 @@
             this.EndCOMIDBox.TabIndex = 24;
             this.EndCOMIDBox.Leave += new System.EventHandler(this.comidBox_Leave);
             // 
-            // label1
+            // comidLabel
             // 
             this.comidLabel.AutoSize = true;
             this.comidLabel.Location = new System.Drawing.Point(76, 22);
-            this.comidLabel.Name = "label1";
+            this.comidLabel.Name = "comidLabel";
             this.comidLabel.Size = new System.Drawing.Size(44, 15);
             this.comidLabel.TabIndex = 23;
             this.comidLabel.Text = "ComID";
@@ -398,11 +398,11 @@
             // 
             this.SegLoadLabel.AutoSize = true;
             this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SegLoadLabel.Location = new System.Drawing.Point(398, 38);
+            this.SegLoadLabel.Location = new System.Drawing.Point(439, 37);
             this.SegLoadLabel.Name = "SegLoadLabel";
-            this.SegLoadLabel.Size = new System.Drawing.Size(292, 17);
+            this.SegLoadLabel.Size = new System.Drawing.Size(203, 17);
             this.SegLoadLabel.TabIndex = 60;
-            this.SegLoadLabel.Text = "Stream segments may load slowly at wide zoom.";
+            this.SegLoadLabel.Text = "Zoom in to see stream segments.";
             this.SegLoadLabel.Visible = false;
             // 
             // label7
