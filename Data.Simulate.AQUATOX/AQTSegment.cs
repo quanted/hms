@@ -4970,7 +4970,7 @@ namespace AQUATOX.AQTSegment
         {
 
             TStateVariable TSV1 = null;
-            bool SuppressText = true;
+            //bool SuppressText = false;
 
             int sercnt = 0;
             string outtxt = "";
@@ -4992,7 +4992,7 @@ namespace AQUATOX.AQTSegment
 
                         sercnt++;
 
-                        SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
+                        //SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
                         for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
                         {
                             ITimeSeriesOutput ito = TSV.SVoutput;
@@ -5005,7 +5005,7 @@ namespace AQUATOX.AQTSegment
 
             outtxt = outtxt + Environment.NewLine;
 
-            if (!SuppressText)
+            // if (!SuppressText)
             {
                 for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
                 {

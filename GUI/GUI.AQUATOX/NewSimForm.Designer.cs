@@ -206,7 +206,6 @@
             this.HelpButton2.TabIndex = 30;
             this.HelpButton2.Text = "   Help";
             this.HelpButton2.UseVisualStyleBackColor = true;
-            this.HelpButton2.Visible = false;
             this.HelpButton2.Click += new System.EventHandler(this.HelpButton2_Click);
             // 
             // infolabel1
@@ -215,9 +214,9 @@
             this.infolabel1.AutoSize = true;
             this.infolabel1.Location = new System.Drawing.Point(398, 531);
             this.infolabel1.Name = "infolabel1";
-            this.infolabel1.Size = new System.Drawing.Size(187, 15);
+            this.infolabel1.Size = new System.Drawing.Size(378, 15);
             this.infolabel1.TabIndex = 39;
-            this.infolabel1.Text = "Click on a Lake/Reservoir to Select";
+            this.infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
             // 
             // infolabel2
             // 
@@ -225,9 +224,9 @@
             this.infolabel2.AutoSize = true;
             this.infolabel2.Location = new System.Drawing.Point(398, 550);
             this.infolabel2.Name = "infolabel2";
-            this.infolabel2.Size = new System.Drawing.Size(244, 15);
+            this.infolabel2.Size = new System.Drawing.Size(357, 15);
             this.infolabel2.TabIndex = 40;
-            this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
+            this.infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
             // 
             // webView
             // 
@@ -348,10 +347,12 @@
             // StreamButton
             // 
             this.StreamButton.AutoSize = true;
+            this.StreamButton.Checked = true;
             this.StreamButton.Location = new System.Drawing.Point(146, 4);
             this.StreamButton.Name = "StreamButton";
             this.StreamButton.Size = new System.Drawing.Size(162, 19);
             this.StreamButton.TabIndex = 2;
+            this.StreamButton.TabStop = true;
             this.StreamButton.Text = "Stream Network (w. lakes)";
             this.StreamButton.UseVisualStyleBackColor = true;
             this.StreamButton.CheckedChanged += new System.EventHandler(this.MapType_CheckChanged);
@@ -359,12 +360,10 @@
             // LakeButton
             // 
             this.LakeButton.AutoSize = true;
-            this.LakeButton.Checked = true;
             this.LakeButton.Location = new System.Drawing.Point(12, 4);
             this.LakeButton.Name = "LakeButton";
             this.LakeButton.Size = new System.Drawing.Size(124, 19);
             this.LakeButton.TabIndex = 0;
-            this.LakeButton.TabStop = true;
             this.LakeButton.Text = "0-D Lake/Reservoir";
             this.LakeButton.UseVisualStyleBackColor = true;
             this.LakeButton.CheckedChanged += new System.EventHandler(this.MapType_CheckChanged);
@@ -397,13 +396,13 @@
             // SegLoadLabel
             // 
             this.SegLoadLabel.AutoSize = true;
-            this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SegLoadLabel.Location = new System.Drawing.Point(439, 37);
+            this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.SegLoadLabel.ForeColor = System.Drawing.SystemColors.InfoText;
+            this.SegLoadLabel.Location = new System.Drawing.Point(438, 39);
             this.SegLoadLabel.Name = "SegLoadLabel";
-            this.SegLoadLabel.Size = new System.Drawing.Size(203, 17);
+            this.SegLoadLabel.Size = new System.Drawing.Size(191, 15);
             this.SegLoadLabel.TabIndex = 60;
             this.SegLoadLabel.Text = "Zoom in to see stream segments.";
-            this.SegLoadLabel.Visible = false;
             // 
             // label7
             // 

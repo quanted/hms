@@ -676,7 +676,7 @@ namespace AQUATOX.AQSim_2D
                         double frac_this_segment = 1.0;
                         double totOutVol = OutVol;
                         if (divergence_flows != null)
-                            foreach (ITimeSeriesOutput its in divergence_flows)
+                            foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
                                 totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;    
                                 // m3/d      m3/d                                         m3/s               s/d

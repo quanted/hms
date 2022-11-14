@@ -349,5 +349,56 @@ namespace GUI.AQUATOX
         {
             AQTTestForm.OpenUrl(HelpTopic);
         }
+
+        private void graph_to_CSV_Click(object sender, EventArgs e)
+        {
+            if (graphBox.SelectedIndex < 0) return;
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "CSV File|*.CSV";
+            saveFileDialog1.Title = "Save graph data to Comma-Separated Text";
+            saveFileDialog1.ShowDialog();
+            if (saveFileDialog1.FileName == "") return;
+
+            int sercount = 0;
+            int ndates=0;
+            List<TStateVariable> TSVList = new();
+            List<int> IndexList = new();
+             
+            string outtxt = "Date, ";
+
+            outSeg.SetMemLocRec();
+
+            TGraphSetup Graph = outSeg.Graphs.GList[graphBox.SelectedIndex];
+            foreach (SeriesID SID in Graph.YItems)
+            {
+                TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
+                if (TSV != null)
+                    if (SID.indx <= TSV.SVoutput.Data.Values.ElementAt(0).Count)
+                    {
+                        outtxt = outtxt + SID.nm.Replace(",", "") + ", ";  // suppress commas in name for CSV output
+                        TSVList.Add(TSV);
+                        IndexList.Add(SID.indx);
+                        sercount++;
+                        ndates = TSV.SVoutput.Data.Keys.Count;
+                    }
+            }
+
+            string datestr = "";
+            for (int date = 0; date < ndates; date++)
+              for (int ser = 0; ser < sercount; ser++)
+              {
+                    ITimeSeriesOutput ito = TSVList[ser].SVoutput;
+                    if (ser == 0)
+                    {
+                        datestr = ito.Data.Keys.ElementAt(date).ToString(); 
+                        outtxt = outtxt + Environment.NewLine + datestr + ", ";  
+                    } 
+                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(date)[IndexList[ser]-1]);
+                    outtxt = outtxt + Val.ToString() + ", ";
+              }
+
+            File.WriteAllText(saveFileDialog1.FileName, outtxt);
+        }
     }
 }

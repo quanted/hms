@@ -6,10 +6,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
-using System.Collections.Specialized;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Drawing;
-using Accord;
 using System.Collections.Generic;
 
 namespace GUI.AQUATOX
@@ -34,8 +30,7 @@ namespace GUI.AQUATOX
 
         static Lake_Surrogates LS = null;
 
-        private NScreenSettings NScrSettings = new();
-        private StringCollection ShortDirNames = new();
+        public NScreenSettings NScrSettings = new();
 
         static public JsonSerializerSettings LSJSONSettings()
         {
@@ -152,11 +147,16 @@ namespace GUI.AQUATOX
                 return;
             }
 
-            if ((!Int32.TryParse(EndCOMIDBox.Text, out int endCOMID)) && (!Double.TryParse(spanBox.Text, out double Span)))
+            bool hasendcomid = Int32.TryParse(EndCOMIDBox.Text, out int endCOMID);
+            bool hasspan = Double.TryParse(spanBox.Text, out double Span);
+
+            if ((!hasendcomid) && (!hasspan))
             {
                 MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
                 return;
             }
+
+            if ((hasendcomid) && (hasspan)) spanBox.Text = ""; //end comid takes precedence so make this clear on the interface
 
             SegLoadLabel.Text = "Please Wait, Reading Stream Network...";
             SegLoadLabel.Visible = true;
@@ -203,17 +203,16 @@ namespace GUI.AQUATOX
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                 {
-                    int CID = AQT2D.SN.order[i][j];
-                    string CString = COMID.ToString();
-                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]); // display all layers
+                    bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
+                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|"+lastshape.ToString()); // display all layers
 
                     //bool in_waterbody = false;
                     //if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(CID);
                     //if (!in_waterbody) webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]);    // don't color segments that are superceded by their lake/reservoir waterbody.
                 };
 
-            webView.CoreWebView2.PostWebMessageAsString("ZOOM"); 
-
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
+            comidBox_Leave(sender, e); //update NScrSettings
             UpdateScreen();
         }
 
@@ -311,8 +310,10 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            string target = "Multi_Segment_Runs";  //fixme new help topic
-            AQTTestForm.OpenUrl(target);
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
+
+            //string target = "Multi_Segment_Runs";  //fixme new help topic
+            //AQTTestForm.OpenUrl(target);
         }
 
 

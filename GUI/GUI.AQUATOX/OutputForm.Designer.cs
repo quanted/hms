@@ -43,16 +43,16 @@ namespace GUI.AQUATOX
             this.label3 = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.Graph_to_CSV = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // OutputBox
             // 
             this.OutputBox.FormattingEnabled = true;
-            this.OutputBox.Location = new System.Drawing.Point(17, 55);
-            this.OutputBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.OutputBox.Location = new System.Drawing.Point(12, 33);
             this.OutputBox.Name = "OutputBox";
-            this.OutputBox.Size = new System.Drawing.Size(331, 33);
+            this.OutputBox.Size = new System.Drawing.Size(233, 23);
             this.OutputBox.TabIndex = 5;
             this.OutputBox.Visible = false;
             this.OutputBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
@@ -60,20 +60,18 @@ namespace GUI.AQUATOX
             // graphBox
             // 
             this.graphBox.FormattingEnabled = true;
-            this.graphBox.Location = new System.Drawing.Point(597, 58);
-            this.graphBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.graphBox.Location = new System.Drawing.Point(419, 35);
             this.graphBox.Name = "graphBox";
-            this.graphBox.Size = new System.Drawing.Size(335, 33);
+            this.graphBox.Size = new System.Drawing.Size(236, 23);
             this.graphBox.TabIndex = 6;
             this.graphBox.SelectedIndexChanged += new System.EventHandler(this.graphBox_selectedIndexChange);
             // 
             // DelRunButton
             // 
             this.DelRunButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DelRunButton.Location = new System.Drawing.Point(359, 55);
-            this.DelRunButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.DelRunButton.Location = new System.Drawing.Point(251, 33);
             this.DelRunButton.Name = "DelRunButton";
-            this.DelRunButton.Size = new System.Drawing.Size(80, 40);
+            this.DelRunButton.Size = new System.Drawing.Size(56, 24);
             this.DelRunButton.TabIndex = 8;
             this.DelRunButton.Text = "Delete";
             this.DelRunButton.UseVisualStyleBackColor = true;
@@ -82,10 +80,9 @@ namespace GUI.AQUATOX
             // EditGraphButton
             // 
             this.EditGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.EditGraphButton.Location = new System.Drawing.Point(943, 55);
-            this.EditGraphButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.EditGraphButton.Location = new System.Drawing.Point(661, 33);
             this.EditGraphButton.Name = "EditGraphButton";
-            this.EditGraphButton.Size = new System.Drawing.Size(80, 40);
+            this.EditGraphButton.Size = new System.Drawing.Size(56, 24);
             this.EditGraphButton.TabIndex = 9;
             this.EditGraphButton.Text = "Edit";
             this.EditGraphButton.UseVisualStyleBackColor = true;
@@ -94,10 +91,9 @@ namespace GUI.AQUATOX
             // DeleteGraphButton
             // 
             this.DeleteGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.DeleteGraphButton.Location = new System.Drawing.Point(1031, 55);
-            this.DeleteGraphButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.DeleteGraphButton.Location = new System.Drawing.Point(723, 33);
             this.DeleteGraphButton.Name = "DeleteGraphButton";
-            this.DeleteGraphButton.Size = new System.Drawing.Size(80, 40);
+            this.DeleteGraphButton.Size = new System.Drawing.Size(56, 24);
             this.DeleteGraphButton.TabIndex = 10;
             this.DeleteGraphButton.Text = "Delete";
             this.DeleteGraphButton.UseVisualStyleBackColor = true;
@@ -106,10 +102,9 @@ namespace GUI.AQUATOX
             // NewGraphButton
             // 
             this.NewGraphButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.NewGraphButton.Location = new System.Drawing.Point(824, 13);
-            this.NewGraphButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.NewGraphButton.Location = new System.Drawing.Point(578, 8);
             this.NewGraphButton.Name = "NewGraphButton";
-            this.NewGraphButton.Size = new System.Drawing.Size(110, 38);
+            this.NewGraphButton.Size = new System.Drawing.Size(77, 23);
             this.NewGraphButton.TabIndex = 11;
             this.NewGraphButton.Text = "New Graph";
             this.NewGraphButton.UseVisualStyleBackColor = true;
@@ -118,32 +113,31 @@ namespace GUI.AQUATOX
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 20);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(13, 14);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(209, 25);
+            this.label1.Size = new System.Drawing.Size(109, 15);
             this.label1.TabIndex = 12;
-            this.label1.Text = "Saved Simulation Results";
+            this.label1.Text = "Simulation Results";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(601, 22);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label2.Location = new System.Drawing.Point(421, 15);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(121, 25);
+            this.label2.Size = new System.Drawing.Size(46, 15);
             this.label2.TabIndex = 13;
-            this.label2.Text = "Saved Graphs";
+            this.label2.Text = "Graphs";
             // 
             // ExportButton
             // 
             this.ExportButton.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.ExportButton.Location = new System.Drawing.Point(454, 55);
-            this.ExportButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.ExportButton.Location = new System.Drawing.Point(314, 33);
             this.ExportButton.Name = "ExportButton";
-            this.ExportButton.Size = new System.Drawing.Size(107, 40);
+            this.ExportButton.Size = new System.Drawing.Size(75, 24);
             this.ExportButton.TabIndex = 14;
-            this.ExportButton.Text = "Save CSV";
+            this.ExportButton.Text = "All to CSV";
             this.ExportButton.UseVisualStyleBackColor = true;
             this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
@@ -151,10 +145,9 @@ namespace GUI.AQUATOX
             // 
             this.toggleLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.toggleLog.Location = new System.Drawing.Point(934, 673);
-            this.toggleLog.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.toggleLog.Location = new System.Drawing.Point(689, 432);
             this.toggleLog.Name = "toggleLog";
-            this.toggleLog.Size = new System.Drawing.Size(163, 40);
+            this.toggleLog.Size = new System.Drawing.Size(114, 24);
             this.toggleLog.TabIndex = 15;
             this.toggleLog.Text = "Toggle Log Scale";
             this.toggleLog.UseVisualStyleBackColor = true;
@@ -164,10 +157,9 @@ namespace GUI.AQUATOX
             // 
             this.resetZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.resetZoom.Location = new System.Drawing.Point(776, 673);
-            this.resetZoom.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.resetZoom.Location = new System.Drawing.Point(578, 432);
             this.resetZoom.Name = "resetZoom";
-            this.resetZoom.Size = new System.Drawing.Size(136, 40);
+            this.resetZoom.Size = new System.Drawing.Size(95, 24);
             this.resetZoom.TabIndex = 16;
             this.resetZoom.Text = "Reset Zoom";
             this.resetZoom.UseVisualStyleBackColor = true;
@@ -177,10 +169,9 @@ namespace GUI.AQUATOX
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(170, 682);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(119, 437);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(588, 25);
+            this.label3.Size = new System.Drawing.Size(388, 15);
             this.label3.TabIndex = 17;
             this.label3.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
             // 
@@ -189,10 +180,9 @@ namespace GUI.AQUATOX
             this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(11, 672);
-            this.HelpButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.HelpButton.Location = new System.Drawing.Point(8, 431);
             this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(124, 40);
+            this.HelpButton.Size = new System.Drawing.Size(87, 24);
             this.HelpButton.TabIndex = 29;
             this.HelpButton.Text = "  Help";
             this.HelpButton.UseVisualStyleBackColor = true;
@@ -203,18 +193,31 @@ namespace GUI.AQUATOX
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Location = new System.Drawing.Point(27, 117);
+            this.pictureBox1.Location = new System.Drawing.Point(19, 70);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1103, 547);
+            this.pictureBox1.Size = new System.Drawing.Size(807, 356);
             this.pictureBox1.TabIndex = 30;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Visible = false;
             // 
+            // Graph_to_CSV
+            // 
+            this.Graph_to_CSV.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.Graph_to_CSV.Location = new System.Drawing.Point(785, 33);
+            this.Graph_to_CSV.Name = "Graph_to_CSV";
+            this.Graph_to_CSV.Size = new System.Drawing.Size(41, 24);
+            this.Graph_to_CSV.TabIndex = 31;
+            this.Graph_to_CSV.Text = "CSV";
+            this.Graph_to_CSV.UseVisualStyleBackColor = true;
+            this.Graph_to_CSV.Click += new System.EventHandler(this.graph_to_CSV_Click);
+            // 
             // OutputForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1160, 718);
+            this.ClientSize = new System.Drawing.Size(847, 459);
+            this.Controls.Add(this.Graph_to_CSV);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.HelpButton);
             this.Controls.Add(this.label3);
@@ -229,8 +232,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.DelRunButton);
             this.Controls.Add(this.graphBox);
             this.Controls.Add(this.OutputBox);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.MinimumSize = new System.Drawing.Size(1173, 746);
+            this.MinimumSize = new System.Drawing.Size(826, 463);
             this.Name = "OutputForm";
             this.Text = "Output";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -255,5 +257,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Button Graph_to_CSV;
     }
 }

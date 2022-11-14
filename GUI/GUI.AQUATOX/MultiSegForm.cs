@@ -20,10 +20,6 @@ using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 using System.Threading;
-using Web.Services.Models;
-using static GUI.AQUATOX.MultiSegForm;
-using Utilities;
-using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace GUI.AQUATOX
 
@@ -247,7 +243,7 @@ namespace GUI.AQUATOX
             }
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when saving Screen Settings: " + ex.Message;
+                AddToProcessLog("ERROR: when saving Screen Settings: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 return;
             }
@@ -271,7 +267,7 @@ namespace GUI.AQUATOX
             }
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when loading Screen Settings: " + ex.Message;
+                AddToProcessLog("ERROR: when loading Screen Settings: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 return;
             }
@@ -327,7 +323,7 @@ namespace GUI.AQUATOX
                 else
                 {
                     string str3;
-                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";  //fixme
+                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";  
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
                     setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
                 }
@@ -728,11 +724,11 @@ namespace GUI.AQUATOX
 
                     if (Lake0D == 0)
                     {
-                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
-                         if (boundaries.Length > 0)
+                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] outofnetwork))
+                         if (outofnetwork.Length > 0)
                          {
                              string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                             foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
+                             foreach (long bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
                              TSafeAddToProcessLog("INPUT: " + bnote);
                          }
                     }
@@ -753,7 +749,7 @@ namespace GUI.AQUATOX
 
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when creating segments: " + ex.Message;
+                AddToProcessLog("ERROR: when creating segments: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 SetInterfaceBusy(false);
                 progressBar1.Visible = false;
@@ -970,7 +966,7 @@ namespace GUI.AQUATOX
 
             catch (Exception ex)
             {
-                ProcessLog.Text += "ERROR: running linked segments: " + ex.Message;
+                AddToProcessLog("ERROR: running linked segments: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 reset_interface_after_run();
                 return;
@@ -1480,12 +1476,12 @@ namespace GUI.AQUATOX
             webView.Visible = true;
             PostWebviewMessage("ERASE");
 
-            int[] boundaries = new int[0];
+            int[] outofnetwork = new int[0];
 
             if (Lake0D > 0) PlotWBCOMID(Lake0D.ToString());  // plot stand alone 0-D lake
             else  // loop through lake/res waterbodies if they exist
             {
-                if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
                 if (AQT2D.SN.waterbodies != null)
                     for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
@@ -1514,8 +1510,8 @@ namespace GUI.AQUATOX
                             
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
-                            GeoJSON = "{}";
-                             // GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service    //FIXME make async
+                            // GeoJSON = "{}";
+                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service    
                             if (GeoJSON.IndexOf("ERROR") >= 0)
                             {
                                 AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
@@ -1550,12 +1546,12 @@ namespace GUI.AQUATOX
                         {
                             if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                                 foreach (int SrcID in Sources)
-                                    if (boundaries.Contains(SrcID))  //ID inflow points with green circles
+                                    if (outofnetwork.Contains(SrcID))  //ID inflow points with green markers
                                     {
                                         PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
                                     }
 
-                            if (i == AQT2D.SN.order.Length - 1) //ID pour point with red circle
+                            if (i == AQT2D.SN.order.Length - 1) //ID pour point with red marker
                             {
                                 PostWebviewMessage("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
                             }
@@ -1655,13 +1651,13 @@ namespace GUI.AQUATOX
                 if (Lake0D == 0)
                 {
                     isBoundarySeg = false;
-                    int[] boundaries = new int[0];
+                    int[] outofnetwork = new int[0];
                     if (AQT2D.SN.boundary != null)
-                        AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                        AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
                     if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                         foreach (int SrcID in Sources)
-                            if (boundaries.Contains(SrcID)) isBoundarySeg = true;
+                            if (outofnetwork.Contains(SrcID)) isBoundarySeg = true;
                 }
 
                 if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
@@ -1941,6 +1937,10 @@ namespace GUI.AQUATOX
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                                 File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
 
+                                ScrSettings.COMIDstr = NSForm.NScrSettings.COMIDstr;
+                                ScrSettings.UpSpanStr = NSForm.NScrSettings.UpSpanStr;
+                                ScrSettings.EndCOMIDstr = NSForm.NScrSettings.EndCOMIDstr;
+
                             }
 
                             SaveScreenSettings();
@@ -2071,7 +2071,7 @@ namespace GUI.AQUATOX
                 }
                 catch (Exception ex)
                 {
-                    ProcessLog.Text = "ERROR: while updating drawing: " + ex.Message;
+                    AddToProcessLog("ERROR: while updating drawing: " + ex.Message); 
                     MessageBox.Show(ex.Message);
                     return;
                 }
