@@ -124,7 +124,7 @@ namespace Utilities
             List<string> edges = new List<string>();
             for(int i = 0; i < this.nodes.Count; i++)
             {
-                if (this.nodes[i].leaf)
+                if (this.nodes[i].leaf && this.nodes[i].upEdge.Count == 0)
                 {
                     edges.Add(this.nodes[i].name);
                 }
@@ -173,6 +173,7 @@ namespace Utilities
             List<Node> iEdges = new List<Node>(){ this.prime };
             List<Node> jEdges;
             int traversed = 0;
+            List<int> traversedNodes = new List<int>();
             while (traversed < this.nodes.Count - this.outNodes.Count)
             {
                 jEdges = new List<Node>();
@@ -186,9 +187,10 @@ namespace Utilities
                             jEdges.Add(iEdges[i].upNode[j]);
                         }
                     }
-                    if (!level.Contains(iEdges[i].name))
+                    if (!level.Contains(iEdges[i].name) && !traversedNodes.Contains(iEdges[i].id))
                     {
                         level.Add(iEdges[i].name);
+                        traversedNodes.Add(iEdges[i].id);
                         traversed += 1;
                     }
                 }
