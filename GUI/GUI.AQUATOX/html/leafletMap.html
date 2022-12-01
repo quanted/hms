@@ -233,7 +233,11 @@
             });
 
             if (layer.feature.properties.COMID != null) {
-                layer.bindTooltip(layer.feature.properties.COMID.toString(), {
+                var str = '';
+                if (feature.properties.GNIS_NAME != null) str = ", " + feature.properties.GNIS_NAME.toString();
+                if (str == ' ') str = '';
+                str = feature.properties.COMID.toString() + str;
+                layer.bindTooltip(str, {
                     permanent: false,
                     opacity: 1.0
                 });
@@ -249,7 +253,7 @@
                 geoLayer.setStyle({ weight: 2 });
                 geoLayer.eachLayer(function (layer) {
                     if (layer.feature.geometry.type == 'Polygon') {
-                        layer.setStyle({ color: 'black', weight: 2 })
+                        layer.setStyle({ color: 'navy', weight: 2 })
                     }
                 });
                 geoLayer.addTo(MAP);
@@ -310,7 +314,10 @@
 
             geoLayer.eachLayer(function (layer) {
                 if (layer.feature.properties.COMID != null) {
-                    str = layer.feature.properties.COMID.toString();
+                    var str = '';
+                    if (layer.feature.properties.GNIS_NAME != null) str = ", " + layer.feature.properties.GNIS_NAME.toString();
+                    if (str == ' ') str = '';
+                    str = layer.feature.properties.COMID.toString() + str;
                     if (str != ' ') { layer.unbindTooltip(); layer.bindTooltip(str, { permanent: permanentlabels, opacity: 1.0 }); };
                 }
             });

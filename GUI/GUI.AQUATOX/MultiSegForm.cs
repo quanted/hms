@@ -475,57 +475,6 @@ namespace GUI.AQUATOX
                 });
         }
 
-
-        // SUPERSEDED BY NEW WINDOW
-        //private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
-        //{
-        //    if (VerifyStreamNetwork())
-        //        if (MessageBox.Show("Overwrite the existing stream network and any inputs and outputs?", "Confirm",
-        //            MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
-
-        //    BaseDir = basedirBox.Text;
-
-        //    string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
-        //    foreach (string directoryFile in directoryFiles)
-        //    {
-        //        System.IO.File.Delete(directoryFile);
-        //    }
-
-        //    ConsoleButton.Checked = true;
-
-        //    if (AQT2D == null) AQT2D = new AQSim_2D();
-
-        //    AddToProcessLog("INFO: Please wait, reading stream network from web service");
-        //    string SNJSON = AQT2D.ReadStreamNetwork(ScrSettings.COMIDstr,  ScrSettings.EndCOMIDstr, ScrSettings.UpSpanStr);
-        //    if (SNJSON == "")
-        //    {
-        //        AddToProcessLog("ERROR: web service returned empty JSON."); return;
-        //    }
-        //    if (SNJSON.IndexOf("ERROR") >= 0)
-        //    {
-        //        AddToProcessLog("ERROR: web service returned: " + SNJSON); return;
-        //    }
-        //    try
-        //    { AQT2D.CreateStreamNetwork(SNJSON); }
-        //    catch
-        //    { AddToProcessLog("ERROR: when converting JSON:" + SNJSON); return; }
-
-        //    AddToProcessLog("INFO: System has " + AQT2D.nSegs.ToString() + " segments");
-
-        //    //string BaseFileN = BaseJSONBox.Text;
-        //    //AddToProcessLog(" Basefile = " + BaseFileN);
-
-        //    AddToProcessLog("INFO: BaseDir = " + BaseDir);
-
-        //    File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
-        //    AddToProcessLog("Finished reading stream network" + Environment.NewLine);
-
-        //    Lake0D = 0;
-
-        //    UpdateScreen();
-        //    if (MapButton2.Checked) PlotCOMIDMap();
-        //}
-
         private bool SegmentsCreated()
         {
             BaseDir = basedirBox.Text;
@@ -685,12 +634,12 @@ namespace GUI.AQUATOX
 
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null)
-                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
+                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
                             continue;
-                        }   //TODO check for NWM data, case where lake/res returns null
+                        }   
 
                         string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
@@ -766,9 +715,9 @@ namespace GUI.AQUATOX
         {
             progressBar1.BeginInvoke((MethodInvoker)delegate ()
             {
-                if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
+                if (Prog < 100) Prog++;  // workaround of animation bug
                 Prog = Math.Max(Prog, 1);
-                if ((Prog > progressBar1.Value) || (Prog == 1)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  //TODO refine
+                if ((Prog > progressBar1.Value) || (Prog == 1) || (progressBar1.Value==100)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  
             });
         }
 
@@ -893,7 +842,7 @@ namespace GUI.AQUATOX
                          BaseDir = basedirBox.Text;
 
                          bool in_waterbody = false;
-                         if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+                         if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(runID);  // is this listed as a lake/res
 
                          int IDtoRun = runID;
                          if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
@@ -1499,7 +1448,7 @@ namespace GUI.AQUATOX
                         if (!NRCheckBox.Checked)
                         {   // suppress show un-run COMIDs (those contained in waterbodies)
                             bool in_waterbody = false;
-                            if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
+                            if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(COMID);
                             if (in_waterbody) continue;  // don't plot segments that are superceded by their lake/reservoir waterbody.
                         }
 
@@ -1661,6 +1610,7 @@ namespace GUI.AQUATOX
                 }
 
                 if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
+                AddToProcessLog("INPUTS:  Possible user edits made to parameters in segment " + filen);  
             }
             else { MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated."); };
         }
@@ -1900,6 +1850,10 @@ namespace GUI.AQUATOX
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                                 File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+
+                                AddToProcessLog("INPUTS: New 0-D lake/reservoir simulation setup.  COMID: " + NSForm.COMID );
+                                AddToProcessLog("INPUTS: Base simulation = "+ BaseJSONFileN);
+                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen.  Surface area set.");
                             }
                             else //NSForm.SNPopulated must be true
                             {
@@ -1941,6 +1895,11 @@ namespace GUI.AQUATOX
                                 ScrSettings.UpSpanStr = NSForm.NScrSettings.UpSpanStr;
                                 ScrSettings.EndCOMIDstr = NSForm.NScrSettings.EndCOMIDstr;
 
+                                AddToProcessLog("INPUTS: New stream network simulation setup.  Pour Point COMID " + ScrSettings.COMIDstr);
+                                 
+                                AddToProcessLog("INPUTS: " + AQT2D.SNStats());
+                                AddToProcessLog("INPUTS: Base simulation for reaches = " + BaseJSONFileN);
+                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen. ");  
                             }
 
                             SaveScreenSettings();
@@ -2022,7 +1981,6 @@ namespace GUI.AQUATOX
         private void TestOrderButtonClick(object sender, EventArgs e)
         {
             {
-
                 ChartVisible(false);
 
                 if (AQT2D == null) AQT2D = new AQSim_2D();
@@ -2058,7 +2016,7 @@ namespace GUI.AQUATOX
                     foreach (int runID in AQT2D.SN.order[ShowStep - 1])  // step through each COMID in this "order" 
                     {
                         bool in_waterbody = false;
-                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(runID);  // is this identified as a lake/res in streamnetwork
 
                         int IDtoRun = runID;
                         if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready

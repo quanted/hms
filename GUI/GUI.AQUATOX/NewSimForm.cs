@@ -107,6 +107,7 @@ namespace GUI.AQUATOX
             else
             {
                 string[] split = content.Split('|');
+                split[1] = split[1].Replace("\\\"", "\"");   // lake geojsons included \ character in strings
                 if (!GeoJSON.ContainsKey(split[0]))  GeoJSON.Add(split[0], split[1]);
             }
                 

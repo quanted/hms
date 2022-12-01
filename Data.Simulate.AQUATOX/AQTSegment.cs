@@ -1928,7 +1928,7 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Enable Parallel.ForEach when not debugging
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Consider Enabling Parallel.ForEach when not debugging... uncertain how much improvement due to transactional costs
 
         }
 
@@ -1965,7 +1965,6 @@ namespace AQUATOX.AQTSegment
         }
 
         // Modify db to Account for a changing volume
-        // Below functions in NUMERICAL.INC
         // -------------------------------------------------------------------------
         // Cash-Karp RungeKutta with adaptive stepsize.
         // 
@@ -3431,7 +3430,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
+                throw new ArgumentException("Internal AQUATOX Error: GetState called for non-existant state variable: " + S.ToString(), "original");  
                 // result = -1;
             }
         }

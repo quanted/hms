@@ -78,13 +78,29 @@ namespace AQUATOX.AQSim_2D
                     int COMID = SN.order[i][j];
                     string CString = COMID.ToString();
                     bool in_waterbody = false;
-                    if (SN.waterbodies != null) in_waterbody = SN.waterbodies.comid_wb.ContainsKey(COMID);
+                    if (SN.waterbodies != null) in_waterbody = NWM_Waterbody(COMID);
                     if (!in_waterbody) FLCount++; // don't count segments that are superceded by their lake/reservoir waterbody.
                 };
             string outstr = "A total of " + (WBCount+FLCount).ToString() + " segments";
             if (WBCount > 0) outstr += " including " + WBCount + " lake/reservoir segments.";
             return outstr;
         }
+
+        /// <summary>
+        /// Returns true if the COMID is located within an NWM waterbody and does not need running as a stream segment.
+        /// </summary>
+        public bool NWM_Waterbody(int COMID)
+        {
+            int WBCOMID;
+            if (SN.waterbodies != null) if (SN.waterbodies.comid_wb.TryGetValue(COMID, out WBCOMID))
+              for (int i = 1; i < SN.waterbodies.wb_table.GetLength(0); i++)
+                    {
+                    if (int.Parse(SN.waterbodies.wb_table[i][0]) == WBCOMID)
+                        return true;
+                    }
+
+            return false;
+        } 
 
         /// <summary>
         /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.

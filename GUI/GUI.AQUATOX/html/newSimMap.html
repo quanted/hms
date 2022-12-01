@@ -227,7 +227,7 @@
                         lastWBLayer = layer;
                         MAP.fitBounds(layer.getBounds());
                         sendMessageToDotnet(str);
-                        str = layer.feature.properties.feature_id.toString() + "|" + layer.toGeoJSON();
+                        str = layer.feature.properties.feature_id.toString() + "|" + JSON.stringify(layer.toGeoJSON());   
                         sendMessageToDotnet(str);
                     };
                 });
