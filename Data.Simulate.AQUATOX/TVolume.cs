@@ -169,10 +169,10 @@ namespace AQUATOX.Volume
             // *  This procedure replaces DeltaMorph as of 12-9-99.                                           *
             // *                                                                                              *
             // *  This procedure ensures all dynamic Morph data is properly set, including:                   *
-            // *         Volume, InflowH2O, Discharge, ZMix, MeanThick, TotDischarge                          *
+            // *         Volume, InflowH2O, Discharge, ZMix, MeanThick, TotDischarge, retentiontime           *
             // *                                                                                              *
             // *  Other Morph variables are not dynamic over a study run, such as                             *
-            // *         P_Shape, ECoeffWater.  They are not modified by this Procedure              *
+            // *         P_Shape, ECoeffWater.  They are not modified by this Procedure                       *
             // *                                                                                              *
             // *  DeltaVolume is called whenever the Volume S.V. or Volume Loadings Data have changed         *
             // *                                                                                              *
@@ -193,6 +193,8 @@ namespace AQUATOX.Volume
             Location.Discharge = Discharg;
             Location.Morph.InflowH2O = Inflow;
             Location.TotDischarge = Discharg;  // used for summing epilimnion and hypolimnion if stratification code enabled
+            AQTSeg.residence_time = AQTSeg.Volume_Last_Step / Discharg;
+             // water res time in d  =               m3     /   m3/d   
 
             if ((Location.SiteType == SiteTypes.Stream))
             {

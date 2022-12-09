@@ -1169,7 +1169,8 @@ namespace AQUATOX.AQTSegment
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;    // output only
+        public double MeanDischarge = 0;   // output only
+        public double residence_time = 1;  // water residence time in days
 
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
@@ -2665,6 +2666,10 @@ namespace AQUATOX.AQTSegment
                 else if ((Math.Abs(hnext) < h_minimum))
                 {
                     h = h_minimum;  // attempt to control min. timestep
+                }
+                else if ((Math.Abs(hnext) > residence_time))
+                {
+                    h = residence_time;  // 12/5/2022 logic to prevent minimum timestep from being below residence time 
                 }
                 else
                 {
