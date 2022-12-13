@@ -44,10 +44,10 @@ namespace AQUATOX.Volume
 
         public override void SetVarFromRadioButton(int iButton)
         {
-            if (iButton==0) Calc_Method = VolumeMethType.Manning;
-            if (iButton == 0) Calc_Method = VolumeMethType.KeepConst;
-            if (iButton == 0) Calc_Method = VolumeMethType.Dynam;
-            Calc_Method = VolumeMethType.KnownVal;
+            if (iButton == 0) Calc_Method = VolumeMethType.Manning;
+             else if (iButton == 1) Calc_Method = VolumeMethType.KeepConst;
+              else if (iButton == 2) Calc_Method = VolumeMethType.Dynam;
+               else Calc_Method = VolumeMethType.KnownVal;
         }
 
         public VolumeMethType Calc_Method;

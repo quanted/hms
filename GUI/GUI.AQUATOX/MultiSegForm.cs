@@ -471,6 +471,7 @@ namespace GUI.AQUATOX
             progressBar1.BeginInvoke((MethodInvoker)delegate ()
                 {
                     progressBar1.Visible = false;
+                    proglabel.Visible= false;
                     CancelButton.Visible = false;
                 });
         }
@@ -616,6 +617,7 @@ namespace GUI.AQUATOX
 
                 UseWaitCursor = true;
                 progressBar1.Visible = true;
+                proglabel.Visible = true;
                 Application.DoEvents();
 
                 SetInterfaceBusy(true);
@@ -686,6 +688,7 @@ namespace GUI.AQUATOX
                     {
                         SetInterfaceBusy(false);
                         progressBar1.Visible = false;
+                        proglabel.Visible = false;  
                         CancelButton.Visible = false;
                         UseWaitCursor = false;
                         UpdateScreen();
@@ -702,6 +705,7 @@ namespace GUI.AQUATOX
                 MessageBox.Show(ex.Message);
                 SetInterfaceBusy(false);
                 progressBar1.Visible = false;
+                proglabel.Visible= false; 
                 CancelButton.Visible = false;
                 UseWaitCursor = false;
                 UpdateScreen();
@@ -736,6 +740,7 @@ namespace GUI.AQUATOX
         {
             UseWaitCursor = false;
             progressBar1.Visible = false;
+            proglabel.Visible = false;  
             CancelButton.Visible = false;
             SetInterfaceBusy(false);
             UpdateScreen();
@@ -750,6 +755,7 @@ namespace GUI.AQUATOX
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
+            proglabel.Visible = true;
 
             SetInterfaceBusy(true);
 
@@ -835,6 +841,7 @@ namespace GUI.AQUATOX
 
                 for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
                 {
+                    proglabel.Text= "Step "+(ordr+1).ToString()+" of "+ AQT2D.SN.order.Length.ToString();
                     await Task.Run(() => Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
                     //                foreach (int runID in AQT2D.SN.order[ordr])
                      {
