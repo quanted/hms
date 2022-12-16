@@ -284,7 +284,7 @@ namespace AQUATOX.AQTSegment
 
             TL.UseConstant = false;
             TL.MultLdg = multldg;
-            TL.Hourly = true;
+            //TL.Hourly = true;  12/14/22
             TL.list = inlist;
 
             string outjson = "";
@@ -3300,7 +3300,7 @@ namespace AQUATOX.AQTSegment
                                     if (SVLoop == T_SVType.StV)
                                     {
                                         PR.InitialCond = PDIR.InitCond * MultFrac;
-                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                        // PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;   // All Hourly = true;  12/14/22
                                     }
                                     else PR.InitialCond = PDIR.ToxInitCond[PR.ToxInt(SVLoop)];
                                 }
@@ -5278,11 +5278,11 @@ namespace AQUATOX.AQTSegment
             DailyLight = light;
 
             HourlyLight = 0;
-            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.Hourly))
+            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val))        // && (LoadsRec.Loadings.Hourly)) 12/14/22
             { HourlyLight = light; }
 
             // 12-5-2016 correction to properly model hourly light time-series inputs
-            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
+            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant)))  // 12/14/22  removed || (!LoadsRec.Loadings.Hourly)
             {
                 // distribute daily loading over daylight hours
                 pp = AQTSeg.Photoperiod();

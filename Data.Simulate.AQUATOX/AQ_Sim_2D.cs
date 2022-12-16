@@ -165,7 +165,7 @@ namespace AQUATOX.AQSim_2D
             KnownValLoad.UseConstant = false;
             KnownValLoad.MultLdg = 1;
             KnownValLoad.NoUserLoad = false;
-            KnownValLoad.Hourly = true;
+            // KnownValLoad.Hourly = true;  12/14/22 
 
             ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
 
@@ -192,7 +192,7 @@ namespace AQUATOX.AQSim_2D
 
             InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
             InflowLoad.MultLdg = 86400;  // seconds per day
-            InflowLoad.Hourly = true;
+            // InflowLoad.Hourly = true;  12/14/22
             InflowLoad.UseConstant = false;
 
             TVol.LoadNotes1 = "Volumes from NWM in m3";
@@ -226,7 +226,7 @@ namespace AQUATOX.AQSim_2D
                 KnownValLoad.UseConstant = false;
                 KnownValLoad.MultLdg = 1;
                 KnownValLoad.NoUserLoad = false;
-                KnownValLoad.Hourly = true;  
+                // KnownValLoad.Hourly = true;  12/14/22
 
                 ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
 
@@ -259,7 +259,7 @@ namespace AQUATOX.AQSim_2D
 
                 InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
                 InflowLoad.MultLdg = 86400;  // seconds per day
-                InflowLoad.Hourly = true;
+                // InflowLoad.Hourly = true; 12/14/22
                 InflowLoad.UseConstant = false;
                 
                 TVol.LoadNotes1 = "Volumes from NWM using flows in m3/s";       
@@ -281,7 +281,7 @@ namespace AQUATOX.AQSim_2D
                 VelocityLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 VelocityLoad.Translate_ITimeSeriesInput(1,0);  //bank 1 for velocity;  minimum velocity of zero
                 VelocityLoad.MultLdg = 100;  // m/s to cm/s
-                VelocityLoad.Hourly = true;
+                // VelocityLoad.Hourly = true; 12/14/22
                 VelocityLoad.UseConstant = false;
                 VelocityLoad.ITSI = null;
             }
@@ -303,7 +303,7 @@ namespace AQUATOX.AQSim_2D
                 DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 DischargeLoad.Translate_ITimeSeriesInput(0,1000/86400);  //default minimum flow of 1000 cu m /d for now
                 DischargeLoad.MultLdg = 86400;  // seconds per day
-                DischargeLoad.Hourly = true;
+                // DischargeLoad.Hourly = true;  12/14/22
                 DischargeLoad.UseConstant = false;
                 TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
                 TVol.LoadNotes2 = "Converted to m3/d using multiplier";
@@ -681,7 +681,7 @@ namespace AQUATOX.AQSim_2D
                 {
                     TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
-                    // TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
+
                     TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
 
@@ -694,7 +694,7 @@ namespace AQUATOX.AQSim_2D
                         if (divergence_flows != null)
                             foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
-                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;    
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step chagnes or time-period is increased since NWM data gathering
                                 // m3/d      m3/d                                         m3/s               s/d
                                 frac_this_segment = OutVol / totOutVol;
                             }
@@ -709,7 +709,7 @@ namespace AQUATOX.AQSim_2D
 
                     TSV.LoadsRec.Loadings.list = newlist;
                     TSV.LoadsRec.Loadings.UseConstant = false;
-                    TSV.LoadsRec.Loadings.Hourly = true;
+                    // TSV.LoadsRec.Loadings.Hourly = true; 12/14/22
                     TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
                 }
             }
