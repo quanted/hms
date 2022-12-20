@@ -708,7 +708,7 @@ namespace AQUATOX.AQTSegment
 
             TL.UseConstant = false;
             TL.MultLdg = multldg;
-            TL.Hourly = true;
+            //TL.Hourly = true;  12/14/22
             TL.list = inlist;
 
             string outjson = "";
@@ -1598,7 +1598,8 @@ namespace AQUATOX.AQTSegment
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;    // output only
+        public double MeanDischarge = 0;   // output only
+        public double residence_time = 1;  // water residence time in days
 
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
@@ -2353,10 +2354,240 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Enable Parallel.ForEach when not debugging
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Consider Enabling Parallel.ForEach when not debugging... uncertain how much improvement due to transactional costs
 
         }
 
+<<<<<<< HEAD
+=======
+
+        public void TryRKStep_CheckZeroState(TStateVariable p)
+        {
+            if (p.State < Consts.Tiny)
+            {
+                p.State = 0.0;
+                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
+                    ((TToxics)p).ppb = 0;
+
+            }
+        }
+
+        public void TryRKStep_CheckZeroStateAllSVs()
+        {
+            foreach (TStateVariable TSV in SV)
+            {
+                TryRKStep_CheckZeroState(TSV);
+            }
+        }
+
+        public void TryRKStep_RestoreStates_From_Holder()
+        {
+            foreach (TStateVariable TSV in SV)
+                TSV.State = TSV.yhold;
+        }
+
+        public void TryRKStep_SaveStates_to_Holder()
+        {
+            foreach (TStateVariable TSV in SV)
+                TSV.yhold = TSV.State;
+        }
+
+        // Modify db to Account for a changing volume
+        // -------------------------------------------------------------------------
+        // Cash-Karp RungeKutta with adaptive stepsize.
+        // 
+        // Source, Cash, Karp, "A Variable Order Runge-Kutta Method for Initial
+        // value problems with rapidly varying right-hand sides" ACM Transactions
+        // on Mathematical Software 16: 201-222, 1990. doi:10.1145/79505.79507
+        // 
+        // Uses Nested Loops to determine fourth and fifth-order accurate solutions
+        // 
+        // See also: http://en.wikipedia.org/wiki/Cash-Karp
+        // http://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_method
+        // 
+        // -------------------------------------------------------------------------
+        public void TryRKStep(DateTime x, double h)
+        {
+            double[] A = { 0, 0, 0.2, 0.3, 0.6, 1.0, 0.875 };
+            double[] B5 = { 0, 0.09788359788, 0, 0.40257648953, 0.21043771044, 0, 0.28910220215 };
+            double[] B4 = { 0, 0.10217737269, 0, 0.38390790344, 0.24459273727, 0.01932198661, 0.25 };  // Butcher Tableau
+            double[,] Tableau = { { 0.2, 0, 0, 0, 0 },
+                                  { 0.075, 0.225, 0, 0, 0 },
+                                  { 0.3, -0.9, 1.2, 0, 0 },
+                                  { -0.2037037037037, 2.5, -2.5925925925926, 1.2962962963, 0 },
+                                  { 0.029495804398148, 0.341796875000000, 0.041594328703704, 0.400345413773148, 0.061767578125000 } };
+            int Steps;
+            int SubStep;
+            double YFourth;
+            TryRKStep_SaveStates_to_Holder();
+            for (Steps = 1; Steps <= 6; Steps++)
+            {
+                if (Steps > 1)
+                {
+                    // First step derivative already completed
+                    TryRKStep_CheckZeroStateAllSVs();
+                    Derivs(x.AddDays(A[Steps] * h), Steps);
+                    TryRKStep_RestoreStates_From_Holder();
+                }
+                if (Steps < 6)
+                {
+                    foreach (TStateVariable TSV in SV)
+                    {
+                        for (SubStep = 1; SubStep <= Steps; SubStep++)
+                            TSV.State = TSV.State + h * Tableau[Steps - 1, SubStep - 1] * TSV.StepRes[SubStep];
+                    }
+                }
+            }  // 6 steps of integration
+
+            foreach (TStateVariable TSV in SV)
+            {
+                TSV.yhold = TSV.State;
+                YFourth = TSV.State;
+                for (Steps = 1; Steps <= 6; Steps++)
+                {  // zero weights for both solutions
+                    if (Steps != 2)
+                    {
+                        TSV.yhold = TSV.yhold + h * (B5[Steps] * TSV.StepRes[Steps]);    // Fifth Order Accurate Soln
+                        YFourth = YFourth + h * (B4[Steps] * TSV.StepRes[Steps]);        // Fourth Order Accurate Soln
+                    }
+                }
+                TSV.yerror = YFourth - TSV.yhold;      // Error is taken to be the difference between the fourth and fith-order accurate solutions
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // Cash-Karp RungeKutta with adaptive stepsize.
+        // 
+        // Adaptive Stepsize Adjustment Source Dr. Michael Thomas Flanagan
+        // www.ee.ucl.ac.uk/~mflanaga
+        // 
+        // -------------------------------------------------------------------------
+        public void AdaptiveStep(ref DateTime x, double hstart, double RelError, ref double h_taken, ref double hnext, double MaxStep)
+        {
+            const double SAFETY = 0.9;
+            double h;
+            double Delta;
+            TStateVariable ErrVar;
+            double MaxError;
+
+            if (PSetup.UseFixStepSize.Val)
+            {
+                h = PSetup.FixStepSize.Val;  // 2/21/2012 new option
+                if ((x.AddDays(h) > PSetup.LastDay.Val))
+                {
+                    // if stepsize can overshoot, decrease
+                    h = (PSetup.LastDay.Val - x).TotalDays;
+                }
+            }
+            else
+            {
+                h = hstart;
+            }
+            do
+            {
+                TryRKStep(x, h);
+                // calculate RKQS 4th and 5th order solutions and estimate error based on their difference
+                MaxError = 0;
+                ErrVar = null;
+                if (!PSetup.UseFixStepSize.Val)
+                {
+                    foreach (TStateVariable TSV in SV)
+                    {
+                        if ((Math.Abs(TSV.yscale) > Consts.VSmall))
+                        {
+                            if ((Math.Abs(TSV.yerror / TSV.yscale) > MaxError))
+                            {
+                                if (!((TSV.yhold < 0) && (TSV.State < Consts.VSmall)))  // no need to track error, state variable constrained to zero
+                                {
+
+                                    MaxError = Math.Abs(TSV.yerror / TSV.yscale);    // maximum error of all differential equations evaluated
+                                    ErrVar = TSV;                                   // save error variable for later use in screen display
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!PSetup.UseFixStepSize.Val)
+                {
+                    if ((MaxError >= RelError))
+                    {
+                        // Step has failed, reduce step-size and try again
+                        // Adaptive Stepsize Adjustment Source ("Delta" Code) Dr. Michael Thomas Flanagan
+                        // www.ee.ucl.ac.uk/~mflanaga
+                        // 
+                        // Permission to use, copy and modify this software and its documentation for
+                        // NON-COMMERCIAL purposes is granted, without fee, provided that an acknowledgement
+                        // to the author, Dr Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies.
+                        // Dr Michael Thomas Flanagan makes no representations about the suitability or fitness
+                        // of the software for any or for a particular purpose. Dr Michael Thomas Flanagan shall
+                        // not be liable for any damages suffered as a result of using, modifying or distributing
+                        // this software or its derivatives.
+
+                        Delta = SAFETY * Math.Pow(MaxError / RelError, -0.25);
+                        if ((Delta < 0.1)) h = h * 0.1;
+                        else h = h * Delta;
+                    }
+                }
+                // no warning at this time
+            } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PSetup.UseFixStepSize.Val)));
+            // If (MaxError>1) and (not StepSizeWarned) then
+            // Begin
+            // StepSizeWarned = true;
+            // MessageStr = 'Warning, the differential equation solver time-step has been forced below the minimum';
+            // If ShowDebug then MessageStr = MessageStr + ' due to the "' +ProgData.ErrVar + '" state variable';
+            // MessageStr = MessageStr + '.  Continuing to step forward using minimum step-size.';
+            // MessageErr = true;
+            // TSMessage;
+            // End;
+            if (PSetup.UseFixStepSize.Val)
+            {
+                hnext = h;
+            }
+            else if ((MaxError < RelError))
+            {
+                // Adaptive Stepsize Adjustment Source ("Delta" code) Dr. Michael Thomas Flanagan www.ee.ucl.ac.uk/~mflanaga, see terms above
+                if (MaxError == 0) Delta = 4.0;
+                else Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
+
+                if ((Delta > 4.0)) Delta = 4.0;
+                if ((Delta < 1.0)) Delta = 1.0;
+
+                hnext = h * Delta;
+            }
+            h_taken = h;
+
+            if (hnext > MaxStep) hnext = MaxStep;
+            if (h > MaxStep) h = MaxStep;
+
+            x = x.AddDays(h);
+
+            foreach (TStateVariable TSV in SV)               // reasonable error, so copy results of differentiation saved in YHolders
+                TSV.State = TSV.yhold;
+
+            Perform_Dilute_or_Concentrate();
+        }
+
+
+        public void Integrate_CheckZeroState(TStateVariable p)
+        {
+            if (p.State < 0)
+            {
+                p.State = 0.0;
+                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
+                    ((TToxics)p).ppb = 0;
+
+            }
+        }
+
+        public void Integrate_CheckZeroStateAllSVs()
+        {
+            foreach (TStateVariable TSV in SV)
+            {
+                Integrate_CheckZeroState(TSV);
+            }
+        }
+
+>>>>>>> dev
         // -----------------------------------------------------------------
         public void DoThisEveryStep_SetFracKilled_and_Spawned(TStateVariable P, double hdid)
         {
@@ -2766,6 +2997,169 @@ namespace AQUATOX.AQTSegment
             //{   ProgData.AnoxicVis = Anoxic;} 
         }
 
+<<<<<<< HEAD
+=======
+        // ------------------------------------------------------------------------
+        // Cash-Karp RungeKutta with adaptive stepsize.
+        // 
+        // The Integrate function steps from the beginning to the end of the
+        // time period and handles bookkeeping at the start and between steps
+        // ------------------------------------------------------------------------
+        public string Integrate(DateTime TStart, DateTime TEnd, double RelError, double h_minimum, double dxsav)
+        {
+            // parameters above -- Starting Point of Integral; Ending Point of Integral; Requested Accuracy of Results; Smallest Step Size; Store-Result Interval
+
+            DateTime x;
+            double hnext = 0;
+            //  DateTime xsav;
+            int lastprog = -1;
+            bool simulation_done;
+            //  bool FinishPoint;
+            double MaxStep;
+            double h_taken = 0;
+            double h;
+            // numsteps         : integer;
+            // sumsteps, avgstep: double;
+            // (*  numsteps = 0;  {debug code}
+            // sumsteps = 0;  {debug code} *)
+            //            rk_has_executed = false;
+            simulation_done = false;
+            if (dxsav < 0.01)
+            {
+                dxsav = 1;
+            }
+            // ensure dxsave <> 0, which causes crash
+            // (**  Initialize variables........*)
+            x = TStart;
+
+
+            if (PSetup.ModelTSDays.Val) MaxStep = 1.0;
+            else MaxStep = 1.0 / 24.0;  // Hourly
+            h = MaxStep;
+
+            SimulationDate = DateTime.Now;
+
+            ModelStartTime = TStart;
+            // TPreviousStep = TStart;
+            TPresent = TStart;
+
+            ChangeData();
+            NormDiff(h);
+
+            Derivs(x, 1);
+            WriteResults(true, TStart); // Write Initial Conditions as the first data Point
+            CalcPPB();
+
+            // (**  Start stepping the RungeKutta.....**)
+            while (!simulation_done)
+            {
+                Integrate_CheckZeroStateAllSVs();
+                Derivs(x, 1);
+
+                foreach (TStateVariable TSV in SV)
+                {
+                    Integrate_SetYScale(TSV);
+                }
+                //                  FinishPoint = (Convert.ToInt32(x * (1.0 / dxsav)) > Convert.ToInt32(xsav * (1.0 / dxsav)));
+
+                CalcPPB();
+                WriteResults(false, x); // Write output to Results Collection
+
+                //                    if (FinishPoint) // if it is time to write rates
+                //                    {      xsav = x;      }
+
+                if ((x.AddDays(h) - TEnd).TotalDays > 0.0)
+                {
+                    // if stepsize can overshoot, decrease
+                    h = (TEnd - x).TotalDays;
+                }
+
+                //                else if (SV.LinkedMode && ((x + h) > Convert.ToInt32(x + 1)))
+                //                {
+                //                    h = (Convert.ToInt32(x + h) - x);
+                //                }
+                // force steps to stop on even one-day increments.
+                // This is required for cascade segments to preserve mass balance (given output avg.)
+
+                AdaptiveStep(ref x, h, RelError, ref h_taken, ref hnext, MaxStep);
+                //                rk_has_executed = true;
+
+                TPresent = x;
+                DoThisEveryStep(h_taken);
+                CalcPPB();
+
+                if ((x - TEnd).TotalDays >= 0.0)
+                {
+                    // are we done?
+                    simulation_done = true;
+                }
+                else if ((Math.Abs(hnext) < h_minimum))
+                {
+                    h = h_minimum;  // attempt to control min. timestep
+                }
+                else if ((Math.Abs(hnext) > residence_time))
+                {
+                    h = residence_time;  // 12/5/2022 logic to prevent minimum timestep from being below residence time 
+                }
+                else
+                {
+                    h = hnext;
+                }
+
+                if ((ProgWorker != null)||(ProgHandle != null))
+                {
+                    int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
+                    if (progint == lastprog)
+                    {
+                        if (ProgWorker != null) ProgWorker.ReportProgress(progint);
+                        else ProgHandle.Report(progint);
+                    };
+
+                    lastprog = progint;
+
+                    if (ProgWorker != null) 
+                        if (ProgWorker.CancellationPending)
+                        {
+                            SimulationDate = DateTime.MinValue;
+                            return ("User Canceled");
+                        }
+
+                    if (_ct != CancellationToken.None)
+                        if (_ct.IsCancellationRequested)
+                        {
+                            SimulationDate = DateTime.MinValue;
+                            return ("User Canceled");
+                        }
+                }
+
+
+                Integrate_CheckZeroStateAllSVs();
+
+                void Integrate_SetYScale(TStateVariable p)
+                {
+                    if (p.State == 0)
+                    {
+                        p.yscale = 0;
+                    }
+                    else
+                    {
+                        p.yscale = Math.Abs(p.State) + Math.Abs(p.StepRes[1] * h) + Consts.Tiny;
+                    }
+                    // Scale of state variable used to assess relative error, 12/24/96
+
+                }
+
+            }
+
+            DoThisEveryStep(h_taken);
+            CalcPPB();
+
+            WriteResults(false, x); // Write final step to Results Collection
+            return PostProcessResults();
+
+        }  // integrate
+
+>>>>>>> dev
 
         // *************************************
         // Modifies Concentration to
@@ -3337,7 +3731,7 @@ namespace AQUATOX.AQTSegment
                                     if (SVLoop == T_SVType.StV)
                                     {
                                         PR.InitialCond = PDIR.InitCond * MultFrac;
-                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                        // PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;   // All Hourly = true;  12/14/22
                                     }
                                     else PR.InitialCond = PDIR.ToxInitCond[PR.ToxInt(SVLoop)];
                                 }
@@ -3472,7 +3866,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
+                throw new ArgumentException("Internal AQUATOX Error: GetState called for non-existant state variable: " + S.ToString(), "original");  
                 // result = -1;
             }
         }
@@ -5315,11 +5709,11 @@ namespace AQUATOX.AQTSegment
             DailyLight = light;
 
             HourlyLight = 0;
-            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.Hourly))
+            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val))        // && (LoadsRec.Loadings.Hourly)) 12/14/22
             { HourlyLight = light; }
 
             // 12-5-2016 correction to properly model hourly light time-series inputs
-            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
+            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant)))  // 12/14/22  removed || (!LoadsRec.Loadings.Hourly)
             {
                 // distribute daily loading over daylight hours
                 pp = AQTSeg.Photoperiod();

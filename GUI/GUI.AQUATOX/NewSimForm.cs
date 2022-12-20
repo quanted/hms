@@ -107,6 +107,7 @@ namespace GUI.AQUATOX
             else
             {
                 string[] split = content.Split('|');
+                split[1] = split[1].Replace("\\\"", "\"");   // lake geojsons included \ character in strings
                 if (!GeoJSON.ContainsKey(split[0]))  GeoJSON.Add(split[0], split[1]);
             }
                 
@@ -397,6 +398,7 @@ namespace GUI.AQUATOX
             else
             {
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
+                SegLoadLabel.Visible = false;
                 infolabel1.Text = "Click on a Lake/Reservoir to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
                 if (!LakeSelected && !SNPopulated) Summary1Label.Text = "WB COMID:  (unselected)";

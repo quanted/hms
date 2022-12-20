@@ -58,7 +58,7 @@ namespace AQUATOX.Loadings
 
     {
         public SortedList<DateTime, double> list = new SortedList<DateTime, double>();
-        public bool Hourly = false;
+        // public bool Hourly = false;       Removed 12/14/2022, causes stair-step loadings for no clear reason;  Now interpolates all loadings.
         public double ConstLoad = 0;         // User Input constant load
         public bool UseConstant = true;      // Flag for using constant load
         public bool NoUserLoad = false;      // Flag for using user input load, or ignoring  the load and using annual ranges and means.  Relevant to Temp, Light, pH, and Nutrients
@@ -114,7 +114,7 @@ namespace AQUATOX.Loadings
                 UseConstant = false;
                 MultLdg = 1;
                 NoUserLoad = false;
-                Hourly = true;  // don't assume truncated to day -- interpolate between date stamps
+                //  Hourly = true;  // don't assume truncated to day -- interpolate between date stamps;  12/14/22 Hourly always true 
 
                 if (ITSI.InputTimeSeries == null)
                     throw new ArgumentException("An ITimeSeries as an AQUATOX Loading must have an associated InputTimeSeries");
@@ -180,7 +180,7 @@ namespace AQUATOX.Loadings
                     if (!foundopt)
                     {
                         TIHolder = TimeIndex;
-                        if (!Hourly) TIHolder = TimeIndex.Date;
+                        //  if (!Hourly) TIHolder = TimeIndex.Date;  12/14/22 no longer stair stepping loadings on daily time step
 
                         int indx = list.BinarySearch(TIHolder);
                         if (indx >= 0)
