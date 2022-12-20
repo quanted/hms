@@ -921,8 +921,8 @@ namespace GUI.AQUATOX
                                      if (outstr == "")
                                      {
                                          if (divergence_flows == null) divergence_flows = new List<ITimeSeriesOutput<List<double>>>();
-                                         DivSim.AQTSeg.SetMemLocRec();
-                                         TVolume tvol = DivSim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                                         DivSim.SetMemLocRec();
+                                         TVolume tvol = DivSim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                                          TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
                                          ITSO = InflowLoad.TimeSeriesAsTSOutput("Divergence Flows", "COMID " + ID.ToString(), 1.0 / 86400.0);  // output flows as m2/s
                                      }
@@ -1122,7 +1122,7 @@ namespace GUI.AQUATOX
                 AQTSim Sim = InstantiateBaseJSON();
                 if (Sim == null) return "";
 
-                Setup_Record SR = Sim.AQTSeg.PSetup;
+                Setup_Record SR = Sim.FirstSeg().PSetup;
                 string msr = JsonConvert.SerializeObject(SR);
                 File.WriteAllText(msfilen, msr);
                 AddToProcessLog("INPUT: Updated master setup record.  Copied from base JSON to " + msfilen);
@@ -1187,10 +1187,10 @@ namespace GUI.AQUATOX
             AQTSim Sim = InstantiateBaseJSON();
             if (Sim == null) return;
 
-            TStateVariable TNH4 = Sim.AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
-            TStateVariable TNO3 = Sim.AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
-            TStateVariable TTSP = Sim.AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
-            TStateVariable TOM = Sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TNH4 = Sim.FirstSeg().GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TNO3 = Sim.FirstSeg().GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TTSP = Sim.FirstSeg().GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TOM = Sim.FirstSeg().GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
 
             bool HasN = (TNH4 != null);
             bool HasP = (TTSP != null);
@@ -1678,7 +1678,7 @@ namespace GUI.AQUATOX
                 AQTSim Sim = new AQTSim();
                 string err = Sim.Instantiate(json);
                 if (err != "") { MessageBox.Show(err); return; }
-                Sim.AQTSeg.SetMemLocRec();
+                Sim.SetMemLocRec();
                 Sim.ArchiveSimulation();
                 OutputForm OutForm = new OutputForm();
                 OutForm.Text = "Multi-Segment output from " + "AQT_Run_" + CString + ".JSON";
@@ -1889,13 +1889,13 @@ namespace GUI.AQUATOX
                                     BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
                                 }
 
-                                BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
-                                BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+                                BSim.FirstSeg().PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
+                                BSim.FirstSeg().PSetup.LastDay.Val = NSForm.EndDT;
 
                                 if (NSForm.SArea > 0)
                                 {
-                                    BSim.AQTSeg.Location.Locale.SurfArea.Val = NSForm.SArea;  //AQUATOX units are m2
-                                    BSim.AQTSeg.Location.Locale.SurfArea.Comment = "Estimate from NWM_Lakes_and_Reservoirs web service";
+                                    BSim.FirstSeg().Location.Locale.SurfArea.Val = NSForm.SArea;  //AQUATOX units are m2
+                                    BSim.FirstSeg().Location.Locale.SurfArea.Comment = "Estimate from NWM_Lakes_and_Reservoirs web service";
                                 }
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
@@ -1931,8 +1931,8 @@ namespace GUI.AQUATOX
                                             }
                                   }
 
-                                BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
-                                BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+                                BSim.FirstSeg().PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
+                                BSim.FirstSeg().PSetup.LastDay.Val = NSForm.EndDT;
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                                 File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory

@@ -60,8 +60,8 @@ namespace AQUATOXBioaccumulation
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
-            AQSim.AQTSeg.SetMemLocRec(); 
-            return AQSim.AQTSeg.AQTBioaccumulationModel_CheckDataRequirements();
+            AQSim.SetMemLocRec(); 
+            return AQSim.FirstSeg().AQTBioaccumulationModel_CheckDataRequirements();
         }
     }
 

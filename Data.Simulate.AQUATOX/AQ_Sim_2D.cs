@@ -299,7 +299,7 @@ namespace AQUATOX.AQSim_2D
         public void archiveOutput(int comid, AQTSim Sim)
         {
             archived_results AR = new archived_results();
-            TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+            TVolume tvol = Sim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
 
             ITimeSeriesOutput ito = tvol.SVoutput;
 
@@ -323,11 +323,11 @@ namespace AQUATOX.AQSim_2D
                 AR.washout[i] = Val;  // m3/d
             }
 
-            AR.concs = new double[Sim.AQTSeg.SV.Count()][];
-            for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
+            AR.concs = new double[Sim.FirstSeg().SV.Count()][];
+            for (int iTSV = 0; iTSV < Sim.FirstSeg().SV.Count; iTSV++)
             {
                 AR.concs[iTSV] = new double[ndates];
-                TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
+                TStateVariable TSV = Sim.FirstSeg().SV[iTSV];
                 for (int i = 0; i < ndates; i++)
                 {
                     ito = TSV.SVoutput;
@@ -457,18 +457,18 @@ namespace AQUATOX.AQSim_2D
             AQTSim Sim = new AQTSim();
             err = Sim.Instantiate(baseSimJSON);
 
-            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
+            Sim.FirstSeg().PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
 
             if (err != "") { return null; }
 
-            Sim.AQTSeg.SetMemLocRec();
+            Sim.FirstSeg().SetMemLocRec();
 
-            Sim.AQTSeg.StudyName = "COMID: " + comid;
-            Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
+            Sim.FirstSeg().SegName = "COMID: " + comid;
+            Sim.FileName = "AQT_Input_" + comid + ".JSON";
             if (lenkm > 0)
             {
-                Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
-                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
+                Sim.FirstSeg().Location.Locale.SiteLength.Val = lenkm;
+                Sim.FirstSeg().Location.Locale.SiteLength.Comment = "From Multi-Seg Linkage";
             }
             return Sim;
         }
@@ -546,8 +546,8 @@ namespace AQUATOX.AQSim_2D
             if (err != "") { return err; }
 
             HydrologyTSI TSI = new();
-            TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
-            TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
+            TSI.DateTimeSpan.StartDate = Sim.FirstSeg().PSetup.FirstDay.Val;
+            TSI.DateTimeSpan.EndDate = Sim.FirstSeg().PSetup.LastDay.Val;
             TSI.Geometry.ComID = WBComid;
             TSI.Geometry.GeometryMetadata["waterbody"] = "true";
             TSI.Source = "nwm";
@@ -557,20 +557,20 @@ namespace AQUATOX.AQSim_2D
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
                 if (TSO.Data.Count == 0) return "ERROR: No data records were returned.  Your date range may be outside available NWM data.";
-                TStateVariable TSV = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
+                TStateVariable TSV = Sim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
                 TVolume TVol = TSV as TVolume;
                 LakeFlowsFromNWM(TVol, TSO);
 
-                Sim.AQTSeg.Location.Locale.ICZMean.Val = TVol.InitialCond / Sim.AQTSeg.Location.Locale.SurfArea.Val;   // Estimate mean depth from volume & surface area
+                Sim.FirstSeg().Location.Locale.ICZMean.Val = TVol.InitialCond / Sim.FirstSeg().Location.Locale.SurfArea.Val;   // Estimate mean depth from volume & surface area
                                                    //m                //m3               //m2
-                Sim.AQTSeg.Location.Locale.ICZMean.Comment = "Estimated from NWM based on surface area and initial volume";
+                Sim.FirstSeg().Location.Locale.ICZMean.Comment = "Estimated from NWM based on surface area and initial volume";
 
-                Sim.AQTSeg.Location.Locale.ZMax.Val = Sim.AQTSeg.Location.Locale.ICZMean.Val * 2.0;  //approximation for now
-                Sim.AQTSeg.Location.Locale.ZMax.Comment = "Estimated as 2.0 x mean depth";
+                Sim.FirstSeg().Location.Locale.ZMax.Val = Sim.FirstSeg().Location.Locale.ICZMean.Val * 2.0;  //approximation for now
+                Sim.FirstSeg().Location.Locale.ZMax.Comment = "Estimated as 2.0 x mean depth";
 
-                Sim.AQTSeg.Location.Locale.SiteLength.Val =  Math.Sqrt(2.0 * Sim.AQTSeg.Location.Locale.SurfArea.Val * 1e-6) ;  //approximation for now
+                Sim.FirstSeg().Location.Locale.SiteLength.Val =  Math.Sqrt(2.0 * Sim.FirstSeg().Location.Locale.SurfArea.Val * 1e-6) ;  //approximation for now
                                                      //km                                            // m2        // km2/m2
-                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "Rough estimate from Surface Area"; 
+                Sim.FirstSeg().Location.Locale.SiteLength.Comment = "Rough estimate from Surface Area"; 
 
                 // Could add to Log -- "Imported Flow Data for " + comid 
             }
@@ -604,8 +604,8 @@ namespace AQUATOX.AQSim_2D
             if (err != "") { return err; }
 
             HydrologyTSI TSI = new();
-            TSI.DateTimeSpan.StartDate = Sim.AQTSeg.PSetup.FirstDay.Val;
-            TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
+            TSI.DateTimeSpan.StartDate = Sim.FirstSeg().PSetup.FirstDay.Val;
+            TSI.DateTimeSpan.EndDate = Sim.FirstSeg().PSetup.LastDay.Val;
             TSI.Geometry.ComID = int.Parse(comid);
             TSI.Geometry.GeometryMetadata["waterbody"] ="false"; 
             TSI.Source = "nwm"; 
@@ -614,7 +614,7 @@ namespace AQUATOX.AQSim_2D
             {
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
-                StreamFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
+                StreamFlowsFromNWM(Sim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
             }
             catch (Exception ex)
             {
@@ -648,22 +648,22 @@ namespace AQUATOX.AQSim_2D
                         SN.waterbodies.comid_wb.TryGetValue(SrcID, out SrcID);  // translate SrcID to the relevant WBCOMID
                         archive.TryGetValue(SrcID, out AR);
                     }
-                if (AR == null) return "WARNING: Segment "+Sim.AQTSeg.StudyName+" is missing expected linkage data from "+SrcID;
+                if (AR == null) return "WARNING: Segment "+Sim.FirstSeg().SegName+" is missing expected linkage data from "+SrcID;
                 } 
             }
 
-            Sim.AQTSeg.PSetup.UseDetrInputRecInflow.Val = false;  // 10/4/2021 inflow from upstream for detritus, not from input record
+            Sim.FirstSeg().PSetup.UseDetrInputRecInflow.Val = false;  // 10/4/2021 inflow from upstream for detritus, not from input record
 
-            for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
+            for (int iTSV = 0; iTSV < Sim.FirstSeg().SV.Count; iTSV++)
             {
-                TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
+                TStateVariable TSV = Sim.FirstSeg().SV[iTSV];
 
                 if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState < AllVariables.TSS)) ||    // Select which state variables move from segment to segment
                     ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || 
                     ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
                     ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
                 {
-                    TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                    TVolume tvol = Sim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
                     // TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
                     TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
@@ -715,9 +715,9 @@ namespace AQUATOX.AQSim_2D
                 outstr.Add("ERROR: " + errstr);
                 return null;
             }
-            Sim.AQTSeg.SetMemLocRec();
+            Sim.FirstSeg().SetMemLocRec();
 
-            Sim.AQTSeg.PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
+            Sim.FirstSeg().PSetup = Newtonsoft.Json.JsonConvert.DeserializeObject<Setup_Record>(setupjson);
             return Sim;
 
         }
@@ -737,13 +737,13 @@ namespace AQUATOX.AQSim_2D
         public bool executeModel(int comid, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
-            Sim.AQTSeg.ProgHandle = this.ProgHandle;
-            Sim.AQTSeg._ct = this.CancelToken;
+            Sim.ProgHandle = this.ProgHandle;
+            Sim._ct = this.CancelToken;
 
             if (SVList == null)
             {
                 SVList = new List<string>();
-                foreach (TStateVariable SV in Sim.AQTSeg.SV)
+                foreach (TStateVariable SV in Sim.FirstSeg().SV)
                 {
                     SVList.Add(SV.PName+" ("+SV.StateUnit+")");   //save list of SVs for output
                 }
@@ -783,7 +783,7 @@ namespace AQUATOX.AQSim_2D
                             }
             }
 
-            Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            Sim.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();
             if (errmessage == "")
             {
@@ -827,7 +827,7 @@ namespace AQUATOX.AQSim_2D
                 json = File.ReadAllText(jsonDir+fileN);
                 AQTSim sim = JsonConvert.DeserializeObject<AQTSim>(json, AQTSim.AQTJSONSettings());
                 sim.SavedRuns = null;
-                sim.AQTSeg.ClearResults();
+                sim.FirstSeg().ClearResults();
                 Sims.Add(fileN,sim);
             }
         }

@@ -5,6 +5,7 @@ using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 //using Microsoft.Research.Science.Data.Imperative;
 using Newtonsoft.Json;
 using System;
@@ -13,6 +14,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 // using sds = Microsoft.Research.Science.Data;
@@ -32,6 +34,7 @@ namespace GUI.AQUATOX
         private bool MultiSegmentInput = false;
         private bool isBoundarySegment = true;
         public AQTSim aQTS = null;
+        public AQUATOXSegment thisSeg = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
         private System.Drawing.Graphics graphics; 
@@ -81,7 +84,7 @@ namespace GUI.AQUATOX
             if (err != "") { MessageBox.Show(err); return false; }
 
             aQTS = Sim;
-            aQTS.AQTSeg.SetMemLocRec();
+            aQTS.SetMemLocRec();
             return true;
         }
 
@@ -99,7 +102,7 @@ namespace GUI.AQUATOX
                 // json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
 
                 if (!LoadJSON(json)) return;
-                aQTS.AQTSeg.FileName = openFileDialog1.FileName;
+                aQTS.FileName = openFileDialog1.FileName;
 
                 ButtonPanel.Visible = true;
                 AddButton.Visible = true;
@@ -121,7 +124,7 @@ namespace GUI.AQUATOX
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "JSON File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
-            saveFileDialog1.FileName = aQTS.AQTSeg.FileName;
+            saveFileDialog1.FileName = aQTS.FileName;
             saveFileDialog1.ShowDialog();
 
             if (saveFileDialog1.FileName != "")
@@ -130,7 +133,7 @@ namespace GUI.AQUATOX
                 string errmessage = aQTS.SaveJSON(ref jsondata);
                 if (errmessage == "")
                 {
-                    aQTS.AQTSeg.FileName = saveFileDialog1.FileName;
+                    aQTS.FileName = saveFileDialog1.FileName;
                     File.WriteAllText(saveFileDialog1.FileName, jsondata);
                     ShowStudyInfo();
                 }
@@ -206,7 +209,7 @@ namespace GUI.AQUATOX
 
                 if (ShowInputDialog(ref SimName) == DialogResult.Cancel) return;
                 if (SimName != "") SimName = SimName + ": ";
-                aQTS.AQTSeg.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
 
                 modelRunningLabel.Visible = true;
@@ -232,7 +235,7 @@ namespace GUI.AQUATOX
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            aQTS.AQTSeg.ProgWorker = worker;
+            aQTS.ProgWorker = worker;
             errmessage = aQTS.Integrate();
 
         }
@@ -273,7 +276,7 @@ namespace GUI.AQUATOX
         private void graph_Click(object sender, EventArgs e)
         {
             if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
-            if (aQTS.AQTSeg.SimulationDate > DateTime.MinValue)
+            if (aQTS.SimulationDate > DateTime.MinValue)
                 aQTS.ArchiveSimulation();
             else { if (!aQTS.HasResults()) { MessageBox.Show("No Results Available"); return; } }
 
@@ -286,12 +289,11 @@ namespace GUI.AQUATOX
         }
 
 
-
         private void Setup_Click(object sender, EventArgs e)
         {
             if (aQTS == null) return;
 
-            Setup_Record SR = aQTS.AQTSeg.PSetup;
+            Setup_Record SR = aQTS.FirstSeg().PSetup;
             SR.Setup(false);
             TParameter[] SS = new TParameter[] {new TSubheading ("Timestep Settings",""), SR.FirstDay,SR.LastDay,SR.RelativeError,SR.UseFixStepSize,SR.FixStepSize,
                 SR.ModelTSDays, new TSubheading("Output Storage Options",""), SR.StepSizeInDays, SR.StoreStepSize, SR.AverageOutput, SR.SaveBRates,
@@ -308,7 +310,7 @@ namespace GUI.AQUATOX
         private void Diagensis(object sender, EventArgs e)
         {
             if (aQTS == null) return;
-            Diagenesis_Rec DR = aQTS.AQTSeg.Diagenesis_Params;
+            Diagenesis_Rec DR = thisSeg.Diagenesis_Params;
             DR.Setup(false);
 
             // Diagenesis Parameters setup window
@@ -330,7 +332,7 @@ namespace GUI.AQUATOX
             List<PlantRecord> PlantDB = new List<PlantRecord>();
 
             int nplt = 0;
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+            foreach (TStateVariable TSV in thisSeg.SV)
                 if (TSV.IsPlant())
                 {
                     TPlant TP = TSV as TPlant;
@@ -360,7 +362,7 @@ namespace GUI.AQUATOX
                 {
                     List<PlantRecord> PlantDB2 = Table_to_PlantDB(table);
                     nplt = 0;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+                    foreach (TStateVariable TSV in thisSeg.SV)
                         if (TSV.IsPlant())
                         {
                             TPlant TP = TSV as TPlant;
@@ -377,17 +379,20 @@ namespace GUI.AQUATOX
         private void ShowStudyInfo()
         {
             if (aQTS == null) return;
+            if (aQTS.AQTSegs.Count == 1) thisSeg = aQTS.AQTSegs.First().Value;
+
+            // TODO SET thisSeg HERE
 
             saveJSON.Enabled = true;
             pictureBox1.Visible = false;
             Refresh();
             Application.DoEvents();
 
-            this.Text = aQTS.AQTSeg.FileName;
-            StudyNameBox.Text = aQTS.AQTSeg.StudyName;
+            this.Text = aQTS.FileName;
+            StudyNameBox.Text = aQTS.StudyName;
             outputbutton.Visible = aQTS.HasResults();
-            Diagenesis.Enabled = aQTS.AQTSeg.Diagenesis_Included();
-            ChemButton.Enabled = aQTS.AQTSeg.Has_Chemicals();
+            Diagenesis.Enabled = thisSeg.Diagenesis_Included();
+            ChemButton.Enabled = thisSeg.Has_Chemicals();
 
             if (MultiSegmentInput) RunStatusLabel.Visible = false;
             else
@@ -396,7 +401,7 @@ namespace GUI.AQUATOX
                 else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
             }
 
-            aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
+            thisSeg.DisplayNames(ref SVList, ref TSVList);
 
             ParametersLabel.Visible = true;
             StateVarLabel.Visible = true;
@@ -413,7 +418,7 @@ namespace GUI.AQUATOX
             void EditChemical(int chemindex)
             {
                 Param_Form Chemform = new Param_Form();
-                TStateVariable TSV = aQTS.AQTSeg.SV[chemindex];
+                TStateVariable TSV = thisSeg.SV[chemindex];
                 TToxics TC = TSV as TToxics;
                 Chemform = new Param_Form();
                 ChemicalRecord CR = TC.ChemRec; CR.Setup();
@@ -429,9 +434,9 @@ namespace GUI.AQUATOX
             if (aQTS == null) return;
 
             int nchm = 0;
-            for (int j = 0; j < aQTS.AQTSeg.SV.Count; j++)
+            for (int j = 0; j < thisSeg.SV.Count; j++)
             {
-                TStateVariable TSV = aQTS.AQTSeg.SV[j];
+                TStateVariable TSV = thisSeg.SV[j];
                 if (TSV.NState == AllVariables.H2OTox)
                 {
                     ChemNames.Add(TSV.PName);
@@ -462,7 +467,7 @@ namespace GUI.AQUATOX
             if (aQTS == null) return;
 
             SiteForm SF = new SiteForm();
-            SF.EditSiteInfo(aQTS);
+            SF.EditSiteInfo(thisSeg);
             ShowStudyInfo();
         }
 
@@ -472,7 +477,7 @@ namespace GUI.AQUATOX
 
             if (aQTS == null) return;
 
-            ReminRecord RR = aQTS.AQTSeg.Location.Remin;
+            ReminRecord RR = thisSeg.Location.Remin;
             RR.Setup();
             TParameter[] PPS = RR.InputArray();
 
@@ -711,7 +716,7 @@ namespace GUI.AQUATOX
             List<AnimalRecord> AnimDB = new List<AnimalRecord>();
 
             int nanm = 0;
-            foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+            foreach (TStateVariable TSV in thisSeg.SV)
                 if (TSV.IsAnimal())
                 {
                     TAnimal TA = TSV as TAnimal;
@@ -741,7 +746,7 @@ namespace GUI.AQUATOX
                 {
                     List<AnimalRecord> AnimalDB2 = Table_to_AnimDB(table);
                     nanm = 0;
-                    foreach (TStateVariable TSV in aQTS.AQTSeg.SV)
+                    foreach (TStateVariable TSV in thisSeg.SV)
                         if (TSV.IsAnimal())
                         {
                             TAnimal TA = TSV as TAnimal;
@@ -917,7 +922,7 @@ namespace GUI.AQUATOX
         private void StudyNameBox_TextChanged(object sender, EventArgs e)
         {
             if (aQTS == null) {; return; }
-            aQTS.AQTSeg.StudyName = StudyNameBox.Text;
+            aQTS.StudyName = StudyNameBox.Text;
         }
 
         private void SVListBox_DoubleClick(object sender, EventArgs e)
@@ -991,11 +996,11 @@ namespace GUI.AQUATOX
         {
             DataTable[] tTables = new DataTable[3];
 
-            tTables = aQTS.AQTSeg.TrophInt_to_Table();
+            tTables = thisSeg.TrophInt_to_Table();
 
             TrophMatrix tm = new TrophMatrix();
-            if (tm.ShowGrid(tTables,aQTS.AQTSeg))
-               aQTS.AQTSeg.Tables_to_Trophint(tTables);
+            if (tm.ShowGrid(tTables,thisSeg))
+               thisSeg.Tables_to_Trophint(tTables);
         }
 
         private void MultiSegButton_Click(object sender, EventArgs e)
@@ -1009,7 +1014,7 @@ namespace GUI.AQUATOX
             ListForm LF = new ListForm();
             List<AllVariables> SVs = null;
 
-            int index = LF.SelectFromList(aQTS.AQTSeg.GetInsertableStates(ref SVs));
+            int index = LF.SelectFromList(thisSeg.GetInsertableStates(ref SVs));
             if (index < 0) return;
 
             AllVariables ns = SVs[index];
@@ -1021,7 +1026,7 @@ namespace GUI.AQUATOX
             {
                 AnimalRecord AR = PF.ReturnRecordFromDB("AnimalLib.JSON") as AnimalRecord;
                 if (AR == null) return;
-                NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
+                NewSV = thisSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
                 if (NewSV != null)
                 {
                     ((TAnimal)NewSV).PAnimalData = AR;
@@ -1032,7 +1037,7 @@ namespace GUI.AQUATOX
             {
                 PlantRecord PR = PF.ReturnRecordFromDB("PlantLib.JSON") as PlantRecord;
                 if (PR == null) return;
-                NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
+                NewSV = thisSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
                 if (NewSV != null)
                 {
                     ((TPlant)NewSV).PAlgalRec = PR;
@@ -1043,9 +1048,9 @@ namespace GUI.AQUATOX
             {
                 ChemicalRecord CR = PF.ReturnRecordFromDB("ChemLib.JSON") as ChemicalRecord;
                 if (CR == null) return;
-                NewSV = aQTS.AQTSeg.Add_OrgTox_SVs(CR);
+                NewSV = thisSeg.Add_OrgTox_SVs(CR);
             }
-            else NewSV = aQTS.AQTSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
+            else NewSV = thisSeg.AddStateVariable(ns, T_SVLayer.WaterCol);
 
             if (NewSV == null) MessageBox.Show("Error adding State Variable");
 
@@ -1056,15 +1061,15 @@ namespace GUI.AQUATOX
         public void DeleteStateVariable(int index) // Deletes the variable identified by DeleteVar and all associated toxicants
         {
 
-            TStateVariable T = aQTS.AQTSeg.SV[index];
-            aQTS.AQTSeg.DeleteVar(index);
+            TStateVariable T = thisSeg.SV[index];
+            thisSeg.DeleteVar(index);
 
             T_SVType ToxLoop;  // Delete associated toxicant records if they exist,  Also Internal Nutrient records
 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= T_SVType.PIntrnl; ToxLoop++)
             {
-               TStateVariable TSV = aQTS.AQTSeg.GetStatePointer(T.NState, ToxLoop, T_SVLayer.WaterCol);
-               if (TSV!= null) aQTS.AQTSeg.DeleteVar(TSV);
+               TStateVariable TSV = thisSeg.GetStatePointer(T.NState, ToxLoop, T_SVLayer.WaterCol);
+               if (TSV!= null) thisSeg.DeleteVar(TSV);
             }
 
             // in the future zero out reciprocal same species record
@@ -1076,17 +1081,17 @@ namespace GUI.AQUATOX
             AllVariables ns = TSVList[SVListBox.SelectedIndex].NState;
 
             int index = -1;
-            for (int i=0; i< aQTS.AQTSeg.SV.Count; i++)
+            for (int i=0; i< thisSeg.SV.Count; i++)
             {
-                if ((ns == aQTS.AQTSeg.SV[i].NState) && ((aQTS.AQTSeg.SV[i].SVType == T_SVType.StV) || (ns == AllVariables.H2OTox)))  { index = i; break; }
+                if ((ns == thisSeg.SV[i].NState) && ((thisSeg.SV[i].SVType == T_SVType.StV) || (ns == AllVariables.H2OTox)))  { index = i; break; }
             }
 
-            if (MessageBox.Show("Delete the state variable: '" + aQTS.AQTSeg.SV[index].PName + "'?", "Confirm",
+            if (MessageBox.Show("Delete the state variable: '" + thisSeg.SV[index].PName + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
             if (ns == AllVariables.H2OTox) 
-              aQTS.AQTSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
+              thisSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
             else DeleteStateVariable(index);
 
             ShowStudyInfo();

@@ -27,10 +27,15 @@ using System.Text;
 
 namespace AQUATOX.AQTSegment
 
-
 {
     public class AQTSim
     {
+        public AQUATOXSegment AQTSeg = null; // TODO FIXME TEMPORARY TO READ OLD JSONS
+
+        public string StudyName = "";
+        public string FileName = "";
+        public string RunID = "";
+
         public Dictionary<string, AQUATOXSegment> AQTSegs = null;
         public Dictionary<string, AQUATOXSegment> SavedRuns = null;
 
@@ -39,6 +44,13 @@ namespace AQUATOX.AQTSegment
         [JsonIgnore] public CancellationToken _ct = CancellationToken.None; // handle cancellation (Task.Run)
         [JsonIgnore] public DateTime SimulationDate = DateTime.MinValue;  // time integration started
         [JsonIgnore] Setup_Record PS = null;
+        [JsonIgnore] AQUATOXSegment _FirstSeg = null;
+
+        public AQUATOXSegment FirstSeg()
+        {
+          if (_FirstSeg == null) _FirstSeg = AQTSegs.First().Value;
+          return _FirstSeg;
+        }
 
         public bool HasResults()
         {
@@ -65,6 +77,13 @@ namespace AQUATOX.AQTSegment
             }
         }
 
+
+        public void SetMemLocRec()
+        {
+            foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) AQTSeg.SetMemLocRec(); 
+        }
+
+
         static public JsonSerializerSettings AQTJSONSettings()
         {
             AQTKnownTypesBinder AQTBinder = new AQTKnownTypesBinder();
@@ -82,8 +101,23 @@ namespace AQUATOX.AQTSegment
             try
             {
                 AQTSim tempsim = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(json, AQTJSONSettings());
+
+                if (AQTSegs == null)  //TODO FIXME CODE TO READ OLD JSONS 
+                {
+                    tempsim.AQTSegs = new Dictionary<string, AQUATOXSegment>();
+                    if (tempsim.AQTSeg != null) tempsim.AQTSegs.Add("Single Segment", tempsim.AQTSeg);
+                    tempsim.StudyName = tempsim.AQTSeg.StudyName;
+                    tempsim.FileName = tempsim.AQTSeg.FileName;
+                    tempsim.RunID = tempsim.AQTSeg.RunID;
+                }  //TODO FIXME CODE TO READ OLD JSONS
+
+                StudyName = tempsim.AQTSeg.StudyName;
+                FileName = tempsim.AQTSeg.FileName;
+                RunID = tempsim.AQTSeg.RunID;
+
                 AQTSegs = tempsim.AQTSegs; 
                 SavedRuns = tempsim.SavedRuns;
+
                 foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) AQTSeg.SetupLinks();
                 return "";
             }
@@ -140,8 +174,8 @@ namespace AQUATOX.AQTSegment
             if (SavedRuns == null) SavedRuns = new Dictionary<string, AQUATOXSegment>();
             foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
             {
-                if (AQTSeg.RunID == "") return false;
-                if (SavedRuns.TryGetValue(AQTSeg.RunID, out AQUATOXSegment savedRun)) return false;
+                if (RunID == "") return false;
+                if (SavedRuns.TryGetValue(RunID, out AQUATOXSegment savedRun)) return false;
             }
 
             string JSONToArchive = "";
@@ -156,7 +190,7 @@ namespace AQUATOX.AQTSegment
                 foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) AQTSeg.Graphs = LatestGraphs;
             }
 
-            foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) SavedRuns.Add(AQTSeg.RunID, AQTSeg);
+            foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) SavedRuns.Add(RunID, AQTSeg);
 
             return true;
         }
@@ -578,7 +612,7 @@ namespace AQUATOX.AQTSegment
         {
             bool isdetritus = false;
             TStateVariable TSV = null;
-            AQUATOXSegment AQTSeg = AQTSegs.First().Value;  //TODO FIXME Make LoadingsFromString segment specific, currently works with 0-D only
+            AQUATOXSegment AQTSeg = FirstSeg();  //TODO FIXME Make LoadingsFromString segment specific, currently works with 0-D only
             switch (SVType)
             {
                 case "TNH4Obj": TSV = AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.WaterCol); break;
@@ -1542,11 +1576,16 @@ namespace AQUATOX.AQTSegment
     {
         public TAQTSite Location = new TAQTSite();       // Site data structure
 
+        // FIXME TODO REMOVE THESE THREE FIELDS USED TO UPGRADE OLD JSONS
+        public string StudyName = "";
+        public string FileName = "";
+        public string RunID = "";
+        // FIXME TODO REMOVE THESE THREE FIELDS USED TO UPGRADE OLD JSONS
+
+
         public TStates SV = new TStates();    // State Variables
         public DateTime TPresent;
-        public string StudyName;
-        public string RunID = "";
-        public string FileName = "";
+        public string SegName;
 
         public Setup_Record PSetup;
 
@@ -3181,7 +3220,7 @@ namespace AQUATOX.AQTSegment
                     TSV.SVoutput.Metadata = new Dictionary<string, string>()
                     {
                         {"AQUATOX_Version", "4.0.0"},
-                        {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
+                        {"WriteTime", (DateTime.Now.ToString(Consts.DateFormatString))},
                         {"State_Variable", TSV.PName},
                     };
 

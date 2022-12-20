@@ -49,13 +49,13 @@ namespace Plants.AQUATOX
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
-            AQSim.AQTSeg.SetMemLocRec();
+            AQSim.SetMemLocRec();
 
             AQTVolumeModel AQTVM = new AQTVolumeModel(AQSim);
             string checkvol = AQTVM.CheckDataRequirements();
             if (checkvol != "") return checkvol;
 
-            return AQSim.AQTSeg.AQTPlantModel_CheckDataRequirements();
+            return AQSim.FirstSeg().AQTPlantModel_CheckDataRequirements();
         }
     }
 }

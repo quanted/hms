@@ -51,13 +51,13 @@ namespace Diagenesis.AQUATOX
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
-            AQSim.AQTSeg.SetMemLocRec();
+            AQSim.SetMemLocRec();
 
             AQTNutrientsModel AQTNM = new AQTNutrientsModel(AQSim);
             string checknutrients = AQTNM.CheckDataRequirements();
             if (checknutrients != "") return checknutrients;
 
-            return AQSim.AQTSeg.AQTDiagenesisModel_CheckDataRequirements();
+            return AQSim.FirstSeg().AQTDiagenesisModel_CheckDataRequirements();
         }
     }
 

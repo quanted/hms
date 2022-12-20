@@ -168,7 +168,7 @@ namespace Web.Services.Controllers
                 string json = await WSAquatoxInputBuilder.GetBaseJson(input.Flags);
                 // Insert loadings into template and return 
                 json = await WSAquatoxInputBuilder.InsertLoadings(json, input);
-                return Ok(JsonConvert.DeserializeObject<JObject>(json)["AQTSeg"]["SV"]);
+                return Ok(JsonConvert.DeserializeObject<JObject>(json)["FirstSeg()"]["SV"]);
             }
             catch (Exception ex)
             {

@@ -60,8 +60,8 @@ namespace Stream.Hydrology.AQUATOX
         /// <returns>string: Error message that is non blank if the simulation json structure does not have the required data </returns>
         public string CheckDataRequirements()
         {
-            AQSim.AQTSeg.SetMemLocRec();
-            return AQSim.AQTSeg.AQTVolumeModel_CheckDataRequirements();
+            AQSim.SetMemLocRec();
+            return AQSim.FirstSeg().AQTVolumeModel_CheckDataRequirements();
         }
     }
     

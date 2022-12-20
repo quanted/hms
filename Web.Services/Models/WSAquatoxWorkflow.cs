@@ -168,7 +168,7 @@ namespace Web.Services.Models
                             return "Invalid Time Series Output.";
                         }
                         // Update stream discharge for current segment simulation
-                        StreamFlowsFromNWM(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO, true);  //JSC 7/1/2021.
+                        StreamFlowsFromNWM(sim.FirstSeg().GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO, true);  //JSC 7/1/2021.
                         break;
                     default:
                         return "Unrecognized dependency: " + item.Key;
@@ -340,12 +340,12 @@ namespace Web.Services.Models
             CA.Washout = archive[0].washout;
             CA.Data = new Dictionary<string, double[]>();
 
-            for (int i = 0; i < sim.AQTSeg.SV.Count; i++)
+            for (int i = 0; i < sim.FirstSeg().SV.Count; i++)
             {
                 // Get the state variable ITimeSeriesOutput and pull units from metadata
-                ITimeSeriesOutput TSO = sim.AQTSeg.SV[i].SVoutput;
+                ITimeSeriesOutput TSO = sim.FirstSeg().SV[i].SVoutput;
                 // Get the state variable name and the current list of values
-                string name = sim.AQTSeg.SV[i].PName + $" ({TSO.Metadata["Unit_1"]})";
+                string name = sim.FirstSeg().SV[i].PName + $" ({TSO.Metadata["Unit_1"]})";
                 double[] values = archive[0].concs[i];
                 // Add to dictionary
                 CA.Data.Add(name, values);

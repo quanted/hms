@@ -71,6 +71,8 @@ namespace GUI.AQUATOX
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
+            this.OutputBox = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -89,7 +91,7 @@ namespace GUI.AQUATOX
             // saveJSON
             // 
             this.saveJSON.Enabled = false;
-            this.saveJSON.Location = new System.Drawing.Point(26, 43);
+            this.saveJSON.Location = new System.Drawing.Point(26, 42);
             this.saveJSON.Name = "saveJSON";
             this.saveJSON.Size = new System.Drawing.Size(87, 24);
             this.saveJSON.TabIndex = 0;
@@ -99,7 +101,7 @@ namespace GUI.AQUATOX
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(26, 152);
+            this.integrate.Location = new System.Drawing.Point(26, 177);
             this.integrate.Name = "integrate";
             this.integrate.Size = new System.Drawing.Size(87, 25);
             this.integrate.TabIndex = 1;
@@ -113,9 +115,9 @@ namespace GUI.AQUATOX
             this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(146, 76);
+            this.progressBar1.Location = new System.Drawing.Point(230, 76);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(579, 23);
+            this.progressBar1.Size = new System.Drawing.Size(495, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar1.TabIndex = 3;
@@ -124,7 +126,7 @@ namespace GUI.AQUATOX
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 321);
+            this.outputbutton.Location = new System.Drawing.Point(26, 345);
             this.outputbutton.Name = "outputbutton";
             this.outputbutton.Size = new System.Drawing.Size(87, 25);
             this.outputbutton.TabIndex = 1;
@@ -248,7 +250,7 @@ namespace GUI.AQUATOX
             this.ButtonPanel.Controls.Add(this.AnimButton);
             this.ButtonPanel.Controls.Add(this.PlantsButton);
             this.ButtonPanel.Controls.Add(this.Diagenesis);
-            this.ButtonPanel.Location = new System.Drawing.Point(163, 127);
+            this.ButtonPanel.Location = new System.Drawing.Point(163, 136);
             this.ButtonPanel.Name = "ButtonPanel";
             this.ButtonPanel.Size = new System.Drawing.Size(244, 182);
             this.ButtonPanel.TabIndex = 17;
@@ -327,7 +329,7 @@ namespace GUI.AQUATOX
             // RunStatusLabel
             // 
             this.RunStatusLabel.AutoSize = true;
-            this.RunStatusLabel.Location = new System.Drawing.Point(28, 187);
+            this.RunStatusLabel.Location = new System.Drawing.Point(28, 211);
             this.RunStatusLabel.Name = "RunStatusLabel";
             this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
             this.RunStatusLabel.TabIndex = 18;
@@ -384,7 +386,7 @@ namespace GUI.AQUATOX
             // 
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(26, 240);
+            this.HelpButton.Location = new System.Drawing.Point(26, 264);
             this.HelpButton.Name = "HelpButton";
             this.HelpButton.Size = new System.Drawing.Size(87, 28);
             this.HelpButton.TabIndex = 23;
@@ -395,7 +397,7 @@ namespace GUI.AQUATOX
             // modelRunningLabel
             // 
             this.modelRunningLabel.AutoSize = true;
-            this.modelRunningLabel.Location = new System.Drawing.Point(145, 60);
+            this.modelRunningLabel.Location = new System.Drawing.Point(230, 58);
             this.modelRunningLabel.Name = "modelRunningLabel";
             this.modelRunningLabel.Size = new System.Drawing.Size(100, 15);
             this.modelRunningLabel.TabIndex = 24;
@@ -406,7 +408,7 @@ namespace GUI.AQUATOX
             // 
             this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(26, 272);
+            this.browserButton.Location = new System.Drawing.Point(26, 296);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
             this.browserButton.Size = new System.Drawing.Size(87, 23);
@@ -418,7 +420,7 @@ namespace GUI.AQUATOX
             // ParametersLabel
             // 
             this.ParametersLabel.AutoSize = true;
-            this.ParametersLabel.Location = new System.Drawing.Point(163, 110);
+            this.ParametersLabel.Location = new System.Drawing.Point(163, 121);
             this.ParametersLabel.Name = "ParametersLabel";
             this.ParametersLabel.Size = new System.Drawing.Size(103, 15);
             this.ParametersLabel.TabIndex = 26;
@@ -451,7 +453,7 @@ namespace GUI.AQUATOX
             // 
             // SetupButton
             // 
-            this.SetupButton.Location = new System.Drawing.Point(22, 98);
+            this.SetupButton.Location = new System.Drawing.Point(28, 126);
             this.SetupButton.Name = "SetupButton";
             this.SetupButton.Size = new System.Drawing.Size(91, 25);
             this.SetupButton.TabIndex = 29;
@@ -493,11 +495,32 @@ namespace GUI.AQUATOX
             this.CancelButt.Visible = false;
             this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
             // 
+            // OutputBox
+            // 
+            this.OutputBox.FormattingEnabled = true;
+            this.OutputBox.Location = new System.Drawing.Point(26, 85);
+            this.OutputBox.Name = "OutputBox";
+            this.OutputBox.Size = new System.Drawing.Size(182, 23);
+            this.OutputBox.TabIndex = 37;
+            this.OutputBox.Visible = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(26, 70);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(97, 15);
+            this.label2.TabIndex = 38;
+            this.label2.Text = "Current Segment";
+            this.label2.Visible = false;
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(813, 490);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.OutputBox);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.SetupButton);
@@ -577,6 +600,8 @@ namespace GUI.AQUATOX
         private PictureBox pictureBox1;
         private Button OKButton;
         private Button CancelButt;
+        private ComboBox OutputBox;
+        private Label label2;
     }
 
 

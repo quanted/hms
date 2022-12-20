@@ -19,24 +19,24 @@ namespace GUI.AQUATOX
     public partial class SiteForm : Form
     {
         private bool GridChanged = false;
-        private AQTSim Sim = null;
+        private AQUATOXSegment Seg = null;
 
         public SiteForm()
         {
             InitializeComponent();
         }
 
-        public bool EditSiteInfo(AQTSim AQS)
+        public bool EditSiteInfo(AQUATOXSegment AQSg)
         {
 
-            Sim = AQS;
-            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(AQS.AQTSeg, AQTSim.AQTJSONSettings());
+            Seg = AQSg;
+            string backup = Newtonsoft.Json.JsonConvert.SerializeObject(AQSg, AQTSim.AQTJSONSettings());
 
             UpdateScreen();
 
             if (ShowDialog() == DialogResult.Cancel)
             {
-                Newtonsoft.Json.JsonConvert.PopulateObject(backup, AQS.AQTSeg, AQTSim.AQTJSONSettings());
+                Newtonsoft.Json.JsonConvert.PopulateObject(backup, AQSg, AQTSim.AQTJSONSettings());
                 return false;
             }
             else return true;
@@ -54,12 +54,12 @@ namespace GUI.AQUATOX
             LTBox.DataSource = new List<string>(new string[] { "Velocity (cm/s)", "Mean Depth (m)", "Evaporation", "Shade (fraction)" });  //special case 
             LTBox.SelectedIndex = 0;
 
-            if  (Sim.AQTSeg.Location.SiteType == SiteTypes.Pond) RBPond.Checked = true; 
-            else if (Sim.AQTSeg.Location.SiteType == SiteTypes.Lake) RBLake.Checked = true;
-            else if (Sim.AQTSeg.Location.SiteType == SiteTypes.Stream) RBStream.Checked = true;
-            else if (Sim.AQTSeg.Location.SiteType == SiteTypes.Reservr1D) RBRes.Checked = true;
-            else if (Sim.AQTSeg.Location.SiteType == SiteTypes.Enclosure) RBEncl.Checked = true;
-            else if (Sim.AQTSeg.Location.SiteType == SiteTypes.Marine) RBMarine.Checked = true;
+            if  (Seg.Location.SiteType == SiteTypes.Pond) RBPond.Checked = true; 
+            else if (Seg.Location.SiteType == SiteTypes.Lake) RBLake.Checked = true;
+            else if (Seg.Location.SiteType == SiteTypes.Stream) RBStream.Checked = true;
+            else if (Seg.Location.SiteType == SiteTypes.Reservr1D) RBRes.Checked = true;
+            else if (Seg.Location.SiteType == SiteTypes.Enclosure) RBEncl.Checked = true;
+            else if (Seg.Location.SiteType == SiteTypes.Marine) RBMarine.Checked = true;
 
             ShowGrid();
         }
@@ -72,46 +72,46 @@ namespace GUI.AQUATOX
 
             if (LTBox.SelectedIndex == 0)
             {
-                if (Sim.AQTSeg.DynVelocity == null) Sim.AQTSeg.DynVelocity = new TLoadings();
-                LoadShown = Sim.AQTSeg.DynVelocity;
+                if (Seg.DynVelocity == null) Seg.DynVelocity = new TLoadings();
+                LoadShown = Seg.DynVelocity;
                 UseConstRadio.Text = "Calculate Velocity (using flow)";
                 UseTimeSeriesRadio.Text = "Use Time Series Below (cm/s)";
-                UseConstRadio.Checked = Sim.AQTSeg.CalcVelocity;
-                UseTimeSeriesRadio.Checked = !Sim.AQTSeg.CalcVelocity;
+                UseConstRadio.Checked = Seg.CalcVelocity;
+                UseTimeSeriesRadio.Checked = !Seg.CalcVelocity;
 
                 ConstLoadBox.Visible = false;
             }
 
             if (LTBox.SelectedIndex == 1)
             {
-                if (Sim.AQTSeg.DynZMean == null) Sim.AQTSeg.DynZMean = new TLoadings();
-                LoadShown = Sim.AQTSeg.DynZMean;
+                if (Seg.DynZMean == null) Seg.DynZMean = new TLoadings();
+                LoadShown = Seg.DynZMean;
                 UseConstRadio.Text = "Use Constant (m)";
                 UseTimeSeriesRadio.Text = "Use Time Series Below (m)";
-                UseConstRadio.Checked = Sim.AQTSeg.UseConstZMean;
-                UseTimeSeriesRadio.Checked = !Sim.AQTSeg.UseConstZMean;
+                UseConstRadio.Checked = Seg.UseConstZMean;
+                UseTimeSeriesRadio.Checked = !Seg.UseConstZMean;
 
                 ConstLoadBox.Visible = true;
-                ConstLoadBox.Text = Sim.AQTSeg.Location.Locale.ICZMean.Val.ToString("G9");
+                ConstLoadBox.Text = Seg.Location.Locale.ICZMean.Val.ToString("G9");
             }
 
             if (LTBox.SelectedIndex == 2)
             {
-                if (Sim.AQTSeg.DynEvap == null) Sim.AQTSeg.DynEvap = new TLoadings();
-                LoadShown = Sim.AQTSeg.DynEvap;
+                if (Seg.DynEvap == null) Seg.DynEvap = new TLoadings();
+                LoadShown = Seg.DynEvap;
                 UseConstRadio.Text = "Use Constant (inch/yr)";
                 UseTimeSeriesRadio.Text = "Use Time Series Below (m3/d)";
-                UseConstRadio.Checked = Sim.AQTSeg.UseConstEvap;
-                UseTimeSeriesRadio.Checked = !Sim.AQTSeg.UseConstEvap;
+                UseConstRadio.Checked = Seg.UseConstEvap;
+                UseTimeSeriesRadio.Checked = !Seg.UseConstEvap;
 
                 ConstLoadBox.Visible = true;
-                ConstLoadBox.Text = Sim.AQTSeg.Location.Locale.MeanEvap.Val.ToString("G9");
+                ConstLoadBox.Text = Seg.Location.Locale.MeanEvap.Val.ToString("G9");
             }
 
             if (LTBox.SelectedIndex == 3)
             {
-                if (Sim.AQTSeg.Shade.Loadings == null) Sim.AQTSeg.Shade.Loadings = new TLoadings();
-                LoadShown = Sim.AQTSeg.Shade.Loadings;
+                if (Seg.Shade.Loadings == null) Seg.Shade.Loadings = new TLoadings();
+                LoadShown = Seg.Shade.Loadings;
                 UseConstRadio.Text = "Use Constant (frac)";
                 UseTimeSeriesRadio.Text = "Use Time Series Below (frac canopy)";
                 UseConstRadio.Checked = LoadShown.UseConstant;
@@ -158,7 +158,7 @@ namespace GUI.AQUATOX
         private void ParameterButton_Click(object sender, EventArgs e)
         {
             Param_Form Siteform = new Param_Form();
-            SiteRecord SR = Sim.AQTSeg.Location.Locale;
+            SiteRecord SR = Seg.Location.Locale;
             SR.Setup();
             TParameter[] PPS = SR.InputArray();
             Siteform.EditParams(ref PPS, "Site Parameters", false, "SiteLib.JSON", "SiteScreen");
@@ -237,9 +237,9 @@ namespace GUI.AQUATOX
         {
             if (GridChanged) SaveGrid();
 
-            if (LTBox.SelectedIndex == 0) Sim.AQTSeg.CalcVelocity = UseConstRadio.Checked;
-            if (LTBox.SelectedIndex == 1) Sim.AQTSeg.UseConstZMean = UseConstRadio.Checked;
-            if (LTBox.SelectedIndex == 2) Sim.AQTSeg.UseConstEvap = UseConstRadio.Checked;
+            if (LTBox.SelectedIndex == 0) Seg.CalcVelocity = UseConstRadio.Checked;
+            if (LTBox.SelectedIndex == 1) Seg.UseConstZMean = UseConstRadio.Checked;
+            if (LTBox.SelectedIndex == 2) Seg.UseConstEvap = UseConstRadio.Checked;
             if (LTBox.SelectedIndex == 3) LoadShown.UseConstant = UseConstRadio.Checked;
 
             ShowGrid();
@@ -279,12 +279,12 @@ namespace GUI.AQUATOX
 
         private void RB_Changed(object sender, EventArgs e)
         {
-            if (RBPond.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Pond; 
-            else if (RBLake.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Lake;
-            else if (RBStream.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Stream;
-            else if (RBRes.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Reservr1D;
-            else if (RBEncl.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Enclosure;
-            else if (RBMarine.Checked) Sim.AQTSeg.Location.SiteType = SiteTypes.Marine;
+            if (RBPond.Checked) Seg.Location.SiteType = SiteTypes.Pond; 
+            else if (RBLake.Checked) Seg.Location.SiteType = SiteTypes.Lake;
+            else if (RBStream.Checked) Seg.Location.SiteType = SiteTypes.Stream;
+            else if (RBRes.Checked) Seg.Location.SiteType = SiteTypes.Reservr1D;
+            else if (RBEncl.Checked) Seg.Location.SiteType = SiteTypes.Enclosure;
+            else if (RBMarine.Checked) Seg.Location.SiteType = SiteTypes.Marine;
         }
 
         private void ConstLoadBox_TextChanged(object sender, EventArgs e)
@@ -292,8 +292,8 @@ namespace GUI.AQUATOX
             try
             {
                 double val = double.Parse(ConstLoadBox.Text);
-                if (LTBox.SelectedIndex == 1) Sim.AQTSeg.Location.Locale.ICZMean.Val = val;
-                if (LTBox.SelectedIndex == 2) Sim.AQTSeg.Location.Locale.MeanEvap.Val = val;  
+                if (LTBox.SelectedIndex == 1) Seg.Location.Locale.ICZMean.Val = val;
+                if (LTBox.SelectedIndex == 2) Seg.Location.Locale.MeanEvap.Val = val;  
                 if (LTBox.SelectedIndex == 3) LoadShown.ConstLoad = val;
                 ConstLoadBox.BackColor = Color.White;
             }

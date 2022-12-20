@@ -125,7 +125,7 @@ namespace Web.Services.Models
                                 // without breaking desktop version.
                                 sim.Instantiate(json);
                                 TStateVariable TSV =
-                                    sim.AQTSeg.GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
+                                    sim.FirstSeg().GetStatePointer(AllVariables.DissRefrDetr, T_SVType.StV, T_SVLayer.WaterCol);
                                 ((TDissRefrDetr)TSV).InputRecord.DataType = (DetrDataType)int.Parse(loading.Metadata["DataType"]);
                                 sim.SaveJSON(ref json);
                                 break;
