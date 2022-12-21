@@ -11,7 +11,7 @@ using AQUATOX.Plants;
 using Newtonsoft.Json;
 using Globals;
 using System.Data;
-
+using System.Runtime.Versioning;
 
 namespace AQUATOX.Chemicals
 {
@@ -188,6 +188,22 @@ namespace AQUATOX.Chemicals
             }
 
         }
+
+        public double ToxDiff()
+        {
+            if (!AQTSeg.Stratified) return 0;
+            double CarrierDiff = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol).TurbDiff();
+            if (CarrierDiff == 0) return 0;
+
+            double RelevantPPB;
+            if (CarrierDiff > 0) RelevantPPB = AQTSeg.otherseg.GetPPB(NState, SVType, Layer);
+            else RelevantPPB = AQTSeg.GetPPB(NState, SVType, Layer);
+
+            return   CarrierDiff * RelevantPPB * 1e-6;
+            //ug/L     ug/L          {g/kg}      {kg/g} 
+
+        }
+
 
         public DataTable PTR_Table()
         {
@@ -1368,6 +1384,7 @@ namespace AQUATOX.Chemicals
                     SaveRate("Volatil", Vl);
                     SaveRate("ToxDisch", ToxDis);
                     SaveRate("Inflow", Inflow);
+                    SaveRate("TurbDiff", TDF);
 
                     SaveRate("GillSorption", GillSorption);
                     SaveRate("Depuration", Dep);
@@ -1428,7 +1445,8 @@ namespace AQUATOX.Chemicals
                 //    DiffDown = SegmentDiffusion(false);
                 //}
                 //else if (!LinkedMode)
-                //    TDF = TurbDiff();  // stratification
+
+                if (AQTSeg.Stratified) TDF = TurbDiff();  
 
                 //ToTPoreWaterTox = AQTSeg.GetStatePointer(AllVariables.PoreWater, ToxType, T_SVLayer.SedLayer1);   // Diffusion from/to pore waters
                 //if (ToTPoreWaterTox != null)

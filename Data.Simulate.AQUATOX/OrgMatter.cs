@@ -593,6 +593,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                     SaveRate("DF_Excretion", DFE);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
                     if (NState != AllVariables.DissRefrDetr)
                         SaveRate("Decomp", DE);
 
@@ -1022,6 +1023,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                     if ((NState == AllVariables.SuspLabDetr))
                         SaveRate("DF_Gameteloss", DFG);
 
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
                     SaveRate("Colonz", Math.Abs(Co));
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
@@ -1109,12 +1111,9 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //    DiffUp = SegmentDiffusion(true);
             //    DiffDown = SegmentDiffusion(false);
             //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
-            //if (AQTSeg.EstuarySegment)
-            //    En = EstuaryEntrainment();
+
+            if (AQTSeg.Stratified) TD = TurbDiff();
+            // if (AQTSeg.EstuarySeg) En = EstuaryEntrainment(); TODO FIXME Add EstuaryEntrainment
 
             DB = Lo + DF + Co - De - WaO + WaI - Se + Re - Pr + PlSlg + PlToxD + McB - STH + SFE + TD + En + DiffUp + DiffDown + Scour;
 

@@ -11,6 +11,7 @@ using AQUATOX.Chemicals;
 using Newtonsoft.Json;
 using Globals;
 using System.Linq;
+using System.Threading;
 
 namespace AQUATOX.Bioaccumulation
 {
@@ -291,6 +292,7 @@ namespace AQUATOX.Bioaccumulation
                         SaveRate("Washout", WashO);
                         SaveRate("Washin", WashI);
                         SaveRate("MortToDetr", MTD);
+                        SaveRate("TurbDiff", TD);
                         SaveRate("NetBoundary", Lo + WashI - WashO + Entr + DiffUp + DiffDown + TD);
                     }
 
@@ -424,7 +426,9 @@ namespace AQUATOX.Bioaccumulation
                     Photo = Photolysis();
                     WashO = CP.Washout() * AQTSeg.GetPPB(AllVariables.SuspLabDetr, SVType, Layer) * 1e-6;
 
-                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. Sink to Hypolimnion Removed
+                    if (AQTSeg.Stratified) TD = ToxDiff();
+
+                    // Some HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  DiffUp and DiffDown removed. Sink to Hypolimnion Removed
 
                     So = Sorption();
                     Des = Desorption();
@@ -454,7 +458,9 @@ namespace AQUATOX.Bioaccumulation
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
 
-                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. Sink to Hypolimnion Removed
+                    if (AQTSeg.Stratified) TD = ToxDiff();
+
+                    // Some HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  DiffUp and DiffDown removed. Sink to Hypolimnion Removed
 
                     So = Sorption();
                     Des = Desorption();
@@ -480,7 +486,9 @@ namespace AQUATOX.Bioaccumulation
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
 
-                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. 
+                    if (AQTSeg.Stratified) TD = ToxDiff();
+
+                    // Some HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  DiffUp and DiffDown removed. Sink to Hypolimnion Removed
                     // pore water diffusion removed, no multi-layer sediment model in HMS at this time
 
                     So = Sorption();
@@ -499,7 +507,9 @@ namespace AQUATOX.Bioaccumulation
                     Photo = Photolysis();
                     WashO = CP.Washout() * pp * 1e-6;
 
-                    // HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  ToxDiff removed, DiffUp and DiffDown removed. 
+                    if (AQTSeg.Stratified) TD = ToxDiff();
+
+                    // Some HMS multi-segment interaction handled by HMS workflow.  ToxInCarrierWashin removed,  DiffUp and DiffDown removed. Sink to Hypolimnion Removed
                     // pore water diffusion removed, no multi-layer sediment model in HMS at this time
 
                     So = Sorption();
@@ -736,17 +746,16 @@ namespace AQUATOX.Bioaccumulation
 
         public override void Derivative(ref double DB)
         {
-            // Derivitives for Plants, Animals are sent to AnimalDeriv
             TPlant CP;
             double Dep = 0;
             double STH = 0;
             double SFE = 0;
             double BioT_Out = 0;
             double BioT_In = 0;
+            double TD = 0;
             double ToxD = 0;
             double Entr = 0;
             double Flt = 0;
-            double Pp = 0;
             double WashO = 0;
             double WashI = 0;
             double Lo = 0;
@@ -758,6 +767,7 @@ namespace AQUATOX.Bioaccumulation
             double Sed2Me = 0;
             double MacBrk = 0;
             double Slgh = 0;
+            double Pp;
             bool SurfaceFloater;
 
             // ----------------------------------------------------------------
@@ -767,10 +777,13 @@ namespace AQUATOX.Bioaccumulation
                 {
                     ClearRate();
                     SaveRate("Loading", Lo);
+
+                    if (AQTSeg.Stratified && (Carrier >= Consts.FirstAlgae && Carrier <= Consts.LastAlgae) && (CP.IsPhytoplankton()))
+                        SaveRate("TurbDiff", TD);
+
                     if ((Carrier >= Consts.FirstAlgae && Carrier <= Consts.LastAlgae) && (!CP.IsPhytoplankton()))
-                    {
                         SaveRate("ToxDislodge", ToxD);
-                    }
+
                     SaveRate("Biotr IN", BioT_In);
                     SaveRate("Biotr OUT", BioT_Out);
                     if (!(NState >= Consts.FirstMacro && NState <= Consts.LastMacro))
@@ -782,7 +795,7 @@ namespace AQUATOX.Bioaccumulation
                         if (SurfaceFloater)
                             SaveRate("Floating", Flt);
 
-                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr);
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr + TD);
                     }
                     if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
                     {
@@ -871,7 +884,10 @@ namespace AQUATOX.Bioaccumulation
                 Uptake = PlantUptake();
                 Dep = Depuration();
 
-                DB = Lo + Uptake - Dep + WashI - (WashO + Predt + Mort + Sed + Exc + ToxD + Slgh) - BioT_Out + BioT_In - STH + SFE + Flt + Sed2Me + Entr;
+                if (AQTSeg.Stratified && (Carrier >= Consts.FirstAlgae && Carrier <= Consts.LastAlgae) && (CP.IsPhytoplankton()) && !SurfaceFloater)
+                    TD = ToxDiff();
+
+                DB = Lo + Uptake - Dep + WashI - (WashO + Predt + Mort + Sed + Exc + ToxD + Slgh) - BioT_Out + BioT_In - STH + SFE + TD + Flt + Sed2Me + Entr;
                 // algae
             }
 
@@ -909,6 +925,7 @@ namespace AQUATOX.Bioaccumulation
                 double Fi = 0;
                 double Entr = 0;
                 double Gam = 0;
+                double TD = 0;
                 double DrifO = 0;
                 double DrifI = 0;
                 double PLs = 0;
@@ -928,6 +945,8 @@ namespace AQUATOX.Bioaccumulation
 
                     SaveRate("Biotr IN", BioT_in);
                     SaveRate("Biotr OUT", BioT_out);
+
+                    if (CP.IsInvertebrate() && CP.IsPlanktonInvert() && AQTSeg.Stratified) SaveRate("TurbDiff", TD);
 
                     CP = ((AQTSeg.GetStatePointer(Carrier, T_SVType.StV, T_SVLayer.WaterCol)) as TAnimal);
 
@@ -977,6 +996,7 @@ namespace AQUATOX.Bioaccumulation
                 Lo = Loading;
                 pp = GetPPB(NState, SVType, Layer);
 
+                if (CP.IsInvertebrate() && CP.IsPlanktonInvert() && AQTSeg.Stratified) TD = ToxDiff();
                 // Removed Estuary entrainment code, migration code 
 
                 EmergI = CP.EmergeInsect * pp * 1e-6;
@@ -1055,7 +1075,7 @@ namespace AQUATOX.Bioaccumulation
             // + Recr
 
 
-                DB = Loading + Gill + Diet - Dep - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
+                DB = Loading + Gill + Diet - Dep + TD - DrifO + DrifI - BioT_out + BioT_in + Migr - (Predt + Mort + Gam + Fi) + PGn - PLs - EmergI + Entr;
                 if ((AQTSeg.DerivStep == 5)) RecrSaveTox = Recr;
             // derivstep 5 is time X+h
 

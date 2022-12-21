@@ -1216,6 +1216,8 @@ namespace AQUATOX.Nutrients
                     SaveRate("Assim", Assm);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
+
                     if (PSed != null)
                     {
                         SaveRate("Diag_Flux", DiaFlx);
@@ -1240,19 +1242,10 @@ namespace AQUATOX.Nutrients
             //if (AQTSeg.LinkedMode)
             //{    WaI = Washin(); }
 
-            //if (AQTSeg.LinkedMode && (!AQTSeg.CascadeRunning))
-            //{
-            //    DiffUp = SegmentDiffusion(true);
-            //    DiffDown = SegmentDiffusion(false);
-            //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
+            if (AQTSeg.Stratified) TD = TurbDiff();
+
             //if (AQTSeg.EstuarySegment)
-            //{
             //    En = EstuaryEntrainment();
-            //}
 
             PSed = (TPO4_Sediment) AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);  // check for diagenesis model  
             if (PSed != null)
@@ -1471,6 +1464,8 @@ namespace AQUATOX.Nutrients
                     {
                         SaveRate("Diag_Flux", DiaFlx);
                     }
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
+
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
 
                     // RELEASE 3.1 PLUS EXPLICIT AMMONIA REMINERALIZATION OUTPUT  JSC 8/16/2012
@@ -1516,10 +1511,8 @@ namespace AQUATOX.Nutrients
             //    DiffUp = SegmentDiffusion(true);
             //    DiffDown = SegmentDiffusion(false);
             //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
+
+            if (AQTSeg.Stratified) TD = TurbDiff();
 
             //if (AQTSeg.EstuarySegment)
             //{
@@ -1725,6 +1718,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
                     if (N2Sed != null) SaveRate("Diag_Flux", DiaFlx);
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
 
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
                 }
@@ -1749,10 +1743,9 @@ namespace AQUATOX.Nutrients
             //    DiffUp = SegmentDiffusion(true);
             //    DiffDown = SegmentDiffusion(false);
             //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
+
+            if (AQTSeg.Stratified) TD = TurbDiff();            
+            
             //if (AQTSeg.EstuarySegment)
             //{
             //    En = EstuaryEntrainment();
@@ -1875,6 +1868,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("AtmosEx", AE);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
                 }
             }
@@ -1916,11 +1910,10 @@ namespace AQUATOX.Nutrients
             //    DiffUp = SegmentDiffusion(true);
             //    DiffDown = SegmentDiffusion(false);
             //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
-            //if (AQTSeg.EstuarySegment)o
+
+            if (AQTSeg.Stratified) TD = TurbDiff();           
+            
+            //if (AQTSeg.EstuarySegment)
             //{
             //    En = EstuaryEntrainment();
             //}
@@ -2248,6 +2241,8 @@ namespace AQUATOX.Nutrients
                     SaveRate("Nitrific", Nitr);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
+
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
                     if (AQTSeg.Diagenesis_Included())
                     {
@@ -2305,7 +2300,8 @@ namespace AQUATOX.Nutrients
         //{   DiffUp = SegmentDiffusion(true);
         //    DiffDown = SegmentDiffusion(false);
         //}
-        //else if ((!AQTSeg.LinkedMode)) TD = TurbDiff();
+
+        if (AQTSeg.Stratified) TD = TurbDiff();
         //if (AQTSeg.EstuarySegment)  En = EstuaryEntrainment();
 
         if (NoLoadOrWash)

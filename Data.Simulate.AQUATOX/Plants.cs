@@ -1542,13 +1542,23 @@ namespace AQUATOX.Plants
 
                     SaveRate("Sediment", S);
                     if (IsPhytoplankton())
+                    {
                         SaveRate("PeriScour", PeriScr);
+                        if (AQTSeg.Stratified)
+                        {
+                            SaveRate("TurbDiff", TD);
+                            SaveRate("SinkToHypo", STH);
+                            SaveRate("SinkFromEpi", SFE);
+                        }
+                        if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
+                    }
 
                     if (!IsPhytoplankton())
                         SaveRate("Sloughing", Slg);
 
                     SaveRate("SinkToHypo", STH);
                     SaveRate("SinkFromEpi", SFE);
+
                     SaveRate("Lt_LIM", Lt_Limit);
                     SaveRate("N_LIM", N_Limit);
                     SaveRate("PO4_LIM", PO4_Limit);
@@ -1558,9 +1568,9 @@ namespace AQUATOX.Plants
                     SaveRate("Chem_LIM", Chem_Limit);
                     if ((IsPeriphyton()))
                         SaveRate("Vel_LIM", Vel_Limit);
-
                     SaveRate("LowLt_LIM", LowLt_Limit);
                     SaveRate("HighLt_LIM", HighLt_Limit);
+
                     if (SurfaceFloater)
                         SaveRate("Floating", Fl);
 
@@ -1579,9 +1589,6 @@ namespace AQUATOX.Plants
                 MortRates.OrgPois[ToxLoop] = 0;
             }
 
-            //Trackit = (DB != -999);
-            // signal to not write mass balance tracking
-
             SurfaceFloater = PAlgalRec.SurfaceFloating.Val;
             L = Loading;
             // WI = Washin();
@@ -1593,27 +1600,27 @@ namespace AQUATOX.Plants
             if (Predation_Link != null) Pr = Predation_Link.ReturnLoad(AQTSeg.TPresent);
 
             WO = Washout();
-            S = Sedimentation();
-            // SinkToHypo is Calculated Here
+            S = Sedimentation();   // SinkToHypo is Calculated Here
             if (!SurfaceFloater)
             {
                 STH = SinkToHypo;
-                // SFE = SinkFromEp();  HMS Removed, no vert stratification
+                // SFE = SinkFromEp();  TODO FIXME ADD
                 Sed2Me = SedToMe();
             }
-            //if (SurfaceFloater)
-            //{
-            //    // Fl = Floating();  HMS Removed, no vert stratification
-            //}
+            if (SurfaceFloater)
+            {
+                // Fl = Floating();  TODO FIXME ADD
+            }
 
-            if (IsPhytoplankton())
-            { PeriScr = PeriphytonSlough(); }
+            if (IsPhytoplankton()) { 
+                PeriScr = PeriphytonSlough();
+                if (AQTSeg.Stratified && (!SurfaceFloater)) TD = TurbDiff();
+            }
 
             if (!IsPhytoplankton())
             { Slg = CalcSlough(); }
 
-            if (SloughEvent)
-            { Slg = 0; }  // set precisely below  11/11/03
+            if (SloughEvent) { Slg = 0;}  // set precisely below  11/11/03
 
             // HMS Removed linked mode and stratification code and estuary-mode code
 
@@ -1630,7 +1637,6 @@ namespace AQUATOX.Plants
             // if (Trackit)  Derivative_TrackMB();
 
         }
-
     } // end TPlant
 
 
@@ -1957,6 +1963,20 @@ namespace AQUATOX.Plants
 
         // --------------------------------------------------------------------------------------------------------------------------------------
 
+        public double NutrDiff()
+        {
+            if (!AQTSeg.Stratified) return 0;
+            double CarrierDiff = AQTSeg.GetStatePointer(NState, T_SVType.StV, T_SVLayer.WaterCol).TurbDiff();
+            if (CarrierDiff == 0) return 0;
+
+            TPlant RelevantPlant;
+            if (CarrierDiff> 0) RelevantPlant = AQTSeg.otherseg.GetStatePointer(NState, T_SVType.StV, Layer) as TPlant;
+            else RelevantPlant = AQTSeg.GetStatePointer(NState, T_SVType.StV, Layer) as TPlant;
+
+             return    CarrierDiff * RelevantPlant.Nutr_2_Org(SVType) * 1e3;
+          // {ug/L}      {mg/L}                    {g/g}             {ug/mg}
+        }
+
         public double Derivative_NToPhytoFromSlough()
         {
             AllVariables PlantLoop;
@@ -2015,9 +2035,7 @@ namespace AQUATOX.Plants
             double ToxD = 0;
             double Entr = 0;
             double Flt = 0;
-            //          double TD = 0;
-            //          double DiffUp = 0;
-            //          double DiffDown = 0;
+            double TD = 0;
             double N2O = 0;
             double WashO = 0;
             double WashI = 0;
@@ -2030,7 +2048,7 @@ namespace AQUATOX.Plants
             double Exc2 = 0;
             double Rsp = 0;
             double FixN = 0;
-            //          double SegVolSave = 0;
+            // double SegVolSave = 0;
             double Sed2Me = 0;
             double MacBrk = 0;
             double Slgh = 0;
@@ -2061,12 +2079,9 @@ namespace AQUATOX.Plants
                         //SaveRate("Washin", WashI);
                         SaveRate("SinkToHyp", STH);
                         SaveRate("SinkFromEp", SFE);
-                        if (SurfaceFloater)
-                        {
-                            SaveRate("Floating", Flt);
-                        }
+                        if (SurfaceFloater) SaveRate("Floating", Flt);
 
-                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr);  //  DiffUp + DiffDown + TD;
+                        SaveRate("NetBoundary", Lo + WashI - WashO + Entr + TD);  //  DiffUp + DiffDown + TD;
                     }
                     if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
                     {
@@ -2179,12 +2194,17 @@ namespace AQUATOX.Plants
                 if ((CP.IsPeriphyton())) Slgh = CP.Sloughing * N2O;
                 else Slgh = -Derivative_NToPhytoFromSlough();
                 Uptk = Uptake();
-                // algae
-                DB = Lo + Uptk + WashI - (WashO + Predt + Mort + Sed + Exc + Exc2 + Rsp + ToxD + Slgh) - STH + SFE + Flt + Sed2Me + Entr + FixN;
-                // algae
-            }
+
+
+                if ((NState >= Consts.FirstAlgae && NState <= Consts.LastAlgae) && (!CP.PAlgalRec.SurfaceFloating.Val))
+                    TD = NutrDiff();
+
+                DB = Lo + Uptk + WashI - (WashO + Predt + Mort + Sed + Exc + Exc2 + Rsp + ToxD + Slgh) - STH + SFE + Flt + Sed2Me + Entr + FixN + TD; // algae
+            }  // algae
+
             // Phytoplankton are subject to currents , diffusion & TD
-            // HMS eliminated turbulent diffusion and linked-segment diffusion as irrelevant to 0D Model
+
+
 
             Derivative_WriteRates();
         }

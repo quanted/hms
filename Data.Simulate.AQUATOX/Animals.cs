@@ -2096,6 +2096,8 @@ namespace AQUATOX.Animals
                     SaveRate("Excretion", Ex);
                     SaveRate("Fishing", Fi);
                     if (!IsPlanktonInvert()) SaveRate("Scour_Entrain", Entr);
+                    if (IsInvertebrate() && IsPlanktonInvert() && AQTSeg.Stratified) SaveRate("TurbDiff", TD);
+
 
                     SaveRate("Predation", Pr);
                     for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
@@ -2204,7 +2206,8 @@ namespace AQUATOX.Animals
             //if (AQTSeg.LinkedMode)   DrI = Washin();
             Recr = Recruit;   // Recr value is used in DoThisEveryStep
             Emrg = EmergeInsect;
-            if (!IsPlanktonInvert())  Entr = Scour_Entrainment();    // Plankton invertebrates are subject to currents
+            if (!IsPlanktonInvert())  Entr = Scour_Entrainment();    // Plankton invertebrates are subject to currents and diffusion
+            if (IsInvertebrate() && IsPlanktonInvert()) TD = TurbDiff();
 
             // removed linked mode, stratification, and estuary code as not relevant to HMS
             

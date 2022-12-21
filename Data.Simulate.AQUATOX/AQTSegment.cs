@@ -24,6 +24,7 @@ using System.IO;
 using System.Data;
 using MathNet.Numerics;
 using System.Text;
+using Data.Source;
 
 namespace AQUATOX.AQTSegment
 
@@ -48,8 +49,8 @@ namespace AQUATOX.AQTSegment
 
         public AQUATOXSegment FirstSeg()
         {
-          if (_FirstSeg == null) _FirstSeg = AQTSegs.First().Value;
-          return _FirstSeg;
+            if (_FirstSeg == null) _FirstSeg = AQTSegs.First().Value;
+            return _FirstSeg;
         }
 
         public bool HasResults()
@@ -80,7 +81,7 @@ namespace AQUATOX.AQTSegment
 
         public void SetMemLocRec()
         {
-            foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) AQTSeg.SetMemLocRec(); 
+            foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) AQTSeg.SetMemLocRec();
         }
 
 
@@ -115,7 +116,7 @@ namespace AQUATOX.AQTSegment
                 FileName = tempsim.AQTSeg.FileName;
                 RunID = tempsim.AQTSeg.RunID;
 
-                AQTSegs = tempsim.AQTSegs; 
+                AQTSegs = tempsim.AQTSegs;
                 SavedRuns = tempsim.SavedRuns;
 
                 foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) AQTSeg.SetupLinks();
@@ -185,7 +186,7 @@ namespace AQUATOX.AQTSegment
 
             if (SavedRuns.Count > 0)
             {
-                string GraphJSON = JsonConvert.SerializeObject(SavedRuns[SavedRuns.Keys.Last()].Graphs, AQTJSONSettings());  
+                string GraphJSON = JsonConvert.SerializeObject(SavedRuns[SavedRuns.Keys.Last()].Graphs, AQTJSONSettings());
                 TGraphs LatestGraphs = JsonConvert.DeserializeObject<TGraphs>(GraphJSON);
                 foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) AQTSeg.Graphs = LatestGraphs;
             }
@@ -200,7 +201,7 @@ namespace AQUATOX.AQTSegment
 
             if (AQTSegs == null) return "AQTSegs not Instantiated";
 
-            foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) 
+            foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
             {
                 try
                 {
@@ -367,104 +368,104 @@ namespace AQUATOX.AQTSegment
         // -------------------------------------------------------------------------
         public void AdaptiveStep(ref DateTime x, double hstart, double RelError, ref double h_taken, ref double hnext, double MaxStep)
         {
-        const double SAFETY = 0.9;
-        double h;
-        double Delta;
-        TStateVariable ErrVar;
-        double MaxError;
+            const double SAFETY = 0.9;
+            double h;
+            double Delta;
+            TStateVariable ErrVar;
+            double MaxError;
 
-        if (PS.UseFixStepSize.Val)
-        {
-            h = PS.FixStepSize.Val;  // 2/21/2012 new option
-            if ((x.AddDays(h) > PS.LastDay.Val))
+            if (PS.UseFixStepSize.Val)
             {
-                // if stepsize can overshoot, decrease
-                h = (PS.LastDay.Val - x).TotalDays;
-            }
-        }
-        else
-        {
-            h = hstart;
-        }
-        do
-        {
-            TryRKStep(x, h);
-            // calculate RKQS 4th and 5th order solutions and estimate error based on their difference
-            MaxError = 0;
-            ErrVar = null;
-            if (!PS.UseFixStepSize.Val)
-            {
-              foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
-                foreach (TStateVariable TSV in AQTSeg.SV)
+                h = PS.FixStepSize.Val;  // 2/21/2012 new option
+                if ((x.AddDays(h) > PS.LastDay.Val))
                 {
-                    if ((Math.Abs(TSV.yscale) > Consts.VSmall))
-                    {
-                        if ((Math.Abs(TSV.yerror / TSV.yscale) > MaxError))
+                    // if stepsize can overshoot, decrease
+                    h = (PS.LastDay.Val - x).TotalDays;
+                }
+            }
+            else
+            {
+                h = hstart;
+            }
+            do
+            {
+                TryRKStep(x, h);
+                // calculate RKQS 4th and 5th order solutions and estimate error based on their difference
+                MaxError = 0;
+                ErrVar = null;
+                if (!PS.UseFixStepSize.Val)
+                {
+                    foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
+                        foreach (TStateVariable TSV in AQTSeg.SV)
                         {
-                            if (!((TSV.yhold < 0) && (TSV.State < Consts.VSmall)))  // no need to track error, state variable constrained to zero
+                            if ((Math.Abs(TSV.yscale) > Consts.VSmall))
                             {
+                                if ((Math.Abs(TSV.yerror / TSV.yscale) > MaxError))
+                                {
+                                    if (!((TSV.yhold < 0) && (TSV.State < Consts.VSmall)))  // no need to track error, state variable constrained to zero
+                                    {
 
-                                MaxError = Math.Abs(TSV.yerror / TSV.yscale);    // maximum error of all differential equations evaluated
-                                ErrVar = TSV;                                   // save error variable for later use in screen display
+                                        MaxError = Math.Abs(TSV.yerror / TSV.yscale);    // maximum error of all differential equations evaluated
+                                        ErrVar = TSV;                                   // save error variable for later use in screen display
+                                    }
+                                }
                             }
                         }
+                }
+                if (!PS.UseFixStepSize.Val)
+                {
+                    if ((MaxError >= RelError))
+                    {
+                        // Step has failed, reduce step-size and try again
+                        // Adaptive Stepsize Adjustment Source ("Delta" Code) Dr. Michael Thomas Flanagan
+                        // www.ee.ucl.ac.uk/~mflanaga
+                        // 
+                        // Permission to use, copy and modify this software and its documentation for
+                        // NON-COMMERCIAL purposes is granted, without fee, provided that an acknowledgement
+                        // to the author, Dr Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies.
+                        // Dr Michael Thomas Flanagan makes no representations about the suitability or fitness
+                        // of the software for any or for a particular purpose. Dr Michael Thomas Flanagan shall
+                        // not be liable for any damages suffered as a result of using, modifying or distributing
+                        // this software or its derivatives.
+
+                        Delta = SAFETY * Math.Pow(MaxError / RelError, -0.25);
+                        if ((Delta < 0.1)) h = h * 0.1;
+                        else h = h * Delta;
                     }
                 }
-            }
-            if (!PS.UseFixStepSize.Val)
+                // no warning at this time
+            } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PS.UseFixStepSize.Val)));
+            // If (MaxError>1) and (not StepSizeWarned) then
+            // Begin
+            // StepSizeWarned = true;
+            // MessageStr = 'Warning, the differential equation solver time-step has been forced below the minimum';
+            // If ShowDebug then MessageStr = MessageStr + ' due to the "' +ProgData.ErrVar + '" state variable';
+            // MessageStr = MessageStr + '.  Continuing to step forward using minimum step-size.';
+            // MessageErr = true;
+            // TSMessage;
+            // End;
+            if (PS.UseFixStepSize.Val)
             {
-                if ((MaxError >= RelError))
-                {
-                    // Step has failed, reduce step-size and try again
-                    // Adaptive Stepsize Adjustment Source ("Delta" Code) Dr. Michael Thomas Flanagan
-                    // www.ee.ucl.ac.uk/~mflanaga
-                    // 
-                    // Permission to use, copy and modify this software and its documentation for
-                    // NON-COMMERCIAL purposes is granted, without fee, provided that an acknowledgement
-                    // to the author, Dr Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies.
-                    // Dr Michael Thomas Flanagan makes no representations about the suitability or fitness
-                    // of the software for any or for a particular purpose. Dr Michael Thomas Flanagan shall
-                    // not be liable for any damages suffered as a result of using, modifying or distributing
-                    // this software or its derivatives.
-
-                    Delta = SAFETY * Math.Pow(MaxError / RelError, -0.25);
-                    if ((Delta < 0.1)) h = h * 0.1;
-                    else h = h * Delta;
-                }
+                hnext = h;
             }
-            // no warning at this time
-        } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PS.UseFixStepSize.Val)));
-        // If (MaxError>1) and (not StepSizeWarned) then
-        // Begin
-        // StepSizeWarned = true;
-        // MessageStr = 'Warning, the differential equation solver time-step has been forced below the minimum';
-        // If ShowDebug then MessageStr = MessageStr + ' due to the "' +ProgData.ErrVar + '" state variable';
-        // MessageStr = MessageStr + '.  Continuing to step forward using minimum step-size.';
-        // MessageErr = true;
-        // TSMessage;
-        // End;
-        if (PS.UseFixStepSize.Val)
-        {
-            hnext = h;
-        }
-        else if ((MaxError < RelError))
-        {
-            // Adaptive Stepsize Adjustment Source ("Delta" code) Dr. Michael Thomas Flanagan www.ee.ucl.ac.uk/~mflanaga, see terms above
-            if (MaxError == 0) Delta = 4.0;
-            else Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
+            else if ((MaxError < RelError))
+            {
+                // Adaptive Stepsize Adjustment Source ("Delta" code) Dr. Michael Thomas Flanagan www.ee.ucl.ac.uk/~mflanaga, see terms above
+                if (MaxError == 0) Delta = 4.0;
+                else Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
 
-            if ((Delta > 4.0)) Delta = 4.0;
-            if ((Delta < 1.0)) Delta = 1.0;
+                if ((Delta > 4.0)) Delta = 4.0;
+                if ((Delta < 1.0)) Delta = 1.0;
 
-            hnext = h * Delta;
-        }
+                hnext = h * Delta;
+            }
 
-        h_taken = h;
+            h_taken = h;
 
-        if (hnext > MaxStep) hnext = MaxStep;
-        if (h > MaxStep) h = MaxStep;
+            if (hnext > MaxStep) hnext = MaxStep;
+            if (h > MaxStep) h = MaxStep;
 
-        x = x.AddDays(h);
+            x = x.AddDays(h);
 
 
             foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
@@ -473,7 +474,7 @@ namespace AQUATOX.AQTSegment
                     TSV.State = TSV.yhold; // reasonable error, so copy results of differentiation saved in YHolders
                 AQTSeg.Perform_Dilute_or_Concentrate();
             }
-    }
+        }
 
 
         public void TryRKStep_CheckZeroState(TStateVariable p)
@@ -558,19 +559,19 @@ namespace AQUATOX.AQTSegment
                 }  // 6 steps of integration
 
             foreach (AQUATOXSegment AQTSeg in AQTSegs.Values) foreach (TStateVariable TSV in AQTSeg.SV)
-            {
-                TSV.yhold = TSV.State;
-                YFourth = TSV.State;
-                for (Steps = 1; Steps <= 6; Steps++)
-                {  // zero weights for both solutions
-                    if (Steps != 2)
-                    {
-                        TSV.yhold = TSV.yhold + h * (B5[Steps] * TSV.StepRes[Steps]);    // Fifth Order Accurate Soln
-                        YFourth = YFourth + h * (B4[Steps] * TSV.StepRes[Steps]);        // Fourth Order Accurate Soln
+                {
+                    TSV.yhold = TSV.State;
+                    YFourth = TSV.State;
+                    for (Steps = 1; Steps <= 6; Steps++)
+                    {  // zero weights for both solutions
+                        if (Steps != 2)
+                        {
+                            TSV.yhold = TSV.yhold + h * (B5[Steps] * TSV.StepRes[Steps]);    // Fifth Order Accurate Soln
+                            YFourth = YFourth + h * (B4[Steps] * TSV.StepRes[Steps]);        // Fourth Order Accurate Soln
+                        }
                     }
+                    TSV.yerror = YFourth - TSV.yhold;      // Error is taken to be the difference between the fourth and fifth-order accurate solutions
                 }
-                TSV.yerror = YFourth - TSV.yhold;      // Error is taken to be the difference between the fourth and fifth-order accurate solutions
-            }
         }
 
 
@@ -626,7 +627,7 @@ namespace AQUATOX.AQTSegment
             if (TSV == null) return null;
 
             LoadingsRecord LR = TSV.LoadsRec;
-            if (isdetritus) { LR = ((TDissRefrDetr)TSV).InputRecord.Load;}
+            if (isdetritus) { LR = ((TDissRefrDetr)TSV).InputRecord.Load; }
 
             bool isTN = (SVType == "TN");      //set TN flags based on user input
             if (isTN || (SVType == "TNO3Obj"))
@@ -656,7 +657,7 @@ namespace AQUATOX.AQTSegment
             else return LR.Alt_Loadings[LoadingType];
         }
 
-        
+
         /// <summary>
         /// Accepts an input JSON sting and information about a constant point-source, nonpoint-source, or inflow loading and inserts that into a return JSON string
         /// </summary>
@@ -716,7 +717,7 @@ namespace AQUATOX.AQTSegment
             if (saveErr != "") return "ERROR: " + saveErr;
             return outjson;
         }
-     }
+    }
 
 
     public class AQUATOXTSOutput : ITimeSeriesOutput
@@ -952,6 +953,82 @@ namespace AQUATOX.AQTSegment
         public TStateVariable()
         { }
 
+
+        // --------------------------------------------------------------------------
+        public double EstuaryTurbDiff()
+        {
+            double result;
+            double Wind;
+            double Langmuir;
+            double BulkMixCoeff = 0.1;
+            double OtherSegState;
+
+            AQUATOXSegment upperseg;
+            if (AQTSeg.UpperSeg) upperseg = AQTSeg; else upperseg = AQTSeg.otherseg;
+
+            Wind = upperseg.GetState(AllVariables.WindLoading, T_SVType.StV, T_SVLayer.WaterCol);
+
+            // 5/20/2008
+            if ((upperseg.Location.MeanThick < 3) && (Wind >= 3)) Langmuir = 5; // < 3 meters and > 3 m/s        
+            else Langmuir = 1;
+
+            OtherSegState = AQTSeg.otherseg.GetState(NState, SVType, Layer);
+
+            result    = (BulkMixCoeff / AQTSeg.Volume_Last_Step) * Langmuir * (OtherSegState - State);
+            // g/m3 d    // m cubed/ d          // m cubed        // unitless       // g/m3    // g/m3
+            
+            if ((result < 0) && (-result > State)) result = -State;
+            if ((result > 0) && (result > OtherSegState)) result = OtherSegState;
+            // TurbDiff can not exceed state variable concentration	10/21/2002
+
+            return(result);
+        }
+
+        // Relevant for tox in water, tox in detritus, and labile detritus
+        public double TurbDiff()  // Calculate Turbulent Diffusion between two stratified layers
+        {
+            double result;
+            // double VertDispersion;
+            // double OtherSegState;
+            // --------------------------------------------------------------------------
+            if (!AQTSeg.Stratified) return 0.0;
+            if (AQTSeg.EstuarySeg) return EstuaryTurbDiff();   // estuary turbdiff not used for marine segment
+
+            result = 0;
+            
+            //if ((AQTSeg.VertDispersionCalcDate == AQTSeg.TPresent))
+            //{
+            //    // optimization
+            //    VertDispersion = AQTSeg.OldVertDispersionVal;
+            //}
+            //else
+            //{
+            //    VertDispersion = AQTSeg.CalcVertDispersion();
+            //    AQTSeg.VertDispersionCalcDate = AQTSeg.TPresent;
+            //    AQTSeg.OldVertDispersionVal = VertDispersion;
+            //}
+
+            //double BulkMixCoeff = VertDispersion * AQTSeg.ThermoclArea() / AQTSeg.StaticZMean();
+            //      // m cubed/ d  // m squared/ d         // m squared             // Thick, m
+            //if (AQTSeg.VSeg == Global.VerticalSegments.Epilimnion)
+            //{
+            //    OtherSegState = AQTSeg.HypoSegment.GetState(NState, SVType, Layer);
+            //}
+            //else
+            //{
+            //    OtherSegState = AQTSeg.EpiSegment.GetState(NState, SVType, Layer);
+            //}
+            //result = (BulkMixCoeff / AQTSeg.SegVol()) * (OtherSegState - State);
+            //// g/m3 d  // m cubed/ d        // m3            // g/m3         // g/m3
+
+            //if ((result < 0) && (-result > State))  result = -State;
+            //if ((result > 0) && (result > OtherSegState)) result = OtherSegState;
+            //// TurbDiff can not exceed state variable concentration	10/21/2002 / Mar/1/2004
+
+            return result;  //non estuary code not yet enabled  12/20/2022
+        }
+
+
         // -------------------------------------------------------------------------------
         public bool Has_Alt_Loadings()
         {
@@ -973,16 +1050,16 @@ namespace AQUATOX.AQTSegment
             if (Has_Alt_Loadings()) toploadindex = 3;
             if ((IsAnimal()) || (NState == AllVariables.Volume)) toploadindex = 2; // specialcases
 
-                if (NState == AllVariables.DissRefrDetr) // special case 
+            if (NState == AllVariables.DissRefrDetr) // special case 
             {
-                toploadindex = 4; 
+                toploadindex = 4;
                 if (index < 3) return "g / d"; //point and non-point source loadings
                 else if (index == 3) return "pct. part.";
                 else if (index == 4) return "pct. refr.";
             }
 
-            if (index<=toploadindex)
-            { 
+            if (index <= toploadindex)
+            {
                 if (index == 1) // pointsource
                 {
                     if (IsAnimal()) return "pct./day";  //special case 
@@ -1011,25 +1088,25 @@ namespace AQUATOX.AQTSegment
 
         public List<string> LoadList()
         {
-            List<string> outList; 
+            List<string> outList;
             if ((NState == AllVariables.pH) || (NState == AllVariables.TSS) || (NState == AllVariables.Temperature) || (NState == AllVariables.Salinity) || (NState == AllVariables.COD))
                 outList = new List<string>(new string[] { "Segment Values" });  //special case s, no inflow loadings, just in-segment driving values
-            else if (NState == AllVariables.Volume) outList = new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case 
+            else if (NState == AllVariables.Volume) outList = new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water" });  //special case 
             else if (NState == AllVariables.Light) outList = new List<string>(new string[] { "Top of Segment Loading" });  //special case 
             else if (IsAnimal()) outList = new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case 
             else if (NState == AllVariables.DissRefrDetr) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
-            else if (Has_Alt_Loadings()) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
-            else outList = new List<string>(new string[] { "In Inflow Water"});
+            else if (Has_Alt_Loadings()) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });
+            else outList = new List<string>(new string[] { "In Inflow Water" });
 
             nontoxloadings = outList.Count;
             AQTSeg.AssignChemRecs();
             if (NState != AllVariables.H2OTox)
-            for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // add tox exposures
-            {
-                TToxics TT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TToxics;
-                if (TT != null) outList.Add(TT.ChemRec.ChemName.Val +" exposure");
+                for (T_SVType ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)  // add tox exposures
+                {
+                    TToxics TT = AQTSeg.GetStatePointer(NState, ToxLoop, T_SVLayer.WaterCol) as TToxics;
+                    if (TT != null) outList.Add(TT.ChemRec.ChemName.Val + " exposure");
 
-            }
+                }
             return outList;
         }
 
@@ -1218,7 +1295,7 @@ namespace AQUATOX.AQTSegment
             result = Disch * State / AQTSeg.SegVol();
             // unit/d // m3/d // unit        // cu m.
 
-            // WashoutStep[AllStates.DerivStep] = result * AllStates.SegVol(); // No MB Tracking for now
+            // WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol(); // No MB Tracking for now
             // 1000*mass                   // mass/L*d            // m3
 
             return result;
@@ -1288,7 +1365,7 @@ namespace AQUATOX.AQTSegment
 
                 // Bowie et al., 1985
                 ReminRecord RR = Location.Remin;
-                // T := AllStates.TCorr(Q10, TRef, TOpt, TMax);
+                // T := AQTSeg.TCorr(Q10, TRef, TOpt, TMax);
                 T = Decomposition_DecTCorr();
                 p = AQTSeg.pHCorr(RR.pHMin.Val, RR.pHMax.Val);
 
@@ -1398,7 +1475,7 @@ namespace AQUATOX.AQTSegment
                     return 1.0;
                 default:
                     throw new Exception("TStateVariable Wet To Dry called for irrelevant variable.");
-            }  
+            }
         }
 
         public double NutrToOrg(AllVariables S)
@@ -1514,10 +1591,10 @@ namespace AQUATOX.AQTSegment
     }
 
     public class TGraphSetup
-    
-    
+
+
     {
-        public string GraphName ;
+        public string GraphName;
         public List<SeriesID> YItems = new List<SeriesID>();
         public string Y1Label;
 
@@ -1596,9 +1673,14 @@ namespace AQUATOX.AQTSegment
         public LoadingsRecord Shade;
         public TGraphs Graphs = new TGraphs();
 
+        public bool EstuarySeg = false;
+        public bool Stratified = false;
+        public bool UpperSeg = true;
+        public AQUATOXSegment otherseg = null;  // if stratified, a pointer to the other segment that must be set before running
+
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;   // output only
+        public double MeanDischarge = 0;    // output only
         public double residence_time = 1;  // water residence time in days
 
         public Diagenesis_Rec Diagenesis_Params;
@@ -2318,7 +2400,8 @@ namespace AQUATOX.AQTSegment
                         ((ns >= AllVariables.Ammonia) && (ns <= AllVariables.Oxygen)) ||
                         ((ns >= AllVariables.Salinity) && (ns <= AllVariables.LgGameFish4)) ||
                         ((ns >= AllVariables.Volume) && (ns <= AllVariables.pH)))
-                    { list.Add(StateText(ns));
+                    {
+                        list.Add(StateText(ns));
                         SVs.Add(ns);
                     }
 
@@ -2354,240 +2437,10 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Consider Enabling Parallel.ForEach when not debugging... uncertain how much improvement due to transactional costs
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Enable Parallel.ForEach when not debugging
 
         }
 
-<<<<<<< HEAD
-=======
-
-        public void TryRKStep_CheckZeroState(TStateVariable p)
-        {
-            if (p.State < Consts.Tiny)
-            {
-                p.State = 0.0;
-                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
-                    ((TToxics)p).ppb = 0;
-
-            }
-        }
-
-        public void TryRKStep_CheckZeroStateAllSVs()
-        {
-            foreach (TStateVariable TSV in SV)
-            {
-                TryRKStep_CheckZeroState(TSV);
-            }
-        }
-
-        public void TryRKStep_RestoreStates_From_Holder()
-        {
-            foreach (TStateVariable TSV in SV)
-                TSV.State = TSV.yhold;
-        }
-
-        public void TryRKStep_SaveStates_to_Holder()
-        {
-            foreach (TStateVariable TSV in SV)
-                TSV.yhold = TSV.State;
-        }
-
-        // Modify db to Account for a changing volume
-        // -------------------------------------------------------------------------
-        // Cash-Karp RungeKutta with adaptive stepsize.
-        // 
-        // Source, Cash, Karp, "A Variable Order Runge-Kutta Method for Initial
-        // value problems with rapidly varying right-hand sides" ACM Transactions
-        // on Mathematical Software 16: 201-222, 1990. doi:10.1145/79505.79507
-        // 
-        // Uses Nested Loops to determine fourth and fifth-order accurate solutions
-        // 
-        // See also: http://en.wikipedia.org/wiki/Cash-Karp
-        // http://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_method
-        // 
-        // -------------------------------------------------------------------------
-        public void TryRKStep(DateTime x, double h)
-        {
-            double[] A = { 0, 0, 0.2, 0.3, 0.6, 1.0, 0.875 };
-            double[] B5 = { 0, 0.09788359788, 0, 0.40257648953, 0.21043771044, 0, 0.28910220215 };
-            double[] B4 = { 0, 0.10217737269, 0, 0.38390790344, 0.24459273727, 0.01932198661, 0.25 };  // Butcher Tableau
-            double[,] Tableau = { { 0.2, 0, 0, 0, 0 },
-                                  { 0.075, 0.225, 0, 0, 0 },
-                                  { 0.3, -0.9, 1.2, 0, 0 },
-                                  { -0.2037037037037, 2.5, -2.5925925925926, 1.2962962963, 0 },
-                                  { 0.029495804398148, 0.341796875000000, 0.041594328703704, 0.400345413773148, 0.061767578125000 } };
-            int Steps;
-            int SubStep;
-            double YFourth;
-            TryRKStep_SaveStates_to_Holder();
-            for (Steps = 1; Steps <= 6; Steps++)
-            {
-                if (Steps > 1)
-                {
-                    // First step derivative already completed
-                    TryRKStep_CheckZeroStateAllSVs();
-                    Derivs(x.AddDays(A[Steps] * h), Steps);
-                    TryRKStep_RestoreStates_From_Holder();
-                }
-                if (Steps < 6)
-                {
-                    foreach (TStateVariable TSV in SV)
-                    {
-                        for (SubStep = 1; SubStep <= Steps; SubStep++)
-                            TSV.State = TSV.State + h * Tableau[Steps - 1, SubStep - 1] * TSV.StepRes[SubStep];
-                    }
-                }
-            }  // 6 steps of integration
-
-            foreach (TStateVariable TSV in SV)
-            {
-                TSV.yhold = TSV.State;
-                YFourth = TSV.State;
-                for (Steps = 1; Steps <= 6; Steps++)
-                {  // zero weights for both solutions
-                    if (Steps != 2)
-                    {
-                        TSV.yhold = TSV.yhold + h * (B5[Steps] * TSV.StepRes[Steps]);    // Fifth Order Accurate Soln
-                        YFourth = YFourth + h * (B4[Steps] * TSV.StepRes[Steps]);        // Fourth Order Accurate Soln
-                    }
-                }
-                TSV.yerror = YFourth - TSV.yhold;      // Error is taken to be the difference between the fourth and fith-order accurate solutions
-            }
-        }
-
-        // -------------------------------------------------------------------------
-        // Cash-Karp RungeKutta with adaptive stepsize.
-        // 
-        // Adaptive Stepsize Adjustment Source Dr. Michael Thomas Flanagan
-        // www.ee.ucl.ac.uk/~mflanaga
-        // 
-        // -------------------------------------------------------------------------
-        public void AdaptiveStep(ref DateTime x, double hstart, double RelError, ref double h_taken, ref double hnext, double MaxStep)
-        {
-            const double SAFETY = 0.9;
-            double h;
-            double Delta;
-            TStateVariable ErrVar;
-            double MaxError;
-
-            if (PSetup.UseFixStepSize.Val)
-            {
-                h = PSetup.FixStepSize.Val;  // 2/21/2012 new option
-                if ((x.AddDays(h) > PSetup.LastDay.Val))
-                {
-                    // if stepsize can overshoot, decrease
-                    h = (PSetup.LastDay.Val - x).TotalDays;
-                }
-            }
-            else
-            {
-                h = hstart;
-            }
-            do
-            {
-                TryRKStep(x, h);
-                // calculate RKQS 4th and 5th order solutions and estimate error based on their difference
-                MaxError = 0;
-                ErrVar = null;
-                if (!PSetup.UseFixStepSize.Val)
-                {
-                    foreach (TStateVariable TSV in SV)
-                    {
-                        if ((Math.Abs(TSV.yscale) > Consts.VSmall))
-                        {
-                            if ((Math.Abs(TSV.yerror / TSV.yscale) > MaxError))
-                            {
-                                if (!((TSV.yhold < 0) && (TSV.State < Consts.VSmall)))  // no need to track error, state variable constrained to zero
-                                {
-
-                                    MaxError = Math.Abs(TSV.yerror / TSV.yscale);    // maximum error of all differential equations evaluated
-                                    ErrVar = TSV;                                   // save error variable for later use in screen display
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!PSetup.UseFixStepSize.Val)
-                {
-                    if ((MaxError >= RelError))
-                    {
-                        // Step has failed, reduce step-size and try again
-                        // Adaptive Stepsize Adjustment Source ("Delta" Code) Dr. Michael Thomas Flanagan
-                        // www.ee.ucl.ac.uk/~mflanaga
-                        // 
-                        // Permission to use, copy and modify this software and its documentation for
-                        // NON-COMMERCIAL purposes is granted, without fee, provided that an acknowledgement
-                        // to the author, Dr Michael Thomas Flanagan at www.ee.ucl.ac.uk/~mflanaga, appears in all copies.
-                        // Dr Michael Thomas Flanagan makes no representations about the suitability or fitness
-                        // of the software for any or for a particular purpose. Dr Michael Thomas Flanagan shall
-                        // not be liable for any damages suffered as a result of using, modifying or distributing
-                        // this software or its derivatives.
-
-                        Delta = SAFETY * Math.Pow(MaxError / RelError, -0.25);
-                        if ((Delta < 0.1)) h = h * 0.1;
-                        else h = h * Delta;
-                    }
-                }
-                // no warning at this time
-            } while (!((MaxError < RelError) || (h < Consts.Minimum_Stepsize) || (PSetup.UseFixStepSize.Val)));
-            // If (MaxError>1) and (not StepSizeWarned) then
-            // Begin
-            // StepSizeWarned = true;
-            // MessageStr = 'Warning, the differential equation solver time-step has been forced below the minimum';
-            // If ShowDebug then MessageStr = MessageStr + ' due to the "' +ProgData.ErrVar + '" state variable';
-            // MessageStr = MessageStr + '.  Continuing to step forward using minimum step-size.';
-            // MessageErr = true;
-            // TSMessage;
-            // End;
-            if (PSetup.UseFixStepSize.Val)
-            {
-                hnext = h;
-            }
-            else if ((MaxError < RelError))
-            {
-                // Adaptive Stepsize Adjustment Source ("Delta" code) Dr. Michael Thomas Flanagan www.ee.ucl.ac.uk/~mflanaga, see terms above
-                if (MaxError == 0) Delta = 4.0;
-                else Delta = SAFETY * Math.Pow(MaxError / RelError, -0.2);
-
-                if ((Delta > 4.0)) Delta = 4.0;
-                if ((Delta < 1.0)) Delta = 1.0;
-
-                hnext = h * Delta;
-            }
-            h_taken = h;
-
-            if (hnext > MaxStep) hnext = MaxStep;
-            if (h > MaxStep) h = MaxStep;
-
-            x = x.AddDays(h);
-
-            foreach (TStateVariable TSV in SV)               // reasonable error, so copy results of differentiation saved in YHolders
-                TSV.State = TSV.yhold;
-
-            Perform_Dilute_or_Concentrate();
-        }
-
-
-        public void Integrate_CheckZeroState(TStateVariable p)
-        {
-            if (p.State < 0)
-            {
-                p.State = 0.0;
-                if ((p.SVType >= Consts.FirstOrgTxTyp) && (p.SVType <= Consts.LastOrgTxTyp))
-                    ((TToxics)p).ppb = 0;
-
-            }
-        }
-
-        public void Integrate_CheckZeroStateAllSVs()
-        {
-            foreach (TStateVariable TSV in SV)
-            {
-                Integrate_CheckZeroState(TSV);
-            }
-        }
-
->>>>>>> dev
         // -----------------------------------------------------------------
         public void DoThisEveryStep_SetFracKilled_and_Spawned(TStateVariable P, double hdid)
         {
@@ -2997,169 +2850,6 @@ namespace AQUATOX.AQTSegment
             //{   ProgData.AnoxicVis = Anoxic;} 
         }
 
-<<<<<<< HEAD
-=======
-        // ------------------------------------------------------------------------
-        // Cash-Karp RungeKutta with adaptive stepsize.
-        // 
-        // The Integrate function steps from the beginning to the end of the
-        // time period and handles bookkeeping at the start and between steps
-        // ------------------------------------------------------------------------
-        public string Integrate(DateTime TStart, DateTime TEnd, double RelError, double h_minimum, double dxsav)
-        {
-            // parameters above -- Starting Point of Integral; Ending Point of Integral; Requested Accuracy of Results; Smallest Step Size; Store-Result Interval
-
-            DateTime x;
-            double hnext = 0;
-            //  DateTime xsav;
-            int lastprog = -1;
-            bool simulation_done;
-            //  bool FinishPoint;
-            double MaxStep;
-            double h_taken = 0;
-            double h;
-            // numsteps         : integer;
-            // sumsteps, avgstep: double;
-            // (*  numsteps = 0;  {debug code}
-            // sumsteps = 0;  {debug code} *)
-            //            rk_has_executed = false;
-            simulation_done = false;
-            if (dxsav < 0.01)
-            {
-                dxsav = 1;
-            }
-            // ensure dxsave <> 0, which causes crash
-            // (**  Initialize variables........*)
-            x = TStart;
-
-
-            if (PSetup.ModelTSDays.Val) MaxStep = 1.0;
-            else MaxStep = 1.0 / 24.0;  // Hourly
-            h = MaxStep;
-
-            SimulationDate = DateTime.Now;
-
-            ModelStartTime = TStart;
-            // TPreviousStep = TStart;
-            TPresent = TStart;
-
-            ChangeData();
-            NormDiff(h);
-
-            Derivs(x, 1);
-            WriteResults(true, TStart); // Write Initial Conditions as the first data Point
-            CalcPPB();
-
-            // (**  Start stepping the RungeKutta.....**)
-            while (!simulation_done)
-            {
-                Integrate_CheckZeroStateAllSVs();
-                Derivs(x, 1);
-
-                foreach (TStateVariable TSV in SV)
-                {
-                    Integrate_SetYScale(TSV);
-                }
-                //                  FinishPoint = (Convert.ToInt32(x * (1.0 / dxsav)) > Convert.ToInt32(xsav * (1.0 / dxsav)));
-
-                CalcPPB();
-                WriteResults(false, x); // Write output to Results Collection
-
-                //                    if (FinishPoint) // if it is time to write rates
-                //                    {      xsav = x;      }
-
-                if ((x.AddDays(h) - TEnd).TotalDays > 0.0)
-                {
-                    // if stepsize can overshoot, decrease
-                    h = (TEnd - x).TotalDays;
-                }
-
-                //                else if (SV.LinkedMode && ((x + h) > Convert.ToInt32(x + 1)))
-                //                {
-                //                    h = (Convert.ToInt32(x + h) - x);
-                //                }
-                // force steps to stop on even one-day increments.
-                // This is required for cascade segments to preserve mass balance (given output avg.)
-
-                AdaptiveStep(ref x, h, RelError, ref h_taken, ref hnext, MaxStep);
-                //                rk_has_executed = true;
-
-                TPresent = x;
-                DoThisEveryStep(h_taken);
-                CalcPPB();
-
-                if ((x - TEnd).TotalDays >= 0.0)
-                {
-                    // are we done?
-                    simulation_done = true;
-                }
-                else if ((Math.Abs(hnext) < h_minimum))
-                {
-                    h = h_minimum;  // attempt to control min. timestep
-                }
-                else if ((Math.Abs(hnext) > residence_time))
-                {
-                    h = residence_time;  // 12/5/2022 logic to prevent minimum timestep from being below residence time 
-                }
-                else
-                {
-                    h = hnext;
-                }
-
-                if ((ProgWorker != null)||(ProgHandle != null))
-                {
-                    int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
-                    if (progint == lastprog)
-                    {
-                        if (ProgWorker != null) ProgWorker.ReportProgress(progint);
-                        else ProgHandle.Report(progint);
-                    };
-
-                    lastprog = progint;
-
-                    if (ProgWorker != null) 
-                        if (ProgWorker.CancellationPending)
-                        {
-                            SimulationDate = DateTime.MinValue;
-                            return ("User Canceled");
-                        }
-
-                    if (_ct != CancellationToken.None)
-                        if (_ct.IsCancellationRequested)
-                        {
-                            SimulationDate = DateTime.MinValue;
-                            return ("User Canceled");
-                        }
-                }
-
-
-                Integrate_CheckZeroStateAllSVs();
-
-                void Integrate_SetYScale(TStateVariable p)
-                {
-                    if (p.State == 0)
-                    {
-                        p.yscale = 0;
-                    }
-                    else
-                    {
-                        p.yscale = Math.Abs(p.State) + Math.Abs(p.StepRes[1] * h) + Consts.Tiny;
-                    }
-                    // Scale of state variable used to assess relative error, 12/24/96
-
-                }
-
-            }
-
-            DoThisEveryStep(h_taken);
-            CalcPPB();
-
-            WriteResults(false, x); // Write final step to Results Collection
-            return PostProcessResults();
-
-        }  // integrate
-
->>>>>>> dev
 
         // *************************************
         // Modifies Concentration to
@@ -3195,7 +2885,7 @@ namespace AQUATOX.AQTSegment
                 return;
             }
 
-            if (Water_Was_Zero)  { Volume_Last_Step = Last_Non_Zero_Vol;  }
+            if (Water_Was_Zero) { Volume_Last_Step = Last_Non_Zero_Vol; }
 
             // Recover from Water Volume Zero State
             Water_Was_Zero = false;
@@ -3866,7 +3556,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("Internal AQUATOX Error: GetState called for non-existant state variable: " + S.ToString(), "original");  
+                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
                 // result = -1;
             }
         }
@@ -5181,7 +4871,7 @@ namespace AQUATOX.AQTSegment
 
         public DataTable[] TrophInt_to_Table()
         {
-            DataTable[] tables =  { new DataTable("Trophic_Interaction_Table"), new DataTable("Egestion_Table"), new DataTable("Trophint_Comments") };
+            DataTable[] tables = { new DataTable("Trophic_Interaction_Table"), new DataTable("Egestion_Table"), new DataTable("Trophint_Comments") };
             AllVariables nsloop;
             AllVariables[] Predators = new AllVariables[50];
             SetMemLocRec();
@@ -5223,7 +4913,7 @@ namespace AQUATOX.AQTSegment
                 TStateVariable TSV = GetStatePointer(nsloop, T_SVType.StV, T_SVLayer.WaterCol);
                 if (TSV != null)
                 {
-                    for (int tindx = 0; tindx<3; tindx++)
+                    for (int tindx = 0; tindx < 3; tindx++)
                     {
                         DataRow row = tables[tindx].NewRow();
                         row[0] = TSV.PName;
@@ -5287,7 +4977,7 @@ namespace AQUATOX.AQTSegment
                             if (df == DBNull.Value) pref = 0;
                             else pref = (double)df;
 
-                           if (pref > 1e-5) table.Rows[PreyIndex][PredIndex] = Math.Round(pref / SumPref,3);
+                            if (pref > 1e-5) table.Rows[PreyIndex][PredIndex] = Math.Round(pref / SumPref, 3);
 
                         }
                     }
@@ -5295,7 +4985,7 @@ namespace AQUATOX.AQTSegment
             }
         }
 
-        private double convcell (object obj)
+        private double convcell(object obj)
         {
             if (obj == DBNull.Value) return 0.0;
             else return (double)obj;
@@ -5787,7 +5477,7 @@ namespace AQUATOX.AQTSegment
                 return;
             }
 
-            //if (AllStates.VSeg == VerticalSegments.Hypolimnion)
+            //if (AQTSeg.VSeg == VerticalSegments.Hypolimnion)
             //{
             //    State = 0;
             //    return;
@@ -5873,7 +5563,7 @@ namespace AQUATOX.AQTSegment
         public AQTKnownTypesBinder()
         {
             KnownTypes = new List<Type> { typeof(TStateVariable), typeof(AQUATOXSegment), typeof(TAQTSite), typeof(AQTSim), typeof(Dictionary<string, AQUATOXSegment>),
-                                          typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(AQUATOX.Volume.TVolume), typeof(LoadingsRecord), typeof(TLoadings),
+                                          typeof(SiteRecord), typeof(ReminRecord), typeof(Setup_Record), typeof(TVolume), typeof(LoadingsRecord), typeof(TLoadings),
                                           typeof(SortedList<DateTime, double>), typeof(AQUATOXTSOutput), typeof(TRemineralize), typeof(TNH4Obj), typeof(TNO3Obj), typeof(TPO4Obj),
                                           typeof(TSalinity), typeof(TpHObj), typeof(TTemperature), typeof(TCO2Obj), typeof(TO2Obj), typeof(DetritalInputRecordType),
                                           typeof(TDissRefrDetr), typeof(TDissLabDetr), typeof(TSuspRefrDetr), typeof(TSuspLabDetr), typeof(TSedRefrDetr), typeof(TSedLabileDetr),
@@ -5889,4 +5579,3 @@ namespace AQUATOX.AQTSegment
     }
 
 }
-
