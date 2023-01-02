@@ -25,6 +25,7 @@ using System.Data;
 using MathNet.Numerics;
 using System.Text;
 using Data.Source;
+using Serilog.Debugging;
 
 namespace AQUATOX.AQTSegment
 
@@ -103,18 +104,18 @@ namespace AQUATOX.AQTSegment
             {
                 AQTSim tempsim = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(json, AQTJSONSettings());
 
-                if (AQTSegs == null)  //TODO FIXME CODE TO READ OLD JSONS 
+                if (tempsim.AQTSegs == null)   //TODO FIXME CODE TO READ OLD JSONS 
                 {
                     tempsim.AQTSegs = new Dictionary<string, AQUATOXSegment>();
                     if (tempsim.AQTSeg != null) tempsim.AQTSegs.Add("Single Segment", tempsim.AQTSeg);
                     tempsim.StudyName = tempsim.AQTSeg.StudyName;
                     tempsim.FileName = tempsim.AQTSeg.FileName;
                     tempsim.RunID = tempsim.AQTSeg.RunID;
-                }  //TODO FIXME CODE TO READ OLD JSONS
 
-                StudyName = tempsim.AQTSeg.StudyName;
-                FileName = tempsim.AQTSeg.FileName;
-                RunID = tempsim.AQTSeg.RunID;
+                    StudyName = tempsim.AQTSeg.StudyName;
+                    FileName = tempsim.AQTSeg.FileName;
+                    RunID = tempsim.AQTSeg.RunID;
+                }  //TODO FIXME CODE TO READ OLD JSONS
 
                 AQTSegs = tempsim.AQTSegs;
                 SavedRuns = tempsim.SavedRuns;
@@ -191,15 +192,17 @@ namespace AQUATOX.AQTSegment
                 foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) AQTSeg.Graphs = LatestGraphs;
             }
 
-            foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) SavedRuns.Add(RunID, AQTSeg);
+            foreach (AQUATOXSegment AQTSeg in SimToArchive.AQTSegs.Values) SavedRuns.Add(AQTSeg.SegName + ": "+RunID, AQTSeg);
 
             return true;
         }
 
         public string Integrate()
         {
-
             if (AQTSegs == null) return "AQTSegs not Instantiated";
+
+            AQUATOXSegment episeg = null;
+            AQUATOXSegment hypseg = null;
 
             foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
             {
@@ -213,6 +216,28 @@ namespace AQUATOX.AQTSegment
 
                     AQTSeg.SVsToInitConds();
                     PS = AQTSeg.PSetup;
+
+                    if (AQTSeg.Stratified) {
+                        if (AQTSeg.UpperSeg)
+                        {
+                            episeg = AQTSeg;  //TODO this works with one stratified pair only
+                            if (hypseg != null)
+                            {
+                                AQTSeg.otherseg = hypseg;
+                                hypseg.otherseg = AQTSeg;
+                            }
+                        }
+                        if (!AQTSeg.UpperSeg)
+                        {
+                            hypseg = AQTSeg;  //TODO this works with one stratified pair only
+                            if (episeg != null)
+                            {
+                                AQTSeg.otherseg = episeg;
+                                episeg.otherseg = AQTSeg;
+                            }
+                        }
+                    }
+
                 }
                 catch (Exception e)
                 {
@@ -1010,7 +1035,7 @@ namespace AQUATOX.AQTSegment
 
             //double BulkMixCoeff = VertDispersion * AQTSeg.ThermoclArea() / AQTSeg.StaticZMean();
             //      // m cubed/ d  // m squared/ d         // m squared             // Thick, m
-            //if (AQTSeg.VSeg == Global.VerticalSegments.Epilimnion)
+            //if (AQTSeg.VSeg == VerticalSegments.Epilimnion)
             //{
             //    OtherSegState = AQTSeg.HypoSegment.GetState(NState, SVType, Layer);
             //}
@@ -1659,7 +1684,6 @@ namespace AQUATOX.AQTSegment
         public string RunID = "";
         // FIXME TODO REMOVE THESE THREE FIELDS USED TO UPGRADE OLD JSONS
 
-
         public TStates SV = new TStates();    // State Variables
         public DateTime TPresent;
         public string SegName;
@@ -1676,12 +1700,13 @@ namespace AQUATOX.AQTSegment
         public bool EstuarySeg = false;
         public bool Stratified = false;
         public bool UpperSeg = true;
-        public AQUATOXSegment otherseg = null;  // if stratified, a pointer to the other segment that must be set before running
+        [JsonIgnore] public AQUATOXSegment otherseg = null;  // if stratified, a pointer to the other segment that must be set before running
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;    // output only
-        public double residence_time = 1;  // water residence time in days
+
+        [JsonIgnore] public double MeanDischarge = 0;    // output only
+        [JsonIgnore] public double residence_time = 1;  // water residence time in days
 
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
@@ -4524,7 +4549,6 @@ namespace AQUATOX.AQTSegment
             AllVariables DetrLoop, Phyto;
             double DetrState;
             bool IncludePlant;
-            //TStates OtherSeg;
             //double ThisSegThick;
             //double OtherSegThick;
 
@@ -5160,8 +5184,6 @@ namespace AQUATOX.AQTSegment
 
     public class TSalinity : TRemineralize  //Salinity is a DRIVING Variable Only
     {
-        //public double SalinityUpper = 0;
-        //public double SalinityLower = 0;
         public TSalinity(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
         }
@@ -5171,6 +5193,28 @@ namespace AQUATOX.AQTSegment
             base.Derivative(ref DB);
             DB = 0;
         }
+
+        public double EstuaryEntrainment()
+        {
+            double result;
+            double HypState;
+            TVolume PV;
+            result = 0;
+
+            if (!AQTSeg.EstuarySeg) return 0;
+
+            if (!AQTSeg.UpperSeg) HypState = State; // lower segment
+            else HypState = AQTSeg.otherseg.GetState(NState, SVType, Layer);
+
+            PV = AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+            result = HypState * PV.SaltWaterInflow() / AQTSeg.SegVol();
+         // unit/L  // unit/L hyp         // m3                // m3
+
+            if (!AQTSeg.UpperSeg)  result = -result;  // entrainment is leaving the hypolimnion
+
+            return result;
+        }
+
 
         public override void CalculateLoad(DateTime TimeIndex)
         {

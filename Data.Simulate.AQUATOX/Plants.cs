@@ -1624,6 +1624,7 @@ namespace AQUATOX.Plants
 
             // HMS Removed linked mode and stratification code and estuary-mode code
 
+
             DB = L + Pho - R - Ex - M - Pr - WO + WI - S + Sed2Me - STH + SFE + TD + En + DiffUp + DiffDown - ToxD - Slg + PeriScr + Fl;
             if (SloughEvent)
             {

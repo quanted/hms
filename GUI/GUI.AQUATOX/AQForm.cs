@@ -211,7 +211,6 @@ namespace GUI.AQUATOX
                 if (SimName != "") SimName = SimName + ": ";
                 aQTS.RunID = SimName + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
 
-
                 modelRunningLabel.Visible = true;
 
                 foreach (Control c in Controls)  // disable all buttons
@@ -379,9 +378,27 @@ namespace GUI.AQUATOX
         private void ShowStudyInfo()
         {
             if (aQTS == null) return;
-            if (aQTS.AQTSegs.Count == 1) thisSeg = aQTS.AQTSegs.First().Value;
+            if (aQTS.AQTSegs.Count == 0) return;
 
-            // TODO SET thisSeg HERE
+            if (aQTS.AQTSegs.Count == 1)
+            {
+                thisSeg = aQTS.AQTSegs.First().Value;
+                SegLabel.Visible = false;
+                SegBox.Visible = false;
+            }
+            else if (thisSeg == null)
+            {
+                SegBox.Items.Clear();
+                foreach (KeyValuePair<string, AQUATOXSegment> entry in aQTS.AQTSegs)
+                {
+                    SegBox.Items.Add(entry.Key);
+                    if (thisSeg == null) thisSeg = entry.Value;
+                }
+                SegBox.SelectedIndex = 0;
+                Application.DoEvents();
+                SegBox.Visible = true;
+                SegLabel.Visible = true;
+            }
 
             saveJSON.Enabled = true;
             pictureBox1.Visible = false;
@@ -1219,6 +1236,15 @@ namespace GUI.AQUATOX
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1) == DialogResult.Yes) this.DialogResult = DialogResult.Cancel;
 
+        }
+
+        private void SegBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Application.DoEvents();
+
+            aQTS.AQTSegs.TryGetValue(SegBox.Text, out thisSeg);
+
+            if (thisSeg != null) ShowStudyInfo();
         }
     }
 }

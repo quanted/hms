@@ -71,8 +71,8 @@ namespace GUI.AQUATOX
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
-            this.OutputBox = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.SegBox = new System.Windows.Forms.ComboBox();
+            this.SegLabel = new System.Windows.Forms.Label();
             this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -495,32 +495,33 @@ namespace GUI.AQUATOX
             this.CancelButt.Visible = false;
             this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
             // 
-            // OutputBox
+            // SegBox
             // 
-            this.OutputBox.FormattingEnabled = true;
-            this.OutputBox.Location = new System.Drawing.Point(26, 85);
-            this.OutputBox.Name = "OutputBox";
-            this.OutputBox.Size = new System.Drawing.Size(182, 23);
-            this.OutputBox.TabIndex = 37;
-            this.OutputBox.Visible = false;
+            this.SegBox.FormattingEnabled = true;
+            this.SegBox.Location = new System.Drawing.Point(26, 85);
+            this.SegBox.Name = "SegBox";
+            this.SegBox.Size = new System.Drawing.Size(182, 23);
+            this.SegBox.TabIndex = 37;
+            this.SegBox.Visible = false;
+            this.SegBox.SelectedIndexChanged += new System.EventHandler(this.SegBox_SelectedIndexChanged);
             // 
-            // label2
+            // SegLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(26, 70);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(97, 15);
-            this.label2.TabIndex = 38;
-            this.label2.Text = "Current Segment";
-            this.label2.Visible = false;
+            this.SegLabel.AutoSize = true;
+            this.SegLabel.Location = new System.Drawing.Point(26, 70);
+            this.SegLabel.Name = "SegLabel";
+            this.SegLabel.Size = new System.Drawing.Size(97, 15);
+            this.SegLabel.TabIndex = 38;
+            this.SegLabel.Text = "Current Segment";
+            this.SegLabel.Visible = false;
             // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(813, 490);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.OutputBox);
+            this.Controls.Add(this.SegLabel);
+            this.Controls.Add(this.SegBox);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.SetupButton);
@@ -600,8 +601,8 @@ namespace GUI.AQUATOX
         private PictureBox pictureBox1;
         private Button OKButton;
         private Button CancelButt;
-        private ComboBox OutputBox;
-        private Label label2;
+        private ComboBox SegBox;
+        private Label SegLabel;
     }
 
 

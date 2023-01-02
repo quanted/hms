@@ -56,6 +56,24 @@ namespace AQUATOX.AQSite
         public TParameter PctPool = new TParameter();
         public TBoolParam UsePhytoRetention = new TBoolParam();
 
+        public TParameter amplitude1 = new TParameter();
+        public TParameter amplitude2 = new TParameter();
+        public TParameter amplitude3 = new TParameter();
+        public TParameter amplitude4 = new TParameter();
+        public TParameter amplitude5 = new TParameter();
+        public TParameter amplitude6 = new TParameter();
+        public TParameter amplitude7 = new TParameter();
+        public TParameter amplitude8 = new TParameter();
+        public TParameter k1 = new TParameter();
+        public TParameter k2 = new TParameter();
+        public TParameter k3 = new TParameter();
+        public TParameter k4 = new TParameter();
+        public TParameter k5 = new TParameter();
+        public TParameter k6 = new TParameter();
+        public TParameter k7 = new TParameter();
+        public TParameter k8 = new TParameter();
+
+
         public void Setup()
         {
             SiteName.Symbol = "Site Name"; SiteName.Name = "Site Name";
