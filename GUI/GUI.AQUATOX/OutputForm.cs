@@ -38,7 +38,6 @@ namespace GUI.AQUATOX
         private OChart chart1 = new OChart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
-        Series series1 = new Series();
         Graphics graphics = null; 
 
         public AQTSim aQTS = null;
@@ -92,14 +91,16 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:#,##0.###}";
 
-            chart1.ChartAreas[0].CursorX.IsUserEnabled = true;
-            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
-            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = false;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = false;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
+
             chart1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
 
-            chart1.ChartAreas[0].CursorY.IsUserEnabled = true;
-            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
-            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = false;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = false;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
+
             chart1.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
 
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
@@ -156,7 +157,7 @@ namespace GUI.AQUATOX
                     }
                 }
 
-                if (e.Button == MouseButtons.Right)
+                if (!zoomOption.Checked)
                 {
                     string msgstr = resultExplode.Series.Name;
                     if (resultExplode.PointIndex > 0)
@@ -399,6 +400,17 @@ namespace GUI.AQUATOX
               }
 
             File.WriteAllText(saveFileDialog1.FileName, outtxt);
+        }
+
+        private void zoomOption_CheckedChanged(object sender, EventArgs e)
+        {
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = zoomOption.Checked;
+
         }
     }
 }

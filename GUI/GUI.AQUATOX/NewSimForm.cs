@@ -223,7 +223,7 @@ namespace GUI.AQUATOX
             if (LS != null) return true;  // don't need to re-read already in memory
 
             double LSVersionNum = 0;
-            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json");
+            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Multi_Seg_Surrogates.json");
 
             if (File.Exists(fileN))
             {
@@ -406,12 +406,12 @@ namespace GUI.AQUATOX
 
         }
 
-        private void LSButton_Click(object sender, EventArgs e)
+        private void MS_Surrogate_Button_Click(object sender, EventArgs e)
         {
-            // private funcitonality to create and write Lake_Surrogates object
-            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
+            // private functionality to create and write Multi-segment Surrogates object
+            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "MS_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
             string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
-            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json", json);
+            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Multi_Seg_Surrogates.json", json);
             return;
 
         }

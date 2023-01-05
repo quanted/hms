@@ -40,10 +40,11 @@ namespace GUI.AQUATOX
             this.ExportButton = new System.Windows.Forms.Button();
             this.toggleLog = new System.Windows.Forms.Button();
             this.resetZoom = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.Graph_to_CSV = new System.Windows.Forms.Button();
+            this.graphOption = new System.Windows.Forms.RadioButton();
+            this.zoomOption = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -165,16 +166,6 @@ namespace GUI.AQUATOX
             this.resetZoom.UseVisualStyleBackColor = true;
             this.resetZoom.Click += new System.EventHandler(this.resetZoom_Click);
             // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(119, 437);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(388, 15);
-            this.label3.TabIndex = 17;
-            this.label3.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
-            // 
             // HelpButton
             // 
             this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -194,7 +185,7 @@ namespace GUI.AQUATOX
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Location = new System.Drawing.Point(19, 70);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(807, 356);
             this.pictureBox1.TabIndex = 30;
@@ -212,15 +203,41 @@ namespace GUI.AQUATOX
             this.Graph_to_CSV.UseVisualStyleBackColor = true;
             this.Graph_to_CSV.Click += new System.EventHandler(this.graph_to_CSV_Click);
             // 
+            // graphOption
+            // 
+            this.graphOption.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.graphOption.AutoSize = true;
+            this.graphOption.Checked = true;
+            this.graphOption.Location = new System.Drawing.Point(307, 432);
+            this.graphOption.Name = "graphOption";
+            this.graphOption.Size = new System.Drawing.Size(247, 19);
+            this.graphOption.TabIndex = 33;
+            this.graphOption.TabStop = true;
+            this.graphOption.Text = "Click on the graph to show date and value";
+            this.graphOption.UseVisualStyleBackColor = true;
+            // 
+            // zoomOption
+            // 
+            this.zoomOption.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.zoomOption.AutoSize = true;
+            this.zoomOption.Location = new System.Drawing.Point(157, 431);
+            this.zoomOption.Name = "zoomOption";
+            this.zoomOption.Size = new System.Drawing.Size(131, 19);
+            this.zoomOption.TabIndex = 32;
+            this.zoomOption.Text = "Draw a box to zoom";
+            this.zoomOption.UseVisualStyleBackColor = true;
+            this.zoomOption.CheckedChanged += new System.EventHandler(this.zoomOption_CheckedChanged);
+            // 
             // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(847, 459);
+            this.Controls.Add(this.graphOption);
+            this.Controls.Add(this.zoomOption);
             this.Controls.Add(this.Graph_to_CSV);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.HelpButton);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.resetZoom);
             this.Controls.Add(this.toggleLog);
             this.Controls.Add(this.ExportButton);
@@ -254,9 +271,10 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.Button toggleLog;
         private System.Windows.Forms.Button resetZoom;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button Graph_to_CSV;
+        private System.Windows.Forms.RadioButton graphOption;
+        private System.Windows.Forms.RadioButton zoomOption;
     }
 }

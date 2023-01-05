@@ -839,7 +839,7 @@ namespace AQUATOX.AQSim_2D
             foreach (DataRow row in table.Rows)
             {
                 string fileN = row.Field<string>("Filename");
-                if (!File.Exists(jsonDir+fileN)) continue;
+                // if (!File.Exists(jsonDir+fileN)) continue;  raise error instead
                 json = File.ReadAllText(jsonDir+fileN);
                 AQTSim sim = JsonConvert.DeserializeObject<AQTSim>(json, AQTSim.AQTJSONSettings());
                 sim.SavedRuns = null;

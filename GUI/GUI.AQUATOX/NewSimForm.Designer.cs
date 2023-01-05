@@ -325,15 +325,15 @@
             // LS_Button
             // 
             this.LS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.LS_Button.Location = new System.Drawing.Point(924, 540);
+            this.LS_Button.Location = new System.Drawing.Point(888, 540);
             this.LS_Button.Name = "LS_Button";
-            this.LS_Button.Size = new System.Drawing.Size(117, 25);
+            this.LS_Button.Size = new System.Drawing.Size(153, 25);
             this.LS_Button.TabIndex = 55;
-            this.LS_Button.Text = "Create LS JSON";
+            this.LS_Button.Text = "Create Template JSON";
             this.LS_Button.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.LS_Button.UseVisualStyleBackColor = true;
             this.LS_Button.Visible = false;
-            this.LS_Button.Click += new System.EventHandler(this.LSButton_Click);
+            this.LS_Button.Click += new System.EventHandler(this.MS_Surrogate_Button_Click);
             // 
             // TogglePanel
             // 
