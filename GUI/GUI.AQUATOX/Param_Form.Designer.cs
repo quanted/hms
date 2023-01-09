@@ -91,7 +91,7 @@
             this.Controls.Add(this.CancelButt);
             this.MinimumSize = new System.Drawing.Size(978, 385);
             this.Name = "Param_Form";
-            this.Text = "Param_Form";
+            this.Text = "Edit Simulation Parameters";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Param_Form_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Param_Form_FormClosed);
             this.Load += new System.EventHandler(this.Param_Form_Load);

@@ -58,6 +58,7 @@
             this.StreamButton = new System.Windows.Forms.RadioButton();
             this.LakeButton = new System.Windows.Forms.RadioButton();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.BrowseJSONButton = new System.Windows.Forms.Button();
             this.NetworkLabel = new System.Windows.Forms.Label();
             this.SegLoadLabel = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -186,7 +187,7 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(120, 68);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(18, 66);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -287,7 +288,7 @@
             // StartDate
             // 
             this.StartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.StartDate.Location = new System.Drawing.Point(109, 117);
+            this.StartDate.Location = new System.Drawing.Point(109, 127);
             this.StartDate.Name = "StartDate";
             this.StartDate.Size = new System.Drawing.Size(103, 23);
             this.StartDate.TabIndex = 51;
@@ -297,7 +298,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(37, 122);
+            this.label3.Location = new System.Drawing.Point(37, 132);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 15);
             this.label3.TabIndex = 52;
@@ -307,7 +308,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(44, 148);
+            this.label5.Location = new System.Drawing.Point(44, 158);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(57, 15);
             this.label5.TabIndex = 54;
@@ -316,7 +317,7 @@
             // EndDate
             // 
             this.EndDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.EndDate.Location = new System.Drawing.Point(109, 144);
+            this.EndDate.Location = new System.Drawing.Point(109, 154);
             this.EndDate.Name = "EndDate";
             this.EndDate.Size = new System.Drawing.Size(103, 23);
             this.EndDate.TabIndex = 53;
@@ -371,6 +372,7 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.BrowseJSONButton);
             this.panel2.Controls.Add(this.ChooseTemplateButton);
             this.panel2.Controls.Add(this.SimBaseLabel);
             this.panel2.Controls.Add(this.SimJSONLabel);
@@ -382,6 +384,17 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(259, 202);
             this.panel2.TabIndex = 59;
+            // 
+            // BrowseJSONButton
+            // 
+            this.BrowseJSONButton.Location = new System.Drawing.Point(145, 66);
+            this.BrowseJSONButton.Name = "BrowseJSONButton";
+            this.BrowseJSONButton.Size = new System.Drawing.Size(67, 23);
+            this.BrowseJSONButton.TabIndex = 55;
+            this.BrowseJSONButton.Text = "Browse";
+            this.BrowseJSONButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.BrowseJSONButton.UseVisualStyleBackColor = true;
+            this.BrowseJSONButton.Click += new System.EventHandler(this.BrowseJSONButton_Click);
             // 
             // NetworkLabel
             // 
@@ -476,7 +489,7 @@
             this.Controls.Add(this.button1);
             this.MinimumSize = new System.Drawing.Size(1003, 553);
             this.Name = "NewSimForm";
-            this.Text = "NewSimForm";
+            this.Text = "New Simulation Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NewSimForm_FormClosing);
             this.Shown += new System.EventHandler(this.NewSimForm_Shown);
             this.ReadNetworkPanel.ResumeLayout(false);
@@ -532,5 +545,6 @@
         private System.Windows.Forms.Label Summary2Label;
         private System.Windows.Forms.Label Summary1Label;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button BrowseJSONButton;
     }
 }

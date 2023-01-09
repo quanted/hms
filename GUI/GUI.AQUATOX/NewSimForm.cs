@@ -1,12 +1,12 @@
 ﻿using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
+using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Web.WebView2.Core;
-using System.Collections.Generic;
 
 namespace GUI.AQUATOX
 
@@ -27,6 +27,7 @@ namespace GUI.AQUATOX
         public DateTime EndDT;
         public bool SNPopulated = false;
         public bool LakeSelected = false;
+        public bool fromtemplate = true;
 
         static Lake_Surrogates LS = null;
 
@@ -247,17 +248,18 @@ namespace GUI.AQUATOX
         }
 
 
-        public static string ChooseLakeTemplate(out string lakename, out AQTSim BaseSim)
+        public static string ChooseJSONTemplate(out string sitename, out AQTSim BaseSim)
         {
             BaseSim = null;
-            lakename = "";
+            sitename = "";
             if (!ReadLakeSurrogates()) return "";
 
             GridForm gf = new GridForm();
+            gf.Text = "Select Surrogate Simulation";
 
-            if (gf.SelectRow(LS.table, "SurrogateLakes"))
+            if (gf.SelectRow(LS.table, "Select_Surrogate"))
             {
-                lakename = gf.chosenlake;
+                sitename = gf.chosenlake;
                 if (LS.Sims.TryGetValue(gf.chosenfileN, out BaseSim)) return gf.chosenfileN;
                    else return "";
             }
@@ -267,9 +269,10 @@ namespace GUI.AQUATOX
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
             string lakename;
-            string lakefilen = ChooseLakeTemplate(out lakename, out BSim);    
+            string lakefilen = ChooseJSONTemplate(out lakename, out BSim);    
             if (lakefilen == "") return;
 
+            fromtemplate = true;
             SimBaseLabel.Text = "Simulation Base: "+lakename;
             BaseJSON_FileN = lakefilen;
             SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\"";
@@ -311,12 +314,9 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
-
-            //string target = "Multi_Segment_Runs";  //fixme new help topic
-            //AQTTestForm.OpenUrl(target);
+            string target = "New_Simulation";
+            AQTTestForm.OpenUrl(target);
         }
-
 
 
 
@@ -413,8 +413,42 @@ namespace GUI.AQUATOX
             string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
             File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Multi_Seg_Surrogates.json", json);
             return;
-
         }
+
+        private void BrowseJSONButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text File|*.txt;*.json";
+            openFileDialog1.Title = "Open a JSON File";
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+
+            if (openFileDialog1.FileName != "")
+            {
+                try
+                {
+                    BSim = new AQTSim();
+                    string err = BSim.Instantiate(File.ReadAllText(openFileDialog1.FileName));
+                    if (err != "")
+                    {
+                        MessageBox.Show("Could not read JSON: " + err);
+                        return;
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Could not read JSON "+ openFileDialog1.FileName);
+                    BSim = null;
+                    return;
+                }
+
+                fromtemplate = false;
+                string filen = Path.GetFileName(openFileDialog1.FileName);
+                SimBaseLabel.Text = "Simulation Base: " + filen;
+                BaseJSON_FileN = openFileDialog1.FileName;
+                SimJSONLabel.Text = "\"" + filen + "\"";
+            }
+        }
+
 
     }
 }

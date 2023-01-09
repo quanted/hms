@@ -523,7 +523,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.ICEdit);
             this.MinimumSize = new System.Drawing.Size(692, 410);
             this.Name = "LoadingsForm";
-            this.Text = "Loadings Form";
+            this.Text = "State Variable Initial Condition and Loadings";
             this.Load += new System.EventHandler(this.GridForm_Load);
             this.LoadingsPanel.ResumeLayout(false);
             this.LoadingsPanel.PerformLayout();

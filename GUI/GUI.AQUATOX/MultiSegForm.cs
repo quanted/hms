@@ -617,6 +617,7 @@ namespace GUI.AQUATOX
 
                 UseWaitCursor = true;
                 progressBar1.Visible = true;
+                proglabel.Text = "Reading NWM data";
                 proglabel.Visible = true;
                 Application.DoEvents();
 
@@ -755,6 +756,7 @@ namespace GUI.AQUATOX
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
+            proglabel.Text = "Model Run Progress";
             proglabel.Visible = true;
 
             SetInterfaceBusy(true);
@@ -1081,7 +1083,7 @@ namespace GUI.AQUATOX
                 Setup_Record SR = Sim.AQTSeg.PSetup;
                 string msr = JsonConvert.SerializeObject(SR);
                 File.WriteAllText(msfilen, msr);
-                AddToProcessLog("INPUT: Updated master setup record.  Copied from base JSON to " + msfilen);
+                TSafeAddToProcessLog("INPUT: Updated master setup record.  Copied from base JSON to " + msfilen);
                 return msr;
             }
 
@@ -1273,7 +1275,7 @@ namespace GUI.AQUATOX
 
             if (Lake0D > 0)
             {
-                filen = NewSimForm.ChooseLakeTemplate(out lakename, out BSim);
+                filen = NewSimForm.ChooseJSONTemplate(out lakename, out BSim);
 
                 if (filen == "") return;
                 BaseJSONBox.Text = filen;
@@ -1822,7 +1824,7 @@ namespace GUI.AQUATOX
                             ScrSettings.EndCOMIDstr = "";
 
                             string BaseJSONFileN = NSForm.BaseJSON_FileN;
-                            ScrSettings.BaseJSONstr = BaseJSONFileN;
+
                             BaseJSONBox.Text = BaseJSONFileN;
                             ScrSettings.COMIDstr = NSForm.COMID;
                             ScrSettings.BaseJSONstr = BaseJSONFileN;
@@ -1856,7 +1858,7 @@ namespace GUI.AQUATOX
                                 }
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+                                if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
 
                                 AddToProcessLog("INPUTS: New 0-D lake/reservoir simulation setup.  COMID: " + NSForm.COMID );
                                 AddToProcessLog("INPUTS: Base simulation = "+ BaseJSONFileN);
@@ -1882,7 +1884,6 @@ namespace GUI.AQUATOX
                                   {
                                     int COMID = AQT2D.SN.order[i][j];
                                     string CString = COMID.ToString();
-
                                     string Geostr;
                                     if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
                                             {
@@ -1896,7 +1897,7 @@ namespace GUI.AQUATOX
                                 BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+                                if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
 
                                 ScrSettings.COMIDstr = NSForm.NScrSettings.COMIDstr;
                                 ScrSettings.UpSpanStr = NSForm.NScrSettings.UpSpanStr;

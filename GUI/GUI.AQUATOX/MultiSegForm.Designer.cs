@@ -814,7 +814,7 @@
             this.Controls.Add(this.viewOutputButton);
             this.MinimumSize = new System.Drawing.Size(1077, 553);
             this.Name = "MultiSegForm";
-            this.Text = "MultiSegForm";
+            this.Text = "Multiple Segment Runs";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);
             this.Shown += new System.EventHandler(this.MultiSegForm_Shown);
             this.ResizeEnd += new System.EventHandler(this.MultiSegForm_ResizeEnd);

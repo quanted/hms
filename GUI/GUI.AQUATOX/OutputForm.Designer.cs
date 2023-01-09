@@ -220,6 +220,7 @@ namespace GUI.AQUATOX
             // 
             this.zoomOption.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.zoomOption.AutoSize = true;
+            this.zoomOption.Cursor = System.Windows.Forms.Cursors.SizeNS;
             this.zoomOption.Location = new System.Drawing.Point(157, 431);
             this.zoomOption.Name = "zoomOption";
             this.zoomOption.Size = new System.Drawing.Size(131, 19);
@@ -251,7 +252,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.OutputBox);
             this.MinimumSize = new System.Drawing.Size(826, 463);
             this.Name = "OutputForm";
-            this.Text = "Output";
+            this.Text = "Output Window";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
