@@ -9,6 +9,7 @@ using AQUATOX.OrgMatter;
 using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
 using Globals;
+using MathNet.Numerics.LinearAlgebra.Factorization;
 
 namespace AQUATOX.Organisms
 
@@ -228,7 +229,8 @@ namespace AQUATOX.Organisms
             // see TAnimal.Respiration  TPlant.Respiration
         }
 
-        public void CalcRiskConc_SetOysterCategory(AllVariables ns)
+
+            public void CalcRiskConc_SetOysterCategory(AllVariables ns)
         {
             TAnimal POy;
             POy = AQTSeg.GetStatePointer(ns, T_SVType.StV, T_SVLayer.WaterCol) as TAnimal;

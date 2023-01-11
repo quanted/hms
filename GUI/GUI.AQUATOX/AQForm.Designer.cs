@@ -453,9 +453,9 @@ namespace GUI.AQUATOX
             // 
             // SetupButton
             // 
-            this.SetupButton.Location = new System.Drawing.Point(28, 126);
+            this.SetupButton.Location = new System.Drawing.Point(28, 129);
             this.SetupButton.Name = "SetupButton";
-            this.SetupButton.Size = new System.Drawing.Size(91, 25);
+            this.SetupButton.Size = new System.Drawing.Size(89, 25);
             this.SetupButton.TabIndex = 29;
             this.SetupButton.Text = "Edit Setup";
             this.SetupButton.UseVisualStyleBackColor = true;
@@ -498,7 +498,7 @@ namespace GUI.AQUATOX
             // SegBox
             // 
             this.SegBox.FormattingEnabled = true;
-            this.SegBox.Location = new System.Drawing.Point(26, 85);
+            this.SegBox.Location = new System.Drawing.Point(28, 86);
             this.SegBox.Name = "SegBox";
             this.SegBox.Size = new System.Drawing.Size(182, 23);
             this.SegBox.TabIndex = 37;
@@ -508,7 +508,7 @@ namespace GUI.AQUATOX
             // SegLabel
             // 
             this.SegLabel.AutoSize = true;
-            this.SegLabel.Location = new System.Drawing.Point(26, 70);
+            this.SegLabel.Location = new System.Drawing.Point(28, 70);
             this.SegLabel.Name = "SegLabel";
             this.SegLabel.Size = new System.Drawing.Size(97, 15);
             this.SegLabel.TabIndex = 38;

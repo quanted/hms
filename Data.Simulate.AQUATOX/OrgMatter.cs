@@ -633,21 +633,15 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //    DiffUp = SegmentDiffusion(true);
             //    DiffDown = SegmentDiffusion(false);
             //}
-            //else if ((!AQTSeg.LinkedMode))
-            //{
-            //    TD = TurbDiff();
-            //}
-
             //if (AQTSeg.MultiLayerSedModelIncluded())
             //{
             //    DetrActiveLayer = AQTSeg.GetStatePointer(DOMState, T_SVType.StV, T_SVLayer.SedLayer1);
             //    DiffSed = -DetrActiveLayer.UpperDiffusion(true);
             //}
 
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    En = EstuaryEntrainment();
-            //}
+            if (AQTSeg.Stratified) TD = TurbDiff();
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
+
             //Derivative_CalcPW();
 
             DB = Lo + DF - DE - Co - WaO + WaI + TD + DiffUp + DiffDown + DiffSed + PWExp - ToPW + En;
@@ -785,13 +779,14 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             ReminRecord RR = Location.Remin;
             DensFactor = AQTSeg.DensityFactor(RR.KSedTemp.Val, RR.KSedSalinity.Val);
 
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    ReminRecord w2 = Location.Remin;
-            //    Sedimented = w2.KSed / Thick * DensFactor * State;
-            //    // g/cu m-d       m/d    m       unitless   g/cu m
-            //    // ESTUARYSEGMENT Sedimented Calculation
-            //}
+            if (AQTSeg.EstuarySeg)
+            {
+                ReminRecord w2 = Location.Remin;
+                Sedimented = Location.Remin.KSed.Val / Thick * DensFactor * State;
+                // g/cu m-d                      m/d    m       unitless   g/cu m
+                // ESTUARYSEGMENT Sedimented Calculation
+            }
+
             //else if (AQTSeg.SedModelIncluded())
             //{
             //    PTopC = (AQTSeg.GetStatePointer(AllVariables.Cohesives, T_SVType.StV, T_SVLayer.SedLayer1));
@@ -815,7 +810,8 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                 //    // mg/L d  // mg/L  // m/d   // m
                 //}
             //}
-            //else
+
+            else
             {
                 // NOT ESTUARY, Sed Model Not Included
                 DetrSinkToHypo = 0;
@@ -848,58 +844,27 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
                 }
             }
 
-            // Not Estuary Sed model not inluded code
-            //DetrSinkToHypo = 0;
-            //if ((!AQTSeg.Stratified) || (AQTSeg.VSeg == VerticalSegments.Hypolimnion) || (Sedimented < 0))
-            //{
-            //    // mg/L d
-            //    // mg/L d
-            //    result = Sedimented;
-            //}
-            //else
-            //{
-            //    // stratified
-            //    TStates w4 = AQTSeg;
-            //    TAQTSite w5 = w4.Location;
-            //    w6 = w5.Locale;
-            //    if (!w6.UseBathymetry)
-            //    {
-            //        DetrSinkToHypo = (w6.ThermoclArea / w6.SurfArea) * Sedimented;
-            //    }
-            //    else
-            //    {
-            //        DetrSinkToHypo = (1.0 - w6.AreaFrac(w6.MaxEpiThick, w6.ZMax)) * Sedimented;
-            //    }
-            //    // 10-14-2010 Note that ZMax parameter pertains to both segments in event of stratification
-            //    result = Sedimented - DetrSinkToHypo;
-            //    // mg/L d  // mg/L d     // frac
-            //}
-
-            return Sedimented;
+           DetrSinkToHypo = 0;
+            if ((!AQTSeg.Stratified) || (!AQTSeg.UpperSeg) || (Sedimented < 0))
+            {
+                return Sedimented;  // 0-D, lower segment, all sedimentation goes to bed below
+            }
+            else
+            {
+                DetrSinkToHypo = Sedimented;  // All sinking to hypolimnion at this time, ignoring sedimentation to epilimnion sediment
+                return 0;
+            }
         }
 
-        // sedimentation
-        //public double DetrSinkFromEp()
-        //{
-        //    double result;
-        //    double SFE;
-        //    double EpiVol;
-        //    double HypVol;
-        //    TStates w1 = AQTSeg;
-        //    if (!w1.Stratified || (w1.VSeg == VerticalSegments.Epilimnion))
-        //    {
-        //        SFE = 0;
-        //    }
-        //    else
-        //    {
-        //        SFE = ((w1.EpiSegment.GetStatePointer(NState, SVType, Layer)) as TSuspendedDetr).DetrSinkToHypo;
-        //        EpiVol = w1.EpiSegment.SegVol();
-        //        HypVol = w1.SegVol();
-        //        SFE = SFE * EpiVol / HypVol;
-        //    }
-        //    result = SFE;
-        //    return result;
-        //}
+        double DetrSinkFromEp()
+        {
+            if ((!AQTSeg.Stratified) || (AQTSeg.UpperSeg)) return 0;
+            double SFE = (AQTSeg.otherseg.GetStatePointer(NState, SVType, Layer) as TSuspendedDetr).DetrSinkToHypo;
+            double EpiVol = AQTSeg.otherseg.SegVol();
+            double HypVol = AQTSeg.SegVol();
+            return SFE * EpiVol / HypVol;
+        }
+
         // --------------------------------------------------
         //public void Derivative_TrackMB()
         //{
@@ -1090,9 +1055,9 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             if (NState == AllVariables.SuspLabDetr)
                 De = Decomposition(Location.Remin.DecayMax_Lab.Val, Consts.KAnaerobic, ref FracAerobic);
 
-            // STH = DetrSinkToHypo;
-            // SinkToHypo=0 if vseg=hypo
-            // SFE = DetrSinkFromEp();
+             STH = DetrSinkToHypo; // SinkToHypo=0 if vseg=hypo
+             SFE = DetrSinkFromEp();
+
             //if (AQTSeg.GetStatePointer(AllVariables.Sand, T_SVType.StV, T_SVLayer.WaterCol) != null)
             //{
             //    if (PBD == null) throw new Exception("Buried Detritus must be utilized with sand silt clay");
@@ -1113,7 +1078,7 @@ public double DetritalFormation(ref double Mort, ref double Excr, ref double Sed
             //}
 
             if (AQTSeg.Stratified) TD = TurbDiff();
-            // if (AQTSeg.EstuarySeg) En = EstuaryEntrainment(); TODO FIXME Add EstuaryEntrainment
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment(); 
 
             DB = Lo + DF + Co - De - WaO + WaI - Se + Re - Pr + PlSlg + PlToxD + McB - STH + SFE + TD + En + DiffUp + DiffDown + Scour;
 

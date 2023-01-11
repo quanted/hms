@@ -177,7 +177,7 @@ namespace AQUATOX.AQTSegment
             foreach (AQUATOXSegment AQTSeg in AQTSegs.Values)
             {
                 if (RunID == "") return false;
-                if (SavedRuns.TryGetValue(RunID, out AQUATOXSegment savedRun)) return false;
+                if (SavedRuns.TryGetValue(AQTSeg.SegName + ": " + RunID, out AQUATOXSegment savedRun)) return false;
             }
 
             string JSONToArchive = "";
@@ -1009,6 +1009,28 @@ namespace AQUATOX.AQTSegment
             return(result);
         }
 
+        public double EstuaryEntrainment()
+        {
+            double result;
+            double HypState;
+            TVolume PV;
+
+            if (!AQTSeg.EstuarySeg) return 0;
+
+            if (!AQTSeg.UpperSeg) HypState = State; // lower segment
+            else HypState = AQTSeg.otherseg.GetState(NState, SVType, Layer);
+
+            PV = AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+            result = HypState * PV.SaltWaterInflow() / AQTSeg.SegVol();
+            // unit/L  // unit/L hyp         // m3                // m3
+
+            if (!AQTSeg.UpperSeg) result = -result;  // entrainment is leaving the hypolimnion
+
+            return result;
+        }
+
+
+
         // Relevant for tox in water, tox in detritus, and labile detritus
         public double TurbDiff()  // Calculate Turbulent Diffusion between two stratified layers
         {
@@ -1821,6 +1843,16 @@ namespace AQUATOX.AQTSegment
             return false;
         }
 
+        public double DepthTop()
+        {
+           if (UpperSeg) return 0.0;
+           else return otherseg.DynamicZMean(); 
+
+            //if (LinkedMode && Stratified && WellMixed())
+            //    result = 0;
+            //// well mixed, average entire light climate, 2-27-08
+            
+        }
 
         public TStateVariable AddStateVariable(AllVariables NS, T_SVLayer Lyr)
         {
@@ -3581,7 +3613,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
+                throw new ArgumentException("GetState called for non-existent state variable: " + S.ToString(), "original");  
                 // result = -1;
             }
         }
@@ -5193,28 +5225,6 @@ namespace AQUATOX.AQTSegment
             base.Derivative(ref DB);
             DB = 0;
         }
-
-        public double EstuaryEntrainment()
-        {
-            double result;
-            double HypState;
-            TVolume PV;
-            result = 0;
-
-            if (!AQTSeg.EstuarySeg) return 0;
-
-            if (!AQTSeg.UpperSeg) HypState = State; // lower segment
-            else HypState = AQTSeg.otherseg.GetState(NState, SVType, Layer);
-
-            PV = AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-            result = HypState * PV.SaltWaterInflow() / AQTSeg.SegVol();
-         // unit/L  // unit/L hyp         // m3                // m3
-
-            if (!AQTSeg.UpperSeg)  result = -result;  // entrainment is leaving the hypolimnion
-
-            return result;
-        }
-
 
         public override void CalculateLoad(DateTime TimeIndex)
         {

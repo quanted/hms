@@ -1135,14 +1135,14 @@ namespace AQUATOX.Nutrients
             }
             // --------------------------------------------------
 
-            public void Derivative_TrackMB()  // FIXME mass balance tracking
+            public void Derivative_TrackMB()  // mass balance tracking not enabled
             {
                 // PO4Obj
                 //double LoadInKg;
                 //double LossInKg;
                 //double LayerInKg;
 
-                //MBLoadRecord MBLR = AQTSeg.MBLoadArray[AllVariables.Phosphate];  // FIXME mass balance tracking
+                //MBLoadRecord MBLR = AQTSeg.MBLoadArray[AllVariables.Phosphate];  //  mass balance tracking not enabled
                 //LoadInKg = Lo * _1.SegVol() * 1000.0 * 1e-6;
                 //MBLR.BoundLoad[_1.DerivStep] = .BoundLoad[_1.DerivStep] + LoadInKg;
                 // Load into modeled system
@@ -1216,6 +1216,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("Assim", Assm);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
                     if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
 
                     if (PSed != null)
@@ -1244,8 +1245,7 @@ namespace AQUATOX.Nutrients
 
             if (AQTSeg.Stratified) TD = TurbDiff();
 
-            //if (AQTSeg.EstuarySegment)
-            //    En = EstuaryEntrainment();
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
 
             PSed = (TPO4_Sediment) AQTSeg.GetStatePointer(AllVariables.Phosphate, T_SVType.StV, T_SVLayer.SedLayer1);  // check for diagenesis model  
             if (PSed != null)
@@ -1379,7 +1379,7 @@ namespace AQUATOX.Nutrients
             // --------------------------------------------------
             public void Derivative_TrackMB()
             {
-                //double LoadInKg;  // FIXME MB Tracking
+                //double LoadInKg;  //  MB Tracking not enabled
                 //double LossInKg;
                 //double LayerInKg;
 
@@ -1460,6 +1460,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("Assimil", Assm);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
                     if (NSed != null)
                     {
                         SaveRate("Diag_Flux", DiaFlx);
@@ -1514,10 +1515,8 @@ namespace AQUATOX.Nutrients
 
             if (AQTSeg.Stratified) TD = TurbDiff();
 
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    En = EstuaryEntrainment();
-            //}
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
+
 
             NSed = (TNH4_Sediment)AQTSeg.GetStatePointer(AllVariables.Ammonia, T_SVType.StV, T_SVLayer.SedLayer1); // search for diagenesis model 
             if (NSed != null)
@@ -1619,7 +1618,7 @@ namespace AQUATOX.Nutrients
 
 
         // --------------------------------------------------
-        //public void Derivative_TrackMB()  FIXME MB Tracking
+        //public void Derivative_TrackMB()  MB Tracking not enabled
         //{
         //    // Track MB For NO3Obj
         //    double LoadInKg;
@@ -1717,6 +1716,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("NO3Assim", NO3Assim);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
                     if (N2Sed != null) SaveRate("Diag_Flux", DiaFlx);
                     if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
 
@@ -1744,12 +1744,10 @@ namespace AQUATOX.Nutrients
             //    DiffDown = SegmentDiffusion(false);
             //}
 
-            if (AQTSeg.Stratified) TD = TurbDiff();            
-            
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    En = EstuaryEntrainment();
-            //}
+            if (AQTSeg.Stratified) TD = TurbDiff();
+
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
+
 
             N2Sed = (TNO3_Sediment)AQTSeg.GetStatePointer(AllVariables.Nitrate, T_SVType.StV, T_SVLayer.SedLayer1);
             if (N2Sed != null)  
@@ -1868,6 +1866,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("AtmosEx", AE);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
                     if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
                 }
@@ -1911,12 +1910,10 @@ namespace AQUATOX.Nutrients
             //    DiffDown = SegmentDiffusion(false);
             //}
 
-            if (AQTSeg.Stratified) TD = TurbDiff();           
-            
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    En = EstuaryEntrainment();
-            //}
+            if (AQTSeg.Stratified) TD = TurbDiff();
+
+            if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
+
             DB = Lo + Re + De - CO2Assim + AE - WaO + WaI + TD + DiffUp + DiffDown + En;
 
             Derivative_WriteRates();
@@ -2241,6 +2238,7 @@ namespace AQUATOX.Nutrients
                     SaveRate("Nitrific", Nitr);
                     SaveRate("Washout", WaO);
                     SaveRate("WashIn", WaI);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", En);
                     if (AQTSeg.Stratified) SaveRate("TurbDiff", TD);
 
                     SaveRate("NetBoundary", Lo + WaI - WaO + En + DiffUp + DiffDown + TD);
@@ -2286,7 +2284,7 @@ namespace AQUATOX.Nutrients
             // mg O2/L =  o2/photo bio. * mg biomass / L
             if (Photosynthesis_Link != null) Pho = Photosynthesis_Link.ReturnLoad(AQTSeg.TPresent);
 
-            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val;    // FIXME calculation of GPP and NPP disabled for now
+            // AQTSeg.GPP[AQTSeg.DerivStep] = Pho * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val;    // calculation of GPP and NPP disabled for now
             // g O2/m2 d            // g/m3 d            // m3            // m2
             // DarkResp = .O2Biomass * SumRespiration(true);  
             // AQTSeg.NPP[.DerivStep] = (Pho - DarkResp) * AQTSeg.SegVol() / AQTSeg.Location.Locale.SurfArea.Val.Val;
@@ -2302,7 +2300,7 @@ namespace AQUATOX.Nutrients
         //}
 
         if (AQTSeg.Stratified) TD = TurbDiff();
-        //if (AQTSeg.EstuarySegment)  En = EstuaryEntrainment();
+        if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
 
         if (NoLoadOrWash)
         {

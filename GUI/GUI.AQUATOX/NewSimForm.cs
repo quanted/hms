@@ -311,10 +311,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
 
-            //string target = "Multi_Segment_Runs";  //fixme new help topic
-            //AQTTestForm.OpenUrl(target);
         }
 
 

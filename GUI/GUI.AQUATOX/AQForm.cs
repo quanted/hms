@@ -484,6 +484,7 @@ namespace GUI.AQUATOX
             if (aQTS == null) return;
 
             SiteForm SF = new SiteForm();
+            if (SegBox.Visible) SF.Text = SegBox.Text + ": " + SF.Text;
             SF.EditSiteInfo(thisSeg);
             ShowStudyInfo();
         }
@@ -948,6 +949,7 @@ namespace GUI.AQUATOX
             TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
 
             LoadingsForm LF = new LoadingsForm();
+            if (SegBox.Visible) LF.Text = SegBox.Text + ": " + LF.Text;
             LF.EditSV(ref TSV, aQTS, isBoundarySegment);
 
             // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
@@ -1016,6 +1018,8 @@ namespace GUI.AQUATOX
             tTables = thisSeg.TrophInt_to_Table();
 
             TrophMatrix tm = new TrophMatrix();
+            if (SegBox.Visible) tm.Text = SegBox.Text + ": " + tm.Text;
+
             if (tm.ShowGrid(tTables,thisSeg))
                thisSeg.Tables_to_Trophint(tTables);
         }

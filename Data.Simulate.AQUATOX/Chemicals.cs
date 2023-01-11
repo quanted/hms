@@ -1416,7 +1416,7 @@ namespace AQUATOX.Chemicals
             {
                 CalculateLoad(AQTSeg.TPresent);
                 Lo = Loading;
-                //if (AQTSeg.EstuarySegment)   {  Entr = EstuaryEntrainment();     }
+                if (AQTSeg.EstuarySeg) Entr = EstuaryEntrainment();
 
                 Hyd = Hydrolysis();
                 Pho = Photolysis();

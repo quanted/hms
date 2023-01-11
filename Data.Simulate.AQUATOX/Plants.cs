@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;
 using AQUATOX.Chemicals;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using MongoDB.Driver;
 
 namespace AQUATOX.Plants
 
@@ -329,6 +331,25 @@ namespace AQUATOX.Plants
             }
         }
 
+        public double Floating()
+        {
+            if (!PAlgalRec.SurfaceFloating.Val) return 0;
+
+            if (!AQTSeg.Stratified) return 0;
+
+            if (AQTSeg.UpperSeg) return -State;    // all surface floating phytoplankton to epilimnion
+            else
+            {
+                // epilimnion code
+                double FFH = ((AQTSeg.otherseg.GetStatePointer(NState, SVType, Layer) as TPlant)).State;
+                // g/m3 hyp
+                double EpiVol = AQTSeg.SegVol();
+                double HypVol = AQTSeg.otherseg.SegVol();
+                return  FFH * HypVol / EpiVol;
+                           // g/m3 epi  // g/m3 hyp
+            }
+        }
+
         // ------------------------------------------------------------------------
 
         public override double WetToDry()
@@ -584,18 +605,19 @@ namespace AQUATOX.Plants
             // Collins & Park, 1989
             DensFactor = AQTSeg.DensityFactor(PAlgalRec.KSedTemp.Val, PAlgalRec.KSedSalinity.Val);
 
-            //if (AQTSeg.EstuarySegment)
-            //{
-            //    // g/cu m-d   m/d    m     unitless   unitless   g/cu m
-            //    Sink = PAlgalRec.KSed.Val / Thick * DensFactor * SedAccel * State;
-            //}
-            //else
+            if (AQTSeg.EstuarySeg)
+            {
+                Sink = PAlgalRec.KSed.Val / Thick * DensFactor * SedAccel * State;
+                // g/cu m-d   m/d    m     unitless   unitless   g/cu m
+            }
+            else
             {
                 // unitless       unitless       unitless
                 if (AQTSeg.MeanDischarge < Consts.Tiny)
                 {
-                    // g/cu m-d   m/d    m      unitless   g/cu m    unitless
                     Sink = PAlgalRec.KSed.Val / Thick * SedAccel * State * DensFactor;
+                    // g/cu m-d   m/d    m      unitless   g/cu m    unitless
+
                 }
                 else
                 {
@@ -634,9 +656,13 @@ namespace AQUATOX.Plants
 
             }  // if Not EstuarySegment
 
-            return Sink;
-
-            // stratified code removed
+            if (AQTSeg.Stratified)
+            {
+                SinkToHypo = Sink;  // All sinking to hypolimnion at this time, ignoring sedimentation to epilimnion sediment
+                return 0;
+            }
+            else return Sink;
+            
         }
 
         // public double Floating()   code for vertically stratified segments removed
@@ -887,7 +913,6 @@ namespace AQUATOX.Plants
         // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
         public double LtAtTop(bool DailyStep)  // light limitation at the top of the water column
-                                               // for HMS implementation, vertical stratification not implemented, hypolimnion code was removed
         {
             double LightVal, LT, EX;
             double DTop;
@@ -897,38 +922,46 @@ namespace AQUATOX.Plants
             // Floating Macrophytes are not subject to light limitation, this function is never executed for them
 
             Incl_Periphyton = !(IsPhytoplankton());
-            DTop = 0;
-            EX = 0;
+            DTop = AQTSeg.DepthTop();
+            if (DTop < Consts.Tiny) EX = 0; // avoid irrelevant calculation
+            else EX = AQTSeg.otherseg.Extinct(Incl_Periphyton, true, true, false, 0);
 
-            // only half is in spectrum used for photsyn. - Edmondson '56
-            PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
+            if (EX * DTop > 20.0) LT = 1.0;
+            else
+            {
+                // only half is in spectrum used for photsyn. - Edmondson '56
+                PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
 
-            if (DailyStep) LightVal = PL.DailyLight;
-            else LightVal = PL.HourlyLight;
+                if (DailyStep) LightVal = PL.DailyLight;
+                else LightVal = PL.HourlyLight;
 
-            if (DailyStep) LightCorr = 1.0;
-            else LightCorr = 1.25;
+                if (DailyStep) LightCorr = 1.0;
+                else LightCorr = 1.25;
 
-            LT = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * DTop));
-            // unitless      ly/d                  ly/d                     1/m  m
+                LT = (-((LightVal / 2) / (LightCorr * LightSat())) * Math.Exp(-EX * DTop));
+                // unitless      ly/d                  ly/d                     1/m  m
 
-            if (LT < -30) LT = 0;  // Prevent a Crash, JSC
-            else LT = Math.Exp(LT);
+                if (LT < -30) LT = 0;  // Prevent a Crash, JSC
+                else LT = Math.Exp(LT);
+            }
 
             return LT;
         }         // ltatTop
 
         // light limitation at depth
         public double LtAtDepth(bool DailyStep)
-        {   // HMS Light at Top, Vertical stratification code stripped, not relevant to HMS Work Flows
-            // Floating Macrophytes not subject to light limitation, this function is never executed for them
+        {   // Floating Macrophytes not subject to light limitation, this function is never executed for them
 
+            double DTop = AQTSeg.DepthTop();
             double LightVal, LD, EX, DBott;
-            double LightCorr;
+            double LightCorr, EpiExtinct;
             bool Incl_Periphyton;
-            TLight PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
 
-            Incl_Periphyton = !(IsPhytoplankton());
+            Incl_Periphyton = !(IsPhytoplankton()); 
+            if (DTop < Consts.Tiny) EpiExtinct = 0; // avoid irrelevant calculation
+            else EpiExtinct = Math.Exp(-AQTSeg.otherseg.Extinct(Incl_Periphyton, true, true, false, 0) * DTop);
+
+            TLight PL = AQTSeg.GetStatePointer(AllVariables.Light, T_SVType.StV, T_SVLayer.WaterCol) as TLight;
             EX = AQTSeg.Extinct(Incl_Periphyton, true, true, false, 0);
             DBott = DepthBottom();
 
@@ -940,6 +973,8 @@ namespace AQUATOX.Plants
             {
                 if (AQTSeg.PSetup.ModelTSDays.Val) LightCorr = 1.0;
                 else LightCorr = 1.25;
+
+                if (DTop>0) LightVal = LightVal * EpiExtinct;  // 8/17/07 account for light at the top of the hypolimnion
 
                 // only half is in spectrum used for photsyn. - Edmondson '56
                 LD = (-((LightVal / 2.0) / (LightCorr * LightSat())) * Math.Exp(-EX * (DBott)));
@@ -1339,6 +1374,9 @@ namespace AQUATOX.Plants
             double TCorrValue;
             TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10.Val, PAlgalRec.TRef.Val, PAlgalRec.TOpt.Val, PAlgalRec.TMax.Val);
             LL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
+
+            if (!AQTSeg.UpperSeg) LL = 1.0;  //test 1/11/2023
+
             NL = NutrLimit();
             AggFP = AggregateFracPhoto();
             Temp_Limit = TCorrValue;  // save for rate output  JSC 9-5-02
@@ -1402,6 +1440,15 @@ namespace AQUATOX.Plants
                 }
             }
             return PSlough;
+        }
+
+        double SinkFromEp()
+        {
+            if ((!AQTSeg.Stratified)||(AQTSeg.UpperSeg)) return 0;
+            double SFE = (AQTSeg.otherseg.GetStatePointer(NState, SVType,Layer) as TPlant).SinkToHypo;
+            double EpiVol = AQTSeg.otherseg.SegVol();
+            double HypVol = AQTSeg.SegVol();
+            return SFE * EpiVol / HypVol;
         }
 
         //public void Derivative_TrackMB()
@@ -1556,9 +1603,6 @@ namespace AQUATOX.Plants
                     if (!IsPhytoplankton())
                         SaveRate("Sloughing", Slg);
 
-                    SaveRate("SinkToHypo", STH);
-                    SaveRate("SinkFromEpi", SFE);
-
                     SaveRate("Lt_LIM", Lt_Limit);
                     SaveRate("N_LIM", N_Limit);
                     SaveRate("PO4_LIM", PO4_Limit);
@@ -1604,23 +1648,26 @@ namespace AQUATOX.Plants
             if (!SurfaceFloater)
             {
                 STH = SinkToHypo;
-                // SFE = SinkFromEp();  TODO FIXME ADD
+                SFE = SinkFromEp(); 
                 Sed2Me = SedToMe();
             }
             if (SurfaceFloater)
             {
-                // Fl = Floating();  TODO FIXME ADD
+                Fl = Floating(); 
             }
 
             if (IsPhytoplankton()) { 
                 PeriScr = PeriphytonSlough();
                 if (AQTSeg.Stratified && (!SurfaceFloater)) TD = TurbDiff();
+                if (AQTSeg.EstuarySeg) En = EstuaryEntrainment();
             }
 
             if (!IsPhytoplankton())
             { Slg = CalcSlough(); }
 
             if (SloughEvent) { Slg = 0;}  // set precisely below  11/11/03
+
+
 
             // HMS Removed linked mode and stratification code and estuary-mode code
 
