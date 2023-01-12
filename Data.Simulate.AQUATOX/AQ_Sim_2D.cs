@@ -766,38 +766,42 @@ namespace AQUATOX.AQSim_2D
             }
                 
             int nSources = 0;
-            if (SN.sources != null)
-             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
-                foreach (int SrcID in Sources)
-                {
-                    if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
+            if (SN != null)
+            {
+                if (SN.sources != null)
+                 if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
+                    foreach (int SrcID in Sources)
                     {
-                        nSources++;
-                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                        if (errstr != "") outstr.Add(errstr);
-                            else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
-                    }
-                };
+                        if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
+                        {
+                            nSources++;
+                            string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                            if (errstr != "") outstr.Add(errstr);
+                                else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
+                        }
+                    };
             
-            if ((SN.waterbodies != null) && (SN.sources != null))
-            {   // pass data into Waterbodies from adjacent stream segments
-                if (SN.waterbodies.comid_wb.ContainsValue(comid))  // if the comid is a waterbody
-                  foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
-                    if (entry.Value == comid)  // for each stream segment in waterbody
-                      if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
-                        foreach (int SrcID in Sources) //loop through the sources
-                          if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
-                            {
-                               archive.TryGetValue(SrcID, out archived_results AR);  // don't pass data from segments not run (e.g. internal segments in the waterbody that are irrelevant)
-                                if (AR != null)
+                if ((SN.waterbodies != null) && (SN.sources != null))
+                {   // pass data into Waterbodies from adjacent stream segments
+                    if (SN.waterbodies.comid_wb.ContainsValue(comid))  // if the comid is a waterbody
+                      foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
+                        if (entry.Value == comid)  // for each stream segment in waterbody
+                          if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
+                            foreach (int SrcID in Sources) //loop through the sources
+                              if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                                 {
-                                    nSources++;
-                                    string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                                    if (errstr != "") outstr.Add(errstr);
-                                        else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
+                                   archive.TryGetValue(SrcID, out archived_results AR);  // don't pass data from segments not run (e.g. internal segments in the waterbody that are irrelevant)
+                                    if (AR != null)
+                                    {
+                                        nSources++;
+                                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                                        if (errstr != "") outstr.Add(errstr);
+                                            else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
+                                    }
                                 }
-                            }
+                }
             }
+
 
             Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();

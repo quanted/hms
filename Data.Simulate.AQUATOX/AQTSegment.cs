@@ -20,7 +20,6 @@ using System.Linq;
 using Newtonsoft.Json;
 using Data;
 using System.ComponentModel;
-using System.IO;
 using System.Data;
 
 namespace AQUATOX.AQTSegment

@@ -5,9 +5,6 @@ using AQUATOX.Plants;
 using AQUATOX.Bioaccumulation;
 using AQUATOX.Animals;
 using AQUATOX.Chemicals;
-using AQUATOX.OrgMatter;
-using AQUATOX.Diagenesis;
-using Newtonsoft.Json;
 using Globals;
 
 namespace AQUATOX.Organisms

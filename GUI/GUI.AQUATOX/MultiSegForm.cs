@@ -809,7 +809,7 @@ namespace GUI.AQUATOX
             AddToProcessLog("INPUTS:  Model Run Initiated");
             try
             {
-                if (AQT2D.SN.network == null)
+                if ((AQT2D.SN == null)||(AQT2D.SN.network == null))
                 {  //0D Lake/Res
 
                     List<string> strout = new();
@@ -1845,7 +1845,13 @@ namespace GUI.AQUATOX
                                 if (BSim == null)
                                 {
                                     BSim = new AQTSim();
-                                    BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                    if (File.Exists("..\\..\\..\\Studies\\" + "Default Lake.JSON"))
+                                        BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                    else
+                                    {
+                                        ShowMsg("Error, cannot find file " + "Studies\\Default Lake.JSON.");
+                                        return;
+                                    }
                                 }
 
                                 BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
