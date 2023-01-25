@@ -1078,7 +1078,7 @@ namespace AQUATOX.Plants
             if ((PAlgalRec.PlantType.Val == "Macrophytes") && (MacroType == TMacroType.Freefloat)) return LL;
 
             DBot = DepthBottom();
-            DT = 0;  // HMS no vertical stratification
+            DT = AQTSeg.DepthTop();  
             if ((DBot - DT) < Consts.Tiny)
             {
                 LL = 1.0;
@@ -1371,12 +1371,9 @@ namespace AQUATOX.Plants
             double AggFP;
             double LL;
             double NL;
-            double TCorrValue;
-            TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10.Val, PAlgalRec.TRef.Val, PAlgalRec.TOpt.Val, PAlgalRec.TMax.Val);
+
+            double TCorrValue = AQTSeg.TCorr(PAlgalRec.Q10.Val, PAlgalRec.TRef.Val, PAlgalRec.TOpt.Val, PAlgalRec.TMax.Val);
             LL = LtLimit(AQTSeg.PSetup.ModelTSDays.Val);
-
-            if (!AQTSeg.UpperSeg) LL = 1.0;  //test 1/11/2023
-
             NL = NutrLimit();
             AggFP = AggregateFracPhoto();
             Temp_Limit = TCorrValue;  // save for rate output  JSC 9-5-02

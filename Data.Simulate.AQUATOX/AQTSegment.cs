@@ -3848,8 +3848,13 @@ namespace AQUATOX.AQTSegment
         //// ---------------------------------------------------------------
 
 
+
+
         public double Velocity(double pctriffle, double pctpool, bool averaged)
         {
+
+           //  if (EstuarySeg) return EstuaryVelocity(averaged);
+
             double xsecarea, avgflow;
             double upflow, downflow;
             double pctrun, runvel, rifflevel, poolvel;
@@ -3933,6 +3938,39 @@ namespace AQUATOX.AQTSegment
 
             return (rifflevel * (pctriffle / 100.0)) + (runvel * (pctrun / 100.0)) + (poolvel * (pctpool / 100.0));
         }
+
+        //public double EstuaryVelocity(bool averaged)
+        //{
+        //    double ResidFlowVel;
+        //    double TidalVel;
+        //    double TidalPrism;
+        //    TVolume PV;
+
+        //    if (Location.Locale.SiteWidth.Val <= 0)
+        //    {
+        //        throw new Exception("\"Site Width\" in the Site Data Record must be greater than zero");
+        //    }
+        //    if (!averaged)
+        //    {
+        //        double  XSecArea = Location.Locale.SiteWidth.Val * DynamicZMean();
+        //                // m2                // m                       // m
+        //        PV = GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+        //        TidalPrism = 2.0 * PV.TidalAmplitude(TPresent) * Location.Locale.SurfArea.Val;
+        //        // m3/d                         // m/d                   // m2
+        //        TidalVel = TidalPrism / XSecArea;
+        //        // m/d      // m3/d        // m2
+        //        ResidFlowVel = Location.Discharge / XSecArea;
+        //        // m/d         // outflow m3/d        // m2
+        //        return Math.Abs(ResidFlowVel + TidalVel * (1 + 0.5 * Math.Sin(2 * Math.PI * TPresent.DayOfYear / 12))) / 86400 * 100;
+        //        // cm/s                 // m/d          // m/d                                                         // s/d   // cm/m
+        //    }
+        //    else
+        //    {
+        //        // Averaged over a year
+        //        return MeanEstVel;
+        //    }
+        //}
+
 
 
         // Diagenesis Model

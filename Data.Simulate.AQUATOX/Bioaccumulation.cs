@@ -12,6 +12,8 @@ using Newtonsoft.Json;
 using Globals;
 using System.Linq;
 using System.Threading;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using System.Reflection.PortableExecutable;
 
 namespace AQUATOX.Bioaccumulation
 {
@@ -256,7 +258,7 @@ namespace AQUATOX.Bioaccumulation
             double SETTD = 0;
             double ToPW = 0;
             double PWExp = 0;
-            double Entr = 0;
+            double Entr = 0;  
             double FracAerobic = 0;
             double Mic_in_Aer = 0;
             double Mic_in_Anaer = 0;
@@ -293,6 +295,7 @@ namespace AQUATOX.Bioaccumulation
                         SaveRate("Washin", WashI);
                         SaveRate("MortToDetr", MTD);
                         SaveRate("TurbDiff", TD);
+                        if (AQTSeg.EstuarySeg) SaveRate("Entrainment", Entr);
                         SaveRate("NetBoundary", Lo + WashI - WashO + Entr + DiffUp + DiffDown + TD);
                     }
 
@@ -358,7 +361,7 @@ namespace AQUATOX.Bioaccumulation
                 SedDetrVar = AllVariables.SedmRefrDetr;
                 SuspDetrVar = AllVariables.SuspRefrDetr;
             }
-  
+
             if (ChemRec.BCFUptake.Val)
             {
                 DB = 0.0;
@@ -366,6 +369,13 @@ namespace AQUATOX.Bioaccumulation
             else
             {
                 Lo = Loading;
+
+                if ((AQTSeg.EstuarySeg) && (NState != AllVariables.SedmLabDetr) && (NState != AllVariables.SedmRefrDetr)) 
+                {
+                    Entr = CP.EstuaryEntrainment();
+                    if (Entr < 0) Entr = Entr * pp * 1e-6;  // Entr negative in hypolimnion
+                    if (Entr > 0) Entr = Entr * AQTSeg.otherseg.GetPPB(NState, SVType, Layer) * 1e-6;
+                }
 
                 Hydr = Hydrolysis();
                 MM = MicrobialMetabolism(ref FracAerobic);
@@ -794,7 +804,7 @@ namespace AQUATOX.Bioaccumulation
                         SaveRate("SinkFromEp", SFE);
                         if (SurfaceFloater)
                             SaveRate("Floating", Flt);
-
+                        if (AQTSeg.EstuarySeg) SaveRate("Entrainment", Entr);
                         SaveRate("NetBoundary", Lo + WashI - WashO + Entr + TD);
                     }
                     if ((NState >= Consts.FirstMacro && NState <= Consts.LastMacro) && (((CP) as TMacrophyte).MacroType == TMacroType.Freefloat))
@@ -859,7 +869,14 @@ namespace AQUATOX.Bioaccumulation
             {
                 Pp = GetPPB(NState, SVType, Layer) * 1e-6;
                 WashO = CP.Washout() * Pp;
-                // removed washoutstep, estuarysegment, accounting in kg, ToxInCarrierWashin here
+                // removed washoutstep, accounting in kg, ToxInCarrierWashin here
+
+                if ((CP.IsPhytoplankton()) && (AQTSeg.EstuarySeg))
+                {
+                    Entr = EstuaryEntrainment();
+                    if (Entr < 0) Entr = Entr * Pp * 1e-6; //Entr negative in lower segment
+                    if (Entr > 0) Entr = Entr * AQTSeg.otherseg.GetPPB(NState, SVType, Layer) * 1e-6;
+                };
 
                 Lo = Loading;
 
@@ -962,6 +979,7 @@ namespace AQUATOX.Bioaccumulation
                     if (NState >= Consts.FirstInvert && NState <= Consts.LastInvert)
                     {
                         SaveRate("Drift", DrifO);
+                        if (AQTSeg.EstuarySeg) SaveRate("Entrainment", Entr);
                     }
                     if (CP.IsFish())
                     {
@@ -996,8 +1014,23 @@ namespace AQUATOX.Bioaccumulation
                 Lo = Loading;
                 pp = GetPPB(NState, SVType, Layer);
 
-                if (CP.IsInvertebrate() && CP.IsPlanktonInvert() && AQTSeg.Stratified) TD = ToxDiff();
-                // Removed Estuary entrainment code, migration code 
+                if (CP.IsInvertebrate() && CP.IsPlanktonInvert() && AQTSeg.Stratified)  
+                {
+                    TD = ToxDiff();
+                    if (AQTSeg.EstuarySeg)  //Pelagic Invertebrate in Estuary subject to Entrainment
+                    {
+                        double EpiSalt;
+                        if (AQTSeg.UpperSeg) //  5-30-08, no entrainment for pelagic inverts. if salt climate is not desirable}
+                            EpiSalt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+                        else EpiSalt = AQTSeg.otherseg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+
+                        bool SaltGoodEpi = ((EpiSalt > CP.PAnimalData.SalMin_Ing.Val) && (EpiSalt < CP.PAnimalData.SalMax_Ing.Val));
+
+                        if (SaltGoodEpi) Entr = CP.EstuaryEntrainment();
+                        if (Entr<0) Entr = Entr * pp * 1e-6;  // Entr negative in hypolimnion
+                        if (Entr> 0) Entr = Entr * AQTSeg.otherseg.GetPPB(NState, SVType, Layer) * 1e-6;
+                    }
+                }
 
                 EmergI = CP.EmergeInsect * pp * 1e-6;
 

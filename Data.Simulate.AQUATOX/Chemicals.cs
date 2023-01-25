@@ -1392,6 +1392,8 @@ namespace AQUATOX.Chemicals
                     SaveRate("Decomp", Decomp);
                     SaveRate("DetrDesorpt", DetrDesorption);
                     SaveRate("PlantSorp", PlantSorp);
+                    if (AQTSeg.EstuarySeg) SaveRate("Entrainment", Entr);
+
                 }
             }
             // ------------------------------------------------------------------

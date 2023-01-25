@@ -56,6 +56,7 @@ namespace AQUATOX.AQSite
         public TParameter PctPool = new TParameter();
         public TBoolParam UsePhytoRetention = new TBoolParam();
 
+        public TParameter SiteWidth = new TParameter();  //Estuary specific parameters start here
         public TParameter amplitude1 = new TParameter();
         public TParameter amplitude2 = new TParameter();
         public TParameter amplitude3 = new TParameter();

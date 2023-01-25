@@ -268,7 +268,7 @@ namespace AQUATOX.Volume
             //m on a given day       // m3/d          // m2
         }
 
-        public double FracUpper()
+        public double FracUpper()  // not used, use fresh water head for pulsing and if negative entrain and send out fresh?
         {
             double result;
             double FWH;
@@ -583,14 +583,13 @@ namespace AQUATOX.Volume
         //public void SetMeanDischarge_CalcEstMeanVars()
         //{
         //    // Calculate MeanDischarge and MeanEstVel for Estuaries
-        //    double N;
+        //    double N = 0;
         //    double DateIndex;
         //    double SumEstVel;
         //    double SumDisch;
-        //    double TTPres;
+        //    DateTime TTPres = AQTSeg.TPresent;
         //    TSalinity TS;
-        //    N = 0;
-        //    TTPres = TPresent;
+
         //    TS = GetStatePointer(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
         //    SumEstVel = 0;
         //    SumDisch = 0;
@@ -660,16 +659,6 @@ namespace AQUATOX.Volume
             MV = 0;
             AQTSeg.MeanDischarge = 0;
             AQTSeg.MeanVolume = 0;
-
-            // AQTSeg.MeanEstVel = 0;
-            //if (EstuarySegment)
-            //{
-            //    // 5-30-2008
-            //    MeanVolume = InitialCond;
-            //    // for entire system
-            //    SetMeanDischarge_CalcEstMeanVars();
-            //    return;
-            //}
 
             if ((Calc_Method==VolumeMethType.Dynam)|| (Calc_Method == VolumeMethType.KeepConst)|| (Calc_Method == VolumeMethType.Manning))
             {

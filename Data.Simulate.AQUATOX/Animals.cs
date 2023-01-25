@@ -9,6 +9,8 @@ using AQUATOX.Chemicals;
 using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using System.Reflection.PortableExecutable;
 
 namespace AQUATOX.Animals
 
@@ -2096,9 +2098,10 @@ namespace AQUATOX.Animals
                     SaveRate("Excretion", Ex);
                     SaveRate("Fishing", Fi);
                     if (!IsPlanktonInvert()) SaveRate("Scour_Entrain", Entr);
-                    if (IsInvertebrate() && IsPlanktonInvert() && AQTSeg.Stratified) SaveRate("TurbDiff", TD);
-
-
+                    if (IsInvertebrate() && IsPlanktonInvert() && AQTSeg.Stratified) { 
+                        SaveRate("TurbDiff", TD);
+                        if (AQTSeg.EstuarySeg) SaveRate("Estuary.Entrain", En);
+                    }
                     SaveRate("Predation", Pr);
                     for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= Consts.LastOrgTxTyp; ToxLoop++)
                     {
@@ -2207,7 +2210,22 @@ namespace AQUATOX.Animals
             Recr = Recruit;   // Recr value is used in DoThisEveryStep
             Emrg = EmergeInsect;
             if (!IsPlanktonInvert())  Entr = Scour_Entrainment();    // Plankton invertebrates are subject to currents and diffusion
-            if (IsInvertebrate() && IsPlanktonInvert()) TD = TurbDiff();
+
+            if (IsInvertebrate() && IsPlanktonInvert())
+            {
+                TD = TurbDiff();
+                if (AQTSeg.EstuarySeg)
+                {
+                    double EpiSalt;
+                    if (AQTSeg.UpperSeg) //  5-30-08, no entrainment for pelagic inverts. if salt climate is not desirable}
+                        EpiSalt = AQTSeg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+                        else EpiSalt = AQTSeg.otherseg.GetState(AllVariables.Salinity, T_SVType.StV, T_SVLayer.WaterCol);
+
+
+                    bool SaltGoodEpi = ((EpiSalt > PAnimalData.SalMin_Ing.Val) &&  (EpiSalt < PAnimalData.SalMax_Ing.Val));
+                    if (SaltGoodEpi) En = EstuaryEntrainment();
+                }
+            }
 
             // removed linked mode, stratification, and estuary code as not relevant to HMS
             
