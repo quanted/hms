@@ -87,6 +87,7 @@
     <ProjectReference Include="..\Diagenesis\Diagenesis.AQUATOX\Diagenesis.AQUATOX.csproj" />
     <ProjectReference Include="..\Ecotoxicology\Ecotoxicology.AQUATOX\Ecotoxicology.AQUATOX.csproj" />
     <ProjectReference Include="..\Evapotranspiration\Evapotranspiration.csproj" />
+    <ProjectReference Include="..\Hawqs\Hawqs.csproj" />
     <ProjectReference Include="..\Humidity\Humidity.csproj" />
     <ProjectReference Include="..\Nutrients\Nutrients.AQUATOX\Nutrients.AQUATOX.csproj" />
     <ProjectReference Include="..\OrganicMatter\OrganicMatter.AQUATOX\OrganicMatter.AQUATOX.csproj" />
