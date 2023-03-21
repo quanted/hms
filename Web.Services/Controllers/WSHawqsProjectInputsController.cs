@@ -5,9 +5,6 @@ using System.Net;
 using System.Net.Mime;
 using Serilog;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using Swashbuckle.AspNetCore.Filters;
 
 using Web.Services.Models;
@@ -34,8 +31,7 @@ namespace Web.Services.Controllers
     /// HMS API controller for retrieving HAWQS project inputs.
     /// </summary>
     [Route("api/hawqs/project/inputs")]
-    //[Produces(MediaTypeNames.Application.Json)]
-    [Produces("text/plain", "application/json")]
+    [Produces(MediaTypeNames.Application.Json)]
     public class WSHawqsProjectInputsController : Microsoft.AspNetCore.Mvc.Controller
     {
         /// <summary>
