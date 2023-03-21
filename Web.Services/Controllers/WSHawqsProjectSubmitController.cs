@@ -152,7 +152,7 @@ namespace Web.Services.Controllers
                 exceptionLog.Fatal(ex.StackTrace);
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete Hawqs project submission."));
                 response.StatusCode = 500;
                 return response;
             }
@@ -185,7 +185,7 @@ namespace Web.Services.Controllers
                 exceptionLog.Fatal(ex.StackTrace);
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                ObjectResult response = new ObjectResult(err.ReturnError("Unable to retreive HAWQS project status."));
                 response.StatusCode = 500;
                 return response;
             }
@@ -218,7 +218,7 @@ namespace Web.Services.Controllers
                 exceptionLog.Fatal(ex.StackTrace);
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                ObjectResult response = new ObjectResult(err.ReturnError("Unable to retieive HAWQS project data."));
                 response.StatusCode = 500;
                 return response;
             }
@@ -250,7 +250,7 @@ namespace Web.Services.Controllers
                 exceptionLog.Fatal(ex.StackTrace);
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                ObjectResult response = new ObjectResult(err.ReturnError("Unable to cancel HAWQS project."));
                 response.StatusCode = 500;
                 return response;
             }
