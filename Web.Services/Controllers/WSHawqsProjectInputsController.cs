@@ -61,7 +61,7 @@ namespace Web.Services.Controllers
                 exceptionlog.Fatal(ex.StackTrace);
 
                 Utilities.ErrorOutput err = new Utilities.ErrorOutput();
-                ObjectResult response = new ObjectResult(err.ReturnError("Unable to complete request due to invalid request or unknown error."));
+                ObjectResult response = new ObjectResult(err.ReturnError("Unable to retireive HAWQS input definitions."));
                 response.StatusCode = 500;
                 return response;
             }
