@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using Hawqs;
 
 namespace Web.Services.Models
 {
@@ -33,10 +36,10 @@ namespace Web.Services.Models
         /// Gets project status.
         /// </summary>
         /// <returns>JSON string</returns>
-        public async Task<string> GetProjectStatus(string apiKey, string projectId)
+        public async Task<HawqsStatus> GetProjectStatus(string apiKey, string projectId)
         {
             Hawqs.Hawqs hawqs = new Hawqs.Hawqs();
-            string projectStatus = await hawqs.GetProjectStatus(apiKey, projectId);
+            HawqsStatus projectStatus = await hawqs.GetProjectStatus(apiKey, projectId);
             return projectStatus;
         }
 
@@ -44,11 +47,11 @@ namespace Web.Services.Models
         /// Gets conpleted project data file urls.
         /// </summary>
         /// <returns>JSON string</returns>
-        public async Task<string> GetProjectData(string apiKey, string projectId, bool process)
+        public async Task<List<HawqsOutput>> GetProjectData(string apiKey, string projectId, bool process)
         {
             Hawqs.Hawqs hawqs = new Hawqs.Hawqs();
-            string dataURLs = await hawqs.GetProjectData(apiKey, projectId, process);
-            return dataURLs;
+            List<HawqsOutput> dataURL = await hawqs.GetProjectData(apiKey, projectId, process);
+            return dataURL;
         }
 
         /// <summary>

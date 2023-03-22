@@ -12,6 +12,7 @@ using Swashbuckle.AspNetCore.Filters;
 
 using Web.Services.Models;
 using Hawqs;
+using System.Collections.Generic;
 
 namespace Web.Services.Controllers
 {
@@ -174,9 +175,8 @@ namespace Web.Services.Controllers
             WSHawqs hawqs = new WSHawqs();
             try
             {
-                string result = await hawqs.GetProjectStatus(request.apiKey, projectId);
-                JObject jResult = JsonConvert.DeserializeObject<JObject>(result);
-                return new ObjectResult(jResult);
+                HawqsStatus result = await hawqs.GetProjectStatus(request.apiKey, projectId);
+                return new ObjectResult(result);
             }
             catch (Exception ex)
             {
@@ -207,9 +207,8 @@ namespace Web.Services.Controllers
             WSHawqs hawqs = new WSHawqs();
             try
             {
-                string result = await hawqs.GetProjectData(request.apiKey, projectId, request.process);
-                JObject jResult = JsonConvert.DeserializeObject<JObject>(result);
-                return new ObjectResult(jResult);
+                List<HawqsOutput> result = await hawqs.GetProjectData(request.apiKey, projectId, request.process);
+                return new ObjectResult(result);
             }
             catch (Exception ex)
             {

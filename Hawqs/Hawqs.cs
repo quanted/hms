@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Hawqs
 {
@@ -24,7 +28,7 @@ namespace Hawqs
                 apiKey = hawqsAPIKey;
             }
 
-            // validate and constrain inputData ranges
+            // TODO: validate and constrain inputData ranges
 
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
@@ -34,7 +38,7 @@ namespace Hawqs
             return await response.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> GetProjectStatus(string apiKey, string projectId)
+        public async Task<HawqsStatus> GetProjectStatus(string apiKey, string projectId)
         {
             if (apiKey == null)
             {
@@ -42,10 +46,14 @@ namespace Hawqs
             }
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-            return await client.GetStringAsync(hawqsAPIUrl + "projects/" + projectId);
+            string response =  await client.GetStringAsync(hawqsAPIUrl + "projects/" + projectId);
+            HawqsStatusResponse statusObject = JsonConvert.DeserializeObject<HawqsStatusResponse>(response);
+
+            var projectStatus = statusObject.status;
+            return projectStatus;
         }
 
-        public async Task<string> GetProjectData(string apiKey, string projectId, bool processData)
+        public async Task<List<HawqsOutput>> GetProjectData(string apiKey, string projectId, bool processData)
         {
             if (apiKey == null)
             {
@@ -53,17 +61,25 @@ namespace Hawqs
             }
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-            var projectData = await client.GetStringAsync(hawqsAPIUrl + "projects/" + projectId);
+            string response = await client.GetStringAsync(hawqsAPIUrl + "projects/" + projectId);
+            HawqsStatusResponse statusObject = JsonConvert.DeserializeObject<HawqsStatusResponse>(response);
+            if (statusObject.status.progress < 100)
+            {
+                return null;
+            }
+
+            List<HawqsOutput> hawqsOutput = statusObject.output;
+
             if (processData)
             {
                 HawqsData hawqsData = new HawqsData();
-                hawqsData.projectData = projectData;
+                // hawqsData.projectData = projectData;
                 ProcessedHawqsData processedHawqsData = HawqsDataProcessor.ProcessData(hawqsData);
-                return "data processing not yet implemented";
+                return null;
             }
             else
             {
-                return projectData;
+                return hawqsOutput;
             }
         }
 
