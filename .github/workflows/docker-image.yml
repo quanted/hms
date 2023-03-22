@@ -7,7 +7,7 @@ name: Create and publish a Docker image
 
 on:
   push:
-    branches: ['dev', 'staging', 'master']
+    branches: ['dev', 'staging', 'master', 'hawqs-api']
 
 env:
   REGISTRY: ghcr.io
