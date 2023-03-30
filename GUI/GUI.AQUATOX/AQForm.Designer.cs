@@ -437,6 +437,7 @@ namespace GUI.AQUATOX
             // 
             // CancelButton
             // 
+            this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.CancelButton.ForeColor = System.Drawing.Color.Black;
             this.CancelButton.Location = new System.Drawing.Point(727, 75);

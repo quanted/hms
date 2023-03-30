@@ -1,16 +1,12 @@
 ﻿using AQUATOX.AQSim_2D;
 using AQUATOX.AQTSegment;
+using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Web.WebView2.Core;
-using System.Collections.Specialized;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Drawing;
-using Accord;
-using System.Collections.Generic;
 
 namespace GUI.AQUATOX
 
@@ -31,11 +27,11 @@ namespace GUI.AQUATOX
         public DateTime EndDT;
         public bool SNPopulated = false;
         public bool LakeSelected = false;
+        public bool fromtemplate = true;
 
         static Lake_Surrogates LS = null;
 
-        private NScreenSettings NScrSettings = new();
-        private StringCollection ShortDirNames = new();
+        public NScreenSettings NScrSettings = new();
 
         static public JsonSerializerSettings LSJSONSettings()
         {
@@ -112,6 +108,7 @@ namespace GUI.AQUATOX
             else
             {
                 string[] split = content.Split('|');
+                split[1] = split[1].Replace("\\\"", "\"");   // lake geojsons included \ character in strings
                 if (!GeoJSON.ContainsKey(split[0]))  GeoJSON.Add(split[0], split[1]);
             }
                 
@@ -152,11 +149,16 @@ namespace GUI.AQUATOX
                 return;
             }
 
-            if ((!Int32.TryParse(EndCOMIDBox.Text, out int endCOMID)) && (!Double.TryParse(spanBox.Text, out double Span)))
+            bool hasendcomid = Int32.TryParse(EndCOMIDBox.Text, out int endCOMID);
+            bool hasspan = Double.TryParse(spanBox.Text, out double Span);
+
+            if ((!hasendcomid) && (!hasspan))
             {
                 MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
                 return;
             }
+
+            if ((hasendcomid) && (hasspan)) spanBox.Text = ""; //end comid takes precedence so make this clear on the interface
 
             SegLoadLabel.Text = "Please Wait, Reading Stream Network...";
             SegLoadLabel.Visible = true;
@@ -203,17 +205,16 @@ namespace GUI.AQUATOX
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                 {
-                    int CID = AQT2D.SN.order[i][j];
-                    string CString = COMID.ToString();
-                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]); // display all layers
+                    bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
+                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|"+lastshape.ToString()); // display all layers
 
                     //bool in_waterbody = false;
                     //if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(CID);
                     //if (!in_waterbody) webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]);    // don't color segments that are superceded by their lake/reservoir waterbody.
                 };
 
-            webView.CoreWebView2.PostWebMessageAsString("ZOOM"); 
-
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
+            comidBox_Leave(sender, e); //update NScrSettings
             UpdateScreen();
         }
 
@@ -223,7 +224,7 @@ namespace GUI.AQUATOX
             if (LS != null) return true;  // don't need to re-read already in memory
 
             double LSVersionNum = 0;
-            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json");
+            string fileN = Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Multi_Seg_Surrogates.json");
 
             if (File.Exists(fileN))
             {
@@ -247,17 +248,18 @@ namespace GUI.AQUATOX
         }
 
 
-        public static string ChooseLakeTemplate(out string lakename, out AQTSim BaseSim)
+        public static string ChooseJSONTemplate(out string sitename, out AQTSim BaseSim)
         {
             BaseSim = null;
-            lakename = "";
+            sitename = "";
             if (!ReadLakeSurrogates()) return "";
 
             GridForm gf = new GridForm();
+            gf.Text = "Select Surrogate Simulation";
 
-            if (gf.SelectRow(LS.table, "SurrogateLakes"))
+            if (gf.SelectRow(LS.table, "Select_Surrogate"))
             {
-                lakename = gf.chosenlake;
+                sitename = gf.chosenlake;
                 if (LS.Sims.TryGetValue(gf.chosenfileN, out BaseSim)) return gf.chosenfileN;
                    else return "";
             }
@@ -267,9 +269,10 @@ namespace GUI.AQUATOX
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
             string lakename;
-            string lakefilen = ChooseLakeTemplate(out lakename, out BSim);    
+            string lakefilen = ChooseJSONTemplate(out lakename, out BSim);    
             if (lakefilen == "") return;
 
+            fromtemplate = true;
             SimBaseLabel.Text = "Simulation Base: "+lakename;
             BaseJSON_FileN = lakefilen;
             SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\"";
@@ -311,10 +314,9 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            string target = "Multi_Segment_Runs";  //fixme new help topic
+            string target = "New_Simulation";
             AQTTestForm.OpenUrl(target);
         }
-
 
 
 
@@ -396,6 +398,7 @@ namespace GUI.AQUATOX
             else
             {
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
+                SegLoadLabel.Visible = false;
                 infolabel1.Text = "Click on a Lake/Reservoir to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
                 if (!LakeSelected && !SNPopulated) Summary1Label.Text = "WB COMID:  (unselected)";
@@ -403,15 +406,49 @@ namespace GUI.AQUATOX
 
         }
 
-        private void LSButton_Click(object sender, EventArgs e)
+        private void MS_Surrogate_Button_Click(object sender, EventArgs e)
         {
-            // private funcitonality to create and write Lake_Surrogates object
-            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
+            // private functionality to create and write Multi-segment Surrogates object
+            Lake_Surrogates LS = new Lake_Surrogates(Path.GetFullPath("..\\..\\..\\2D_Inputs\\" + "MS_Surrogates_Table.json"), "..\\..\\..\\Studies\\");
             string json = JsonConvert.SerializeObject(LS, LSJSONSettings());
-            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Lake_Surrogates.json", json);
+            File.WriteAllText("..\\..\\..\\2D_Inputs\\" + "Multi_Seg_Surrogates.json", json);
             return;
-
         }
+
+        private void BrowseJSONButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Text File|*.txt;*.json";
+            openFileDialog1.Title = "Open a JSON File";
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return;
+
+            if (openFileDialog1.FileName != "")
+            {
+                try
+                {
+                    BSim = new AQTSim();
+                    string err = BSim.Instantiate(File.ReadAllText(openFileDialog1.FileName));
+                    if (err != "")
+                    {
+                        MessageBox.Show("Could not read JSON: " + err);
+                        return;
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Could not read JSON "+ openFileDialog1.FileName);
+                    BSim = null;
+                    return;
+                }
+
+                fromtemplate = false;
+                string filen = Path.GetFileName(openFileDialog1.FileName);
+                SimBaseLabel.Text = "Simulation Base: " + filen;
+                BaseJSON_FileN = openFileDialog1.FileName;
+                SimJSONLabel.Text = "\"" + filen + "\"";
+            }
+        }
+
 
     }
 }

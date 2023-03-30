@@ -20,7 +20,6 @@ using System.Linq;
 using Newtonsoft.Json;
 using Data;
 using System.ComponentModel;
-using System.IO;
 using System.Data;
 
 namespace AQUATOX.AQTSegment
@@ -284,7 +283,7 @@ namespace AQUATOX.AQTSegment
 
             TL.UseConstant = false;
             TL.MultLdg = multldg;
-            TL.Hourly = true;
+            //TL.Hourly = true;  12/14/22
             TL.list = inlist;
 
             string outjson = "";
@@ -1169,7 +1168,8 @@ namespace AQUATOX.AQTSegment
 
         public bool CalcVelocity = true;
         public TLoadings DynVelocity = null;
-        public double MeanDischarge = 0;    // output only
+        public double MeanDischarge = 0;   // output only
+        public double residence_time = 1;  // water residence time in days
 
         public Diagenesis_Rec Diagenesis_Params;
         public bool Diagenesis_Steady_State = false;  // whether to calculate layer 1 as steady state
@@ -1928,7 +1928,7 @@ namespace AQUATOX.AQTSegment
 
             foreach (TStateVariable TSV in SV) TSV.TakeDerivative(Step);
 
-            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Enable Parallel.ForEach when not debugging
+            // Parallel.ForEach(SV, TSV => TSV.TakeDerivative(Step));  FIXME Consider Enabling Parallel.ForEach when not debugging... uncertain how much improvement due to transactional costs
 
         }
 
@@ -1965,7 +1965,6 @@ namespace AQUATOX.AQTSegment
         }
 
         // Modify db to Account for a changing volume
-        // Below functions in NUMERICAL.INC
         // -------------------------------------------------------------------------
         // Cash-Karp RungeKutta with adaptive stepsize.
         // 
@@ -2667,6 +2666,10 @@ namespace AQUATOX.AQTSegment
                 {
                     h = h_minimum;  // attempt to control min. timestep
                 }
+                else if ((Math.Abs(hnext) > residence_time))
+                {
+                    h = residence_time;  // 12/5/2022 logic to prevent minimum timestep from being below residence time 
+                }
                 else
                 {
                     h = hnext;
@@ -3296,7 +3299,7 @@ namespace AQUATOX.AQTSegment
                                     if (SVLoop == T_SVType.StV)
                                     {
                                         PR.InitialCond = PDIR.InitCond * MultFrac;
-                                        PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;
+                                        // PR.LoadsRec.Loadings.Hourly = PDIR.Load.Loadings.Hourly;   // All Hourly = true;  12/14/22
                                     }
                                     else PR.InitialCond = PDIR.ToxInitCond[PR.ToxInt(SVLoop)];
                                 }
@@ -3431,7 +3434,7 @@ namespace AQUATOX.AQTSegment
             if (!(p == null)) { return p.State; }
             else
             {
-                throw new ArgumentException("GetState called for non-existant state variable: " + S.ToString(), "original");  // fixme error message
+                throw new ArgumentException("Internal AQUATOX Error: GetState called for non-existant state variable: " + S.ToString(), "original");  
                 // result = -1;
             }
         }
@@ -4970,7 +4973,7 @@ namespace AQUATOX.AQTSegment
         {
 
             TStateVariable TSV1 = null;
-            bool SuppressText = true;
+            //bool SuppressText = false;
 
             int sercnt = 0;
             string outtxt = "";
@@ -4992,7 +4995,7 @@ namespace AQUATOX.AQTSegment
 
                         sercnt++;
 
-                        SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
+                        //SuppressText = (TSV.SVoutput.Data.Keys.Count > 5000);
                         for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
                         {
                             ITimeSeriesOutput ito = TSV.SVoutput;
@@ -5005,7 +5008,7 @@ namespace AQUATOX.AQTSegment
 
             outtxt = outtxt + Environment.NewLine;
 
-            if (!SuppressText)
+            // if (!SuppressText)
             {
                 for (int i = 0; i < TSV1.SVoutput.Data.Keys.Count; i++)
                 {
@@ -5274,11 +5277,11 @@ namespace AQUATOX.AQTSegment
             DailyLight = light;
 
             HourlyLight = 0;
-            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.Hourly))
+            if ((!LoadsRec.Loadings.NoUserLoad) && (!AQTSeg.PSetup.ModelTSDays.Val))        // && (LoadsRec.Loadings.Hourly)) 12/14/22
             { HourlyLight = light; }
 
             // 12-5-2016 correction to properly model hourly light time-series inputs
-            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant) || (!LoadsRec.Loadings.Hourly)))
+            if ((!AQTSeg.PSetup.ModelTSDays.Val) && (LoadsRec.Loadings.NoUserLoad || (LoadsRec.Loadings.UseConstant)))  // 12/14/22  removed || (!LoadsRec.Loadings.Hourly)
             {
                 // distribute daily loading over daylight hours
                 pp = AQTSeg.Photoperiod();

@@ -58,6 +58,7 @@
             this.StreamButton = new System.Windows.Forms.RadioButton();
             this.LakeButton = new System.Windows.Forms.RadioButton();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.BrowseJSONButton = new System.Windows.Forms.Button();
             this.NetworkLabel = new System.Windows.Forms.Label();
             this.SegLoadLabel = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -186,7 +187,7 @@
             // 
             // ChooseTemplateButton
             // 
-            this.ChooseTemplateButton.Location = new System.Drawing.Point(120, 68);
+            this.ChooseTemplateButton.Location = new System.Drawing.Point(18, 66);
             this.ChooseTemplateButton.Name = "ChooseTemplateButton";
             this.ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
             this.ChooseTemplateButton.TabIndex = 29;
@@ -206,7 +207,6 @@
             this.HelpButton2.TabIndex = 30;
             this.HelpButton2.Text = "   Help";
             this.HelpButton2.UseVisualStyleBackColor = true;
-            this.HelpButton2.Visible = false;
             this.HelpButton2.Click += new System.EventHandler(this.HelpButton2_Click);
             // 
             // infolabel1
@@ -215,9 +215,9 @@
             this.infolabel1.AutoSize = true;
             this.infolabel1.Location = new System.Drawing.Point(398, 531);
             this.infolabel1.Name = "infolabel1";
-            this.infolabel1.Size = new System.Drawing.Size(187, 15);
+            this.infolabel1.Size = new System.Drawing.Size(378, 15);
             this.infolabel1.TabIndex = 39;
-            this.infolabel1.Text = "Click on a Lake/Reservoir to Select";
+            this.infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
             // 
             // infolabel2
             // 
@@ -225,9 +225,9 @@
             this.infolabel2.AutoSize = true;
             this.infolabel2.Location = new System.Drawing.Point(398, 550);
             this.infolabel2.Name = "infolabel2";
-            this.infolabel2.Size = new System.Drawing.Size(244, 15);
+            this.infolabel2.Size = new System.Drawing.Size(357, 15);
             this.infolabel2.TabIndex = 40;
-            this.infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom.";
+            this.infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
             // 
             // webView
             // 
@@ -288,7 +288,7 @@
             // StartDate
             // 
             this.StartDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.StartDate.Location = new System.Drawing.Point(109, 117);
+            this.StartDate.Location = new System.Drawing.Point(109, 127);
             this.StartDate.Name = "StartDate";
             this.StartDate.Size = new System.Drawing.Size(103, 23);
             this.StartDate.TabIndex = 51;
@@ -298,7 +298,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(37, 122);
+            this.label3.Location = new System.Drawing.Point(37, 132);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 15);
             this.label3.TabIndex = 52;
@@ -308,7 +308,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(44, 148);
+            this.label5.Location = new System.Drawing.Point(44, 158);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(57, 15);
             this.label5.TabIndex = 54;
@@ -317,7 +317,7 @@
             // EndDate
             // 
             this.EndDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.EndDate.Location = new System.Drawing.Point(109, 144);
+            this.EndDate.Location = new System.Drawing.Point(109, 154);
             this.EndDate.Name = "EndDate";
             this.EndDate.Size = new System.Drawing.Size(103, 23);
             this.EndDate.TabIndex = 53;
@@ -326,15 +326,15 @@
             // LS_Button
             // 
             this.LS_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.LS_Button.Location = new System.Drawing.Point(924, 540);
+            this.LS_Button.Location = new System.Drawing.Point(888, 540);
             this.LS_Button.Name = "LS_Button";
-            this.LS_Button.Size = new System.Drawing.Size(117, 25);
+            this.LS_Button.Size = new System.Drawing.Size(153, 25);
             this.LS_Button.TabIndex = 55;
-            this.LS_Button.Text = "Create LS JSON";
+            this.LS_Button.Text = "Create Template JSON";
             this.LS_Button.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.LS_Button.UseVisualStyleBackColor = true;
             this.LS_Button.Visible = false;
-            this.LS_Button.Click += new System.EventHandler(this.LSButton_Click);
+            this.LS_Button.Click += new System.EventHandler(this.MS_Surrogate_Button_Click);
             // 
             // TogglePanel
             // 
@@ -348,10 +348,12 @@
             // StreamButton
             // 
             this.StreamButton.AutoSize = true;
+            this.StreamButton.Checked = true;
             this.StreamButton.Location = new System.Drawing.Point(146, 4);
             this.StreamButton.Name = "StreamButton";
             this.StreamButton.Size = new System.Drawing.Size(162, 19);
             this.StreamButton.TabIndex = 2;
+            this.StreamButton.TabStop = true;
             this.StreamButton.Text = "Stream Network (w. lakes)";
             this.StreamButton.UseVisualStyleBackColor = true;
             this.StreamButton.CheckedChanged += new System.EventHandler(this.MapType_CheckChanged);
@@ -359,12 +361,10 @@
             // LakeButton
             // 
             this.LakeButton.AutoSize = true;
-            this.LakeButton.Checked = true;
             this.LakeButton.Location = new System.Drawing.Point(12, 4);
             this.LakeButton.Name = "LakeButton";
             this.LakeButton.Size = new System.Drawing.Size(124, 19);
             this.LakeButton.TabIndex = 0;
-            this.LakeButton.TabStop = true;
             this.LakeButton.Text = "0-D Lake/Reservoir";
             this.LakeButton.UseVisualStyleBackColor = true;
             this.LakeButton.CheckedChanged += new System.EventHandler(this.MapType_CheckChanged);
@@ -372,6 +372,7 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.BrowseJSONButton);
             this.panel2.Controls.Add(this.ChooseTemplateButton);
             this.panel2.Controls.Add(this.SimBaseLabel);
             this.panel2.Controls.Add(this.SimJSONLabel);
@@ -383,6 +384,17 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(259, 202);
             this.panel2.TabIndex = 59;
+            // 
+            // BrowseJSONButton
+            // 
+            this.BrowseJSONButton.Location = new System.Drawing.Point(145, 66);
+            this.BrowseJSONButton.Name = "BrowseJSONButton";
+            this.BrowseJSONButton.Size = new System.Drawing.Size(67, 23);
+            this.BrowseJSONButton.TabIndex = 55;
+            this.BrowseJSONButton.Text = "Browse";
+            this.BrowseJSONButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.BrowseJSONButton.UseVisualStyleBackColor = true;
+            this.BrowseJSONButton.Click += new System.EventHandler(this.BrowseJSONButton_Click);
             // 
             // NetworkLabel
             // 
@@ -397,13 +409,13 @@
             // SegLoadLabel
             // 
             this.SegLoadLabel.AutoSize = true;
-            this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SegLoadLabel.Location = new System.Drawing.Point(439, 37);
+            this.SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.SegLoadLabel.ForeColor = System.Drawing.SystemColors.InfoText;
+            this.SegLoadLabel.Location = new System.Drawing.Point(438, 39);
             this.SegLoadLabel.Name = "SegLoadLabel";
-            this.SegLoadLabel.Size = new System.Drawing.Size(203, 17);
+            this.SegLoadLabel.Size = new System.Drawing.Size(191, 15);
             this.SegLoadLabel.TabIndex = 60;
             this.SegLoadLabel.Text = "Zoom in to see stream segments.";
-            this.SegLoadLabel.Visible = false;
             // 
             // label7
             // 
@@ -477,7 +489,7 @@
             this.Controls.Add(this.button1);
             this.MinimumSize = new System.Drawing.Size(1003, 553);
             this.Name = "NewSimForm";
-            this.Text = "NewSimForm";
+            this.Text = "New Simulation Window";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NewSimForm_FormClosing);
             this.Shown += new System.EventHandler(this.NewSimForm_Shown);
             this.ReadNetworkPanel.ResumeLayout(false);
@@ -533,5 +545,6 @@
         private System.Windows.Forms.Label Summary2Label;
         private System.Windows.Forms.Label Summary1Label;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button BrowseJSONButton;
     }
 }

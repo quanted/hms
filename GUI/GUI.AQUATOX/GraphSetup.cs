@@ -10,15 +10,6 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace GUI.AQUATOX
 {
-    public static class StringExtensions
-    {
-        public static bool Contains(this string source, string toCheck, StringComparison comp)
-        {
-            return source?.IndexOf(toCheck, comp) >= 0;
-        }
-    }
-
-
     public partial class GraphSetupForm : Form
     {
 
@@ -201,6 +192,14 @@ namespace GUI.AQUATOX
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
+        }
+    }
+
+    public static class StringExtensions
+    {
+        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        {
+            return source?.IndexOf(toCheck, comp) >= 0;
         }
     }
 }

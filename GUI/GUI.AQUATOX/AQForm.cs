@@ -5,7 +5,6 @@ using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
-//using Microsoft.Research.Science.Data.Imperative;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-// using sds = Microsoft.Research.Science.Data;
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 

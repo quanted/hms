@@ -161,7 +161,7 @@ namespace GUI.AQUATOX
                 WarningLabel.Visible = true;
                 WarningLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             }
-            if (isInternalSeg)
+            if (isInternalSeg && !(SV.NState == AllVariables.Volume))
             {
                 WarningLabel.Visible = true;
                 WarningLabel.Text = "Inflow Loadings not relevant.";
