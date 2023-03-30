@@ -88,7 +88,18 @@ namespace Streamflow
             }
             else
             {
-                Dictionary<string, object> comidGages = Utilities.COMID.GetGageInfo(input.Geometry.GeometryMetadata["gaugestation"], out errorMsg);
+                int gageID = -1;
+                try
+                {
+                    gageID = Int32.Parse(input.Geometry.GeometryMetadata["gaugestation"]);
+                }
+                catch (FormatException)
+                {
+                    errorMsg = "Invalid stream GageID provided in the geometry metadata for gaugestation. Value must be an integer.";
+                    return null;
+                }
+
+                Dictionary<string, object> comidGages = Utilities.COMID.GetGageInfo(gageID, out errorMsg);
                 if (comidGages.ContainsKey("GAGEID"))
                 {
                     output.Metadata = Utilities.Metadata.MergeMetadata(output.Metadata, comidGages, "NWIS");
