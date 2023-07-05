@@ -57,7 +57,6 @@ namespace GUI.AQUATOX
             this.PlantsButton = new System.Windows.Forms.Button();
             this.Diagenesis = new System.Windows.Forms.Button();
             this.RunStatusLabel = new System.Windows.Forms.Label();
-            this.AddButton = new System.Windows.Forms.Button();
             this.EditButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.MultiSegButton = new System.Windows.Forms.Button();
@@ -71,9 +70,22 @@ namespace GUI.AQUATOX
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
+            this.AddButton = new System.Windows.Forms.Button();
+            this.DeleteResultsButton = new System.Windows.Forms.Button();
+            this.estdbbutton = new System.Windows.Forms.Button();
+            this.AnnealPanel = new System.Windows.Forms.Panel();
+            this.randomBox = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.IterationBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.TStartBox = new System.Windows.Forms.TextBox();
+            this.calcerror = new System.Windows.Forms.Button();
+            this.ExportBest = new System.Windows.Forms.Button();
+            this.parallelanneal = new System.Windows.Forms.Button();
             this.DBPanel.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.AnnealPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // loadJSON
@@ -124,7 +136,7 @@ namespace GUI.AQUATOX
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 321);
+            this.outputbutton.Location = new System.Drawing.Point(26, 345);
             this.outputbutton.Name = "outputbutton";
             this.outputbutton.Size = new System.Drawing.Size(87, 25);
             this.outputbutton.TabIndex = 1;
@@ -233,7 +245,7 @@ namespace GUI.AQUATOX
             this.DBPanel.Controls.Add(this.ChemDB);
             this.DBPanel.Controls.Add(this.ReminDB);
             this.DBPanel.Controls.Add(this.AnimalDB);
-            this.DBPanel.Location = new System.Drawing.Point(453, 9);
+            this.DBPanel.Location = new System.Drawing.Point(454, 6);
             this.DBPanel.Name = "DBPanel";
             this.DBPanel.Size = new System.Drawing.Size(343, 55);
             this.DBPanel.TabIndex = 16;
@@ -333,18 +345,6 @@ namespace GUI.AQUATOX
             this.RunStatusLabel.TabIndex = 18;
             this.RunStatusLabel.Text = "Run Status";
             // 
-            // AddButton
-            // 
-            this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddButton.Location = new System.Drawing.Point(444, 450);
-            this.AddButton.Name = "AddButton";
-            this.AddButton.Size = new System.Drawing.Size(60, 25);
-            this.AddButton.TabIndex = 21;
-            this.AddButton.Text = "Add";
-            this.AddButton.UseVisualStyleBackColor = true;
-            this.AddButton.Visible = false;
-            this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
-            // 
             // EditButton
             // 
             this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -384,7 +384,7 @@ namespace GUI.AQUATOX
             // 
             this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
             this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(26, 240);
+            this.HelpButton.Location = new System.Drawing.Point(26, 264);
             this.HelpButton.Name = "HelpButton";
             this.HelpButton.Size = new System.Drawing.Size(87, 28);
             this.HelpButton.TabIndex = 23;
@@ -406,7 +406,7 @@ namespace GUI.AQUATOX
             // 
             this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(26, 272);
+            this.browserButton.Location = new System.Drawing.Point(26, 296);
             this.browserButton.Margin = new System.Windows.Forms.Padding(0);
             this.browserButton.Name = "browserButton";
             this.browserButton.Size = new System.Drawing.Size(87, 23);
@@ -493,11 +493,152 @@ namespace GUI.AQUATOX
             this.CancelButt.Visible = false;
             this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
             // 
+            // AddButton
+            // 
+            this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.AddButton.Location = new System.Drawing.Point(444, 450);
+            this.AddButton.Name = "AddButton";
+            this.AddButton.Size = new System.Drawing.Size(60, 25);
+            this.AddButton.TabIndex = 21;
+            this.AddButton.Text = "Add";
+            this.AddButton.UseVisualStyleBackColor = true;
+            this.AddButton.Visible = false;
+            this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
+            // 
+            // DeleteResultsButton
+            // 
+            this.DeleteResultsButton.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.DeleteResultsButton.ForeColor = System.Drawing.Color.Black;
+            this.DeleteResultsButton.Location = new System.Drawing.Point(47, 205);
+            this.DeleteResultsButton.Margin = new System.Windows.Forms.Padding(0);
+            this.DeleteResultsButton.Name = "DeleteResultsButton";
+            this.DeleteResultsButton.Size = new System.Drawing.Size(64, 22);
+            this.DeleteResultsButton.TabIndex = 39;
+            this.DeleteResultsButton.Text = "Delete all";
+            this.DeleteResultsButton.UseVisualStyleBackColor = true;
+            this.DeleteResultsButton.Visible = false;
+            this.DeleteResultsButton.Click += new System.EventHandler(this.DeleteResultsButton_Click);
+            // 
+            // estdbbutton
+            // 
+            this.estdbbutton.Location = new System.Drawing.Point(175, 19);
+            this.estdbbutton.Name = "estdbbutton";
+            this.estdbbutton.Size = new System.Drawing.Size(59, 20);
+            this.estdbbutton.TabIndex = 40;
+            this.estdbbutton.Text = "est db";
+            this.estdbbutton.UseVisualStyleBackColor = true;
+            this.estdbbutton.Click += new System.EventHandler(this.estdbbutton_Click);
+            // 
+            // AnnealPanel
+            // 
+            this.AnnealPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.AnnealPanel.Controls.Add(this.randomBox);
+            this.AnnealPanel.Controls.Add(this.label4);
+            this.AnnealPanel.Controls.Add(this.IterationBox);
+            this.AnnealPanel.Controls.Add(this.label2);
+            this.AnnealPanel.Controls.Add(this.TStartBox);
+            this.AnnealPanel.Controls.Add(this.calcerror);
+            this.AnnealPanel.Controls.Add(this.ExportBest);
+            this.AnnealPanel.Controls.Add(this.parallelanneal);
+            this.AnnealPanel.Controls.Add(this.estdbbutton);
+            this.AnnealPanel.Location = new System.Drawing.Point(163, 325);
+            this.AnnealPanel.Name = "AnnealPanel";
+            this.AnnealPanel.Size = new System.Drawing.Size(252, 97);
+            this.AnnealPanel.TabIndex = 48;
+            this.AnnealPanel.Visible = false;
+            // 
+            // randomBox
+            // 
+            this.randomBox.AutoSize = true;
+            this.randomBox.Checked = true;
+            this.randomBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.randomBox.Location = new System.Drawing.Point(165, 57);
+            this.randomBox.Name = "randomBox";
+            this.randomBox.Size = new System.Drawing.Size(70, 19);
+            this.randomBox.TabIndex = 55;
+            this.randomBox.Text = "rnd start";
+            this.randomBox.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(85, 58);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(31, 15);
+            this.label4.TabIndex = 54;
+            this.label4.Text = "n / T";
+            // 
+            // IterationBox
+            // 
+            this.IterationBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.IterationBox.Location = new System.Drawing.Point(118, 55);
+            this.IterationBox.Name = "IterationBox";
+            this.IterationBox.Size = new System.Drawing.Size(28, 22);
+            this.IterationBox.TabIndex = 53;
+            this.IterationBox.Text = "200";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 58);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(39, 15);
+            this.label2.TabIndex = 52;
+            this.label2.Text = "T start";
+            // 
+            // TStartBox
+            // 
+            this.TStartBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.TStartBox.Location = new System.Drawing.Point(46, 54);
+            this.TStartBox.Name = "TStartBox";
+            this.TStartBox.Size = new System.Drawing.Size(28, 22);
+            this.TStartBox.TabIndex = 51;
+            this.TStartBox.Text = "100";
+            // 
+            // calcerror
+            // 
+            this.calcerror.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.calcerror.ForeColor = System.Drawing.Color.Black;
+            this.calcerror.Location = new System.Drawing.Point(166, 17);
+            this.calcerror.Margin = new System.Windows.Forms.Padding(0);
+            this.calcerror.Name = "calcerror";
+            this.calcerror.Size = new System.Drawing.Size(71, 22);
+            this.calcerror.TabIndex = 50;
+            this.calcerror.Text = "Calc Error";
+            this.calcerror.UseVisualStyleBackColor = true;
+            this.calcerror.Click += new System.EventHandler(this.calcerror_Click);
+            // 
+            // ExportBest
+            // 
+            this.ExportBest.Enabled = false;
+            this.ExportBest.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ExportBest.ForeColor = System.Drawing.Color.Black;
+            this.ExportBest.Location = new System.Drawing.Point(84, 17);
+            this.ExportBest.Margin = new System.Windows.Forms.Padding(0);
+            this.ExportBest.Name = "ExportBest";
+            this.ExportBest.Size = new System.Drawing.Size(71, 22);
+            this.ExportBest.TabIndex = 49;
+            this.ExportBest.Text = "ExportBest";
+            this.ExportBest.UseVisualStyleBackColor = true;
+            this.ExportBest.Click += new System.EventHandler(this.ExportBestClick);
+            // 
+            // parallelanneal
+            // 
+            this.parallelanneal.Location = new System.Drawing.Point(13, 17);
+            this.parallelanneal.Name = "parallelanneal";
+            this.parallelanneal.Size = new System.Drawing.Size(59, 23);
+            this.parallelanneal.TabIndex = 48;
+            this.parallelanneal.Text = "|| anneal";
+            this.parallelanneal.UseVisualStyleBackColor = true;
+            this.parallelanneal.Click += new System.EventHandler(this.ParallelAnnealClick);
+            // 
             // AQTTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(813, 490);
+            this.Controls.Add(this.AnnealPanel);
+            this.Controls.Add(this.DeleteResultsButton);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
             this.Controls.Add(this.SetupButton);
@@ -532,6 +673,8 @@ namespace GUI.AQUATOX
             this.DBPanel.PerformLayout();
             this.ButtonPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.AnnealPanel.ResumeLayout(false);
+            this.AnnealPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -562,7 +705,6 @@ namespace GUI.AQUATOX
         private Button PlantsButton;
         private Button Diagenesis;
         private Label RunStatusLabel;
-        private Button AddButton;
         private Button EditButton;
         private Button DeleteButton;
         private Button FoodWebButton;
@@ -577,6 +719,19 @@ namespace GUI.AQUATOX
         private PictureBox pictureBox1;
         private Button OKButton;
         private Button CancelButt;
+        private Button AddButton;
+        private Button button3;
+        private Button DeleteResultsButton;
+        private Button estdbbutton;
+        private Panel AnnealPanel;
+        private CheckBox randomBox;
+        private Label label4;
+        private TextBox IterationBox;
+        private Label label2;
+        private TextBox TStartBox;
+        private Button calcerror;
+        private Button ExportBest;
+        private Button parallelanneal;
     }
 
 
