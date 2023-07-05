@@ -42,9 +42,11 @@ namespace GUI.AQUATOX
 
         public AQTSim aQTS = null;
         public AQUATOXSegment outSeg = null;
+        
 
         private int ScaleX(int x)
         {
+            
             double ScaleX = graphics.DpiX / 96;
             return Convert.ToInt32(x * ScaleX);
         }
@@ -176,9 +178,9 @@ namespace GUI.AQUATOX
             int i = graphBox.SelectedIndex;
             graphBox.Items.Clear();
             graphBox.Text = "";
-            if (outSeg == null) return;
+            if (aQTS.AQTSeg == null) return;
 
-            foreach (TGraphSetup TGS in outSeg.Graphs.GList)
+            foreach (TGraphSetup TGS in aQTS.AQTSeg.Graphs.GList)
             {
                 graphBox.Items.Add(TGS.GraphName);
             }
@@ -234,9 +236,10 @@ namespace GUI.AQUATOX
             unZoom();
 
             if (graphBox.SelectedIndex < 0) return;
+            if (outSeg == null) return;
 
             outSeg.SetMemLocRec();
-            TGraphSetup Graph = outSeg.Graphs.GList[graphBox.SelectedIndex];
+            TGraphSetup Graph = aQTS.AQTSeg.Graphs.GList[graphBox.SelectedIndex];
 
             foreach (SeriesID SID in Graph.YItems)
             {
@@ -268,21 +271,22 @@ namespace GUI.AQUATOX
         {
             if (outSeg == null) return;
             GraphSetupForm GSForm = new GraphSetupForm();
-            if (GSForm.EditGraph(outSeg, -1)) UpdateGraphBox();
+            if (GSForm.EditGraph(aQTS.AQTSeg, -1)) UpdateGraphBox();
             graphBox.SelectedIndex = graphBox.Items.Count - 1;
 
         }
 
         private void graphBox_selectedIndexChange(object sender, EventArgs e)
         {
+            if (outSeg == null) return;
             DisplayGraph();
         }
 
         private void EditGraphButton_Click(object sender, EventArgs e)
         {
-            if (outSeg == null) return;
+            if (aQTS.AQTSeg == null) return;
             GraphSetupForm GSForm = new GraphSetupForm();
-            if (GSForm.EditGraph(outSeg, graphBox.SelectedIndex)) UpdateGraphBox();
+            if (GSForm.EditGraph(aQTS.AQTSeg, graphBox.SelectedIndex)) UpdateGraphBox();
         }
 
         private void DeleteGraphButton_Click(object sender, EventArgs e)
@@ -292,7 +296,7 @@ namespace GUI.AQUATOX
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == System.Windows.Forms.DialogResult.Yes)
             {
-                outSeg.Graphs.DeleteGraph(graphBox.SelectedIndex);
+                aQTS.AQTSeg.Graphs.DeleteGraph(graphBox.SelectedIndex);
                 UpdateGraphBox();
                 DisplayGraph();
             }
@@ -370,7 +374,7 @@ namespace GUI.AQUATOX
 
             outSeg.SetMemLocRec();
 
-            TGraphSetup Graph = outSeg.Graphs.GList[graphBox.SelectedIndex];
+            TGraphSetup Graph = aQTS.AQTSeg.Graphs.GList[graphBox.SelectedIndex];
             foreach (SeriesID SID in Graph.YItems)
             {
                 TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
