@@ -20,9 +20,6 @@ using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 using System.Threading;
-using Web.Services.Models;
-using static GUI.AQUATOX.MultiSegForm;
-using Utilities;
 
 namespace GUI.AQUATOX
 
@@ -164,14 +161,6 @@ namespace GUI.AQUATOX
             webView.CoreWebView2.ProcessFailed += WebView_ProcessFailed;
         }
 
-        private void SendMessage(object sender, EventArgs e)
-        {
-            if (webView != null && webView.CoreWebView2 != null)
-            {
-                webView.CoreWebView2.PostWebMessageAsString("Message from Dotnet buttton");
-            }
-        }
-
         void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
         {
             MessageBox.Show("WebView Process Failed");
@@ -247,14 +236,14 @@ namespace GUI.AQUATOX
             try
             {
                 if (!VerifyBaseDir()) return;
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
                 string ScrString = JsonConvert.SerializeObject(ScrSettings);
                 File.WriteAllText(BaseDir + "ScreenSettings.JSON", ScrString);
                 UpdateRecentFiles(BaseDir);
             }
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when saving Screen Settings: " + ex.Message;
+                AddToProcessLog("ERROR: when saving Screen Settings: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 return;
             }
@@ -270,7 +259,7 @@ namespace GUI.AQUATOX
             try
             {
                 if (!VerifyBaseDir()) return;
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
                 if (!File.Exists((BaseDir + "ScreenSettings.JSON"))) return;
                 string ScrString = File.ReadAllText(BaseDir + "ScreenSettings.JSON");
                 ScrSettings = JsonConvert.DeserializeObject<ScreenSettings>(ScrString);
@@ -278,7 +267,7 @@ namespace GUI.AQUATOX
             }
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when loading Screen Settings: " + ex.Message;
+                AddToProcessLog("ERROR: when loading Screen Settings: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 return;
             }
@@ -334,7 +323,7 @@ namespace GUI.AQUATOX
                 else
                 {
                     string str3;
-                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
+                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";  
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
                     setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
                 }
@@ -482,64 +471,14 @@ namespace GUI.AQUATOX
             progressBar1.BeginInvoke((MethodInvoker)delegate ()
                 {
                     progressBar1.Visible = false;
+                    proglabel.Visible= false;
                     CancelButton.Visible = false;
                 });
         }
 
-
-        // SUPERSEDED BY NEW WINDOW
-        //private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
-        //{
-        //    if (VerifyStreamNetwork())
-        //        if (MessageBox.Show("Overwrite the existing stream network and any inputs and outputs?", "Confirm",
-        //            MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
-
-        //    BaseDir = basedirBox.Text;
-
-        //    string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
-        //    foreach (string directoryFile in directoryFiles)
-        //    {
-        //        System.IO.File.Delete(directoryFile);
-        //    }
-
-        //    ConsoleButton.Checked = true;
-
-        //    if (AQT2D == null) AQT2D = new AQSim_2D();
-
-        //    AddToProcessLog("INFO: Please wait, reading stream network from web service");
-        //    string SNJSON = AQT2D.ReadStreamNetwork(ScrSettings.COMIDstr,  ScrSettings.EndCOMIDstr, ScrSettings.UpSpanStr);
-        //    if (SNJSON == "")
-        //    {
-        //        AddToProcessLog("ERROR: web service returned empty JSON."); return;
-        //    }
-        //    if (SNJSON.IndexOf("ERROR") >= 0)
-        //    {
-        //        AddToProcessLog("ERROR: web service returned: " + SNJSON); return;
-        //    }
-        //    try
-        //    { AQT2D.CreateStreamNetwork(SNJSON); }
-        //    catch
-        //    { AddToProcessLog("ERROR: when converting JSON:" + SNJSON); return; }
-
-        //    AddToProcessLog("INFO: System has " + AQT2D.nSegs.ToString() + " segments");
-
-        //    //string BaseFileN = BaseJSONBox.Text;
-        //    //AddToProcessLog(" Basefile = " + BaseFileN);
-
-        //    AddToProcessLog("INFO: BaseDir = " + BaseDir);
-
-        //    File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
-        //    AddToProcessLog("Finished reading stream network" + Environment.NewLine);
-
-        //    Lake0D = 0;
-
-        //    UpdateScreen();
-        //    if (MapButton2.Checked) PlotCOMIDMap();
-        //}
-
         private bool SegmentsCreated()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string FileN = "";
             if (Lake0D > 0) FileN = BaseDir + "AQT_Input_" + Lake0D.ToString() + ".JSON";
             else
@@ -552,7 +491,7 @@ namespace GUI.AQUATOX
 
         private DateTime ModelRunDate()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string comid;
             if (Lake0D > 0) comid = Lake0D.ToString();
             else comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
@@ -590,13 +529,13 @@ namespace GUI.AQUATOX
 
         private bool VerifyBaseDir()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             return Directory.Exists(BaseDir);
         }
 
         private bool VerifyStreamNetwork()
         {
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             if (AQT2D == null) AQT2D = new AQSim_2D();
             if (AQT2D.SN == null)
             {
@@ -651,7 +590,7 @@ namespace GUI.AQUATOX
             {
                 TSafeAddToProcessLog(errmessage);
                 UseWaitCursor = false;
-                // webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBComid + "|red");  Can't be called in Async
+                PostWebviewMessage("COLOR|" + WBComid + "|red");  
                 TSafeHideProgBar();
                 ConsoleButton.Checked = true;
             }
@@ -666,7 +605,7 @@ namespace GUI.AQUATOX
             {
                 ConsoleButton.Checked = true;
                 ChartVisible(false);
-                string BaseDir = basedirBox.Text;
+                BaseDir = basedirBox.Text;
 
                 if (!VerifyStreamNetwork()) return;
 
@@ -678,6 +617,8 @@ namespace GUI.AQUATOX
 
                 UseWaitCursor = true;
                 progressBar1.Visible = true;
+                proglabel.Text = "Reading NWM data";
+                proglabel.Visible = true;
                 Application.DoEvents();
 
                 SetInterfaceBusy(true);
@@ -696,12 +637,12 @@ namespace GUI.AQUATOX
 
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null)
-                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(int.Parse(comid));
+                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
                             continue;
-                        }   //TODO check for NWM data, case where lake/res returns null
+                        }   
 
                         string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
@@ -715,7 +656,7 @@ namespace GUI.AQUATOX
                         {
                             TSafeAddToProcessLog(errmessage);
                             UseWaitCursor = false;
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + comid + "|red");
+                            PostWebviewMessage("COLOR|" + comid + "|red");
                             TSafeHideProgBar();
                             return;
                         }
@@ -735,19 +676,20 @@ namespace GUI.AQUATOX
 
                     if (Lake0D == 0)
                     {
-                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] boundaries))
-                         if (boundaries.Length > 0)
+                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] outofnetwork))
+                         if (outofnetwork.Length > 0)
                          {
                              string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                             foreach (long bid in boundaries) bnote = bnote + bid.ToString() + ", ";
+                             foreach (long bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
                              TSafeAddToProcessLog("INPUT: " + bnote);
                          }
                     }
 
-                    BeginInvoke((Action)(() =>
+                    this.BeginInvoke((MethodInvoker)(() =>
                     {
                         SetInterfaceBusy(false);
                         progressBar1.Visible = false;
+                        proglabel.Visible = false;  
                         CancelButton.Visible = false;
                         UseWaitCursor = false;
                         UpdateScreen();
@@ -760,10 +702,11 @@ namespace GUI.AQUATOX
 
             catch (Exception ex)
             {
-                ProcessLog.Text = "ERROR: when creating segments: " + ex.Message;
+                AddToProcessLog("ERROR: when creating segments: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 SetInterfaceBusy(false);
                 progressBar1.Visible = false;
+                proglabel.Visible= false; 
                 CancelButton.Visible = false;
                 UseWaitCursor = false;
                 UpdateScreen();
@@ -777,9 +720,9 @@ namespace GUI.AQUATOX
         {
             progressBar1.BeginInvoke((MethodInvoker)delegate ()
             {
-                if (Prog < 100) progressBar1.Value = (Prog + 1);  // workaround of animation bug
+                if (Prog < 100) Prog++;  // workaround of animation bug
                 Prog = Math.Max(Prog, 1);
-                if ((Prog > progressBar1.Value) || (Prog == 1)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  //TODO refine
+                if ((Prog > progressBar1.Value) || (Prog == 1) || (progressBar1.Value==100)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  
             });
         }
 
@@ -798,6 +741,7 @@ namespace GUI.AQUATOX
         {
             UseWaitCursor = false;
             progressBar1.Visible = false;
+            proglabel.Visible = false;  
             CancelButton.Visible = false;
             SetInterfaceBusy(false);
             UpdateScreen();
@@ -812,6 +756,8 @@ namespace GUI.AQUATOX
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
+            proglabel.Text = "Model Run Progress";
+            proglabel.Visible = true;
 
             SetInterfaceBusy(true);
 
@@ -831,6 +777,14 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        private void PostWebviewMessage(string str)
+        {
+            webView.BeginInvoke((MethodInvoker)(() =>
+            {
+                webView.CoreWebView2.PostWebMessageAsString(str);
+            }));
+        }
+
         async private void executeButton_Click(object sender, EventArgs e)  //execute the full model run given initialized AQT2D
         {
             ChartVisible(false);
@@ -839,7 +793,7 @@ namespace GUI.AQUATOX
             //if (AQT2D == null) AQT2D = new AQSim_2D();
             //if (AQT2D.SN == null)
             //{
-            //    string BaseDir = basedirBox.Text;
+            //    BaseDir = basedirBox.Text;
             //    if (!ValidFilen(BaseDir + "StreamNetwork.JSON", true)) return;
             //    string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
             //    AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
@@ -855,7 +809,7 @@ namespace GUI.AQUATOX
             AddToProcessLog("INPUTS:  Model Run Initiated");
             try
             {
-                if (AQT2D.SN.network == null)
+                if ((AQT2D.SN == null)||(AQT2D.SN.network == null))
                 {  //0D Lake/Res
 
                     List<string> strout = new();
@@ -873,7 +827,7 @@ namespace GUI.AQUATOX
                             TSafeAddToProcessLog("INPUT: Run saved as " + "AQT_Run_" + Lake0D.ToString() + ".JSON");
                         }
 
-                        BeginInvoke((Action)(() =>  //reset GUI following run
+                        this.BeginInvoke((MethodInvoker)(() =>  //reset GUI following run
                         {
                             reset_interface_after_run();
                         }));
@@ -889,14 +843,15 @@ namespace GUI.AQUATOX
 
                 for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
                 {
+                    proglabel.Text= "Step "+(ordr+1).ToString()+" of "+ AQT2D.SN.order.Length.ToString();
                     await Task.Run(() => Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
                     //                foreach (int runID in AQT2D.SN.order[ordr])
                      {
                          List<string> strout = new();
-                         string BaseDir = basedirBox.Text;
+                         BaseDir = basedirBox.Text;
 
                          bool in_waterbody = false;
-                         if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+                         if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(runID);  // is this listed as a lake/res
 
                          int IDtoRun = runID;
                          if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
@@ -935,10 +890,7 @@ namespace GUI.AQUATOX
                          if (AQT2D.executeModel(IDtoRun, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
                              File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);
 
-                         BeginInvoke((Action)(() =>
-                         {
-                             webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
-                         }));
+                         PostWebviewMessage("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
 
                          foreach (string msg in strout) TSafeAddToProcessLog(msg); //write update to status log
 
@@ -972,7 +924,7 @@ namespace GUI.AQUATOX
 
             catch (Exception ex)
             {
-                ProcessLog.Text += "ERROR: running linked segments: " + ex.Message;
+                AddToProcessLog("ERROR: running linked segments: " + ex.Message);
                 MessageBox.Show(ex.Message);
                 reset_interface_after_run();
                 return;
@@ -1131,7 +1083,7 @@ namespace GUI.AQUATOX
                 Setup_Record SR = Sim.AQTSeg.PSetup;
                 string msr = JsonConvert.SerializeObject(SR);
                 File.WriteAllText(msfilen, msr);
-                AddToProcessLog("INPUT: Updated master setup record.  Copied from base JSON to " + msfilen);
+                TSafeAddToProcessLog("INPUT: Updated master setup record.  Copied from base JSON to " + msfilen);
                 return msr;
             }
 
@@ -1202,7 +1154,7 @@ namespace GUI.AQUATOX
             bool HasP = (TTSP != null);
             bool HasOM = (TOM != null);
 
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
 
             if (OverlandTable == null)
             {   // set up input table based on base JSON specification 
@@ -1323,7 +1275,7 @@ namespace GUI.AQUATOX
 
             if (Lake0D > 0)
             {
-                filen = NewSimForm.ChooseLakeTemplate(out lakename, out BSim);
+                filen = NewSimForm.ChooseJSONTemplate(out lakename, out BSim);
 
                 if (filen == "") return;
                 BaseJSONBox.Text = filen;
@@ -1415,18 +1367,18 @@ namespace GUI.AQUATOX
         }
 
 
-        //string ReadGeoJSON(string WBcomid)
-        //{
-        //    GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(WBcomid);
-        //    object SG = catchment.GetStreamGeometryV2(WBcomid);
-        //    if (SG == null) return "null";
-        //    return "not null";
+//        string ReadGeoJSON(string comid)
+//        {
+            //GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid,true);
+            //object SG = catchment.GetStreamGeometryV2(comid);
+            //if (SG == null) return "null";
+            //return "not null";
 
-        //    //return;
-        //    //WSCatchment WSC = new();
-        //    //Task<Dictionary<string, object>> rslt;
-        //    //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
-        //}
+            //return;
+            //WSCatchment WSC = new();
+            //Task<Dictionary<string, object>> rslt;
+            //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
+//        }
 
 
         bool PlotWBCOMID(string WBString)
@@ -1464,7 +1416,7 @@ namespace GUI.AQUATOX
                         if (IDLoc > -1) GeoJSON = GeoJSON.Insert(IDLoc, "\"COMID\":" + WBString + ",");
                     }
 
-                    webView.CoreWebView2.PostWebMessageAsString("ADDWB|" + GeoJSON);
+                    PostWebviewMessage("ADDWB|" + GeoJSON);
                 }
                 return true;
             }
@@ -1472,26 +1424,22 @@ namespace GUI.AQUATOX
 
         async void PlotCOMIDMap()
         {
+            BaseDir = basedirBox.Text;
             string GeoJSON;
             double[][] polyline;
 
             await mapReadyForRender; // segments can't render until page is loaded
 
-            //          if (webView.CoreWebView2 == null)
-            //          { await webviewready; } //ensure webview initialized
-            //          await webView.CoreWebView2.DOMContentLoaded(null);
-            //          MessageBox.Show("Rendering Now");
-
             logfilen.Visible = false;
             webView.Visible = true;
-            webView.CoreWebView2.PostWebMessageAsString("ERASE");
+            PostWebviewMessage("ERASE");
 
-            int[] boundaries = new int[0];
+            int[] outofnetwork = new int[0];
 
             if (Lake0D > 0) PlotWBCOMID(Lake0D.ToString());  // plot stand alone 0-D lake
             else  // loop through lake/res waterbodies if they exist
             {
-                if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
                 if (AQT2D.SN.waterbodies != null)
                     for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
@@ -1509,17 +1457,19 @@ namespace GUI.AQUATOX
                         if (!NRCheckBox.Checked)
                         {   // suppress show un-run COMIDs (those contained in waterbodies)
                             bool in_waterbody = false;
-                            if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(COMID);
+                            if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(COMID);
                             if (in_waterbody) continue;  // don't plot segments that are superceded by their lake/reservoir waterbody.
                         }
 
-                        if (File.Exists(BaseDir + CString + ".GeoJSON"))
-                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
+                        if (File.Exists(BaseDir + CString + ".GeoJSON")) 
+                         { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }   
                         else
                         {
+                            
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
-                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service
+                            // GeoJSON = "{}";
+                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service    
                             if (GeoJSON.IndexOf("ERROR") >= 0)
                             {
                                 AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
@@ -1533,7 +1483,7 @@ namespace GUI.AQUATOX
 
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
-                            webView.CoreWebView2.PostWebMessageAsString("ADD|" + GeoJSON);
+                            PostWebviewMessage("ADD|" + GeoJSON);
                         }
 
                         if (GeoJSON == "{}") polyline = null;
@@ -1554,21 +1504,21 @@ namespace GUI.AQUATOX
                         {
                             if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                                 foreach (int SrcID in Sources)
-                                    if (boundaries.Contains(SrcID))  //ID inflow points with green circles
+                                    if (outofnetwork.Contains(SrcID))  //ID inflow points with green markers
                                     {
-                                        webView.CoreWebView2.PostWebMessageAsString("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
+                                        PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
                                     }
 
-                            if (i == AQT2D.SN.order.Length - 1) //ID pour point with red circle
+                            if (i == AQT2D.SN.order.Length - 1) //ID pour point with red marker
                             {
-                                webView.CoreWebView2.PostWebMessageAsString("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
+                                PostWebviewMessage("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
                             }
 
                         }
                     }
             }
 
-            webView.CoreWebView2.PostWebMessageAsString("RENDER");
+            PostWebviewMessage("RENDER");
 
             LabelCheckBox_CheckedChanged(null, null);
 
@@ -1648,7 +1598,7 @@ namespace GUI.AQUATOX
         {
 
             int COMID = Int32.Parse(CString);
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Input_" + CString + ".JSON";
             if (ValidFilen(filen, false))
             {
@@ -1659,16 +1609,17 @@ namespace GUI.AQUATOX
                 if (Lake0D == 0)
                 {
                     isBoundarySeg = false;
-                    int[] boundaries = new int[0];
+                    int[] outofnetwork = new int[0];
                     if (AQT2D.SN.boundary != null)
-                        AQT2D.SN.boundary.TryGetValue("out-of-network", out boundaries);
+                        AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
                     if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
                         foreach (int SrcID in Sources)
-                            if (boundaries.Contains(SrcID)) isBoundarySeg = true;
+                            if (outofnetwork.Contains(SrcID)) isBoundarySeg = true;
                 }
 
                 if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
+                AddToProcessLog("INPUTS:  Possible user edits made to parameters in segment " + filen);  
             }
             else { MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated."); };
         }
@@ -1676,7 +1627,7 @@ namespace GUI.AQUATOX
         private void ViewOutput(string CString)
         {
             string graphjson = "";
-            string BaseDir = basedirBox.Text;
+            BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Run_" + CString + ".JSON";
             string graphfilen = BaseDir + "OutputGraphs" + ".JSON";
 
@@ -1812,7 +1763,7 @@ namespace GUI.AQUATOX
         {
             if (webView.CoreWebView2 == null) return;
 
-            webView.CoreWebView2.PostWebMessageAsString("BOUNDS|" + ShowBoundBox.Checked.ToString());
+            PostWebviewMessage("BOUNDS|" + ShowBoundBox.Checked.ToString());
         }
 
         private void NewProject_Click(object sender, EventArgs e)
@@ -1843,7 +1794,7 @@ namespace GUI.AQUATOX
                             if (fbd.ShowDialog() == DialogResult.OK)
                             {
                                 basedirBox.Text = fbd.SelectedPath + "\\";
-                                string BaseDir = basedirBox.Text;
+                                BaseDir = basedirBox.Text;
                                 string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
                                 if (directoryFiles.Length>0) 
                                 {
@@ -1873,7 +1824,7 @@ namespace GUI.AQUATOX
                             ScrSettings.EndCOMIDstr = "";
 
                             string BaseJSONFileN = NSForm.BaseJSON_FileN;
-                            ScrSettings.BaseJSONstr = BaseJSONFileN;
+
                             BaseJSONBox.Text = BaseJSONFileN;
                             ScrSettings.COMIDstr = NSForm.COMID;
                             ScrSettings.BaseJSONstr = BaseJSONFileN;
@@ -1886,14 +1837,21 @@ namespace GUI.AQUATOX
                                 string SNJSON = "{\"WBComid\": " + NSForm.COMID + "}";
                                 File.WriteAllText(BaseDir + "StreamNetwork.JSON", SNJSON);
 
-                                if (NSForm.GeoJSON != "") File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", NSForm.GeoJSON);
+                                string Geostr;
+                                if (NSForm.GeoJSON.TryGetValue(NSForm.COMID, out Geostr)) File.WriteAllText(BaseDir + NSForm.COMID + ".GeoJSON", Geostr);
 
                                 if (File.Exists(BaseDir + "MasterSetup.json")) System.IO.File.Delete(BaseDir + "MasterSetup.json");
                                 AQTSim BSim = NSForm.BSim;
                                 if (BSim == null)
                                 {
                                     BSim = new AQTSim();
-                                    BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                    if (File.Exists("..\\..\\..\\Studies\\" + "Default Lake.JSON"))
+                                        BSim.Instantiate(File.ReadAllText("..\\..\\..\\Studies\\" + "Default Lake.JSON"));
+                                    else
+                                    {
+                                        ShowMsg("Error, cannot find file " + "Studies\\Default Lake.JSON.");
+                                        return;
+                                    }
                                 }
 
                                 BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
@@ -1906,7 +1864,11 @@ namespace GUI.AQUATOX
                                 }
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+                                if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
+
+                                AddToProcessLog("INPUTS: New 0-D lake/reservoir simulation setup.  COMID: " + NSForm.COMID );
+                                AddToProcessLog("INPUTS: Base simulation = "+ BaseJSONFileN);
+                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen.  Surface area set.");
                             }
                             else //NSForm.SNPopulated must be true
                             {
@@ -1921,12 +1883,37 @@ namespace GUI.AQUATOX
                                     BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));
                                 }
 
+                                AQT2D = null;
+                                if (VerifyStreamNetwork())
+                                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                                  for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                                  {
+                                    int COMID = AQT2D.SN.order[i][j];
+                                    string CString = COMID.ToString();
+                                    string Geostr;
+                                    if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
+                                            {
+                                                Geostr = Geostr.Replace(@"\", "");
+                                                Geostr = "{\"stream_geometry\":{\"type\":\"FeatureCollection\",\"features\":[" + Geostr + "]}}";
+                                                File.WriteAllText(BaseDir + CString + ".GeoJSON", Geostr);
+                                            }
+                                  }
+
                                 BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
                                 BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
 
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                                File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save back as JSON in project directory
+                                if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
 
+                                ScrSettings.COMIDstr = NSForm.NScrSettings.COMIDstr;
+                                ScrSettings.UpSpanStr = NSForm.NScrSettings.UpSpanStr;
+                                ScrSettings.EndCOMIDstr = NSForm.NScrSettings.EndCOMIDstr;
+
+                                AddToProcessLog("INPUTS: New stream network simulation setup.  Pour Point COMID " + ScrSettings.COMIDstr);
+                                 
+                                AddToProcessLog("INPUTS: " + AQT2D.SNStats());
+                                AddToProcessLog("INPUTS: Base simulation for reaches = " + BaseJSONFileN);
+                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen. ");  
                             }
 
                             SaveScreenSettings();
@@ -2002,19 +1989,18 @@ namespace GUI.AQUATOX
         {
             string boolstr = "False";
             if (LabelCheckBox.Checked) boolstr = "True";
-            webView.CoreWebView2.PostWebMessageAsString("LABELS|" + boolstr);
+            PostWebviewMessage("LABELS|" + boolstr);
         }
 
         private void TestOrderButtonClick(object sender, EventArgs e)
         {
             {
-
                 ChartVisible(false);
 
                 if (AQT2D == null) AQT2D = new AQSim_2D();
                 if (AQT2D.SN == null)
                 {
-                    string BaseDir = basedirBox.Text;
+                    BaseDir = basedirBox.Text;
                     if (!ValidFilen(BaseDir + "StreamNetwork.JSON", true)) return;
                     string SNJSON = System.IO.File.ReadAllText(BaseDir + "StreamNetwork.JSON", Encoding.Default);  //read stored streamnetwork (SN object) if necessary
                     AQT2D.SN = JsonConvert.DeserializeObject<AQSim_2D.streamNetwork>(SNJSON);
@@ -2029,10 +2015,10 @@ namespace GUI.AQUATOX
 
                     for (int s2 = 0; s2 < AQT2D.SN.order.Length; s2++)
                         foreach (int runID in AQT2D.SN.order[s2])
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + runID.ToString() + "|grey");
+                            PostWebviewMessage("COLOR|" + runID.ToString() + "|grey");
                     if (AQT2D.SN.waterbodies != null)
                         foreach (string[] WBID in AQT2D.SN.waterbodies.wb_table)
-                            webView.CoreWebView2.PostWebMessageAsString("COLOR|" + WBID[0] + "|grey");
+                            PostWebviewMessage("COLOR|" + WBID[0] + "|grey");
                     executed.Clear();
 
                     // draw all shapes in gray
@@ -2044,20 +2030,20 @@ namespace GUI.AQUATOX
                     foreach (int runID in AQT2D.SN.order[ShowStep - 1])  // step through each COMID in this "order" 
                     {
                         bool in_waterbody = false;
-                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(runID);  // is this listed as a lake/res
+                        if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(runID);  // is this identified as a lake/res in streamnetwork
 
                         int IDtoRun = runID;
                         if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
 
                         string lineColor = "red";
                         if (IDtoRun == -9999) { IDtoRun = runID; lineColor = "white"; }
-                        webView.CoreWebView2.PostWebMessageAsString("COLOR|" + IDtoRun.ToString() + "|" + lineColor);
+                        PostWebviewMessage("COLOR|" + IDtoRun.ToString() + "|" + lineColor);
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    ProcessLog.Text = "ERROR: while updating drawing: " + ex.Message;
+                    AddToProcessLog("ERROR: while updating drawing: " + ex.Message); 
                     MessageBox.Show(ex.Message);
                     return;
                 }

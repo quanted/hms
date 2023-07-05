@@ -78,13 +78,29 @@ namespace AQUATOX.AQSim_2D
                     int COMID = SN.order[i][j];
                     string CString = COMID.ToString();
                     bool in_waterbody = false;
-                    if (SN.waterbodies != null) in_waterbody = SN.waterbodies.comid_wb.ContainsKey(COMID);
+                    if (SN.waterbodies != null) in_waterbody = NWM_Waterbody(COMID);
                     if (!in_waterbody) FLCount++; // don't count segments that are superceded by their lake/reservoir waterbody.
                 };
             string outstr = "A total of " + (WBCount+FLCount).ToString() + " segments";
             if (WBCount > 0) outstr += " including " + WBCount + " lake/reservoir segments.";
             return outstr;
         }
+
+        /// <summary>
+        /// Returns true if the COMID is located within an NWM waterbody and does not need running as a stream segment.
+        /// </summary>
+        public bool NWM_Waterbody(int COMID)
+        {
+            int WBCOMID;
+            if (SN.waterbodies != null) if (SN.waterbodies.comid_wb.TryGetValue(COMID, out WBCOMID))
+              for (int i = 1; i < SN.waterbodies.wb_table.GetLength(0); i++)
+                    {
+                    if (int.Parse(SN.waterbodies.wb_table[i][0]) == WBCOMID)
+                        return true;
+                    }
+
+            return false;
+        } 
 
         /// <summary>
         /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.
@@ -149,7 +165,7 @@ namespace AQUATOX.AQSim_2D
             KnownValLoad.UseConstant = false;
             KnownValLoad.MultLdg = 1;
             KnownValLoad.NoUserLoad = false;
-            KnownValLoad.Hourly = true;
+            // KnownValLoad.Hourly = true;  12/14/22 
 
             ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
 
@@ -176,7 +192,7 @@ namespace AQUATOX.AQSim_2D
 
             InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
             InflowLoad.MultLdg = 86400;  // seconds per day
-            InflowLoad.Hourly = true;
+            // InflowLoad.Hourly = true;  12/14/22
             InflowLoad.UseConstant = false;
 
             TVol.LoadNotes1 = "Volumes from NWM in m3";
@@ -210,7 +226,7 @@ namespace AQUATOX.AQSim_2D
                 KnownValLoad.UseConstant = false;
                 KnownValLoad.MultLdg = 1;
                 KnownValLoad.NoUserLoad = false;
-                KnownValLoad.Hourly = true;  
+                // KnownValLoad.Hourly = true;  12/14/22
 
                 ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
 
@@ -243,7 +259,7 @@ namespace AQUATOX.AQSim_2D
 
                 InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
                 InflowLoad.MultLdg = 86400;  // seconds per day
-                InflowLoad.Hourly = true;
+                // InflowLoad.Hourly = true; 12/14/22
                 InflowLoad.UseConstant = false;
                 
                 TVol.LoadNotes1 = "Volumes from NWM using flows in m3/s";       
@@ -265,7 +281,7 @@ namespace AQUATOX.AQSim_2D
                 VelocityLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 VelocityLoad.Translate_ITimeSeriesInput(1,0);  //bank 1 for velocity;  minimum velocity of zero
                 VelocityLoad.MultLdg = 100;  // m/s to cm/s
-                VelocityLoad.Hourly = true;
+                // VelocityLoad.Hourly = true; 12/14/22
                 VelocityLoad.UseConstant = false;
                 VelocityLoad.ITSI = null;
             }
@@ -287,7 +303,7 @@ namespace AQUATOX.AQSim_2D
                 DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
                 DischargeLoad.Translate_ITimeSeriesInput(0,1000/86400);  //default minimum flow of 1000 cu m /d for now
                 DischargeLoad.MultLdg = 86400;  // seconds per day
-                DischargeLoad.Hourly = true;
+                // DischargeLoad.Hourly = true;  12/14/22
                 DischargeLoad.UseConstant = false;
                 TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
                 TVol.LoadNotes2 = "Converted to m3/d using multiplier";
@@ -665,7 +681,7 @@ namespace AQUATOX.AQSim_2D
                 {
                     TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
-                    // TLoadings DischargeLoad = tvol.LoadsRec.Alt_Loadings[1];    
+
                     TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
 
@@ -676,9 +692,9 @@ namespace AQUATOX.AQSim_2D
                         double frac_this_segment = 1.0;
                         double totOutVol = OutVol;
                         if (divergence_flows != null)
-                            foreach (ITimeSeriesOutput its in divergence_flows)
+                            foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
-                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;    
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step chagnes or time-period is increased since NWM data gathering
                                 // m3/d      m3/d                                         m3/s               s/d
                                 frac_this_segment = OutVol / totOutVol;
                             }
@@ -693,7 +709,7 @@ namespace AQUATOX.AQSim_2D
 
                     TSV.LoadsRec.Loadings.list = newlist;
                     TSV.LoadsRec.Loadings.UseConstant = false;
-                    TSV.LoadsRec.Loadings.Hourly = true;
+                    // TSV.LoadsRec.Loadings.Hourly = true; 12/14/22
                     TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
                 }
             }
@@ -750,38 +766,42 @@ namespace AQUATOX.AQSim_2D
             }
                 
             int nSources = 0;
-            if (SN.sources != null)
-             if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
-                foreach (int SrcID in Sources)
-                {
-                    if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
+            if (SN != null)
+            {
+                if (SN.sources != null)
+                 if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
+                    foreach (int SrcID in Sources)
                     {
-                        nSources++;
-                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                        if (errstr != "") outstr.Add(errstr);
-                            else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
-                    }
-                };
+                        if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
+                        {
+                            nSources++;
+                            string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                            if (errstr != "") outstr.Add(errstr);
+                                else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
+                        }
+                    };
             
-            if ((SN.waterbodies != null) && (SN.sources != null))
-            {   // pass data into Waterbodies from adjacent stream segments
-                if (SN.waterbodies.comid_wb.ContainsValue(comid))  // if the comid is a waterbody
-                  foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
-                    if (entry.Value == comid)  // for each stream segment in waterbody
-                      if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
-                        foreach (int SrcID in Sources) //loop through the sources
-                          if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
-                            {
-                               archive.TryGetValue(SrcID, out archived_results AR);  // don't pass data from segments not run (e.g. internal segments in the waterbody that are irrelevant)
-                                if (AR != null)
+                if ((SN.waterbodies != null) && (SN.sources != null))
+                {   // pass data into Waterbodies from adjacent stream segments
+                    if (SN.waterbodies.comid_wb.ContainsValue(comid))  // if the comid is a waterbody
+                      foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
+                        if (entry.Value == comid)  // for each stream segment in waterbody
+                          if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
+                            foreach (int SrcID in Sources) //loop through the sources
+                              if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                                 {
-                                    nSources++;
-                                    string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
-                                    if (errstr != "") outstr.Add(errstr);
-                                        else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
+                                   archive.TryGetValue(SrcID, out archived_results AR);  // don't pass data from segments not run (e.g. internal segments in the waterbody that are irrelevant)
+                                    if (AR != null)
+                                    {
+                                        nSources++;
+                                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                                        if (errstr != "") outstr.Add(errstr);
+                                            else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
+                                    }
                                 }
-                            }
+                }
             }
+
 
             Sim.AQTSeg.RunID = "Run: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             string errmessage = Sim.Integrate();
@@ -823,7 +843,7 @@ namespace AQUATOX.AQSim_2D
             foreach (DataRow row in table.Rows)
             {
                 string fileN = row.Field<string>("Filename");
-                if (!File.Exists(jsonDir+fileN)) continue;
+                // if (!File.Exists(jsonDir+fileN)) continue;  raise error instead
                 json = File.ReadAllText(jsonDir+fileN);
                 AQTSim sim = JsonConvert.DeserializeObject<AQTSim>(json, AQTSim.AQTJSONSettings());
                 sim.SavedRuns = null;

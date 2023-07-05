@@ -82,11 +82,11 @@ namespace Utilities
             return dbData;
         }
 
-        public static Dictionary<string, object> GetGageInfo(string gageID, out string errorMsg)
+        public static Dictionary<string, object> GetGageInfo(int gageID, out string errorMsg)
         {
             errorMsg = "";
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string query = "SELECT * FROM GageInfo WHERE GAGEID=" + gageID;
+            string query = "SELECT * FROM GageInfo WHERE GAGEID=" + gageID.ToString();
             Dictionary<string, object> dbData = Utilities.SQLite.GetDataObject(dbPath, query);
             return dbData;
         }

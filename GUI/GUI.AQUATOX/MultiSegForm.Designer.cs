@@ -35,12 +35,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this.BaseJSONBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.CancelButton = new System.Windows.Forms.Button();
             this.StatusLabel = new System.Windows.Forms.Label();
             this.FlowsButton = new System.Windows.Forms.Button();
             this.SetupButton = new System.Windows.Forms.Button();
             this.executeButton = new System.Windows.Forms.Button();
             this.CreateButton = new System.Windows.Forms.Button();
+            this.proglabel = new System.Windows.Forms.Label();
             this.ReadNetworkPanel = new System.Windows.Forms.Panel();
             this.SILabel3 = new System.Windows.Forms.Label();
             this.SILabel2 = new System.Windows.Forms.Label();
@@ -66,7 +68,6 @@
             this.ShowBoundBox = new System.Windows.Forms.CheckBox();
             this.outputjump = new System.Windows.Forms.CheckBox();
             this.PlotButton = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.infolabel1 = new System.Windows.Forms.Label();
             this.infolabel2 = new System.Windows.Forms.Label();
             this.TestOrderButton = new System.Windows.Forms.Button();
@@ -127,7 +128,7 @@
             this.ProcessLog.Multiline = true;
             this.ProcessLog.Name = "ProcessLog";
             this.ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.ProcessLog.Size = new System.Drawing.Size(817, 444);
+            this.ProcessLog.Size = new System.Drawing.Size(817, 456);
             this.ProcessLog.TabIndex = 6;
             this.ProcessLog.WordWrap = false;
             // 
@@ -155,25 +156,39 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.progressBar1);
             this.panel1.Controls.Add(this.CancelButton);
             this.panel1.Controls.Add(this.StatusLabel);
             this.panel1.Controls.Add(this.FlowsButton);
             this.panel1.Controls.Add(this.SetupButton);
             this.panel1.Controls.Add(this.executeButton);
             this.panel1.Controls.Add(this.CreateButton);
+            this.panel1.Controls.Add(this.proglabel);
             this.panel1.Location = new System.Drawing.Point(24, 291);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(259, 178);
+            this.panel1.Size = new System.Drawing.Size(259, 187);
             this.panel1.TabIndex = 23;
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
+            this.progressBar1.Location = new System.Drawing.Point(2, 135);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(252, 21);
+            this.progressBar1.Step = 1;
+            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.progressBar1.TabIndex = 27;
+            this.progressBar1.Value = 1;
+            this.progressBar1.Visible = false;
             // 
             // CancelButton
             // 
             this.CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.CancelButton.ForeColor = System.Drawing.Color.Black;
-            this.CancelButton.Location = new System.Drawing.Point(87, 151);
+            this.CancelButton.Location = new System.Drawing.Point(87, 160);
             this.CancelButton.Margin = new System.Windows.Forms.Padding(0);
             this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(68, 24);
+            this.CancelButton.Size = new System.Drawing.Size(68, 23);
             this.CancelButton.TabIndex = 50;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
@@ -182,7 +197,7 @@
             // 
             // StatusLabel
             // 
-            this.StatusLabel.Location = new System.Drawing.Point(11, 127);
+            this.StatusLabel.Location = new System.Drawing.Point(11, 135);
             this.StatusLabel.Name = "StatusLabel";
             this.StatusLabel.Size = new System.Drawing.Size(235, 15);
             this.StatusLabel.TabIndex = 26;
@@ -191,7 +206,7 @@
             // 
             // FlowsButton
             // 
-            this.FlowsButton.Location = new System.Drawing.Point(58, 67);
+            this.FlowsButton.Location = new System.Drawing.Point(58, 65);
             this.FlowsButton.Name = "FlowsButton";
             this.FlowsButton.Size = new System.Drawing.Size(127, 23);
             this.FlowsButton.TabIndex = 23;
@@ -201,7 +216,7 @@
             // 
             // SetupButton
             // 
-            this.SetupButton.Location = new System.Drawing.Point(58, 13);
+            this.SetupButton.Location = new System.Drawing.Point(58, 11);
             this.SetupButton.Name = "SetupButton";
             this.SetupButton.Size = new System.Drawing.Size(127, 23);
             this.SetupButton.TabIndex = 21;
@@ -211,7 +226,7 @@
             // 
             // executeButton
             // 
-            this.executeButton.Location = new System.Drawing.Point(58, 94);
+            this.executeButton.Location = new System.Drawing.Point(58, 92);
             this.executeButton.Name = "executeButton";
             this.executeButton.Size = new System.Drawing.Size(127, 23);
             this.executeButton.TabIndex = 9;
@@ -221,13 +236,24 @@
             // 
             // CreateButton
             // 
-            this.CreateButton.Location = new System.Drawing.Point(58, 40);
+            this.CreateButton.Location = new System.Drawing.Point(58, 38);
             this.CreateButton.Name = "CreateButton";
             this.CreateButton.Size = new System.Drawing.Size(127, 23);
             this.CreateButton.TabIndex = 8;
             this.CreateButton.Text = "Create Linked Inputs";
             this.CreateButton.UseVisualStyleBackColor = true;
             this.CreateButton.Click += new System.EventHandler(this.createButton_Click);
+            // 
+            // proglabel
+            // 
+            this.proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.proglabel.Location = new System.Drawing.Point(10, 118);
+            this.proglabel.Name = "proglabel";
+            this.proglabel.Size = new System.Drawing.Size(235, 15);
+            this.proglabel.TabIndex = 51;
+            this.proglabel.Text = "Model Progress Label";
+            this.proglabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.proglabel.Visible = false;
             // 
             // ReadNetworkPanel
             // 
@@ -276,7 +302,7 @@
             this.OutputPanel.Controls.Add(this.label3);
             this.OutputPanel.Controls.Add(this.CSVButton);
             this.OutputPanel.Enabled = false;
-            this.OutputPanel.Location = new System.Drawing.Point(24, 481);
+            this.OutputPanel.Location = new System.Drawing.Point(24, 490);
             this.OutputPanel.Name = "OutputPanel";
             this.OutputPanel.Size = new System.Drawing.Size(259, 81);
             this.OutputPanel.TabIndex = 25;
@@ -376,7 +402,7 @@
             this.TogglePanel.Controls.Add(this.GraphButton);
             this.TogglePanel.Controls.Add(this.MapButton2);
             this.TogglePanel.Controls.Add(this.ConsoleButton);
-            this.TogglePanel.Location = new System.Drawing.Point(305, 539);
+            this.TogglePanel.Location = new System.Drawing.Point(305, 551);
             this.TogglePanel.Name = "TogglePanel";
             this.TogglePanel.Size = new System.Drawing.Size(291, 23);
             this.TogglePanel.TabIndex = 36;
@@ -438,13 +464,13 @@
             this.PlotPanel.Controls.Add(this.PlotButton);
             this.PlotPanel.Location = new System.Drawing.Point(305, 52);
             this.PlotPanel.Name = "PlotPanel";
-            this.PlotPanel.Size = new System.Drawing.Size(716, 23);
+            this.PlotPanel.Size = new System.Drawing.Size(814, 23);
             this.PlotPanel.TabIndex = 38;
             // 
             // NRCheckBox
             // 
             this.NRCheckBox.AutoSize = true;
-            this.NRCheckBox.Location = new System.Drawing.Point(508, 2);
+            this.NRCheckBox.Location = new System.Drawing.Point(623, 2);
             this.NRCheckBox.Name = "NRCheckBox";
             this.NRCheckBox.Size = new System.Drawing.Size(162, 19);
             this.NRCheckBox.TabIndex = 43;
@@ -455,7 +481,7 @@
             // LabelCheckBox
             // 
             this.LabelCheckBox.AutoSize = true;
-            this.LabelCheckBox.Location = new System.Drawing.Point(428, 3);
+            this.LabelCheckBox.Location = new System.Drawing.Point(543, 3);
             this.LabelCheckBox.Name = "LabelCheckBox";
             this.LabelCheckBox.Size = new System.Drawing.Size(59, 19);
             this.LabelCheckBox.TabIndex = 42;
@@ -468,7 +494,7 @@
             this.ShowBoundBox.AutoSize = true;
             this.ShowBoundBox.Checked = true;
             this.ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ShowBoundBox.Location = new System.Drawing.Point(244, 3);
+            this.ShowBoundBox.Location = new System.Drawing.Point(359, 3);
             this.ShowBoundBox.Name = "ShowBoundBox";
             this.ShowBoundBox.Size = new System.Drawing.Size(170, 19);
             this.ShowBoundBox.TabIndex = 41;
@@ -482,9 +508,10 @@
             this.outputjump.Checked = true;
             this.outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outputjump.Enabled = false;
+            this.outputjump.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.outputjump.Location = new System.Drawing.Point(120, 3);
             this.outputjump.Name = "outputjump";
-            this.outputjump.Size = new System.Drawing.Size(112, 19);
+            this.outputjump.Size = new System.Drawing.Size(115, 19);
             this.outputjump.TabIndex = 40;
             this.outputjump.Text = "Click to Outputs";
             this.outputjump.UseVisualStyleBackColor = true;
@@ -500,23 +527,11 @@
             this.PlotButton.UseVisualStyleBackColor = true;
             this.PlotButton.Click += new System.EventHandler(this.PlotButton_Click);
             // 
-            // progressBar1
-            // 
-            this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            this.progressBar1.Location = new System.Drawing.Point(27, 419);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(252, 23);
-            this.progressBar1.Step = 1;
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this.progressBar1.TabIndex = 27;
-            this.progressBar1.Value = 1;
-            this.progressBar1.Visible = false;
-            // 
             // infolabel1
             // 
             this.infolabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel1.AutoSize = true;
-            this.infolabel1.Location = new System.Drawing.Point(619, 541);
+            this.infolabel1.Location = new System.Drawing.Point(619, 553);
             this.infolabel1.Name = "infolabel1";
             this.infolabel1.Size = new System.Drawing.Size(361, 15);
             this.infolabel1.TabIndex = 39;
@@ -527,7 +542,7 @@
             // 
             this.infolabel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.infolabel2.AutoSize = true;
-            this.infolabel2.Location = new System.Drawing.Point(619, 560);
+            this.infolabel2.Location = new System.Drawing.Point(619, 572);
             this.infolabel2.Name = "infolabel2";
             this.infolabel2.Size = new System.Drawing.Size(244, 15);
             this.infolabel2.TabIndex = 40;
@@ -537,12 +552,13 @@
             // TestOrderButton
             // 
             this.TestOrderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.TestOrderButton.Location = new System.Drawing.Point(1044, 51);
+            this.TestOrderButton.Location = new System.Drawing.Point(1091, 51);
             this.TestOrderButton.Name = "TestOrderButton";
-            this.TestOrderButton.Size = new System.Drawing.Size(75, 23);
+            this.TestOrderButton.Size = new System.Drawing.Size(28, 23);
             this.TestOrderButton.TabIndex = 42;
             this.TestOrderButton.Text = "Step 0";
             this.TestOrderButton.UseVisualStyleBackColor = true;
+            this.TestOrderButton.Visible = false;
             this.TestOrderButton.Click += new System.EventHandler(this.TestOrderButtonClick);
             // 
             // webView
@@ -556,7 +572,7 @@
             this.webView.Location = new System.Drawing.Point(306, 81);
             this.webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.webView.Name = "webView";
-            this.webView.Size = new System.Drawing.Size(817, 454);
+            this.webView.Size = new System.Drawing.Size(817, 466);
             this.webView.TabIndex = 43;
             this.webView.ZoomFactor = 1D;
             // 
@@ -607,7 +623,7 @@
             // OutputLabel
             // 
             this.OutputLabel.AutoSize = true;
-            this.OutputLabel.Location = new System.Drawing.Point(54, 472);
+            this.OutputLabel.Location = new System.Drawing.Point(54, 481);
             this.OutputLabel.Name = "OutputLabel";
             this.OutputLabel.Size = new System.Drawing.Size(126, 15);
             this.OutputLabel.TabIndex = 48;
@@ -630,7 +646,7 @@
             // 
             this.toggleLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.toggleLog.Location = new System.Drawing.Point(1008, 542);
+            this.toggleLog.Location = new System.Drawing.Point(1008, 554);
             this.toggleLog.Name = "toggleLog";
             this.toggleLog.Size = new System.Drawing.Size(114, 24);
             this.toggleLog.TabIndex = 51;
@@ -641,7 +657,7 @@
             // GraphLabel
             // 
             this.GraphLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.GraphLabel.Location = new System.Drawing.Point(619, 543);
+            this.GraphLabel.Location = new System.Drawing.Point(619, 555);
             this.GraphLabel.Name = "GraphLabel";
             this.GraphLabel.Size = new System.Drawing.Size(262, 32);
             this.GraphLabel.TabIndex = 53;
@@ -651,7 +667,7 @@
             // 
             this.resetZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.resetZoom.Location = new System.Drawing.Point(907, 542);
+            this.resetZoom.Location = new System.Drawing.Point(907, 554);
             this.resetZoom.Name = "resetZoom";
             this.resetZoom.Size = new System.Drawing.Size(95, 24);
             this.resetZoom.TabIndex = 52;
@@ -668,7 +684,7 @@
             this.LogPanel.Controls.Add(this.InfoBox);
             this.LogPanel.Controls.Add(this.InputsBox);
             this.LogPanel.Controls.Add(this.ErrorsBox);
-            this.LogPanel.Location = new System.Drawing.Point(602, 539);
+            this.LogPanel.Location = new System.Drawing.Point(602, 551);
             this.LogPanel.Name = "LogPanel";
             this.LogPanel.Size = new System.Drawing.Size(521, 40);
             this.LogPanel.TabIndex = 54;
@@ -764,7 +780,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1135, 586);
+            this.ClientSize = new System.Drawing.Size(1135, 598);
             this.Controls.Add(this.webView);
             this.Controls.Add(this.logfilen);
             this.Controls.Add(this.LogPanel);
@@ -780,7 +796,6 @@
             this.Controls.Add(this.TestOrderButton);
             this.Controls.Add(this.infolabel2);
             this.Controls.Add(this.infolabel1);
-            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.PlotPanel);
             this.Controls.Add(this.browseButton);
             this.Controls.Add(this.TogglePanel);
@@ -799,7 +814,7 @@
             this.Controls.Add(this.viewOutputButton);
             this.MinimumSize = new System.Drawing.Size(1077, 553);
             this.Name = "MultiSegForm";
-            this.Text = "MultiSegForm";
+            this.Text = "Multiple Segment Runs";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MultiSegForm_FormClosing);
             this.Shown += new System.EventHandler(this.MultiSegForm_Shown);
             this.ResizeEnd += new System.EventHandler(this.MultiSegForm_ResizeEnd);
@@ -882,5 +897,6 @@
         private System.Windows.Forms.CheckBox WarningsBox;
         private System.Windows.Forms.Button LogChange;
         private System.Windows.Forms.Label logfilen;
+        private System.Windows.Forms.Label proglabel;
     }
 }

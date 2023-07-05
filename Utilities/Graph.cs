@@ -71,13 +71,13 @@ namespace Utilities
 
     public class Graph
     {
-        public Node prime;                              // Stream Network: pourpoint segment
-        public ConcurrentDictionary<int, Node> nodeDict;          // Stream Network: Dictionary of nodes in network by id
-        private List<Node> nodes;                       // Stream Network: List of nodes in network
-        private List<Node> edgeNodes;                   // Stream Network: list of edge nodes in the network
-        public List<List<string>> order;                // Stream Network: breadth-first search ordering by node name (ComID)
-        public List<string> edges;                      // Stream Network: headwaters
-        public List<string> outNodes;                   // Stream Network: List of out of network nodes
+        public Node prime;                                          // Stream Network: pourpoint segment
+        public ConcurrentDictionary<int, Node> nodeDict;            // Stream Network: Dictionary of nodes in network by id
+        private List<Node> nodes;                                   // Stream Network: List of nodes in network
+        private List<Node> edgeNodes;                               // Stream Network: list of edge nodes in the network
+        public List<List<string>> order;                            // Stream Network: breadth-first search ordering by node name (ComID)
+        public List<string> edges;                                  // Stream Network: headwaters
+        public List<string> outNodes;                               // Stream Network: List of out of network nodes
 
         public Graph()
         {
@@ -124,7 +124,7 @@ namespace Utilities
             List<string> edges = new List<string>();
             for(int i = 0; i < this.nodes.Count; i++)
             {
-                if (this.nodes[i].leaf)
+                if (this.nodes[i].leaf && this.nodes[i].upEdge.Count == 0)
                 {
                     edges.Add(this.nodes[i].name);
                 }
@@ -173,6 +173,7 @@ namespace Utilities
             List<Node> iEdges = new List<Node>(){ this.prime };
             List<Node> jEdges;
             int traversed = 0;
+            List<int> traversedNodes = new List<int>();
             while (traversed < this.nodes.Count - this.outNodes.Count)
             {
                 jEdges = new List<Node>();
@@ -186,9 +187,10 @@ namespace Utilities
                             jEdges.Add(iEdges[i].upNode[j]);
                         }
                     }
-                    if (!level.Contains(iEdges[i].name))
+                    if (!level.Contains(iEdges[i].name) && !traversedNodes.Contains(iEdges[i].id))
                     {
                         level.Add(iEdges[i].name);
+                        traversedNodes.Add(iEdges[i].id);
                         traversed += 1;
                     }
                 }

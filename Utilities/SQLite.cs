@@ -2,6 +2,7 @@
 using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -80,6 +81,9 @@ namespace Utilities
                 absPath = dbPath;
             }
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             Dictionary<string, string> data = new Dictionary<string, string>();
             SqliteConnectionStringBuilder connectionStringBuilder = new SqliteConnectionStringBuilder()
             {
@@ -123,6 +127,8 @@ namespace Utilities
                     }
                     con.Close();
                 }
+                stopwatch.Stop();
+                Log.Information("SQLITE QUERY - Query Runtime: " + stopwatch.Elapsed.TotalSeconds.ToString() + " sec");
                 return data;
             }
             catch (SqliteException ex)

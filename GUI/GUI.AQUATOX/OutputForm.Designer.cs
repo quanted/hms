@@ -40,6 +40,7 @@ namespace GUI.AQUATOX
             this.ExportButton = new System.Windows.Forms.Button();
             this.toggleLog = new System.Windows.Forms.Button();
             this.resetZoom = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
             this.HelpButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.Graph_to_CSV = new System.Windows.Forms.Button();
@@ -166,6 +167,17 @@ namespace GUI.AQUATOX
             this.resetZoom.UseVisualStyleBackColor = true;
             this.resetZoom.Click += new System.EventHandler(this.resetZoom_Click);
             // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(170, 682);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(588, 25);
+            this.label3.TabIndex = 17;
+            this.label3.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
+            // 
             // HelpButton
             // 
             this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -239,6 +251,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.Graph_to_CSV);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.HelpButton);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.resetZoom);
             this.Controls.Add(this.toggleLog);
             this.Controls.Add(this.ExportButton);
@@ -272,6 +285,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.Button toggleLog;
         private System.Windows.Forms.Button resetZoom;
+        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button HelpButton;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button Graph_to_CSV;
