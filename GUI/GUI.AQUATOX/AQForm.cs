@@ -5,7 +5,6 @@ using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
-//using Microsoft.Research.Science.Data.Imperative;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -44,11 +43,19 @@ namespace GUI.AQUATOX
         public AQTTestForm()
         {
             InitializeComponent();
+
             Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
             Worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunCompleted);
             Worker.WorkerReportsProgress = true;
             Worker.WorkerSupportsCancellation = true;
+
+            ParAnnealWorker.DoWork += new DoWorkEventHandler(ParAnnealWorker_DoWork);
+            ParAnnealWorker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
+            ParAnnealWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(AnnealWorker_RunCompleted);
+            ParAnnealWorker.WorkerReportsProgress = true;
+            ParAnnealWorker.WorkerSupportsCancellation = true;
+
             graphics = this.CreateGraphics();
             defaultBrowser = Properties.Settings.Default.BrowserExe;
         }
@@ -195,9 +202,28 @@ namespace GUI.AQUATOX
             return result;
         }
 
+        private void Set_Buttons(bool Running)
+        {
+            modelRunningLabel.Visible = Running;
+
+            foreach (Control c in Controls)  // disable all buttons
+            {
+                if (c != AnnealPanel)
+                  c.Enabled = !Running;
+            }
+
+            modelRunningLabel.Enabled = Running;
+            CancelButton.Enabled = Running;
+            CancelButton.Visible = Running;
+            progressBar1.Enabled = Running;
+            progressBar1.Visible = Running;
+        }
+
+
         private void integrate_Click(object sender, EventArgs e)
         {
             string SimName = "";
+
 
             if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
             else
@@ -228,7 +254,6 @@ namespace GUI.AQUATOX
 
             aQTS.AQTSeg.ProgWorker = worker;
             errmessage = aQTS.Integrate();
-
         }
 
         private void Worker_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -929,7 +954,7 @@ namespace GUI.AQUATOX
             // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
 
             ShowStudyInfo();
-            
+
         }
 
 
@@ -941,7 +966,7 @@ namespace GUI.AQUATOX
 
         private void NetCDF_Click(object sender, EventArgs e)
         {
-            
+
             // Gets the path to the NetCDF file to be used as a data source.
             //var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputrch.nc?openMode=readOnly");
             // var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
@@ -1014,7 +1039,7 @@ namespace GUI.AQUATOX
             Param_Form PF = new Param_Form();
 
             TStateVariable NewSV = null;
- 
+
             if ((ns >= Consts.FirstAnimal) && (ns <= Consts.LastAnimal))
             {
                 AnimalRecord AR = PF.ReturnRecordFromDB("AnimalLib.JSON") as AnimalRecord;
@@ -1173,7 +1198,7 @@ namespace GUI.AQUATOX
             SVListBox.Top = ScaleY(78);
             StateVarLabel.Top = ScaleY(60);
             SVListBox.Height = ScaleY(390);
-                        
+
             HelpButton.Top = ScaleY(78);
             browserButton.Top = ScaleY(110);
 
@@ -1214,6 +1239,668 @@ namespace GUI.AQUATOX
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1) == DialogResult.Yes) this.DialogResult = DialogResult.Cancel;
 
+        }
+
+        // Random rnd = new Random();
+        private double RandUniform(double DMin, double DMax)
+        {
+            return (DMax - DMin) * ThreadLocalRandom.Instance.NextDouble() + DMin;
+        }
+
+        private void AnnealWorker_RunCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            progressBar1.Update();
+
+            Set_Buttons(false);
+            ExportBest.Enabled = false;
+
+            ShowStudyInfo();
+        }
+
+
+        private double SimError(AQTSim Sim)
+        {
+            bool WINTERSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1999, 1, 1, 0, 0, 0)) == 0);  // winterstart triggered based on 1/1/1999 start date
+
+            int[] Indices = new int[6] { 3, 22, 42, 63, 83, 103 };    
+            double[,] ObsPctPhyto = new double[4, 6] {{ 11.382, 29.0909, 0, 0, 0, 0 }, //Diatoms
+                                                     { 21.14,9.7,17.65,7.27,4.31,31.29 }, //Greens
+                                                     { 36.59,25.45,61.18,70.0,12.35,9.4 }, //cyanobacteria
+                                                     { 30.89,35.76,21.18,22.73,83.33,59.31 }}; //chrysophytes
+
+
+            double[,] ObsBioEst = new double[7, 4] {{0.00129,0.00239,0.00413,0.00349},
+                                                    {0.00808,0.00269,0.00707,0.00994},
+                                                    {0.01559,0.00387,0.00616,0.01426},
+                                                    {0.00000,0.00320,0.01108,0.00384},
+                                                    {0.00000,0.00061,0.00585,0.00190},
+                                                    {0.00000,0.00444,0.01273,0.08586},
+                                                    {0.00000,0.02282,0.00686,0.04326}};
+
+            int[] BioIndices = new int[7] { 3, 22, 29, 42, 63, 83, 103 };    // annual 
+
+            int[] ChlaInd = new int[15] { 8, 14, 22, 28, 36, 43, 51, 58, 64, 71, 78, 87, 104, 110, 121 };
+            double[] ObsChla = new double[15] { 0.43, 0.66, 0.779, 1.393, 0.512, 0.799, 0.328, 0.35, 0.471, 0.615, 1.885, 4.467, 2.602, 2.48, 2.623 };
+
+            if (WINTERSTART)
+            {
+                for (int i = 0; i < Indices.Length; i++)  // start simulation on 1/1/1999 rather than 6/1/1999  
+                {
+                    Indices[i] += 151;
+                }
+
+                for (int i = 0; i < ChlaInd.Length; i++)
+                {
+                    ChlaInd[i] += 151;
+                }
+
+                for (int i = 0; i < BioIndices.Length; i++)
+                {
+                    BioIndices[i] += 151;
+                }
+            }
+
+
+            //        int DiatomPos = 12;
+            //        int GreensPos = 13;
+            //        int CyanPos = 14;
+            //        int ChrysoPos = 15;
+
+            double[] ModelSumPhyto = new double[6];
+            double[] ModelChla = new double[15];
+
+            double[,] PctPhyto = new double[4, 6];
+            double[] phyto = new double[4];
+
+            for (int i = 0; i < 6; i++)
+            {
+                ModelSumPhyto[i] = 0;
+                for (int p = 12; p < 16; p++)
+                {
+                    phyto[p - 12] = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices[i])[0]);
+                    ModelSumPhyto[i] += phyto[p - 12];
+                }
+
+                for (int p = 12; p < 16; p++)
+                    PctPhyto[p - 12, i] = 100 * (phyto[p - 12] / ModelSumPhyto[i]);
+            }
+
+            //double Bioerror = 0;
+            //for (int i = 0; i < 7; i++)
+            //{
+            //   for (int p = 12; p < 16; p++)
+            //    {
+            //        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(BioIndices[i])[0]);
+            //        double ObsBio = ObsBioEst[i, p-12];
+            //        Bioerror += Math.Abs(ModelBio - ObsBio);
+            //    }
+            //}
+            //return Bioerror*100;
+
+            // double chlaMAE25 = 0;
+            double chlaFE3 = 0;
+            for (int i = 0; i < 15; i++)
+            {
+                ModelChla[i] = 0;
+                for (int p = 12; p < 16; p++)
+                {
+                    TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
+                    double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
+
+                    ModelChla[i] +=
+                        Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ChlaInd[i])[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
+                }
+             // chlaMAE25 += Math.Abs(ModelChla[i] - ObsChla[i]);
+                chlaFE3 += Math.Max(ModelChla[i], ObsChla[i]) / Math.Min(ModelChla[i], ObsChla[i]);
+            }
+
+            if (WINTERSTART)
+            {
+                double[] WinterChla = new double[4] { 1.0, 1.0, 1.0, 1.0 };
+                int[] WChlaInd = new int[4] { 15, 40, 70, 90 }; //WINTER chl-a indices
+
+                double ModelWChla; //WINTER
+                for (int i = 0; i < 4; i++)
+                {
+                    ModelWChla = 0;
+                    for (int p = 12; p < 16; p++)
+                    {
+                        TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
+                        double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
+
+                        ModelWChla +=
+                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(WChlaInd[i])[0]) * (0.526 / Plant_to_ChlA);
+                    }
+                    chlaFE3 += Math.Max(ModelWChla, WinterChla[i]) / Math.Min(ModelWChla, WinterChla[i]);
+                    //chlaMAE25 += Math.Abs(ModelWChla - WinterChla[i]);
+                }
+                // chlaMAE25 = (chlaMAE25 / 19) * 25;  //WINTER 19 observations
+                chlaFE3 = (chlaFE3 / 19.0) * 3.0;  //WINTER 19 observations
+            }
+            else
+            {
+                //chlaMAE25 = (chlaMAE25 / 15) * 25;  //summer 15 observations
+                chlaFE3 = (chlaFE3 / 15.0) * 3.0;  //WINTER 19 observations
+            }
+
+            double phytoMAE = 0;
+            for (int i = 0; i < 6; i++)
+                for (int p = 0; p < 4; p++)
+                    phytoMAE += Math.Abs(PctPhyto[p, i] - ObsPctPhyto[p, i]);
+            phytoMAE = phytoMAE / 24.0;
+
+            //return chlaMAE25 + phytoMAE;
+            return chlaFE3 + phytoMAE;
+        }
+
+        public static class ThreadLocalRandom
+        {
+            private static readonly Random globalRandom = new Random();
+            private static readonly object globalLock = new object();
+
+            private static readonly ThreadLocal<Random> threadRandom = new ThreadLocal<Random>(NewRandom);
+
+            public static Random NewRandom()
+            {
+                lock (globalLock)
+                {
+                    return new Random(globalRandom.Next());
+                }
+            }
+
+            public static Random Instance { get { return threadRandom.Value; } }
+
+            public static int Next()
+            {
+                return Instance.Next();
+            }
+        }
+
+
+
+        private void ParallelAnnealClick(object sender, EventArgs e)
+        {
+            if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
+            else
+            {
+                Set_Buttons(true);
+                ExportBest.Enabled = true;
+
+
+                ParAnnealWorker.RunWorkerAsync();
+            }
+        }
+
+        private void ParAnnealWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            aQTS.AQTSeg.ProgWorker = worker;
+            ParallelAnneal();
+        }
+
+
+        const int NDTypes = 10;   // CHANGEDIST
+        const int NDists = NDTypes * 4;
+        double[] BestParms = new double[NDists];
+        int[] DTypes = new int[NDists];
+        int[] SVIndices = new int[NDists];
+
+
+        private void ParallelAnneal()
+        {
+
+            string logfile;
+            
+
+            double Old_Error = 100000;
+            double Min_Error = 100000;
+            double New_Error = 100000;
+            double Min_Error_Logged = 100000;
+            double T = double.Parse(TStartBox.Text);  // start at temperature of 50
+            int NUMDRAWS = int.Parse(IterationBox.Text); // Number of draws to run at each temperature;  fixme 
+            const double T_min = 0.0001;
+            const double Alpha = 0.9;
+            TPlant TP;
+
+            //DType 0 = TOpt
+            //DType 1 = PMax
+            //DType 2 = RespRate
+            //DType 3 = LightSat     NOT Currently MinSat 6/10/2023  // CHANGEDIST
+            //DType 4 = NHalfSat
+            //DType 5 = PHalfSat
+            //DType 6 = EMort
+            //DType 7 = Mort Coeff
+            //DType 8 = Min Temp
+            //DType 9 = Max Temp
+            //DType 7 = MaxSat 6/10/2023 // CHANGEDIST
+
+            double[,] DMins = new double[NDTypes, 4];
+            double[,] DMaxs = new double[NDTypes, 4];
+
+            DMins[0, 0] = 15.0; DMaxs[0, 0] = 30.0; //DType 0 = TOpt  DIATOMS
+            DMins[0, 1] = 10.0; DMaxs[0, 1] = 35.0; //DType 0 = TOpt  Chlorella
+            DMins[0, 2] = 12.0; DMaxs[0, 2] = 35.0; //DType 0 = TOpt  Cyanobacteria
+            DMins[0, 3] = 10.0; DMaxs[0, 3] = 23.0; //DType 0 = TOpt  Chrysophyte
+
+            DMins[1, 0] = 0.4; DMaxs[1, 0] = 3.5; //DType 1 = PMax  DIATOMS
+            DMins[1, 1] = 0.1; DMaxs[1, 1] = 3.5; //DType 1 = PMax  Chlorella
+            DMins[1, 2] = 0.2; DMaxs[1, 2] = 3.5; //DType 1 = PMax  Cyanobacteria
+            DMins[1, 3] = 0.2; DMaxs[1, 3] = 1.0; //DType 1 = PMax  Chrysophyte
+
+            DMins[8, 0] = 0.0; DMaxs[8, 0] = 15; //DType 8 = TMin  DIATOMS
+            DMins[8, 1] = 0.0; DMaxs[8, 1] = 15; //DType 8 = TMin  Chlorella
+            DMins[8, 2] = 1.0; DMaxs[8, 2] = 20; //DType 8 = TMin  Cyanobacteria
+            DMins[8, 3] = -2.0; DMaxs[8, 3] = 12; //DType 8 = TMin  Chrysophyte
+
+            DMins[9, 0] = 25.0; DMaxs[9, 0] = 35.0; //DType 9 = TMax  DIATOMS
+            DMins[9, 1] = 30.0; DMaxs[9, 1] = 48.0; //DType 9 = TMax  Chlorella
+            DMins[9, 2] = 20.0; DMaxs[9, 2] = 42.0; //DType 9 = TMax  Cyanobacteria
+            DMins[9, 3] = 25.0; DMaxs[9, 3] = 37.0; //DType 9 = TMax  Chrysophyte
+
+
+            for (int i = 0; i < 4; i++)
+            {
+                DMins[2, i] = 0.001; DMaxs[2, i] = 0.2;   //DType 2 = RespRate20
+                DMins[3, i] = 18; DMaxs[3, i] = 1000;  //DType 3 = EnteredLightSat  // CHANGEDIST
+                DMins[4, i] = 0.0005; DMaxs[4, i] = 0.53;  //DType 4 = NHalfSat
+                DMins[5, i] = 0.0001; DMaxs[5, i] = 0.1;   //DType 5 = PHalfSat
+                DMins[6, i] = 0.005; DMaxs[6, i] = 0.05;  //DType 6 = EMort
+                DMins[7, i] = 0.0001; DMaxs[7, i] = 0.03;  //DType 7 = Mortality Coeff
+            }
+
+            double[] OldParms = new double[NDists];
+
+            int dtype = 0;
+            int org = 0;
+            int svindex = 12; //12-15 are diatoms through chrysophytes
+            
+            for (int d = 0; d < NDists; d++)  // set up distributions
+            {
+                DTypes[d] = dtype;
+                SVIndices[d] = svindex;
+                if (randomBox.Checked) OldParms[d] = RandUniform(DMins[DTypes[d], org], DMaxs[DTypes[d], org]);  // first random value
+
+                dtype++;
+                if (dtype > NDTypes - 1)
+                {
+                    dtype = 0;
+                    svindex++;
+                    org++;
+                }
+            };
+
+            if (!randomBox.Checked)
+            {
+                CopySimToParm(aQTS.AQTSeg, OldParms);
+            }
+
+            aQTS.SavedRuns.Clear();  //segment will be copied, so simplify
+            aQTS.AQTSeg.ClearResults();
+
+            logfile = @"N:\Temporary\" + Path.GetFileName(aQTS.AQTSeg.FileName) + "PSALog.txt";
+
+            string AQTSJSON = Newtonsoft.Json.JsonConvert.SerializeObject(aQTS, AQTSim.AQTJSONSettings());
+
+            bool UserCancel = false;
+            int totruns = 0;
+            int uselessruns = 0;
+            int Truns = 0;
+
+            while (T > T_min)
+            {
+                if (UserCancel) return;
+
+                int LastAccept = -1;
+                int lastprog = 0;
+                int runs = 0;
+
+                Parallel.For(0, NUMDRAWS, (dr, state) =>
+                {
+                double[] NewParms = new double[NDists];
+
+                OldParms.CopyTo(NewParms, 0);
+                int OldParmIndex = LastAccept;  // interation basis for this test
+
+                int index = ThreadLocalRandom.Instance.Next(0, NDists - 1);
+
+                NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);
+
+                AQTSim LocalAQTS = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(AQTSJSON, AQTSim.AQTJSONSettings());  //likely costly in terms of time
+                LocalAQTS.AQTSeg.SetupLinks();
+                CopyParmToSim(LocalAQTS.AQTSeg,NewParms);
+
+                LocalAQTS.Integrate();
+
+                New_Error = SimError(LocalAQTS);
+
+                double AP = (Old_Error - New_Error) / T;
+                if (AP > 100) AP = 3E+43;
+                else AP = Math.Exp(AP);
+
+                bool AcceptThis = ((New_Error < Min_Error) || (AP > ThreadLocalRandom.Instance.NextDouble()));
+
+                if ((OldParmIndex != LastAccept) && (AcceptThis))
+                        uselessruns++;  // acceptable run, but last run was accepted so throw it out 
+
+                totruns++; //total runs
+                runs++; //runs in this loop
+                Truns++; //runs at this temperature this loop
+
+                int progint = Math.Max((int)(((double)runs / (double)NUMDRAWS) * 100.0), 1);
+                if (progint > lastprog)
+                    {
+                        ParAnnealWorker.ReportProgress(progint, "Temperature: " + T.ToString("0.####") + "; Err: " + Min_Error.ToString(("00.###")) +
+                            "; Used: " + ((((double)Truns - (double)uselessruns) / (double)Truns) * 100.0).ToString("#0.0") +
+                            "% ( " + (Truns - uselessruns).ToString() + " of " + Truns.ToString() + ").  TotRuns = " + totruns.ToString());
+                        lastprog = progint;
+                    }
+
+                if (ParAnnealWorker.CancellationPending)
+                    {
+                        UserCancel = true;
+                        state.Break();
+                    }
+
+                if ((OldParmIndex == LastAccept) && (AcceptThis)) // accept 
+                    {
+                        LastAccept = dr; //this is the latest accepted parameter set now
+                        Old_Error = New_Error;
+                        lock (OldParms) { NewParms.CopyTo(OldParms, 0); }
+
+                        if (New_Error < Min_Error)
+                        {
+                            Min_Error = New_Error;
+                            lock (BestParms) { NewParms.CopyTo(BestParms, 0); }
+                        }
+                    }
+                }); //parallel.For
+
+                if (Min_Error < Min_Error_Logged)
+                    using (StreamWriter sw = File.AppendText(logfile))
+                    {
+                        sw.Write("Error " + Min_Error.ToString() + "; Temperature " + T.ToString() + "; ");
+
+                        foreach (double item in BestParms) sw.Write(item.ToString() + "; ");
+                        sw.WriteLine();
+
+                        Min_Error_Logged = Min_Error;
+                    }
+
+                if ((Truns - uselessruns) > (NUMDRAWS / 2))
+                {
+                    T = Alpha * T;
+                    Truns = 0;
+                    uselessruns = 0;
+                }
+            }
+
+            CopyParmToSim(aQTS.AQTSeg, BestParms);
+        }
+
+
+        private void CopyParmToSim(AQUATOXSegment ASeg, double[] Parms)
+        {
+            TPlant TP;
+
+            for (int d = 0; d < NDists; d++) // copy back results to simulation
+            {
+                TP = ASeg.SV[SVIndices[d]] as TPlant;
+
+                switch (DTypes[d])
+                {
+                    case 0: TP.PAlgalRec.TOpt.Val = Parms[d]; break;
+                    case 1: TP.PAlgalRec.PMax.Val = Parms[d]; break;
+                    case 2: TP.PAlgalRec.Resp20.Val = Parms[d]; break;
+                    case 3: TP.PAlgalRec.EnteredLightSat.Val = Parms[d]; break;  
+                    case 4: TP.PAlgalRec.KN.Val = Parms[d]; break;
+                    case 5: TP.PAlgalRec.KPO4.Val = Parms[d]; break;
+                    case 6: TP.PAlgalRec.EMort.Val = Parms[d]; break;
+                    case 7: TP.PAlgalRec.KMort.Val = Parms[d]; break;
+                    case 8: TP.PAlgalRec.TRef.Val = Parms[d]; break;
+                    case 9: TP.PAlgalRec.TMax.Val = Parms[d]; break;
+
+                }
+            }
+        }
+
+        private void CopySimToParm(AQUATOXSegment ASeg, double[] Parms)
+        {
+            TPlant TP;
+
+            for (int d = 0; d < NDists; d++) // copy back results to simulation
+            {
+                TP = ASeg.SV[SVIndices[d]] as TPlant;
+
+                switch (DTypes[d])
+                {
+                    case 0: Parms[d] = TP.PAlgalRec.TOpt.Val; break;
+                    case 1: Parms[d] = TP.PAlgalRec.PMax.Val ; break;
+                    case 2: Parms[d] = TP.PAlgalRec.Resp20.Val ; break;
+                    case 3: Parms[d] = TP.PAlgalRec.EnteredLightSat.Val ; break;
+                    case 4: Parms[d] = TP.PAlgalRec.KN.Val ; break;
+                    case 5: Parms[d] = TP.PAlgalRec.KPO4.Val ; break;
+                    case 6: Parms[d] = TP.PAlgalRec.EMort.Val ; break;
+                    case 7: Parms[d] = TP.PAlgalRec.KMort.Val ; break;
+                    case 8: Parms[d] = TP.PAlgalRec.TRef.Val ; break;
+                    case 9: Parms[d] = TP.PAlgalRec.TMax.Val ; break;
+                }
+            }
+        }
+
+        private void ExportBestClick(object sender, EventArgs e)
+        {
+            CopyParmToSim(aQTS.AQTSeg,BestParms);
+            saveJSON_Click(sender, e);
+        }
+
+        private void DeleteResultsButton_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Delete all archived results?", "Confirm",
+                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            {
+                aQTS.SavedRuns.Clear();
+                ShowStudyInfo();
+            }
+        }
+
+
+        // -------------------------------------------------------------------------------------------------------------------------------------
+
+        string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\ACEBI2_IW10_Simplified.csv";
+        string DBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Estuary_to_COMID_DB_051223_B.csv";
+        string OutDBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Estuary_to_COMID_DB_051523.csv";
+        char csvDelimiter = ',';
+
+        public static void DataTableToCSV(DataTable dtDataTable, string strFilePath)
+        {
+            StreamWriter sw = new StreamWriter(strFilePath, false);
+            //headers    
+            for (int i = 0; i < dtDataTable.Columns.Count; i++)
+            {
+                sw.Write(dtDataTable.Columns[i]);
+                if (i < dtDataTable.Columns.Count - 1)
+                {
+                    sw.Write(",");
+                }
+            }
+            sw.Write(sw.NewLine);
+            foreach (DataRow dr in dtDataTable.Rows)
+            {
+                for (int i = 0; i < dtDataTable.Columns.Count; i++)
+                {
+                    if (!Convert.IsDBNull(dr[i]))
+                    {
+                        string value = dr[i].ToString();
+                        if (value.Contains(','))
+                        {
+                            value = String.Format("\"{0}\"", value);
+                            sw.Write(value);
+                        }
+                        else
+                        {
+                            sw.Write(dr[i].ToString());
+                        }
+                    }
+                    if (i < dtDataTable.Columns.Count - 1)
+                    {
+                        sw.Write(",");
+                    }
+                }
+                sw.Write(sw.NewLine);
+            }
+            sw.Close();
+        }
+
+        public DataTable CSVtoDataTable(string strFilePath, char csvDelimiter)
+        {
+            DataTable dt = new DataTable();
+            using (StreamReader sr = new StreamReader(strFilePath))
+            {
+                string[] headers = sr.ReadLine().Split(csvDelimiter);
+                foreach (string header in headers)
+                {
+                    try
+                    {
+                        dt.Columns.Add(header);
+                    }
+                    catch { }
+                }
+                while (!sr.EndOfStream)
+                {
+                    string[] rows = sr.ReadLine().Split(csvDelimiter);
+                    DataRow dr = dt.NewRow();
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        dr[i] = rows[i];
+                    }
+                    dt.Rows.Add(dr);
+                }
+
+            }
+            return dt;
+        }
+
+        DataTable dt;
+        DataTable DBt;
+
+
+        private string[] downCOMIDs(string COMIDstr)
+        {
+            string searchstr = "COMID='" + COMIDstr + "'";
+            DataRow[] rows = dt.Select(searchstr);
+            if (rows == null) return null;
+            if (rows.Count() == 0) return null;
+
+            searchstr = "FROMNODE='" + rows[0]["TONODE"].ToString() + "'";
+            rows = dt.Select(searchstr);
+            if (rows == null) return null;
+            if (rows.Count() == 0) return null;
+
+            string[] res = new string[rows.Count()];
+            for (int r = 0; r < rows.Count(); r++)
+                res[r] = rows[r]["COMID"].ToString();
+            return res;
+        }
+
+
+        private List<string> traverseDown5(string COMIDstr)
+        {
+
+            List<string> res;
+
+            void downCOMIDs5(string COMIDstr, int depth)
+            {
+                if (depth > 5) return;
+                string[] DCIs = downCOMIDs(COMIDstr);
+                if (DCIs != null)
+                {
+                    if (DCIs.Length > 1)  // choose dominant pathway in a divergence
+                    {
+                        foreach (string DCI in DCIs)
+                        {
+                            string searchstr = "COMID='" + DCI + "'";
+                            DataRow[] divrows = dt.Select(searchstr);
+                            if (divrows == null) return;
+                            string DivString = divrows[0]["DIVERGENCE"].ToString();
+                            int DivInt = (int)float.Parse(DivString);
+                            if (DivInt < 2)
+                            {
+                                res.Add(DCI);
+                                downCOMIDs5(DCI, depth + 1);
+                            }
+                        }
+                    }
+
+                    else // just one downstream traversal
+                    {
+                        res.Add(DCIs[0]);
+                        downCOMIDs5(DCIs[0], depth + 1);
+                    };
+                }
+            };
+
+            res = new List<string>();
+            downCOMIDs5(COMIDstr, 1);  //recursively traverse down river 5 levels if possible
+            return res;
+        }
+
+        private void estdbbutton_Click(object sender, EventArgs e)
+        {
+            dt = CSVtoDataTable(CsvFilePath, csvDelimiter);
+            //          string[] dcs = downCOMIDs("20149957");
+
+            DBt = CSVtoDataTable(DBFilePath, csvDelimiter);
+
+            DataTable NewDBt = new DataTable();
+            NewDBt.Columns.Add("Estuary ID");
+            NewDBt.Columns.Add("Intersecting COMID");
+
+            int r = 0;
+            string CurrentEstID = "";
+            while (r < DBt.Rows.Count)
+            {
+                string EstID = DBt.Rows[r]["Estuary ID"].ToString();
+                if (CurrentEstID != EstID)
+                {
+                    CurrentEstID = EstID;
+                    string searchstr = "[Estuary ID]='" + EstID + "'";
+                    DataRow[] intersections = DBt.Select(searchstr);
+                    string[] intCOMIDs = new string[intersections.Length];
+                    for (int i = 0; i < intersections.Count(); i++) intCOMIDs[i] = intersections[i]["Intersecting COMID"].ToString();
+
+                    for (int i = 0; i < intersections.Count(); i++)
+                    {
+                        List<string> dcid5 = traverseDown5(intersections[i]["Intersecting COMID"].ToString());
+                        if (intCOMIDs[i] == "6721589")
+                        {
+                            intCOMIDs[i] = intCOMIDs[i] + ""; // Trap cases for QA/QC
+                        }
+                        bool DoubleCount = false;
+                        foreach (string c in dcid5) if (intCOMIDs.Contains(c)) DoubleCount = true;
+                        if (!DoubleCount) NewDBt.Rows.Add(intersections[i].ItemArray);  // no double counting so keep in DB
+                    }
+
+                }
+                r++;
+            }
+
+            //DataTableToCSV(NewDBt, OutDBFilePath);
+
+        }
+
+        private void calcerror_Click(object sender, EventArgs e)
+        {
+            if (aQTS == null) { MessageBox.Show("No Simulation Loaded"); return; }
+
+            try
+            {
+                MessageBox.Show(SimError(aQTS).ToString());
+            }
+            catch
+            {
+                MessageBox.Show("exception raised while calculating error");
+            }
         }
     }
     
