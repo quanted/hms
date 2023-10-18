@@ -47,7 +47,7 @@
 
             // catchments
             const URL_NWS_WB =
-                "https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS/NWM_Lakes_and_Reservoirs/MapServer/0";
+                "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer/0";
             const URL_NP21_CATCHMENTS =
                 "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/Catchments_NP21_Simplified/MapServer/0";
             // WBD - HUC_8
@@ -98,7 +98,7 @@
                         arcgisOnline,
                         L.esri.Geocoding.mapServiceProvider({
                             label: 'Waterbodies and WBCOMIDs',
-                            url: 'https://idpgis.ncep.noaa.gov/arcgis/rest/services/NWS/NWM_Lakes_and_Reservoirs/MapServer',
+                            url: 'https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer',
                             layers: [0],
                             formatSuggestion: function (feature) {
                                 return feature.properties.GNIS_NAME + ' - ' + feature.properties.feature_id; // format suggestions like this.
@@ -163,16 +163,9 @@
                 oldzoom = newzoom;
             });
 
-            const STAMEN_TONER = L.tileLayer("https://stamen-tiles-{s}.a.ssl.fastly.net/{variant}/{z}/{x}/{y}{r}.{ext}", {
+            const LIGHT_GRAY = L.tileLayer("https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
                 attribution:
-                    'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
-                    '<a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; ' +
-                    'Map data {attribution.OpenStreetMap}',
-                subdomains: 'abcd',
-                minZoom: 3,
-                maxZoom: 18,
-                variant: 'toner-lite',
-                ext: 'png'
+                    'Sources: Esri, HERE, Garmin, (c) OpenStreetMap contributors, and the GIS user community',
             }).addTo(MAP);
 
             const NAT_GEO = L.tileLayer(
@@ -192,7 +185,7 @@
             );
 
             const Base_Maps = {
-                "Black and White": STAMEN_TONER,
+                "Black and White": LIGHT_GRAY,
                 "ESRI Natl. Geo.": NAT_GEO,
                 "ESRI Imagery": SATELLITE,
             };
