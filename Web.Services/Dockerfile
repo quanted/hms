@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine3.16 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.21-alpine3.18 AS base
 WORKDIR /app
 EXPOSE 8080
 
