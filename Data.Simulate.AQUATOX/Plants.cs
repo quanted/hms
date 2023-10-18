@@ -1,8 +1,6 @@
 ﻿using System;
 using AQUATOX.AQTSegment;
 using AQUATOX.AQSite;
-using AQUATOX.OrgMatter;
-using AQUATOX.Diagenesis;
 using Newtonsoft.Json;
 using Globals;
 using AQUATOX.Organisms;

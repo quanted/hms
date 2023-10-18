@@ -146,5 +146,15 @@ namespace GUI.AQUATOX
             chosenlake = row.Cells[0].Value.ToString();
             chosenfileN = row.Cells[6].Value.ToString();
         }
-}
+
+        private void copybutton_Click(object sender, EventArgs e)
+        {
+            dataGridView1.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            dataGridView1.MultiSelect = true;
+            dataGridView1.SelectAll();
+            DataObject dataObj = dataGridView1.GetClipboardContent();
+            if (dataObj != null)
+                Clipboard.SetDataObject(dataObj);
+        }
+    }
 }

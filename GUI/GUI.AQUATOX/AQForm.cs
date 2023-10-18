@@ -209,7 +209,7 @@ namespace GUI.AQUATOX
             foreach (Control c in Controls)  // disable all buttons
             {
                 if (c != AnnealPanel)
-                  c.Enabled = !Running;
+                    c.Enabled = !Running;
             }
 
             modelRunningLabel.Enabled = Running;
@@ -1260,137 +1260,185 @@ namespace GUI.AQUATOX
 
         private double SimError(AQTSim Sim)
         {
-            bool WINTERSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1999, 1, 1, 0, 0, 0)) == 0);  // winterstart triggered based on 1/1/1999 start date
+            // bool WINTERSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1999, 1, 1, 0, 0, 0)) == 0);  // winterstart triggered based on 1/1/1999 start date
+            bool VALSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1984, 4, 1, 0, 0, 0)) == 0);  // ValStart triggered based on 4/1/1984 start date
 
-            int[] Indices = new int[6] { 3, 22, 42, 63, 83, 103 };    
-            double[,] ObsPctPhyto = new double[4, 6] {{ 11.382, 29.0909, 0, 0, 0, 0 }, //Diatoms
-                                                     { 21.14,9.7,17.65,7.27,4.31,31.29 }, //Greens
-                                                     { 36.59,25.45,61.18,70.0,12.35,9.4 }, //cyanobacteria
-                                                     { 30.89,35.76,21.18,22.73,83.33,59.31 }}; //chrysophytes
+            int[] Indices = new int[6] { 3, 22, 42, 63, 83, 103 };
 
+            // double[,] ObsPctPhyto = new double[4, 6] {{ 11.382, 29.0909, 0, 0, 0, 0 }, //Diatoms          //IF to be used again, fix indices and update to biomass pct based on calibrated cell sizes 8/31/2023
+            //                                        { 21.14,9.7,17.65,7.27,4.31,31.29 }, //Greens
+            //                                        { 36.59,25.45,61.18,70.0,12.35,9.4 }, //cyanobacteria
+            //                                        { 30.89,35.76,21.18,22.73,83.33,59.31 }}; //chrysophytes
 
-            double[,] ObsBioEst = new double[7, 4] {{0.00129,0.00239,0.00413,0.00349},
-                                                    {0.00808,0.00269,0.00707,0.00994},
-                                                    {0.01559,0.00387,0.00616,0.01426},
-                                                    {0.00000,0.00320,0.01108,0.00384},
-                                                    {0.00000,0.00061,0.00585,0.00190},
-                                                    {0.00000,0.00444,0.01273,0.08586},
-                                                    {0.00000,0.02282,0.00686,0.04326}};
+            double[,] ObsBioEst = new double[7, 4] {{0.00227,0.00646,0.00134,0.02182},   //updated based on calibrated cell sizes 8/31/2023
+                                                    {0.00708,0.00353,0.00128,0.03117},
+                                                    {0.00605,0.00363,0.00132,0.02090},
+                                                    {0.00013,0.00382,0.00150,0.01054},
+                                                    {0.00000,0.00147,0.00222,0.01279},
+                                                    {0.00000,0.00734,0.00171,0.23017},
+                                                    {0.00067,0.04935,0.00142,0.16644}};
+
+            double[,] ValBioEst = new double[8, 4] {{0.03295,0.03367,0.00041,0.00890},  //9-14-23 added val data based on Cal_and_Validation_Data_cal_cell_weight_8-28-23.xlsx
+                                                    {0.03160,0.02543,0.00000,0.00495},
+                                                    {0.00857,0.01562,0.00051,0.00357},
+                                                    {0.00172,0.02852,0.00137,0.00000},
+                                                    {0.00067,0.14915,0.00017,0.00000},
+                                                    {0.00104,0.13864,0.00045,0.00000},
+                                                    {0.00080,0.07334,0.03363,0.00000},
+                                                    {0.00031,0.04650,0.02249,0.01147}};
+
+            double[] ValChlaEst = new double[8] { 1.49000, 0.58500, 0.28000, 0.62667, 1.84000, 3.05333, 1.81667, 0.72000 };
+            int[] ValIndices = new int[8] { 13, 27, 33, 55, 76, 91, 105, 133 };
 
             int[] BioIndices = new int[7] { 3, 22, 29, 42, 63, 83, 103 };    // annual 
 
             int[] ChlaInd = new int[15] { 8, 14, 22, 28, 36, 43, 51, 58, 64, 71, 78, 87, 104, 110, 121 };
-            double[] ObsChla = new double[15] { 0.43, 0.66, 0.779, 1.393, 0.512, 0.799, 0.328, 0.35, 0.471, 0.615, 1.885, 4.467, 2.602, 2.48, 2.623 };
+            double[] ObsChla = new double[15] { 0.430, 0.655, 0.7786, 1.393, 0.512, 0.799, 0.328, 0.348, 0.471, 0.615, 1.885, 4.467, 2.6024, 2.4795, 2.623 };
+            double[] ModelChla = new double[15];
+            double Bioerror;
 
-            if (WINTERSTART)
-            {
+                        {
                 for (int i = 0; i < Indices.Length; i++)  // start simulation on 1/1/1999 rather than 6/1/1999  
                 {
-                    Indices[i] += 151;
+                    Indices[i] += 61;
                 }
-
                 for (int i = 0; i < ChlaInd.Length; i++)
                 {
-                    ChlaInd[i] += 151;
+                    ChlaInd[i] += 61;
                 }
-
                 for (int i = 0; i < BioIndices.Length; i++)
                 {
-                    BioIndices[i] += 151;
+                    BioIndices[i] += 61;
                 }
-            }
+                for (int i = 0; i < ValIndices.Length; i++)
+                {
+                    ValIndices[i] += 61;
+                }
 
+                
+
+            }
 
             //        int DiatomPos = 12;
             //        int GreensPos = 13;
             //        int CyanPos = 14;
             //        int ChrysoPos = 15;
-
-            double[] ModelSumPhyto = new double[6];
-            double[] ModelChla = new double[15];
-
-            double[,] PctPhyto = new double[4, 6];
-            double[] phyto = new double[4];
-
-            for (int i = 0; i < 6; i++)
-            {
-                ModelSumPhyto[i] = 0;
-                for (int p = 12; p < 16; p++)
-                {
-                    phyto[p - 12] = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices[i])[0]);
-                    ModelSumPhyto[i] += phyto[p - 12];
-                }
-
-                for (int p = 12; p < 16; p++)
-                    PctPhyto[p - 12, i] = 100 * (phyto[p - 12] / ModelSumPhyto[i]);
-            }
-
-            //double Bioerror = 0;
-            //for (int i = 0; i < 7; i++)
+            //        double[] ModelSumPhyto = new double[6];
+            //  double[,] PctPhyto = new double[4, 6];
+            //  double[] phyto = new double[4];
+            //
+            //for (int i = 0; i < 6; i++)
             //{
-            //   for (int p = 12; p < 16; p++)
+            //    ModelSumPhyto[i] = 0;
+            //    for (int p = 12; p < 16; p++)
             //    {
-            //        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(BioIndices[i])[0]);
-            //        double ObsBio = ObsBioEst[i, p-12];
-            //        Bioerror += Math.Abs(ModelBio - ObsBio);
+            //        phyto[p - 12] = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices[i])[0]);
+            //        ModelSumPhyto[i] += phyto[p - 12];
             //    }
+            //    for (int p = 12; p < 16; p++)
+            //        PctPhyto[p - 12, i] = 100 * (phyto[p - 12] / ModelSumPhyto[i]);198
             //}
-            //return Bioerror*100;
 
-            // double chlaMAE25 = 0;
-            double chlaFE3 = 0;
-            for (int i = 0; i < 15; i++)
+            if (VALSTART)
             {
-                ModelChla[i] = 0;
-                for (int p = 12; p < 16; p++)
+                Bioerror = 0;
+                for (int i = 0; i < 8; i++)
                 {
-                    TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
-                    double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
-
-                    ModelChla[i] +=
-                        Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ChlaInd[i])[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
+                    for (int p = 12; p < 16; p++)
+                    {
+                        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ValIndices[i] - 1)[0]);
+                        double ObsBio = ValBioEst[i, p - 12];
+                        Bioerror += 50 * Math.Abs(ModelBio - ObsBio);
+                    }
                 }
-             // chlaMAE25 += Math.Abs(ModelChla[i] - ObsChla[i]);
-                chlaFE3 += Math.Max(ModelChla[i], ObsChla[i]) / Math.Min(ModelChla[i], ObsChla[i]);
             }
-
-            if (WINTERSTART)
+            else
             {
-                double[] WinterChla = new double[4] { 1.0, 1.0, 1.0, 1.0 };
-                int[] WChlaInd = new int[4] { 15, 40, 70, 90 }; //WINTER chl-a indices
-
-                double ModelWChla; //WINTER
-                for (int i = 0; i < 4; i++)
+                Bioerror = 0;
+                for (int i = 0; i < 7; i++)
                 {
-                    ModelWChla = 0;
+                    for (int p = 12; p < 16; p++)
+                    {
+                        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(BioIndices[i])[0]);
+                        double ObsBio = ObsBioEst[i, p - 12];
+                        Bioerror += 50 * Math.Abs(ModelBio - ObsBio);
+                    }
+                }
+            };
+
+            double chlaMAE25 = 0;
+
+            if (VALSTART)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    ModelChla[i] = 0;
                     for (int p = 12; p < 16; p++)
                     {
                         TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
                         double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
 
-                        ModelWChla +=
-                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(WChlaInd[i])[0]) * (0.526 / Plant_to_ChlA);
+                        ModelChla[i] +=
+                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ValIndices[i] - 1)[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
                     }
-                    chlaFE3 += Math.Max(ModelWChla, WinterChla[i]) / Math.Min(ModelWChla, WinterChla[i]);
-                    //chlaMAE25 += Math.Abs(ModelWChla - WinterChla[i]);
+                    chlaMAE25 += Math.Abs(ModelChla[i] - ValChlaEst[i]);
                 }
-                // chlaMAE25 = (chlaMAE25 / 19) * 25;  //WINTER 19 observations
-                chlaFE3 = (chlaFE3 / 19.0) * 3.0;  //WINTER 19 observations
             }
             else
             {
-                //chlaMAE25 = (chlaMAE25 / 15) * 25;  //summer 15 observations
-                chlaFE3 = (chlaFE3 / 15.0) * 3.0;  //WINTER 19 observations
+                for (int i = 0; i < 15; i++)
+                {
+                    ModelChla[i] = 0;
+                    for (int p = 12; p < 16; p++)
+                    {
+                        TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
+                        double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
+
+                        ModelChla[i] +=
+                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ChlaInd[i])[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
+                    }
+                    chlaMAE25 += Math.Abs(ModelChla[i] - ObsChla[i]);
+                    // chlaFE15 += Math.Max(ModelChla[i], ObsChla[i]) / Math.Min(ModelChla[i], ObsChla[i]);
+                }
             }
 
-            double phytoMAE = 0;
-            for (int i = 0; i < 6; i++)
-                for (int p = 0; p < 4; p++)
-                    phytoMAE += Math.Abs(PctPhyto[p, i] - ObsPctPhyto[p, i]);
-            phytoMAE = phytoMAE / 24.0;
+            //if (WINTERSTART)
+            //{
+            //    double[] WinterChla = new double[4] { 1.0, 1.0, 1.0, 1.0 };
+            //    int[] WChlaInd = new int[4] { 15, 40, 70, 90 }; //WINTER chl-a indices
+
+            //    double ModelWChla; //WINTER
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        ModelWChla = 0;
+            //        for (int p = 12; p < 16; p++)
+            //        {
+            //            TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
+            //            double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
+
+            //            ModelWChla +=
+            //                Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(WChlaInd[i])[0]) * (0.526 / Plant_to_ChlA);
+            //        }
+            //        //chlaFE15 += Math.Max(ModelWChla, WinterChla[i]) / Math.Min(ModelWChla, WinterChla[i]);
+            //        chlaMAE25 += Math.Abs(ModelWChla - WinterChla[i]);
+            //    }
+            //    chlaMAE25 = (chlaMAE25 / 19) * 50;  //WINTER 19 observations
+            //    //chlaFE15 = (chlaFE15 / 19.0) * 15.0;  //WINTER 19 observations
+            //}
+            //else
+            {
+                chlaMAE25 = (chlaMAE25 / 15) * 50;  //summer 15 observations
+                //chlaFE15 = (chlaFE15 / 15.0) * 15.0;  //summer 15 observations
+            }
+
+            //double phytoMAE = 0;
+            //for (int i = 0; i < 6; i++)
+            //for (int p = 0; p < 4; p++)
+            //phytoMAE += Math.Abs(PctPhyto[p, i] - ObsPctPhyto[p, i]);
+            //phytoMAE = phytoMAE / 24.0;
 
             //return chlaMAE25 + phytoMAE;
-            return chlaFE3 + phytoMAE;
+            return chlaMAE25 + Bioerror;   //Avg chl-a * 50 + sum Bio error * 50
         }
 
         public static class ThreadLocalRandom
@@ -1450,11 +1498,9 @@ namespace GUI.AQUATOX
         {
 
             string logfile;
-            
 
             double Old_Error = 100000;
             double Min_Error = 100000;
-            double New_Error = 100000;
             double Min_Error_Logged = 100000;
             double T = double.Parse(TStartBox.Text);  // start at temperature of 50
             int NUMDRAWS = int.Parse(IterationBox.Text); // Number of draws to run at each temperature;  fixme 
@@ -1513,7 +1559,7 @@ namespace GUI.AQUATOX
             int dtype = 0;
             int org = 0;
             int svindex = 12; //12-15 are diatoms through chrysophytes
-            
+
             for (int d = 0; d < NDists; d++)  // set up distributions
             {
                 DTypes[d] = dtype;
@@ -1556,52 +1602,61 @@ namespace GUI.AQUATOX
 
                 Parallel.For(0, NUMDRAWS, (dr, state) =>
                 {
-                double[] NewParms = new double[NDists];
+                    double[] NewParms = new double[NDists];
 
-                OldParms.CopyTo(NewParms, 0);
-                int OldParmIndex = LastAccept;  // interation basis for this test
+                    OldParms.CopyTo(NewParms, 0);
+                    int OldParmIndex = LastAccept;  // interation basis for this test
 
-                int index = ThreadLocalRandom.Instance.Next(0, NDists - 1);
+                    int index = ThreadLocalRandom.Instance.Next(0, NDists - 1);
 
-                NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);
+                    NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);
 
-                AQTSim LocalAQTS = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(AQTSJSON, AQTSim.AQTJSONSettings());  //likely costly in terms of time
-                LocalAQTS.AQTSeg.SetupLinks();
-                CopyParmToSim(LocalAQTS.AQTSeg,NewParms);
+                    AQTSim LocalAQTS = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(AQTSJSON, AQTSim.AQTJSONSettings());  //likely costly in terms of time
+                    LocalAQTS.AQTSeg.SetupLinks();
+                    CopyParmToSim(LocalAQTS.AQTSeg, NewParms);
 
-                LocalAQTS.Integrate();
+                    LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
+                    LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
+                    LocalAQTS.Integrate(); // 1999 simulation
+                    double New_Error = SimError(LocalAQTS);
 
-                New_Error = SimError(LocalAQTS);
 
-                double AP = (Old_Error - New_Error) / T;
-                if (AP > 100) AP = 3E+43;
-                else AP = Math.Exp(AP);
+                    LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run first year of validation period
+                    LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1984, 10, 12);
+                    LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;  //9/28/2023, start with low chrysophytes in 1984 as a test
 
-                bool AcceptThis = ((New_Error < Min_Error) || (AP > ThreadLocalRandom.Instance.NextDouble()));
+                    LocalAQTS.Integrate(); // 1984 simulation
+                    New_Error = (New_Error + SimError(LocalAQTS)) / 2;
 
-                if ((OldParmIndex != LastAccept) && (AcceptThis))
+                    double AP = (Old_Error - New_Error) / T;    
+                    if (AP > 100) AP = 3E+43;
+                    else AP = Math.Exp(AP);
+
+                    bool AcceptThis = ((New_Error < Min_Error) || (AP > ThreadLocalRandom.Instance.NextDouble()));
+
+                    if ((OldParmIndex != LastAccept) && (AcceptThis))
                         uselessruns++;  // acceptable run, but last run was accepted so throw it out 
 
-                totruns++; //total runs
-                runs++; //runs in this loop
-                Truns++; //runs at this temperature this loop
+                    totruns++; //total runs
+                    runs++; //runs in this loop
+                    Truns++; //runs at this temperature this loop
 
-                int progint = Math.Max((int)(((double)runs / (double)NUMDRAWS) * 100.0), 1);
-                if (progint > lastprog)
+                    int progint = Math.Max((int)(((double)runs / (double)NUMDRAWS) * 100.0), 1);
+                    if (progint > lastprog)
                     {
-                        ParAnnealWorker.ReportProgress(progint, "Temperature: " + T.ToString("0.####") + "; Err: " + Min_Error.ToString(("00.###")) +
+                        ParAnnealWorker.ReportProgress(progint, "Temperature: " + T.ToString("0.####") + "; BestErr: " + Min_Error.ToString(("00.###")) + "; Current: " + Old_Error.ToString(("00.###")) +
                             "; Used: " + ((((double)Truns - (double)uselessruns) / (double)Truns) * 100.0).ToString("#0.0") +
                             "% ( " + (Truns - uselessruns).ToString() + " of " + Truns.ToString() + ").  TotRuns = " + totruns.ToString());
                         lastprog = progint;
                     }
 
-                if (ParAnnealWorker.CancellationPending)
+                    if (ParAnnealWorker.CancellationPending)
                     {
                         UserCancel = true;
                         state.Break();
                     }
 
-                if ((OldParmIndex == LastAccept) && (AcceptThis)) // accept 
+                    if ((OldParmIndex == LastAccept) && (AcceptThis)) // accept 
                     {
                         LastAccept = dr; //this is the latest accepted parameter set now
                         Old_Error = New_Error;
@@ -1651,13 +1706,19 @@ namespace GUI.AQUATOX
                     case 0: TP.PAlgalRec.TOpt.Val = Parms[d]; break;
                     case 1: TP.PAlgalRec.PMax.Val = Parms[d]; break;
                     case 2: TP.PAlgalRec.Resp20.Val = Parms[d]; break;
-                    case 3: TP.PAlgalRec.EnteredLightSat.Val = Parms[d]; break;  
+                    case 3: TP.PAlgalRec.EnteredLightSat.Val = Parms[d]; break;
                     case 4: TP.PAlgalRec.KN.Val = Parms[d]; break;
                     case 5: TP.PAlgalRec.KPO4.Val = Parms[d]; break;
                     case 6: TP.PAlgalRec.EMort.Val = Parms[d]; break;
                     case 7: TP.PAlgalRec.KMort.Val = Parms[d]; break;
-                    case 8: TP.PAlgalRec.TRef.Val = Parms[d]; break;
-                    case 9: TP.PAlgalRec.TMax.Val = Parms[d]; break;
+                    case 8:
+                        TP.PAlgalRec.TRef.Val = Parms[d];
+                        if (TP.PAlgalRec.TRef.Val >= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TRef.Val = TP.PAlgalRec.TOpt.Val - 0.5;
+                        break;
+                    case 9:
+                        TP.PAlgalRec.TMax.Val = Parms[d];
+                        if (TP.PAlgalRec.TMax.Val <= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TMax.Val = TP.PAlgalRec.TOpt.Val + 0.5;
+                        break;
 
                 }
             }
@@ -1674,22 +1735,22 @@ namespace GUI.AQUATOX
                 switch (DTypes[d])
                 {
                     case 0: Parms[d] = TP.PAlgalRec.TOpt.Val; break;
-                    case 1: Parms[d] = TP.PAlgalRec.PMax.Val ; break;
-                    case 2: Parms[d] = TP.PAlgalRec.Resp20.Val ; break;
-                    case 3: Parms[d] = TP.PAlgalRec.EnteredLightSat.Val ; break;
-                    case 4: Parms[d] = TP.PAlgalRec.KN.Val ; break;
-                    case 5: Parms[d] = TP.PAlgalRec.KPO4.Val ; break;
-                    case 6: Parms[d] = TP.PAlgalRec.EMort.Val ; break;
-                    case 7: Parms[d] = TP.PAlgalRec.KMort.Val ; break;
-                    case 8: Parms[d] = TP.PAlgalRec.TRef.Val ; break;
-                    case 9: Parms[d] = TP.PAlgalRec.TMax.Val ; break;
+                    case 1: Parms[d] = TP.PAlgalRec.PMax.Val; break;
+                    case 2: Parms[d] = TP.PAlgalRec.Resp20.Val; break;
+                    case 3: Parms[d] = TP.PAlgalRec.EnteredLightSat.Val; break;
+                    case 4: Parms[d] = TP.PAlgalRec.KN.Val; break;
+                    case 5: Parms[d] = TP.PAlgalRec.KPO4.Val; break;
+                    case 6: Parms[d] = TP.PAlgalRec.EMort.Val; break;
+                    case 7: Parms[d] = TP.PAlgalRec.KMort.Val; break;
+                    case 8: Parms[d] = TP.PAlgalRec.TRef.Val; break;
+                    case 9: Parms[d] = TP.PAlgalRec.TMax.Val; break;
                 }
             }
         }
 
         private void ExportBestClick(object sender, EventArgs e)
         {
-            CopyParmToSim(aQTS.AQTSeg,BestParms);
+            CopyParmToSim(aQTS.AQTSeg, BestParms);
             saveJSON_Click(sender, e);
         }
 
@@ -1700,6 +1761,7 @@ namespace GUI.AQUATOX
                  MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
                 aQTS.SavedRuns.Clear();
+                aQTS.AQTSeg.ClearResults();
                 ShowStudyInfo();
             }
         }
@@ -1707,9 +1769,9 @@ namespace GUI.AQUATOX
 
         // -------------------------------------------------------------------------------------------------------------------------------------
 
-        string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\ACEBI2_IW10_Simplified.csv";
-        string DBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Estuary_to_COMID_DB_051223_B.csv";
-        string OutDBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Estuary_to_COMID_DB_051523.csv";
+        string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\APF_Endpoints_D_Feature_Name.csv";
+        string DBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Feature_to_COMID_DB_092223_PreB.csv";
+        string OutDBFilePath = @"N:\AQUATOX\CSRA\GIS\estuaries\Intersecting_Feature_to_COMID_DB_092223_Processed.csv";
         char csvDelimiter = ',';
 
         public static void DataTableToCSV(DataTable dtDataTable, string strFilePath)
@@ -1811,7 +1873,7 @@ namespace GUI.AQUATOX
 
             void downCOMIDs5(string COMIDstr, int depth)
             {
-                if (depth > 5) return;
+                if (depth > 8) return;
                 string[] DCIs = downCOMIDs(COMIDstr);
                 if (DCIs != null)
                 {
@@ -1885,7 +1947,7 @@ namespace GUI.AQUATOX
                 r++;
             }
 
-            //DataTableToCSV(NewDBt, OutDBFilePath);
+            DataTableToCSV(NewDBt, OutDBFilePath);
 
         }
 
@@ -1903,5 +1965,5 @@ namespace GUI.AQUATOX
             }
         }
     }
-    
+
 }

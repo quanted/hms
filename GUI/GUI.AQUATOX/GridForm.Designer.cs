@@ -29,94 +29,104 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.OKButton = new System.Windows.Forms.Button();
-            this.CancelButt = new System.Windows.Forms.Button();
-            this.changedLabel = new System.Windows.Forms.Label();
-            this.HelpButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.SuspendLayout();
+            dataGridView1 = new System.Windows.Forms.DataGridView();
+            OKButton = new System.Windows.Forms.Button();
+            CancelButt = new System.Windows.Forms.Button();
+            changedLabel = new System.Windows.Forms.Label();
+            HelpButton = new System.Windows.Forms.Button();
+            copybutton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SuspendLayout();
             // 
             // dataGridView1
             // 
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(23, 46);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 25;
-            this.dataGridView1.Size = new System.Drawing.Size(746, 466);
-            this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
-            this.dataGridView1.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridView1_DataError);
+            dataGridView1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new System.Drawing.Point(23, 46);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 51;
+            dataGridView1.RowTemplate.Height = 25;
+            dataGridView1.Size = new System.Drawing.Size(745, 472);
+            dataGridView1.TabIndex = 0;
+            dataGridView1.CellClick += dataGridView1_CellClick;
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
+            dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
+            dataGridView1.DataError += dataGridView1_DataError;
             // 
             // OKButton
             // 
-            this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(644, 12);
-            this.OKButton.Name = "OKButton";
-            this.OKButton.Size = new System.Drawing.Size(61, 23);
-            this.OKButton.TabIndex = 25;
-            this.OKButton.Text = "OK";
-            this.OKButton.UseVisualStyleBackColor = true;
-            this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
+            OKButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            OKButton.Location = new System.Drawing.Point(643, 12);
+            OKButton.Name = "OKButton";
+            OKButton.Size = new System.Drawing.Size(61, 23);
+            OKButton.TabIndex = 25;
+            OKButton.Text = "OK";
+            OKButton.UseVisualStyleBackColor = true;
+            OKButton.Click += OKButton_Click;
             // 
             // CancelButt
             // 
-            this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(711, 12);
-            this.CancelButt.Name = "CancelButt";
-            this.CancelButt.Size = new System.Drawing.Size(61, 23);
-            this.CancelButt.TabIndex = 26;
-            this.CancelButt.Text = "Cancel";
-            this.CancelButt.UseVisualStyleBackColor = true;
-            this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
+            CancelButt.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            CancelButt.Location = new System.Drawing.Point(710, 12);
+            CancelButt.Name = "CancelButt";
+            CancelButt.Size = new System.Drawing.Size(61, 23);
+            CancelButt.TabIndex = 26;
+            CancelButt.Text = "Cancel";
+            CancelButt.UseVisualStyleBackColor = true;
+            CancelButt.Click += CancelButt_Click;
             // 
             // changedLabel
             // 
-            this.changedLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.changedLabel.AutoSize = true;
-            this.changedLabel.Location = new System.Drawing.Point(574, 16);
-            this.changedLabel.Name = "changedLabel";
-            this.changedLabel.Size = new System.Drawing.Size(53, 15);
-            this.changedLabel.TabIndex = 27;
-            this.changedLabel.Text = "changed";
-            this.changedLabel.Visible = false;
+            changedLabel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            changedLabel.AutoSize = true;
+            changedLabel.Location = new System.Drawing.Point(573, 16);
+            changedLabel.Name = "changedLabel";
+            changedLabel.Size = new System.Drawing.Size(53, 15);
+            changedLabel.TabIndex = 27;
+            changedLabel.Text = "changed";
+            changedLabel.Visible = false;
             // 
             // HelpButton
             // 
-            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(456, 10);
-            this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(87, 27);
-            this.HelpButton.TabIndex = 28;
-            this.HelpButton.Text = "  Help";
-            this.HelpButton.UseVisualStyleBackColor = true;
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            HelpButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            HelpButton.Image = Properties.Resources.help_icon;
+            HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            HelpButton.Location = new System.Drawing.Point(455, 10);
+            HelpButton.Name = "HelpButton";
+            HelpButton.Size = new System.Drawing.Size(87, 27);
+            HelpButton.TabIndex = 28;
+            HelpButton.Text = "  Help";
+            HelpButton.UseVisualStyleBackColor = true;
+            HelpButton.Click += HelpButton_Click;
+            // 
+            // copybutton
+            // 
+            copybutton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            copybutton.Location = new System.Drawing.Point(23, 14);
+            copybutton.Name = "copybutton";
+            copybutton.Size = new System.Drawing.Size(61, 23);
+            copybutton.TabIndex = 29;
+            copybutton.Text = "Copy All";
+            copybutton.UseVisualStyleBackColor = true;
+            copybutton.Click += copybutton_Click;
             // 
             // GridForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(794, 535);
-            this.Controls.Add(this.HelpButton);
-            this.Controls.Add(this.changedLabel);
-            this.Controls.Add(this.OKButton);
-            this.Controls.Add(this.CancelButt);
-            this.Controls.Add(this.dataGridView1);
-            this.Name = "GridForm";
-            this.Text = "Matrix Data Entry";
-            this.Load += new System.EventHandler(this.GridForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(793, 541);
+            Controls.Add(copybutton);
+            Controls.Add(HelpButton);
+            Controls.Add(changedLabel);
+            Controls.Add(OKButton);
+            Controls.Add(CancelButt);
+            Controls.Add(dataGridView1);
+            Name = "GridForm";
+            Text = "Matrix Data Entry";
+            Load += GridForm_Load;
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -126,5 +136,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Label changedLabel;
         private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Button copybutton;
     }
 }

@@ -3637,12 +3637,11 @@ namespace AQUATOX.AQTSegment
             double TMaxAdapt = TMax + Acclimation;
             // C          C     C
             double TOptAdapt = TOpt + Acclimation;
-            if (Q10 <= 1.0)
+            if (Q10 <= 1.0) // JSC added "=" to "<=" otherwise YT=0, division by zero
             {
-                // JSC added "=" to "<=" otherwise YT=0, division by zero
-                Q10 = 2.0;
+                Q10 = 2.0;  // rate of change per 10 degrees
             }
-            // rate of change per 10 degrees
+            
             if (TMaxAdapt <= TOptAdapt)
             {
                 TMaxAdapt = TOptAdapt + Consts.VSmall;

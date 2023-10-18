@@ -420,8 +420,10 @@ namespace AQUATOX.AQSim_2D
     /// <returns>JSON or error message</returns>
     public string ReadStreamNetwork(string comid, string endComid, string span)
         {
-            string requestURL = "https://qedcloud.net/hms/rest/api/";
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+
+            //string requestURL = "http://localhost:31000/hms/rest/api/";
+            //string requestURL = "https://qedcloud.net/hms/rest/api/";
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             //string requestURL = "https://qed.epa.gov/hms/rest/api/";
             string component = "info";
             string dataset = "streamnetwork";
