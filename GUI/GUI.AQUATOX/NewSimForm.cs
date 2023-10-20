@@ -84,7 +84,7 @@ namespace GUI.AQUATOX
 
         void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
         {
-             MessageBox.Show("WebView Process Failed"); 
+             // MessageBox.Show("WebView Process Failed"); 
         }
 
 

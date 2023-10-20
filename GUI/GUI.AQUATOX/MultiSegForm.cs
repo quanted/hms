@@ -1489,9 +1489,9 @@ namespace GUI.AQUATOX
                         if (GeoJSON == "{}") polyline = null;
                         else
                         {
-                            GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
                             try
                             {
+                                GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
                                 polyline = coords.stream_geometry.features[0].geometry.coordinates;
                             }
                             catch

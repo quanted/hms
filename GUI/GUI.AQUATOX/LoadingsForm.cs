@@ -424,8 +424,8 @@ namespace GUI.AQUATOX
         /// </summary>
         public void submitRequest()
         {
-            string requestURL = "https://qedcloud.net/hms/rest/api/";
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+            //string requestURL = "https://qedcloud.net/hms/rest/api/";
+            string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
             // string requestURL = "https://qed.epa.gov/hms/rest/api/";
             string component = "hydrology";
             string dataset = "streamflow";
