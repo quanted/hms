@@ -43,6 +43,7 @@
             var oldzoom = 6;
             var AwaitSearch = false;
             ZoomThresh = 9;
+            LakeZoomThresh = 6;
 
 
             // catchments
@@ -150,13 +151,25 @@
                 newzoom = MAP.getZoom();
                 if (newzoom <= ZoomThresh) {
                     if (oldzoom > ZoomThresh) {
-                        if (!lakemode) MAP.removeLayer(FLOWLINES_LAYER);
+                        MAP.removeLayer(FLOWLINES_LAYER);
                     }
                 }
 
-                if (newzoom > ZoomThresh) {
+                if (newzoom <= LakeZoomThresh) {
+                    if (oldzoom > LakeZoomThresh) {
+                        MAP.removeLayer(WB_LAYER);
+                    }
+                }
+
+                if (newzoom > ZoomThresh)   {
                     if (oldzoom <= ZoomThresh) {
                         if (!lakemode) MAP.addLayer(FLOWLINES_LAYER);
+                    }
+                }
+
+                if (newzoom > LakeZoomThresh) {
+                    if (oldzoom <= LakeZoomThresh) {
+                        MAP.addLayer(WB_LAYER);
                     }
                 }
 
@@ -314,7 +327,7 @@
                 "NWS Lake/Res": WB_LAYER,
             };
 
-            WB_LAYER.addTo(MAP);  
+            // WB_LAYER.addTo(MAP);  
 
             const LAYER_OPTIONS = L.control.layers(Base_Maps, OVERLAY_MAPS);
             LAYER_OPTIONS.addTo(MAP);
@@ -365,13 +378,13 @@
             function ShowStreamDefaults() {
                 newzoom = MAP.getZoom();
                 if (newzoom > ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
-                MAP.addLayer(WB_LAYER);
+                if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
                 FLOWLINES_LAYER.setStyle({color: "blue", weight: 1 });
                 StreamSearch();
             }
 
             function ShowLakeDefaults() {
-                MAP.addLayer(WB_LAYER);
+                if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
                 MAP.removeLayer(FLOWLINES_LAYER);
                 FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
                 LakeSearch()
