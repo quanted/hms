@@ -20,6 +20,12 @@ using Microsoft.Web.WebView2.Core;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 using System.Threading;
+using Hawqs;
+using System.Net.Http;
+using Aron.Weiler;
+using MongoDB.Driver;
+using System.Linq.Expressions;
+using System.Speech.Synthesis;
 
 namespace GUI.AQUATOX
 
@@ -29,6 +35,7 @@ namespace GUI.AQUATOX
         private CancellationTokenSource _cts;
         private AQSim_2D AQT2D = null;
         private int Lake0D = 0;
+        private int HUC14 = 0;
 
         private FormWindowState LastWindowState = FormWindowState.Minimized;
         private OChart chart1 = new OChart();
@@ -289,6 +296,7 @@ namespace GUI.AQUATOX
             bool streamnetwork = false;
             if (validDirectory) streamnetwork = VerifyStreamNetwork();
             bool is0D = (Lake0D > 0);
+            bool isHUC14 = (HUC14 > 0);
             bool inputsegs = false;
             DateTime modelrun = DateTime.MinValue;
 
@@ -323,7 +331,7 @@ namespace GUI.AQUATOX
                 else
                 {
                     string str3;
-                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";  
+                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
                     setinfolabels("Stream Network Read", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
                 }
@@ -471,7 +479,7 @@ namespace GUI.AQUATOX
             progressBar1.BeginInvoke((MethodInvoker)delegate ()
                 {
                     progressBar1.Visible = false;
-                    proglabel.Visible= false;
+                    proglabel.Visible = false;
                     CancelButton.Visible = false;
                 });
         }
@@ -590,7 +598,7 @@ namespace GUI.AQUATOX
             {
                 TSafeAddToProcessLog(errmessage);
                 UseWaitCursor = false;
-                PostWebviewMessage("COLOR|" + WBComid + "|red");  
+                PostWebviewMessage("COLOR|" + WBComid + "|red");
                 TSafeHideProgBar();
                 ConsoleButton.Checked = true;
             }
@@ -642,7 +650,7 @@ namespace GUI.AQUATOX
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
                             continue;
-                        }   
+                        }
 
                         string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
 
@@ -677,19 +685,19 @@ namespace GUI.AQUATOX
                     if (Lake0D == 0)
                     {
                         if (AQT2D.SN.boundary.TryGetValue("out-of-network", out int[] outofnetwork))
-                         if (outofnetwork.Length > 0)
-                         {
-                             string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                             foreach (long bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
-                             TSafeAddToProcessLog("INPUT: " + bnote);
-                         }
+                            if (outofnetwork.Length > 0)
+                            {
+                                string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
+                                foreach (long bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
+                                TSafeAddToProcessLog("INPUT: " + bnote);
+                            }
                     }
 
                     this.BeginInvoke((MethodInvoker)(() =>
                     {
                         SetInterfaceBusy(false);
                         progressBar1.Visible = false;
-                        proglabel.Visible = false;  
+                        proglabel.Visible = false;
                         CancelButton.Visible = false;
                         UseWaitCursor = false;
                         UpdateScreen();
@@ -706,7 +714,7 @@ namespace GUI.AQUATOX
                 MessageBox.Show(ex.Message);
                 SetInterfaceBusy(false);
                 progressBar1.Visible = false;
-                proglabel.Visible= false; 
+                proglabel.Visible = false;
                 CancelButton.Visible = false;
                 UseWaitCursor = false;
                 UpdateScreen();
@@ -722,7 +730,7 @@ namespace GUI.AQUATOX
             {
                 if (Prog < 100) Prog++;  // workaround of animation bug
                 Prog = Math.Max(Prog, 1);
-                if ((Prog > progressBar1.Value) || (Prog == 1) || (progressBar1.Value==100)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  
+                if ((Prog > progressBar1.Value) || (Prog == 1) || (progressBar1.Value == 100)) progressBar1.Value = Math.Max(Prog, 1); // avoid jumping back and forth  
             });
         }
 
@@ -741,7 +749,7 @@ namespace GUI.AQUATOX
         {
             UseWaitCursor = false;
             progressBar1.Visible = false;
-            proglabel.Visible = false;  
+            proglabel.Visible = false;
             CancelButton.Visible = false;
             SetInterfaceBusy(false);
             UpdateScreen();
@@ -809,7 +817,7 @@ namespace GUI.AQUATOX
             AddToProcessLog("INPUTS:  Model Run Initiated");
             try
             {
-                if ((AQT2D.SN == null)||(AQT2D.SN.network == null))
+                if ((AQT2D.SN == null) || (AQT2D.SN.network == null))
                 {  //0D Lake/Res
 
                     List<string> strout = new();
@@ -819,7 +827,7 @@ namespace GUI.AQUATOX
                     await Task.Run(() =>
                     {
                         success = (AQT2D.executeModel(Lake0D, MasterSetupJson(), ref strout, ref json, null, null));   //run the 0D segment 
-                        if (!success) foreach(string msg in strout) TSafeAddToProcessLog(msg);
+                        if (!success) foreach (string msg in strout) TSafeAddToProcessLog(msg);
                         else
                         {
                             File.WriteAllText(BaseDir + "AQT_Run_" + Lake0D.ToString() + ".JSON", json);
@@ -843,7 +851,7 @@ namespace GUI.AQUATOX
 
                 for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
                 {
-                    proglabel.Text= "Step "+(ordr+1).ToString()+" of "+ AQT2D.SN.order.Length.ToString();
+                    proglabel.Text = "Step " + (ordr + 1).ToString() + " of " + AQT2D.SN.order.Length.ToString();
                     await Task.Run(() => Parallel.ForEach(AQT2D.SN.order[ordr], runID =>
                     //                foreach (int runID in AQT2D.SN.order[ordr])
                      {
@@ -1367,18 +1375,18 @@ namespace GUI.AQUATOX
         }
 
 
-//        string ReadGeoJSON(string comid)
-//        {
-            //GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid,true);
-            //object SG = catchment.GetStreamGeometryV2(comid);
-            //if (SG == null) return "null";
-            //return "not null";
+        //        string ReadGeoJSON(string comid)
+        //        {
+        //GIS.Operations.Catchment catchment = new GIS.Operations.Catchment(comid,true);
+        //object SG = catchment.GetStreamGeometryV2(comid);
+        //if (SG == null) return "null";
+        //return "not null";
 
-            //return;
-            //WSCatchment WSC = new();
-            //Task<Dictionary<string, object>> rslt;
-            //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
-//        }
+        //return;
+        //WSCatchment WSC = new();
+        //Task<Dictionary<string, object>> rslt;
+        //await Task.Factory.StartNew<>(WSC.Get(WBcomid, streamGeometry: true));
+        //        }
 
 
         bool PlotWBCOMID(string WBString)
@@ -1461,11 +1469,11 @@ namespace GUI.AQUATOX
                             if (in_waterbody) continue;  // don't plot segments that are superceded by their lake/reservoir waterbody.
                         }
 
-                        if (File.Exists(BaseDir + CString + ".GeoJSON")) 
-                         { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }   
+                        if (File.Exists(BaseDir + CString + ".GeoJSON"))
+                        { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
                         else
                         {
-                            
+
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
                             // GeoJSON = "{}";
@@ -1489,9 +1497,9 @@ namespace GUI.AQUATOX
                         if (GeoJSON == "{}") polyline = null;
                         else
                         {
-                            GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
                             try
                             {
+                                GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
                                 polyline = coords.stream_geometry.features[0].geometry.coordinates;
                             }
                             catch
@@ -1619,7 +1627,7 @@ namespace GUI.AQUATOX
                 }
 
                 if (AQForm.EditLinkedInput(ref json, isBoundarySeg)) File.WriteAllText(filen, json);
-                AddToProcessLog("INPUTS:  Possible user edits made to parameters in segment " + filen);  
+                AddToProcessLog("INPUTS:  Possible user edits made to parameters in segment " + filen);
             }
             else { MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated."); };
         }
@@ -1796,7 +1804,7 @@ namespace GUI.AQUATOX
                                 basedirBox.Text = fbd.SelectedPath + "\\";
                                 BaseDir = basedirBox.Text;
                                 string[] directoryFiles = System.IO.Directory.GetFiles(BaseDir, "*.JSON");
-                                if (directoryFiles.Length>0) 
+                                if (directoryFiles.Length > 0)
                                 {
                                     if (MessageBox.Show("Directory is not empty, overwrite existing JSON files?", "Confirm",
                                       MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
@@ -1866,8 +1874,8 @@ namespace GUI.AQUATOX
                                 string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                                 if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
 
-                                AddToProcessLog("INPUTS: New 0-D lake/reservoir simulation setup.  COMID: " + NSForm.COMID );
-                                AddToProcessLog("INPUTS: Base simulation = "+ BaseJSONFileN);
+                                AddToProcessLog("INPUTS: New 0-D lake/reservoir simulation setup.  COMID: " + NSForm.COMID);
+                                AddToProcessLog("INPUTS: Base simulation = " + BaseJSONFileN);
                                 AddToProcessLog("INPUTS: Start date and end date set from inputs on screen.  Surface area set.");
                             }
                             else //NSForm.SNPopulated must be true
@@ -1885,19 +1893,19 @@ namespace GUI.AQUATOX
 
                                 AQT2D = null;
                                 if (VerifyStreamNetwork())
-                                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                                  for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
-                                  {
-                                    int COMID = AQT2D.SN.order[i][j];
-                                    string CString = COMID.ToString();
-                                    string Geostr;
-                                    if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
+                                    for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                                        for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                                        {
+                                            int COMID = AQT2D.SN.order[i][j];
+                                            string CString = COMID.ToString();
+                                            string Geostr;
+                                            if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
                                             {
                                                 Geostr = Geostr.Replace(@"\", "");
                                                 Geostr = "{\"stream_geometry\":{\"type\":\"FeatureCollection\",\"features\":[" + Geostr + "]}}";
                                                 File.WriteAllText(BaseDir + CString + ".GeoJSON", Geostr);
                                             }
-                                  }
+                                        }
 
                                 BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
                                 BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
@@ -1910,10 +1918,10 @@ namespace GUI.AQUATOX
                                 ScrSettings.EndCOMIDstr = NSForm.NScrSettings.EndCOMIDstr;
 
                                 AddToProcessLog("INPUTS: New stream network simulation setup.  Pour Point COMID " + ScrSettings.COMIDstr);
-                                 
+
                                 AddToProcessLog("INPUTS: " + AQT2D.SNStats());
                                 AddToProcessLog("INPUTS: Base simulation for reaches = " + BaseJSONFileN);
-                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen. ");  
+                                AddToProcessLog("INPUTS: Start date and end date set from inputs on screen. ");
                             }
 
                             SaveScreenSettings();
@@ -2043,7 +2051,7 @@ namespace GUI.AQUATOX
                 }
                 catch (Exception ex)
                 {
-                    AddToProcessLog("ERROR: while updating drawing: " + ex.Message); 
+                    AddToProcessLog("ERROR: while updating drawing: " + ex.Message);
                     MessageBox.Show(ex.Message);
                     return;
                 }
@@ -2056,7 +2064,7 @@ namespace GUI.AQUATOX
 
         private void LogOptions_CheckChanged(object sender, EventArgs e)
         {
-            if (showinglog == "") showinglog  = TodaysLogName();
+            if (showinglog == "") showinglog = TodaysLogName();
             ShowLog();
         }
 
@@ -2086,7 +2094,7 @@ namespace GUI.AQUATOX
             if (LogChange.Text == "Today's Log")
             {
                 LogChange.Text = "Change Log";
-                showinglog = TodaysLogName(); 
+                showinglog = TodaysLogName();
                 ShowLog();
                 return;
             }
@@ -2103,6 +2111,212 @@ namespace GUI.AQUATOX
                 showinglog = openFileDialog1.FileName;
                 ShowLog();
             }
+
+        }
+
+
+        string apikey = "API KEY HERE";
+        public class runstatus
+        {
+            public string id { get; set; }
+            public string url { get; set; }
+        }
+
+
+        async private void HAWQS_Click(object sender, EventArgs e)
+        {
+
+            Hawqs.Hawqs hw = new();
+            runstatus RS;
+
+            var HAWQSInput = new
+            {
+                dataset = "HUC10",
+                downstreamSubbasin = "0318000101",
+                setHrus = new
+                {
+                    method = "area",
+                    target = 2,
+                    units = "km2"
+                },
+                weatherDataset = "PRISM",
+                startingSimulationDate = "1981-01-01",
+                endingSimulationDate = "1984-12-31",
+                warmupYears = 1,
+                outputPrintSetting = "daily",
+                reportData = new
+                {
+                    formats = new List<string> { "csv", "netcdf" },
+                    units = "metric",
+                    outputs = new
+                    {
+                        rch = new
+                        {
+                            statistics = new List<string> { "daily" }
+                        },
+                        sub = new
+                        {
+                            statistics = new List<string> { "daily" }
+                        }
+
+                    }
+                }
+            };  // var HAWQSInput
+
+
+            try
+            {
+                ConsoleButton.Checked = true;
+                ChartVisible(false);
+                BaseDir = basedirBox.Text;
+
+                //if (!VerifyStreamNetwork()) return;
+
+                //if (SegmentsCreated())
+                //if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
+                //MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+
+                AddToProcessLog("INPUTS: Initializing HAWQS.");
+
+                UseWaitCursor = true;
+                progressBar1.Visible = true;
+                proglabel.Text = "HAWQS RUN";
+                proglabel.Visible = true;
+                Application.DoEvents();
+
+                SetInterfaceBusy(true);
+
+                string hawqsinput = JsonConvert.SerializeObject(HAWQSInput);
+                Task<string> tsk = hw.SubmitProject(apikey, hawqsinput);
+
+                await tsk;
+
+                AddToProcessLog(tsk.Result + Environment.NewLine);
+                RS = JsonConvert.DeserializeObject<runstatus>(tsk.Result);
+                AddToProcessLog("HAWQS Run ID= " + RS.id + Environment.NewLine);
+
+                int progress = 0;
+                while (progress < 100)
+                {
+                    Thread.Sleep(1000);  // check every one second
+                    Task<HawqsStatus> ths = hw.GetProjectStatus(apikey, RS.id);
+                    await (ths);
+                    progress = ths.Result.progress;
+                    TSafeUpdateProgress(progress);
+                }
+
+                Task<List<HawqsOutput>> GPDT = hw.GetProjectData(apikey, RS.id, false);
+                await (GPDT);
+                List<HawqsOutput> LHO = GPDT.Result;
+
+                string HO = JsonConvert.SerializeObject(LHO);
+                AddToProcessLog((HO) + Environment.NewLine);
+
+                bool foundrch = false;
+                int indx = 0;
+                string url = "";
+                while ((!foundrch) && (indx < LHO.Count))
+                {
+                    url = LHO[indx].url;
+                    foundrch = url.Contains("output_rch_daily.csv");
+                    indx++;
+                }
+
+                if (!foundrch) AddToProcessLog("ERROR: daily reach output CSV not found in HAWQS data URLs.");
+                else
+                {
+                    AddToProcessLog("INFO: Downloading daily reach data from " + url);
+
+                    HttpClient hc = new HttpClient();
+
+                    try
+                    {
+                        using (var fs = await hc.GetStreamAsync(url))
+                        using (var fileStream = new FileStream(BaseDir + "output_rch_daily.csv", FileMode.CreateNew))
+                            await fs.CopyToAsync(fileStream);
+                        AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_daily.csv");
+                        hc.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        AddToProcessLog("ERROR: when downloading file: " + ex.Message);
+                        hc.Dispose();
+                    }
+                }
+
+                SetInterfaceBusy(false);
+                progressBar1.Visible = false;
+                proglabel.Visible = false;
+                CancelButton.Visible = false;
+                UseWaitCursor = false;
+                UpdateScreen();
+
+                return;
+            }
+
+            catch (Exception ex)
+            {
+                AddToProcessLog("ERROR: when running HAWQS: " + ex.Message);
+                MessageBox.Show(ex.Message);
+                SetInterfaceBusy(false);
+                progressBar1.Visible = false;
+                proglabel.Visible = false;
+                CancelButton.Visible = false;
+                UseWaitCursor = false;
+                UpdateScreen();
+
+                return;
+            }
+
+        }
+
+        public class HAWQSRCHRow
+        {
+            public double lat, lon;
+            public double[] vals;
+        }
+
+
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            BaseDir = basedirBox.Text;
+            string filen = BaseDir + "output_rch_daily.csv";
+            if (!File.Exists(filen))
+            {
+                AddToProcessLog("ERROR: can't find reach output file: " + filen);
+                return;
+            }
+
+            string[] colnames;  
+            MultiKeyDictionary<DateTime, int, HAWQSRCHRow> HAWQSRchData = new();
+
+            try
+            {
+                string[] csvlines = File.ReadAllLines(filen); 
+                colnames = csvlines[0].Split(',');  //read header line, note columns 0-3 have "date" through "sub-basin"
+                for (int i = 1; i < csvlines.Length; i++)
+                {
+                    string[] rowdata = csvlines[i].Split(',');  //split 
+                    DateTime date = DateTime.ParseExact(rowdata[0], "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+                    HAWQSRCHRow row = new();
+                    row.lat = Convert.ToDouble(rowdata[1]);
+                    row.lon = Convert.ToDouble(rowdata[2]);
+                    int SubBasin = Convert.ToInt32(rowdata[3]);
+                    row.vals = new double[rowdata.Length - 4];
+                    for (int j = 4; j < rowdata.Length; j++) row.vals[j-4] = Convert.ToDouble(rowdata[j]);
+                    HAWQSRchData.Add(date, SubBasin, row);
+                }
+
+                AddToProcessLog(colnames[4]+" to "+ colnames[colnames.Length-1]);
+            }
+
+            catch (Exception ex)
+            {
+                AddToProcessLog("ERROR: when reading CSV file: " + filen + "; " + ex.Message);
+                MessageBox.Show(ex.Message);
+            }
+
 
         }
     }

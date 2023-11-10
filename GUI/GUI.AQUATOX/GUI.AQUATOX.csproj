@@ -198,6 +198,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
     <ProjectReference Include="..\..\Data\Data.csproj" />
+    <ProjectReference Include="..\..\Hawqs\Hawqs.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -237,6 +238,12 @@
 
   <ItemGroup>
     <None Update="2D_Inputs\Lake_Surrogates.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="html\JS\geojson-vt.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="html\JS\leaflet-geojson-vt.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="html\leaflet-search.min.js">

@@ -33,516 +33,620 @@ namespace GUI.AQUATOX
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AQTTestForm));
-            this.loadJSON = new System.Windows.Forms.Button();
-            this.saveJSON = new System.Windows.Forms.Button();
-            this.integrate = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.outputbutton = new System.Windows.Forms.Button();
-            this.AnimalDB = new System.Windows.Forms.Button();
-            this.ReminDB = new System.Windows.Forms.Button();
-            this.ChemDB = new System.Windows.Forms.Button();
-            this.SiteDB = new System.Windows.Forms.Button();
-            this.PlantsDB = new System.Windows.Forms.Button();
-            this.SVListBox = new System.Windows.Forms.ListBox();
-            this.StudyNameBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.DBPanel = new System.Windows.Forms.Panel();
-            this.ButtonPanel = new System.Windows.Forms.Panel();
-            this.FoodWebButton = new System.Windows.Forms.Button();
-            this.ReminButton = new System.Windows.Forms.Button();
-            this.SiteButton = new System.Windows.Forms.Button();
-            this.ChemButton = new System.Windows.Forms.Button();
-            this.AnimButton = new System.Windows.Forms.Button();
-            this.PlantsButton = new System.Windows.Forms.Button();
-            this.Diagenesis = new System.Windows.Forms.Button();
-            this.RunStatusLabel = new System.Windows.Forms.Label();
-            this.AddButton = new System.Windows.Forms.Button();
-            this.EditButton = new System.Windows.Forms.Button();
-            this.DeleteButton = new System.Windows.Forms.Button();
-            this.MultiSegButton = new System.Windows.Forms.Button();
-            this.HelpButton = new System.Windows.Forms.Button();
-            this.modelRunningLabel = new System.Windows.Forms.Label();
-            this.browserButton = new System.Windows.Forms.Button();
-            this.ParametersLabel = new System.Windows.Forms.Label();
-            this.StateVarLabel = new System.Windows.Forms.Label();
-            this.CancelButton = new System.Windows.Forms.Button();
-            this.SetupButton = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.OKButton = new System.Windows.Forms.Button();
-            this.CancelButt = new System.Windows.Forms.Button();
-            this.DBPanel.SuspendLayout();
-            this.ButtonPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.SuspendLayout();
+            loadJSON = new Button();
+            saveJSON = new Button();
+            integrate = new Button();
+            progressBar1 = new ProgressBar();
+            outputbutton = new Button();
+            AnimalDB = new Button();
+            ReminDB = new Button();
+            ChemDB = new Button();
+            SiteDB = new Button();
+            PlantsDB = new Button();
+            SVListBox = new ListBox();
+            StudyNameBox = new TextBox();
+            label1 = new Label();
+            label3 = new Label();
+            DBPanel = new Panel();
+            ButtonPanel = new Panel();
+            FoodWebButton = new Button();
+            ReminButton = new Button();
+            SiteButton = new Button();
+            ChemButton = new Button();
+            AnimButton = new Button();
+            PlantsButton = new Button();
+            Diagenesis = new Button();
+            RunStatusLabel = new Label();
+            AddButton = new Button();
+            EditButton = new Button();
+            DeleteButton = new Button();
+            MultiSegButton = new Button();
+            HelpButton = new Button();
+            modelRunningLabel = new Label();
+            browserButton = new Button();
+            ParametersLabel = new Label();
+            StateVarLabel = new Label();
+            CancelButton = new Button();
+            SetupButton = new Button();
+            pictureBox1 = new PictureBox();
+            OKButton = new Button();
+            CancelButt = new Button();
+            HTestButton = new Button();
+            textBox1 = new TextBox();
+            HStatusButton = new Button();
+            HCancelButton = new Button();
+            HGetDataButton = new Button();
+            pidBox = new TextBox();
+            label2 = new Label();
+            HInstantiateButton = new Button();
+            DBPanel.SuspendLayout();
+            ButtonPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            SuspendLayout();
             // 
             // loadJSON
             // 
-            this.loadJSON.Location = new System.Drawing.Point(26, 11);
-            this.loadJSON.Name = "loadJSON";
-            this.loadJSON.Size = new System.Drawing.Size(87, 24);
-            this.loadJSON.TabIndex = 0;
-            this.loadJSON.Text = "Load ";
-            this.loadJSON.UseVisualStyleBackColor = true;
-            this.loadJSON.Click += new System.EventHandler(this.loadJSON_Click);
+            loadJSON.Location = new System.Drawing.Point(26, 11);
+            loadJSON.Name = "loadJSON";
+            loadJSON.Size = new System.Drawing.Size(87, 24);
+            loadJSON.TabIndex = 0;
+            loadJSON.Text = "Load ";
+            loadJSON.UseVisualStyleBackColor = true;
+            loadJSON.Click += loadJSON_Click;
             // 
             // saveJSON
             // 
-            this.saveJSON.Enabled = false;
-            this.saveJSON.Location = new System.Drawing.Point(26, 43);
-            this.saveJSON.Name = "saveJSON";
-            this.saveJSON.Size = new System.Drawing.Size(87, 24);
-            this.saveJSON.TabIndex = 0;
-            this.saveJSON.Text = "Save";
-            this.saveJSON.UseVisualStyleBackColor = true;
-            this.saveJSON.Click += new System.EventHandler(this.saveJSON_Click);
+            saveJSON.Enabled = false;
+            saveJSON.Location = new System.Drawing.Point(26, 43);
+            saveJSON.Name = "saveJSON";
+            saveJSON.Size = new System.Drawing.Size(87, 24);
+            saveJSON.TabIndex = 0;
+            saveJSON.Text = "Save";
+            saveJSON.UseVisualStyleBackColor = true;
+            saveJSON.Click += saveJSON_Click;
             // 
             // integrate
             // 
-            this.integrate.Location = new System.Drawing.Point(26, 152);
-            this.integrate.Name = "integrate";
-            this.integrate.Size = new System.Drawing.Size(87, 25);
-            this.integrate.TabIndex = 1;
-            this.integrate.Text = "Run";
-            this.integrate.UseVisualStyleBackColor = true;
-            this.integrate.Visible = false;
-            this.integrate.Click += new System.EventHandler(this.integrate_Click);
+            integrate.Location = new System.Drawing.Point(26, 152);
+            integrate.Name = "integrate";
+            integrate.Size = new System.Drawing.Size(87, 25);
+            integrate.TabIndex = 1;
+            integrate.Text = "Run";
+            integrate.UseVisualStyleBackColor = true;
+            integrate.Visible = false;
+            integrate.Click += integrate_Click;
             // 
             // progressBar1
             // 
-            this.progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(146, 76);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(579, 23);
-            this.progressBar1.Step = 1;
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this.progressBar1.TabIndex = 3;
-            this.progressBar1.Value = 1;
-            this.progressBar1.Visible = false;
+            progressBar1.AccessibleRole = AccessibleRole.Dial;
+            progressBar1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            progressBar1.Location = new System.Drawing.Point(146, 76);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new System.Drawing.Size(579, 23);
+            progressBar1.Step = 1;
+            progressBar1.Style = ProgressBarStyle.Continuous;
+            progressBar1.TabIndex = 3;
+            progressBar1.Value = 1;
+            progressBar1.Visible = false;
             // 
             // outputbutton
             // 
-            this.outputbutton.Location = new System.Drawing.Point(26, 321);
-            this.outputbutton.Name = "outputbutton";
-            this.outputbutton.Size = new System.Drawing.Size(87, 25);
-            this.outputbutton.TabIndex = 1;
-            this.outputbutton.Text = "Output";
-            this.outputbutton.UseVisualStyleBackColor = true;
-            this.outputbutton.Visible = false;
-            this.outputbutton.Click += new System.EventHandler(this.graph_Click);
+            outputbutton.Location = new System.Drawing.Point(26, 321);
+            outputbutton.Name = "outputbutton";
+            outputbutton.Size = new System.Drawing.Size(87, 25);
+            outputbutton.TabIndex = 1;
+            outputbutton.Text = "Output";
+            outputbutton.UseVisualStyleBackColor = true;
+            outputbutton.Visible = false;
+            outputbutton.Click += graph_Click;
             // 
             // AnimalDB
             // 
-            this.AnimalDB.Location = new System.Drawing.Point(76, 21);
-            this.AnimalDB.Name = "AnimalDB";
-            this.AnimalDB.Size = new System.Drawing.Size(60, 25);
-            this.AnimalDB.TabIndex = 0;
-            this.AnimalDB.Text = "Animals";
-            this.AnimalDB.UseVisualStyleBackColor = true;
-            this.AnimalDB.Click += new System.EventHandler(this.AnimDB_Click);
+            AnimalDB.Location = new System.Drawing.Point(76, 21);
+            AnimalDB.Name = "AnimalDB";
+            AnimalDB.Size = new System.Drawing.Size(60, 25);
+            AnimalDB.TabIndex = 0;
+            AnimalDB.Text = "Animals";
+            AnimalDB.UseVisualStyleBackColor = true;
+            AnimalDB.Click += AnimDB_Click;
             // 
             // ReminDB
             // 
-            this.ReminDB.Location = new System.Drawing.Point(142, 21);
-            this.ReminDB.Name = "ReminDB";
-            this.ReminDB.Size = new System.Drawing.Size(60, 25);
-            this.ReminDB.TabIndex = 5;
-            this.ReminDB.Text = "Remin. ";
-            this.ReminDB.UseVisualStyleBackColor = true;
-            this.ReminDB.Click += new System.EventHandler(this.ReminDB_Click);
+            ReminDB.Location = new System.Drawing.Point(142, 21);
+            ReminDB.Name = "ReminDB";
+            ReminDB.Size = new System.Drawing.Size(60, 25);
+            ReminDB.TabIndex = 5;
+            ReminDB.Text = "Remin. ";
+            ReminDB.UseVisualStyleBackColor = true;
+            ReminDB.Click += ReminDB_Click;
             // 
             // ChemDB
             // 
-            this.ChemDB.Location = new System.Drawing.Point(208, 20);
-            this.ChemDB.Name = "ChemDB";
-            this.ChemDB.Size = new System.Drawing.Size(60, 25);
-            this.ChemDB.TabIndex = 6;
-            this.ChemDB.Text = "Chems";
-            this.ChemDB.UseVisualStyleBackColor = true;
-            this.ChemDB.Click += new System.EventHandler(this.ChemDB_Click);
+            ChemDB.Location = new System.Drawing.Point(208, 20);
+            ChemDB.Name = "ChemDB";
+            ChemDB.Size = new System.Drawing.Size(60, 25);
+            ChemDB.TabIndex = 6;
+            ChemDB.Text = "Chems";
+            ChemDB.UseVisualStyleBackColor = true;
+            ChemDB.Click += ChemDB_Click;
             // 
             // SiteDB
             // 
-            this.SiteDB.Location = new System.Drawing.Point(10, 21);
-            this.SiteDB.Name = "SiteDB";
-            this.SiteDB.Size = new System.Drawing.Size(60, 25);
-            this.SiteDB.TabIndex = 7;
-            this.SiteDB.Text = "Sites";
-            this.SiteDB.UseVisualStyleBackColor = true;
-            this.SiteDB.Click += new System.EventHandler(this.SiteDB_Click);
+            SiteDB.Location = new System.Drawing.Point(10, 21);
+            SiteDB.Name = "SiteDB";
+            SiteDB.Size = new System.Drawing.Size(60, 25);
+            SiteDB.TabIndex = 7;
+            SiteDB.Text = "Sites";
+            SiteDB.UseVisualStyleBackColor = true;
+            SiteDB.Click += SiteDB_Click;
             // 
             // PlantsDB
             // 
-            this.PlantsDB.Location = new System.Drawing.Point(274, 20);
-            this.PlantsDB.Name = "PlantsDB";
-            this.PlantsDB.Size = new System.Drawing.Size(60, 25);
-            this.PlantsDB.TabIndex = 8;
-            this.PlantsDB.Text = "Plants";
-            this.PlantsDB.UseVisualStyleBackColor = true;
-            this.PlantsDB.Click += new System.EventHandler(this.PlantsDB_Click);
+            PlantsDB.Location = new System.Drawing.Point(274, 20);
+            PlantsDB.Name = "PlantsDB";
+            PlantsDB.Size = new System.Drawing.Size(60, 25);
+            PlantsDB.TabIndex = 8;
+            PlantsDB.Text = "Plants";
+            PlantsDB.UseVisualStyleBackColor = true;
+            PlantsDB.Click += PlantsDB_Click;
             // 
             // SVListBox
             // 
-            this.SVListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.SVListBox.FormattingEnabled = true;
-            this.SVListBox.ItemHeight = 15;
-            this.SVListBox.Location = new System.Drawing.Point(440, 126);
-            this.SVListBox.Name = "SVListBox";
-            this.SVListBox.Size = new System.Drawing.Size(356, 319);
-            this.SVListBox.TabIndex = 9;
-            this.SVListBox.Visible = false;
-            this.SVListBox.SelectedIndexChanged += new System.EventHandler(this.SVListBox_SelectedIndexChanged);
-            this.SVListBox.DoubleClick += new System.EventHandler(this.SVListBox_DoubleClick);
+            SVListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            SVListBox.FormattingEnabled = true;
+            SVListBox.ItemHeight = 15;
+            SVListBox.Location = new System.Drawing.Point(440, 126);
+            SVListBox.Name = "SVListBox";
+            SVListBox.Size = new System.Drawing.Size(356, 319);
+            SVListBox.TabIndex = 9;
+            SVListBox.Visible = false;
+            SVListBox.SelectedIndexChanged += SVListBox_SelectedIndexChanged;
+            SVListBox.DoubleClick += SVListBox_DoubleClick;
             // 
             // StudyNameBox
             // 
-            this.StudyNameBox.Location = new System.Drawing.Point(146, 27);
-            this.StudyNameBox.Name = "StudyNameBox";
-            this.StudyNameBox.Size = new System.Drawing.Size(287, 23);
-            this.StudyNameBox.TabIndex = 10;
-            this.StudyNameBox.TextChanged += new System.EventHandler(this.StudyNameBox_TextChanged);
+            StudyNameBox.Location = new System.Drawing.Point(146, 27);
+            StudyNameBox.Name = "StudyNameBox";
+            StudyNameBox.Size = new System.Drawing.Size(287, 23);
+            StudyNameBox.TabIndex = 10;
+            StudyNameBox.TextChanged += StudyNameBox_TextChanged;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(142, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(113, 15);
-            this.label1.TabIndex = 13;
-            this.label1.Text = "Name of Simulation";
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(142, 9);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(113, 15);
+            label1.TabIndex = 13;
+            label1.Text = "Name of Simulation";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 2);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(167, 15);
-            this.label3.TabIndex = 15;
-            this.label3.Text = "Databases of Parameter Values";
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(10, 2);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(167, 15);
+            label3.TabIndex = 15;
+            label3.Text = "Databases of Parameter Values";
             // 
             // DBPanel
             // 
-            this.DBPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.DBPanel.Controls.Add(this.label3);
-            this.DBPanel.Controls.Add(this.PlantsDB);
-            this.DBPanel.Controls.Add(this.SiteDB);
-            this.DBPanel.Controls.Add(this.ChemDB);
-            this.DBPanel.Controls.Add(this.ReminDB);
-            this.DBPanel.Controls.Add(this.AnimalDB);
-            this.DBPanel.Location = new System.Drawing.Point(453, 9);
-            this.DBPanel.Name = "DBPanel";
-            this.DBPanel.Size = new System.Drawing.Size(343, 55);
-            this.DBPanel.TabIndex = 16;
+            DBPanel.BorderStyle = BorderStyle.FixedSingle;
+            DBPanel.Controls.Add(label3);
+            DBPanel.Controls.Add(PlantsDB);
+            DBPanel.Controls.Add(SiteDB);
+            DBPanel.Controls.Add(ChemDB);
+            DBPanel.Controls.Add(ReminDB);
+            DBPanel.Controls.Add(AnimalDB);
+            DBPanel.Location = new System.Drawing.Point(453, 9);
+            DBPanel.Name = "DBPanel";
+            DBPanel.Size = new System.Drawing.Size(343, 55);
+            DBPanel.TabIndex = 16;
             // 
             // ButtonPanel
             // 
-            this.ButtonPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ButtonPanel.Controls.Add(this.FoodWebButton);
-            this.ButtonPanel.Controls.Add(this.ReminButton);
-            this.ButtonPanel.Controls.Add(this.SiteButton);
-            this.ButtonPanel.Controls.Add(this.ChemButton);
-            this.ButtonPanel.Controls.Add(this.AnimButton);
-            this.ButtonPanel.Controls.Add(this.PlantsButton);
-            this.ButtonPanel.Controls.Add(this.Diagenesis);
-            this.ButtonPanel.Location = new System.Drawing.Point(163, 127);
-            this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(244, 182);
-            this.ButtonPanel.TabIndex = 17;
-            this.ButtonPanel.Visible = false;
+            ButtonPanel.BorderStyle = BorderStyle.FixedSingle;
+            ButtonPanel.Controls.Add(FoodWebButton);
+            ButtonPanel.Controls.Add(ReminButton);
+            ButtonPanel.Controls.Add(SiteButton);
+            ButtonPanel.Controls.Add(ChemButton);
+            ButtonPanel.Controls.Add(AnimButton);
+            ButtonPanel.Controls.Add(PlantsButton);
+            ButtonPanel.Controls.Add(Diagenesis);
+            ButtonPanel.Location = new System.Drawing.Point(163, 127);
+            ButtonPanel.Name = "ButtonPanel";
+            ButtonPanel.Size = new System.Drawing.Size(244, 182);
+            ButtonPanel.TabIndex = 17;
+            ButtonPanel.Visible = false;
             // 
             // FoodWebButton
             // 
-            this.FoodWebButton.Location = new System.Drawing.Point(66, 130);
-            this.FoodWebButton.Name = "FoodWebButton";
-            this.FoodWebButton.Size = new System.Drawing.Size(92, 25);
-            this.FoodWebButton.TabIndex = 8;
-            this.FoodWebButton.Text = "Food Web";
-            this.FoodWebButton.UseVisualStyleBackColor = true;
-            this.FoodWebButton.Click += new System.EventHandler(this.FoodWebButton_Click);
+            FoodWebButton.Location = new System.Drawing.Point(66, 130);
+            FoodWebButton.Name = "FoodWebButton";
+            FoodWebButton.Size = new System.Drawing.Size(92, 25);
+            FoodWebButton.TabIndex = 8;
+            FoodWebButton.Text = "Food Web";
+            FoodWebButton.UseVisualStyleBackColor = true;
+            FoodWebButton.Click += FoodWebButton_Click;
             // 
             // ReminButton
             // 
-            this.ReminButton.Location = new System.Drawing.Point(127, 14);
-            this.ReminButton.Name = "ReminButton";
-            this.ReminButton.Size = new System.Drawing.Size(92, 25);
-            this.ReminButton.TabIndex = 2;
-            this.ReminButton.Text = "Org. Matter";
-            this.ReminButton.UseVisualStyleBackColor = true;
-            this.ReminButton.Click += new System.EventHandler(this.Remin);
+            ReminButton.Location = new System.Drawing.Point(127, 14);
+            ReminButton.Name = "ReminButton";
+            ReminButton.Size = new System.Drawing.Size(92, 25);
+            ReminButton.TabIndex = 2;
+            ReminButton.Text = "Org. Matter";
+            ReminButton.UseVisualStyleBackColor = true;
+            ReminButton.Click += Remin;
             // 
             // SiteButton
             // 
-            this.SiteButton.Location = new System.Drawing.Point(19, 14);
-            this.SiteButton.Name = "SiteButton";
-            this.SiteButton.Size = new System.Drawing.Size(92, 25);
-            this.SiteButton.TabIndex = 3;
-            this.SiteButton.Text = "Site";
-            this.SiteButton.UseVisualStyleBackColor = true;
-            this.SiteButton.Click += new System.EventHandler(this.Sites);
+            SiteButton.Location = new System.Drawing.Point(19, 14);
+            SiteButton.Name = "SiteButton";
+            SiteButton.Size = new System.Drawing.Size(92, 25);
+            SiteButton.TabIndex = 3;
+            SiteButton.Text = "Site";
+            SiteButton.UseVisualStyleBackColor = true;
+            SiteButton.Click += Sites;
             // 
             // ChemButton
             // 
-            this.ChemButton.Location = new System.Drawing.Point(126, 50);
-            this.ChemButton.Name = "ChemButton";
-            this.ChemButton.Size = new System.Drawing.Size(92, 25);
-            this.ChemButton.TabIndex = 4;
-            this.ChemButton.Text = "Chemicals";
-            this.ChemButton.UseVisualStyleBackColor = true;
-            this.ChemButton.Click += new System.EventHandler(this.Chems);
+            ChemButton.Location = new System.Drawing.Point(126, 50);
+            ChemButton.Name = "ChemButton";
+            ChemButton.Size = new System.Drawing.Size(92, 25);
+            ChemButton.TabIndex = 4;
+            ChemButton.Text = "Chemicals";
+            ChemButton.UseVisualStyleBackColor = true;
+            ChemButton.Click += Chems;
             // 
             // AnimButton
             // 
-            this.AnimButton.Location = new System.Drawing.Point(19, 86);
-            this.AnimButton.Name = "AnimButton";
-            this.AnimButton.Size = new System.Drawing.Size(92, 25);
-            this.AnimButton.TabIndex = 5;
-            this.AnimButton.Text = "Animals";
-            this.AnimButton.UseVisualStyleBackColor = true;
-            this.AnimButton.Click += new System.EventHandler(this.AnimButton_Click);
+            AnimButton.Location = new System.Drawing.Point(19, 86);
+            AnimButton.Name = "AnimButton";
+            AnimButton.Size = new System.Drawing.Size(92, 25);
+            AnimButton.TabIndex = 5;
+            AnimButton.Text = "Animals";
+            AnimButton.UseVisualStyleBackColor = true;
+            AnimButton.Click += AnimButton_Click;
             // 
             // PlantsButton
             // 
-            this.PlantsButton.Location = new System.Drawing.Point(19, 50);
-            this.PlantsButton.Name = "PlantsButton";
-            this.PlantsButton.Size = new System.Drawing.Size(92, 25);
-            this.PlantsButton.TabIndex = 6;
-            this.PlantsButton.Text = "Plants";
-            this.PlantsButton.UseVisualStyleBackColor = true;
-            this.PlantsButton.Click += new System.EventHandler(this.Plants);
+            PlantsButton.Location = new System.Drawing.Point(19, 50);
+            PlantsButton.Name = "PlantsButton";
+            PlantsButton.Size = new System.Drawing.Size(92, 25);
+            PlantsButton.TabIndex = 6;
+            PlantsButton.Text = "Plants";
+            PlantsButton.UseVisualStyleBackColor = true;
+            PlantsButton.Click += Plants;
             // 
             // Diagenesis
             // 
-            this.Diagenesis.Location = new System.Drawing.Point(127, 86);
-            this.Diagenesis.Name = "Diagenesis";
-            this.Diagenesis.Size = new System.Drawing.Size(91, 25);
-            this.Diagenesis.TabIndex = 7;
-            this.Diagenesis.Text = "Diagenesis";
-            this.Diagenesis.UseVisualStyleBackColor = true;
-            this.Diagenesis.Click += new System.EventHandler(this.Diagensis);
+            Diagenesis.Location = new System.Drawing.Point(127, 86);
+            Diagenesis.Name = "Diagenesis";
+            Diagenesis.Size = new System.Drawing.Size(91, 25);
+            Diagenesis.TabIndex = 7;
+            Diagenesis.Text = "Diagenesis";
+            Diagenesis.UseVisualStyleBackColor = true;
+            Diagenesis.Click += Diagensis;
             // 
             // RunStatusLabel
             // 
-            this.RunStatusLabel.AutoSize = true;
-            this.RunStatusLabel.Location = new System.Drawing.Point(28, 187);
-            this.RunStatusLabel.Name = "RunStatusLabel";
-            this.RunStatusLabel.Size = new System.Drawing.Size(63, 15);
-            this.RunStatusLabel.TabIndex = 18;
-            this.RunStatusLabel.Text = "Run Status";
+            RunStatusLabel.AutoSize = true;
+            RunStatusLabel.Location = new System.Drawing.Point(28, 187);
+            RunStatusLabel.Name = "RunStatusLabel";
+            RunStatusLabel.Size = new System.Drawing.Size(63, 15);
+            RunStatusLabel.TabIndex = 18;
+            RunStatusLabel.Text = "Run Status";
             // 
             // AddButton
             // 
-            this.AddButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.AddButton.Location = new System.Drawing.Point(444, 450);
-            this.AddButton.Name = "AddButton";
-            this.AddButton.Size = new System.Drawing.Size(60, 25);
-            this.AddButton.TabIndex = 21;
-            this.AddButton.Text = "Add";
-            this.AddButton.UseVisualStyleBackColor = true;
-            this.AddButton.Visible = false;
-            this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
+            AddButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            AddButton.Location = new System.Drawing.Point(444, 450);
+            AddButton.Name = "AddButton";
+            AddButton.Size = new System.Drawing.Size(60, 25);
+            AddButton.TabIndex = 21;
+            AddButton.Text = "Add";
+            AddButton.UseVisualStyleBackColor = true;
+            AddButton.Visible = false;
+            AddButton.Click += AddButton_Click;
             // 
             // EditButton
             // 
-            this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.EditButton.Location = new System.Drawing.Point(584, 450);
-            this.EditButton.Name = "EditButton";
-            this.EditButton.Size = new System.Drawing.Size(60, 25);
-            this.EditButton.TabIndex = 20;
-            this.EditButton.Text = "Edit";
-            this.EditButton.UseVisualStyleBackColor = true;
-            this.EditButton.Visible = false;
-            this.EditButton.Click += new System.EventHandler(this.EditButton_Click);
+            EditButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            EditButton.Location = new System.Drawing.Point(584, 450);
+            EditButton.Name = "EditButton";
+            EditButton.Size = new System.Drawing.Size(60, 25);
+            EditButton.TabIndex = 20;
+            EditButton.Text = "Edit";
+            EditButton.UseVisualStyleBackColor = true;
+            EditButton.Visible = false;
+            EditButton.Click += EditButton_Click;
             // 
             // DeleteButton
             // 
-            this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.DeleteButton.Location = new System.Drawing.Point(514, 450);
-            this.DeleteButton.Name = "DeleteButton";
-            this.DeleteButton.Size = new System.Drawing.Size(60, 25);
-            this.DeleteButton.TabIndex = 19;
-            this.DeleteButton.Text = "Delete";
-            this.DeleteButton.UseVisualStyleBackColor = true;
-            this.DeleteButton.Visible = false;
-            this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
+            DeleteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            DeleteButton.Location = new System.Drawing.Point(514, 450);
+            DeleteButton.Name = "DeleteButton";
+            DeleteButton.Size = new System.Drawing.Size(60, 25);
+            DeleteButton.TabIndex = 19;
+            DeleteButton.Text = "Delete";
+            DeleteButton.UseVisualStyleBackColor = true;
+            DeleteButton.Visible = false;
+            DeleteButton.Click += DeleteButton_Click;
             // 
             // MultiSegButton
             // 
-            this.MultiSegButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.MultiSegButton.Location = new System.Drawing.Point(26, 445);
-            this.MultiSegButton.Name = "MultiSegButton";
-            this.MultiSegButton.Size = new System.Drawing.Size(138, 24);
-            this.MultiSegButton.TabIndex = 22;
-            this.MultiSegButton.Text = "NWM-Linked Runs";
-            this.MultiSegButton.UseVisualStyleBackColor = true;
-            this.MultiSegButton.Click += new System.EventHandler(this.MultiSegButton_Click);
+            MultiSegButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            MultiSegButton.Location = new System.Drawing.Point(26, 445);
+            MultiSegButton.Name = "MultiSegButton";
+            MultiSegButton.Size = new System.Drawing.Size(138, 24);
+            MultiSegButton.TabIndex = 22;
+            MultiSegButton.Text = "NWM-Linked Runs";
+            MultiSegButton.UseVisualStyleBackColor = true;
+            MultiSegButton.Click += MultiSegButton_Click;
             // 
             // HelpButton
             // 
-            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(26, 240);
-            this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(87, 28);
-            this.HelpButton.TabIndex = 23;
-            this.HelpButton.Text = "  Help";
-            this.HelpButton.UseVisualStyleBackColor = true;
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            HelpButton.Image = Properties.Resources.help_icon;
+            HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            HelpButton.Location = new System.Drawing.Point(26, 240);
+            HelpButton.Name = "HelpButton";
+            HelpButton.Size = new System.Drawing.Size(87, 28);
+            HelpButton.TabIndex = 23;
+            HelpButton.Text = "  Help";
+            HelpButton.UseVisualStyleBackColor = true;
+            HelpButton.Click += HelpButton_Click;
             // 
             // modelRunningLabel
             // 
-            this.modelRunningLabel.AutoSize = true;
-            this.modelRunningLabel.Location = new System.Drawing.Point(145, 60);
-            this.modelRunningLabel.Name = "modelRunningLabel";
-            this.modelRunningLabel.Size = new System.Drawing.Size(100, 15);
-            this.modelRunningLabel.TabIndex = 24;
-            this.modelRunningLabel.Text = "Model is Running";
-            this.modelRunningLabel.Visible = false;
+            modelRunningLabel.AutoSize = true;
+            modelRunningLabel.Location = new System.Drawing.Point(145, 60);
+            modelRunningLabel.Name = "modelRunningLabel";
+            modelRunningLabel.Size = new System.Drawing.Size(100, 15);
+            modelRunningLabel.TabIndex = 24;
+            modelRunningLabel.Text = "Model is Running";
+            modelRunningLabel.Visible = false;
             // 
             // browserButton
             // 
-            this.browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.browserButton.ForeColor = System.Drawing.Color.Black;
-            this.browserButton.Location = new System.Drawing.Point(26, 272);
-            this.browserButton.Margin = new System.Windows.Forms.Padding(0);
-            this.browserButton.Name = "browserButton";
-            this.browserButton.Size = new System.Drawing.Size(87, 23);
-            this.browserButton.TabIndex = 25;
-            this.browserButton.Text = "Select Browser";
-            this.browserButton.UseVisualStyleBackColor = true;
-            this.browserButton.Click += new System.EventHandler(this.browserButton_Click);
+            browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            browserButton.ForeColor = System.Drawing.Color.Black;
+            browserButton.Location = new System.Drawing.Point(26, 272);
+            browserButton.Margin = new Padding(0);
+            browserButton.Name = "browserButton";
+            browserButton.Size = new System.Drawing.Size(87, 23);
+            browserButton.TabIndex = 25;
+            browserButton.Text = "Select Browser";
+            browserButton.UseVisualStyleBackColor = true;
+            browserButton.Click += browserButton_Click;
             // 
             // ParametersLabel
             // 
-            this.ParametersLabel.AutoSize = true;
-            this.ParametersLabel.Location = new System.Drawing.Point(163, 110);
-            this.ParametersLabel.Name = "ParametersLabel";
-            this.ParametersLabel.Size = new System.Drawing.Size(103, 15);
-            this.ParametersLabel.TabIndex = 26;
-            this.ParametersLabel.Text = "Model Parameters";
-            this.ParametersLabel.Visible = false;
+            ParametersLabel.AutoSize = true;
+            ParametersLabel.Location = new System.Drawing.Point(163, 110);
+            ParametersLabel.Name = "ParametersLabel";
+            ParametersLabel.Size = new System.Drawing.Size(103, 15);
+            ParametersLabel.TabIndex = 26;
+            ParametersLabel.Text = "Model Parameters";
+            ParametersLabel.Visible = false;
             // 
             // StateVarLabel
             // 
-            this.StateVarLabel.AutoSize = true;
-            this.StateVarLabel.Location = new System.Drawing.Point(441, 108);
-            this.StateVarLabel.Name = "StateVarLabel";
-            this.StateVarLabel.Size = new System.Drawing.Size(193, 15);
-            this.StateVarLabel.TabIndex = 27;
-            this.StateVarLabel.Text = "Model State Variables and Loadings";
-            this.StateVarLabel.Visible = false;
+            StateVarLabel.AutoSize = true;
+            StateVarLabel.Location = new System.Drawing.Point(441, 108);
+            StateVarLabel.Name = "StateVarLabel";
+            StateVarLabel.Size = new System.Drawing.Size(193, 15);
+            StateVarLabel.TabIndex = 27;
+            StateVarLabel.Text = "Model State Variables and Loadings";
+            StateVarLabel.Visible = false;
             // 
             // CancelButton
             // 
-            this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.CancelButton.ForeColor = System.Drawing.Color.Black;
-            this.CancelButton.Location = new System.Drawing.Point(727, 75);
-            this.CancelButton.Margin = new System.Windows.Forms.Padding(0);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(68, 25);
-            this.CancelButton.TabIndex = 28;
-            this.CancelButton.Text = "Cancel";
-            this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Visible = false;
-            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            CancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            CancelButton.ForeColor = System.Drawing.Color.Black;
+            CancelButton.Location = new System.Drawing.Point(727, 75);
+            CancelButton.Margin = new Padding(0);
+            CancelButton.Name = "CancelButton";
+            CancelButton.Size = new System.Drawing.Size(68, 25);
+            CancelButton.TabIndex = 28;
+            CancelButton.Text = "Cancel";
+            CancelButton.UseVisualStyleBackColor = true;
+            CancelButton.Visible = false;
+            CancelButton.Click += CancelButton_Click;
             // 
             // SetupButton
             // 
-            this.SetupButton.Location = new System.Drawing.Point(22, 98);
-            this.SetupButton.Name = "SetupButton";
-            this.SetupButton.Size = new System.Drawing.Size(91, 25);
-            this.SetupButton.TabIndex = 29;
-            this.SetupButton.Text = "Edit Setup";
-            this.SetupButton.UseVisualStyleBackColor = true;
-            this.SetupButton.Visible = false;
-            this.SetupButton.Click += new System.EventHandler(this.Setup_Click);
+            SetupButton.Location = new System.Drawing.Point(22, 98);
+            SetupButton.Name = "SetupButton";
+            SetupButton.Size = new System.Drawing.Size(91, 25);
+            SetupButton.TabIndex = 29;
+            SetupButton.Text = "Edit Setup";
+            SetupButton.UseVisualStyleBackColor = true;
+            SetupButton.Visible = false;
+            SetupButton.Click += Setup_Click;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(220, 116);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(468, 288);
-            this.pictureBox1.TabIndex = 30;
-            this.pictureBox1.TabStop = false;
+            pictureBox1.Image = (System.Drawing.Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new System.Drawing.Point(220, 116);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new System.Drawing.Size(468, 288);
+            pictureBox1.TabIndex = 30;
+            pictureBox1.TabStop = false;
             // 
             // OKButton
             // 
-            this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.OKButton.Location = new System.Drawing.Point(659, 11);
-            this.OKButton.Name = "OKButton";
-            this.OKButton.Size = new System.Drawing.Size(61, 23);
-            this.OKButton.TabIndex = 35;
-            this.OKButton.Text = "OK";
-            this.OKButton.UseVisualStyleBackColor = true;
-            this.OKButton.Visible = false;
+            OKButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            OKButton.DialogResult = DialogResult.OK;
+            OKButton.Location = new System.Drawing.Point(659, 11);
+            OKButton.Name = "OKButton";
+            OKButton.Size = new System.Drawing.Size(61, 23);
+            OKButton.TabIndex = 35;
+            OKButton.Text = "OK";
+            OKButton.UseVisualStyleBackColor = true;
+            OKButton.Visible = false;
             // 
             // CancelButt
             // 
-            this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(735, 11);
-            this.CancelButt.Name = "CancelButt";
-            this.CancelButt.Size = new System.Drawing.Size(61, 23);
-            this.CancelButt.TabIndex = 36;
-            this.CancelButt.Text = "Cancel";
-            this.CancelButt.UseVisualStyleBackColor = true;
-            this.CancelButt.Visible = false;
-            this.CancelButt.Click += new System.EventHandler(this.CancelButt_Click);
+            CancelButt.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            CancelButt.Location = new System.Drawing.Point(735, 11);
+            CancelButt.Name = "CancelButt";
+            CancelButt.Size = new System.Drawing.Size(61, 23);
+            CancelButt.TabIndex = 36;
+            CancelButt.Text = "Cancel";
+            CancelButt.UseVisualStyleBackColor = true;
+            CancelButt.Visible = false;
+            CancelButt.Click += CancelButt_Click;
+            // 
+            // HTestButton
+            // 
+            HTestButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            HTestButton.Location = new System.Drawing.Point(146, 451);
+            HTestButton.Name = "HTestButton";
+            HTestButton.Size = new System.Drawing.Size(87, 24);
+            HTestButton.TabIndex = 37;
+            HTestButton.Text = "Start Hawqs";
+            HTestButton.UseVisualStyleBackColor = true;
+            HTestButton.Visible = false;
+            HTestButton.Click += TestButton_Click;
+            // 
+            // textBox1
+            // 
+            textBox1.AcceptsReturn = true;
+            textBox1.AcceptsTab = true;
+            textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            textBox1.Location = new System.Drawing.Point(146, 399);
+            textBox1.Multiline = true;
+            textBox1.Name = "textBox1";
+            textBox1.Size = new System.Drawing.Size(650, 15);
+            textBox1.TabIndex = 38;
+            textBox1.Visible = false;
+            // 
+            // HStatusButton
+            // 
+            HStatusButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            HStatusButton.Location = new System.Drawing.Point(239, 450);
+            HStatusButton.Name = "HStatusButton";
+            HStatusButton.Size = new System.Drawing.Size(87, 24);
+            HStatusButton.TabIndex = 39;
+            HStatusButton.Text = "Check Status";
+            HStatusButton.UseVisualStyleBackColor = true;
+            HStatusButton.Visible = false;
+            HStatusButton.Click += HGetStatusClick;
+            // 
+            // HCancelButton
+            // 
+            HCancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            HCancelButton.Location = new System.Drawing.Point(332, 450);
+            HCancelButton.Name = "HCancelButton";
+            HCancelButton.Size = new System.Drawing.Size(59, 24);
+            HCancelButton.TabIndex = 40;
+            HCancelButton.Text = "cancel";
+            HCancelButton.UseVisualStyleBackColor = true;
+            HCancelButton.Visible = false;
+            HCancelButton.Click += HCancelClick;
+            // 
+            // HGetDataButton
+            // 
+            HGetDataButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            HGetDataButton.Location = new System.Drawing.Point(397, 450);
+            HGetDataButton.Name = "HGetDataButton";
+            HGetDataButton.Size = new System.Drawing.Size(59, 24);
+            HGetDataButton.TabIndex = 41;
+            HGetDataButton.Text = "getdata";
+            HGetDataButton.UseVisualStyleBackColor = true;
+            HGetDataButton.Visible = false;
+            HGetDataButton.Click += HGetResultsClick;
+            // 
+            // pidBox
+            // 
+            pidBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            pidBox.Location = new System.Drawing.Point(239, 421);
+            pidBox.Name = "pidBox";
+            pidBox.Size = new System.Drawing.Size(45, 23);
+            pidBox.TabIndex = 42;
+            pidBox.Visible = false;
+            // 
+            // label2
+            // 
+            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(172, 425);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(61, 15);
+            label2.TabIndex = 43;
+            label2.Text = "Process ID";
+            label2.Visible = false;
+            // 
+            // HInstantiateButton
+            // 
+            HInstantiateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            HInstantiateButton.Location = new System.Drawing.Point(291, 420);
+            HInstantiateButton.Name = "HInstantiateButton";
+            HInstantiateButton.Size = new System.Drawing.Size(91, 24);
+            HInstantiateButton.TabIndex = 44;
+            HInstantiateButton.Text = "instantiate RD";
+            HInstantiateButton.UseVisualStyleBackColor = true;
+            HInstantiateButton.Visible = false;
+            HInstantiateButton.Click += HInstantiateClick;
             // 
             // AQTTestForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(813, 490);
-            this.Controls.Add(this.OKButton);
-            this.Controls.Add(this.CancelButt);
-            this.Controls.Add(this.SetupButton);
-            this.Controls.Add(this.CancelButton);
-            this.Controls.Add(this.StateVarLabel);
-            this.Controls.Add(this.ParametersLabel);
-            this.Controls.Add(this.browserButton);
-            this.Controls.Add(this.HelpButton);
-            this.Controls.Add(this.MultiSegButton);
-            this.Controls.Add(this.AddButton);
-            this.Controls.Add(this.EditButton);
-            this.Controls.Add(this.DeleteButton);
-            this.Controls.Add(this.RunStatusLabel);
-            this.Controls.Add(this.ButtonPanel);
-            this.Controls.Add(this.DBPanel);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.StudyNameBox);
-            this.Controls.Add(this.SVListBox);
-            this.Controls.Add(this.outputbutton);
-            this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.integrate);
-            this.Controls.Add(this.loadJSON);
-            this.Controls.Add(this.saveJSON);
-            this.Controls.Add(this.modelRunningLabel);
-            this.Controls.Add(this.pictureBox1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(828, 465);
-            this.Name = "AQTTestForm";
-            this.Text = "AQUATOX.NET 1.0.0 ";
-            this.Load += new System.EventHandler(this.AQTTestForm_Load);
-            this.DBPanel.ResumeLayout(false);
-            this.DBPanel.PerformLayout();
-            this.ButtonPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(813, 490);
+            Controls.Add(HInstantiateButton);
+            Controls.Add(label2);
+            Controls.Add(pidBox);
+            Controls.Add(HGetDataButton);
+            Controls.Add(HCancelButton);
+            Controls.Add(HStatusButton);
+            Controls.Add(textBox1);
+            Controls.Add(HTestButton);
+            Controls.Add(OKButton);
+            Controls.Add(CancelButt);
+            Controls.Add(SetupButton);
+            Controls.Add(CancelButton);
+            Controls.Add(StateVarLabel);
+            Controls.Add(ParametersLabel);
+            Controls.Add(browserButton);
+            Controls.Add(HelpButton);
+            Controls.Add(MultiSegButton);
+            Controls.Add(AddButton);
+            Controls.Add(EditButton);
+            Controls.Add(DeleteButton);
+            Controls.Add(RunStatusLabel);
+            Controls.Add(ButtonPanel);
+            Controls.Add(DBPanel);
+            Controls.Add(label1);
+            Controls.Add(StudyNameBox);
+            Controls.Add(SVListBox);
+            Controls.Add(outputbutton);
+            Controls.Add(progressBar1);
+            Controls.Add(integrate);
+            Controls.Add(loadJSON);
+            Controls.Add(saveJSON);
+            Controls.Add(modelRunningLabel);
+            Controls.Add(pictureBox1);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MinimumSize = new System.Drawing.Size(828, 465);
+            Name = "AQTTestForm";
+            Text = "AQUATOX.NET 1.0.0 ";
+            Load += AQTTestForm_Load;
+            DBPanel.ResumeLayout(false);
+            DBPanel.PerformLayout();
+            ButtonPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
-        private System.Windows.Forms.Button loadJSON;
-        private System.Windows.Forms.Button saveJSON;
-        private System.Windows.Forms.Button integrate;
+        private Button loadJSON;
+        private Button saveJSON;
+        private Button integrate;
         private ProgressBar progressBar1;
         private Button outputbutton;
         private Button AnimalDB;
@@ -578,6 +682,14 @@ namespace GUI.AQUATOX
         private PictureBox pictureBox1;
         private Button OKButton;
         private Button CancelButt;
+        private Button HTestButton;
+        private TextBox textBox1;
+        private Button HStatusButton;
+        private Button HCancelButton;
+        private Button HGetDataButton;
+        private TextBox pidBox;
+        private Label label2;
+        private Button HInstantiateButton;
     }
 
 

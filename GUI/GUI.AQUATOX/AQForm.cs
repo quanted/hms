@@ -4,7 +4,11 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
+using Data;
 using Globals;
+using Hawqs;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,7 +17,9 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 
@@ -32,7 +38,7 @@ namespace GUI.AQUATOX
         public AQTSim aQTS = null;
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
-        private System.Drawing.Graphics graphics; 
+        private System.Drawing.Graphics graphics;
 
 
         public AQTTestForm()
@@ -151,8 +157,8 @@ namespace GUI.AQUATOX
 
         private DialogResult ShowInputDialog(ref string input)
         {
-            System.Drawing.Size size = new System.Drawing.Size(ScaleX(400),ScaleY(70));
-            
+            System.Drawing.Size size = new System.Drawing.Size(ScaleX(400), ScaleY(70));
+
             Form inputBox = new Form();
             inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             inputBox.ClientSize = size;
@@ -169,7 +175,7 @@ namespace GUI.AQUATOX
             okButton.Name = "okButton";
             okButton.Size = new System.Drawing.Size(ScaleX(75), ScaleY(23));
             okButton.Text = "&OK";
-            okButton.Location = new System.Drawing.Point(size.Width - ScaleX(160) , ScaleY(39));
+            okButton.Location = new System.Drawing.Point(size.Width - ScaleX(160), ScaleY(39));
             inputBox.Controls.Add(okButton);
 
             Button cancelButton = new Button();
@@ -210,7 +216,7 @@ namespace GUI.AQUATOX
                 modelRunningLabel.Visible = true;
 
                 foreach (Control c in Controls)  // disable all buttons
-                  {
+                {
                     c.Enabled = false;
                 }
 
@@ -239,14 +245,14 @@ namespace GUI.AQUATOX
         {
             progressBar1.Update();
             if (e.Error != null) MessageBox.Show("Error Raised: " + e.Error.Message);
-            if ((!e.Cancelled)&&(errmessage == ""))
+            if ((!e.Cancelled) && (errmessage == ""))
             {
                 Application.DoEvents();
                 graph_Click(null, null);
                 ShowStudyInfo();
             };
 
-            if ((errmessage != "")&&(errmessage != "User Canceled")) MessageBox.Show(errmessage);
+            if ((errmessage != "") && (errmessage != "User Canceled")) MessageBox.Show(errmessage);
 
             modelRunningLabel.Visible = false;
             foreach (Control c in Controls)  // enable all buttons
@@ -264,7 +270,7 @@ namespace GUI.AQUATOX
         private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             if (e.ProgressPercentage < 100) progressBar1.Value = (e.ProgressPercentage + 1);  // workaround of animation bug
-            progressBar1.Value = Math.Max(e.ProgressPercentage,1);    //always show a little bit of green in progress bar
+            progressBar1.Value = Math.Max(e.ProgressPercentage, 1);    //always show a little bit of green in progress bar
         }
 
 
@@ -299,7 +305,7 @@ namespace GUI.AQUATOX
             Param_Form SetupForm = new Param_Form();
             SetupForm.SuppressComment = true;
             SetupForm.SuppressSymbol = true;
-            SetupForm.EditParams(ref SS, "Simulation Setup", true,"", "SetupWindow");
+            SetupForm.EditParams(ref SS, "Simulation Setup", true, "", "SetupWindow");
             ShowStudyInfo();
         }
 
@@ -318,7 +324,7 @@ namespace GUI.AQUATOX
                 DR.SiSat,DR.KDSi2,DR.DKDSi1,DR.O2critSi,DR.LigninDetr, DR.Si_Diatom   };
 
             Param_Form PF3 = new Param_Form();
-            PF3.EditParams(ref PA3, "Diagenesis Parameters", false,"", "Remineralization");
+            PF3.EditParams(ref PA3, "Diagenesis Parameters", false, "", "Remineralization");
         }
 
         private void Plants(object sender, EventArgs e)
@@ -338,7 +344,7 @@ namespace GUI.AQUATOX
 
             if (nplt == 0)
             {
-                MessageBox.Show("There are no plants in the current simulation"); 
+                MessageBox.Show("There are no plants in the current simulation");
                 return;
             }
 
@@ -514,7 +520,8 @@ namespace GUI.AQUATOX
             if (Param is TSubheading) return;
 
             if (Param.GetType() == typeof(TParameter))
-            { row[ColNum] = Param.Val;
+            {
+                row[ColNum] = Param.Val;
                 row[ColNum + 1] = Param.Comment;
                 ColNum++;
             }
@@ -733,7 +740,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, false,"AnimalDataScreen"))
+            if (gf.ShowGrid(table, false, false, "AnimalDataScreen"))
             {
                 if (gf.gridChange)
                 {
@@ -819,7 +826,7 @@ namespace GUI.AQUATOX
 
         private string ReadDBPath(string deflt)
         {
-            string fileN = Path.GetFullPath("..\\..\\..\\DB\\"+deflt);
+            string fileN = Path.GetFullPath("..\\..\\..\\DB\\" + deflt);
             if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No)
@@ -850,7 +857,7 @@ namespace GUI.AQUATOX
         private void SiteDB_Click(object sender, EventArgs e)
         {
             string fileN = ReadDBPath("SiteLib.JSON");
-            if (fileN == "") return;    
+            if (fileN == "") return;
 
             string json = File.ReadAllText(fileN);
             List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
@@ -897,7 +904,7 @@ namespace GUI.AQUATOX
             }
 
             GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true,"PlantData"))
+            if (gf.ShowGrid(table, false, true, "PlantData"))
             {
                 if (gf.gridChange)
                 {
@@ -920,7 +927,7 @@ namespace GUI.AQUATOX
 
         private void SVListBox_DoubleClick(object sender, EventArgs e)
         {
-            if (SVListBox.SelectedIndex == -1) { MessageBox.Show("No State Variable is Selected."); return; } 
+            if (SVListBox.SelectedIndex == -1) { MessageBox.Show("No State Variable is Selected."); return; }
             TStateVariable TSV = TSVList[SVListBox.SelectedIndex];
 
             LoadingsForm LF = new LoadingsForm();
@@ -929,7 +936,7 @@ namespace GUI.AQUATOX
             // AQTStudy.Adjust_Internal_Nutrients;  // Future code to enable -- in case plant types have changed
 
             ShowStudyInfo();
-            
+
         }
 
 
@@ -941,24 +948,24 @@ namespace GUI.AQUATOX
 
         private void NetCDF_Click(object sender, EventArgs e)
         {
-            
+
             // Gets the path to the NetCDF file to be used as a data source.
             //var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputrch.nc?openMode=readOnly");
-           // var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
+            // var dataset = sds.DataSet.Open("N:\\AQUATOX\\CSRA\\outputhru.nc?openMode=readOnly");
 
-          //  sds.MetadataDictionary dt = dataset.Metadata;
+            //  sds.MetadataDictionary dt = dataset.Metadata;
 
             string fieldname = "NO3GWkg_ha";
 
             double[,,] dataValues = null; //  dataset.GetData<double[,,]>(fieldname);
             var result = string.Join(",", dataValues);
 
-            StreamWriter file = new StreamWriter("N:\\AQUATOX\\CSRA\\"+ fieldname+".csv");
+            StreamWriter file = new StreamWriter("N:\\AQUATOX\\CSRA\\" + fieldname + ".csv");
             int topi = dataValues.GetLength(0);
             int topj = dataValues.GetLength(1);
             int topk = dataValues.GetLength(2);
 
-             topi = 365; //output first year for debugging 
+            topi = 365; //output first year for debugging 
 
             for (int i = 0; i < topi; i++)
             {
@@ -974,7 +981,7 @@ namespace GUI.AQUATOX
 
             file.Close();
 
-            MessageBox.Show("Exported N:\\AQUATOX\\CSRA\\"+ fieldname+".csv");
+            MessageBox.Show("Exported N:\\AQUATOX\\CSRA\\" + fieldname + ".csv");
 
         }
 
@@ -992,8 +999,8 @@ namespace GUI.AQUATOX
             tTables = aQTS.AQTSeg.TrophInt_to_Table();
 
             TrophMatrix tm = new TrophMatrix();
-            if (tm.ShowGrid(tTables,aQTS.AQTSeg))
-               aQTS.AQTSeg.Tables_to_Trophint(tTables);
+            if (tm.ShowGrid(tTables, aQTS.AQTSeg))
+                aQTS.AQTSeg.Tables_to_Trophint(tTables);
         }
 
         private void MultiSegButton_Click(object sender, EventArgs e)
@@ -1014,7 +1021,7 @@ namespace GUI.AQUATOX
             Param_Form PF = new Param_Form();
 
             TStateVariable NewSV = null;
- 
+
             if ((ns >= Consts.FirstAnimal) && (ns <= Consts.LastAnimal))
             {
                 AnimalRecord AR = PF.ReturnRecordFromDB("AnimalLib.JSON") as AnimalRecord;
@@ -1061,8 +1068,8 @@ namespace GUI.AQUATOX
 
             for (ToxLoop = Consts.FirstOrgTxTyp; ToxLoop <= T_SVType.PIntrnl; ToxLoop++)
             {
-               TStateVariable TSV = aQTS.AQTSeg.GetStatePointer(T.NState, ToxLoop, T_SVLayer.WaterCol);
-               if (TSV!= null) aQTS.AQTSeg.DeleteVar(TSV);
+                TStateVariable TSV = aQTS.AQTSeg.GetStatePointer(T.NState, ToxLoop, T_SVLayer.WaterCol);
+                if (TSV != null) aQTS.AQTSeg.DeleteVar(TSV);
             }
 
             // in the future zero out reciprocal same species record
@@ -1074,17 +1081,17 @@ namespace GUI.AQUATOX
             AllVariables ns = TSVList[SVListBox.SelectedIndex].NState;
 
             int index = -1;
-            for (int i=0; i< aQTS.AQTSeg.SV.Count; i++)
+            for (int i = 0; i < aQTS.AQTSeg.SV.Count; i++)
             {
-                if ((ns == aQTS.AQTSeg.SV[i].NState) && ((aQTS.AQTSeg.SV[i].SVType == T_SVType.StV) || (ns == AllVariables.H2OTox)))  { index = i; break; }
+                if ((ns == aQTS.AQTSeg.SV[i].NState) && ((aQTS.AQTSeg.SV[i].SVType == T_SVType.StV) || (ns == AllVariables.H2OTox))) { index = i; break; }
             }
 
             if (MessageBox.Show("Delete the state variable: '" + aQTS.AQTSeg.SV[index].PName + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-            if (ns == AllVariables.H2OTox) 
-              aQTS.AQTSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
+            if (ns == AllVariables.H2OTox)
+                aQTS.AQTSeg.RemoveOrgToxStateVariable(SVListBox.SelectedIndex);
             else DeleteStateVariable(index);
 
             ShowStudyInfo();
@@ -1092,7 +1099,7 @@ namespace GUI.AQUATOX
         }
 
         private static List<string> BrowserNames = new List<string> { "Chrome", "Firefox", "Internet Explorer", "Microsoft Edge", "Safari", "Other" };
-        private static string[] BrowserExe =   { "chrome.exe", "firefox.exe", "iexplore.exe", "msedge.exe", "safari.exe", "" };
+        private static string[] BrowserExe = { "chrome.exe", "firefox.exe", "iexplore.exe", "msedge.exe", "safari.exe", "" };
 
         static public string SelectDefaultBrowser()
         {
@@ -1101,7 +1108,7 @@ namespace GUI.AQUATOX
             int index = LF.SelectFromList(BrowserNames);
             if (index < 0) return "";
             string bExe = BrowserExe[index];
-            if (bExe == "") 
+            if (bExe == "")
             {
                 OpenFileDialog openFileDialog1 = new OpenFileDialog();
                 openFileDialog1.Filter = "Browser EXE|*.exe";
@@ -1114,8 +1121,8 @@ namespace GUI.AQUATOX
 
         static public void OpenUrl(string bookmark)
         {
-            string url = "file:"+Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
-            url = Uri.UnescapeDataString(url +"#"+bookmark);
+            string url = "file:" + Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
+            url = Uri.UnescapeDataString(url + "#" + bookmark);
             try
             {
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = false });  //true opens default browser, but not at context-sensitive bookmark
@@ -1133,9 +1140,9 @@ namespace GUI.AQUATOX
 
                     url = url.Replace("&", "^&");
                     // string args = $"/c start {url}";
-                    string args = $"/c start {defaultBrowser} {url}";  
+                    string args = $"/c start {defaultBrowser} {url}";
 
-                    Process.Start(new ProcessStartInfo("cmd", args) { CreateNoWindow = true});
+                    Process.Start(new ProcessStartInfo("cmd", args) { CreateNoWindow = true });
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -1173,7 +1180,7 @@ namespace GUI.AQUATOX
             SVListBox.Top = ScaleY(78);
             StateVarLabel.Top = ScaleY(60);
             SVListBox.Height = ScaleY(390);
-                        
+
             HelpButton.Top = ScaleY(78);
             browserButton.Top = ScaleY(110);
 
@@ -1212,6 +1219,117 @@ namespace GUI.AQUATOX
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1) == DialogResult.Yes) this.DialogResult = DialogResult.Cancel;
 
+        }
+
+
+        public class runstatus
+        {
+            public string id { get; set; }
+            public string url { get; set; }
+        }
+        runstatus RS;
+
+        string apikey = "API KEY HERE";
+        Hawqs.Hawqs hw = new();
+
+        private async void TestButton_Click(object sender, EventArgs e)
+        {
+
+            var inputData = new
+            {
+                dataset = "HUC10",
+                downstreamSubbasin = "0318000101",
+                setHrus = new
+                {
+                    method = "area",
+                    target = 2,
+                    units = "km2"
+                },
+                weatherDataset = "PRISM",
+                startingSimulationDate = "1981-01-01",
+                endingSimulationDate = "1982-12-31",
+                warmupYears = 1,
+                outputPrintSetting = "daily",
+                reportData = new
+                {
+                    formats = new List<string> { "csv", "netcdf" },
+                    units = "metric",
+                    outputs = new
+                    {
+                        rch = new
+                        {
+                            statistics = new List<string> { "daily" }
+                        },
+                        sub = new
+                        {
+                            statistics = new List<string> { "daily" }
+                        }
+
+                    }
+                }
+            };
+
+            textBox1.Visible = true;
+
+            //Task<string> tsk = hw.GetProjectInputDefinitions();
+            //await (tsk);
+            //tsk = tsk;
+
+            string hawqsinput = JsonConvert.SerializeObject(inputData);
+
+            Task<string> tsk = hw.SubmitProject(apikey, hawqsinput);
+            await (tsk);
+            textBox1.AppendText(tsk.Result + Environment.NewLine);
+            RS = JsonConvert.DeserializeObject<runstatus>(tsk.Result + Environment.NewLine);
+            pidBox.Text = RS.id;
+
+        }
+
+
+
+        private async void HGetStatusClick(object sender, EventArgs e)
+        {
+            if (RS == null) return;
+            if (hw == null) return;
+
+            textBox1.Visible = true;
+            Task<HawqsStatus> ths = hw.GetProjectStatus(apikey, RS.id);
+            await (ths);
+            textBox1.AppendText(ths.Result.progress.ToString() + " " + ths.Result.message + Environment.NewLine);
+        }
+
+        private async void HCancelClick(object sender, EventArgs e)
+        {
+            if (RS == null) return;
+            if (hw == null) return;
+
+            textBox1.Visible = true;
+            Task<string> tcn = hw.CancelProjectExecution(apikey, RS.id);
+            await (tcn);
+            textBox1.AppendText(tcn.Status + tcn.Result + Environment.NewLine);
+        }
+
+        private async void HGetResultsClick(object sender, EventArgs e)
+        {
+            if (RS == null) return;
+            if (hw == null) return;
+
+            textBox1.Visible = true;
+
+            Task<List<HawqsOutput>> GPDT = hw.GetProjectData(apikey, RS.id, false);
+            await (GPDT);
+
+            List<HawqsOutput> LHO = GPDT.Result;
+
+            string HO = JsonConvert.SerializeObject(LHO);
+            textBox1.AppendText(HO);
+
+        }
+
+        private void HInstantiateClick(object sender, EventArgs e)
+        {
+            RS = new runstatus();
+            RS.id = pidBox.Text;
         }
     }
 }

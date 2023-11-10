@@ -84,7 +84,7 @@ namespace GUI.AQUATOX
 
         void WebView_ProcessFailed(object sender, CoreWebView2ProcessFailedEventArgs args)
         {
-             MessageBox.Show("WebView Process Failed"); 
+            //MessageBox.Show("WebView Process Failed");
         }
 
 
@@ -109,12 +109,12 @@ namespace GUI.AQUATOX
             {
                 string[] split = content.Split('|');
                 split[1] = split[1].Replace("\\\"", "\"");   // lake geojsons included \ character in strings
-                if (!GeoJSON.ContainsKey(split[0]))  GeoJSON.Add(split[0], split[1]);
+                if (!GeoJSON.ContainsKey(split[0])) GeoJSON.Add(split[0], split[1]);
             }
-                
+
         }
 
-        protected override void WndProc(ref Message m)  
+        protected override void WndProc(ref Message m)
         {
             // Suppress the WM_UPDATEUISTATE message
             if (m.Msg == 0x128) return;
@@ -142,7 +142,7 @@ namespace GUI.AQUATOX
 
         private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
-                        
+
             if (!Int32.TryParse(comidBox.Text, out int COMID))
             {
                 MessageBox.Show("Please either enter a COMID in the COMID box or click on a stream segment to select a pour point.");
@@ -184,7 +184,7 @@ namespace GUI.AQUATOX
             {
                 Cursor.Current = Cursors.Default;
                 SegLoadLabel.Visible = false;
-                MessageBox.Show("ERROR converting JSON: " + SNJSON); 
+                MessageBox.Show("ERROR converting JSON: " + SNJSON);
                 return;
             }
 
@@ -206,7 +206,7 @@ namespace GUI.AQUATOX
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                 {
                     bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
-                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|"+lastshape.ToString()); // display all layers
+                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|" + lastshape.ToString()); // display all layers
 
                     //bool in_waterbody = false;
                     //if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(CID);
@@ -261,19 +261,24 @@ namespace GUI.AQUATOX
             {
                 sitename = gf.chosenlake;
                 if (LS.Sims.TryGetValue(gf.chosenfileN, out BaseSim)) return gf.chosenfileN;
-                   else return "";
+                else return "";
             }
             else return "";
         }
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
+            string NEHUC14 = File.ReadAllText(@"N:\AQUATOX\CSRA\GIS\HUC_14\HUC14_v_g_50.geojson");
+//            string NEHUC14 = File.ReadAllText(@"N:\AQUATOX\CSRA\GIS\HUC_14\HUC14_NE.geojson");
+            webView.CoreWebView2.PostWebMessageAsString("ADD|" + NEHUC14); // display all layers
+            return; //fixme
+
             string lakename;
-            string lakefilen = ChooseJSONTemplate(out lakename, out BSim);    
+            string lakefilen = ChooseJSONTemplate(out lakename, out BSim);
             if (lakefilen == "") return;
 
             fromtemplate = true;
-            SimBaseLabel.Text = "Simulation Base: "+lakename;
+            SimBaseLabel.Text = "Simulation Base: " + lakename;
             BaseJSON_FileN = lakefilen;
             SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\"";
         }
@@ -285,7 +290,8 @@ namespace GUI.AQUATOX
             StartDT = StartDate.Value;
             EndDT = EndDate.Value;
 
-            if (DialogResult == DialogResult.OK)  {
+            if (DialogResult == DialogResult.OK)
+            {
                 if (!LakeSelected && !SNPopulated)
                 {
                     string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
@@ -321,7 +327,7 @@ namespace GUI.AQUATOX
 
 
         private void webView_MouseDown(bool lake, string COMIDstr)
-            
+
         {
             string[] msg = COMIDstr.Split('|');
             COMID = msg[1];
@@ -355,7 +361,7 @@ namespace GUI.AQUATOX
                     if (SimName == " ") SimName = "COMID: " + COMID;
                     comidBox.Text = COMID;
 
-                    comidLabel.ForeColor =  System.Drawing.Color.DarkOrange;
+                    comidLabel.ForeColor = System.Drawing.Color.DarkOrange;
                     NScrSettings.COMIDstr = COMID;
                     SimNameEdit.Text = SimName;
                 }
@@ -436,7 +442,7 @@ namespace GUI.AQUATOX
                 }
                 catch
                 {
-                    MessageBox.Show("Could not read JSON "+ openFileDialog1.FileName);
+                    MessageBox.Show("Could not read JSON " + openFileDialog1.FileName);
                     BSim = null;
                     return;
                 }

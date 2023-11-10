@@ -22,7 +22,7 @@ namespace Utilities
             flaskURL = flaskURL is null ? Environment.GetEnvironmentVariable("FLASK_SERVER") : flaskURL;
             if(flaskURL == null)
             {
-                flaskURL = "localhost:7777";
+                flaskURL = "http://localhost:31000/hms/rest/api/v2/";  //JSC Modified from 7777
             }
 
             JsonSerializerOptions options = new JsonSerializerOptions()

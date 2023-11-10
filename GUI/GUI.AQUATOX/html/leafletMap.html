@@ -218,7 +218,6 @@
             flowline = JSON.parse(gstr).stream_geometry;  //stream segments only
             if (allShapes == null) allShapes = flowline
             else allShapes = concatGeoJSON(allShapes, flowline);
-            // sendMessageToDotnet(gstr);
         }
 
         function AddWBGeoJSON(gstr) {
