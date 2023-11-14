@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0.21-alpine3.18 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.24-alpine3.18 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine3.16 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.416-alpine3.18 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
@@ -13,6 +13,7 @@ RUN dotnet publish --self-contained --runtime linux-musl-x64 -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
+RUN apk upgrade --available
 
 COPY --from=publish /app .
 RUN ls /app/App_Data
