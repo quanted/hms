@@ -24,8 +24,6 @@ using Hawqs;
 using System.Net.Http;
 using Aron.Weiler;
 using MongoDB.Driver;
-using System.Linq.Expressions;
-using System.Speech.Synthesis;
 
 namespace GUI.AQUATOX
 
@@ -2115,7 +2113,7 @@ namespace GUI.AQUATOX
         }
 
 
-        string apikey = "API KEY HERE";
+        string apikey = "mL+mO3xTBi1boKpdYHTdBTictavSe4opAvDAXzIAXwA=";
         public class runstatus
         {
             public string id { get; set; }
@@ -2182,6 +2180,12 @@ namespace GUI.AQUATOX
                 progressBar1.Visible = true;
                 proglabel.Text = "HAWQS RUN";
                 proglabel.Visible = true;
+
+                if (File.Exists(BaseDir + "output_rch_daily.csv"))
+                  if (MessageBox.Show("Overwrite the existing set of HAWQS linkage data?  (" + BaseDir + "output_rch_daily.csv" + ")", "Confirm",
+                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+
+
                 Application.DoEvents();
 
                 SetInterfaceBusy(true);
@@ -2191,9 +2195,12 @@ namespace GUI.AQUATOX
 
                 await tsk;
 
-                AddToProcessLog(tsk.Result + Environment.NewLine);
+                // AddToProcessLog(tsk.Result + Environment.NewLine);
                 RS = JsonConvert.DeserializeObject<runstatus>(tsk.Result);
-                AddToProcessLog("HAWQS Run ID= " + RS.id + Environment.NewLine);
+
+                if (RS == null) throw new ArgumentException("HAWQS did not return any results");
+
+                AddToProcessLog("INFO: HAWQS Run ID= " + RS.id + Environment.NewLine);
 
                 int progress = 0;
                 while (progress < 100)
@@ -2232,7 +2239,7 @@ namespace GUI.AQUATOX
                     try
                     {
                         using (var fs = await hc.GetStreamAsync(url))
-                        using (var fileStream = new FileStream(BaseDir + "output_rch_daily.csv", FileMode.CreateNew))
+                        using (var fileStream = new FileStream(BaseDir + "output_rch_daily.csv", FileMode.Create))
                             await fs.CopyToAsync(fileStream);
                         AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_daily.csv");
                         hc.Dispose();
@@ -2257,7 +2264,6 @@ namespace GUI.AQUATOX
             catch (Exception ex)
             {
                 AddToProcessLog("ERROR: when running HAWQS: " + ex.Message);
-                MessageBox.Show(ex.Message);
                 SetInterfaceBusy(false);
                 progressBar1.Visible = false;
                 proglabel.Visible = false;

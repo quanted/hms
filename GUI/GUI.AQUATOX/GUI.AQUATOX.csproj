@@ -252,6 +252,9 @@
     <None Update="html\leafletMap.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="html\LPIP.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="html\newSimMap.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

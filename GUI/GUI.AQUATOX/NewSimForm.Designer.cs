@@ -55,6 +55,7 @@
             EndDate = new System.Windows.Forms.DateTimePicker();
             LS_Button = new System.Windows.Forms.Button();
             TogglePanel = new System.Windows.Forms.Panel();
+            radioButton1 = new System.Windows.Forms.RadioButton();
             StreamButton = new System.Windows.Forms.RadioButton();
             LakeButton = new System.Windows.Forms.RadioButton();
             panel2 = new System.Windows.Forms.Panel();
@@ -66,7 +67,6 @@
             Summary2Label = new System.Windows.Forms.Label();
             Summary1Label = new System.Windows.Forms.Label();
             label8 = new System.Windows.Forms.Label();
-            radioButton1 = new System.Windows.Forms.RadioButton();
             ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             TogglePanel.SuspendLayout();
@@ -192,7 +192,7 @@
             ChooseTemplateButton.Name = "ChooseTemplateButton";
             ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
             ChooseTemplateButton.TabIndex = 29;
-            ChooseTemplateButton.Text = "Choose Template";
+            ChooseTemplateButton.Text = "Use Template";
             ChooseTemplateButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             ChooseTemplateButton.UseVisualStyleBackColor = true;
             ChooseTemplateButton.Click += Choose_from_Template_Click;
@@ -345,6 +345,18 @@
             TogglePanel.Size = new System.Drawing.Size(414, 26);
             TogglePanel.TabIndex = 58;
             // 
+            // radioButton1
+            // 
+            radioButton1.AutoSize = true;
+            radioButton1.Checked = true;
+            radioButton1.Location = new System.Drawing.Point(311, 3);
+            radioButton1.Name = "radioButton1";
+            radioButton1.Size = new System.Drawing.Size(62, 19);
+            radioButton1.TabIndex = 3;
+            radioButton1.TabStop = true;
+            radioButton1.Text = "HUC14";
+            radioButton1.UseVisualStyleBackColor = true;
+            // 
             // StreamButton
             // 
             StreamButton.AutoSize = true;
@@ -462,18 +474,6 @@
             label8.Size = new System.Drawing.Size(133, 15);
             label8.TabIndex = 63;
             label8.Text = "Selected Model Domain";
-            // 
-            // radioButton1
-            // 
-            radioButton1.AutoSize = true;
-            radioButton1.Checked = true;
-            radioButton1.Location = new System.Drawing.Point(311, 3);
-            radioButton1.Name = "radioButton1";
-            radioButton1.Size = new System.Drawing.Size(62, 19);
-            radioButton1.TabIndex = 3;
-            radioButton1.TabStop = true;
-            radioButton1.Text = "HUC14";
-            radioButton1.UseVisualStyleBackColor = true;
             // 
             // NewSimForm
             // 

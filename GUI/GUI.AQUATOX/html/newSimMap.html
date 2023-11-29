@@ -32,6 +32,7 @@
     <!-- geojson vt  -->
     <script src="JS/geojson-vt.js"></script>
     <script src="JS/leaflet-geojson-vt.js"></script>
+    <script src='LPIP.js'></script>
 
 </head>
 
@@ -51,8 +52,10 @@
         var lakemode = true;
         var oldzoom = 6;
         var AwaitSearch = false;
+        var H14Showing = false;
         ZoomThresh = 9;
         LakeZoomThresh = 6;
+        H14ZoomThresh = 8;
 
 
         // catchments
@@ -61,8 +64,8 @@
         const URL_NP21_CATCHMENTS =
             "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/Catchments_NP21_Simplified/MapServer/0";
         // WBD - HUC_8
-        const URL_NP21_HUC8 =
-            "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/WBD_NP21_Simplified/MapServer/2";
+        const URL_NP21_HUCs =
+            "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/WBD_NP21_Simplified/MapServer/";
         // flowlines
         const URL_NP21_FLOWLINES =
             "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/0";
@@ -119,6 +122,72 @@
             }).addTo(MAP);
         }
 
+        var H14Maps = [];
+        var H14Codes = [];
+        var H14GeoJson = [];
+
+
+        MAP.on('moveend', function () {
+            if (H14Showing) ShowHUC14Maps();
+        });
+
+        function ShowHUC14Maps() {
+            if (!H14Showing) return;
+
+            var MB = MAP.getBounds();
+            var E_Code = LonCode(MB.getEast());
+            var W_Code = LonCode(MB.getWest());
+            var S_Code = LatCode(MB.getSouth());
+            var N_Code = LatCode(MB.getNorth());
+
+            var Codes = [];
+            Codes.push(E_Code + N_Code);
+            Codes.push(E_Code + S_Code);
+            Codes.push(W_Code + N_Code);
+            Codes.push(W_Code + S_Code);
+
+            Codes.forEach((code) => {
+                if (!H14Codes.includes(code)) {
+                    sendMessageToDotnet('H14' + code);   
+                    H14Codes.push(code);
+                }
+            })
+
+            for (let i = 0; i < H14Codes.length; ++i) {
+                if (!Codes.includes(H14Codes[i])) {
+                    delete H14Codes[i];
+                    if (H14Maps[i] != null) MAP.removeLayer(H14Maps[i]);
+                    delete H14Maps[i];
+                    delete H14GeoJson[i];
+                }
+            }
+        }
+
+
+        function LonCode(lon) {
+            var lonch;
+
+            if (lon > -83.48) { lonch = "1" }
+            else if (lon > -91.72) { lonch = "2" }
+            else if (lon > -99.96) { lonch = "3" }
+            else if (lon > -108.20) { lonch = "4" }
+            else if (lon > -116.44) { lonch = "5" }
+            else { lonch = "6" };
+
+            return lonch; 
+        }
+
+
+        function LatCode(lat) {
+            var latch;
+            if (lat < 36.0) { latch = "0" }
+            else if (lat < 41.5) { latch = "1" }
+            else { latch = "2" }; 
+
+            return latch;
+        }
+
+
         function StreamSearch() {
             lakemode = false;
             if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
@@ -155,6 +224,46 @@
 
         });
 
+        //start geojson-vt map tiles
+        //interaction on the underlying polygon not drawn but represented by the tiles - they draw better
+        var highlight;
+        var allShapes;
+
+        MAP.on('click', function (e) {
+            if (highlight) {
+                MAP.removeLayer(highlight)
+            }
+            var x = e.latlng.lng;
+            var y = e.latlng.lat;
+
+            H14GeoJson.forEach((geojsonlayer) => {
+                if (geojsonlayer) {
+                    var layerData = pointInLayer([x, y], geojsonlayer, true);
+                    if (!layerData[0]) {
+                        console.log('nothing to see here')
+                    } else {
+                        var highlightIndex = layerData[0].feature.properties.HUC14;
+                        highlight = new L.geoJson(allShapes, {
+                            filter: function (feature, layer) {
+                                return feature.properties.HUC14 == highlightIndex
+                            },
+                            style: { color: 'deepskyblue', fillColor: 'deepskyblue' }
+                        }).addTo(MAP);
+
+                        var attributes = highlightIndex.split('-', 2);
+                        var name = attributes[0];
+                        var popup = 'Parcel ID: ' + name;
+                        MAP.on('popupopen', function () {
+                        });
+                        MAP.openPopup(popup, e.latlng);
+                        MAP.on('popupclose', function () {
+                            MAP.removeLayer(highlight)
+                        });
+                        return;
+                    }
+                }
+            });
+        });
 
         MAP.on('zoomend', function () {
             newzoom = MAP.getZoom();
@@ -165,14 +274,18 @@
             }
 
             if (newzoom <= LakeZoomThresh) {
-                if (oldzoom > LakeZoomThresh) {
-                    MAP.removeLayer(WB_LAYER);
-                }
+                if (oldzoom > LakeZoomThresh) MAP.removeLayer(WB_LAYER);
             }
 
             if (newzoom > LakeZoomThresh) {
-                if (oldzoom <= LakeZoomThresh) {
-                    MAP.addLayer(WB_LAYER);
+                if (oldzoom <= LakeZoomThresh) MAP.addLayer(WB_LAYER);
+            }
+
+            if (newzoom < H14ZoomThresh) H14Showing = false;
+            if (newzoom >= H14ZoomThresh) {
+                H14Showing = true;  //fixme context dependent
+                if (oldzoom <= H14ZoomThresh) {                    
+                    ShowHUC14Maps();
                 }
             }
 
@@ -205,9 +318,6 @@
             "ESRI Natl. Geo.": NAT_GEO,
             "ESRI Imagery": SATELLITE,
         };
-        //            const BASE_OPTIONS = L.control.layers()
-        //((null, Base_Maps);
-        //BASE_OPTIONS.addTo(MAP);
 
         const WB_LAYER = L.esri
             .featureLayer({
@@ -303,12 +413,30 @@
         //                weight: 1,
         //            });
 
-        const BOUNDARIES_LAYER = L.esri
+        const HUC8 = L.esri
             .featureLayer({
-                url: URL_NP21_HUC8,
+                url: URL_NP21_HUCs+"2",
             });
-        BOUNDARIES_LAYER.setStyle({
+        HUC8.setStyle({
             color: "red",
+            fillOpacity: 0,
+            weight: 1,
+        });
+        const HUC10 = L.esri
+            .featureLayer({
+                url: URL_NP21_HUCs + "1",
+            });
+        HUC10.setStyle({
+            color: "maroon",
+            fillOpacity: 0,
+            weight: 1,
+        });
+        const HUC12 = L.esri
+            .featureLayer({
+                url: URL_NP21_HUCs + "0",
+            });
+        HUC12.setStyle({
+            color: "darkolivegreen",
             fillOpacity: 0,
             weight: 1,
         });
@@ -325,7 +453,9 @@
         });
 
         const OVERLAY_MAPS = {
-            "HUC8 Boundaries": BOUNDARIES_LAYER,
+            "HUC8 Boundaries": HUC8,
+            "HUC10 Boundaries": HUC10,
+            "HUC12 Boundaries": HUC12,
             //                Catchments: CATCHMENTS_LAYER,
             "Flow Lines": FLOWLINES_LAYER,
             "NWS Lake/Res": WB_LAYER,
@@ -381,29 +511,29 @@
         }
 
         var geojsonStyle = {
-            color: "#000",
+            color: "#4A5D23",
             weight: 1,
             opacity: 1,
-            fillOpacity: 0,
+            fillOpacity: 0.01,
         };
 
 
         // app interaction
         function AddGeoJSON(gstr) {
-            var allShapes = JSON.parse(gstr);
+
+            allShapes = JSON.parse(gstr);
 
             var options = {
                 maxZoom: 20,
-                tolerance: 3,
+                minZoom: H14ZoomThresh,
+                tolerance: 5,
                 debug: 0,
                 style: geojsonStyle
             };
-            var canvasLayer = L.geoJson.vt(allShapes, options).addTo(MAP);
+            H14GeoJson.push(new L.GeoJSON(allShapes));
+            H14Maps.push(L.geoJson.vt(allShapes, options).addTo(MAP));
 
-//            geoLayer = L.geoJSON(allShapes);
-//            geoLayer.setStyle({ weight: 1 });
-//            geoLayer.addTo(MAP);
-
+            //sendMessageToDotnet('DoneDraw');
         }
 
         function ShowStreamDefaults() {

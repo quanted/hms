@@ -105,6 +105,18 @@ namespace GUI.AQUATOX
                     webView_MouseDown((content.StartsWith("LAKE|")), content);
                 }, null);
             }
+            else if (content.StartsWith("H14"))
+            {
+                Cursor.Current = Cursors.WaitCursor; //fixme not working
+                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";
+                string HUC14 = File.ReadAllText(filestr);
+                webView.CoreWebView2.PostWebMessageAsString("ADD|" + HUC14); // display layer
+            }
+            else if (content.StartsWith("DoneDraw"))
+            {
+                Cursor.Current = Cursors.Default;
+            }
+
             else
             {
                 string[] split = content.Split('|');
@@ -268,11 +280,6 @@ namespace GUI.AQUATOX
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
         {
-            string NEHUC14 = File.ReadAllText(@"N:\AQUATOX\CSRA\GIS\HUC_14\HUC14_v_g_50.geojson");
-//            string NEHUC14 = File.ReadAllText(@"N:\AQUATOX\CSRA\GIS\HUC_14\HUC14_NE.geojson");
-            webView.CoreWebView2.PostWebMessageAsString("ADD|" + NEHUC14); // display all layers
-            return; //fixme
-
             string lakename;
             string lakefilen = ChooseJSONTemplate(out lakename, out BSim);
             if (lakefilen == "") return;
