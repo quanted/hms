@@ -244,7 +244,7 @@ namespace GUI.AQUATOX
             foreach (SeriesID SID in Graph.YItems)
             {
                 TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
-                if (TSV != null) 
+                if ((TSV != null) && (TSV.SVoutput !=null))
                  if (SID.indx<= TSV.SVoutput.Data.Values.ElementAt(0).Count)
                  {
                     List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);

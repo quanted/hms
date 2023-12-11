@@ -519,7 +519,7 @@ namespace GUI.AQUATOX
             // 
             // estdbbutton
             // 
-            estdbbutton.Location = new System.Drawing.Point(340, 445);
+            estdbbutton.Location = new System.Drawing.Point(348, 451);
             estdbbutton.Name = "estdbbutton";
             estdbbutton.Size = new System.Drawing.Size(59, 24);
             estdbbutton.TabIndex = 40;

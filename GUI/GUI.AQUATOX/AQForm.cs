@@ -4,6 +4,7 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
+using AQUATOX.Loadings;
 using Globals;
 using Newtonsoft.Json;
 using System;
@@ -17,7 +18,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Threading;
-using System.Linq.Expressions;
+using System.Drawing.Text;
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 
@@ -1278,7 +1279,7 @@ namespace GUI.AQUATOX
                                                     {0.00000,0.00734,0.00171,0.23017},
                                                     {0.00067,0.04935,0.00142,0.16644}};
 
-            double[,] ValBioEst = new double[8, 4] {{0.03295,0.03367,0.00041,0.00890},  //9-14-23 added val data based on Cal_and_Validation_Data_cal_cell_weight_8-28-23.xlsx
+            double[,] ValBioEst = new double[8, 4] {{0.03295,0.03367,0.00041,0.00890},  //9-14-23 added 1984 data based on Cal_and_Validation_Data_cal_cell_weight_8-28-23.xlsx
                                                     {0.03160,0.02543,0.00000,0.00495},
                                                     {0.00857,0.01562,0.00051,0.00357},
                                                     {0.00172,0.02852,0.00137,0.00000},
@@ -1297,8 +1298,8 @@ namespace GUI.AQUATOX
             double[] ModelChla = new double[15];
             double Bioerror;
 
-                        {
-                for (int i = 0; i < Indices.Length; i++)  // start simulation on 1/1/1999 rather than 6/1/1999  
+            {
+                for (int i = 0; i < Indices.Length; i++)  // start simulation on 4/1 rather than 6/1
                 {
                     Indices[i] += 61;
                 }
@@ -1314,8 +1315,6 @@ namespace GUI.AQUATOX
                 {
                     ValIndices[i] += 61;
                 }
-
-                
 
             }
 
@@ -1487,8 +1486,8 @@ namespace GUI.AQUATOX
         }
 
 
-        const int NDTypes = 10;   // CHANGEDIST
-        const int NDists = NDTypes * 4;
+        const int NDTypes = 11;   // CHANGEDIST //12/6 rotifer is index 10 
+        const int NDists = NDTypes * 4;   
         double[] BestParms = new double[NDists];
         int[] DTypes = new int[NDists];
         int[] SVIndices = new int[NDists];
@@ -1502,11 +1501,33 @@ namespace GUI.AQUATOX
             double Old_Error = 100000;
             double Min_Error = 100000;
             double Min_Error_Logged = 100000;
-            double T = double.Parse(TStartBox.Text);  // start at temperature of 50
-            int NUMDRAWS = int.Parse(IterationBox.Text); // Number of draws to run at each temperature;  fixme 
+            double T = double.Parse(TStartBox.Text);  // start at temperature based on text box
+            int NUMDRAWS = int.Parse(IterationBox.Text); // Number of draws to run at each temperature;  
             const double T_min = 0.0001;
             const double Alpha = 0.9;
-            TPlant TP;
+            // TPlant TP;
+            string AQTSJSON;
+
+            double RunOneIteration(double[] NewParms)
+            {
+                AQTSim LocalAQTS = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(AQTSJSON, AQTSim.AQTJSONSettings());  //likely costly in terms of time
+                LocalAQTS.AQTSeg.SetupLinks();
+                CopyParmToSim(LocalAQTS.AQTSeg, NewParms);
+
+                LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;   //12/6  Start with low Chryso always for no_CR version   //9/28/2023, normal chrysophytes in 1999 
+                LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
+                LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
+                LocalAQTS.Integrate(); // 1999 simulation
+                double New_Error = SimError(LocalAQTS);
+
+                LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run first year of validation period
+                LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1984, 10, 12);
+                LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;  //9/28/2023, start with low chrysophytes in 1984 
+
+                LocalAQTS.Integrate(); // 1984 simulation
+                return (New_Error + SimError(LocalAQTS)) / 2;
+            }
+
 
             //DType 0 = TOpt
             //DType 1 = PMax
@@ -1519,6 +1540,8 @@ namespace GUI.AQUATOX
             //DType 8 = Min Temp
             //DType 9 = Max Temp
             //DType 7 = MaxSat 6/10/2023 // CHANGEDIST
+
+            //DType 10 = Rotifer parameters
 
             double[,] DMins = new double[NDTypes, 4];
             double[,] DMaxs = new double[NDTypes, 4];
@@ -1543,6 +1566,10 @@ namespace GUI.AQUATOX
             DMins[9, 2] = 20.0; DMaxs[9, 2] = 42.0; //DType 9 = TMax  Cyanobacteria
             DMins[9, 3] = 25.0; DMaxs[9, 3] = 37.0; //DType 9 = TMax  Chrysophyte
 
+            DMins[10, 0] = 1; DMaxs[10, 0] = 4; //DType 10 = CMAX Rotifer
+            DMins[10, 1] = 0.01; DMaxs[10, 1] = 0.1; //DType 10 = Min Prey Rotifer
+            DMins[10, 2] = 0.005; DMaxs[10, 2] = 0.1; //DType 10 = Mort Coeff Rotifer
+            DMins[10, 3] = 0.0001; DMaxs[10, 3] = 0.002; //DType 10 = Const Inflow Loading Rotifer
 
             for (int i = 0; i < 4; i++)
             {
@@ -1564,7 +1591,7 @@ namespace GUI.AQUATOX
             {
                 DTypes[d] = dtype;
                 SVIndices[d] = svindex;
-                if (randomBox.Checked) OldParms[d] = RandUniform(DMins[DTypes[d], org], DMaxs[DTypes[d], org]);  // first random value
+                if (randomBox.Checked) OldParms[d] = RandUniform(DMins[DTypes[d], org], DMaxs[DTypes[d], org]);  // initialize all parameters with random values
 
                 dtype++;
                 if (dtype > NDTypes - 1)
@@ -1575,17 +1602,20 @@ namespace GUI.AQUATOX
                 }
             };
 
-            if (!randomBox.Checked)
-            {
-                CopySimToParm(aQTS.AQTSeg, OldParms);
-            }
-
             aQTS.SavedRuns.Clear();  //segment will be copied, so simplify
             aQTS.AQTSeg.ClearResults();
 
             logfile = @"N:\Temporary\" + Path.GetFileName(aQTS.AQTSeg.FileName) + "PSALog.txt";
 
-            string AQTSJSON = Newtonsoft.Json.JsonConvert.SerializeObject(aQTS, AQTSim.AQTJSONSettings());
+            AQTSJSON = Newtonsoft.Json.JsonConvert.SerializeObject(aQTS, AQTSim.AQTJSONSettings());
+
+            if (!randomBox.Checked)
+            {
+                CopySimToParm(aQTS.AQTSeg, OldParms);
+                Old_Error = RunOneIteration(OldParms);
+                Min_Error = Old_Error;
+                Min_Error_Logged = Old_Error;
+            }
 
             bool UserCancel = false;
             int totruns = 0;
@@ -1608,27 +1638,11 @@ namespace GUI.AQUATOX
                     int OldParmIndex = LastAccept;  // interation basis for this test
 
                     int index = ThreadLocalRandom.Instance.Next(0, NDists - 1);
-
                     NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);
 
-                    AQTSim LocalAQTS = Newtonsoft.Json.JsonConvert.DeserializeObject<AQTSim>(AQTSJSON, AQTSim.AQTJSONSettings());  //likely costly in terms of time
-                    LocalAQTS.AQTSeg.SetupLinks();
-                    CopyParmToSim(LocalAQTS.AQTSeg, NewParms);
+                    double New_Error = RunOneIteration(NewParms);
 
-                    LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
-                    LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
-                    LocalAQTS.Integrate(); // 1999 simulation
-                    double New_Error = SimError(LocalAQTS);
-
-
-                    LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run first year of validation period
-                    LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1984, 10, 12);
-                    LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;  //9/28/2023, start with low chrysophytes in 1984 as a test
-
-                    LocalAQTS.Integrate(); // 1984 simulation
-                    New_Error = (New_Error + SimError(LocalAQTS)) / 2;
-
-                    double AP = (Old_Error - New_Error) / T;    
+                    double AP = (Old_Error - New_Error) / T;
                     if (AP > 100) AP = 3E+43;
                     else AP = Math.Exp(AP);
 
@@ -1699,26 +1713,40 @@ namespace GUI.AQUATOX
 
             for (int d = 0; d < NDists; d++) // copy back results to simulation
             {
-                TP = ASeg.SV[SVIndices[d]] as TPlant;
-
-                switch (DTypes[d])
+                if (DTypes[d] < 10)
                 {
-                    case 0: TP.PAlgalRec.TOpt.Val = Parms[d]; break;
-                    case 1: TP.PAlgalRec.PMax.Val = Parms[d]; break;
-                    case 2: TP.PAlgalRec.Resp20.Val = Parms[d]; break;
-                    case 3: TP.PAlgalRec.EnteredLightSat.Val = Parms[d]; break;
-                    case 4: TP.PAlgalRec.KN.Val = Parms[d]; break;
-                    case 5: TP.PAlgalRec.KPO4.Val = Parms[d]; break;
-                    case 6: TP.PAlgalRec.EMort.Val = Parms[d]; break;
-                    case 7: TP.PAlgalRec.KMort.Val = Parms[d]; break;
-                    case 8:
-                        TP.PAlgalRec.TRef.Val = Parms[d];
-                        if (TP.PAlgalRec.TRef.Val >= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TRef.Val = TP.PAlgalRec.TOpt.Val - 0.5;
-                        break;
-                    case 9:
-                        TP.PAlgalRec.TMax.Val = Parms[d];
-                        if (TP.PAlgalRec.TMax.Val <= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TMax.Val = TP.PAlgalRec.TOpt.Val + 0.5;
-                        break;
+                    TP = ASeg.SV[SVIndices[d]] as TPlant;
+
+                    switch (DTypes[d])
+                    {
+                        case 0: TP.PAlgalRec.TOpt.Val = Parms[d]; break;
+                        case 1: TP.PAlgalRec.PMax.Val = Parms[d]; break;
+                        case 2: TP.PAlgalRec.Resp20.Val = Parms[d]; break;
+                        case 3: TP.PAlgalRec.EnteredLightSat.Val = Parms[d]; break;
+                        case 4: TP.PAlgalRec.KN.Val = Parms[d]; break;
+                        case 5: TP.PAlgalRec.KPO4.Val = Parms[d]; break;
+                        case 6: TP.PAlgalRec.EMort.Val = Parms[d]; break;
+                        case 7: TP.PAlgalRec.KMort.Val = Parms[d]; break;
+                        case 8:
+                            TP.PAlgalRec.TRef.Val = Parms[d];
+                            if (TP.PAlgalRec.TRef.Val >= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TRef.Val = TP.PAlgalRec.TOpt.Val - 0.5;
+                            break;
+                        case 9:
+                            TP.PAlgalRec.TMax.Val = Parms[d];
+                            if (TP.PAlgalRec.TMax.Val <= TP.PAlgalRec.TOpt.Val) TP.PAlgalRec.TMax.Val = TP.PAlgalRec.TOpt.Val + 0.5;
+                            break;
+                    }
+                }
+                else {  //rotifer code
+                    TAnimal TRot = ASeg.SV[17] as TAnimal;
+                    switch (SVIndices[d])
+                    {
+                        case 12: TRot.PAnimalData.CMax.Val = Parms[d]; break;
+                        case 13: TRot.PAnimalData.BMin.Val = Parms[d]; break;
+                        case 14: TRot.PAnimalData.KMort.Val = Parms[d]; break;
+                        case 15: TRot.LoadsRec.Loadings.ConstLoad = Parms[d]; break;
+                    }
+
 
                 }
             }
@@ -1730,21 +1758,37 @@ namespace GUI.AQUATOX
 
             for (int d = 0; d < NDists; d++) // copy back results to simulation
             {
-                TP = ASeg.SV[SVIndices[d]] as TPlant;
-
-                switch (DTypes[d])
+                if (DTypes[d] < 10)
                 {
-                    case 0: Parms[d] = TP.PAlgalRec.TOpt.Val; break;
-                    case 1: Parms[d] = TP.PAlgalRec.PMax.Val; break;
-                    case 2: Parms[d] = TP.PAlgalRec.Resp20.Val; break;
-                    case 3: Parms[d] = TP.PAlgalRec.EnteredLightSat.Val; break;
-                    case 4: Parms[d] = TP.PAlgalRec.KN.Val; break;
-                    case 5: Parms[d] = TP.PAlgalRec.KPO4.Val; break;
-                    case 6: Parms[d] = TP.PAlgalRec.EMort.Val; break;
-                    case 7: Parms[d] = TP.PAlgalRec.KMort.Val; break;
-                    case 8: Parms[d] = TP.PAlgalRec.TRef.Val; break;
-                    case 9: Parms[d] = TP.PAlgalRec.TMax.Val; break;
+
+                    TP = ASeg.SV[SVIndices[d]] as TPlant;
+
+                    switch (DTypes[d])
+                    {
+                        case 0: Parms[d] = TP.PAlgalRec.TOpt.Val; break;
+                        case 1: Parms[d] = TP.PAlgalRec.PMax.Val; break;
+                        case 2: Parms[d] = TP.PAlgalRec.Resp20.Val; break;
+                        case 3: Parms[d] = TP.PAlgalRec.EnteredLightSat.Val; break;
+                        case 4: Parms[d] = TP.PAlgalRec.KN.Val; break;
+                        case 5: Parms[d] = TP.PAlgalRec.KPO4.Val; break;
+                        case 6: Parms[d] = TP.PAlgalRec.EMort.Val; break;
+                        case 7: Parms[d] = TP.PAlgalRec.KMort.Val; break;
+                        case 8: Parms[d] = TP.PAlgalRec.TRef.Val; break;
+                        case 9: Parms[d] = TP.PAlgalRec.TMax.Val; break;
+                    }
                 }
+                else {  //rotifer code
+                    TAnimal TRot = ASeg.SV[17] as TAnimal;
+                    switch (SVIndices[d])
+                    {
+                        case 12: Parms[d] =TRot.PAnimalData.CMax.Val; break;
+                        case 13: Parms[d] = TRot.PAnimalData.BMin.Val; break;
+                        case 14: Parms[d] = TRot.PAnimalData.KMort.Val; break;
+                        case 15: Parms[d] = TRot.LoadsRec.Loadings.ConstLoad; break;
+                    }
+
+                }
+
             }
         }
 
@@ -1957,7 +2001,73 @@ namespace GUI.AQUATOX
 
             try
             {
-                MessageBox.Show(SimError(aQTS).ToString());
+                Set_Buttons(true);
+                modelRunningLabel.Text = "Model is Running";
+                aQTS.AQTSeg.ProgWorker = null;
+
+                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;   // 12/6  Start with low Chryso always for no_CR version  
+                aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
+                aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
+                aQTS.AQTSeg.RunID = "1999: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate(); // 1999 simulation
+                aQTS.ArchiveSimulation();
+                double New_Error = SimError(aQTS);
+
+                aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run 1984 as second calibration year
+                aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1984, 10, 12);
+                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;  // lower chrysophyte initialization for 1984
+                aQTS.AQTSeg.RunID = "1984: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate(); // 1984 simulation
+                aQTS.ArchiveSimulation();
+                New_Error = (New_Error + SimError(aQTS)) / 2;
+
+                aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1985, 4, 1);  // run 1985
+                aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1985, 10, 12);
+                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;  // lower chrysophyte initialization for 1985
+                aQTS.AQTSeg.RunID = "1985: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate(); // 1985 simulation
+                aQTS.ArchiveSimulation();
+
+
+                aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // bioassay period
+                aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 7, 05);
+                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;   // 12/6  Start with low Chryso always for no_CR version  
+                aQTS.AQTSeg.RunID = "Bioassay Baseline: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate();
+                aQTS.ArchiveSimulation();
+
+                TLoadings NO3Loadings = aQTS.AQTSeg.SV[1].LoadsRec.Loadings;
+                int indx = NO3Loadings.list.BinarySearch(new DateTime(1999, 6, 29));
+                int indx2 = NO3Loadings.list.BinarySearch(new DateTime(1999, 7, 6));
+                NO3Loadings.list[new DateTime(1999, 6, 29)] = NO3Loadings.list.Values[indx] + 2.26;
+                NO3Loadings.list[new DateTime(1999, 7, 6)] = NO3Loadings.list.Values[indx2] + 2.26;
+                // + 2.26 mg / L, 6 - 29 and 7 - 6 1999
+                aQTS.AQTSeg.RunID = "NO3 Bioassay: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate();
+                aQTS.ArchiveSimulation();
+                NO3Loadings.list[new DateTime(1999, 6, 29)] = NO3Loadings.list.Values[indx] - 2.26;
+                NO3Loadings.list[new DateTime(1999, 7, 6)] = NO3Loadings.list.Values[indx2] - 2.26;
+
+
+                TLoadings TSPLoadings = aQTS.AQTSeg.SV[2].LoadsRec.Loadings;
+                indx = TSPLoadings.list.BinarySearch(new DateTime(1999, 6, 27));
+                indx2 = TSPLoadings.list.BinarySearch(new DateTime(1999, 7, 4));
+                TSPLoadings.list[new DateTime(1999, 6, 27)] = TSPLoadings.list.Values[indx] + 0.19;
+                TSPLoadings.list[new DateTime(1999, 7, 4)] = TSPLoadings.list.Values[indx2] + 0.19;
+                // Added .19 to 6 / 29 and 7 / 4 for Bioassay
+                aQTS.AQTSeg.RunID = "PO4 Bioassay: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+                aQTS.Integrate();
+                aQTS.ArchiveSimulation();
+                TSPLoadings.list[new DateTime(1999, 6, 27)] = TSPLoadings.list.Values[indx] - 0.19;
+                TSPLoadings.list[new DateTime(1999, 7, 4)] = TSPLoadings.list.Values[indx2] - 0.19;
+
+                aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // reset to calibration period
+                aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
+
+                Set_Buttons(false);
+
+                ShowStudyInfo();
+                MessageBox.Show(New_Error.ToString());
             }
             catch
             {
