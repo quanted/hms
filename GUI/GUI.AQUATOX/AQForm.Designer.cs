@@ -71,14 +71,6 @@ namespace GUI.AQUATOX
             pictureBox1 = new PictureBox();
             OKButton = new Button();
             CancelButt = new Button();
-            HTestButton = new Button();
-            textBox1 = new TextBox();
-            HStatusButton = new Button();
-            HCancelButton = new Button();
-            HGetDataButton = new Button();
-            pidBox = new TextBox();
-            label2 = new Label();
-            HInstantiateButton = new Button();
             DBPanel.SuspendLayout();
             ButtonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -499,111 +491,11 @@ namespace GUI.AQUATOX
             CancelButt.Visible = false;
             CancelButt.Click += CancelButt_Click;
             // 
-            // HTestButton
-            // 
-            HTestButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            HTestButton.Location = new System.Drawing.Point(146, 451);
-            HTestButton.Name = "HTestButton";
-            HTestButton.Size = new System.Drawing.Size(87, 24);
-            HTestButton.TabIndex = 37;
-            HTestButton.Text = "Start Hawqs";
-            HTestButton.UseVisualStyleBackColor = true;
-            HTestButton.Visible = false;
-            HTestButton.Click += TestButton_Click;
-            // 
-            // textBox1
-            // 
-            textBox1.AcceptsReturn = true;
-            textBox1.AcceptsTab = true;
-            textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            textBox1.Location = new System.Drawing.Point(146, 399);
-            textBox1.Multiline = true;
-            textBox1.Name = "textBox1";
-            textBox1.Size = new System.Drawing.Size(650, 15);
-            textBox1.TabIndex = 38;
-            textBox1.Visible = false;
-            // 
-            // HStatusButton
-            // 
-            HStatusButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            HStatusButton.Location = new System.Drawing.Point(239, 450);
-            HStatusButton.Name = "HStatusButton";
-            HStatusButton.Size = new System.Drawing.Size(87, 24);
-            HStatusButton.TabIndex = 39;
-            HStatusButton.Text = "Check Status";
-            HStatusButton.UseVisualStyleBackColor = true;
-            HStatusButton.Visible = false;
-            HStatusButton.Click += HGetStatusClick;
-            // 
-            // HCancelButton
-            // 
-            HCancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            HCancelButton.Location = new System.Drawing.Point(332, 450);
-            HCancelButton.Name = "HCancelButton";
-            HCancelButton.Size = new System.Drawing.Size(59, 24);
-            HCancelButton.TabIndex = 40;
-            HCancelButton.Text = "cancel";
-            HCancelButton.UseVisualStyleBackColor = true;
-            HCancelButton.Visible = false;
-            HCancelButton.Click += HCancelClick;
-            // 
-            // HGetDataButton
-            // 
-            HGetDataButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            HGetDataButton.Location = new System.Drawing.Point(397, 450);
-            HGetDataButton.Name = "HGetDataButton";
-            HGetDataButton.Size = new System.Drawing.Size(59, 24);
-            HGetDataButton.TabIndex = 41;
-            HGetDataButton.Text = "getdata";
-            HGetDataButton.UseVisualStyleBackColor = true;
-            HGetDataButton.Visible = false;
-            HGetDataButton.Click += HGetResultsClick;
-            // 
-            // pidBox
-            // 
-            pidBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            pidBox.Location = new System.Drawing.Point(239, 421);
-            pidBox.Name = "pidBox";
-            pidBox.Size = new System.Drawing.Size(45, 23);
-            pidBox.TabIndex = 42;
-            pidBox.Visible = false;
-            // 
-            // label2
-            // 
-            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            label2.AutoSize = true;
-            label2.Location = new System.Drawing.Point(172, 425);
-            label2.Name = "label2";
-            label2.Size = new System.Drawing.Size(61, 15);
-            label2.TabIndex = 43;
-            label2.Text = "Process ID";
-            label2.Visible = false;
-            // 
-            // HInstantiateButton
-            // 
-            HInstantiateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            HInstantiateButton.Location = new System.Drawing.Point(291, 420);
-            HInstantiateButton.Name = "HInstantiateButton";
-            HInstantiateButton.Size = new System.Drawing.Size(91, 24);
-            HInstantiateButton.TabIndex = 44;
-            HInstantiateButton.Text = "instantiate RD";
-            HInstantiateButton.UseVisualStyleBackColor = true;
-            HInstantiateButton.Visible = false;
-            HInstantiateButton.Click += HInstantiateClick;
-            // 
             // AQTTestForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(813, 490);
-            Controls.Add(HInstantiateButton);
-            Controls.Add(label2);
-            Controls.Add(pidBox);
-            Controls.Add(HGetDataButton);
-            Controls.Add(HCancelButton);
-            Controls.Add(HStatusButton);
-            Controls.Add(textBox1);
-            Controls.Add(HTestButton);
             Controls.Add(OKButton);
             Controls.Add(CancelButt);
             Controls.Add(SetupButton);
@@ -682,14 +574,6 @@ namespace GUI.AQUATOX
         private PictureBox pictureBox1;
         private Button OKButton;
         private Button CancelButt;
-        private Button HTestButton;
-        private TextBox textBox1;
-        private Button HStatusButton;
-        private Button HCancelButton;
-        private Button HGetDataButton;
-        private TextBox pidBox;
-        private Label label2;
-        private Button HInstantiateButton;
     }
 
 

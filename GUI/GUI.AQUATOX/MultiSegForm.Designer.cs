@@ -66,6 +66,7 @@
             ConsoleButton = new System.Windows.Forms.RadioButton();
             browseButton = new System.Windows.Forms.Button();
             PlotPanel = new System.Windows.Forms.Panel();
+            ShowH14Box = new System.Windows.Forms.CheckBox();
             NRCheckBox = new System.Windows.Forms.CheckBox();
             LabelCheckBox = new System.Windows.Forms.CheckBox();
             ShowBoundBox = new System.Windows.Forms.CheckBox();
@@ -116,7 +117,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label2.Location = new System.Drawing.Point(10, 12);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(67, 15);
@@ -126,11 +127,11 @@
             // ProcessLog
             // 
             ProcessLog.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            ProcessLog.Location = new System.Drawing.Point(306, 90);
+            ProcessLog.Location = new System.Drawing.Point(306, 92);
             ProcessLog.Multiline = true;
             ProcessLog.Name = "ProcessLog";
             ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            ProcessLog.Size = new System.Drawing.Size(817, 456);
+            ProcessLog.Size = new System.Drawing.Size(822, 454);
             ProcessLog.TabIndex = 6;
             ProcessLog.WordWrap = false;
             // 
@@ -215,7 +216,7 @@
             // 
             // CancelButton
             // 
-            CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             CancelButton.ForeColor = System.Drawing.Color.Black;
             CancelButton.Location = new System.Drawing.Point(87, 160);
             CancelButton.Margin = new System.Windows.Forms.Padding(0);
@@ -278,7 +279,7 @@
             // 
             // proglabel
             // 
-            proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
             proglabel.Location = new System.Drawing.Point(10, 118);
             proglabel.Name = "proglabel";
             proglabel.Size = new System.Drawing.Size(235, 15);
@@ -319,7 +320,7 @@
             // SILabel1
             // 
             SILabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            SILabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             SILabel1.Location = new System.Drawing.Point(10, 16);
             SILabel1.Name = "SILabel1";
             SILabel1.Size = new System.Drawing.Size(235, 19);
@@ -379,7 +380,7 @@
             // 
             // viewOutputButton
             // 
-            viewOutputButton.Location = new System.Drawing.Point(83, 485);
+            viewOutputButton.Location = new System.Drawing.Point(83, 489);
             viewOutputButton.Name = "viewOutputButton";
             viewOutputButton.Size = new System.Drawing.Size(127, 23);
             viewOutputButton.TabIndex = 49;
@@ -476,7 +477,7 @@
             // 
             // browseButton
             // 
-            browseButton.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            browseButton.Font = new System.Drawing.Font("Arial Narrow", 9F);
             browseButton.ForeColor = System.Drawing.Color.Black;
             browseButton.Location = new System.Drawing.Point(506, 8);
             browseButton.Margin = new System.Windows.Forms.Padding(0);
@@ -489,15 +490,27 @@
             // 
             // PlotPanel
             // 
+            PlotPanel.Controls.Add(ShowH14Box);
             PlotPanel.Controls.Add(NRCheckBox);
             PlotPanel.Controls.Add(LabelCheckBox);
             PlotPanel.Controls.Add(ShowBoundBox);
             PlotPanel.Controls.Add(outputjump);
             PlotPanel.Controls.Add(PlotButton);
-            PlotPanel.Location = new System.Drawing.Point(305, 52);
+            PlotPanel.Location = new System.Drawing.Point(305, 49);
             PlotPanel.Name = "PlotPanel";
             PlotPanel.Size = new System.Drawing.Size(814, 23);
             PlotPanel.TabIndex = 38;
+            // 
+            // ShowH14Box
+            // 
+            ShowH14Box.AutoSize = true;
+            ShowH14Box.Location = new System.Drawing.Point(252, 3);
+            ShowH14Box.Name = "ShowH14Box";
+            ShowH14Box.Size = new System.Drawing.Size(100, 19);
+            ShowH14Box.TabIndex = 66;
+            ShowH14Box.Text = "Show HUC14s";
+            ShowH14Box.UseVisualStyleBackColor = true;
+            ShowH14Box.CheckedChanged += ShowH14Box_CheckedChanged;
             // 
             // NRCheckBox
             // 
@@ -513,7 +526,7 @@
             // LabelCheckBox
             // 
             LabelCheckBox.AutoSize = true;
-            LabelCheckBox.Location = new System.Drawing.Point(543, 3);
+            LabelCheckBox.Location = new System.Drawing.Point(556, 3);
             LabelCheckBox.Name = "LabelCheckBox";
             LabelCheckBox.Size = new System.Drawing.Size(59, 19);
             LabelCheckBox.TabIndex = 42;
@@ -526,7 +539,7 @@
             ShowBoundBox.AutoSize = true;
             ShowBoundBox.Checked = true;
             ShowBoundBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            ShowBoundBox.Location = new System.Drawing.Point(359, 3);
+            ShowBoundBox.Location = new System.Drawing.Point(379, 3);
             ShowBoundBox.Name = "ShowBoundBox";
             ShowBoundBox.Size = new System.Drawing.Size(170, 19);
             ShowBoundBox.TabIndex = 41;
@@ -540,7 +553,7 @@
             outputjump.Checked = true;
             outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             outputjump.Enabled = false;
-            outputjump.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            outputjump.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             outputjump.Location = new System.Drawing.Point(120, 3);
             outputjump.Name = "outputjump";
             outputjump.Size = new System.Drawing.Size(115, 19);
@@ -584,7 +597,7 @@
             // TestOrderButton
             // 
             TestOrderButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            TestOrderButton.Location = new System.Drawing.Point(1091, 51);
+            TestOrderButton.Location = new System.Drawing.Point(1096, 51);
             TestOrderButton.Name = "TestOrderButton";
             TestOrderButton.Size = new System.Drawing.Size(28, 23);
             TestOrderButton.TabIndex = 42;
@@ -599,17 +612,17 @@
             webView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            webView.Location = new System.Drawing.Point(306, 86);
+            webView.Location = new System.Drawing.Point(306, 93);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(817, 466);
+            webView.Size = new System.Drawing.Size(822, 453);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
             // RecentLabel
             // 
             RecentLabel.AutoSize = true;
-            RecentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            RecentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             RecentLabel.Location = new System.Drawing.Point(699, 14);
             RecentLabel.Name = "RecentLabel";
             RecentLabel.Size = new System.Drawing.Size(95, 15);
@@ -628,7 +641,7 @@
             // 
             // NewProject
             // 
-            NewProject.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            NewProject.Font = new System.Drawing.Font("Segoe UI", 9F);
             NewProject.ForeColor = System.Drawing.Color.Black;
             NewProject.Location = new System.Drawing.Point(582, 7);
             NewProject.Margin = new System.Windows.Forms.Padding(0);
@@ -646,7 +659,7 @@
             Separator.Enabled = false;
             Separator.Location = new System.Drawing.Point(1, 41);
             Separator.Name = "Separator";
-            Separator.Size = new System.Drawing.Size(1135, 2);
+            Separator.Size = new System.Drawing.Size(1140, 2);
             Separator.TabIndex = 47;
             // 
             // OutputLabel
@@ -660,7 +673,7 @@
             // 
             // BrowseJSON
             // 
-            BrowseJSON.Font = new System.Drawing.Font("Arial Narrow", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            BrowseJSON.Font = new System.Drawing.Font("Arial Narrow", 9F);
             BrowseJSON.ForeColor = System.Drawing.Color.Black;
             BrowseJSON.Location = new System.Drawing.Point(227, 90);
             BrowseJSON.Margin = new System.Windows.Forms.Padding(0);
@@ -675,7 +688,7 @@
             // 
             toggleLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            toggleLog.Location = new System.Drawing.Point(1008, 554);
+            toggleLog.Location = new System.Drawing.Point(1013, 554);
             toggleLog.Name = "toggleLog";
             toggleLog.Size = new System.Drawing.Size(114, 24);
             toggleLog.TabIndex = 51;
@@ -696,7 +709,7 @@
             // 
             resetZoom.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            resetZoom.Location = new System.Drawing.Point(907, 554);
+            resetZoom.Location = new System.Drawing.Point(912, 554);
             resetZoom.Name = "resetZoom";
             resetZoom.Size = new System.Drawing.Size(95, 24);
             resetZoom.TabIndex = 52;
@@ -713,7 +726,7 @@
             LogPanel.Controls.Add(InfoBox);
             LogPanel.Controls.Add(InputsBox);
             LogPanel.Controls.Add(ErrorsBox);
-            LogPanel.Location = new System.Drawing.Point(602, 551);
+            LogPanel.Location = new System.Drawing.Point(607, 551);
             LogPanel.Name = "LogPanel";
             LogPanel.Size = new System.Drawing.Size(521, 40);
             LogPanel.TabIndex = 54;
@@ -721,7 +734,7 @@
             // 
             // LogChange
             // 
-            LogChange.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            LogChange.Font = new System.Drawing.Font("Arial", 9F);
             LogChange.ForeColor = System.Drawing.Color.Black;
             LogChange.Location = new System.Drawing.Point(381, 5);
             LogChange.Margin = new System.Windows.Forms.Padding(0);
@@ -749,7 +762,7 @@
             // 
             label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             label1.AutoSize = true;
-            label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label1.Location = new System.Drawing.Point(60, 12);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(41, 15);
@@ -798,7 +811,7 @@
             // logfilen
             // 
             logfilen.AutoSize = true;
-            logfilen.Location = new System.Drawing.Point(313, 78);
+            logfilen.Location = new System.Drawing.Point(313, 77);
             logfilen.Name = "logfilen";
             logfilen.Size = new System.Drawing.Size(83, 15);
             logfilen.TabIndex = 55;
@@ -809,7 +822,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1135, 598);
+            ClientSize = new System.Drawing.Size(1140, 598);
             Controls.Add(webView);
             Controls.Add(logfilen);
             Controls.Add(LogPanel);
@@ -930,5 +943,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button HAWQS_button;
+        private System.Windows.Forms.CheckBox ShowH14Box;
     }
 }

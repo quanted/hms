@@ -53,9 +53,8 @@
             label3 = new System.Windows.Forms.Label();
             label5 = new System.Windows.Forms.Label();
             EndDate = new System.Windows.Forms.DateTimePicker();
-            LS_Button = new System.Windows.Forms.Button();
             TogglePanel = new System.Windows.Forms.Panel();
-            radioButton1 = new System.Windows.Forms.RadioButton();
+            HUCButton = new System.Windows.Forms.RadioButton();
             StreamButton = new System.Windows.Forms.RadioButton();
             LakeButton = new System.Windows.Forms.RadioButton();
             panel2 = new System.Windows.Forms.Panel();
@@ -63,22 +62,30 @@
             NetworkLabel = new System.Windows.Forms.Label();
             SegLoadLabel = new System.Windows.Forms.Label();
             label7 = new System.Windows.Forms.Label();
-            panel1 = new System.Windows.Forms.Panel();
+            SummaryPanel = new System.Windows.Forms.Panel();
             Summary2Label = new System.Windows.Forms.Label();
             Summary1Label = new System.Windows.Forms.Label();
             label8 = new System.Windows.Forms.Label();
+            ShowH14Box = new System.Windows.Forms.CheckBox();
+            BHUC12 = new System.Windows.Forms.RadioButton();
+            BHUC14 = new System.Windows.Forms.RadioButton();
+            BHUC10 = new System.Windows.Forms.RadioButton();
+            BHUC8 = new System.Windows.Forms.RadioButton();
+            label1 = new System.Windows.Forms.Label();
+            HUCSelectionPanel = new System.Windows.Forms.Panel();
             ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             TogglePanel.SuspendLayout();
             panel2.SuspendLayout();
-            panel1.SuspendLayout();
+            SummaryPanel.SuspendLayout();
+            HUCSelectionPanel.SuspendLayout();
             SuspendLayout();
             // 
             // button1
             // 
             button1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-            button1.Location = new System.Drawing.Point(930, 11);
+            button1.Location = new System.Drawing.Point(970, 11);
             button1.Name = "button1";
             button1.Size = new System.Drawing.Size(61, 26);
             button1.TabIndex = 0;
@@ -192,7 +199,7 @@
             ChooseTemplateButton.Name = "ChooseTemplateButton";
             ChooseTemplateButton.Size = new System.Drawing.Size(117, 23);
             ChooseTemplateButton.TabIndex = 29;
-            ChooseTemplateButton.Text = "Use Template";
+            ChooseTemplateButton.Text = "Choose Template";
             ChooseTemplateButton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
             ChooseTemplateButton.UseVisualStyleBackColor = true;
             ChooseTemplateButton.Click += Choose_from_Template_Click;
@@ -202,7 +209,7 @@
             HelpButton2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             HelpButton2.Image = (System.Drawing.Image)resources.GetObject("HelpButton2.Image");
             HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton2.Location = new System.Drawing.Point(822, 9);
+            HelpButton2.Location = new System.Drawing.Point(862, 9);
             HelpButton2.Name = "HelpButton2";
             HelpButton2.Size = new System.Drawing.Size(78, 28);
             HelpButton2.TabIndex = 30;
@@ -214,7 +221,7 @@
             // 
             infolabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel1.AutoSize = true;
-            infolabel1.Location = new System.Drawing.Point(398, 532);
+            infolabel1.Location = new System.Drawing.Point(398, 578);
             infolabel1.Name = "infolabel1";
             infolabel1.Size = new System.Drawing.Size(378, 15);
             infolabel1.TabIndex = 39;
@@ -224,7 +231,7 @@
             // 
             infolabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel2.AutoSize = true;
-            infolabel2.Location = new System.Drawing.Point(398, 551);
+            infolabel2.Location = new System.Drawing.Point(398, 597);
             infolabel2.Name = "infolabel2";
             infolabel2.Size = new System.Drawing.Size(357, 15);
             infolabel2.TabIndex = 40;
@@ -236,10 +243,10 @@
             webView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = System.Drawing.Color.White;
-            webView.Location = new System.Drawing.Point(297, 59);
+            webView.Location = new System.Drawing.Point(297, 71);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(785, 463);
+            webView.Size = new System.Drawing.Size(825, 499);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -247,7 +254,7 @@
             // 
             button3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button3.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            button3.Location = new System.Drawing.Point(1021, 11);
+            button3.Location = new System.Drawing.Point(1061, 11);
             button3.Name = "button3";
             button3.Size = new System.Drawing.Size(61, 26);
             button3.TabIndex = 46;
@@ -257,7 +264,7 @@
             // SimNameEdit
             // 
             SimNameEdit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            SimNameEdit.Location = new System.Drawing.Point(121, 13);
+            SimNameEdit.Location = new System.Drawing.Point(117, 10);
             SimNameEdit.Name = "SimNameEdit";
             SimNameEdit.Size = new System.Drawing.Size(260, 23);
             SimNameEdit.TabIndex = 47;
@@ -267,7 +274,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            label2.Location = new System.Drawing.Point(16, 16);
+            label2.Location = new System.Drawing.Point(12, 13);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(102, 15);
             label2.TabIndex = 48;
@@ -322,48 +329,36 @@
             EndDate.TabIndex = 53;
             EndDate.Value = new System.DateTime(2011, 1, 1, 0, 0, 0, 0);
             // 
-            // LS_Button
-            // 
-            LS_Button.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            LS_Button.Location = new System.Drawing.Point(930, 541);
-            LS_Button.Name = "LS_Button";
-            LS_Button.Size = new System.Drawing.Size(153, 25);
-            LS_Button.TabIndex = 55;
-            LS_Button.Text = "Create Template JSON";
-            LS_Button.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            LS_Button.UseVisualStyleBackColor = true;
-            LS_Button.Visible = false;
-            LS_Button.Click += MS_Surrogate_Button_Click;
-            // 
             // TogglePanel
             // 
-            TogglePanel.Controls.Add(radioButton1);
+            TogglePanel.Controls.Add(HUCButton);
             TogglePanel.Controls.Add(StreamButton);
             TogglePanel.Controls.Add(LakeButton);
             TogglePanel.Location = new System.Drawing.Point(388, 8);
             TogglePanel.Name = "TogglePanel";
-            TogglePanel.Size = new System.Drawing.Size(414, 26);
+            TogglePanel.Size = new System.Drawing.Size(388, 28);
             TogglePanel.TabIndex = 58;
             // 
-            // radioButton1
+            // HUCButton
             // 
-            radioButton1.AutoSize = true;
-            radioButton1.Checked = true;
-            radioButton1.Location = new System.Drawing.Point(311, 3);
-            radioButton1.Name = "radioButton1";
-            radioButton1.Size = new System.Drawing.Size(62, 19);
-            radioButton1.TabIndex = 3;
-            radioButton1.TabStop = true;
-            radioButton1.Text = "HUC14";
-            radioButton1.UseVisualStyleBackColor = true;
+            HUCButton.AutoSize = true;
+            HUCButton.Location = new System.Drawing.Point(304, 3);
+            HUCButton.Name = "HUCButton";
+            HUCButton.Size = new System.Drawing.Size(75, 19);
+            HUCButton.TabIndex = 4;
+            HUCButton.Text = "One HUC";
+            HUCButton.UseVisualStyleBackColor = true;
+            HUCButton.CheckedChanged += MapType_CheckChanged;
             // 
             // StreamButton
             // 
             StreamButton.AutoSize = true;
-            StreamButton.Location = new System.Drawing.Point(143, 4);
+            StreamButton.Checked = true;
+            StreamButton.Location = new System.Drawing.Point(8, 3);
             StreamButton.Name = "StreamButton";
             StreamButton.Size = new System.Drawing.Size(162, 19);
             StreamButton.TabIndex = 2;
+            StreamButton.TabStop = true;
             StreamButton.Text = "Stream Network (w. lakes)";
             StreamButton.UseVisualStyleBackColor = true;
             StreamButton.CheckedChanged += MapType_CheckChanged;
@@ -371,7 +366,7 @@
             // LakeButton
             // 
             LakeButton.AutoSize = true;
-            LakeButton.Location = new System.Drawing.Point(12, 4);
+            LakeButton.Location = new System.Drawing.Point(174, 3);
             LakeButton.Name = "LakeButton";
             LakeButton.Size = new System.Drawing.Size(124, 19);
             LakeButton.TabIndex = 0;
@@ -421,11 +416,11 @@
             SegLoadLabel.AutoSize = true;
             SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             SegLoadLabel.ForeColor = System.Drawing.SystemColors.InfoText;
-            SegLoadLabel.Location = new System.Drawing.Point(438, 39);
+            SegLoadLabel.Location = new System.Drawing.Point(678, 46);
             SegLoadLabel.Name = "SegLoadLabel";
-            SegLoadLabel.Size = new System.Drawing.Size(306, 15);
+            SegLoadLabel.Size = new System.Drawing.Size(191, 15);
             SegLoadLabel.TabIndex = 60;
-            SegLoadLabel.Text = "Zoom in to see stream segments and lakes/reservoirs.";
+            SegLoadLabel.Text = "Zoom in to see stream segments.";
             // 
             // label7
             // 
@@ -436,15 +431,15 @@
             label7.TabIndex = 61;
             label7.Text = "Base Simulation and Dates";
             // 
-            // panel1
+            // SummaryPanel
             // 
-            panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            panel1.Controls.Add(Summary2Label);
-            panel1.Controls.Add(Summary1Label);
-            panel1.Location = new System.Drawing.Point(17, 59);
-            panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(259, 79);
-            panel1.TabIndex = 62;
+            SummaryPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            SummaryPanel.Controls.Add(Summary2Label);
+            SummaryPanel.Controls.Add(Summary1Label);
+            SummaryPanel.Location = new System.Drawing.Point(17, 59);
+            SummaryPanel.Name = "SummaryPanel";
+            SummaryPanel.Size = new System.Drawing.Size(259, 79);
+            SummaryPanel.TabIndex = 62;
             // 
             // Summary2Label
             // 
@@ -475,19 +470,100 @@
             label8.TabIndex = 63;
             label8.Text = "Selected Model Domain";
             // 
+            // ShowH14Box
+            // 
+            ShowH14Box.AutoSize = true;
+            ShowH14Box.Location = new System.Drawing.Point(393, 44);
+            ShowH14Box.Name = "ShowH14Box";
+            ShowH14Box.Size = new System.Drawing.Size(157, 19);
+            ShowH14Box.TabIndex = 65;
+            ShowH14Box.Text = "Show HUC14 Boundaries";
+            ShowH14Box.UseVisualStyleBackColor = true;
+            ShowH14Box.CheckedChanged += ShowH14Box_CheckedChanged;
+            // 
+            // BHUC12
+            // 
+            BHUC12.AutoSize = true;
+            BHUC12.Location = new System.Drawing.Point(76, 3);
+            BHUC12.Name = "BHUC12";
+            BHUC12.Size = new System.Drawing.Size(62, 19);
+            BHUC12.TabIndex = 0;
+            BHUC12.Text = "HUC12";
+            BHUC12.UseVisualStyleBackColor = true;
+            BHUC12.CheckedChanged += BHUC14_CheckedChanged;
+            // 
+            // BHUC14
+            // 
+            BHUC14.AutoSize = true;
+            BHUC14.Checked = true;
+            BHUC14.Location = new System.Drawing.Point(8, 3);
+            BHUC14.Name = "BHUC14";
+            BHUC14.Size = new System.Drawing.Size(62, 19);
+            BHUC14.TabIndex = 2;
+            BHUC14.TabStop = true;
+            BHUC14.Text = "HUC14";
+            BHUC14.UseVisualStyleBackColor = true;
+            BHUC14.CheckedChanged += BHUC14_CheckedChanged;
+            // 
+            // BHUC10
+            // 
+            BHUC10.AutoSize = true;
+            BHUC10.Location = new System.Drawing.Point(144, 3);
+            BHUC10.Name = "BHUC10";
+            BHUC10.Size = new System.Drawing.Size(62, 19);
+            BHUC10.TabIndex = 5;
+            BHUC10.Text = "HUC10";
+            BHUC10.UseVisualStyleBackColor = true;
+            BHUC10.CheckedChanged += BHUC14_CheckedChanged;
+            // 
+            // BHUC8
+            // 
+            BHUC8.AutoSize = true;
+            BHUC8.Location = new System.Drawing.Point(212, 3);
+            BHUC8.Name = "BHUC8";
+            BHUC8.Size = new System.Drawing.Size(56, 19);
+            BHUC8.TabIndex = 6;
+            BHUC8.Text = "HUC8";
+            BHUC8.UseVisualStyleBackColor = true;
+            BHUC8.CheckedChanged += BHUC14_CheckedChanged;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(273, 6);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(38, 15);
+            label1.TabIndex = 7;
+            label1.Text = "label1";
+            // 
+            // HUCSelectionPanel
+            // 
+            HUCSelectionPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            HUCSelectionPanel.Controls.Add(label1);
+            HUCSelectionPanel.Controls.Add(BHUC8);
+            HUCSelectionPanel.Controls.Add(BHUC10);
+            HUCSelectionPanel.Controls.Add(BHUC14);
+            HUCSelectionPanel.Controls.Add(BHUC12);
+            HUCSelectionPanel.Location = new System.Drawing.Point(388, 40);
+            HUCSelectionPanel.Name = "HUCSelectionPanel";
+            HUCSelectionPanel.Size = new System.Drawing.Size(278, 26);
+            HUCSelectionPanel.TabIndex = 64;
+            HUCSelectionPanel.Visible = false;
+            // 
             // NewSimForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1095, 577);
+            ClientSize = new System.Drawing.Size(1135, 623);
+            Controls.Add(ShowH14Box);
+            Controls.Add(HUCSelectionPanel);
             Controls.Add(label8);
-            Controls.Add(panel1);
+            Controls.Add(SummaryPanel);
+            Controls.Add(SegLoadLabel);
             Controls.Add(label7);
             Controls.Add(NetworkLabel);
-            Controls.Add(SegLoadLabel);
             Controls.Add(panel2);
             Controls.Add(TogglePanel);
-            Controls.Add(LS_Button);
             Controls.Add(label2);
             Controls.Add(SimNameEdit);
             Controls.Add(button3);
@@ -509,8 +585,10 @@
             TogglePanel.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
-            panel1.ResumeLayout(false);
-            panel1.PerformLayout();
+            SummaryPanel.ResumeLayout(false);
+            SummaryPanel.PerformLayout();
+            HUCSelectionPanel.ResumeLayout(false);
+            HUCSelectionPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -542,7 +620,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.DateTimePicker EndDate;
-        private System.Windows.Forms.Button LS_Button;
         private System.Windows.Forms.Panel TogglePanel;
         private System.Windows.Forms.RadioButton StreamButton;
         private System.Windows.Forms.RadioButton LakeButton;
@@ -550,11 +627,18 @@
         private System.Windows.Forms.Label NetworkLabel;
         private System.Windows.Forms.Label SegLoadLabel;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel SummaryPanel;
         private System.Windows.Forms.Label Summary2Label;
         private System.Windows.Forms.Label Summary1Label;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button BrowseJSONButton;
-        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.RadioButton HUCButton;
+        private System.Windows.Forms.Panel HUCSelectionPanel;
+        private System.Windows.Forms.RadioButton BHUC8;
+        private System.Windows.Forms.RadioButton BHUC10;
+        private System.Windows.Forms.RadioButton BHUC14;
+        private System.Windows.Forms.RadioButton BHUC12;
+        private System.Windows.Forms.CheckBox ShowH14Box;
+        private System.Windows.Forms.Label label1;
     }
 }

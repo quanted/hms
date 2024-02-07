@@ -13,10 +13,10 @@ namespace GUI.AQUATOX
 {
     public partial class NewSimForm : Form
     {
-        // private BackgroundWorker Worker = new BackgroundWorker();  potentially to be added, to report progress
         private AQSim_2D AQT2D = null;
-
-        public string COMID = "";
+        public string COMID = ""; // user selected COMID Pour Point for StreamNetwork
+        public string WBCOMID = ""; // user selected WBCOMID for 0-D lake/res model
+        public string HUCChosen = ""; // the user selected HUC number for the model (8-14 characters)
         public Dictionary<string, string> GeoJSON = new();
         public string ExportSNJSON = "";
         public string SimName = "";
@@ -26,11 +26,10 @@ namespace GUI.AQUATOX
         public DateTime StartDT;  // start and end simulation time 
         public DateTime EndDT;
         public bool SNPopulated = false;
-        public bool LakeSelected = false;
         public bool fromtemplate = true;
+        public string HUCStr = "14";
 
         static Lake_Surrogates LS = null;
-
         public NScreenSettings NScrSettings = new();
 
         static public JsonSerializerSettings LSJSONSettings()
@@ -102,21 +101,26 @@ namespace GUI.AQUATOX
             {
                 System.Threading.SynchronizationContext.Current.Post((_) =>
                 {
-                    webView_MouseDown((content.StartsWith("LAKE|")), content);
+                    webView_MouseDown((content.StartsWith("LAKE|")), false, content);
                 }, null);
             }
             else if (content.StartsWith("H14"))
             {
-                Cursor.Current = Cursors.WaitCursor; //fixme not working
                 string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";
                 string HUC14 = File.ReadAllText(filestr);
                 webView.CoreWebView2.PostWebMessageAsString("ADD|" + HUC14); // display layer
             }
             else if (content.StartsWith("DoneDraw"))
             {
-                Cursor.Current = Cursors.Default;
+                Application.DoEvents();
             }
-
+            else if (content.StartsWith("HUC"))
+            {
+                System.Threading.SynchronizationContext.Current.Post((_) =>
+                {
+                    webView_MouseDown(false,true, content);
+                }, null);
+            }
             else
             {
                 string[] split = content.Split('|');
@@ -134,7 +138,7 @@ namespace GUI.AQUATOX
             // https://stackoverflow.com/questions/8848203/alt-key-causes-form-to-redraw
         }
 
-        private void UpdateScreen()
+        private void UpdateLeftPanels()
         {
             ReadNetworkPanel.Visible = StreamButton.Checked;
             NetworkLabel.Visible = StreamButton.Checked;
@@ -142,6 +146,51 @@ namespace GUI.AQUATOX
             comidBox.Text = NScrSettings.COMIDstr;
             EndCOMIDBox.Text = NScrSettings.EndCOMIDstr;
             spanBox.Text = NScrSettings.UpSpanStr;
+
+            if (LakeButton.Checked)
+            {
+
+                if (WBCOMID =="")
+                {
+                    Summary1Label.Text = "WB COMID:  (unselected)";
+                    Summary2Label.Visible = false;
+                }
+                else
+                {
+                    Summary1Label.Text = "WBCOMID: " + WBCOMID;
+                    SimNameEdit.Text = SimName;
+                    if (SArea > 0)
+                    {
+                        Summary2Label.Visible = true;
+                        Summary2Label.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
+                    }
+                    else Summary2Label.Visible = false;
+                }
+
+
+            }
+            else if (HUCButton.Checked)
+            {
+                SimNameEdit.Text = SimName;
+                if (HUCChosen == "") Summary1Label.Text = "HUC" + HUCStr + ":  (unselected)";
+                else Summary1Label.Text = "HUC" + HUCStr +": " + HUCChosen;
+                Summary2Label.Visible = false;
+
+            }
+            else  // otherwise-- stream network selected
+            {
+                if (SNPopulated)
+                {
+                    Summary1Label.Text = "Pour Point: " + COMID;
+                    Summary2Label.Text = AQT2D.SNStats();
+                    Summary2Label.Visible = true;
+                }
+                else
+                {
+                    if (!SNPopulated) Summary1Label.Text = "Stream network has not been read";
+                    Summary2Label.Visible = false;
+                }
+            };
         }
 
 
@@ -206,30 +255,24 @@ namespace GUI.AQUATOX
             endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
 
             SNPopulated = true;
-            LakeSelected = false;
-            Summary1Label.Text = "Pour Point: " + COMID;
-            Summary2Label.Text = AQT2D.SNStats();
-            Summary2Label.Visible = true;
+            
+            HighlightStreamNetwork();
 
-            //if (AQT2D.SN.waterbodies != null)
-            //    for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+            comidBox_Leave(sender, e); //update NScrSettings
+            UpdateLeftPanels();
+        }
 
+
+        private void HighlightStreamNetwork()
+        {
             for (int i = 0; i < AQT2D.SN.order.Length; i++)
                 for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                 {
                     bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
                     webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|" + lastshape.ToString()); // display all layers
-
-                    //bool in_waterbody = false;
-                    //if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.SN.waterbodies.comid_wb.ContainsKey(CID);
-                    //if (!in_waterbody) webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j]);    // don't color segments that are superceded by their lake/reservoir waterbody.
                 };
-
             webView.CoreWebView2.PostWebMessageAsString("ZOOM");
-            comidBox_Leave(sender, e); //update NScrSettings
-            UpdateScreen();
         }
-
 
         private static bool ReadLakeSurrogates()
         {
@@ -299,10 +342,11 @@ namespace GUI.AQUATOX
 
             if (DialogResult == DialogResult.OK)
             {
-                if (!LakeSelected && !SNPopulated)
+                if ((StreamButton.Checked && !SNPopulated)||(LakeButton.Checked && (WBCOMID==""))||(HUCButton.Checked && (HUCChosen=="")))
                 {
                     string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
                     if (LakeButton.Checked) ErrStr = "To create a 0-D Lake/Reservoir simulation, you must first click on a waterbody on the map";
+                    if (HUCButton.Checked) ErrStr = "To create a HUC simulation, you must first click on one of the HUCs diaplsyed on the map";
                     MessageBox.Show(ErrStr, "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
                     e.Cancel = true;
                 }
@@ -314,6 +358,13 @@ namespace GUI.AQUATOX
                        MessageBoxDefaultButton.Button1);
                     e.Cancel = true;
                 }
+
+                if (!e.Cancel)
+                {
+                    if (!StreamButton.Checked) COMID = "";
+                    if (!HUCButton.Checked) HUCChosen = "";
+                    if (!LakeButton.Checked) WBCOMID = "";
+                }
             }
 
         }
@@ -321,7 +372,7 @@ namespace GUI.AQUATOX
         private void NewSimForm_Shown(object sender, EventArgs e)
         {
             //basedirBox.Text = Properties.Settings.Default.MS_Directory;
-            UpdateScreen();
+            UpdateLeftPanels();
         }
 
 
@@ -333,34 +384,36 @@ namespace GUI.AQUATOX
 
 
 
-        private void webView_MouseDown(bool lake, string COMIDstr)
+
+
+        private void webView_MouseDown(bool lake, bool HUC, string COMIDstr)
 
         {
             string[] msg = COMIDstr.Split('|');
-            COMID = msg[1];
             SArea = 0;
-            Summary2Label.Visible = false;
 
             if (lake)
             {
+                WBCOMID = msg[1];
                 if (msg.Length > 2) SimName = msg[2];
-                else SimName = "WBCOMID: " + COMID;
-                if (SimName == " ") SimName = "WBCOMID: " + COMID;
+                else SimName = "WBCOMID: " + WBCOMID;
+                if (SimName == " ") SimName = "WBCOMID: " + WBCOMID;
                 if (msg.Length > 3) if (!double.TryParse(msg[3], out SArea)) SArea = -9999;
 
-                if (SArea > 0)
-                {
-                    Summary2Label.Visible = true;
-                    Summary2Label.Text = "Surface Area (sq. km): " + (SArea / 1e6).ToString("N3");    //m3 to sq km.
-                }
-                else Summary2Label.Visible = false;
-                Summary1Label.Text = "WBCOMID: " + COMID;
-                SimNameEdit.Text = SimName;
-                SNPopulated = false;
-                LakeSelected = true;
+                UpdateLeftPanels();
+
+            }
+            else if (HUC)
+            {
+                HUCChosen = msg[1];
+                if (msg.Length > 2) SimName = "HUC" + HUCStr + ": "+msg[2];
+                else SimName = "HUC" + HUCStr + ": " + HUCChosen;
+
+                UpdateLeftPanels();
             }
             else  //flow lines
             {
+                COMID = msg[1];
                 if (msg[0] == "FL")
                 {
                     if (msg.Length > 2) SimName = msg[2];
@@ -388,7 +441,6 @@ namespace GUI.AQUATOX
         }
 
 
-
         private void comidBox_Leave(object sender, EventArgs e)
         {
             NScrSettings.COMIDstr = comidBox.Text;
@@ -398,25 +450,39 @@ namespace GUI.AQUATOX
 
         private void MapType_CheckChanged(object sender, EventArgs e)
         {
-            UpdateScreen();
+            UpdateLeftPanels();
             if (StreamButton.Checked)
             {
+                ShowH14Box.Visible = true;
+                ShowH14Box.Checked = false;
+                HUCSelectionPanel.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
                 SegLoadLabel.Text = "Zoom in to see stream segments.";
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
                 infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
-                if (!LakeSelected && !SNPopulated) Summary1Label.Text = "Stream network has not been read";
             }
-            else
+            else if (LakeButton.Checked)
             {
+                ShowH14Box.Visible = false;
+                HUCSelectionPanel.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
                 SegLoadLabel.Visible = false;
                 infolabel1.Text = "Click on a Lake/Reservoir to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
-                if (!LakeSelected && !SNPopulated) Summary1Label.Text = "WB COMID:  (unselected)";
             }
+            else //  HUCButton.checked
+            {
+                ShowH14Box.Visible = false;
+                webView.CoreWebView2.PostWebMessageAsString("HUCMAP|" + HUCStr);
+                HUCSelectionPanel.Visible = true;
 
+                SegLoadLabel.Text = "Zoom in to see HUC14 segments.";
+                SegLoadLabel.Visible = BHUC14.Checked;
+
+                infolabel1.Text = "Click on one HUC to Select";
+                infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+            }
         }
 
         private void MS_Surrogate_Button_Click(object sender, EventArgs e)
@@ -462,7 +528,21 @@ namespace GUI.AQUATOX
             }
         }
 
+        private void BHUC14_CheckedChanged(object sender, EventArgs e)
+        {
+            if (BHUC8.Checked) HUCStr = "8";
+            else if (BHUC10.Checked) HUCStr = "10";
+            else if (BHUC12.Checked) HUCStr = "12";
+            else HUCStr = "14";
+            MapType_CheckChanged(sender, e);
+        }
 
+        private void ShowH14Box_CheckedChanged(object sender, EventArgs e)
+        {
+            string showstr = "false";
+            if (ShowH14Box.Checked) showstr = "true";
+            webView.CoreWebView2.PostWebMessageAsString("SHOWH14|" + showstr);
+        }
     }
 }
 

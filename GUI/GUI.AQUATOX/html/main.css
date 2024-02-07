@@ -17,6 +17,7 @@
 
 #map_container {
     background: white;
+    cursor: pointer;
 }
 
 #message-bar {

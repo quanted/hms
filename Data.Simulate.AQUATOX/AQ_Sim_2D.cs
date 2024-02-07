@@ -14,6 +14,8 @@ using Streamflow;
 using System.Net;
 using System.Threading;
 using System.Data;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace AQUATOX.AQSim_2D
 
@@ -113,7 +115,7 @@ namespace AQUATOX.AQSim_2D
         public class archived_results
         {
             public DateTime[] dates;
-            public double[] washout;  // m3
+            public double[] washout; // m3
             public double[][] concs; // g/m3 or mg/m3 depending on state var
         }
 
@@ -389,35 +391,93 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         /// <param name="comid">comid</param>
         /// <returns>JSON or error message</returns>
+
         /// 
-        public string ReadWBGeoJSON(string WBcomid)
-    {
 
-        string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
-        // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
 
-        try
+        public async Task<string> ReadWBGeoJSON(string WBcomid)
         {
-            string rurl = requestURL + "?f=geojson&where=COMID%3D" + WBcomid;
-            var request = (HttpWebRequest)WebRequest.Create(rurl);
-            var response = (HttpWebResponse)request.GetResponse();
-            return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
+            // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
+
+            try
+            {
+                string rurl = requestURL + "?f=geojson&where=COMID%3D" + WBcomid;
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(rurl))
+                using (HttpContent content = response.Content)
+                {
+                    // Check if the response is successful
+                    if (!response.IsSuccessStatusCode)
+                        throw new HttpRequestException($"Error: {response.StatusCode}, {response.ReasonPhrase}");
+
+                    string result = await content.ReadAsStringAsync();
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
-        catch (Exception ex)
+
+        public async Task<string> ReadHUCGeoJSON(string HUCStr, string HUCID)
         {
-            return ex.Message;
+            try
+            {
+                string requestURL = "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer";
+
+                // Determine the layer ID based on HUCStr
+                int layerID = -1;
+                switch (HUCStr)
+                {
+                    case "HUC8":
+                        layerID = 4; // Replace with the correct layer ID for HUC8
+                        break;
+                    case "HUC10":
+                        layerID = 5; // Replace with the correct layer ID for HUC10
+                        break;
+                    case "HUC12":
+                        layerID = 6; // Replace with the correct layer ID for HUC12
+                        break;
+                    case "HUC14":
+                        return "ERROR: HUC14 GEOJSON web service is not available";
+                    default:
+                        return "ERROR: Invalid HUCStr specified";
+                }
+
+                // Construct the URL with the layer ID and HUCID
+                string queryParams = $"f=geojson&where={HUCStr}='{HUCID}'";
+                string fullURL = $"{requestURL}/{layerID}/query?{queryParams}";
+
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(fullURL))
+                using (HttpContent content = response.Content)
+                {
+                    // Check if the response is successful
+                    if (!response.IsSuccessStatusCode)
+                        throw new HttpRequestException($"Error: {response.StatusCode}, {response.ReasonPhrase}");
+
+                    string result = await content.ReadAsStringAsync();
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
-    }
 
 
-    /// <summary>
-    /// Reads the stream network data structure from web services
-    /// </summary>
-    /// <param name="comid">Primary comid</param>
-    /// <param name="endComid">Optional PourID</param>
-    /// <param name="span">Optional up-stream distance to search in km</param>
-    /// <returns>JSON or error message</returns>
-    public string ReadStreamNetwork(string comid, string endComid, string span)
+
+        /// <summary>
+        /// Reads the stream network data structure from web services
+        /// </summary>
+        /// <param name="comid">Primary comid</param>
+        /// <param name="endComid">Optional PourID</param>
+        /// <param name="span">Optional up-stream distance to search in km</param>
+        /// <returns>JSON or error message</returns>
+        public string ReadStreamNetwork(string comid, string endComid, string span)
         {
             string requestURL = "https://qedcloud.net/hms/rest/api/";
             //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";

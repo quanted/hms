@@ -50,13 +50,15 @@
         var redlayers = [];
         var redCOMIDs = [];
         var lakemode = true;
+        var streammode = false;
         var oldzoom = 6;
         var AwaitSearch = false;
-        var H14Showing = false;
+        var H14Zoom = false;
+        var H14Selected = false;
+        var LakeZoom = false;
         ZoomThresh = 9;
         LakeZoomThresh = 6;
-        H14ZoomThresh = 8;
-
+        H14ZoomThresh = 9;
 
         // catchments
         const URL_NWS_WB =
@@ -99,6 +101,7 @@
 
         function LakeSearch() {
             lakemode = true;
+            streammode = false;
             if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
             if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
             ResetRedLayers();
@@ -126,13 +129,21 @@
         var H14Codes = [];
         var H14GeoJson = [];
 
-
         MAP.on('moveend', function () {
-            if (H14Showing) ShowHUC14Maps();
+            if (H14Zoom && H14Selected) ShowHUC14Maps();
+            centerBox.setContent(LatLngToArrayString(MAP.getCenter()));            
         });
 
         function ShowHUC14Maps() {
-            if (!H14Showing) return;
+            if (!(H14Zoom && H14Selected)) {
+                for (let i = 0; i < H14Codes.length; ++i) {
+                    delete H14Codes[i];
+                    if (H14Maps[i] != null) MAP.removeLayer(H14Maps[i]);
+                    delete H14Maps[i];
+                    delete H14GeoJson[i];
+                };
+                return;
+            };
 
             var MB = MAP.getBounds();
             var E_Code = LonCode(MB.getEast());
@@ -190,6 +201,7 @@
 
         function StreamSearch() {
             lakemode = false;
+            streammode = true;
             if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
             if (geosearch != null) geosearch.remove();
             geosearch = null;
@@ -219,20 +231,13 @@
             if (geoLayer != null) { geoLayer.bringToFront(); }
         });
 
-        MAP.on('moveend', function () {
-            centerBox.setContent(LatLngToArrayString(MAP.getCenter()));
-
-        });
 
         //start geojson-vt map tiles
         //interaction on the underlying polygon not drawn but represented by the tiles - they draw better
-        var highlight;
+        var clickedHUC14 = null;
         var allShapes;
 
         MAP.on('click', function (e) {
-            if (highlight) {
-                MAP.removeLayer(highlight)
-            }
             var x = e.latlng.lng;
             var y = e.latlng.lat;
 
@@ -240,26 +245,32 @@
                 if (geojsonlayer) {
                     var layerData = pointInLayer([x, y], geojsonlayer, true);
                     if (!layerData[0]) {
-                        console.log('nothing to see here')
+                        console.log('no HUC14 at click location');
                     } else {
+                        if (clickedHUC14) {
+                            clickedHUC14.setStyle({
+                                color: "#4A5D23", // Reset the border color to its default color
+                                weight: 1,        // Reset the border weight to its default value
+                            });
+
+                            MAP.removeLayer(clickedHUC14);
+                        }
+
                         var highlightIndex = layerData[0].feature.properties.HUC14;
-                        highlight = new L.geoJson(allShapes, {
+                        clickedHUC14 = new L.geoJson(allShapes, {
                             filter: function (feature, layer) {
-                                return feature.properties.HUC14 == highlightIndex
+                                return feature.properties.HUC14 == highlightIndex;
                             },
-                            style: { color: 'deepskyblue', fillColor: 'deepskyblue' }
+                            style: { color: 'deepskyblue', weight: 2, fillOpacity: 0.0}
                         }).addTo(MAP);
 
                         var attributes = highlightIndex.split('-', 2);
                         var name = attributes[0];
-                        var popup = 'Parcel ID: ' + name;
-                        MAP.on('popupopen', function () {
-                        });
-                        MAP.openPopup(popup, e.latlng);
-                        MAP.on('popupclose', function () {
-                            MAP.removeLayer(highlight)
-                        });
-                        return;
+                        sendMessageToDotnet("HUC14|" + name);
+                        var str = name + "|" + JSON.stringify(clickedHUC14.toGeoJSON());
+                        sendMessageToDotnet(str);
+
+                        MAP.fitBounds(clickedHUC14.getBounds());
                     }
                 }
             });
@@ -267,23 +278,28 @@
 
         MAP.on('zoomend', function () {
             newzoom = MAP.getZoom();
-            if (newzoom <= ZoomThresh) {
-                if (oldzoom > ZoomThresh) {
-                    MAP.removeLayer(FLOWLINES_LAYER);
+
+            if (streammode) {
+                if (newzoom <= ZoomThresh) {
+                    if (oldzoom > ZoomThresh) MAP.removeLayer(FLOWLINES_LAYER);
+                }
+                if (newzoom > ZoomThresh) {
+                    if (oldzoom <= ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
                 }
             }
 
-            if (newzoom <= LakeZoomThresh) {
-                if (oldzoom > LakeZoomThresh) MAP.removeLayer(WB_LAYER);
+            if (lakemode||streammode) {
+                if (newzoom <= LakeZoomThresh) {
+                    if (oldzoom > LakeZoomThresh) MAP.removeLayer(WB_LAYER);
+                }
+                if (newzoom > LakeZoomThresh) {
+                    if (oldzoom <= LakeZoomThresh) MAP.addLayer(WB_LAYER);
+                }
             }
 
-            if (newzoom > LakeZoomThresh) {
-                if (oldzoom <= LakeZoomThresh) MAP.addLayer(WB_LAYER);
-            }
-
-            if (newzoom < H14ZoomThresh) H14Showing = false;
+            if (newzoom < H14ZoomThresh) H14Zoom = false;
             if (newzoom >= H14ZoomThresh) {
-                H14Showing = true;  //fixme context dependent
+                H14Zoom = true;  
                 if (oldzoom <= H14ZoomThresh) {                    
                     ShowHUC14Maps();
                 }
@@ -413,55 +429,77 @@
         //                weight: 1,
         //            });
 
-        const HUC8 = L.esri
-            .featureLayer({
-                url: URL_NP21_HUCs+"2",
+        function createHUCLayer(url, color, defaultColor, hucLevel, onEachFeature) {
+            var lastClickedHUC = null;
+
+            function HUCClick(e) {
+                if (lastClickedHUC) {
+                    lastClickedHUC.setStyle({
+                        color: defaultColor, // Reset the border color to its default color
+                        weight: 1,          // Reset the border weight to its default value
+                    });
+                }
+                lastClickedHUC = e.layer;
+
+                var properties = e.layer.feature.properties;
+                var name = properties[`HUC_${hucLevel}`];
+                var desc = properties[`HU_${hucLevel}_NAME`]
+
+                e.layer.setStyle({
+                    color: color,   // Change the border color to highlight
+                    weight: 2,      // Increase the border weight for highlighting
+                });
+
+                MAP.fitBounds(e.layer.getBounds());
+                var str1 = `HUC${hucLevel}|${name}`;
+                if (desc !== null && desc !== undefined) {
+                    str1 += "|"+desc;
+                }
+                sendMessageToDotnet(str1);
+
+                var str = `${name}|${JSON.stringify(e.layer.toGeoJSON())}`;
+                sendMessageToDotnet(str);
+            }
+
+            const layer = L.esri.featureLayer({
+                url: url,
+                onEachFeature: onEachFeature || null,
             });
-        HUC8.setStyle({
-            color: "red",
-            fillOpacity: 0,
-            weight: 1,
-        });
-        const HUC10 = L.esri
-            .featureLayer({
-                url: URL_NP21_HUCs + "1",
+
+            layer.setStyle({
+                color: defaultColor,
+                fillOpacity: 0,
+                weight: 1,
             });
-        HUC10.setStyle({
-            color: "maroon",
-            fillOpacity: 0,
-            weight: 1,
-        });
-        const HUC12 = L.esri
-            .featureLayer({
-                url: URL_NP21_HUCs + "0",
-            });
-        HUC12.setStyle({
-            color: "darkolivegreen",
-            fillOpacity: 0,
-            weight: 1,
+
+            layer.on('click', HUCClick);
+
+            return layer;
+        }
+
+        const HUC8 = createHUCLayer(URL_NP21_HUCs + "2", "blue", "red", 8);
+        const HUC10 = createHUCLayer(URL_NP21_HUCs + "1", "blue", "maroon", 10);
+        const HUC12 = createHUCLayer(URL_NP21_HUCs + "0", "red", "navy", 12);
+
+        const FLOWLINES_LAYER = L.esri.featureLayer({
+            url: URL_NP21_FLOWLINES,
+            onEachFeature: FLonEachFeature,
         });
 
-        const FLOWLINES_LAYER = L.esri
-            .featureLayer({
-                url: URL_NP21_FLOWLINES,
-                onEachFeature: FLonEachFeature
-            });
         FLOWLINES_LAYER.setStyle({
             color: "blue",
             fillOpacity: 0,
             weight: 1,
         });
 
+
         const OVERLAY_MAPS = {
             "HUC8 Boundaries": HUC8,
             "HUC10 Boundaries": HUC10,
             "HUC12 Boundaries": HUC12,
-            //                Catchments: CATCHMENTS_LAYER,
             "Flow Lines": FLOWLINES_LAYER,
             "NWS Lake/Res": WB_LAYER,
         };
-
-        // WB_LAYER.addTo(MAP);
 
         const LAYER_OPTIONS = L.control.layers(Base_Maps, OVERLAY_MAPS);
         LAYER_OPTIONS.addTo(MAP);
@@ -533,13 +571,14 @@
             H14GeoJson.push(new L.GeoJSON(allShapes));
             H14Maps.push(L.geoJson.vt(allShapes, options).addTo(MAP));
 
-            //sendMessageToDotnet('DoneDraw');
+            sendMessageToDotnet('DoneDraw');
         }
 
         function ShowStreamDefaults() {
             newzoom = MAP.getZoom();
             if (newzoom > ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
             if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
+            RemoveHUCMaps()
             FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
             StreamSearch();
         }
@@ -547,9 +586,37 @@
         function ShowLakeDefaults() {
             if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
             MAP.removeLayer(FLOWLINES_LAYER);
+            RemoveHUCMaps()
             FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
             LakeSearch()
         }
+
+        function RemoveHUCMaps() {
+            MAP.removeLayer(HUC8);
+            MAP.removeLayer(HUC10);
+            MAP.removeLayer(HUC12);
+            H14Selected = false;
+            ShowHUC14Maps();
+        }
+
+        function ShowHUCDefaults(hucstr) {
+            MAP.removeLayer(WB_LAYER);
+            MAP.removeLayer(FLOWLINES_LAYER);
+            if (hucstr == "8") MAP.addLayer(HUC8); else MAP.removeLayer(HUC8);
+            if (hucstr == "10") MAP.addLayer(HUC10); else MAP.removeLayer(HUC10);
+            if (hucstr == "12") MAP.addLayer(HUC12); else MAP.removeLayer(HUC12);
+            H14Selected = (hucstr == "14");
+            ShowHUC14Maps();
+            FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
+            LakeSearch()
+        }
+
+        function ShowH14(show) {
+            if (show == "true") H14Selected = true;
+               else H14Selected = false;
+            ShowHUC14Maps();
+        }
+
 
         function highlightFlowLine(COMID, lastlayer) {
             FLOWLINES_LAYER.eachFeature(function (lyr) {
@@ -613,6 +680,8 @@
             if (messageArr[0] == "RESETCOLORS") ResetRedLayers();
             if (messageArr[0] == "ADD") AddGeoJSON(messageArr[1]);
             if (messageArr[0] == "ZOOM") ZoomtoRedLayers();
+            if (messageArr[0] == "HUCMAP") ShowHUCDefaults(messageArr[1]);
+            if (messageArr[0] == "SHOWH14") ShowH14(messageArr[1]);
 
             //                console.log(`message from dotnet: ${event.data}`);
             //                this.document.getElementById("message-bar").innerHTML =

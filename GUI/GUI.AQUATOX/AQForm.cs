@@ -4,11 +4,8 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
-using Data;
 using Globals;
 using Hawqs;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,7 +22,6 @@ using System.Windows.Forms;
 
 namespace GUI.AQUATOX
 {
-
 
     public partial class AQTTestForm : Form
     {
@@ -1222,114 +1218,110 @@ namespace GUI.AQUATOX
         }
 
 
-        public class runstatus
+        public static void DataTableToCSV(DataTable dtDataTable, string strFilePath)
         {
-            public string id { get; set; }
-            public string url { get; set; }
-        }
-        runstatus RS;
-
-        string apikey = "API KEY HERE";
-        Hawqs.Hawqs hw = new();
-
-        private async void TestButton_Click(object sender, EventArgs e)
-        {
-
-            var inputData = new
+            StreamWriter sw = new StreamWriter(strFilePath, false);
+            //headers    
+            for (int i = 0; i < dtDataTable.Columns.Count; i++)
             {
-                dataset = "HUC10",
-                downstreamSubbasin = "0318000101",
-                setHrus = new
+                sw.Write(dtDataTable.Columns[i]);
+                if (i < dtDataTable.Columns.Count - 1)
                 {
-                    method = "area",
-                    target = 2,
-                    units = "km2"
-                },
-                weatherDataset = "PRISM",
-                startingSimulationDate = "1981-01-01",
-                endingSimulationDate = "1982-12-31",
-                warmupYears = 1,
-                outputPrintSetting = "daily",
-                reportData = new
+                    sw.Write(",");
+                }
+            }
+            sw.Write(sw.NewLine);
+            foreach (DataRow dr in dtDataTable.Rows)
+            {
+                for (int i = 0; i < dtDataTable.Columns.Count; i++)
                 {
-                    formats = new List<string> { "csv", "netcdf" },
-                    units = "metric",
-                    outputs = new
+                    if (!Convert.IsDBNull(dr[i]))
                     {
-                        rch = new
+                        string value = dr[i].ToString();
+                        if (value.Contains(','))
                         {
-                            statistics = new List<string> { "daily" }
-                        },
-                        sub = new
-                        {
-                            statistics = new List<string> { "daily" }
+                            value = String.Format("\"{0}\"", value);
+                            sw.Write(value);
                         }
-
+                        else
+                        {
+                            sw.Write(dr[i].ToString());
+                        }
+                    }
+                    if (i < dtDataTable.Columns.Count - 1)
+                    {
+                        sw.Write(",");
                     }
                 }
-            };
-
-            textBox1.Visible = true;
-
-            //Task<string> tsk = hw.GetProjectInputDefinitions();
-            //await (tsk);
-            //tsk = tsk;
-
-            string hawqsinput = JsonConvert.SerializeObject(inputData);
-
-            Task<string> tsk = hw.SubmitProject(apikey, hawqsinput);
-            await (tsk);
-            textBox1.AppendText(tsk.Result + Environment.NewLine);
-            RS = JsonConvert.DeserializeObject<runstatus>(tsk.Result + Environment.NewLine);
-            pidBox.Text = RS.id;
-
+                sw.Write(sw.NewLine);
+            }
+            sw.Close();
         }
 
-
-
-        private async void HGetStatusClick(object sender, EventArgs e)
+        char csvDelimiter = ',';
+        public DataTable CSVtoDataTable(string strFilePath, char csvDelimiter)
         {
-            if (RS == null) return;
-            if (hw == null) return;
+            DataTable dt = new DataTable();
+            using (StreamReader sr = new StreamReader(strFilePath))
+            {
+                string[] headers = sr.ReadLine().Split(csvDelimiter);
+                foreach (string header in headers)
+                {
+                    try
+                    {
+                        dt.Columns.Add(header);
+                    }
+                    catch { }
+                }
+                while (!sr.EndOfStream)
+                {
+                    string[] rows = sr.ReadLine().Split(csvDelimiter);
+                    DataRow dr = dt.NewRow();
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        dr[i] = rows[i];
+                    }
+                    dt.Rows.Add(dr);
+                }
 
-            textBox1.Visible = true;
-            Task<HawqsStatus> ths = hw.GetProjectStatus(apikey, RS.id);
-            await (ths);
-            textBox1.AppendText(ths.Result.progress.ToString() + " " + ths.Result.message + Environment.NewLine);
+            }
+            return dt;
         }
 
-        private async void HCancelClick(object sender, EventArgs e)
-        {
-            if (RS == null) return;
-            if (hw == null) return;
+        string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect.csv";
+        string ModFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect_MOD.csv";
+        string omitfilepath = @"N:\AQUATOX\CSRA\GIS\HUC_14\COMD_HUC14_Omit_List.csv";
 
-            textBox1.Visible = true;
-            Task<string> tcn = hw.CancelProjectExecution(apikey, RS.id);
-            await (tcn);
-            textBox1.AppendText(tcn.Status + tcn.Result + Environment.NewLine);
-        }
 
-        private async void HGetResultsClick(object sender, EventArgs e)
-        {
-            if (RS == null) return;
-            if (hw == null) return;
+        //private void button1_Click(object sender, EventArgs e)  // process duplicate COMIDs in COMID to HUC14 database
+        //{
+        //    DataTable dt = CSVtoDataTable(omitfilepath, csvDelimiter);
+        //    StreamWriter sw = new StreamWriter(ModFilePath, false);
+        //    using (StreamReader sr = new StreamReader(CsvFilePath))
+        //    {
+        //        string header = sr.ReadLine();
+        //        // string[] headers = header.Split(csvDelimiter);
+        //        sw.WriteLine(header);
 
-            textBox1.Visible = true;
-
-            Task<List<HawqsOutput>> GPDT = hw.GetProjectData(apikey, RS.id, false);
-            await (GPDT);
-
-            List<HawqsOutput> LHO = GPDT.Result;
-
-            string HO = JsonConvert.SerializeObject(LHO);
-            textBox1.AppendText(HO);
-
-        }
-
-        private void HInstantiateClick(object sender, EventArgs e)
-        {
-            RS = new runstatus();
-            RS.id = pidBox.Text;
-        }
+        //        while (!sr.EndOfStream)
+        //        {
+        //            string row = sr.ReadLine();
+        //            string[] fields = row.Split(csvDelimiter);
+        //            string searchstr = "[COMID]='" + fields[0]+"'";
+        //            DataRow[] dr = dt.Select(searchstr);
+        //            if (dr.Length == 0) { sw.WriteLine(fields[0]+",\""+fields[1]+ "\"," + fields[2] + ","); }
+        //            else
+        //            {
+        //                bool inrows = false;
+        //                for (int i = 0;i < dr.Length;i++)
+        //                {
+        //                    if ((dr[i][1].ToString() == fields[1])|| ("0" + dr[i][1].ToString() == fields[1])) inrows = true;
+        //                }
+        //                if (!inrows) { sw.WriteLine(fields[0] + ",\"" + fields[1] + "\"," + fields[2] + "," + dr[0][2].ToString()); }
+        //            }
+        //        }
+        //        sw.Close();
+        //    }
+        // }
     }
 }
