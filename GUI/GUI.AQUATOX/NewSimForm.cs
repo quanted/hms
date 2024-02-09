@@ -173,7 +173,7 @@ namespace GUI.AQUATOX
             {
                 SimNameEdit.Text = SimName;
                 if (HUCChosen == "") Summary1Label.Text = "HUC" + HUCStr + ":  (unselected)";
-                else Summary1Label.Text = "HUC" + HUCStr +": " + HUCChosen;
+                else Summary1Label.Text = "HUC"+": " + HUCChosen;
                 Summary2Label.Visible = false;
 
             }
@@ -467,7 +467,8 @@ namespace GUI.AQUATOX
                 ShowH14Box.Visible = false;
                 HUCSelectionPanel.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
-                SegLoadLabel.Visible = false;
+                SegLoadLabel.Text = "Zoom in to see Lakes/Reservoirs.";
+                SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a Lake/Reservoir to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
             }

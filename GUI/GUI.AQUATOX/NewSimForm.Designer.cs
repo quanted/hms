@@ -73,6 +73,7 @@
             BHUC8 = new System.Windows.Forms.RadioButton();
             label1 = new System.Windows.Forms.Label();
             HUCSelectionPanel = new System.Windows.Forms.Panel();
+            label4 = new System.Windows.Forms.Label();
             ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             TogglePanel.SuspendLayout();
@@ -85,7 +86,7 @@
             // 
             button1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-            button1.Location = new System.Drawing.Point(970, 11);
+            button1.Location = new System.Drawing.Point(956, 9);
             button1.Name = "button1";
             button1.Size = new System.Drawing.Size(61, 26);
             button1.TabIndex = 0;
@@ -96,7 +97,7 @@
             // SimBaseLabel
             // 
             SimBaseLabel.AutoSize = true;
-            SimBaseLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            SimBaseLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             SimBaseLabel.Location = new System.Drawing.Point(18, 28);
             SimBaseLabel.Name = "SimBaseLabel";
             SimBaseLabel.Size = new System.Drawing.Size(175, 15);
@@ -114,7 +115,7 @@
             ReadNetworkPanel.Controls.Add(EndCOMIDBox);
             ReadNetworkPanel.Controls.Add(comidLabel);
             ReadNetworkPanel.Controls.Add(comidBox);
-            ReadNetworkPanel.Location = new System.Drawing.Point(17, 155);
+            ReadNetworkPanel.Location = new System.Drawing.Point(17, 149);
             ReadNetworkPanel.Name = "ReadNetworkPanel";
             ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             ReadNetworkPanel.TabIndex = 24;
@@ -209,7 +210,7 @@
             HelpButton2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             HelpButton2.Image = (System.Drawing.Image)resources.GetObject("HelpButton2.Image");
             HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton2.Location = new System.Drawing.Point(862, 9);
+            HelpButton2.Location = new System.Drawing.Point(856, 7);
             HelpButton2.Name = "HelpButton2";
             HelpButton2.Size = new System.Drawing.Size(78, 28);
             HelpButton2.TabIndex = 30;
@@ -221,9 +222,11 @@
             // 
             infolabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel1.AutoSize = true;
-            infolabel1.Location = new System.Drawing.Point(398, 578);
+            infolabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            infolabel1.ForeColor = System.Drawing.Color.Maroon;
+            infolabel1.Location = new System.Drawing.Point(398, 495);
             infolabel1.Name = "infolabel1";
-            infolabel1.Size = new System.Drawing.Size(378, 15);
+            infolabel1.Size = new System.Drawing.Size(392, 15);
             infolabel1.TabIndex = 39;
             infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
             // 
@@ -231,9 +234,11 @@
             // 
             infolabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel2.AutoSize = true;
-            infolabel2.Location = new System.Drawing.Point(398, 597);
+            infolabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            infolabel2.ForeColor = System.Drawing.Color.Maroon;
+            infolabel2.Location = new System.Drawing.Point(398, 514);
             infolabel2.Name = "infolabel2";
-            infolabel2.Size = new System.Drawing.Size(357, 15);
+            infolabel2.Size = new System.Drawing.Size(377, 15);
             infolabel2.TabIndex = 40;
             infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
             // 
@@ -246,7 +251,7 @@
             webView.Location = new System.Drawing.Point(297, 71);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(825, 499);
+            webView.Size = new System.Drawing.Size(809, 416);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -254,7 +259,7 @@
             // 
             button3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button3.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            button3.Location = new System.Drawing.Point(1061, 11);
+            button3.Location = new System.Drawing.Point(1045, 9);
             button3.Name = "button3";
             button3.Size = new System.Drawing.Size(61, 26);
             button3.TabIndex = 46;
@@ -273,7 +278,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label2.Location = new System.Drawing.Point(12, 13);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(102, 15);
@@ -284,7 +289,7 @@
             // 
             SimJSONLabel.AutoSize = true;
             SimJSONLabel.Cursor = System.Windows.Forms.Cursors.SizeNWSE;
-            SimJSONLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            SimJSONLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
             SimJSONLabel.Location = new System.Drawing.Point(18, 48);
             SimJSONLabel.Name = "SimJSONLabel";
             SimJSONLabel.Size = new System.Drawing.Size(113, 15);
@@ -303,7 +308,7 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label3.Location = new System.Drawing.Point(37, 132);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(65, 15);
@@ -313,7 +318,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label5.Location = new System.Drawing.Point(44, 158);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(57, 15);
@@ -334,17 +339,18 @@
             TogglePanel.Controls.Add(HUCButton);
             TogglePanel.Controls.Add(StreamButton);
             TogglePanel.Controls.Add(LakeButton);
-            TogglePanel.Location = new System.Drawing.Point(388, 8);
+            TogglePanel.Location = new System.Drawing.Point(433, 7);
             TogglePanel.Name = "TogglePanel";
-            TogglePanel.Size = new System.Drawing.Size(388, 28);
+            TogglePanel.Size = new System.Drawing.Size(397, 28);
             TogglePanel.TabIndex = 58;
             // 
             // HUCButton
             // 
             HUCButton.AutoSize = true;
-            HUCButton.Location = new System.Drawing.Point(304, 3);
+            HUCButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            HUCButton.Location = new System.Drawing.Point(317, 3);
             HUCButton.Name = "HUCButton";
-            HUCButton.Size = new System.Drawing.Size(75, 19);
+            HUCButton.Size = new System.Drawing.Size(76, 19);
             HUCButton.TabIndex = 4;
             HUCButton.Text = "One HUC";
             HUCButton.UseVisualStyleBackColor = true;
@@ -354,9 +360,10 @@
             // 
             StreamButton.AutoSize = true;
             StreamButton.Checked = true;
-            StreamButton.Location = new System.Drawing.Point(8, 3);
+            StreamButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            StreamButton.Location = new System.Drawing.Point(7, 3);
             StreamButton.Name = "StreamButton";
-            StreamButton.Size = new System.Drawing.Size(162, 19);
+            StreamButton.Size = new System.Drawing.Size(174, 19);
             StreamButton.TabIndex = 2;
             StreamButton.TabStop = true;
             StreamButton.Text = "Stream Network (w. lakes)";
@@ -366,9 +373,10 @@
             // LakeButton
             // 
             LakeButton.AutoSize = true;
-            LakeButton.Location = new System.Drawing.Point(174, 3);
+            LakeButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            LakeButton.Location = new System.Drawing.Point(182, 3);
             LakeButton.Name = "LakeButton";
-            LakeButton.Size = new System.Drawing.Size(124, 19);
+            LakeButton.Size = new System.Drawing.Size(134, 19);
             LakeButton.TabIndex = 0;
             LakeButton.Text = "0-D Lake/Reservoir";
             LakeButton.UseVisualStyleBackColor = true;
@@ -404,7 +412,7 @@
             // NetworkLabel
             // 
             NetworkLabel.AutoSize = true;
-            NetworkLabel.Location = new System.Drawing.Point(26, 146);
+            NetworkLabel.Location = new System.Drawing.Point(26, 140);
             NetworkLabel.Name = "NetworkLabel";
             NetworkLabel.Size = new System.Drawing.Size(157, 15);
             NetworkLabel.TabIndex = 26;
@@ -414,9 +422,9 @@
             // SegLoadLabel
             // 
             SegLoadLabel.AutoSize = true;
-            SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            SegLoadLabel.ForeColor = System.Drawing.SystemColors.InfoText;
-            SegLoadLabel.Location = new System.Drawing.Point(678, 46);
+            SegLoadLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 1, true);
+            SegLoadLabel.ForeColor = System.Drawing.Color.Maroon;
+            SegLoadLabel.Location = new System.Drawing.Point(692, 46);
             SegLoadLabel.Name = "SegLoadLabel";
             SegLoadLabel.Size = new System.Drawing.Size(191, 15);
             SegLoadLabel.TabIndex = 60;
@@ -425,11 +433,12 @@
             // label7
             // 
             label7.AutoSize = true;
+            label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             label7.Location = new System.Drawing.Point(26, 311);
             label7.Name = "label7";
-            label7.Size = new System.Drawing.Size(146, 15);
+            label7.Size = new System.Drawing.Size(213, 15);
             label7.TabIndex = 61;
-            label7.Text = "Base Simulation and Dates";
+            label7.Text = "Base AQUATOX Simulation and Dates";
             // 
             // SummaryPanel
             // 
@@ -443,7 +452,7 @@
             // 
             // Summary2Label
             // 
-            Summary2Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            Summary2Label.Font = new System.Drawing.Font("Segoe UI", 9F);
             Summary2Label.Location = new System.Drawing.Point(15, 33);
             Summary2Label.Name = "Summary2Label";
             Summary2Label.Size = new System.Drawing.Size(224, 34);
@@ -454,7 +463,7 @@
             // Summary1Label
             // 
             Summary1Label.AutoSize = true;
-            Summary1Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            Summary1Label.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             Summary1Label.Location = new System.Drawing.Point(15, 11);
             Summary1Label.Name = "Summary1Label";
             Summary1Label.Size = new System.Drawing.Size(148, 15);
@@ -550,11 +559,22 @@
             HUCSelectionPanel.TabIndex = 64;
             HUCSelectionPanel.Visible = false;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            label4.Location = new System.Drawing.Point(392, 13);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(33, 15);
+            label4.TabIndex = 66;
+            label4.Text = "Type";
+            // 
             // NewSimForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1135, 623);
+            ClientSize = new System.Drawing.Size(1119, 540);
+            Controls.Add(label4);
             Controls.Add(ShowH14Box);
             Controls.Add(HUCSelectionPanel);
             Controls.Add(label8);
@@ -573,7 +593,7 @@
             Controls.Add(HelpButton2);
             Controls.Add(ReadNetworkPanel);
             Controls.Add(button1);
-            MinimumSize = new System.Drawing.Size(1003, 553);
+            MinimumSize = new System.Drawing.Size(1122, 573);
             Name = "NewSimForm";
             Text = "New Simulation Window";
             FormClosing += NewSimForm_FormClosing;
@@ -640,5 +660,6 @@
         private System.Windows.Forms.RadioButton BHUC12;
         private System.Windows.Forms.CheckBox ShowH14Box;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label4;
     }
 }

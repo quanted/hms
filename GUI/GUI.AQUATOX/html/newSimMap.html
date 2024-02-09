@@ -142,6 +142,7 @@
                     delete H14Maps[i];
                     delete H14GeoJson[i];
                 };
+                if (clickedHUC14) MAP.removeLayer(clickedHUC14);
                 return;
             };
 
@@ -595,6 +596,7 @@
             MAP.removeLayer(HUC8);
             MAP.removeLayer(HUC10);
             MAP.removeLayer(HUC12);
+            if (clickedHUC14) MAP.removeLayer(clickedHUC14);
             H14Selected = false;
             ShowHUC14Maps();
         }

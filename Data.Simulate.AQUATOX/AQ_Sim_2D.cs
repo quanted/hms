@@ -883,8 +883,6 @@ namespace AQUATOX.AQSim_2D
             outstr.Add("INFO: " + "--> Executed COMID " + comid.ToString());
             return true;
         }
-
-
     }
 
     public class Lake_Surrogates

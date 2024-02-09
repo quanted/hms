@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Xml.Linq;
 using Utilities;
+using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace GUI.AQUATOX
 
@@ -164,6 +166,8 @@ namespace GUI.AQUATOX
 
             chart1.Location = new System.Drawing.Point(webView.Left, webView.Top);
             chart1.Size = new System.Drawing.Size(webView.Width, webView.Height);
+
+            DataSourceBox.SelectedIndex = 0;
         }
 
 
@@ -202,10 +206,11 @@ namespace GUI.AQUATOX
             else if (content.StartsWith("DoneDraw"))
             {
                 Application.DoEvents();
+                this.Cursor = Cursors.Default; // Reset cursor to default
             }
             else if (content.StartsWith("Bounds"))
             {
-                BoundStr = content.Substring(7).Split(','); 
+                BoundStr = content.Substring(7).Split(',');
             }
             else System.Threading.SynchronizationContext.Current.Post((_) =>
             {
@@ -319,14 +324,14 @@ namespace GUI.AQUATOX
             bool validDirectory = VerifyBaseDir();
             bool validJSON = false;
             if (validDirectory) validJSON = VerifyStreamNetwork();
-            bool is0D = (Lake0D > 0);
-            bool isHUC = (HUC0D != "");
+            bool isLake0D = (Lake0D > 0);
+            bool isHUC0D = (HUC0D != "");
             bool inputsegs = false;
             DateTime modelrun = DateTime.MinValue;
 
             if (!validDirectory) setinfolabels("Please Specify a Valid Directory", "", "");
 
-            if (is0D||isHUC)
+            if (isLake0D || isHUC0D)
             {
                 CreateButton.Text = "Read NWM";
                 FlowsButton.Text = "Model Params.";
@@ -335,9 +340,13 @@ namespace GUI.AQUATOX
                 OutputPanel.Visible = false;
                 GraphButton.Visible = false;
                 ShowBoundBox.Visible = false;
-                LabelCheckBox.Visible = false;   
+                LabelCheckBox.Visible = false;
                 NRCheckBox.Visible = false;
                 viewOutputButton.Visible = true;
+                DataSourceBox.Items.Clear();
+                if (isLake0D) DataSourceBox.Items.Add("NWM (flows only)");
+                else DataSourceBox.Items.Add("HAWQS Simulation");
+                DataSourceBox.SelectedIndex = 0;
             }
             else
             {
@@ -351,12 +360,19 @@ namespace GUI.AQUATOX
                 LabelCheckBox.Visible = true;
                 NRCheckBox.Visible = true;
                 viewOutputButton.Visible = false;
+                if (DataSourceBox.Items.Count < 2)
+                {
+                    DataSourceBox.Items.Clear();
+                    DataSourceBox.Items.Add("HAWQS Simulation");
+                    DataSourceBox.Items.Add("NWM (flows only)");
+                    DataSourceBox.SelectedIndex = 0;  //fixme this could differ if model setup has been completed
+                }
             };
 
             if (validJSON)
             {
-                if (is0D) setinfolabels("0-D Lake/Reservoir Simulation", "WBCOMID " + Lake0D, "");
-                else if (isHUC) setinfolabels("HUC" + HUCStr(HUC0D) + " Simulation", "HUC ID " + HUC0D, "");
+                if (isLake0D) setinfolabels("0-D Lake/Reservoir Simulation", "WBCOMID " + Lake0D, "");
+                else if (isHUC0D) setinfolabels("HUC" + HUCStr(HUC0D) + " Simulation", "HUC ID " + HUC0D, "");
                 else
                 {
                     string str3;
@@ -387,7 +403,7 @@ namespace GUI.AQUATOX
             else if (inputsegs) StatusLabel.Text = "Linked Input Segments Created";
             else if (validJSON)
             {
-                if (is0D) StatusLabel.Text = "Site Selected";
+                if (isLake0D) StatusLabel.Text = "Site Selected";
                 else StatusLabel.Text = "Stream Network Created";
             }
             else if (validDirectory) StatusLabel.Text = "Model Not Initiated";
@@ -395,7 +411,7 @@ namespace GUI.AQUATOX
 
             BaseJSONBox.Enabled = validDirectory;
             ChooseTemplateButton.Enabled = validDirectory;
-            ReadNetworkPanel.Enabled = validDirectory;
+            SystemInfoPanel.Enabled = validDirectory;
             PlotPanel.Enabled = validJSON;
             TogglePanel.Enabled = validJSON;
             SetupButton.Enabled = validDirectory;
@@ -756,7 +772,6 @@ namespace GUI.AQUATOX
 
                 return;
             }
-
         }
 
         private void TSafeUpdateProgress(int Prog)
@@ -1343,32 +1358,20 @@ namespace GUI.AQUATOX
         }
 
         private void Choose_from_Template_Click(object sender, EventArgs e)
+
         {
-            string filen = "";
-            string lakename = "";
-            AQTSim BSim = null;
+            string lakename;
+            AQTSim BSim;
 
-            if (Lake0D > 0)
-            {
-                filen = NewSimForm.ChooseJSONTemplate(out lakename, out BSim);
+            string filen = NewSimForm.ChooseJSONTemplate(out lakename, out BSim);
 
-                if (filen == "") return;
-                BaseJSONBox.Text = filen;
-                string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
-                File.WriteAllText(basedirBox.Text + filen, BFJSON);    // save back as JSON in project directory
-            }
-            else
-            {
-                CheckboxForm CBF = new CheckboxForm();
-                CBF.Text = "Select elements to include in template";
-                List<bool> BoolList = CBF.SelectFromBoxes(AQSim_2D.MultiSegSimFlags());
-                if (BoolList == null) return;
-
-                filen = AQSim_2D.MultiSegSimName(BoolList);
-                BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + filen;
-            }
+            if (filen == "") return;
+            BaseJSONBox.Text = filen;
+            string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
+            File.WriteAllText(basedirBox.Text + filen, BFJSON);    // save back as JSON in project directory
 
             MessageBox.Show("Selected Template File: " + filen);
+            AddToProcessLog("INPUTS: Selected Template File: " + filen);
             BaseJSONBox_Leave(sender, e);
         }
 
@@ -1521,34 +1524,34 @@ namespace GUI.AQUATOX
         }
 
 
-    public string InsertPropertiesInGeoJSON(string geoJsonString, string id, string name)
-    {
-        // Parse the GeoJSON string into a JObject
-        var geoJson = JObject.Parse(geoJsonString);
-
-        // Check if the root object contains a "features" array
-        if (geoJson["features"] is JArray features)
+        public string InsertPropertiesInGeoJSON(string geoJsonString, string id, string name)
         {
-            foreach (var feature in features)
+            // Parse the GeoJSON string into a JObject
+            var geoJson = JObject.Parse(geoJsonString);
+
+            // Check if the root object contains a "features" array
+            if (geoJson["features"] is JArray features)
             {
-                // Ensure each feature has a "properties" object
-                var properties = feature["properties"] as JObject ?? new JObject();
+                foreach (var feature in features)
+                {
+                    // Ensure each feature has a "properties" object
+                    var properties = feature["properties"] as JObject ?? new JObject();
 
-                // Add or update the ID and Name properties
-                properties["ID"] = id;
-                properties["Name"] = name;
+                    // Add or update the ID and Name properties
+                    properties["ID"] = id;
+                    properties["Name"] = name;
 
-                // Assign the updated properties back to the feature
-                feature["properties"] = properties;
+                    // Assign the updated properties back to the feature
+                    feature["properties"] = properties;
+                }
             }
+
+            // Return the modified GeoJSON as a string
+            return geoJson.ToString();
         }
 
-        // Return the modified GeoJSON as a string
-        return geoJson.ToString();
-    }
 
-
-    async void PlotCOMIDMap()
+        async void PlotCOMIDMap()
         {
             BaseDir = basedirBox.Text;
             string GeoJSON;
@@ -1562,7 +1565,7 @@ namespace GUI.AQUATOX
 
             int[] outofnetwork = new int[0];
 
-            if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID","");  // plot stand alone 0-D lake    fixme, name
+            if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID", "");  // plot stand alone 0-D lake    fixme, name
             else if (HUC0D != "") PlotGeoJSON(HUC0D, "HUC", "");  // plot stand alone HUC  fixme, name
             else  // loop through lake/res waterbodies if they exist
             {
@@ -2319,8 +2322,11 @@ namespace GUI.AQUATOX
             else return "2";
         }
 
-        async private void HAWQS_Click(object sender, EventArgs e)
+
+        private void Render_RelevantH14s()
         {
+            this.Cursor = Cursors.WaitCursor; // Set cursor to wait cursor
+
             List<string> H14s = ID_Relevant_HUC14s();
             foreach (string H14 in H14s)
                 TSafeAddToProcessLog(H14);
@@ -2344,59 +2350,100 @@ namespace GUI.AQUATOX
             Codes.Add(W_Code + N_Code);
             Codes.Add(W_Code + S_Code);
 
-            foreach (string code in Codes) 
+            foreach (string code in Codes)
             {
                 string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + code + ".geojson";
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
-                PostWebviewMessage("ADDWB|" + RelevantH14s);
+                PostWebviewMessage("RH14s|" + RelevantH14s);
             }
 
-            PostWebviewMessage("RENDER");
-            return;
+            this.Cursor = Cursors.Default; // Set cursor to wait cursor
+
+        }
 
 
+        public class HAWQSInput
+        {
+            public string dataset { get; set; } = "HUC14";
+            public string downstreamSubbasin { get; set; } = "01010002010504";
+            public SetHrus setHrus { get; set; } = new SetHrus();
+            public string weatherDataset { get; set; } = "PRISM";
+            public string startingSimulationDate { get; set; } = "1981-01-01";
+            public string endingSimulationDate { get; set; } = "1984-12-31";
+            public int warmupYears { get; set; } = 1;
+            public string outputPrintSetting { get; set; } = "daily";
+            public ReportData reportData { get; set; } = new ReportData();
+        }
+
+        public class SetHrus
+        {
+            public string method { get; set; } = "none";
+            public int target { get; set; } = 0;
+            public string units { get; set; } = "none";
+        }
+
+        public class ReportData
+        {
+            public List<string> formats { get; set; } = new List<string> { "csv" };
+            public string units { get; set; } = "metric";
+            public Outputs outputs { get; set; } = new Outputs();
+        }
+
+        public class Outputs
+        {
+            public Rch rch { get; set; } = new Rch();
+            public Sub sub { get; set; } = new Sub();
+        }
+
+        public class Rch
+        {
+            public List<string> statistics { get; set; } = new List<string> { "daily" };
+        }
+
+        public class Sub
+        {
+            public List<string> statistics { get; set; } = new List<string> { "daily" };
+        }
+
+
+        async private void HAWQS_Click(object sender, EventArgs e)
+        {
+            if (!VerifyStreamNetwork()) return;
+            if (Lake0D > 0) ShowMsg("Lake0D setup TBD");
+            bool isHUC0D = (HUC0D != "");
+
+            if (!isHUC0D)
+            {
+                Render_RelevantH14s();
+                ShowMsg("Relevant HUC14s are displayed.  Further model setup for stream network TBD");
+                return;
+            }
+
+            //HUC0D HAWQS run
 
             Hawqs.Hawqs hw = new();
             runstatus RS;
 
-            var HAWQSInput = new
-            {
-                dataset = "HUC14",
-                downstreamSubbasin = "01010002010504",
-                setHrus = new
-                {
-                    method = "none",
-                    target = 0,
-                    units = "none"
-                },
-                weatherDataset = "PRISM",
-                startingSimu1onDate = "1981-01-01",
-                endingSimulationDate = "1984-12-31",
-                warmupYears = 1,
-                outputPrintSetting = "daily",
-                reportData = new
-                {
-                    formats = new List<string> { "csv", "netcdf" },
-                    units = "metric",
-                    outputs = new
-                    {
-                        rch = new
-                        {
-                            statistics = new List<string> { "daily" }
-                        },
-                        sub = new
-                        {
-                            statistics = new List<string> { "daily" }
-                        }
-
-                    }
-                }
-            };  // var HAWQSInput
-
+            HAWQSInput HAWQSInp = new HAWQSInput();
 
             try
             {
+                HAWQSInp.dataset = "HUC" + HUCStr(HUC0D);
+                HAWQSInp.downstreamSubbasin = HUC0D;
+
+                string msj = MasterSetupJson();
+                if (msj == "")
+                {
+                    AddToProcessLog("ERROR: MasterSetup.json missing and could not be created.");
+                    return;
+                }
+                Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
+
+                DateTime firstHAWQSday = SR.FirstDay.Val.AddYears(-1);  //assumes one warmup year for now
+                HAWQSInp.startingSimulationDate = firstHAWQSday.ToString("yyyy-MM-dd");
+                HAWQSInp.endingSimulationDate = SR.LastDay.Val.ToString("yyyy-MM-dd");
+
                 ConsoleButton.Checked = true;
                 ChartVisible(false);
                 BaseDir = basedirBox.Text;
@@ -2409,21 +2456,19 @@ namespace GUI.AQUATOX
 
                 AddToProcessLog("INPUTS: Initializing HAWQS.");
 
-                UseWaitCursor = true;
-                progressBar1.Visible = true;
-                proglabel.Text = "HAWQS RUN";
-                proglabel.Visible = true;
-
                 if (File.Exists(BaseDir + "output_rch_daily.csv"))
                     if (MessageBox.Show("Overwrite the existing set of HAWQS linkage data?  (" + BaseDir + "output_rch_daily.csv" + ")", "Confirm",
                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-
+                UseWaitCursor = true;
+                progressBar1.Visible = true;
+                proglabel.Text = "HAWQS RUN";
+                proglabel.Visible = true;
                 Application.DoEvents();
-
                 SetInterfaceBusy(true);
 
-                string hawqsinput = JsonConvert.SerializeObject(HAWQSInput);
+                string hawqsinput = JsonConvert.SerializeObject(HAWQSInp);
+
                 Task<string> tsk = hw.SubmitProject(apikey, hawqsinput);
 
                 await tsk;
@@ -2515,10 +2560,14 @@ namespace GUI.AQUATOX
             public double[] vals;
         }
 
-
-
-        private void button3_Click(object sender, EventArgs e)
+        private void ReadHAWQS_Click(object sender, EventArgs e)
         {
+            ConsoleButton.Checked = true;
+            ChartVisible(false);
+            BaseDir = basedirBox.Text;
+
+            if (!VerifyStreamNetwork()) return;
+
             BaseDir = basedirBox.Text;
             string filen = BaseDir + "output_rch_daily.csv";
             if (!File.Exists(filen))
@@ -2527,13 +2576,24 @@ namespace GUI.AQUATOX
                 return;
             }
 
+            if (Lake0D > 0)
+            {
+                AddToProcessLog("ERROR: HAWQS linkages are not currently enabled for 0-D lake simulations due to horizontal mismatch.");
+                return;
+            }
+
+            if (SegmentsCreated())
+                if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
+
             string[] colnames;
-            MultiKeyDictionary<DateTime, int, HAWQSRCHRow> HAWQSRchData = new();
+            MultiKeyDictionary<DateTime, long, HAWQSRCHRow> HAWQSRchData = new();
 
             try
             {
                 string[] csvlines = File.ReadAllLines(filen);
                 colnames = csvlines[0].Split(',');  //read header line, note columns 0-3 have "date" through "sub-basin"
+                colnames = colnames.Skip(4).ToArray();  // colnames now will correspond with row.vals
                 for (int i = 1; i < csvlines.Length; i++)
                 {
                     string[] rowdata = csvlines[i].Split(',');  //split 
@@ -2541,15 +2601,13 @@ namespace GUI.AQUATOX
                     HAWQSRCHRow row = new();
                     row.lat = Convert.ToDouble(rowdata[1]);
                     row.lon = Convert.ToDouble(rowdata[2]);
-                    int SubBasin = Convert.ToInt32(rowdata[3]);
+                    long SubBasin = Convert.ToInt64(rowdata[3]);
                     row.vals = new double[rowdata.Length - 4];
                     for (int j = 4; j < rowdata.Length; j++) row.vals[j - 4] = Convert.ToDouble(rowdata[j]);
                     HAWQSRchData.Add(date, SubBasin, row);
                 }
 
-                AddToProcessLog(colnames[4] + " to " + colnames[colnames.Length - 1]);
-
-
+                AddToProcessLog("INPUTS: read HAWQS file " + filen);
             }
 
             catch (Exception ex)
@@ -2558,14 +2616,36 @@ namespace GUI.AQUATOX
                 MessageBox.Show(ex.Message);
             }
 
+            string BaseFileN = FullBaseJSONName();
+            if (BaseFileN == "") return;
+            AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
+            string msj = MasterSetupJson();
+
+            if (HUC0D != "")
+            {
+                HAWQSReadBoundary(HUC0D.ToString(), msj);
+                HAWQSReadOverLand(HUC0D.ToString(), msj);
+            }
+
+
+
 
         }
 
         private void ShowH14Box_CheckedChanged(object sender, EventArgs e)
         {
             string showstr = "false";
-            if (ShowH14Box.Checked) showstr = "true";
+            if (ShowH14Box.Checked)
+            {
+                showstr = "true";
+                this.Cursor = Cursors.WaitCursor; // Set cursor to wait cursor
+            }
             webView.CoreWebView2.PostWebMessageAsString("SHOWH14|" + showstr);
+        }
+
+        private void DataSourceBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            HAWQSButtonPanel.Visible = DataSourceBox.Text.Contains("HAWQS");
         }
     }
 }

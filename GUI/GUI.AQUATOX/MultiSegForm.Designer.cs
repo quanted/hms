@@ -34,19 +34,17 @@
             ProcessLog = new System.Windows.Forms.TextBox();
             label5 = new System.Windows.Forms.Label();
             BaseJSONBox = new System.Windows.Forms.TextBox();
-            panel1 = new System.Windows.Forms.Panel();
-            panel2 = new System.Windows.Forms.Panel();
-            button3 = new System.Windows.Forms.Button();
+            ModelSetupPanel = new System.Windows.Forms.Panel();
+            label4 = new System.Windows.Forms.Label();
+            DataSourceBox = new System.Windows.Forms.ComboBox();
+            HAWQSButtonPanel = new System.Windows.Forms.Panel();
+            ReadHAWQSButton = new System.Windows.Forms.Button();
             HAWQS_button = new System.Windows.Forms.Button();
-            progressBar1 = new System.Windows.Forms.ProgressBar();
-            CancelButton = new System.Windows.Forms.Button();
-            StatusLabel = new System.Windows.Forms.Label();
+            CreateButton = new System.Windows.Forms.Button();
             FlowsButton = new System.Windows.Forms.Button();
             SetupButton = new System.Windows.Forms.Button();
-            executeButton = new System.Windows.Forms.Button();
-            CreateButton = new System.Windows.Forms.Button();
-            proglabel = new System.Windows.Forms.Label();
-            ReadNetworkPanel = new System.Windows.Forms.Panel();
+            SystemInfoPanel = new System.Windows.Forms.Panel();
+            trackBar1 = new System.Windows.Forms.TrackBar();
             SILabel3 = new System.Windows.Forms.Label();
             SILabel2 = new System.Windows.Forms.Label();
             SILabel1 = new System.Windows.Forms.Label();
@@ -93,14 +91,23 @@
             InputsBox = new System.Windows.Forms.CheckBox();
             ErrorsBox = new System.Windows.Forms.CheckBox();
             logfilen = new System.Windows.Forms.Label();
-            panel1.SuspendLayout();
-            panel2.SuspendLayout();
-            ReadNetworkPanel.SuspendLayout();
+            label9 = new System.Windows.Forms.Label();
+            ExecutePanel = new System.Windows.Forms.Panel();
+            progressBar1 = new System.Windows.Forms.ProgressBar();
+            StatusLabel = new System.Windows.Forms.Label();
+            CancelButton = new System.Windows.Forms.Button();
+            executeButton = new System.Windows.Forms.Button();
+            proglabel = new System.Windows.Forms.Label();
+            ModelSetupPanel.SuspendLayout();
+            HAWQSButtonPanel.SuspendLayout();
+            SystemInfoPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             OutputPanel.SuspendLayout();
             TogglePanel.SuspendLayout();
             PlotPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             LogPanel.SuspendLayout();
+            ExecutePanel.SuspendLayout();
             SuspendLayout();
             // 
             // basedirBox
@@ -131,14 +138,14 @@
             ProcessLog.Multiline = true;
             ProcessLog.Name = "ProcessLog";
             ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            ProcessLog.Size = new System.Drawing.Size(822, 454);
+            ProcessLog.Size = new System.Drawing.Size(814, 467);
             ProcessLog.TabIndex = 6;
             ProcessLog.WordWrap = false;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point(14, 72);
+            label5.Location = new System.Drawing.Point(14, 67);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(62, 15);
             label5.TabIndex = 17;
@@ -147,7 +154,7 @@
             // BaseJSONBox
             // 
             BaseJSONBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            BaseJSONBox.Location = new System.Drawing.Point(83, 69);
+            BaseJSONBox.Location = new System.Drawing.Point(83, 64);
             BaseJSONBox.Name = "BaseJSONBox";
             BaseJSONBox.Size = new System.Drawing.Size(200, 23);
             BaseJSONBox.TabIndex = 16;
@@ -156,45 +163,65 @@
             BaseJSONBox.Enter += BaseJSONBox_Enter;
             BaseJSONBox.Leave += BaseJSONBox_Leave;
             // 
-            // panel1
+            // ModelSetupPanel
             // 
-            panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            panel1.Controls.Add(panel2);
-            panel1.Controls.Add(progressBar1);
-            panel1.Controls.Add(CancelButton);
-            panel1.Controls.Add(StatusLabel);
-            panel1.Controls.Add(FlowsButton);
-            panel1.Controls.Add(SetupButton);
-            panel1.Controls.Add(executeButton);
-            panel1.Controls.Add(CreateButton);
-            panel1.Controls.Add(proglabel);
-            panel1.Location = new System.Drawing.Point(24, 291);
-            panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(259, 187);
-            panel1.TabIndex = 23;
+            ModelSetupPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            ModelSetupPanel.Controls.Add(label4);
+            ModelSetupPanel.Controls.Add(DataSourceBox);
+            ModelSetupPanel.Controls.Add(HAWQSButtonPanel);
+            ModelSetupPanel.Controls.Add(CreateButton);
+            ModelSetupPanel.Controls.Add(FlowsButton);
+            ModelSetupPanel.Controls.Add(SetupButton);
+            ModelSetupPanel.Location = new System.Drawing.Point(24, 262);
+            ModelSetupPanel.Name = "ModelSetupPanel";
+            ModelSetupPanel.Size = new System.Drawing.Size(255, 116);
+            ModelSetupPanel.TabIndex = 23;
             // 
-            // panel2
+            // label4
             // 
-            panel2.Controls.Add(button3);
-            panel2.Controls.Add(HAWQS_button);
-            panel2.Location = new System.Drawing.Point(29, 38);
-            panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size(187, 77);
-            panel2.TabIndex = 52;
+            label4.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            label4.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            label4.Location = new System.Drawing.Point(5, 32);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(53, 29);
+            label4.TabIndex = 56;
+            label4.Text = "Data Source";
+            label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // button3
+            // DataSourceBox
             // 
-            button3.Location = new System.Drawing.Point(29, 42);
-            button3.Name = "button3";
-            button3.Size = new System.Drawing.Size(127, 23);
-            button3.TabIndex = 13;
-            button3.Text = "Read HAWQS data";
-            button3.UseVisualStyleBackColor = true;
-            button3.Click += button3_Click;
+            DataSourceBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            DataSourceBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
+            DataSourceBox.FormattingEnabled = true;
+            DataSourceBox.Items.AddRange(new object[] { "HAWQS Simulation", "NWM (Flows Only)" });
+            DataSourceBox.Location = new System.Drawing.Point(61, 36);
+            DataSourceBox.Name = "DataSourceBox";
+            DataSourceBox.Size = new System.Drawing.Size(125, 21);
+            DataSourceBox.TabIndex = 52;
+            DataSourceBox.SelectedIndexChanged += DataSourceBox_SelectedIndexChanged;
+            // 
+            // HAWQSButtonPanel
+            // 
+            HAWQSButtonPanel.Controls.Add(ReadHAWQSButton);
+            HAWQSButtonPanel.Controls.Add(HAWQS_button);
+            HAWQSButtonPanel.Location = new System.Drawing.Point(27, 63);
+            HAWQSButtonPanel.Name = "HAWQSButtonPanel";
+            HAWQSButtonPanel.Size = new System.Drawing.Size(169, 55);
+            HAWQSButtonPanel.TabIndex = 52;
+            // 
+            // ReadHAWQSButton
+            // 
+            ReadHAWQSButton.Location = new System.Drawing.Point(32, 27);
+            ReadHAWQSButton.Name = "ReadHAWQSButton";
+            ReadHAWQSButton.Size = new System.Drawing.Size(127, 23);
+            ReadHAWQSButton.TabIndex = 13;
+            ReadHAWQSButton.Text = "Link HAWQS data";
+            ReadHAWQSButton.UseVisualStyleBackColor = true;
+            ReadHAWQSButton.Click += ReadHAWQS_Click;
             // 
             // HAWQS_button
             // 
-            HAWQS_button.Location = new System.Drawing.Point(29, 13);
+            HAWQS_button.Location = new System.Drawing.Point(32, 2);
             HAWQS_button.Name = "HAWQS_button";
             HAWQS_button.Size = new System.Drawing.Size(127, 23);
             HAWQS_button.TabIndex = 12;
@@ -202,44 +229,19 @@
             HAWQS_button.UseVisualStyleBackColor = true;
             HAWQS_button.Click += HAWQS_Click;
             // 
-            // progressBar1
+            // CreateButton
             // 
-            progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            progressBar1.Location = new System.Drawing.Point(2, 135);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new System.Drawing.Size(252, 21);
-            progressBar1.Step = 1;
-            progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            progressBar1.TabIndex = 27;
-            progressBar1.Value = 1;
-            progressBar1.Visible = false;
-            // 
-            // CancelButton
-            // 
-            CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            CancelButton.ForeColor = System.Drawing.Color.Black;
-            CancelButton.Location = new System.Drawing.Point(87, 160);
-            CancelButton.Margin = new System.Windows.Forms.Padding(0);
-            CancelButton.Name = "CancelButton";
-            CancelButton.Size = new System.Drawing.Size(68, 23);
-            CancelButton.TabIndex = 50;
-            CancelButton.Text = "Cancel";
-            CancelButton.UseVisualStyleBackColor = true;
-            CancelButton.Visible = false;
-            CancelButton.Click += CancelButton_Click;
-            // 
-            // StatusLabel
-            // 
-            StatusLabel.Location = new System.Drawing.Point(11, 135);
-            StatusLabel.Name = "StatusLabel";
-            StatusLabel.Size = new System.Drawing.Size(235, 15);
-            StatusLabel.TabIndex = 26;
-            StatusLabel.Text = "Model Status Label";
-            StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            CreateButton.Location = new System.Drawing.Point(58, 63);
+            CreateButton.Name = "CreateButton";
+            CreateButton.Size = new System.Drawing.Size(127, 23);
+            CreateButton.TabIndex = 8;
+            CreateButton.Text = "Create Linked Inputs";
+            CreateButton.UseVisualStyleBackColor = true;
+            CreateButton.Click += createButton_Click;
             // 
             // FlowsButton
             // 
-            FlowsButton.Location = new System.Drawing.Point(58, 65);
+            FlowsButton.Location = new System.Drawing.Point(58, 89);
             FlowsButton.Name = "FlowsButton";
             FlowsButton.Size = new System.Drawing.Size(127, 23);
             FlowsButton.TabIndex = 23;
@@ -249,7 +251,7 @@
             // 
             // SetupButton
             // 
-            SetupButton.Location = new System.Drawing.Point(58, 11);
+            SetupButton.Location = new System.Drawing.Point(60, 10);
             SetupButton.Name = "SetupButton";
             SetupButton.Size = new System.Drawing.Size(127, 23);
             SetupButton.TabIndex = 21;
@@ -257,61 +259,38 @@
             SetupButton.UseVisualStyleBackColor = true;
             SetupButton.Click += SetupButton_Click;
             // 
-            // executeButton
+            // SystemInfoPanel
             // 
-            executeButton.Location = new System.Drawing.Point(58, 92);
-            executeButton.Name = "executeButton";
-            executeButton.Size = new System.Drawing.Size(127, 23);
-            executeButton.TabIndex = 9;
-            executeButton.Text = "Execute Network";
-            executeButton.UseVisualStyleBackColor = true;
-            executeButton.Click += executeButton_Click;
+            SystemInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            SystemInfoPanel.Controls.Add(trackBar1);
+            SystemInfoPanel.Controls.Add(SILabel3);
+            SystemInfoPanel.Controls.Add(SILabel2);
+            SystemInfoPanel.Controls.Add(SILabel1);
+            SystemInfoPanel.Location = new System.Drawing.Point(24, 128);
+            SystemInfoPanel.Name = "SystemInfoPanel";
+            SystemInfoPanel.Size = new System.Drawing.Size(255, 122);
+            SystemInfoPanel.TabIndex = 24;
             // 
-            // CreateButton
+            // trackBar1
             // 
-            CreateButton.Location = new System.Drawing.Point(57, 38);
-            CreateButton.Name = "CreateButton";
-            CreateButton.Size = new System.Drawing.Size(127, 23);
-            CreateButton.TabIndex = 8;
-            CreateButton.Text = "Create Linked Inputs";
-            CreateButton.UseVisualStyleBackColor = true;
-            CreateButton.Click += createButton_Click;
-            // 
-            // proglabel
-            // 
-            proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
-            proglabel.Location = new System.Drawing.Point(10, 118);
-            proglabel.Name = "proglabel";
-            proglabel.Size = new System.Drawing.Size(235, 15);
-            proglabel.TabIndex = 51;
-            proglabel.Text = "Model Progress Label";
-            proglabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            proglabel.Visible = false;
-            // 
-            // ReadNetworkPanel
-            // 
-            ReadNetworkPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            ReadNetworkPanel.Controls.Add(SILabel3);
-            ReadNetworkPanel.Controls.Add(SILabel2);
-            ReadNetworkPanel.Controls.Add(SILabel1);
-            ReadNetworkPanel.Location = new System.Drawing.Point(24, 133);
-            ReadNetworkPanel.Name = "ReadNetworkPanel";
-            ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
-            ReadNetworkPanel.TabIndex = 24;
+            trackBar1.Location = new System.Drawing.Point(123, 135);
+            trackBar1.Name = "trackBar1";
+            trackBar1.Size = new System.Drawing.Size(104, 45);
+            trackBar1.TabIndex = 57;
             // 
             // SILabel3
             // 
             SILabel3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel3.Location = new System.Drawing.Point(10, 81);
+            SILabel3.Location = new System.Drawing.Point(10, 80);
             SILabel3.Name = "SILabel3";
-            SILabel3.Size = new System.Drawing.Size(235, 48);
+            SILabel3.Size = new System.Drawing.Size(235, 40);
             SILabel3.TabIndex = 56;
             SILabel3.Text = "XX segments including XX lake/reservoir segments";
             // 
             // SILabel2
             // 
             SILabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel2.Location = new System.Drawing.Point(11, 41);
+            SILabel2.Location = new System.Drawing.Point(11, 40);
             SILabel2.Name = "SILabel2";
             SILabel2.Size = new System.Drawing.Size(235, 40);
             SILabel2.TabIndex = 55;
@@ -321,7 +300,7 @@
             // 
             SILabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             SILabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            SILabel1.Location = new System.Drawing.Point(10, 16);
+            SILabel1.Location = new System.Drawing.Point(10, 15);
             SILabel1.Name = "SILabel1";
             SILabel1.Size = new System.Drawing.Size(235, 19);
             SILabel1.TabIndex = 54;
@@ -335,9 +314,9 @@
             OutputPanel.Controls.Add(label3);
             OutputPanel.Controls.Add(CSVButton);
             OutputPanel.Enabled = false;
-            OutputPanel.Location = new System.Drawing.Point(24, 490);
+            OutputPanel.Location = new System.Drawing.Point(24, 508);
             OutputPanel.Name = "OutputPanel";
-            OutputPanel.Size = new System.Drawing.Size(259, 81);
+            OutputPanel.Size = new System.Drawing.Size(255, 81);
             OutputPanel.TabIndex = 25;
             // 
             // chartButton
@@ -380,7 +359,7 @@
             // 
             // viewOutputButton
             // 
-            viewOutputButton.Location = new System.Drawing.Point(83, 489);
+            viewOutputButton.Location = new System.Drawing.Point(83, 504);
             viewOutputButton.Name = "viewOutputButton";
             viewOutputButton.Size = new System.Drawing.Size(127, 23);
             viewOutputButton.TabIndex = 49;
@@ -391,7 +370,7 @@
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(53, 125);
+            label7.Location = new System.Drawing.Point(53, 119);
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(108, 15);
             label7.TabIndex = 26;
@@ -400,11 +379,11 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(53, 282);
+            label8.Location = new System.Drawing.Point(53, 254);
             label8.Name = "label8";
-            label8.Size = new System.Drawing.Size(152, 15);
+            label8.Size = new System.Drawing.Size(168, 15);
             label8.TabIndex = 27;
-            label8.Text = "Model Setup and Execution";
+            label8.Text = "Model Setup and Data LInkage";
             // 
             // ChooseTemplateButton
             // 
@@ -435,7 +414,7 @@
             TogglePanel.Controls.Add(GraphButton);
             TogglePanel.Controls.Add(MapButton2);
             TogglePanel.Controls.Add(ConsoleButton);
-            TogglePanel.Location = new System.Drawing.Point(305, 551);
+            TogglePanel.Location = new System.Drawing.Point(305, 564);
             TogglePanel.Name = "TogglePanel";
             TogglePanel.Size = new System.Drawing.Size(291, 23);
             TogglePanel.TabIndex = 36;
@@ -576,7 +555,7 @@
             // 
             infolabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel1.AutoSize = true;
-            infolabel1.Location = new System.Drawing.Point(619, 553);
+            infolabel1.Location = new System.Drawing.Point(619, 566);
             infolabel1.Name = "infolabel1";
             infolabel1.Size = new System.Drawing.Size(361, 15);
             infolabel1.TabIndex = 39;
@@ -587,7 +566,7 @@
             // 
             infolabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel2.AutoSize = true;
-            infolabel2.Location = new System.Drawing.Point(619, 572);
+            infolabel2.Location = new System.Drawing.Point(619, 585);
             infolabel2.Name = "infolabel2";
             infolabel2.Size = new System.Drawing.Size(244, 15);
             infolabel2.TabIndex = 40;
@@ -597,7 +576,7 @@
             // TestOrderButton
             // 
             TestOrderButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            TestOrderButton.Location = new System.Drawing.Point(1096, 51);
+            TestOrderButton.Location = new System.Drawing.Point(1088, 51);
             TestOrderButton.Name = "TestOrderButton";
             TestOrderButton.Size = new System.Drawing.Size(28, 23);
             TestOrderButton.TabIndex = 42;
@@ -615,7 +594,7 @@
             webView.Location = new System.Drawing.Point(306, 93);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(822, 453);
+            webView.Size = new System.Drawing.Size(814, 466);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -659,13 +638,13 @@
             Separator.Enabled = false;
             Separator.Location = new System.Drawing.Point(1, 41);
             Separator.Name = "Separator";
-            Separator.Size = new System.Drawing.Size(1140, 2);
+            Separator.Size = new System.Drawing.Size(1132, 2);
             Separator.TabIndex = 47;
             // 
             // OutputLabel
             // 
             OutputLabel.AutoSize = true;
-            OutputLabel.Location = new System.Drawing.Point(54, 481);
+            OutputLabel.Location = new System.Drawing.Point(53, 496);
             OutputLabel.Name = "OutputLabel";
             OutputLabel.Size = new System.Drawing.Size(126, 15);
             OutputLabel.TabIndex = 48;
@@ -688,7 +667,7 @@
             // 
             toggleLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            toggleLog.Location = new System.Drawing.Point(1013, 554);
+            toggleLog.Location = new System.Drawing.Point(1005, 567);
             toggleLog.Name = "toggleLog";
             toggleLog.Size = new System.Drawing.Size(114, 24);
             toggleLog.TabIndex = 51;
@@ -699,7 +678,7 @@
             // GraphLabel
             // 
             GraphLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            GraphLabel.Location = new System.Drawing.Point(619, 555);
+            GraphLabel.Location = new System.Drawing.Point(619, 568);
             GraphLabel.Name = "GraphLabel";
             GraphLabel.Size = new System.Drawing.Size(262, 32);
             GraphLabel.TabIndex = 53;
@@ -709,7 +688,7 @@
             // 
             resetZoom.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            resetZoom.Location = new System.Drawing.Point(912, 554);
+            resetZoom.Location = new System.Drawing.Point(904, 567);
             resetZoom.Name = "resetZoom";
             resetZoom.Size = new System.Drawing.Size(95, 24);
             resetZoom.TabIndex = 52;
@@ -726,9 +705,9 @@
             LogPanel.Controls.Add(InfoBox);
             LogPanel.Controls.Add(InputsBox);
             LogPanel.Controls.Add(ErrorsBox);
-            LogPanel.Location = new System.Drawing.Point(607, 551);
+            LogPanel.Location = new System.Drawing.Point(599, 565);
             LogPanel.Name = "LogPanel";
-            LogPanel.Size = new System.Drawing.Size(521, 40);
+            LogPanel.Size = new System.Drawing.Size(521, 37);
             LogPanel.TabIndex = 54;
             LogPanel.Visible = false;
             // 
@@ -763,7 +742,7 @@
             label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             label1.AutoSize = true;
             label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            label1.Location = new System.Drawing.Point(60, 12);
+            label1.Location = new System.Drawing.Point(60, 9);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(41, 15);
             label1.TabIndex = 55;
@@ -818,11 +797,90 @@
             logfilen.Text = "Log File Name";
             logfilen.Visible = false;
             // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new System.Drawing.Point(50, 383);
+            label9.Name = "label9";
+            label9.Size = new System.Drawing.Size(96, 15);
+            label9.TabIndex = 56;
+            label9.Text = "Model Execution";
+            // 
+            // ExecutePanel
+            // 
+            ExecutePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            ExecutePanel.Controls.Add(progressBar1);
+            ExecutePanel.Controls.Add(StatusLabel);
+            ExecutePanel.Controls.Add(CancelButton);
+            ExecutePanel.Controls.Add(executeButton);
+            ExecutePanel.Controls.Add(proglabel);
+            ExecutePanel.Location = new System.Drawing.Point(24, 391);
+            ExecutePanel.Name = "ExecutePanel";
+            ExecutePanel.Size = new System.Drawing.Size(255, 102);
+            ExecutePanel.TabIndex = 53;
+            // 
+            // progressBar1
+            // 
+            progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
+            progressBar1.Location = new System.Drawing.Point(2, 48);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new System.Drawing.Size(249, 21);
+            progressBar1.Step = 1;
+            progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            progressBar1.TabIndex = 53;
+            progressBar1.Value = 1;
+            progressBar1.Visible = false;
+            // 
+            // StatusLabel
+            // 
+            StatusLabel.Location = new System.Drawing.Point(5, 54);
+            StatusLabel.Name = "StatusLabel";
+            StatusLabel.Size = new System.Drawing.Size(235, 15);
+            StatusLabel.TabIndex = 56;
+            StatusLabel.Text = "Model Status Label";
+            StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // CancelButton
+            // 
+            CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            CancelButton.ForeColor = System.Drawing.Color.Black;
+            CancelButton.Location = new System.Drawing.Point(89, 71);
+            CancelButton.Margin = new System.Windows.Forms.Padding(0);
+            CancelButton.Name = "CancelButton";
+            CancelButton.Size = new System.Drawing.Size(68, 23);
+            CancelButton.TabIndex = 54;
+            CancelButton.Text = "Cancel";
+            CancelButton.UseVisualStyleBackColor = true;
+            CancelButton.Visible = false;
+            // 
+            // executeButton
+            // 
+            executeButton.Location = new System.Drawing.Point(59, 8);
+            executeButton.Name = "executeButton";
+            executeButton.Size = new System.Drawing.Size(127, 23);
+            executeButton.TabIndex = 52;
+            executeButton.Text = "Execute Network";
+            executeButton.UseVisualStyleBackColor = true;
+            executeButton.Click += executeButton_Click;
+            // 
+            // proglabel
+            // 
+            proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            proglabel.Location = new System.Drawing.Point(10, 33);
+            proglabel.Name = "proglabel";
+            proglabel.Size = new System.Drawing.Size(235, 15);
+            proglabel.TabIndex = 55;
+            proglabel.Text = "Model Progress Label";
+            proglabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            proglabel.Visible = false;
+            // 
             // MultiSegForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1140, 598);
+            ClientSize = new System.Drawing.Size(1132, 611);
+            Controls.Add(label9);
+            Controls.Add(ExecutePanel);
             Controls.Add(webView);
             Controls.Add(logfilen);
             Controls.Add(LogPanel);
@@ -846,24 +904,26 @@
             Controls.Add(label8);
             Controls.Add(label7);
             Controls.Add(OutputPanel);
-            Controls.Add(ReadNetworkPanel);
-            Controls.Add(panel1);
+            Controls.Add(SystemInfoPanel);
+            Controls.Add(ModelSetupPanel);
             Controls.Add(label5);
             Controls.Add(BaseJSONBox);
             Controls.Add(ProcessLog);
             Controls.Add(label2);
             Controls.Add(basedirBox);
             Controls.Add(viewOutputButton);
-            MinimumSize = new System.Drawing.Size(1077, 553);
+            MinimumSize = new System.Drawing.Size(1148, 650);
             Name = "MultiSegForm";
             Text = "Multiple Segment Runs";
             FormClosing += MultiSegForm_FormClosing;
             Shown += MultiSegForm_Shown;
             ResizeEnd += MultiSegForm_ResizeEnd;
             Resize += MultiSegForm_Resize;
-            panel1.ResumeLayout(false);
-            panel2.ResumeLayout(false);
-            ReadNetworkPanel.ResumeLayout(false);
+            ModelSetupPanel.ResumeLayout(false);
+            HAWQSButtonPanel.ResumeLayout(false);
+            SystemInfoPanel.ResumeLayout(false);
+            SystemInfoPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             OutputPanel.ResumeLayout(false);
             OutputPanel.PerformLayout();
             TogglePanel.ResumeLayout(false);
@@ -873,6 +933,7 @@
             ((System.ComponentModel.ISupportInitialize)webView).EndInit();
             LogPanel.ResumeLayout(false);
             LogPanel.PerformLayout();
+            ExecutePanel.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -883,12 +944,11 @@
         private System.Windows.Forms.TextBox ProcessLog;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox BaseJSONBox;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel ModelSetupPanel;
         private System.Windows.Forms.Button FlowsButton;
         private System.Windows.Forms.Button SetupButton;
-        private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Button CreateButton;
-        private System.Windows.Forms.Panel ReadNetworkPanel;
+        private System.Windows.Forms.Panel SystemInfoPanel;
         private System.Windows.Forms.Button chartButton;
         private System.Windows.Forms.ComboBox SVBox;
         private System.Windows.Forms.Label label3;
@@ -901,14 +961,12 @@
         private System.Windows.Forms.Panel TogglePanel;
         private System.Windows.Forms.RadioButton MapButton2;
         private System.Windows.Forms.RadioButton ConsoleButton;
-        private System.Windows.Forms.Label StatusLabel;
         private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.Panel PlotPanel;
         private System.Windows.Forms.CheckBox showCOMIDsBox;
         private System.Windows.Forms.RadioButton flowchartButton;
         private System.Windows.Forms.Button PlotButton;
         private System.Windows.Forms.CheckBox outputjump;
-        private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.RadioButton GraphButton;
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
@@ -921,7 +979,6 @@
         private System.Windows.Forms.Label Separator;
         private System.Windows.Forms.Label OutputLabel;
         private System.Windows.Forms.Button viewOutputButton;
-        private System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.Button BrowseJSON;
         private System.Windows.Forms.Button toggleLog;
         private System.Windows.Forms.Label GraphLabel;
@@ -939,10 +996,19 @@
         private System.Windows.Forms.CheckBox WarningsBox;
         private System.Windows.Forms.Button LogChange;
         private System.Windows.Forms.Label logfilen;
-        private System.Windows.Forms.Label proglabel;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Panel HAWQSButtonPanel;
+        private System.Windows.Forms.Button ReadHAWQSButton;
         private System.Windows.Forms.Button HAWQS_button;
         private System.Windows.Forms.CheckBox ShowH14Box;
+        private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.ComboBox DataSourceBox;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Panel ExecutePanel;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Label StatusLabel;
+        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button executeButton;
+        private System.Windows.Forms.Label proglabel;
+        private System.Windows.Forms.Label label4;
     }
 }

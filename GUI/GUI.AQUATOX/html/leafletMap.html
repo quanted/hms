@@ -38,7 +38,9 @@
 
     <script>
         var allShapes = null;
+        var relH14 = null;
         var geoLayer;
+        var rH14Layer;
         H14ZoomThresh = 9;
         var oldzoom = 6;
 		var H14Zoom = false;  
@@ -354,6 +356,30 @@
             else allShapes = concatGeoJSON(allShapes, wb);
         }
 
+        function AddRelevantH14s(gstr) {
+            rh = JSON.parse(gstr);
+            if (relH14 == null) relH14 = rh
+            else relH14 = concatGeoJSON(relH14, rh);
+            rH14Layer = L.geoJSON(relH14, {
+                onEachFeature: function (feature, layer) {
+                    if (feature.properties && feature.properties.HUC14) {
+                        layer.bindTooltip("HUC14: "+feature.properties.HUC14, {
+                            permanent: false,
+                            direction: 'auto'
+                        });
+                    }
+                }
+            });
+            rH14Layer.setStyle({ weight: 2 });
+            rH14Layer.eachLayer(function (layer) {
+                if (layer.feature.geometry.type == 'Polygon') {
+                    layer.setStyle({ color: 'navy', weight: 1, fillOpacity: 0.0 })
+                }
+            });
+            rH14Layer.addTo(MAP);
+            if (geoLayer) geoLayer.bringToFront();
+        }
+
         function onEachFeature(feature, layer) {
             layer.on('click', function (e) {
                 if (layer.feature.properties.COMID != null) sendMessageToDotnet(layer.feature.properties.COMID.toString());
@@ -476,7 +502,8 @@
             if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
             if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
             if (messageArr[0] == "LABELS") Labels(messageArr[1]);
-			if (messageArr[0] == "SHOWH14") ShowH14(messageArr[1]);            
+            if (messageArr[0] == "SHOWH14") ShowH14(messageArr[1]); 
+            if (messageArr[0] == "RH14s") AddRelevantH14s(messageArr[1]); 
 
             //                console.log(`message from dotnet: ${event.data}`);
             //                this.document.getElementById("message-bar").innerHTML =
