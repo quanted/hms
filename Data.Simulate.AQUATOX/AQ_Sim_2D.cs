@@ -10,12 +10,16 @@ using Data;
 using System.IO;
 using AQUATOX.Plants;
 using AQUATOX.Animals;
-using Streamflow;
 using System.Net;
 using System.Threading;
 using System.Data;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using Utilities;
+using Microsoft.VisualBasic.FileIO;
+using SharpCompress.Common;
+using static Data.Source.PRISMData;
 
 namespace AQUATOX.AQSim_2D
 
@@ -41,6 +45,115 @@ namespace AQUATOX.AQSim_2D
             [JsonProperty("comid-wbcomid")] public Dictionary<int, int> comid_wb;
             [JsonProperty("waterbody-table")] public string[][] wb_table;
         }
+
+        public class HAWQSInfo
+        {
+            public List<string> sourceHUCs;
+
+            private Dictionary<string, List<string>> fromtoData = new Dictionary<string, List<string>>();
+
+            public void LoadFromtoData(string HUC_ID)
+            {
+                string HUCStr = HUC_ID.Length.ToString();
+                string fromtopath = $@"..\..\..\2D_Inputs\fromto\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";  // fixme deployment
+
+                if (File.Exists(fromtopath))  //csv file with "OutletHUC, InletHUC"
+                {
+                    using (TextFieldParser parser = new TextFieldParser(fromtopath))
+                    {
+                        parser.TextFieldType = FieldType.Delimited;
+                        parser.SetDelimiters(",");
+
+                        while (!parser.EndOfData)
+                        {
+                            string[] fields = parser.ReadFields();
+                            if (fields.Length >= 2)
+                            {
+                                if (!fromtoData.ContainsKey(fields[1]))
+                                {
+                                    fromtoData[fields[1]] = new List<string>();
+                                }
+                                fromtoData[fields[1]].Add(fields[0]);
+                            }
+                        }
+                    }
+                }
+                else throw new Exception("File Not Found: "+fromtopath);
+            }
+
+            public string[] boundaryHUCs(string HUC_ID)
+            {
+                if (fromtoData.TryGetValue(HUC_ID, out List<string> matchingHUCs))
+                {
+                    return matchingHUCs.ToArray();
+                }
+                else return new string[0];
+            }
+                            
+
+            public void AddSourceHUCs(string HUC_ID)
+            {
+                // Helper method to check if the HUC starts with the same first two characters
+                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 2) == huc2.Substring(0, 2);
+
+                foreach (var boundaryHuc in boundaryHUCs(HUC_ID))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
+                {
+                    if (!sourceHUCs.Contains(boundaryHuc))
+                    {
+                        sourceHUCs.Add(boundaryHuc);
+
+                        if (IsSameRegion(boundaryHuc, HUC_ID))
+                            AddSourceHUCs(boundaryHuc); // Recursively add BoundaryHUCs if the identified boundaryHuc is in the same region
+                    }
+                }
+            }
+
+        }
+
+        public class HAWQSInput
+        {
+            public string dataset { get; set; } = "HUC14";
+            public string downstreamSubbasin { get; set; } = "01010002010504";
+            public string[] upstreamSubbasins { get; set; } 
+            public SetHrus setHrus { get; set; } = new SetHrus();
+            public string weatherDataset { get; set; } = "PRISM";
+            public string startingSimulationDate { get; set; } = "1981-01-01";
+            public string endingSimulationDate { get; set; } = "1984-12-31";
+            public int warmupYears { get; set; } = 2;
+            public string outputPrintSetting { get; set; } = "daily";
+            public ReportData reportData { get; set; } = new ReportData();
+        }
+
+        public class SetHrus
+        {
+            public string method { get; set; } = "none";
+            public double target { get; set; } = 0;
+            public string units { get; set; } = "none";
+        }
+
+        public class ReportData
+        {
+            public List<string> formats { get; set; } = new List<string> { "csv" };
+            public string units { get; set; } = "metric";
+            public Outputs outputs { get; set; } = new Outputs();
+        }
+
+        public class Outputs
+        {
+            public Rch rch { get; set; } = new Rch();
+            public Sub sub { get; set; } = new Sub();
+        }
+
+        public class Rch
+        {
+            public List<string> statistics { get; set; } = new List<string> { "daily" };
+        }
+
+        public class Sub
+        {
+            public List<string> statistics { get; set; } = new List<string> { "daily" };
+        }
+
 
         /// <summary>
         /// current stream network object
@@ -527,7 +640,7 @@ namespace AQUATOX.AQSim_2D
         };
 
  
-        private AQTSim JSON_to_AQTSim(string baseJSON, string setupjson, string comid, double lenkm, out string err)
+        private AQTSim JSON_to_AQTSim(string baseJSON, string setupjson, string segtype, string IDstr, double lenkm, out string err)
         {
             AQTSim Sim = new AQTSim();
             err = Sim.Instantiate(baseSimJSON);
@@ -538,8 +651,8 @@ namespace AQUATOX.AQSim_2D
 
             Sim.AQTSeg.SetMemLocRec();
 
-            Sim.AQTSeg.StudyName = "COMID: " + comid;
-            Sim.AQTSeg.FileName = "AQT_Input_" + comid + ".JSON";
+            Sim.AQTSeg.StudyName = segtype+": " + IDstr;
+            Sim.AQTSeg.FileName = "AQT_Input_" + IDstr + ".JSON";
             if (lenkm > 0)
             {
                 Sim.AQTSeg.Location.Locale.SiteLength.Val = lenkm;
@@ -611,13 +724,95 @@ namespace AQUATOX.AQSim_2D
             //return JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(rstring);
         }
 
+
+        public void VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
+        {
+
+            void setupLoad(TLoadings load)
+            {
+                load.list.Clear();
+                load.list.Capacity = ThisSeg.Count;
+                load.UseConstant = false;
+                load.MultLdg = 1;
+                load.NoUserLoad = false;
+                load.ITSI = null;
+            }
+
+            TVol.InitialCond = ThisSeg[FirstDate].vals[1] * 86400;  //FIXME assumes one-day retention time
+            TVol.Calc_Method = VolumeMethType.KnownVal;
+
+            TLoadings KnownLoad =  TVol.LoadsRec.Loadings; ;  
+            TLoadings InflowLoad = TVol.LoadsRec.Alt_Loadings[0];   // array slot [0] is "inflow" in this case (TVolume)
+
+            setupLoad(InflowLoad);
+            setupLoad(KnownLoad);
+
+            foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
+            {
+                InflowLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //inflow from RCH_Daily file -- converted to m3/d
+                double knownvol = Math.Max(pair.Value.vals[1] * 86400, TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;   
+                //FIXME assumes one-day retention time
+                KnownLoad.list.Add(pair.Key, knownvol);
+            }
+         
+            TVol.LoadNotes1 = "Volumes from HAWQS converted to m3/day";
+            TVol.LoadNotes2 = "ASSUMES 1-D Retention Time";
+            TVol.AQTSeg.CalcVelocity = true;
+        }
+
+
+
+        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, string HUC0D, string setupjson, bool boundary, bool overland, out string jsondata)
+        {
+            jsondata = "";
+            long HUCID = long.Parse(HUC0D);
+            List <long> Boundaries = new();  //rch data rows relevant to boundary conditions for this HUC14
+            Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[HUCID];
+            string HUCStr = HUC0D.Length.ToString();
+
+            string err;
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);
+            if (err != "") { return err; }
+
+
+            TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+
+            VolFlowFromHAWQS(TVol, ThisSeg, Sim.AQTSeg.PSetup.FirstDay.Val);
+
+            string[] components = { "FLOW", "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  //wtmp
+
+            DateTime time = DateTime.Now;
+            double boundload = 0;
+            foreach (long bound in Boundaries)
+            {
+            //    boundload = HRD[time,  ]
+            }
+
+            // inflow = 
+
+            if (boundary)
+            {
+
+            }
+
+            if (overland)
+            {
+
+            }
+            
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            return errmessage;
+
+        }
+
+
         public string PopulateLakeRes(int WBComid, string setupjson, out string jsondata)
         {
             jsondata = "";
             string WBCstr = WBComid.ToString();
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, WBCstr, -9999, out err);
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "WBCOMID", WBCstr, -9999, out err);
             if (err != "") { return err; }
 
             HydrologyTSI TSI = new();
@@ -675,7 +870,7 @@ namespace AQUATOX.AQSim_2D
             double lenkm = double.Parse(SN.network[iSeg][4]);
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, comid, lenkm, out err);
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "COMID", comid, lenkm, out err);
             if (err != "") { return err; }
 
             HydrologyTSI TSI = new();
@@ -683,7 +878,7 @@ namespace AQUATOX.AQSim_2D
             TSI.DateTimeSpan.EndDate = Sim.AQTSeg.PSetup.LastDay.Val;
             TSI.Geometry.ComID = int.Parse(comid);
             TSI.Geometry.GeometryMetadata["waterbody"] ="false"; 
-            TSI.Source = "nwm"; 
+            TSI.Source = "nwm";
 
             try
             {
@@ -753,7 +948,7 @@ namespace AQUATOX.AQSim_2D
                         if (divergence_flows != null)
                             foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
-                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step chagnes or time-period is increased since NWM data gathering
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step changes or time-period is increased since NWM data gathering
                                 // m3/d      m3/d                                         m3/s               s/d
                                 frac_this_segment = OutVol / totOutVol;
                             }
@@ -909,6 +1104,13 @@ namespace AQUATOX.AQSim_2D
             }
         }
     }
+
+    public class HAWQSRCHRow
+    {
+        public double lat, lon;
+        public double[] vals;
+    }
+
 
     public class LSKnownTypesBinder : AQTKnownTypesBinder
     {

@@ -33,6 +33,7 @@ GUI/GUI.AQUATOX/Studies/NoResults/
 GUI/GUI.AQUATOX/Studies/Omit/
 GUI/GUI.AQUATOX/Studies/Strat/
 GUI/GUI.AQUATOX/Studies/TooBig/
+collected-static
 
 # Database files
 *.db

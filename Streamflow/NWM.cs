@@ -30,8 +30,8 @@ namespace Streamflow
             dataRequest += "&waterbody=" + waterbody;
 
             FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000).Result;
-            if (results == null) {
-                errorMsg = "ERROR: Unable to complete Flask Data Request for " + comids;  // JSC 9/7/2022
+            if ((results == null) || (results.data == null)) {
+                errorMsg = "ERROR: Unable to complete NWM Flask Data Request for " + comids;  // JSC 9/7/2022
                 return null; 
             }
 
@@ -43,22 +43,32 @@ namespace Streamflow
             //string dataURL = "https://ceamdev.ceeopdev.net/hms/rest/api/v2/hms/data";
             //FlaskData<TimeSeriesOutput<List<double>>> results = Utilities.WebAPI.RequestData<FlaskData<TimeSeriesOutput<List<double>>>>(dataRequest, 1000, flaskURL, dataURL).Result;
 
-            output = results.data;
-            output.Metadata.Add("comids", comids);
-            if (input.TemporalResolution.ToLower() == "daily") {
-                output.Data = output.ToDaily(input.DateTimeSpan.DateTimeFormat, input, true, false);
-                output.Metadata.Add("temporal_timestep", "daily");
-            }
-            else if (input.TemporalResolution.ToLower() == "monthly")
+            try
             {
-                output.Data = output.ToMonthly(input.DateTimeSpan.DateTimeFormat, input, true, false);
-                output.Metadata.Add("temporal_timestep", "monthly");
+                output = results.data;
+                output.Metadata.Add("comids", comids);
+                if (input.TemporalResolution.ToLower() == "daily")
+                {
+                    output.Data = output.ToDaily(input.DateTimeSpan.DateTimeFormat, input, true, false);
+                    output.Metadata.Add("temporal_timestep", "daily");
+                }
+                else if (input.TemporalResolution.ToLower() == "monthly")
+                {
+                    output.Data = output.ToMonthly(input.DateTimeSpan.DateTimeFormat, input, true, false);
+                    output.Metadata.Add("temporal_timestep", "monthly");
+                }
+                else
+                {
+                    output.Metadata.Add("temporal_timestep", "hourly");
+                }
+                return output;
             }
-            else
+            catch
             {
-                output.Metadata.Add("temporal_timestep", "hourly");
+                errorMsg = "ERROR: Unable to read results from NWM Flask Data Request for " + comids;  // JSC 2/13/2024
+                return null;
             }
-            return output;
+
+            }
         }
-    }
 }

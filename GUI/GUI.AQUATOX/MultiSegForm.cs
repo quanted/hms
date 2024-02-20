@@ -3,13 +3,11 @@ using AQUATOX.AQTSegment;
 using AQUATOX.Loadings;
 using AQUATOX.OrgMatter;
 using AQUATOX.Volume;
-using Aron.Weiler;  //multi-key dictionary
 using Data;
 using Globals;
 using Hawqs;
 using Microsoft.Web.WebView2.Core;
 using MongoDB.Driver;
-using MongoDB.Driver.GeoJsonObjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -21,17 +19,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Xml.Linq;
 using Utilities;
-using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace GUI.AQUATOX
 
@@ -199,7 +193,7 @@ namespace GUI.AQUATOX
             }
             else if (content.StartsWith("H14"))
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";
+                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";  // fixme deployment
                 string HUC14 = File.ReadAllText(filestr);
                 webView.CoreWebView2.PostWebMessageAsString("ADDH14|" + HUC14); // display layer
             }
@@ -534,7 +528,7 @@ namespace GUI.AQUATOX
             BaseDir = basedirBox.Text;
             string FileN = "";
             if (Lake0D > 0) FileN = BaseDir + "AQT_Input_" + Lake0D.ToString() + ".JSON";
-            else if (HUC0D != "") FileN = BaseDir + "AQT_Input_" + HUC0D.ToString() + ".JSON";
+            else if (HUC0D != "") FileN = BaseDir + "AQT_Input_" + HUC0D + ".JSON";
             else
             {
                 string comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];  //check last segment
@@ -548,6 +542,7 @@ namespace GUI.AQUATOX
             BaseDir = basedirBox.Text;
             string comid;
             if (Lake0D > 0) comid = Lake0D.ToString();
+            if (HUC0D != "") comid = HUC0D;
             else comid = AQT2D.SN.network[AQT2D.SN.network.Length - 1][0];
             string FileN = BaseDir + "AQT_Run_" + comid.ToString() + ".JSON";
             if (!ValidFilen(FileN, false)) return DateTime.MinValue;
@@ -647,7 +642,7 @@ namespace GUI.AQUATOX
             }
             else
             {
-                TSafeAddToProcessLog(errmessage);
+                TSafeAddToProcessLog("ERROR: "+errmessage);
                 UseWaitCursor = false;
                 PostWebviewMessage("COLOR|" + WBComid + "|red");
                 TSafeHideProgBar();
@@ -659,6 +654,19 @@ namespace GUI.AQUATOX
 
         async void Read_Water_Flows()  //create a set of 0D jsons for stream network given AQT2D "SN" object
         {
+
+            void ResetInterface()
+            {
+                this.BeginInvoke((MethodInvoker)(() =>
+                {
+                    SetInterfaceBusy(false);
+                    progressBar1.Visible = false;
+                    proglabel.Visible = false;
+                    CancelButton.Visible = false;
+                    UseWaitCursor = false;
+                    UpdateScreen();
+                }));
+            }
 
             try
             {
@@ -714,9 +722,8 @@ namespace GUI.AQUATOX
                         else
                         {
                             TSafeAddToProcessLog(errmessage);
-                            UseWaitCursor = false;
                             PostWebviewMessage("COLOR|" + comid + "|red");
-                            TSafeHideProgBar();
+                            ResetInterface();
                             return;
                         }
                     }
@@ -744,15 +751,7 @@ namespace GUI.AQUATOX
                             }
                     }
 
-                    this.BeginInvoke((MethodInvoker)(() =>
-                    {
-                        SetInterfaceBusy(false);
-                        progressBar1.Visible = false;
-                        proglabel.Visible = false;
-                        CancelButton.Visible = false;
-                        UseWaitCursor = false;
-                        UpdateScreen();
-                    }));
+                    ResetInterface();
 
                 });
 
@@ -763,13 +762,7 @@ namespace GUI.AQUATOX
             {
                 AddToProcessLog("ERROR: when creating segments: " + ex.Message);
                 MessageBox.Show(ex.Message);
-                SetInterfaceBusy(false);
-                progressBar1.Visible = false;
-                proglabel.Visible = false;
-                CancelButton.Visible = false;
-                UseWaitCursor = false;
-                UpdateScreen();
-
+                ResetInterface();
                 return;
             }
         }
@@ -1972,8 +1965,8 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 string StudyStr;
-                                if (IsHUC) StudyStr = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";
-                                else StudyStr = "..\\..\\..\\Studies\\Default Lake.JSON";
+                                if (IsHUC) StudyStr = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";  // fixme deployment?
+                                else StudyStr = "..\\..\\..\\Studies\\Default Lake.JSON";  // fixme deployment?
                                 BSim = new AQTSim();
                                 if (File.Exists(StudyStr))
                                     BSim.Instantiate(File.ReadAllText(StudyStr));
@@ -2011,7 +2004,7 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 BSim = new AQTSim();
-                                BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));
+                                BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));  // fixme deployment?
                             }
 
                             AQT2D = null;
@@ -2237,14 +2230,14 @@ namespace GUI.AQUATOX
         }
 
 
-        string apikey = "mL+mO3xTBi1boKpdYHTdBTictavSe4opAvDAXzIAXwA=";
+        string apikey = "mL+mO3xTBi1boKpdYHTdBTictavSe4opAvDAXzIAXwA=";  // fixme deployment
         public class runstatus
         {
             public string id { get; set; }
             public string url { get; set; }
         }
 
-        public string dbpath = @"..\..\..\2D_Inputs\COMID_HUC14_Unique.sqlite";
+        public string dbpath = @"..\..\..\2D_Inputs\COMID_HUC14_Unique.sqlite";  // fixme deployment
 
         public List<string> ID_Relevant_HUC14s()
         {
@@ -2352,7 +2345,7 @@ namespace GUI.AQUATOX
 
             foreach (string code in Codes)
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + code + ".geojson";
+                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + code + ".geojson";  // fixme deployment
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
                 PostWebviewMessage("RH14s|" + RelevantH14s);
@@ -2360,50 +2353,6 @@ namespace GUI.AQUATOX
 
             this.Cursor = Cursors.Default; // Set cursor to wait cursor
 
-        }
-
-
-        public class HAWQSInput
-        {
-            public string dataset { get; set; } = "HUC14";
-            public string downstreamSubbasin { get; set; } = "01010002010504";
-            public SetHrus setHrus { get; set; } = new SetHrus();
-            public string weatherDataset { get; set; } = "PRISM";
-            public string startingSimulationDate { get; set; } = "1981-01-01";
-            public string endingSimulationDate { get; set; } = "1984-12-31";
-            public int warmupYears { get; set; } = 1;
-            public string outputPrintSetting { get; set; } = "daily";
-            public ReportData reportData { get; set; } = new ReportData();
-        }
-
-        public class SetHrus
-        {
-            public string method { get; set; } = "none";
-            public int target { get; set; } = 0;
-            public string units { get; set; } = "none";
-        }
-
-        public class ReportData
-        {
-            public List<string> formats { get; set; } = new List<string> { "csv" };
-            public string units { get; set; } = "metric";
-            public Outputs outputs { get; set; } = new Outputs();
-        }
-
-        public class Outputs
-        {
-            public Rch rch { get; set; } = new Rch();
-            public Sub sub { get; set; } = new Sub();
-        }
-
-        public class Rch
-        {
-            public List<string> statistics { get; set; } = new List<string> { "daily" };
-        }
-
-        public class Sub
-        {
-            public List<string> statistics { get; set; } = new List<string> { "daily" };
         }
 
 
@@ -2425,12 +2374,19 @@ namespace GUI.AQUATOX
             Hawqs.Hawqs hw = new();
             runstatus RS;
 
-            HAWQSInput HAWQSInp = new HAWQSInput();
+            AQSim_2D.HAWQSInput HAWQSInp = new();
+            AQSim_2D.HAWQSInfo HAWQSInf = new();
 
             try
             {
-                HAWQSInp.dataset = "HUC" + HUCStr(HUC0D);
+                string hucstr = HUCStr(HUC0D);  // "8" to "14"
+                HAWQSInp.dataset = "HUC" + hucstr;
                 HAWQSInp.downstreamSubbasin = HUC0D;
+
+                HAWQSInf.sourceHUCs = new();
+                HAWQSInf.LoadFromtoData(HUC0D); //load relevant fromto data to dictionary
+                HAWQSInf.AddSourceHUCs(HUC0D);
+                HAWQSInp.upstreamSubbasins = HAWQSInf.sourceHUCs.ToArray();
 
                 string msj = MasterSetupJson();
                 if (msj == "")
@@ -2440,13 +2396,21 @@ namespace GUI.AQUATOX
                 }
                 Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
 
-                DateTime firstHAWQSday = SR.FirstDay.Val.AddYears(-1);  //assumes one warmup year for now
+                DateTime firstHAWQSday = SR.FirstDay.Val.AddYears(-2);  //default is a two-year spin up
                 HAWQSInp.startingSimulationDate = firstHAWQSday.ToString("yyyy-MM-dd");
                 HAWQSInp.endingSimulationDate = SR.LastDay.Val.ToString("yyyy-MM-dd");
+
+                HAWQSInp.setHrus.method = "area";
+                HAWQSInp.setHrus.units = "km2";
+
+                HAWQSInp.setHrus.target = 1.0;
+                if (hucstr == "12") HAWQSInp.setHrus.target = 0.5;
+                if (hucstr == "14") HAWQSInp.setHrus.target = 0.1; //TAMU specs
 
                 ConsoleButton.Checked = true;
                 ChartVisible(false);
                 BaseDir = basedirBox.Text;
+
 
                 //if (!VerifyStreamNetwork()) return;
 
@@ -2466,8 +2430,10 @@ namespace GUI.AQUATOX
                 proglabel.Visible = true;
                 Application.DoEvents();
                 SetInterfaceBusy(true);
-
+                
                 string hawqsinput = JsonConvert.SerializeObject(HAWQSInp);
+
+                AddToProcessLog("INPUTS: HAWQS Input-- "+hawqsinput);
 
                 Task<string> tsk = hw.SubmitProject(apikey, hawqsinput);
 
@@ -2554,12 +2520,6 @@ namespace GUI.AQUATOX
 
         }
 
-        public class HAWQSRCHRow
-        {
-            public double lat, lon;
-            public double[] vals;
-        }
-
         private void ReadHAWQS_Click(object sender, EventArgs e)
         {
             ConsoleButton.Checked = true;
@@ -2587,7 +2547,20 @@ namespace GUI.AQUATOX
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
             string[] colnames;
-            MultiKeyDictionary<DateTime, long, HAWQSRCHRow> HAWQSRchData = new();
+            
+            Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup
+            void AddHAWQSRchData(long longKey, DateTime dateTimeKey, HAWQSRCHRow data)
+            {
+                // Check if the outer dictionary already has the long key
+                if (!HAWQSRchData.ContainsKey(longKey))
+                {
+                    // If not, create a new inner dictionary
+                    HAWQSRchData[longKey] = new Dictionary<DateTime, HAWQSRCHRow>();
+                }
+
+                // Now, add or update the data in the inner dictionary
+                HAWQSRchData[longKey][dateTimeKey] = data;
+            }
 
             try
             {
@@ -2604,7 +2577,7 @@ namespace GUI.AQUATOX
                     long SubBasin = Convert.ToInt64(rowdata[3]);
                     row.vals = new double[rowdata.Length - 4];
                     for (int j = 4; j < rowdata.Length; j++) row.vals[j - 4] = Convert.ToDouble(rowdata[j]);
-                    HAWQSRchData.Add(date, SubBasin, row);
+                    AddHAWQSRchData(SubBasin, date,  row);
                 }
 
                 AddToProcessLog("INPUTS: read HAWQS file " + filen);
@@ -2614,6 +2587,7 @@ namespace GUI.AQUATOX
             {
                 AddToProcessLog("ERROR: when reading CSV file: " + filen + "; " + ex.Message);
                 MessageBox.Show(ex.Message);
+                return;
             }
 
             string BaseFileN = FullBaseJSONName();
@@ -2623,13 +2597,21 @@ namespace GUI.AQUATOX
 
             if (HUC0D != "")
             {
-                HAWQSReadBoundary(HUC0D.ToString(), msj);
-                HAWQSReadOverLand(HUC0D.ToString(), msj);
+                string errmessage = AQT2D.HAWQSRead(HAWQSRchData, HUC0D, msj, true, true, out string AQSimJSON);
+
+                if (errmessage == "")
+                {
+                    string OutFilen = BaseDir + "AQT_Input_" + HUC0D + ".JSON";
+                    File.WriteAllText(OutFilen, AQSimJSON);
+                    TSafeAddToProcessLog("INPUT: Read HAWQS Data for HUC: " + HUC0D);
+                    Application.DoEvents();
+                }
+                else
+                {
+                    TSafeAddToProcessLog("ERROR: " + errmessage);
+                    ConsoleButton.Checked = true;
+                }
             }
-
-
-
-
         }
 
         private void ShowH14Box_CheckedChanged(object sender, EventArgs e)
