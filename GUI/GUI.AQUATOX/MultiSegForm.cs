@@ -2375,7 +2375,7 @@ namespace GUI.AQUATOX
             runstatus RS;
 
             AQSim_2D.HAWQSInput HAWQSInp = new();
-            AQSim_2D.HAWQSInfo HAWQSInf = new();
+            AQT2D.HAWQSInf = new();
 
             try
             {
@@ -2383,10 +2383,10 @@ namespace GUI.AQUATOX
                 HAWQSInp.dataset = "HUC" + hucstr;
                 HAWQSInp.downstreamSubbasin = HUC0D;
 
-                HAWQSInf.sourceHUCs = new();
-                HAWQSInf.LoadFromtoData(HUC0D); //load relevant fromto data to dictionary
-                HAWQSInf.AddSourceHUCs(HUC0D);
-                HAWQSInp.upstreamSubbasins = HAWQSInf.sourceHUCs.ToArray();
+                AQT2D.HAWQSInf.sourceHUCs = new();
+                AQT2D.HAWQSInf.LoadFromtoData(HUC0D); //load relevant fromto data to dictionary
+                AQT2D.HAWQSInf.AddSourceHUCs(HUC0D);
+                HAWQSInp.upstreamSubbasins = AQT2D.HAWQSInf.sourceHUCs.ToArray();
 
                 string msj = MasterSetupJson();
                 if (msj == "")
@@ -2406,6 +2406,8 @@ namespace GUI.AQUATOX
                 HAWQSInp.setHrus.target = 1.0;
                 if (hucstr == "12") HAWQSInp.setHrus.target = 0.5;
                 if (hucstr == "14") HAWQSInp.setHrus.target = 0.1; //TAMU specs
+
+                HAWQSInp.reportData.outputs.rch.subbasins = AQT2D.HAWQSInf.boundaryHUCs(HUC0D, true).ToArray();
 
                 ConsoleButton.Checked = true;
                 ChartVisible(false);
@@ -2546,8 +2548,6 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-            string[] colnames;
-            
             Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup
             void AddHAWQSRchData(long longKey, DateTime dateTimeKey, HAWQSRCHRow data)
             {
@@ -2565,8 +2565,9 @@ namespace GUI.AQUATOX
             try
             {
                 string[] csvlines = File.ReadAllLines(filen);
-                colnames = csvlines[0].Split(',');  //read header line, note columns 0-3 have "date" through "sub-basin"
-                colnames = colnames.Skip(4).ToArray();  // colnames now will correspond with row.vals
+                AQT2D.HAWQSInf = new(); 
+                AQT2D.HAWQSInf.colnames = csvlines[0].Split(',');  //read header line, note columns 0-3 have "date" through "sub-basin"
+                AQT2D.HAWQSInf.colnames = AQT2D.HAWQSInf.colnames.Skip(4).ToArray();  // colnames now will correspond with row.vals
                 for (int i = 1; i < csvlines.Length; i++)
                 {
                     string[] rowdata = csvlines[i].Split(',');  //split 

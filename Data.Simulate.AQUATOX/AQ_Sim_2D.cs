@@ -15,11 +15,10 @@ using System.Threading;
 using System.Data;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
-using Utilities;
 using Microsoft.VisualBasic.FileIO;
-using SharpCompress.Common;
-using static Data.Source.PRISMData;
+using AQUATOX.OrgMatter;
+using Amazon.Auth.AccessControlPolicy;
+using DnsClient.Protocol;
 
 namespace AQUATOX.AQSim_2D
 
@@ -49,6 +48,7 @@ namespace AQUATOX.AQSim_2D
         public class HAWQSInfo
         {
             public List<string> sourceHUCs;
+            public string[] colnames;
 
             private Dictionary<string, List<string>> fromtoData = new Dictionary<string, List<string>>();
 
@@ -81,13 +81,19 @@ namespace AQUATOX.AQSim_2D
                 else throw new Exception("File Not Found: "+fromtopath);
             }
 
-            public string[] boundaryHUCs(string HUC_ID)
+            public List<string> boundaryHUCs(string HUC_ID, bool include_self)
             {
                 if (fromtoData.TryGetValue(HUC_ID, out List<string> matchingHUCs))
                 {
-                    return matchingHUCs.ToArray();
+                    if (include_self) matchingHUCs.Add(HUC_ID);
+                    return matchingHUCs;
                 }
-                else return new string[0];
+                else
+                {
+                    List<string> boundary = new List<string>();
+                    if (include_self) boundary.Add(HUC_ID);
+                    return boundary;
+                }
             }
                             
 
@@ -96,7 +102,7 @@ namespace AQUATOX.AQSim_2D
                 // Helper method to check if the HUC starts with the same first two characters
                 bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 2) == huc2.Substring(0, 2);
 
-                foreach (var boundaryHuc in boundaryHUCs(HUC_ID))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
+                foreach (var boundaryHuc in boundaryHUCs(HUC_ID,false))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
                 {
                     if (!sourceHUCs.Contains(boundaryHuc))
                     {
@@ -147,6 +153,8 @@ namespace AQUATOX.AQSim_2D
         public class Rch
         {
             public List<string> statistics { get; set; } = new List<string> { "daily" };
+
+            public string[] subbasins { get; set; }
         }
 
         public class Sub
@@ -154,6 +162,13 @@ namespace AQUATOX.AQSim_2D
             public List<string> statistics { get; set; } = new List<string> { "daily" };
         }
 
+
+
+
+        /// <summary>
+        /// Info linked from HAWQS
+        /// </summary>
+        public HAWQSInfo HAWQSInf = null;
 
         /// <summary>
         /// current stream network object
@@ -724,28 +739,28 @@ namespace AQUATOX.AQSim_2D
             //return JsonConvert.DeserializeObject<TimeSeriesOutput<List<double>>>(rstring);
         }
 
+        public void setupLoad(TLoadings load, int count)
+        {
+            load.list.Clear();
+            load.list.Capacity = count;
+            load.UseConstant = false;
+            load.MultLdg = 1;
+            load.NoUserLoad = false;
+            load.ITSI = null;
+        }
+
 
         public void VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
         {
 
-            void setupLoad(TLoadings load)
-            {
-                load.list.Clear();
-                load.list.Capacity = ThisSeg.Count;
-                load.UseConstant = false;
-                load.MultLdg = 1;
-                load.NoUserLoad = false;
-                load.ITSI = null;
-            }
-
             TVol.InitialCond = ThisSeg[FirstDate].vals[1] * 86400;  //FIXME assumes one-day retention time
             TVol.Calc_Method = VolumeMethType.KnownVal;
 
-            TLoadings KnownLoad =  TVol.LoadsRec.Loadings; ;  
+            TLoadings KnownLoad =  TVol.LoadsRec.Loadings;   
             TLoadings InflowLoad = TVol.LoadsRec.Alt_Loadings[0];   // array slot [0] is "inflow" in this case (TVolume)
 
-            setupLoad(InflowLoad);
-            setupLoad(KnownLoad);
+            setupLoad(InflowLoad, ThisSeg.Count);
+            setupLoad(KnownLoad, ThisSeg.Count);
 
             foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
             {
@@ -766,43 +781,112 @@ namespace AQUATOX.AQSim_2D
         {
             jsondata = "";
             long HUCID = long.Parse(HUC0D);
-            List <long> Boundaries = new();  //rch data rows relevant to boundary conditions for this HUC14
+            HAWQSInfo HInfo = new();
+            HInfo.LoadFromtoData(HUC0D);
+            List <string> Boundaries = HInfo.boundaryHUCs(HUC0D, false);  //rch data rows relevant to boundary conditions for this HUC14
             Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[HUCID];
+            List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
+            foreach (string bound in Boundaries)
+            {
+                BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
+            }
+
             string HUCStr = HUC0D.Length.ToString();
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);  //fixme, add HUC length?
             if (err != "") { return err; }
 
-
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+            DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
+            VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);
 
-            VolFlowFromHAWQS(TVol, ThisSeg, Sim.AQTSeg.PSetup.FirstDay.Val);
+            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  //wtmp
+            AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen };
 
-            string[] components = { "FLOW", "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  //wtmp
-
-            DateTime time = DateTime.Now;
-            double boundload = 0;
-            foreach (long bound in Boundaries)
+            TPlant PPhyto = null; 
+            for (AllVariables AlgLoop = Consts.FirstAlgae; AlgLoop <= Consts.LastAlgae; AlgLoop++)  //identify any phytoplankton in the simulation for CHLA linkage
             {
-            //    boundload = HRD[time,  ]
+                TPlant TP = Sim.AQTSeg.GetStatePointer(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                if (TP != null)
+                {
+                    if (TP.IsPhytoplankton())  //Chl-a is assigned to first phytoplankton in the simulation 
+                    {
+                        PPhyto = TP;  
+                        SVs[4] = TP.NState;
+                        break;
+                    }
+                }
             }
 
-            // inflow = 
-
-            if (boundary)
+            double InitFlow = ThisSeg[FirstDay].vals[1];  //column for flow_OUT
+            for (int i = 0; i < components.Length; i++)
             {
+                bool isSED = (components[i] == "SED");  //sediment is handled differently in units and modeling
+                bool isCBOD = (components[i] == "CBOD"); //unique input data structure in AQUATOX for CBOD
+                bool isCHLA = (components[i] == "CHLA"); //Convert CHLA to biomass units
 
-            }
+                int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
+                int col_OUT = col_IN + 1;
 
-            if (overland)
-            {
+                TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
+                if (TSV != null)
+                {
+                    TSV.InitialCond = ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
+                    if (isSED) TSV.InitialCond *= 1000;  // sed is in units of tons
+                    if (isCHLA) TSV.InitialCond = TSV.InitialCond * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90 ;
+                    //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
 
+                    TLoadings InflowLoad = TSV.LoadsRec.Loadings;     // inflow loadings for boundary condition segments
+                    TLoadings PSLoad = TSV.LoadsRec.Alt_Loadings[2];  // Alt_Loadings[2] is non - point source loadings
+
+                    if (isCBOD)
+                    {
+                        DetritalInputRecordType DIR = ((TDissRefrDetr)TSV).InputRecord;
+                        DIR.InitCond = TSV.InitialCond;
+                        DIR.DataType = DetrDataType.CBOD;
+                        InflowLoad = DIR.Load.Loadings; 
+                        PSLoad = DIR.Load.Alt_Loadings[2];  //deal with different data structure for susp&dissolved detritus (CBOD)
+                    }
+
+                    bool overlandrelevant = (!isSED && !isCHLA);  //non-point source loads not relevant in AQUATOX for these state vars.
+
+                    if (boundary || isSED) setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs
+                    if (overland && overlandrelevant) setupLoad(PSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
+
+                    foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                    {
+                        double boundInput = 0;
+                        double boundflow = 0;
+
+                        foreach (Dictionary<DateTime, HAWQSRCHRow> BoundSeg in BoundSegs)
+                        {
+                            boundInput += BoundSeg[pair.Key].vals[col_OUT];  // kg/d
+                            boundflow += BoundSeg[pair.Key].vals[1];  // flow out in m3/s
+                        }
+
+                        double inflowConc = 0;
+                        if (boundflow > Consts.Tiny)
+                             inflowConc = boundInput / boundflow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s)
+                        if (components[i] == "SED") inflowConc *= 1000;  // sed is in units of tons
+
+                        if (boundary || isSED)
+                        {
+                            InflowLoad.list.Add(pair.Key, inflowConc);
+                        }
+
+                        if (overland && overlandrelevant)
+                        {
+                            double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
+                            double overland_flow = (comp_IN - boundInput) * 1000;   // g/d = kg/d * 1000 g/kg
+                            PSLoad.list.Add(pair.Key, overland_flow);   // 
+                        }
+                    }
+                }
             }
             
             string errmessage = Sim.SaveJSON(ref jsondata);
             return errmessage;
-
         }
 
 
