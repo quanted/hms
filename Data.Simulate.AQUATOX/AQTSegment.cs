@@ -2678,7 +2678,7 @@ namespace AQUATOX.AQTSegment
                 if ((ProgWorker != null)||(ProgHandle != null))
                 {
                     int progint = (int)Math.Round(100 * ((x - TStart) / (TEnd - TStart)));
-                    if (progint == lastprog)
+                    if (progint != lastprog)
                     {
                         if (ProgWorker != null) ProgWorker.ReportProgress(progint);
                         else ProgHandle.Report(progint);
@@ -2975,14 +2975,30 @@ namespace AQUATOX.AQTSegment
                                 TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
                             }
 
-                        if (TSV.NState == AllVariables.Volume)  //5/5/2021, always write volume rates
-                            foreach (TRate PR in TSV.RateColl)
+                        if (TSV.NState == AllVariables.Volume)
+                        {
+                            foreach (TRate PR in TSV.RateColl)  //5/5/2021, always write volume rates
                             {
                                 double ThisRate = PR.GetRate();
                                 string ustr = "m3/d";
                                 if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
                                 TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
                             }
+
+                            // store other general calculations in TVolume state variable for now  FIXME
+
+                            // chl a
+                            double chla = 0;
+                            for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
+                            {
+                                TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                                if (PP != null) chla += PP.State * ((0.526 / PP.PAlgalRec.Plant_to_Chla.Val) * 1000.0);
+
+                            }
+                            if (firstwrite) TSV.SVResults.AddColumn("chlorophyll a", "ug/L");
+                            TSV.SVResults.Results[rescnt].Add(chla); 
+
+                        }
                     }
             }
         }
@@ -3620,12 +3636,11 @@ namespace AQUATOX.AQTSegment
             double TMaxAdapt = TMax + Acclimation;
             // C          C     C
             double TOptAdapt = TOpt + Acclimation;
-            if (Q10 <= 1.0)
+            if (Q10 <= 1.0) // JSC added "=" to "<=" otherwise YT=0, division by zero
             {
-                // JSC added "=" to "<=" otherwise YT=0, division by zero
-                Q10 = 2.0;
+                Q10 = 2.0;  // rate of change per 10 degrees
             }
-            // rate of change per 10 degrees
+            
             if (TMaxAdapt <= TOptAdapt)
             {
                 TMaxAdapt = TOptAdapt + Consts.VSmall;

@@ -94,10 +94,10 @@
             label9 = new System.Windows.Forms.Label();
             ExecutePanel = new System.Windows.Forms.Panel();
             progressBar1 = new System.Windows.Forms.ProgressBar();
-            StatusLabel = new System.Windows.Forms.Label();
             CancelButton = new System.Windows.Forms.Button();
             executeButton = new System.Windows.Forms.Button();
             proglabel = new System.Windows.Forms.Label();
+            StatusLabel = new System.Windows.Forms.Label();
             ModelSetupPanel.SuspendLayout();
             HAWQSButtonPanel.SuspendLayout();
             SystemInfoPanel.SuspendLayout();
@@ -204,9 +204,9 @@
             // 
             HAWQSButtonPanel.Controls.Add(ReadHAWQSButton);
             HAWQSButtonPanel.Controls.Add(HAWQS_button);
-            HAWQSButtonPanel.Location = new System.Drawing.Point(27, 63);
+            HAWQSButtonPanel.Location = new System.Drawing.Point(28, 61);
             HAWQSButtonPanel.Name = "HAWQSButtonPanel";
-            HAWQSButtonPanel.Size = new System.Drawing.Size(169, 55);
+            HAWQSButtonPanel.Size = new System.Drawing.Size(185, 55);
             HAWQSButtonPanel.TabIndex = 52;
             // 
             // ReadHAWQSButton
@@ -810,10 +810,10 @@
             // 
             ExecutePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             ExecutePanel.Controls.Add(progressBar1);
-            ExecutePanel.Controls.Add(StatusLabel);
             ExecutePanel.Controls.Add(CancelButton);
             ExecutePanel.Controls.Add(executeButton);
             ExecutePanel.Controls.Add(proglabel);
+            ExecutePanel.Controls.Add(StatusLabel);
             ExecutePanel.Location = new System.Drawing.Point(24, 391);
             ExecutePanel.Name = "ExecutePanel";
             ExecutePanel.Size = new System.Drawing.Size(255, 102);
@@ -822,7 +822,7 @@
             // progressBar1
             // 
             progressBar1.AccessibleRole = System.Windows.Forms.AccessibleRole.Dial;
-            progressBar1.Location = new System.Drawing.Point(2, 48);
+            progressBar1.Location = new System.Drawing.Point(3, 49);
             progressBar1.Name = "progressBar1";
             progressBar1.Size = new System.Drawing.Size(249, 21);
             progressBar1.Step = 1;
@@ -831,17 +831,9 @@
             progressBar1.Value = 1;
             progressBar1.Visible = false;
             // 
-            // StatusLabel
-            // 
-            StatusLabel.Location = new System.Drawing.Point(5, 54);
-            StatusLabel.Name = "StatusLabel";
-            StatusLabel.Size = new System.Drawing.Size(235, 15);
-            StatusLabel.TabIndex = 56;
-            StatusLabel.Text = "Model Status Label";
-            StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // CancelButton
             // 
+            CancelButton.Cursor = System.Windows.Forms.Cursors.Hand;
             CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             CancelButton.ForeColor = System.Drawing.Color.Black;
             CancelButton.Location = new System.Drawing.Point(89, 71);
@@ -852,6 +844,7 @@
             CancelButton.Text = "Cancel";
             CancelButton.UseVisualStyleBackColor = true;
             CancelButton.Visible = false;
+            CancelButton.Click += CancelButton_Click;
             // 
             // executeButton
             // 
@@ -866,13 +859,22 @@
             // proglabel
             // 
             proglabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
-            proglabel.Location = new System.Drawing.Point(10, 33);
+            proglabel.Location = new System.Drawing.Point(10, 34);
             proglabel.Name = "proglabel";
             proglabel.Size = new System.Drawing.Size(235, 15);
             proglabel.TabIndex = 55;
             proglabel.Text = "Model Progress Label";
             proglabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             proglabel.Visible = false;
+            // 
+            // StatusLabel
+            // 
+            StatusLabel.Location = new System.Drawing.Point(6, 50);
+            StatusLabel.Name = "StatusLabel";
+            StatusLabel.Size = new System.Drawing.Size(235, 40);
+            StatusLabel.TabIndex = 56;
+            StatusLabel.Text = "Model Ready to Run: Input Segments Created";
+            StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MultiSegForm
             // 

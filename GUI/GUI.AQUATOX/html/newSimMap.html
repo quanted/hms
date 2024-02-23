@@ -236,7 +236,6 @@
         //start geojson-vt map tiles
         //interaction on the underlying polygon not drawn but represented by the tiles - they draw better
         var clickedHUC14 = null;
-        var allShapes;
 
         MAP.on('click', function (e) {
             var x = e.latlng.lng;
@@ -258,20 +257,22 @@
                         }
 
                         var highlightIndex = layerData[0].feature.properties.HUC14;
-                        clickedHUC14 = new L.geoJson(allShapes, {
+                        clickedHUC14 = new L.geoJson(geojsonlayer.toGeoJSON(), {
                             filter: function (feature, layer) {
                                 return feature.properties.HUC14 == highlightIndex;
                             },
-                            style: { color: 'deepskyblue', weight: 2, fillOpacity: 0.0}
-                        }).addTo(MAP);
-
-                        var attributes = highlightIndex.split('-', 2);
-                        var name = attributes[0];
-                        sendMessageToDotnet("HUC14|" + name);
-                        var str = name + "|" + JSON.stringify(clickedHUC14.toGeoJSON());
-                        sendMessageToDotnet(str);
-
-                        MAP.fitBounds(clickedHUC14.getBounds());
+                            style: { color: 'deepskyblue', weight: 2, fillOpacity: 0.0 }
+                        });
+                        bounds = clickedHUC14.getBounds();
+                        if (bounds.isValid()) { 
+                            clickedHUC14.addTo(MAP);
+                            var attributes = highlightIndex.split('-', 2);
+                            var name = attributes[0];
+                            sendMessageToDotnet("HUC14|" + name);
+                            var str = name + "|" + JSON.stringify(clickedHUC14.toGeoJSON());
+                            sendMessageToDotnet(str);
+                            MAP.fitBounds(bounds);
+                        }
                     }
                 }
             });
@@ -570,7 +571,9 @@
                 style: geojsonStyle
             };
             H14GeoJson.push(new L.GeoJSON(allShapes));
-            H14Maps.push(L.geoJson.vt(allShapes, options).addTo(MAP));
+            H14Map = L.geoJson.vt(allShapes, options).addTo(MAP);
+            H14Maps.push(H14Map);
+            H14Map.bringToFront();
 
             sendMessageToDotnet('DoneDraw');
         }

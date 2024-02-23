@@ -17,14 +17,11 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
-using Amazon.Auth.AccessControlPolicy;
-using DnsClient.Protocol;
 
 namespace AQUATOX.AQSim_2D
 
 {
     public class AQSim_2D
-
     {
         /// <summary>
         /// holds results from streamNetwork web service
@@ -99,8 +96,8 @@ namespace AQUATOX.AQSim_2D
 
             public void AddSourceHUCs(string HUC_ID)
             {
-                // Helper method to check if the HUC starts with the same first two characters
-                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 2) == huc2.Substring(0, 2);
+                // Helper method to check if the HUC starts with the same first eight characters
+                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
 
                 foreach (var boundaryHuc in boundaryHUCs(HUC_ID,false))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
                 {
@@ -120,7 +117,8 @@ namespace AQUATOX.AQSim_2D
         {
             public string dataset { get; set; } = "HUC14";
             public string downstreamSubbasin { get; set; } = "01010002010504";
-            public string[] upstreamSubbasins { get; set; } 
+            public string[] upstreamSubbasins { get; set; }
+            //public string upstreamDataSources { get; set; } = "NWM";
             public SetHrus setHrus { get; set; } = new SetHrus();
             public string weatherDataset { get; set; } = "PRISM";
             public string startingSimulationDate { get; set; } = "1981-01-01";
@@ -794,15 +792,15 @@ namespace AQUATOX.AQSim_2D
             string HUCStr = HUC0D.Length.ToString();
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);  //fixme, add HUC length?
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);  //fixme, add HUC length
             if (err != "") { return err; }
 
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
             DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
             VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);
 
-            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  //wtmp
-            AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen };
+            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  
+            AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen, AllVariables.Temperature };
 
             TPlant PPhyto = null; 
             for (AllVariables AlgLoop = Consts.FirstAlgae; AlgLoop <= Consts.LastAlgae; AlgLoop++)  //identify any phytoplankton in the simulation for CHLA linkage
@@ -817,20 +815,20 @@ namespace AQUATOX.AQSim_2D
                         break;
                     }
                 }
-            }
+            }  
 
             double InitFlow = ThisSeg[FirstDay].vals[1];  //column for flow_OUT
             for (int i = 0; i < components.Length; i++)
             {
                 bool isSED = (components[i] == "SED");  //sediment is handled differently in units and modeling
                 bool isCBOD = (components[i] == "CBOD"); //unique input data structure in AQUATOX for CBOD
-                bool isCHLA = (components[i] == "CHLA"); //Convert CHLA to biomass units
+                bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
 
                 int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
                 int col_OUT = col_IN + 1;
 
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
-                if (TSV != null)
+                if (TSV != null) 
                 {
                     TSV.InitialCond = ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
                     if (isSED) TSV.InitialCond *= 1000;  // sed is in units of tons
@@ -851,8 +849,21 @@ namespace AQUATOX.AQSim_2D
 
                     bool overlandrelevant = (!isSED && !isCHLA);  //non-point source loads not relevant in AQUATOX for these state vars.
 
-                    if (boundary || isSED) setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs
-                    if (overland && overlandrelevant) setupLoad(PSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
+                    TSV.LoadNotes1 = "";
+                    TSV.LoadNotes2 = "";
+                    if (boundary || isSED) 
+                    {
+                        setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs
+                        TSV.LoadNotes1 = "Inflow Loads from HAWQS Linkage (Daily RCH file)";
+                        if (isSED) TSV.LoadNotes1 = "In-reach Sediment Values from HAWQS Linkage (Daily RCH file)";
+                    }
+                    
+
+                    if (overland && overlandrelevant)
+                    {
+                        setupLoad(PSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
+                        TSV.LoadNotes2 = "Non-Point Source Loads from HAWQS Simulation";
+                    }
 
                     foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
                     {
@@ -878,13 +889,28 @@ namespace AQUATOX.AQSim_2D
                         if (overland && overlandrelevant)
                         {
                             double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
-                            double overland_flow = (comp_IN - boundInput) * 1000;   // g/d = kg/d * 1000 g/kg
-                            PSLoad.list.Add(pair.Key, overland_flow);   // 
+                            double overland_flow = Math.Max(0,(comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
+                            PSLoad.list.Add(pair.Key, overland_flow);   // add daily NPS load in grams/d 
                         }
                     }
                 }
             }
-            
+
+            // Water Temperature Linkage Here
+            TStateVariable TTemp = Sim.AQTSeg.GetStatePointer( AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            int col_WTMP = Array.IndexOf(HAWQSInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
+            if ((TTemp != null) && (col_WTMP >= 0))
+            {
+                TTemp.InitialCond = ThisSeg[FirstDay].vals[col_WTMP];
+                TTemp.LoadNotes1 = "Temperature from HAWQS RCH data";
+                TTemp.LoadNotes2 = "";
+                setupLoad(TTemp.LoadsRec.Loadings, ThisSeg.Count);
+                foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                {
+                    TTemp.LoadsRec.Loadings.list.Add(pair.Key, pair.Value.vals[col_WTMP]);  // add daily WT in deg C
+                }
+            }
+
             string errmessage = Sim.SaveJSON(ref jsondata);
             return errmessage;
         }
@@ -1081,14 +1107,14 @@ namespace AQUATOX.AQSim_2D
         /// Segments must be executed in the order and with the parallel processing specified within SN streamnetwork object.
         /// Results of the simulation are passed back in a json and stored in the archive Dictionary.
         /// </summary>
-        /// <param name="comid">integer comid of segment in network</param>
+        /// <param name="segID">integer ID (comid, HUC, WBcomid) of segment in network</param>
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="outstr">information about the status of the run for the user's log</param>
         /// <param name="jsonstring">the completed simulation with results </param>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
         /// <returns>boolean: true if the run was completed successfully</returns>/// 
-        public bool executeModel(int comid, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
+        public bool executeModel(long segID, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
         {
             AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
             Sim.AQTSeg.ProgHandle = this.ProgHandle;
@@ -1107,23 +1133,23 @@ namespace AQUATOX.AQSim_2D
             if (SN != null)
             {
                 if (SN.sources != null)
-                 if (SN.sources.TryGetValue(comid.ToString(), out int[] Sources))
+                 if (SN.sources.TryGetValue(segID.ToString(), out int[] Sources))
                     foreach (int SrcID in Sources)
                     {
-                        if ((SrcID != comid) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
+                        if ((SrcID != segID) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                         {
                             nSources++;
                             string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
                             if (errstr != "") outstr.Add(errstr);
-                                else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + comid.ToString());
+                                else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + segID.ToString());
                         }
                     };
             
                 if ((SN.waterbodies != null) && (SN.sources != null))
                 {   // pass data into Waterbodies from adjacent stream segments
-                    if (SN.waterbodies.comid_wb.ContainsValue(comid))  // if the comid is a waterbody
+                    if (SN.waterbodies.comid_wb.ContainsValue((int)segID))  // if the comid is a waterbody
                       foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
-                        if (entry.Value == comid)  // for each stream segment in waterbody
+                        if (entry.Value == segID)  // for each stream segment in waterbody
                           if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
                             foreach (int SrcID in Sources) //loop through the sources
                               if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
@@ -1134,7 +1160,7 @@ namespace AQUATOX.AQSim_2D
                                         nSources++;
                                         string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
                                         if (errstr != "") outstr.Add(errstr);
-                                            else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + comid.ToString());
+                                            else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + segID.ToString());
                                     }
                                 }
                 }
@@ -1145,7 +1171,7 @@ namespace AQUATOX.AQSim_2D
             string errmessage = Sim.Integrate();
             if (errmessage == "")
             {
-                archiveOutput(comid, Sim);
+                archiveOutput((int)segID, Sim);
                 errmessage = Sim.SaveJSON(ref jsonstring);
 
                 if (errmessage != "")
@@ -1159,7 +1185,7 @@ namespace AQUATOX.AQSim_2D
                 return false;
                  };
 
-            outstr.Add("INFO: " + "--> Executed COMID " + comid.ToString());
+            outstr.Add("INFO: " + "--> Executed Segment " + segID.ToString());
             return true;
         }
     }

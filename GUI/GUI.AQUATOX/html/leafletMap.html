@@ -383,6 +383,11 @@
         function onEachFeature(feature, layer) {
             layer.on('click', function (e) {
                 if (layer.feature.properties.COMID != null) sendMessageToDotnet(layer.feature.properties.COMID.toString());
+                else if (layer.feature.properties.ID != null) sendMessageToDotnet(layer.feature.properties.ID.toString());
+                else if (layer.feature.properties.HUC_12 != null) sendMessageToDotnet(layer.feature.properties.HUC_12.toString());    
+                else if (layer.feature.properties.HUC_10 != null) sendMessageToDotnet(layer.feature.properties.HUC_10.toString());    
+                else if (layer.feature.properties.HUC_8 != null) sendMessageToDotnet(layer.feature.properties.HUC_8.toString());    
+
             });
 
             if (layer.feature.properties.ID != null) {
