@@ -86,7 +86,11 @@ namespace GUI.AQUATOX
 
             SV = IncomingS;
             isInternalSeg = !isBoundary;
+
             UpdateScreen();
+
+            int panelBottom = LoadingsPanel.Location.Y+LTPanel.Location.Y + LTPanel.Height + 20;
+            if (panelBottom > this.ClientSize.Height) this.Height = panelBottom + (this.Height - this.ClientSize.Height);  //ensure notes are visible.
 
             if (ShowDialog() == DialogResult.Cancel)
             {

@@ -1071,6 +1071,15 @@ namespace AQUATOX.AQTSegment
             PR.Rate[AQTSeg.DerivStep] = Rt;
         }
 
+        // return output header stint for graphing/export purposes
+        public string OutputText(int col)
+        {
+            if (SVoutput == null) return "";
+            return SVoutput.Metadata["State_Variable"] + " " +
+                   SVoutput.Metadata["Name_" + col.ToString()] +
+                   " (" + SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+        }
+
     }  // end TStateVariable
 
 
@@ -1094,7 +1103,7 @@ namespace AQUATOX.AQTSegment
     {
         public string GraphName ;
         public List<SeriesID> YItems = new List<SeriesID>();
-        public string Y1Label;
+        public string Y1Label;  // not currently used
 
         // public Color[,] Colors;
         // public TSeriesPointerStyle[,] Shapes;
@@ -5047,6 +5056,53 @@ namespace AQUATOX.AQTSegment
             return outtxt;
         }
 
+        public void DefaultGraphs()
+        {
+
+            TGraphSetup AddVarsToGraph(string name, AllVariables firstvar, AllVariables lastvar)
+            {
+                TGraphSetup result = new TGraphSetup(name);
+                for (AllVariables var = firstvar; var <= lastvar; var++)
+                {
+                    TStateVariable TSV = GetStatePointer(var, T_SVType.StV, T_SVLayer.WaterCol);
+                    if (TSV != null) 
+                    {
+                        string sertxt = TSV.OutputText(1);
+                        result.YItems.Add(new SeriesID() { nm = sertxt, lyr = TSV.Layer, ns = TSV.NState, typ = TSV.SVType, indx = 1});
+
+                        if (var==AllVariables.Volume)
+                        {
+                            result.YItems.Add(new SeriesID() { nm = TSV.OutputText(2), lyr = TSV.Layer, ns = TSV.NState, typ = TSV.SVType, indx = 2 }); //add inflow
+                        }
+
+                    }
+                }
+                return result;
+            };
+
+            if (Graphs.GList.Count > 0) return;
+
+            //nutrients
+            TGraphSetup ngraph = AddVarsToGraph("Nutrients",AllVariables.Ammonia, AllVariables.Phosphate);
+            if (ngraph.YItems.Count > 0) Graphs.GList.Add(ngraph);
+
+            //watervol
+            TGraphSetup vgraph = AddVarsToGraph("Water Volume", AllVariables.Volume, AllVariables.Volume);
+            if (vgraph.YItems.Count > 0) Graphs.GList.Add(vgraph);
+
+            //OM
+            TGraphSetup OMgraph = AddVarsToGraph("Organic Matter", AllVariables.DissRefrDetr, AllVariables.SuspLabDetr);
+            if (OMgraph.YItems.Count > 0) Graphs.GList.Add(OMgraph);
+
+            //plants
+            TGraphSetup Pgraph = AddVarsToGraph("Plants", Consts.FirstPlant, Consts.LastPlant);
+            if (Pgraph.YItems.Count > 0) Graphs.GList.Add(Pgraph);
+
+            //animals
+            TGraphSetup Agraph = AddVarsToGraph("Animals", Consts.FirstAnimal, Consts.LastAnimal);
+            if (Agraph.YItems.Count > 0) Graphs.GList.Add(Agraph);
+
+        }
 
     }  // end TAQUATOXSegment
 

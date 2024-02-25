@@ -71,9 +71,7 @@ namespace GUI.AQUATOX
                         int ccount = vallist.Count();
                         for (int col = 1; col <= ccount; col++)
                         {
-                            string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
-                                 TSV.SVoutput.Metadata["Name_" + col.ToString()] +
-                                 " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+                            string sertxt = TSV.OutputText(col);
 
                             if (listBox2.Items.Contains(sertxt))
                                 Graph.YItems.Add(new SeriesID() { nm = sertxt, lyr = TSV.Layer, ns=TSV.NState, typ=TSV.SVType, indx=col});
@@ -98,9 +96,7 @@ namespace GUI.AQUATOX
                     if (!ShowRatesBox.Checked) ccount = 1;
                     for (int col = 1; col <= ccount; col++)
                     {
-                        string sertxt = TSV.SVoutput.Metadata["State_Variable"] + " " +
-                             TSV.SVoutput.Metadata["Name_" + col.ToString()] +
-                             " (" + TSV.SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+                        string sertxt = TSV.OutputText(col);  
 
                         if ((string.IsNullOrEmpty(SubstringBox.Text))||(sertxt.Contains(SubstringBox.Text, StringComparison.OrdinalIgnoreCase)))
                          {

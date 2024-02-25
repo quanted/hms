@@ -92,12 +92,12 @@ namespace AQUATOX.AQSim_2D
                     return boundary;
                 }
             }
-                            
+                        
 
             public void AddSourceHUCs(string HUC_ID)
             {
                 // Helper method to check if the HUC starts with the same first eight characters
-                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
+                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);  
 
                 foreach (var boundaryHuc in boundaryHUCs(HUC_ID,false))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
                 {
