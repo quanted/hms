@@ -196,7 +196,7 @@ namespace GUI.AQUATOX
 
             aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
             
-            //if (aQTS.AQTSeg.Graphs.GList.Count < 1) aQTS.AQTSeg.DefaultGraphs();
+            if (aQTS.AQTSeg.Graphs.GList.Count < 1) aQTS.AQTSeg.DefaultGraphs();
             UpdateGraphBox();
             DisplayGraph();
         }
@@ -338,7 +338,7 @@ namespace GUI.AQUATOX
         private void toggleLog_Click(object sender, EventArgs e)
         {
             chart1.ChartAreas[0].AxisY.IsLogarithmic = !(chart1.ChartAreas[0].AxisY.IsLogarithmic);
-            if (chart1.ChartAreas[0].AxisY.IsLogarithmic) chart1.ChartAreas[0].AxisY.LabelStyle.Format = "E1";
+            if (chart1.ChartAreas[0].AxisY.IsLogarithmic) chart1.ChartAreas[0].AxisY.LabelStyle.Format = "0.0+E00";
             else chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:#,##0.###}";
         }
 

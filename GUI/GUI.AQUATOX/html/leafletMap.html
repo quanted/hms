@@ -12,10 +12,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
-    <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
-            integrity="sha512-YZ6b5bXRVwipfqul5krehD9qlbJzc6KOGXYsDjU9HHXW2gK57xmWl2gU6nAegiErAqFXhygKIsWPKbjLPXVb2g=="
-            crossorigin=""></script>
-
+    <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js" integrity="sha384-twf8YFpk0FSzm0AmW2GRJjjnqIuQ2y86vZXh2roYI8O+kFbEBjSUDUT6U72w8shL" crossorigin="anonymous"></script>
     <style> 
 
     .leaflet-tooltip { padding: 2px; }
@@ -259,34 +256,29 @@
 
             const layer = L.esri.featureLayer({
                 url: url,
+                style: (feature) => {
+                        return { color: defaultColor, weight: 1, fillOpacity: 0 };
+                },
                 onEachFeature: onEachFeature || null,
-            });
-
-            layer.setStyle({
-                color: defaultColor,
-                fillOpacity: 0,
-                weight: 1,
             });
 
             return layer;
 
 		}
 
-        const HUC8 = createHUCLayer(URL_NP21_HUCs + "2", "blue", "red", 8);
+        const HUC8 = createHUCLayer(URL_NP21_HUCs + "2", "blue", "orange", 8);
         const HUC10 = createHUCLayer(URL_NP21_HUCs + "1", "blue", "maroon", 10);
         const HUC12 = createHUCLayer(URL_NP21_HUCs + "0", "red", "navy", 12);
 
         const FLOWLINES_LAYER = L.esri
             .featureLayer({
                 url: URL_NP21_FLOWLINES,
+                style: (feature) => {
+                        return { color: "black", weight: 1, fillOpacity: 0 };
+                },
+
                 onEachFeature: FLonEachFeature
             });
-        FLOWLINES_LAYER.setStyle({
-            color: "black",
-            fillOpacity: 0,
-            weight: 1,
-        });
-
 
         const OVERLAY_MAPS = {
             "HUC8 Boundaries": HUC8,
@@ -387,7 +379,6 @@
                 else if (layer.feature.properties.HUC_12 != null) sendMessageToDotnet(layer.feature.properties.HUC_12.toString());    
                 else if (layer.feature.properties.HUC_10 != null) sendMessageToDotnet(layer.feature.properties.HUC_10.toString());    
                 else if (layer.feature.properties.HUC_8 != null) sendMessageToDotnet(layer.feature.properties.HUC_8.toString());    
-
             });
 
             if (layer.feature.properties.ID != null) {

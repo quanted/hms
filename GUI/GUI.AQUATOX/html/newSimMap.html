@@ -13,17 +13,11 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
-    <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
-            integrity="sha512-YZ6b5bXRVwipfqul5krehD9qlbJzc6KOGXYsDjU9HHXW2gK57xmWl2gU6nAegiErAqFXhygKIsWPKbjLPXVb2g=="
-            crossorigin=""></script>
-
+    <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js" integrity="sha384-twf8YFpk0FSzm0AmW2GRJjjnqIuQ2y86vZXh2roYI8O+kFbEBjSUDUT6U72w8shL" crossorigin="anonymous"></script>
     <!-- Load Esri Leaflet Geocoder from CDN -->
-    <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@3.1.3/dist/esri-leaflet-geocoder.css"
-          integrity="sha512-IM3Hs+feyi40yZhDH6kV8vQMg4Fh20s9OzInIIAc4nx7aMYMfo+IenRUekoYsHZqGkREUgx0VvlEsgm7nCDW9g=="
-          crossorigin="">
-    <script src="https://unpkg.com/esri-leaflet-geocoder@3.1.3/dist/esri-leaflet-geocoder.js"
-            integrity="sha512-mwRt9Y/qhSlNH3VWCNNHrCwquLLU+dTbmMxVud/GcnbXfOKJ35sznUmt3yM39cMlHR2sHbV9ymIpIMDpKg4kKw=="
-            crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@3.1.4/dist/esri-leaflet-geocoder.css" integrity="sha384-29tCxPoeXnj1Eu4bPYJptxWeuI1WdrXSrGlz1J5lP6voxpJXn2f98srAoeG6KXCi" crossorigin="anonymous">
+    <script src="https://unpkg.com/esri-leaflet-geocoder@3.1.4/dist/esri-leaflet-geocoder.js" integrity="sha384-4LYfv8nxzrIglv5c92vOwCL7CJOPTE9QU2s7rngYvVD9JwJoz9bEnLmwZsZ8Dvgu" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"
             integrity="sha512-Abr21JO2YqcJ03XGZRPuZSWKBhJpUAR6+2wH5zBeO4wAw4oksr8PRdF+BKIRsxvCdq+Mv4670rZ+dLnIyabbGw=="
             crossorigin="anonymous" "></script>
@@ -102,8 +96,8 @@
         function LakeSearch() {
             lakemode = true;
             streammode = false;
-            if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
-            if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
+            if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue", weight: 1 }); };
+            if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue", weight: 1 }); };
             ResetRedLayers();
 
             if (geosearch != null) geosearch.remove();
@@ -241,6 +235,7 @@
             var x = e.latlng.lng;
             var y = e.latlng.lat;
 
+            if ((!lakemode)&&(!streammode))
             H14GeoJson.forEach((geojsonlayer) => {
                 if (geojsonlayer) {
                     var layerData = pointInLayer([x, y], geojsonlayer, true);
@@ -261,7 +256,7 @@
                             filter: function (feature, layer) {
                                 return feature.properties.HUC14 == highlightIndex;
                             },
-                            style: { color: 'deepskyblue', weight: 2, fillOpacity: 0.0 }
+                            style: { color: 'deepskyblue', weight: 2, fillOpacity: 0.0 }  
                         });
                         bounds = clickedHUC14.getBounds();
                         if (bounds.isValid()) { 
@@ -383,8 +378,7 @@
             if (redCOMIDs.length > 0)
                 redCOMIDs.forEach(redCOMID => {
                     if (feature.properties.COMID == redCOMID) {
-                        layer.options.style.weight = 2;
-                        layer.options.style.color = 'red';
+                        layer.setStyle({ weight: 2, color:'red' });
                     }
                 });
 
@@ -435,43 +429,43 @@
             var lastClickedHUC = null;
 
             function HUCClick(e) {
-                if (lastClickedHUC) {
-                    lastClickedHUC.setStyle({
-                        color: defaultColor, // Reset the border color to its default color
-                        weight: 1,          // Reset the border weight to its default value
+                if ((!lakemode) && (!streammode)) {
+                    if (lastClickedHUC) {
+                        lastClickedHUC.setStyle({
+                            color: defaultColor, // Reset the border color to its default color
+                            weight: 1,          // Reset the border weight to its default value
+                        });
+                    }
+                    lastClickedHUC = e.layer;
+
+                    var properties = e.layer.feature.properties;
+                    var name = properties[`HUC_${hucLevel}`];
+                    var desc = properties[`HU_${hucLevel}_NAME`]
+
+                    e.layer.setStyle({
+                        color: color,   // Change the border color to highlight
+                        weight: 2,      // Increase the border weight for highlighting
                     });
+
+                    MAP.fitBounds(e.layer.getBounds());
+                    var str1 = `HUC${hucLevel}|${name}`;
+                    if (desc !== null && desc !== undefined) {
+                        str1 += "|" + desc;
+                    }
+                    sendMessageToDotnet(str1);
+
+                    var str = `${name}|${JSON.stringify(e.layer.toGeoJSON())}`;
+                    sendMessageToDotnet(str);
                 }
-                lastClickedHUC = e.layer;
-
-                var properties = e.layer.feature.properties;
-                var name = properties[`HUC_${hucLevel}`];
-                var desc = properties[`HU_${hucLevel}_NAME`]
-
-                e.layer.setStyle({
-                    color: color,   // Change the border color to highlight
-                    weight: 2,      // Increase the border weight for highlighting
-                });
-
-                MAP.fitBounds(e.layer.getBounds());
-                var str1 = `HUC${hucLevel}|${name}`;
-                if (desc !== null && desc !== undefined) {
-                    str1 += "|"+desc;
-                }
-                sendMessageToDotnet(str1);
-
-                var str = `${name}|${JSON.stringify(e.layer.toGeoJSON())}`;
-                sendMessageToDotnet(str);
             }
 
             const layer = L.esri.featureLayer({
                 url: url,
+                style: (feature) => {
+                      if (!(lastClickedHUC&&(lastClickedHUC.feature === feature))) 
+                         return { color: defaultColor, weight: 1, fillOpacity: 0 };
+                    },
                 onEachFeature: onEachFeature || null,
-            });
-
-            layer.setStyle({
-                color: defaultColor,
-                fillOpacity: 0,
-                weight: 1,
             });
 
             layer.on('click', HUCClick);
@@ -483,8 +477,18 @@
         const HUC10 = createHUCLayer(URL_NP21_HUCs + "1", "blue", "maroon", 10);
         const HUC12 = createHUCLayer(URL_NP21_HUCs + "0", "red", "navy", 12);
 
+
         const FLOWLINES_LAYER = L.esri.featureLayer({
             url: URL_NP21_FLOWLINES,
+            style: (feature) => {
+                const isInRedLayers = redlayers.some(l => l.feature === feature);
+                const isLastFlLayer = lastFlLayer && lastFlLayer.feature === feature;
+                const isLastFl2Layer = lastFl2Layer && lastFl2Layer.feature === feature;
+
+                if (!isInRedLayers && !isLastFlLayer && !isLastFl2Layer) {
+                    return { color: 'blue', weight: 1 };
+                }
+            },
             onEachFeature: FLonEachFeature,
         });
 
@@ -492,6 +496,18 @@
             color: "blue",
             fillOpacity: 0,
             weight: 1,
+        });
+
+        // Event listener for when layer starts loading
+        FLOWLINES_LAYER.on('loading', function () {
+            // Change cursor to 'wait' when loading starts
+            document.getElementById('map').style.cursor = 'wait';
+        });
+
+        // Event listener for when layer finishes loading
+        FLOWLINES_LAYER.on('load', function () {
+            // Revert cursor back to default when loading finishes
+            document.getElementById('map').style.cursor = '';
         });
 
 
@@ -560,7 +576,6 @@
 
         // app interaction
         function AddGeoJSON(gstr) {
-
             allShapes = JSON.parse(gstr);
 
             var options = {
@@ -605,6 +620,8 @@
         }
 
         function ShowHUCDefaults(hucstr) {
+            lakemode = false;
+            streammode = false;
             MAP.removeLayer(WB_LAYER);
             MAP.removeLayer(FLOWLINES_LAYER);
             if (hucstr == "8") MAP.addLayer(HUC8); else MAP.removeLayer(HUC8);
@@ -613,7 +630,8 @@
             H14Selected = (hucstr == "14");
             ShowHUC14Maps();
             FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
-            LakeSearch()
+            if (geosearch != null) geosearch.remove();
+            geosearch = null;
         }
 
         function ShowH14(show) {

@@ -38,6 +38,7 @@
             label4 = new System.Windows.Forms.Label();
             DataSourceBox = new System.Windows.Forms.ComboBox();
             HAWQSButtonPanel = new System.Windows.Forms.Panel();
+            EditJSONBox = new System.Windows.Forms.CheckBox();
             ReadHAWQSButton = new System.Windows.Forms.Button();
             HAWQS_button = new System.Windows.Forms.Button();
             CreateButton = new System.Windows.Forms.Button();
@@ -174,7 +175,7 @@
             ModelSetupPanel.Controls.Add(SetupButton);
             ModelSetupPanel.Location = new System.Drawing.Point(24, 262);
             ModelSetupPanel.Name = "ModelSetupPanel";
-            ModelSetupPanel.Size = new System.Drawing.Size(255, 116);
+            ModelSetupPanel.Size = new System.Drawing.Size(255, 118);
             ModelSetupPanel.TabIndex = 23;
             // 
             // label4
@@ -202,12 +203,25 @@
             // 
             // HAWQSButtonPanel
             // 
+            HAWQSButtonPanel.Controls.Add(EditJSONBox);
             HAWQSButtonPanel.Controls.Add(ReadHAWQSButton);
             HAWQSButtonPanel.Controls.Add(HAWQS_button);
-            HAWQSButtonPanel.Location = new System.Drawing.Point(28, 61);
+            HAWQSButtonPanel.Location = new System.Drawing.Point(28, 60);
             HAWQSButtonPanel.Name = "HAWQSButtonPanel";
-            HAWQSButtonPanel.Size = new System.Drawing.Size(185, 55);
+            HAWQSButtonPanel.Size = new System.Drawing.Size(224, 52);
             HAWQSButtonPanel.TabIndex = 52;
+            // 
+            // EditJSONBox
+            // 
+            EditJSONBox.Checked = true;
+            EditJSONBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            EditJSONBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            EditJSONBox.Location = new System.Drawing.Point(163, 1);
+            EditJSONBox.Name = "EditJSONBox";
+            EditJSONBox.Size = new System.Drawing.Size(55, 31);
+            EditJSONBox.TabIndex = 67;
+            EditJSONBox.Text = "Edit JSON";
+            EditJSONBox.UseVisualStyleBackColor = true;
             // 
             // ReadHAWQSButton
             // 
@@ -359,7 +373,7 @@
             // 
             // viewOutputButton
             // 
-            viewOutputButton.Location = new System.Drawing.Point(83, 504);
+            viewOutputButton.Location = new System.Drawing.Point(83, 513);
             viewOutputButton.Name = "viewOutputButton";
             viewOutputButton.Size = new System.Drawing.Size(127, 23);
             viewOutputButton.TabIndex = 49;
@@ -1012,5 +1026,6 @@
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Label proglabel;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox EditJSONBox;
     }
 }

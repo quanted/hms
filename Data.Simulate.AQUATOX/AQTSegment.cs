@@ -35,7 +35,16 @@ namespace AQUATOX.AQTSegment
         {
             if (SavedRuns == null) return false;
             else if (SavedRuns.Count == 0) return false;
-            else return true;
+
+            List<string> keysToRemove = new List<string>();
+            foreach (KeyValuePair<string, AQUATOXSegment> entry in SavedRuns)
+            {
+                AQUATOXSegment segment = entry.Value;
+                if (segment.SV[0].SVoutput == null) keysToRemove.Add(entry.Key);  //invalid segment has no output
+            }
+            foreach (string key in keysToRemove) SavedRuns.Remove(key);  //remove invalid segment in archived results
+
+            return (SavedRuns.Count > 0);
         }
 
         public string SaveJSON(ref string json)

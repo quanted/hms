@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace AQUATOX.AQSim_2D
 
@@ -34,6 +35,7 @@ namespace AQUATOX.AQSim_2D
             public Dictionary<string, int[]> boundary;
             [JsonProperty("divergent-paths")] public Dictionary<string, int[]> divergentpaths;
             public cWaterbodies waterbodies;
+
         }
 
         public class cWaterbodies
@@ -44,15 +46,19 @@ namespace AQUATOX.AQSim_2D
 
         public class HAWQSInfo
         {
-            public List<string> sourceHUCs;
+            public List<string> upriverHUCs;
+            public List<string> HAWQSboundaryHUCs;
             public string[] colnames;
+            public List<string> modelDomain;  // var for multi-seg runs ensure that boundary conditions are not set within model domain
 
             private Dictionary<string, List<string>> fromtoData = new Dictionary<string, List<string>>();
+            private string fromtofilen = "";
 
             public void LoadFromtoData(string HUC_ID)
             {
                 string HUCStr = HUC_ID.Length.ToString();
                 string fromtopath = $@"..\..\..\2D_Inputs\fromto\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";  // fixme deployment
+                if (fromtofilen == fromtopath) return;  //already loaded
 
                 if (File.Exists(fromtopath))  //csv file with "OutletHUC, InletHUC"
                 {
@@ -74,12 +80,14 @@ namespace AQUATOX.AQSim_2D
                             }
                         }
                     }
+                    fromtofilen = fromtopath;
                 }
                 else throw new Exception("File Not Found: "+fromtopath);
             }
 
-            public List<string> boundaryHUCs(string HUC_ID, bool include_self)
+            public List<string> boundaryHUCs(string HUC_ID, bool include_self)  //returns the upstream boundaries for the given HUC_ID
             {
+                if (HUC_ID == "") return null;
                 if (fromtoData.TryGetValue(HUC_ID, out List<string> matchingHUCs))
                 {
                     if (include_self) matchingHUCs.Add(HUC_ID);
@@ -96,21 +104,26 @@ namespace AQUATOX.AQSim_2D
 
             public void AddSourceHUCs(string HUC_ID)
             {
-                // Helper method to check if the HUC starts with the same first eight characters
-                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);  
+                // function to check if the HUC starts with the same first eight characters
+                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
+                // function to check if the HUC is located within the model domain (may span multiple HUC8s)
+                bool InModelDomain(string huc) => modelDomain.Contains(huc);
 
                 foreach (var boundaryHuc in boundaryHUCs(HUC_ID,false))  // Add the initial HUC_ID's BoundaryHUCs to the list if they aren't already present
                 {
-                    if (!sourceHUCs.Contains(boundaryHuc))
+                    if (!upriverHUCs.Contains(boundaryHuc))
                     {
-                        sourceHUCs.Add(boundaryHuc);
+                        upriverHUCs.Add(boundaryHuc);
 
                         if (IsSameRegion(boundaryHuc, HUC_ID))
                             AddSourceHUCs(boundaryHuc); // Recursively add BoundaryHUCs if the identified boundaryHuc is in the same region
+                        else if ((!HAWQSboundaryHUCs.Contains(boundaryHuc))&&(!InModelDomain(boundaryHuc)))
+                        {
+                            HAWQSboundaryHUCs.Add(boundaryHuc);  //identify those segments out of the region as upstream bound
+                        }
                     }
                 }
             }
-
         }
 
         public class HAWQSInput
@@ -118,7 +131,7 @@ namespace AQUATOX.AQSim_2D
             public string dataset { get; set; } = "HUC14";
             public string downstreamSubbasin { get; set; } = "01010002010504";
             public string[] upstreamSubbasins { get; set; }
-            //public string upstreamDataSources { get; set; } = "NWM";
+            public string upstreamDataSource { get; set; } = "NWM";
             public SetHrus setHrus { get; set; } = new SetHrus();
             public string weatherDataset { get; set; } = "PRISM";
             public string startingSimulationDate { get; set; } = "1981-01-01";
@@ -775,24 +788,24 @@ namespace AQUATOX.AQSim_2D
 
 
 
-        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, string HUC0D, string setupjson, bool boundary, bool overland, out string jsondata)
+        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, out string jsondata)
         {
             jsondata = "";
-            long HUCID = long.Parse(HUC0D);
-            HAWQSInfo HInfo = new();
-            HInfo.LoadFromtoData(HUC0D);
-            List <string> Boundaries = HInfo.boundaryHUCs(HUC0D, false);  //rch data rows relevant to boundary conditions for this HUC14
-            Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[HUCID];
+            long ID = long.Parse(SegID);
+
+            Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[ID];
             List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
             foreach (string bound in Boundaries)
             {
-                BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
+                long parsedBound = long.Parse(bound);
+                if (HRD.ContainsKey(parsedBound)) BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
+                else return "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID;
             }
 
-            string HUCStr = HUC0D.Length.ToString();
+            string HUCStr = SegID.Length.ToString();
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, HUC0D, -9999, out err);  //fixme, add HUC length
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, SegID, -9999, out err);  //fixme, add HUC length
             if (err != "") { return err; }
 
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
@@ -836,7 +849,7 @@ namespace AQUATOX.AQSim_2D
                     //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
 
                     TLoadings InflowLoad = TSV.LoadsRec.Loadings;     // inflow loadings for boundary condition segments
-                    TLoadings PSLoad = TSV.LoadsRec.Alt_Loadings[2];  // Alt_Loadings[2] is non - point source loadings
+                    TLoadings NPSLoad = TSV.LoadsRec.Alt_Loadings[2];  // Alt_Loadings[2] is non - point source loadings
 
                     if (isCBOD)
                     {
@@ -844,14 +857,14 @@ namespace AQUATOX.AQSim_2D
                         DIR.InitCond = TSV.InitialCond;
                         DIR.DataType = DetrDataType.CBOD;
                         InflowLoad = DIR.Load.Loadings; 
-                        PSLoad = DIR.Load.Alt_Loadings[2];  //deal with different data structure for susp&dissolved detritus (CBOD)
+                        NPSLoad = DIR.Load.Alt_Loadings[2];  //deal with different data structure for susp&dissolved detritus (CBOD)
                     }
 
                     bool overlandrelevant = (!isSED && !isCHLA);  //non-point source loads not relevant in AQUATOX for these state vars.
 
                     TSV.LoadNotes1 = "";
                     TSV.LoadNotes2 = "";
-                    if (boundary || isSED) 
+                    if (link_boundary || isSED) 
                     {
                         setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs
                         TSV.LoadNotes1 = "Inflow Loads from HAWQS Linkage (Daily RCH file)";
@@ -859,9 +872,9 @@ namespace AQUATOX.AQSim_2D
                     }
                     
 
-                    if (overland && overlandrelevant)
+                    if (link_overland && overlandrelevant)
                     {
-                        setupLoad(PSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
+                        setupLoad(NPSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
                         TSV.LoadNotes2 = "Non-Point Source Loads from HAWQS Simulation";
                     }
 
@@ -878,19 +891,19 @@ namespace AQUATOX.AQSim_2D
 
                         double inflowConc = 0;
                         if (boundflow > Consts.Tiny)
-                             inflowConc = boundInput / boundflow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s)
-                        if (components[i] == "SED") inflowConc *= 1000;  // sed is in units of tons
+                             inflowConc = boundInput / boundflow * 0.0115740;  //  (kg/d) / (m3/s) * (mg/kg * d/s)
+                        if (components[i] == "SED") inflowConc *= 1000;        // in HAWQS sed is in units of tons, other components in kg
 
-                        if (boundary || isSED)
+                        if (link_boundary || isSED)
                         {
                             InflowLoad.list.Add(pair.Key, inflowConc);
                         }
 
-                        if (overland && overlandrelevant)
+                        if (link_overland && overlandrelevant)
                         {
                             double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
                             double overland_flow = Math.Max(0,(comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
-                            PSLoad.list.Add(pair.Key, overland_flow);   // add daily NPS load in grams/d 
+                            NPSLoad.list.Add(pair.Key, overland_flow);   // add daily NPS load in grams/d 
                         }
                     }
                 }
