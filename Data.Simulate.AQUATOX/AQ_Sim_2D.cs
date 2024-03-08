@@ -17,7 +17,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace AQUATOX.AQSim_2D
 
@@ -139,6 +138,7 @@ namespace AQUATOX.AQSim_2D
             public int warmupYears { get; set; } = 2;
             public string outputPrintSetting { get; set; } = "daily";
             public ReportData reportData { get; set; } = new ReportData();
+            public bool disaggregateComids { get; set; } = false;
         }
 
         public class SetHrus
@@ -146,6 +146,8 @@ namespace AQUATOX.AQSim_2D
             public string method { get; set; } = "none";
             public double target { get; set; } = 0;
             public string units { get; set; } = "none";
+            public string[] exemptLanduse { get; set; } = new string[] { "AGWF", "AGWR", "AGWT", "RIWF", "RIWN", "UPWF", "UPWN", "WATR", "WETF", "WETL", "WETN" };
+            public string[] noAreaRedistribution { get; set; } = new string[] { "AGWF", "AGWR", "AGWT", "RIWF", "RIWN", "UPWF", "UPWN", "WATR", "WETF", "WETL", "WETN" };
         }
 
         public class ReportData

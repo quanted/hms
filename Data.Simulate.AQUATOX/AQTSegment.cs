@@ -5081,7 +5081,9 @@ namespace AQUATOX.AQTSegment
 
                         if (var==AllVariables.Volume)
                         {
-                            result.YItems.Add(new SeriesID() { nm = TSV.OutputText(2), lyr = TSV.Layer, ns = TSV.NState, typ = TSV.SVType, indx = 2 }); //add inflow
+                            int inflowcolumn = 2;
+                            if (PSetup.SaveBRates.Val) inflowcolumn = 5;  // after inflow, outflow, and evap in units of "percent"
+                            result.YItems.Add(new SeriesID() { nm = TSV.OutputText(inflowcolumn), lyr = TSV.Layer, ns = TSV.NState, typ = TSV.SVType, indx = inflowcolumn }); //add inflow
                         }
 
                     }

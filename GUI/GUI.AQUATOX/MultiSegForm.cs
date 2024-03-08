@@ -6,11 +6,11 @@ using AQUATOX.Volume;
 using Data;
 using Globals;
 using Hawqs;
-using Microsoft.VisualBasic;
 using Microsoft.Web.WebView2.Core;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SevenZip;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -24,10 +24,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using Utilities;
 using static AQUATOX.AQSim_2D.AQSim_2D;
+using System.Globalization;
 
 namespace GUI.AQUATOX
 
@@ -404,8 +405,16 @@ namespace GUI.AQUATOX
             else if (validJSON)
             {
                 if (isLake0D) StatusLabel.Text = "Site Selected";
-                else if (isHUC0D) StatusLabel.Text = "HUC Selected";
-                else StatusLabel.Text = "Stream Network Created";
+                else if (isHUC0D)
+                {
+                    if (File.Exists(BaseDir + "output_rch_daily.csv")) StatusLabel.Text = "HAWQS Run Completed";
+                    else StatusLabel.Text = "HUC Selected";
+                }
+                else
+                {
+                    if (File.Exists(BaseDir + "output_rch_disaggregated.csv")) StatusLabel.Text = "HAWQS Run Completed";
+                    StatusLabel.Text = "Stream Network Created";
+                }
             }
             else if (validDirectory) StatusLabel.Text = "Model Not Initiated";
             else StatusLabel.Text = "Invalid Directory Specified";
@@ -2402,7 +2411,61 @@ namespace GUI.AQUATOX
         Hawqs.Hawqs HAWQS_Sim = null;
         runstatus HAWQS_RunStatus = null;
 
-        async private void HAWQS_Click(object sender, EventArgs e)
+public class CSVAggregator
+    {
+        public static async Task<string> DownloadAndAggregateCSV(string fileUrl)
+        {
+            var tempFilePath = Path.GetTempFileName();
+            var outputStringBuilder = new StringBuilder();
+
+            // Download file
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                using (var fs = new FileStream(tempFilePath, FileMode.Create))
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    await stream.CopyToAsync(fs);
+                }
+            }
+
+            SevenZipCompressor.SetLibraryPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"x64\7z.dll"));  //fixme deployment
+            // Extract and aggregate CSVs
+            using (var extractor = new SevenZipExtractor(tempFilePath))
+            {
+                foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith(".csv") && file.Size > 170))  // 170 byte files simply contain an error message
+                {
+                    using (var entryStream = new MemoryStream())
+                    {
+                        extractor.ExtractFile(entry.FileName, entryStream);
+                        entryStream.Position = 0;
+
+                        using (var reader = new StreamReader(entryStream))
+                        {
+                            bool isFirstFile = outputStringBuilder.Length == 0;
+                            while (!reader.EndOfStream)
+                            {
+                                var line = reader.ReadLine();
+                                if (isFirstFile || !reader.EndOfStream)
+                                {
+                                    outputStringBuilder.AppendLine(line);
+                                }
+                                isFirstFile = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            File.Delete(tempFilePath);
+            return outputStringBuilder.ToString();
+        }
+    }
+
+
+    async private void HAWQS_Click(object sender, EventArgs e)
         {
             if (!VerifyStreamNetwork()) return;
             if (Lake0D > 0)
@@ -2422,12 +2485,13 @@ namespace GUI.AQUATOX
             string[] outputHUCs;
 
             string hucstr;
-            if (!isHUC0D)
+            if (!isHUC0D)  //streamnetwork code first
             {
                 List<string> H14s = Render_RelevantH14s(out string pourpoint);
                 HAWQSInp.downstreamSubbasin = pourpoint;
 
                 HAWQSInp.dataset = "HUC14";
+                HAWQSInp.disaggregateComids = true;
                 hucstr = "14";
                 List<string> outhucs = new();
                 AQT2D.HAWQSInf.modelDomain = H14s;
@@ -2445,7 +2509,7 @@ namespace GUI.AQUATOX
                 }
                 outputHUCs = outhucs.ToArray();
             }
-            else
+            else  //HUC0D code
             {
                 hucstr = HUCStr(HUC0D);  // "8" to "14"
                 HAWQSInp.dataset = "HUC" + hucstr;
@@ -2557,9 +2621,13 @@ namespace GUI.AQUATOX
                     TSafeUpdateProgress(progress);
                 }
 
-                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, HAWQS_RunStatus.id, false);
+                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, "702" , false);   //HAWQS_RunStatus.id  FIXME
                 await (GPDT);
                 List<HawqsOutput> LHO = GPDT.Result;
+
+                string urlName = "output_rch_daily.csv";
+                if (!isHUC0D) urlName = "output_rch_daily_comids.7z";
+
 
                 if (LHO.Count == 0) AddToProcessLog("WARNING: No HAWQS Results Returned.");
                 else
@@ -2572,11 +2640,11 @@ namespace GUI.AQUATOX
                     while ((!foundrch) && (indx < LHO.Count))
                     {
                         url = LHO[indx].url;
-                        foundrch = url.Contains("output_rch_daily.csv");
+                        foundrch = url.Contains(urlName);
                         indx++;
                     }
 
-                    if (!foundrch) AddToProcessLog("ERROR: daily reach output CSV not found in HAWQS data URLs.");
+                    if (!foundrch) AddToProcessLog("ERROR: daily reach output "+urlName+" not found in HAWQS data URLs.");
                     else
                     {
                         AddToProcessLog("INFO: Downloading daily reach data from " + url);
@@ -2585,11 +2653,20 @@ namespace GUI.AQUATOX
 
                         try
                         {
-                            using (var fs = await hc.GetStreamAsync(url))
-                            using (var fileStream = new FileStream(BaseDir + "output_rch_daily.csv", FileMode.Create))
-                                await fs.CopyToAsync(fileStream);
-                            AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_daily.csv");
-                            hc.Dispose();
+                            if (!isHUC0D)  // aggregate all the CSVs in the 7z file
+                            {
+                                string csvstring = await CSVAggregator.DownloadAndAggregateCSV(url);
+                                File.WriteAllText(BaseDir + "output_rch_disaggregated.csv",csvstring);
+                                AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_disaggregated.csv");
+                            }
+                            else //download data for HUC0D
+                            {
+                                using (var fs = await hc.GetStreamAsync(url))
+                                using (var fileStream = new FileStream(BaseDir + "output_rch_daily.csv", FileMode.Create))
+                                    await fs.CopyToAsync(fileStream);
+                                AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_daily.csv");
+                                hc.Dispose();
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -2626,7 +2703,10 @@ namespace GUI.AQUATOX
             if (!VerifyStreamNetwork()) return;
 
             BaseDir = basedirBox.Text;
+
             string RCHfileN = BaseDir + "output_rch_daily.csv";
+            if (HUC0D == "")  RCHfileN = BaseDir + "output_rch_disaggregated.csv";
+
             if (!File.Exists(RCHfileN))
             {
                 AddToProcessLog("ERROR: can't find reach output file: " + RCHfileN);
@@ -2663,14 +2743,16 @@ namespace GUI.AQUATOX
                 for (int i = 1; i < csvlines.Length; i++)
                 {
                     string[] rowdata = csvlines[i].Split(',');  //split 
-                    DateTime date = DateTime.ParseExact(rowdata[0], "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-                    HAWQSRCHRow row = new();
-                    row.lat = Convert.ToDouble(rowdata[1]);
-                    row.lon = Convert.ToDouble(rowdata[2]);
-                    long SubBasin = Convert.ToInt64(rowdata[3]);
-                    row.vals = new double[rowdata.Length - 4];
-                    for (int j = 4; j < rowdata.Length; j++) row.vals[j - 4] = Convert.ToDouble(rowdata[j]);
-                    AddHAWQSRchData(SubBasin, date, row);
+                    if (DateTime.TryParseExact(rowdata[0], "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+                    {
+                        HAWQSRCHRow row = new();
+                        row.lat = Convert.ToDouble(rowdata[1]);
+                        row.lon = Convert.ToDouble(rowdata[2]);
+                        long SubBasin = Convert.ToInt64(rowdata[3]);
+                        row.vals = new double[rowdata.Length - 4];
+                        for (int j = 4; j < rowdata.Length; j++) row.vals[j - 4] = Convert.ToDouble(rowdata[j]);
+                        AddHAWQSRchData(SubBasin, date, row);
+                    }
                 }
 
                 AddToProcessLog("INPUTS: read HAWQS file " + RCHfileN);  
