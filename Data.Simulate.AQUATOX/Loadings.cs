@@ -107,7 +107,7 @@ namespace AQUATOX.Loadings
             return TSO;
         }
 
-        public void Translate_ITimeSeriesInput(int column, double minVal)   
+        public void Translate_ITimeSeriesInput(int column, double multiplier, double minVal)   
         {
           if (ITSI!=null)
             {
@@ -130,6 +130,7 @@ namespace AQUATOX.Loadings
                           throw new ArgumentException("Cannot convert '"+entry.Key+"' to TDateTime");
                     if (!(Double.TryParse(entry.Value[column], out double val)))
                         throw new ArgumentException("Cannot convert '" + entry.Value + "' to Double");
+                    val = val * multiplier;
                     if (val < minVal) val = minVal;
                     list.Add(date, val);
                 }
@@ -141,7 +142,7 @@ namespace AQUATOX.Loadings
 
         public double ReturnLoad(DateTime TimeIndex)
         {
-            if (!ITSI_Translated) Translate_ITimeSeriesInput(0,0.0);
+            if (!ITSI_Translated) Translate_ITimeSeriesInput(0,1,0.0);
 
             double RetLoad; // Hold Result
 
@@ -158,7 +159,7 @@ namespace AQUATOX.Loadings
         public double ReturnTSLoad(DateTime TimeIndex)
         {
 
-            if (!ITSI_Translated) Translate_ITimeSeriesInput(0,0.0);
+            if (!ITSI_Translated) Translate_ITimeSeriesInput(0,1,0.0);
 
             double RetLoad;
             DateTime TIHolder;

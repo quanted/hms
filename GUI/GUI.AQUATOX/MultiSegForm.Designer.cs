@@ -231,7 +231,7 @@
             ReadHAWQSButton.TabIndex = 13;
             ReadHAWQSButton.Text = "Link HAWQS data";
             ReadHAWQSButton.UseVisualStyleBackColor = true;
-            ReadHAWQSButton.Click += ReadHAWQS_Click;
+            ReadHAWQSButton.Click += Link_HAWQS_Click;
             // 
             // HAWQS_button
             // 
@@ -543,8 +543,6 @@
             // outputjump
             // 
             outputjump.AutoSize = true;
-            outputjump.Checked = true;
-            outputjump.CheckState = System.Windows.Forms.CheckState.Checked;
             outputjump.Enabled = false;
             outputjump.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             outputjump.Location = new System.Drawing.Point(120, 3);

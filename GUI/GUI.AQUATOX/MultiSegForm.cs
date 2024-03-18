@@ -29,6 +29,8 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 using System.Globalization;
+using Utilities;
+using System.Collections.Concurrent;
 
 namespace GUI.AQUATOX
 
@@ -262,6 +264,10 @@ namespace GUI.AQUATOX
 
             RecentFilesBox.DataSource = null;
             RecentFilesBox.DataSource = ShortDirNames;
+
+            RecentFilesBox.SelectionChangeCommitted -= RecentFilesBox_SelectionChangeCommitted;
+            RecentFilesBox.SelectedIndex = 0;
+            RecentFilesBox.SelectionChangeCommitted += RecentFilesBox_SelectionChangeCommitted;
         }
 
         private void SaveScreenSettings()
@@ -382,7 +388,8 @@ namespace GUI.AQUATOX
 
                 UpdateRecentFiles(basedirBox.Text);
                 inputsegs = SegmentsCreated();
-                HAWQSrun = (File.Exists(BaseDir + "output_rch_daily.csv"));
+                if (isHUC0D) HAWQSrun = File.Exists(BaseDir + "output_rch_daily.csv");
+                else HAWQSrun = File.Exists(BaseDir + "output_rch_disaggregated.csv");
                 ReadHAWQSButton.Enabled = HAWQSrun;
 
                 if (inputsegs)
@@ -641,22 +648,21 @@ namespace GUI.AQUATOX
             Read_Water_Flows();
         }
 
-        void Read_WB_Water_Flows(string WBComidStr, string msj)
+        string Read_WB_Water_Flows(string WBComidStr, bool daily, string msj)
         {
             int WBComid;
-            if (!Int32.TryParse(WBComidStr, out WBComid)) return;
+            if (!Int32.TryParse(WBComidStr, out WBComid)) return "";
 
             string filen = BaseDir + "AQT_Input_" + WBComidStr + ".JSON";
 
-            string errmessage = AQT2D.PopulateLakeRes(WBComid, msj, out string jsondata);
+            string errmessage = AQT2D.PopulateLakeRes(WBComid, msj, daily, out string jsondata);
 
             if (errmessage == "")
             {
                 File.WriteAllText(filen, jsondata);
-
-                TSafeAddToProcessLog("INPUT: Read Volumes and Flows and Saved JSON for WaterBody: " + WBComidStr);
-
+                TSafeAddToProcessLog("INPUT: Read NWM Volumes and Flows and Saved JSON for WaterBody: " + WBComidStr);
                 Application.DoEvents();
+                return jsondata;
             }
             else
             {
@@ -665,6 +671,7 @@ namespace GUI.AQUATOX
                 PostWebviewMessage("COLOR|" + WBComid + "|red");
                 TSafeHideProgBar();
                 ConsoleButton.Checked = true;
+                return "";
             }
 
 
@@ -746,14 +753,14 @@ namespace GUI.AQUATOX
                     }
 
 
-                    if (Lake0D > 0) Read_WB_Water_Flows(Lake0D.ToString(), msj);
+                    if (Lake0D > 0) Read_WB_Water_Flows(Lake0D.ToString(), false, msj);
                     else
                     {
                         if (AQT2D.SN.waterbodies != null)
                             for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
                             {
                                 string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
-                                Read_WB_Water_Flows(WBString, msj);
+                                Read_WB_Water_Flows(WBString, false, msj);
                             }
                     }
 
@@ -807,13 +814,14 @@ namespace GUI.AQUATOX
             browseButton.Enabled = !busy;
         }
 
-        private void reset_interface_after_run()
+        private void reset_interface_after_run(bool success)
         {
             this.BeginInvoke((MethodInvoker)(() =>
             {
                 UseWaitCursor = false;
                 TSafeHideProgBar();
                 SetInterfaceBusy(false);
+                outputjump.Checked = success;
                 UpdateScreen();
             }));
         }
@@ -922,7 +930,7 @@ namespace GUI.AQUATOX
                 TSafeAddToProcessLog("INPUT: Run saved as " + "AQT_Run_" + segID + ".JSON");
             }
 
-            reset_interface_after_run();
+            reset_interface_after_run(success);
         }
 
         private async Task RunStreamNetworkModel()
@@ -934,23 +942,35 @@ namespace GUI.AQUATOX
             for (int ordr = 0; ordr < AQT2D.SN.order.Length; ordr++)
             {
                 proglabel.Text = $"Step {ordr + 1} of {AQT2D.SN.order.Length}";
-                await ExecuteModelForEachSegment(ordr, outofnetwork);
+                bool success = await ExecuteModelForEachSegment(ordr, outofnetwork);
+
                 UpdateProgress(ordr);
 
                 if (ordr == AQT2D.SN.order.Length - 1)
-                    FinalizeModelRun();
+                    FinalizeModelRun(success);
+
+                if (!success)
+                {
+                    FinalizeModelRun(false);
+                    return;
+                }
             }
         }
-
-        private async Task ExecuteModelForEachSegment(int order, int[] outofnetwork)
+        
+        private async Task<bool> ExecuteModelForEachSegment(int order, int[] outofnetwork)
         {
+            var results = new ConcurrentBag<bool>();  //thread safe storage of model results
+
             await Task.Run(() => Parallel.ForEach(AQT2D.SN.order[order], runID =>
             {
-                ExecuteSingleSNSegment(runID, outofnetwork);
+                bool result = ExecuteSingleSNSegment(runID, outofnetwork);
+                results.Add(result);
             }));
+
+            return results.All(r => r);  //returns true if all simulations were successful, otherwise false
         }
 
-        private void ExecuteSingleSNSegment(int runID, int[] outofnetwork)
+        private bool ExecuteSingleSNSegment(int runID, int[] outofnetwork)
         // execute a single segment that is part of a stream network
         {
             List<string> strout = new();
@@ -964,7 +984,7 @@ namespace GUI.AQUATOX
             if (in_waterbody)
                 IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
             if (IDtoRun == -9999)
-                return;
+                return true;
 
             string runIDstr = IDtoRun.ToString();
             string FileN = BaseDir + "AQT_Input_" + runIDstr + ".JSON";
@@ -973,7 +993,7 @@ namespace GUI.AQUATOX
                 TSafeAddToProcessLog("ERROR: File Missing " + FileN);
                 UseWaitCursor = false;
                 TSafeHideProgBar();
-                return;
+                return false;
             }
             string json = File.ReadAllText(FileN);  //read one segment of 2D model
 
@@ -1002,13 +1022,21 @@ namespace GUI.AQUATOX
                 }
             }
 
+            bool success = true;
             if (AQT2D.executeModel(IDtoRun, MasterSetupJson(), ref strout, ref json, divergence_flows, outofnetwork))   //run one segment of 2D model
+            {
                 File.WriteAllText(BaseDir + "AQT_Run_" + runIDstr + ".JSON", json);
-
-            PostWebviewMessage("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
+                PostWebviewMessage("COLOR|" + runIDstr + "|green");  // draw COMID shape in green after execute
+            }
+            else
+            {
+                PostWebviewMessage("COLOR|" + runIDstr + "|red");  // draw COMID shape in red after error
+                success = false;
+            }
 
             foreach (string msg in strout)
                 TSafeAddToProcessLog(msg); //write update to status log
+            return success;
         }
 
         private void UpdateProgress(int currentStep)
@@ -1016,13 +1044,14 @@ namespace GUI.AQUATOX
             TSafeUpdateProgress((int)(((float)currentStep / (float)AQT2D.SN.order.Length) * 100.0));
         }
 
-        private void FinalizeModelRun()
+        private void FinalizeModelRun(bool success)
         {
             bindgraphlist();
             OutputPanel.Enabled = true;
             SaveModelRunResults();
-            reset_interface_after_run();
-            AddToProcessLog("INPUTS: Model execution complete");
+            reset_interface_after_run(success);
+            if (success) TSafeAddToProcessLog("INPUTS: Model execution complete");
+            else TSafeAddToProcessLog("ERROR:  Network Run terminated due to execution error.");
         }
 
         private void SaveModelRunResults()
@@ -1039,7 +1068,7 @@ namespace GUI.AQUATOX
         {
             AddToProcessLog($"ERROR: running linked segments: {ex.Message}");
             MessageBox.Show(ex.Message);
-            reset_interface_after_run();
+            reset_interface_after_run(false);
         }
 
         private void bindgraphlist()
@@ -2095,7 +2124,7 @@ namespace GUI.AQUATOX
             if (_cts != null)
             {
                 _cts.Cancel();
-                reset_interface_after_run();
+                reset_interface_after_run(false);
             }
         }
 
@@ -2621,7 +2650,7 @@ public class CSVAggregator
                     TSafeUpdateProgress(progress);
                 }
 
-                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, "702" , false);   //HAWQS_RunStatus.id  FIXME
+                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, HAWQS_RunStatus.id, false);   
                 await (GPDT);
                 List<HawqsOutput> LHO = GPDT.Result;
 
@@ -2694,7 +2723,7 @@ public class CSVAggregator
             }
         }
 
-        private void ReadHAWQS_Click(object sender, EventArgs e)
+        async private void Link_HAWQS_Click(object sender, EventArgs e)
         {
             ConsoleButton.Checked = true;
             ChartVisible(false);
@@ -2792,22 +2821,50 @@ public class CSVAggregator
             }
             else  //multi-segment HAWQS Read
             {
+                Dictionary<string, string> WB_JSONs = new Dictionary<string, string>();
+                if (AQT2D.SN.waterbodies != null)  //if there is a NWM lake or reservoir, read volumes and flows from NWM, overland and inflow nutrients will come from HAWQS
+                {
+                    TSafeAddToProcessLog("INPUT: Reading Lake-Reservoir Volumes and flows from NWM");
+                    for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+                    {
+                        string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
+                        string WBJSON = Read_WB_Water_Flows(WBString, true, msj);  //daily volumes and flows from NWM
+                        if (WBJSON != "")
+                        {
+                            TSafeAddToProcessLog("INPUT: " + WBString + " Lake/Reservoir data for volume and flow read from NWM.  Overland and inflow nutrients will come from HAWQS.");
+                            WB_JSONs.Add(WBString, WBJSON);
+                        }
+                    }
+                }
+
                 int[] boundaries = { };
                 int[] outofnetwork = new int[0];
                 if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
+                Dictionary<int, int> wbCountTracker = new Dictionary<int, int>();  //tracks number of COMIDS identified to each waterbody so that weighted averaging can be completed
 
                 for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
                 {
                     string comid = AQT2D.SN.network[iSeg][0];
                     string inpfilen = BaseDir + "AQT_Input_" + comid + ".JSON";
+                    int WBCOMID = -1;
+                    int wbcount = 0;
+                    string WBJSON = "";
 
                     bool in_waterbody = false;
-                    if (AQT2D.SN.waterbodies != null)
-                        if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
-                    if (in_waterbody)
+                    if ((AQT2D.SN.waterbodies != null) && (AQT2D.SN.waterbodies.comid_wb != null))
                     {
-                        TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
-                        continue;
+                        WBCOMID = AQT2D.NWM_WaterbodyID(int.Parse(comid));
+                        in_waterbody = (WBCOMID != -1);
+                        if (in_waterbody)
+                        {
+                            TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.  HAWQS inputs added to that waterbody.");
+                            WB_JSONs.TryGetValue(WBCOMID.ToString(), out WBJSON);
+                            inpfilen = BaseDir + "AQT_Input_" + WBCOMID + ".JSON";  //write data to lake/res input not COMID
+
+                            if (wbCountTracker.ContainsKey(WBCOMID)) wbCountTracker[WBCOMID]++;
+                            else wbCountTracker[WBCOMID] = 1;  //this WBCOMID hasn't had any COMIDs assigned to it yet
+                            wbcount = wbCountTracker[WBCOMID];
+                        }
                     }
 
                     bool boundaryseg = false;
@@ -2816,12 +2873,20 @@ public class CSVAggregator
                         foreach (int SrcID in Sources)
                             if (outofnetwork.Contains(SrcID)) boundaryseg = true;   //ID inflow points to get inflow data
 
-                    string errmessage = AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, out string AQSimJSON);
+                    string errmessage = "";
+                    string AQSimJSON = "";
+                    if (in_waterbody) errmessage = AQT2D.HAWQS_add_COMID_to_WB(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, wbcount, WBJSON, boundaryseg, true, out AQSimJSON);                       
+                    else errmessage = AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, out AQSimJSON);
 
                     if (errmessage == "")
                     {
                         File.WriteAllText(inpfilen, AQSimJSON);
-                        TSafeAddToProcessLog("INPUT: Read HAWQS Reach data for Volumes, nutrients, OM, and Flows and saved JSON for " + comid);
+                        if (in_waterbody)
+                        {
+                            TSafeAddToProcessLog("INPUT: Added to Lake/Res " + WBCOMID + " HAWQS overland flows and any boundary condition inputs from COMID " + comid);
+                            WB_JSONs[WBCOMID.ToString()] = AQSimJSON;
+                        }
+                        else TSafeAddToProcessLog("INPUT: Read HAWQS Reach data for Volumes, nutrients, OM, and Flows and saved JSON for " + comid);
                         // TSafeUpdateProgress((int)(iSeg / AQT2D.nSegs * 100.0));
                     }
                     else

@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
+using Utilities;
 
 namespace AQUATOX.AQSim_2D
 
@@ -229,19 +230,28 @@ namespace AQUATOX.AQSim_2D
         }
 
         /// <summary>
+        /// Returns the WBCOMID associated with the streamflow COMID or -1 if the COMID is not located within an NWM waterbody
+        /// </summary>
+        public int NWM_WaterbodyID(int COMID)
+        {
+            int WBCOMID;
+            if (SN.waterbodies != null) if (SN.waterbodies.comid_wb.TryGetValue(COMID, out WBCOMID))
+                    for (int i = 1; i < SN.waterbodies.wb_table.GetLength(0); i++)
+                    {
+                        if (int.Parse(SN.waterbodies.wb_table[i][0]) == WBCOMID)
+                            return WBCOMID;
+                    }
+
+            return -1;
+        }
+
+
+        /// <summary>
         /// Returns true if the COMID is located within an NWM waterbody and does not need running as a stream segment.
         /// </summary>
         public bool NWM_Waterbody(int COMID)
         {
-            int WBCOMID;
-            if (SN.waterbodies != null) if (SN.waterbodies.comid_wb.TryGetValue(COMID, out WBCOMID))
-              for (int i = 1; i < SN.waterbodies.wb_table.GetLength(0); i++)
-                    {
-                    if (int.Parse(SN.waterbodies.wb_table[i][0]) == WBCOMID)
-                        return true;
-                    }
-
-            return false;
+            return NWM_WaterbodyID(COMID) != -1;
         } 
 
         /// <summary>
@@ -332,8 +342,8 @@ namespace AQUATOX.AQSim_2D
                 firstvol = false;
             }
 
-            InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
-            InflowLoad.MultLdg = 86400;  // seconds per day
+            InflowLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  // default minimum flow of 1000 cmd for now, multiplier of seconds/day
+            InflowLoad.MultLdg = 1;  // seconds per day
             // InflowLoad.Hourly = true;  12/14/22
             InflowLoad.UseConstant = false;
 
@@ -399,8 +409,8 @@ namespace AQUATOX.AQSim_2D
                     firstvol = false;
                 }
 
-                InflowLoad.Translate_ITimeSeriesInput(0, 1000 / 86400);  // default minimum flow of 1000 cmd for now
-                InflowLoad.MultLdg = 86400;  // seconds per day
+                InflowLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  // default minimum flow of 1000 cmd for now  multiplier is seconds per day
+                InflowLoad.MultLdg = 1;  
                 // InflowLoad.Hourly = true; 12/14/22
                 InflowLoad.UseConstant = false;
                 
@@ -421,7 +431,7 @@ namespace AQUATOX.AQSim_2D
                 }
 
                 VelocityLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
-                VelocityLoad.Translate_ITimeSeriesInput(1,0);  //bank 1 for velocity;  minimum velocity of zero
+                VelocityLoad.Translate_ITimeSeriesInput(1,1,0);  //bank 1 for velocity;  minimum velocity of zero
                 VelocityLoad.MultLdg = 100;  // m/s to cm/s
                 // VelocityLoad.Hourly = true; 12/14/22
                 VelocityLoad.UseConstant = false;
@@ -443,8 +453,8 @@ namespace AQUATOX.AQSim_2D
                 }
 
                 DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
-                DischargeLoad.Translate_ITimeSeriesInput(0,1000/86400);  //default minimum flow of 1000 cu m /d for now
-                DischargeLoad.MultLdg = 86400;  // seconds per day
+                DischargeLoad.Translate_ITimeSeriesInput(0,86400, 1000);  //default minimum flow of 1000 cu m /d for now, multiplier is seconds/day
+                DischargeLoad.MultLdg = 1;  
                 // DischargeLoad.Hourly = true;  12/14/22
                 DischargeLoad.UseConstant = false;
                 TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
@@ -766,7 +776,8 @@ namespace AQUATOX.AQSim_2D
         public void VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
         {
 
-            TVol.InitialCond = ThisSeg[FirstDate].vals[1] * 86400;  //FIXME assumes one-day retention time
+            TVol.InitialCond = Math.Max(ThisSeg[FirstDate].vals[1] * 86400, TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;     
+            //FIXME assumes one-day retention time
             TVol.Calc_Method = VolumeMethType.KnownVal;
 
             TLoadings KnownLoad =  TVol.LoadsRec.Loadings;   
@@ -777,7 +788,7 @@ namespace AQUATOX.AQSim_2D
 
             foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
             {
-                InflowLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //inflow from RCH_Daily file -- converted to m3/d
+                InflowLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //inflow from RCH_Daily file -- converted from cms to m3/d
                 double knownvol = Math.Max(pair.Value.vals[1] * 86400, TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;   
                 //FIXME assumes one-day retention time
                 KnownLoad.list.Add(pair.Key, knownvol);
@@ -788,14 +799,188 @@ namespace AQUATOX.AQSim_2D
             TVol.AQTSeg.CalcVelocity = true;
         }
 
-
-
-        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, out string jsondata)
+        /// <summary>
+        /// Link COMID data from HAWQS into this lake/reservoir JSON
+        /// Add any boundary conditions to point-source loads, inflow loads will come from linkage of other in-model-domain COMIDS
+        /// </summary>
+        /// <param name="HRD">HAWQS Reach Data -- a nested dictionary of relevant inputs for each HAWQS subbasin</param>
+        /// <param name="Boundaries">The list of upstream boundaries that have data relevant to the SegID segment unit</param>
+        /// <param name="SegID">The identifying string for the unit-- can be COMID, or HUC8-HUC14 identifier</param>
+        /// <param name="SegIndex">Count of the number of COMIDs that have passed data to this Lake/Reservoir, including this one</param>
+        /// <param name="WBJSON">The input waterbody JSON that will be modified with this COMID data from HAWQS</param>
+        /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="link_boundary">should boundary condition inflows from HAWQS be added to this segment-- i.e. is the up-river segment out of the AQUATOX domain?</param>
+        /// <param name="link_overland">should overland flows be added to this segment</param>
+        /// <param name="jsondata">returns the AQUATOX simulation JSON after HAWQS data has been linked</param>
+        /// <returns></returns>
+        public string HAWQS_add_COMID_to_WB(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List<string> Boundaries, string SegID, int SegIndex, string WBJSON, bool link_boundary, bool link_overland, out string jsondata)
         {
             jsondata = "";
             long ID = long.Parse(SegID);
 
             Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[ID];
+            List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
+            foreach (string bound in Boundaries)
+            {
+                long parsedBound = long.Parse(bound);
+                if (HRD.ContainsKey(parsedBound)) BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
+                else return "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID;
+            }
+
+            string HUCStr = SegID.Length.ToString();
+
+            AQTSim Sim = JsonConvert.DeserializeObject<AQTSim>(WBJSON, AQTSim.AQTJSONSettings());
+
+            // Volume has already been loaded from NWM.
+
+            DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
+
+            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };
+            AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen, AllVariables.Temperature };
+
+            TPlant PPhyto = null;
+            for (AllVariables AlgLoop = Consts.FirstAlgae; AlgLoop <= Consts.LastAlgae; AlgLoop++)  //identify any phytoplankton in the simulation for CHLA linkage
+            {
+                TPlant TP = Sim.AQTSeg.GetStatePointer(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                if (TP != null)
+                {
+                    if (TP.IsPhytoplankton())  //Chl-a is assigned to first phytoplankton in the simulation 
+                    {
+                        PPhyto = TP;
+                        SVs[4] = TP.NState;
+                        break;
+                    }
+                }
+            }
+
+            double InitFlow = ThisSeg[FirstDay].vals[1];  //column for flow_OUT
+            for (int i = 0; i < components.Length; i++)
+            {
+                bool isSED = (components[i] == "SED");  //sediment is handled differently in units and modeling
+                bool isCBOD = (components[i] == "CBOD"); //unique input data structure in AQUATOX for CBOD
+                bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
+
+                int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
+                int col_OUT = col_IN + 1;
+
+                TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
+                if (TSV != null)
+                {
+                    double COMID_IC = (InitFlow <= 0) ? 0 : ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
+                    if (isSED) COMID_IC *= 1000;  // sed is in units of tons
+                    if (isCHLA) COMID_IC = COMID_IC * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90;
+                    //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
+
+                    if (SegIndex == 1) TSV.InitialCond = COMID_IC;
+                    else TSV.InitialCond = (COMID_IC + TSV.InitialCond * (SegIndex - 1)) / SegIndex;  //Average initial condition for all COMIDs within the WBCOMID
+
+                    TLoadings PSLoad = TSV.LoadsRec.Alt_Loadings[0];  // Alt_Loadings[0] is point source loadings, used for boundary condition rivers in this case
+                    TLoadings NPSLoad = TSV.LoadsRec.Alt_Loadings[2];  // Alt_Loadings[2] is non-point source loadings
+
+                    if (isCBOD)
+                    {
+                        DetritalInputRecordType DIR = ((TDissRefrDetr)TSV).InputRecord;
+                        DIR.InitCond = TSV.InitialCond;
+                        DIR.DataType = DetrDataType.CBOD;
+                        PSLoad = DIR.Load.Alt_Loadings[0]; 
+                        NPSLoad = DIR.Load.Alt_Loadings[2];  //deal with different data structure for susp&dissolved detritus (CBOD)
+                    }
+
+                    bool overlandrelevant = (!isSED && !isCHLA);  //non-point source loads not relevant in AQUATOX for these state vars.
+
+                    if (SegIndex == 1)
+                    { 
+                        TSV.LoadNotes1 = "";
+                        TSV.LoadNotes2 = "";
+                    }
+
+                    if (link_boundary || isSED)
+                    {
+                        if (SegIndex == 1) setupLoad(PSLoad, ThisSeg.Count);  //get PS loads ready to receive inputs 
+                        TSV.LoadNotes1 = "Inflow Loads from HAWQS Linkage (Daily RCH file)";
+                        if (isSED) TSV.LoadNotes1 = "In-reach Sediment Values from HAWQS Linkage (Daily RCH file)";
+                    }
+
+
+                    if (link_overland && overlandrelevant)
+                    {
+                        if (SegIndex == 1) setupLoad(NPSLoad, ThisSeg.Count);  //get non-point source loads ready to receive inputs
+                        TSV.LoadNotes2 = "Non-Point Source Loads from HAWQS Simulation";
+                    }
+
+                    foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                    {
+                        double boundInput = 0;
+                        double boundflow = 0;
+
+                        foreach (Dictionary<DateTime, HAWQSRCHRow> BoundSeg in BoundSegs)
+                        {
+                            boundInput += BoundSeg[pair.Key].vals[col_OUT];  // kg/d
+                            boundflow += BoundSeg[pair.Key].vals[1];  // flow out in m3/s
+                        }
+
+                        double inflowMass = 0;  //inflow mass in g for boundary conditions (out of linked-segment domain)
+                        if (boundflow > Consts.Tiny)
+                            inflowMass = boundInput * 1000;  //  (kg/d) / (g / kg) 
+                        if (components[i] == "SED") inflowMass *= 1000;   // in HAWQS sed is in units of tons, other components in kg
+
+                        if (link_boundary || isSED)
+                        {
+                            if (!PSLoad.list.ContainsKey(pair.Key)) PSLoad.list.Add(pair.Key, inflowMass);
+                            else PSLoad.list[pair.Key] = PSLoad.list[pair.Key] + inflowMass;  //sum all boundary condition inputs
+                        }
+
+                        if (link_overland && overlandrelevant)
+                        {
+                            double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
+                            double overland_flow = Math.Max(0, (comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
+                            if (!NPSLoad.list.ContainsKey(pair.Key)) NPSLoad.list.Add(pair.Key, overland_flow);
+                            else NPSLoad.list[pair.Key] = NPSLoad.list[pair.Key] + overland_flow;  //sum all overland inputs
+                        }
+                    }
+                }
+            }
+
+            // Water Temperature Linkage Here
+            TStateVariable TTemp = Sim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            int col_WTMP = Array.IndexOf(HAWQSInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
+            if ((TTemp != null) && (col_WTMP >= 0))
+            {
+                TTemp.InitialCond = ThisSeg[FirstDay].vals[col_WTMP];
+                TTemp.LoadNotes1 = "Temperature from HAWQS RCH data";
+                TTemp.LoadNotes2 = "";
+                setupLoad(TTemp.LoadsRec.Loadings, ThisSeg.Count);
+                foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                {
+                    TTemp.LoadsRec.Loadings.list.Add(pair.Key, pair.Value.vals[col_WTMP]);  // add daily WT in deg C
+                }
+            }
+
+            string errmessage = Sim.SaveJSON(ref jsondata);
+            return errmessage;
+        }
+
+
+        /// <summary>
+        /// Adds HAWQS daily outputs for overland flows and inflows (where relevant) to the simulation unit identified with SegID
+        /// </summary>
+        /// <param name="HRD">HAWQS Reach Data -- a nested dictionary of relevant inputs for each HAWQS subbasin</param>
+        /// <param name="Boundaries">The list of upstream boundaries that have data relevant to the SegID segment unit</param>
+        /// <param name="SegID">The identifying string for the unit-- can be COMID, or HUC8-HUC14 identifier</param>
+        /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="link_boundary">should boundary condition inflows from HAWQS be added to this segment-- i.e. is the up-river segment out of the AQUATOX domain?</param>
+        /// <param name="link_overland">should overland flows be added to this segment</param>
+        /// <param name="jsondata">returns the AQUATOX simulation JSON after HAWQS data has been linked</param>
+        /// <returns></returns>
+        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, out string jsondata)
+        {
+            jsondata = "";
+            long ID = long.Parse(SegID);
+
+            Dictionary<DateTime, HAWQSRCHRow> ThisSeg;
+            if (HRD.ContainsKey(ID)) ThisSeg = HRD[ID];
+            else return "ERROR: COMID " + SegID + " missing from HAWQS reach output";
+
             List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
             foreach (string bound in Boundaries)
             {
@@ -840,12 +1025,14 @@ namespace AQUATOX.AQSim_2D
                 bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
 
                 int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
+                if (col_IN < 0) return "ERROR: Missing column " + components[i] + "_IN from HAWQS RCH output.";
+
                 int col_OUT = col_IN + 1;
 
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
                 if (TSV != null) 
                 {
-                    TSV.InitialCond = ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
+                    TSV.InitialCond = (InitFlow <= 0) ? 0 : ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
                     if (isSED) TSV.InitialCond *= 1000;  // sed is in units of tons
                     if (isCHLA) TSV.InitialCond = TSV.InitialCond * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90 ;
                     //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
@@ -930,8 +1117,15 @@ namespace AQUATOX.AQSim_2D
             return errmessage;
         }
 
-
-        public string PopulateLakeRes(int WBComid, string setupjson, out string jsondata)
+        /// <summary>
+        /// Reads NWM Volumes and Flows and Saved JSON for WaterBody associated with WBCOMID
+        /// </summary>
+        /// <param name="WBComid">The waterbody COMID</param>
+        /// <param name="setupjson">A JSON with the relevant setup parameters for the linked simulation</param>
+        /// <param name="daily">Return daily rather than hourly results?</param>
+        /// <param name="jsondata">Return of the JSON with the NWM volumes, flows, and simplified geometry parameters</param>
+        /// <returns></returns>
+        public string PopulateLakeRes(int WBComid, string setupjson, bool daily, out string jsondata)
         {
             jsondata = "";
             string WBCstr = WBComid.ToString();
@@ -946,6 +1140,7 @@ namespace AQUATOX.AQSim_2D
             TSI.Geometry.ComID = WBComid;
             TSI.Geometry.GeometryMetadata["waterbody"] = "true";
             TSI.Source = "nwm";
+            if (daily) TSI.TemporalResolution = "daily";
 
             try
             {
@@ -1074,7 +1269,7 @@ namespace AQUATOX.AQSim_2D
                             foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
                                 totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step changes or time-period is increased since NWM data gathering
-                                // m3/d      m3/d                                         m3/s               s/d
+                                // m3/d       m3/d                                        m3/s               s/d
                                 frac_this_segment = OutVol / totOutVol;
                             }
 
@@ -1191,12 +1386,12 @@ namespace AQUATOX.AQSim_2D
 
                 if (errmessage != "")
                 {
-                    outstr.Add("ERROR: " + errmessage);
+                    outstr.Add("ERROR running segment " + segID + ": " + errmessage);
                     return false;
                 }
             }
             else {
-                outstr.Add("ERROR: " + errmessage);
+                outstr.Add("ERROR running segment " + segID + ": " + errmessage);
                 return false;
                  };
 

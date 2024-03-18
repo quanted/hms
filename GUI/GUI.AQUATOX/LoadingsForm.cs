@@ -418,7 +418,7 @@ namespace GUI.AQUATOX
             }
 
             SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
-            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0,0.0);
+            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0,1,0.0);
             ShowGrid();
         }
 
