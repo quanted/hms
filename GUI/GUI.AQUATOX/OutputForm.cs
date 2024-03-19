@@ -25,7 +25,7 @@ namespace GUI.AQUATOX
                 {
                     base.OnPaint(e);
                 }
-                catch 
+                catch
                 {
                     ChartAreas[0].AxisY.IsLogarithmic = false;
                     System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
@@ -38,15 +38,15 @@ namespace GUI.AQUATOX
         private OChart chart1 = new OChart();
         ChartArea chartArea1 = new ChartArea();
         Legend legend1 = new Legend();
-        Graphics graphics = null; 
+        Graphics graphics = null;
 
         public AQTSim aQTS = null;
         public AQUATOXSegment outSeg = null;
-        
+
 
         private int ScaleX(int x)
         {
-            
+
             double ScaleX = graphics.DpiX / 96;
             return Convert.ToInt32(x * ScaleX);
         }
@@ -130,7 +130,10 @@ namespace GUI.AQUATOX
             Application.DoEvents();
             OutputBox.Visible = true;
 
-            ShowDialog();
+            BeginInvoke((MethodInvoker)delegate ()
+            {
+                ShowDialog();
+            });
 
         }
 
@@ -195,7 +198,7 @@ namespace GUI.AQUATOX
             Application.DoEvents();
 
             aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
-            
+
             if (aQTS.AQTSeg.Graphs.GList.Count < 1) aQTS.AQTSeg.DefaultGraphs();
             UpdateGraphBox();
             DisplayGraph();
@@ -245,26 +248,26 @@ namespace GUI.AQUATOX
             foreach (SeriesID SID in Graph.YItems)
             {
                 TStateVariable TSV = outSeg.GetStatePointer(SID.ns, SID.typ, SID.lyr);
-                if (TSV != null) 
-                 if (SID.indx<= TSV.SVoutput.Data.Values.ElementAt(0).Count)
-                 {
-                    List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
-                    Series ser = chart1.Series.Add(SID.nm);
-
-                    ser.ChartType = SeriesChartType.Line;
-                    ser.BorderWidth = 2;
-                    ser.MarkerStyle = MarkerStyle.Diamond;
-                    ser.Enabled = true;
-                    sercnt++;
-
-                    for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
+                if (TSV != null)
+                    if (SID.indx <= TSV.SVoutput.Data.Values.ElementAt(0).Count)
                     {
-                        ITimeSeriesOutput ito = TSV.SVoutput;
-                        string datestr = ito.Data.Keys.ElementAt(i).ToString();
-                        Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx - 1]);
-                        ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
+                        List<string> vallist = TSV.SVoutput.Data.Values.ElementAt(0);
+                        Series ser = chart1.Series.Add(SID.nm);
+
+                        ser.ChartType = SeriesChartType.Line;
+                        ser.BorderWidth = 2;
+                        ser.MarkerStyle = MarkerStyle.Diamond;
+                        ser.Enabled = true;
+                        sercnt++;
+
+                        for (int i = 0; i < TSV.SVoutput.Data.Keys.Count; i++)
+                        {
+                            ITimeSeriesOutput ito = TSV.SVoutput;
+                            string datestr = ito.Data.Keys.ElementAt(i).ToString();
+                            Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(i)[SID.indx - 1]);
+                            ser.Points.AddXY(Convert.ToDateTime(datestr), Val);
+                        }
                     }
-                 }
             }
         }
 
@@ -344,7 +347,7 @@ namespace GUI.AQUATOX
 
         private void unZoom()
         {
-            chart1.ChartAreas [0].AxisX.ScaleView.ZoomReset(0);
+            chart1.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
             chart1.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
         }
 
@@ -369,10 +372,10 @@ namespace GUI.AQUATOX
             if (saveFileDialog1.FileName == "") return;
 
             int sercount = 0;
-            int ndates=0;
+            int ndates = 0;
             List<TStateVariable> TSVList = new();
             List<int> IndexList = new();
-             
+
             string outtxt = "Date, ";
 
             outSeg.SetMemLocRec();
@@ -394,17 +397,17 @@ namespace GUI.AQUATOX
 
             string datestr = "";
             for (int date = 0; date < ndates; date++)
-              for (int ser = 0; ser < sercount; ser++)
-              {
+                for (int ser = 0; ser < sercount; ser++)
+                {
                     ITimeSeriesOutput ito = TSVList[ser].SVoutput;
                     if (ser == 0)
                     {
-                        datestr = ito.Data.Keys.ElementAt(date).ToString(); 
-                        outtxt = outtxt + Environment.NewLine + datestr + ", ";  
-                    } 
-                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(date)[IndexList[ser]-1]);
+                        datestr = ito.Data.Keys.ElementAt(date).ToString();
+                        outtxt = outtxt + Environment.NewLine + datestr + ", ";
+                    }
+                    Double Val = Convert.ToDouble(ito.Data.Values.ElementAt(date)[IndexList[ser] - 1]);
                     outtxt = outtxt + Val.ToString() + ", ";
-              }
+                }
 
             File.WriteAllText(saveFileDialog1.FileName, outtxt);
         }
@@ -419,5 +422,38 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = zoomOption.Checked;
 
         }
+
+        private void SaveParametersClick(object sender, EventArgs e)
+        {
+            if (OutputBox.SelectedIndex < 0) return;
+
+            if (aQTS == null) return;
+            aQTS.SavedRuns.TryGetValue(OutputBox.Text, out outSeg);
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "JSON File|*.JSON";
+            saveFileDialog1.Title = @"Save parameters for the archived output '" + OutputBox.Text + "'";
+            saveFileDialog1.FileName = OutputBox.Text;
+            saveFileDialog1.ShowDialog();
+
+            if (saveFileDialog1.FileName != "")
+            {
+                string jsondata = "";
+                AQTSim ExportSim = new();
+                ExportSim.SavedRuns = new();
+                ExportSim.AQTSeg = outSeg;
+                ExportSim.SavedRuns.Add(OutputBox.Text, outSeg);
+                string errmessage = ExportSim.SaveJSON(ref jsondata);
+                if (errmessage == "")
+                {
+                    aQTS.AQTSeg.FileName = saveFileDialog1.FileName;
+                    File.WriteAllText(saveFileDialog1.FileName, jsondata);
+                    MessageBox.Show("Saved parameters and results for the archived output '" + OutputBox.Text + "'");
+                }
+                else MessageBox.Show(errmessage);
+            }
+
+        }
+
     }
 }

@@ -205,6 +205,7 @@
     <ProjectReference Include="..\..\Data.Simulate.AQUATOX\Data.Simulate.AQUATOX.csproj" />
     <ProjectReference Include="..\..\Data\Data.csproj" />
     <ProjectReference Include="..\..\Hawqs\Hawqs.csproj" />
+    <ProjectReference Include="..\..\Web.Services\Web.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

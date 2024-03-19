@@ -401,7 +401,7 @@ namespace GUI.AQUATOX
             // 
             // browserButton
             // 
-            browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            browserButton.Font = new System.Drawing.Font("Arial Narrow", 8.25F);
             browserButton.ForeColor = System.Drawing.Color.Black;
             browserButton.Location = new System.Drawing.Point(26, 272);
             browserButton.Margin = new Padding(0);
@@ -435,7 +435,7 @@ namespace GUI.AQUATOX
             // CancelButton
             // 
             CancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F);
             CancelButton.ForeColor = System.Drawing.Color.Black;
             CancelButton.Location = new System.Drawing.Point(727, 75);
             CancelButton.Margin = new Padding(0);
@@ -525,6 +525,7 @@ namespace GUI.AQUATOX
             MinimumSize = new System.Drawing.Size(828, 465);
             Name = "AQTTestForm";
             Text = "AQUATOX.NET 1.0.0 ";
+            FormClosing += AQTTestForm_FormClosing;
             Load += AQTTestForm_Load;
             DBPanel.ResumeLayout(false);
             DBPanel.PerformLayout();

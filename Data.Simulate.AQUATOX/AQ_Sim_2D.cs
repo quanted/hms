@@ -17,7 +17,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
-using Utilities;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace AQUATOX.AQSim_2D
 
@@ -437,7 +438,7 @@ namespace AQUATOX.AQSim_2D
                 VelocityLoad.UseConstant = false;
                 VelocityLoad.ITSI = null;
             }
-            else  // use discharge and manning's equation
+            else  // don't use velocity, use discharge and manning's equation
             {
                 TVol.Calc_Method = VolumeMethType.Manning;
 
@@ -542,10 +543,6 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         /// <param name="comid">comid</param>
         /// <returns>JSON or error message</returns>
-
-        /// 
-
-
         public async Task<string> ReadWBGeoJSON(string WBcomid)
         {
             string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
@@ -699,6 +696,8 @@ namespace AQUATOX.AQSim_2D
             return Sim;
         }
 
+        
+
         /// <summary>
         /// Submit POST request to HMS web API for stream flow
         /// </summary>
@@ -772,30 +771,30 @@ namespace AQUATOX.AQSim_2D
             load.ITSI = null;
         }
 
-
+        /// <summary>
+        /// Creates inputs for a Volume model for the AQUATOX segment using HAWQS flows, Manning's Equation, and site-specific geometry
+        /// </summary>
+        /// <param name="TVol">The AQUATOX Volume object</param>
+        /// <param name="ThisSeg">The full set of HAWQS daily results for this segment</param>
+        /// <param name="FirstDate">The first date fo the AQUATOX simulation</param>
         public void VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
         {
+            TVol.Discharg = ThisSeg[FirstDate].vals[1] * 86400; // convert to m3/day
+            TVol.InitialCond = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;     
 
-            TVol.InitialCond = Math.Max(ThisSeg[FirstDate].vals[1] * 86400, TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;     
-            //FIXME assumes one-day retention time
-            TVol.Calc_Method = VolumeMethType.KnownVal;
+            TVol.Calc_Method = VolumeMethType.Manning;
 
-            TLoadings KnownLoad =  TVol.LoadsRec.Loadings;   
-            TLoadings InflowLoad = TVol.LoadsRec.Alt_Loadings[0];   // array slot [0] is "inflow" in this case (TVolume)
+            TLoadings DischargLoad = TVol.LoadsRec.Alt_Loadings[1];   // array slot [0] is "inflow" in this case (TVolume)
 
-            setupLoad(InflowLoad, ThisSeg.Count);
-            setupLoad(KnownLoad, ThisSeg.Count);
+            setupLoad(DischargLoad, ThisSeg.Count);
 
             foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
             {
-                InflowLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //inflow from RCH_Daily file -- converted from cms to m3/d
-                double knownvol = Math.Max(pair.Value.vals[1] * 86400, TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;   
-                //FIXME assumes one-day retention time
-                KnownLoad.list.Add(pair.Key, knownvol);
+                DischargLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //flow from RCH_Daily file -- converted from cms to m3/d
             }
          
-            TVol.LoadNotes1 = "Volumes from HAWQS converted to m3/day";
-            TVol.LoadNotes2 = "ASSUMES 1-D Retention Time";
+            TVol.LoadNotes1 = "Flows from HAWQS converted to m3/day";
+            TVol.LoadNotes2 = "Manning's Equation Used to Estimate Volume";
             TVol.AQTSeg.CalcVelocity = true;
         }
 
@@ -811,11 +810,10 @@ namespace AQUATOX.AQSim_2D
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="link_boundary">should boundary condition inflows from HAWQS be added to this segment-- i.e. is the up-river segment out of the AQUATOX domain?</param>
         /// <param name="link_overland">should overland flows be added to this segment</param>
-        /// <param name="jsondata">returns the AQUATOX simulation JSON after HAWQS data has been linked</param>
-        /// <returns></returns>
-        public string HAWQS_add_COMID_to_WB(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List<string> Boundaries, string SegID, int SegIndex, string WBJSON, bool link_boundary, bool link_overland, out string jsondata)
+        /// <returns>jsondata (the AQUATOX simulation JSON after HAWQS data has been linked), errors</returns>
+        public async Task<(string,string)> HAWQS_add_COMID_to_WB(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List<string> Boundaries, string SegID, int SegIndex, string WBJSON, bool link_boundary, bool link_overland)
         {
-            jsondata = "";
+            string jsondata = "";
             long ID = long.Parse(SegID);
 
             Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[ID];
@@ -824,7 +822,7 @@ namespace AQUATOX.AQSim_2D
             {
                 long parsedBound = long.Parse(bound);
                 if (HRD.ContainsKey(parsedBound)) BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
-                else return "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID;
+                else return ("","ERROR: boundary condition " + bound + " missing for Segment ID " + SegID);
             }
 
             string HUCStr = SegID.Length.ToString();
@@ -957,9 +955,181 @@ namespace AQUATOX.AQSim_2D
             }
 
             string errmessage = Sim.SaveJSON(ref jsondata);
-            return errmessage;
+            return (jsondata, errmessage);
         }
 
+        public bool ReadHUCGeometry(AQTSim Sim, string HUCID)
+        {
+            int HUClen = HUCID.Length;
+            string rtesFilen;
+            string subbasinFilen;
+
+            if (HUClen == 8)
+            {
+                rtesFilen = "rtes-huc8-2024-03-01-071355.csv";
+                subbasinFilen = "subbasins-huc8-2023-05-02-124826.csv";
+            }
+            else
+            if (HUClen == 10)
+            {
+                rtesFilen = "rtes-huc10-2024-03-01-071352.csv";
+                subbasinFilen = "subbasins-huc10-2023-05-02-124829.csv";
+            }
+            else
+            {
+                rtesFilen = "rtes-huc12-2024-03-01-070604.csv";
+                subbasinFilen = "subbasins-huc12-2023-05-23-115646.csv";
+            }
+
+            string DBDir = @"N:\AQUATOX\CSRA\HAWQS\RTEs\";  //fixme deployment
+            
+
+            double[] ExtractFromCSV(string filePath, string uniqueId, int[] columnIndices)
+            {
+                double[] result = new double[columnIndices.Length];
+
+                using (var reader = new StreamReader(filePath))
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine();
+                        var values = line.Split(',');
+
+                        if (values[0] == uniqueId)
+                        {
+                            for (int i = 0; i < columnIndices.Length; i++)
+                            {
+                                if (columnIndices[i] < values.Length)
+                                    result[i] = double.Parse(values[columnIndices[i]], CultureInfo.InvariantCulture);
+                            }
+                            return result;
+                        }
+                    }
+
+                return result; 
+            }
+
+            try
+            {
+
+                double[] SubData = ExtractFromCSV(DBDir + subbasinFilen, HUCID, new int[] { 3, 4, 8 });
+                double CumulativeArea = SubData[0];
+                double Lat = SubData[1];
+                double SubElev = SubData[2];
+
+                double[] RTEData = ExtractFromCSV(DBDir + rtesFilen, HUCID, new int[] { 1, 2 });
+                double Slope = RTEData[0];
+                double Length = RTEData[1];
+
+                double CH_W2 = 1.29d * Math.Pow(CumulativeArea, 0.6);  //estimates based on equations from TAMU/HAWQS
+                double CH_D = 0.13d * Math.Pow(CumulativeArea, 0.4);
+
+                Sim.AQTSeg.Location.Locale.SiteLength.Val = Length;  //km
+                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "RTE data inputs from HAWQS/SWAT";
+
+                Sim.AQTSeg.Location.Locale.Channel_Slope.Val = Slope;  //m/m
+                Sim.AQTSeg.Location.Locale.Channel_Slope.Comment = "RTE data inputs from HAWQS/SWAT";
+
+                Sim.AQTSeg.Location.Locale.ICZMean.Val = CH_D;  //m
+                Sim.AQTSeg.Location.Locale.ICZMean.Comment = "Estimated based on Subbasin Cumulative Area using eqn. from HAWQS/SWAT";
+                Sim.AQTSeg.Location.Locale.ZMax.Val = Sim.AQTSeg.Location.Locale.ICZMean.Val * 2.0;  //approximation for now
+                Sim.AQTSeg.Location.Locale.ZMax.Comment = "Estimated as 2.0 x mean depth";
+
+                Sim.AQTSeg.Location.Locale.SurfArea.Val = CH_W2 * Length * 1000d;  //m2
+                Sim.AQTSeg.Location.Locale.SurfArea.Comment = "Estimated based on Subbasin Cumulative Area using eqn. from HAWQS/SWAT";
+
+                Sim.AQTSeg.Location.Locale.Latitude.Val = Lat;
+                Sim.AQTSeg.Location.Locale.Latitude.Comment = "SUB data inputs from HAWQS/SWAT";
+                Sim.AQTSeg.Location.Locale.Altitude.Val = SubElev;
+                Sim.AQTSeg.Location.Locale.Altitude.Comment = "SUB data inputs from HAWQS/SWAT";
+
+                Sim.AQTSeg.Location.Locale.UseEnteredManning.Val = true;
+                Sim.AQTSeg.Location.Locale.EnteredManning.Val = 0.040; //natural channel default
+                Sim.AQTSeg.Location.Locale.EnteredManning.Comment = "natural channel default";
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ReadHUCGeometry Error occurred: " + ex.Message);
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// Updates the AQTSim geometry using geometry from NHD+ via webservice.
+        /// </summary>
+        /// <param name="Sim">Simulation to be updated</param>
+        /// <param name="COMID">NHD COMID</param>
+        /// <returns>success of update</returns>
+        public async Task<bool> ReadCOMIDGeometry(AQTSim Sim, string COMID)
+        {
+            Dictionary<string, string> ExtractMetadata(string json)
+            {
+                var result = new Dictionary<string, string>();
+                JObject jsonObject = JObject.Parse(json);
+                var metadata = jsonObject["metadata"] as JObject;
+
+                // List of parameters to extract
+                string[] parameters = { "LengthKM",  "SLOPE", "BANKFULL_WIDTH", "BANKFULL_DEPTH", "CentroidLatitude" };
+
+                // Loop through each parameter
+                foreach (var param in parameters)
+                {
+                    // Get the value if it exists, otherwise -9999
+                    var value = metadata[param]?.ToObject<object>() ?? -9999;
+                    result.Add(param, value.ToString());
+                }
+
+                return result;
+            }
+
+            string baseUrl = "https://qedcloud.net/hms/rest/api/info/catchment";
+            string parameters = "?comid="+COMID+"&streamcat=false&geometry=false&nwis=false&streamGeometry=false&cn=false&network=false";
+            string fullUrl = baseUrl + parameters;
+
+            Dictionary<string, string> GeoVals;
+
+            try
+
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    var response = await client.GetAsync(fullUrl);
+                    var contentString = await response.Content.ReadAsStringAsync();
+                    string deserializedObject = JsonConvert.DeserializeObject<object>(contentString).ToString();
+                    GeoVals = ExtractMetadata(deserializedObject);
+                }
+
+                double sitelength = double.Parse(GeoVals["LengthKM"]);
+                Sim.AQTSeg.Location.Locale.SiteLength.Val = sitelength;  //km
+                Sim.AQTSeg.Location.Locale.SiteLength.Comment = "from WSCatchment web service";
+
+                Sim.AQTSeg.Location.Locale.Channel_Slope.Val = double.Parse(GeoVals["SLOPE"]);  //m/m
+                Sim.AQTSeg.Location.Locale.Channel_Slope.Comment = "from WSCatchment web service";
+
+                Sim.AQTSeg.Location.Locale.ICZMean.Val = double.Parse(GeoVals["BANKFULL_DEPTH"]);  //m
+                Sim.AQTSeg.Location.Locale.ICZMean.Comment = "BANKFULL_DEPTH from WSCatchment web service";
+                Sim.AQTSeg.Location.Locale.ZMax.Val = Sim.AQTSeg.Location.Locale.ICZMean.Val * 1.5;  //approximation for now
+                Sim.AQTSeg.Location.Locale.ZMax.Comment = "Estimated as 1.5 x BANKFULL_DEPTH";
+
+                Sim.AQTSeg.Location.Locale.Latitude.Val = double.Parse(GeoVals["CentroidLatitude"]);
+                Sim.AQTSeg.Location.Locale.Latitude.Comment = "from WSCatchment web service";
+
+                Sim.AQTSeg.Location.Locale.SurfArea.Val = double.Parse(GeoVals["BANKFULL_WIDTH"])*sitelength*1000d;  //m2
+                Sim.AQTSeg.Location.Locale.SurfArea.Comment = "calculated from from WSCatchment web service";
+
+                Sim.AQTSeg.Location.Locale.UseEnteredManning.Val = true;
+                Sim.AQTSeg.Location.Locale.EnteredManning.Val = 0.040; //natural channel default
+                Sim.AQTSeg.Location.Locale.EnteredManning.Comment = "natural channel default";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ReadCOMIDGeometry Error occurred: " + ex.Message);
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// Adds HAWQS daily outputs for overland flows and inflows (where relevant) to the simulation unit identified with SegID
@@ -970,34 +1140,42 @@ namespace AQUATOX.AQSim_2D
         /// <param name="setupjson">string holding the master setup record</param>
         /// <param name="link_boundary">should boundary condition inflows from HAWQS be added to this segment-- i.e. is the up-river segment out of the AQUATOX domain?</param>
         /// <param name="link_overland">should overland flows be added to this segment</param>
-        /// <param name="jsondata">returns the AQUATOX simulation JSON after HAWQS data has been linked</param>
-        /// <returns></returns>
-        public string HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, out string jsondata)
+        /// <returns>jsondata (the AQUATOX simulation JSON after HAWQS data has been linked), errors</returns>
+        public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, bool is_COMID)
         {
-            jsondata = "";
+            string jsondata = "";
             long ID = long.Parse(SegID);
 
             Dictionary<DateTime, HAWQSRCHRow> ThisSeg;
             if (HRD.ContainsKey(ID)) ThisSeg = HRD[ID];
-            else return "ERROR: COMID " + SegID + " missing from HAWQS reach output";
+            else return ("","ERROR: Segment " + SegID + " missing from HAWQS reach output");
 
             List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
             foreach (string bound in Boundaries)
             {
                 long parsedBound = long.Parse(bound);
                 if (HRD.ContainsKey(parsedBound)) BoundSegs.Add(HRD[long.Parse(bound)]);  // identify the relevant boundary condition inputs
-                else return "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID;
+                else return ("", "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID);
             }
 
-            string HUCStr = SegID.Length.ToString();
+            string IDStr;
+            if (is_COMID) IDStr = "COMID " + SegID;
+            else IDStr = "HUC" + SegID.Length.ToString() + " " + SegID;
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, "HUC"+HUCStr, SegID, -9999, out err);  //fixme, add HUC length
-            if (err != "") { return err; }
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, IDStr, SegID, -9999, out err);  //COMID length from ReadCOMIDGeometry
+            if (err != "") { return ("", err); }
+
+
+            if (is_COMID)
+            {
+                if (!await ReadCOMIDGeometry(Sim, SegID)) return ("", "ERROR: Cannot read COMID " + SegID + " geometry from webserivce");
+            }
+            else if (!ReadHUCGeometry(Sim, SegID)) return ("", "ERROR: Cannot read HUC Geometry for " + SegID + " from local databases"); ;
 
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
             DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
-            VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);
+            VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);  // read data for volume/flow model from HAWQS Linkage
 
             string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  
             AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen, AllVariables.Temperature };
@@ -1025,7 +1203,7 @@ namespace AQUATOX.AQSim_2D
                 bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
 
                 int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
-                if (col_IN < 0) return "ERROR: Missing column " + components[i] + "_IN from HAWQS RCH output.";
+                if (col_IN < 0) return ("", "ERROR: Missing column " + components[i] + "_IN from HAWQS RCH output.");
 
                 int col_OUT = col_IN + 1;
 
@@ -1114,7 +1292,7 @@ namespace AQUATOX.AQSim_2D
             }
 
             string errmessage = Sim.SaveJSON(ref jsondata);
-            return errmessage;
+            return (jsondata,errmessage);
         }
 
         /// <summary>
@@ -1224,8 +1402,10 @@ namespace AQUATOX.AQSim_2D
         /// <param name="SrcID">COMID of the upstream segments from which data is being passed</param>
         /// <param name="ninputs">Number of upstream inputs</param>
         /// <param name="AR">Data structure of archived inputs from which to gather model results</param>
+        /// <param name="passMass">if true passes mass, if false, passes the water concentration which can be done if water models may differ between segments e.g. reservoir to stream</param> 
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
-        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null )  
+        /// <returns>errors, warnings</returns>
+        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, bool passMass, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
         {
             //archived_results AR;
             if (AR == null)    // (AR.Equals(null)) crashed
@@ -1268,16 +1448,24 @@ namespace AQUATOX.AQSim_2D
                         if (divergence_flows != null)
                             foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
                             {
-                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //TODO FIXME potential issue if time-step changes or time-period is increased since NWM data gathering
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //potential issue if master setup time-step changes or simulation time-period is increased since NWM data gathering
                                 // m3/d       m3/d                                        m3/s               s/d
                                 frac_this_segment = OutVol / totOutVol;
                             }
 
                         double InVol = InflowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
 
-                        if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
-                        else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol)* frac_this_segment);  // first or only input
-                        else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  //adding second or third inputs
+                        if (passMass)
+                        {
+                            if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
+                            else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  // first or only input
+                            else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  //adding second or third inputs
+                        }
+                        else // pass concentration
+                        {
+                            if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i]);  // first or only input
+                            else newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] *(ninputs-1) + AR.concs[iTSV][i])/ninputs );  //weighted-averaging second or third inputs
+                        }
 
                     }
 
@@ -1349,7 +1537,7 @@ namespace AQUATOX.AQSim_2D
                         if ((SrcID != segID) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                         {
                             nSources++;
-                            string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                            string errstr = Pass_Data(Sim, SrcID, nSources, true, null, divergence_flows);
                             if (errstr != "") outstr.Add(errstr);
                                 else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + segID.ToString());
                         }
@@ -1368,7 +1556,7 @@ namespace AQUATOX.AQSim_2D
                                     if (AR != null)
                                     {
                                         nSources++;
-                                        string errstr = Pass_Data(Sim, SrcID, nSources, null, divergence_flows);
+                                        string errstr = Pass_Data(Sim, SrcID, nSources, false, null, divergence_flows);
                                         if (errstr != "") outstr.Add(errstr);
                                             else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + segID.ToString());
                                     }

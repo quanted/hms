@@ -20,9 +20,9 @@ namespace AQUATOX.Volume
     public class TVolume : TStateVariable
     {
         // [JsonIgnore] double // LastCalcTA ;  
-        // [JsonIgnore] double // LastTimeTA ;        // don't need saving
+        // [JsonIgnore] double // LastTimeTA ;        // these don't need saving
         [JsonIgnore] double Inflow = 0.0;
-        [JsonIgnore] double Discharg = 0.0;          // don't need saving
+        [JsonIgnore] public double Discharg = 0.0;    // these don't need saving
         [JsonIgnore] double InflowLoad = 0.0;
         [JsonIgnore] double DischargeLoad = 0.0;
         [JsonIgnore] double KnownValueLoad = 0.0;

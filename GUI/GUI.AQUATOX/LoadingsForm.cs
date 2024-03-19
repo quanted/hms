@@ -18,7 +18,8 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
- 
+using Microsoft.Research.Science.Data.Utilities;
+using System.Reflection.Emit;
 namespace GUI.AQUATOX
 {
 
@@ -201,9 +202,10 @@ namespace GUI.AQUATOX
         public void ShowGrid()
         {
             GridChanged = false;
+            int LTSI = LTBox.SelectedIndex;
 
-            if (LTBox.SelectedIndex < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
-            else if (LTBox.SelectedIndex < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTBox.SelectedIndex - 1];
+            if (LTSI < 1) LoadShown = SV.LoadsRec.Loadings;   // Set LoadShown
+            else if (LTSI < 4) LoadShown = SV.LoadsRec.Alt_Loadings[LTSI - 1];
 
             ToxIC.Visible = false;
             ToxICLabel.Visible = false;
@@ -212,7 +214,7 @@ namespace GUI.AQUATOX
             if (DetritusScreen) //special case suspended & dissolved detr -- quick implementation, move this logic to .NET later
             {   // pull-down list is "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved/Particulate", "Labile/Refractory"  special case for detritus
                 DetritalInputRecordType DIR = ((TDissRefrDetr)SV).InputRecord;
-                switch (LTBox.SelectedIndex)
+                switch (LTSI)
                 {
                     case 0: LoadShown = DIR.Load.Loadings; break;
                     case 1: LoadShown = DIR.Load.Alt_Loadings[0]; break;
@@ -221,19 +223,19 @@ namespace GUI.AQUATOX
                     case 4: LoadShown = DIR.Percent_Refr.Loadings; break;
                 }
 
-                if (LTBox.SelectedIndex > 2)
+                if (LTSI > 2)
                 {
                     ToxIC.Visible = true;
                     ToxICLabel.Visible = true;
                     ToxICUnitLabel.Visible = true;
-                    if (LTBox.SelectedIndex ==3) ToxIC.Text = DIR.Percent_PartIC.ToString("G9");
+                    if (LTSI ==3) ToxIC.Text = DIR.Percent_PartIC.ToString("G9");
                     else ToxIC.Text = DIR.Percent_RefrIC.ToString("G9");
                 }
             }
 
-            if (LTBox.SelectedIndex > SV.nontoxloadings-1)  //then toxicant selected
+            if (LTSI > SV.nontoxloadings-1)  //then toxicant selected
             {
-                int chemint = 1 + LTBox.SelectedIndex - SV.nontoxloadings;
+                int chemint = 1 + LTSI - SV.nontoxloadings;
                 T_SVType chemtype = T_SVType.OrgTox1;  chemtype--;  //set to enumerated variable before
                 int currentchem = 0;
                 TT = null;
@@ -289,6 +291,24 @@ namespace GUI.AQUATOX
             dataGridView1.DataSource = LoadTable;
             if (LoadShown.UseConstant) dataGridView1.ForeColor = Color.Gray;
             else dataGridView1.ForeColor = Color.Black;
+
+            if (SV.NState == AllVariables.Volume)  // enable or disable the LoadingPanel based on the inputs needed for the volume model selected
+            {
+                bool disable = (RB0.Checked && LTSI < 2) || // manning's coefficient
+                               (RB1.Checked && LTSI != 1) || // const volume
+                               (RB2.Checked && LTSI == 0) || // calculate
+                               (RB3.Checked && LTSI == 2);  // known value
+
+                foreach (Control control in LTPanel.Controls)
+                {
+                    if ((control.Name == "LTBox") || (control.Name == "LTLabel")) continue;
+
+                    control.Enabled = !disable;
+                }
+                dataGridView1.Enabled = !disable;
+                if (disable) dataGridView1.ForeColor = Color.Gray;
+                      else dataGridView1.ForeColor = Color.Black;
+            }
         }
 
         private void CancelButt_Click(object sender, EventArgs e)
@@ -658,6 +678,7 @@ namespace GUI.AQUATOX
             else RBReturn = 3;
 
             SV.SetVarFromRadioButton(RBReturn);
+            ShowGrid();
         }
 
         private void ToxIC_TextChanged(object sender, EventArgs e)

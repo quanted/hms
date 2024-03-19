@@ -82,15 +82,14 @@
             OutputLabel = new System.Windows.Forms.Label();
             BrowseJSON = new System.Windows.Forms.Button();
             toggleLog = new System.Windows.Forms.Button();
-            GraphLabel = new System.Windows.Forms.Label();
             resetZoom = new System.Windows.Forms.Button();
             LogPanel = new System.Windows.Forms.Panel();
             LogChange = new System.Windows.Forms.Button();
-            WarningsBox = new System.Windows.Forms.CheckBox();
             label1 = new System.Windows.Forms.Label();
             InfoBox = new System.Windows.Forms.CheckBox();
             InputsBox = new System.Windows.Forms.CheckBox();
             ErrorsBox = new System.Windows.Forms.CheckBox();
+            WarningsBox = new System.Windows.Forms.CheckBox();
             logfilen = new System.Windows.Forms.Label();
             label9 = new System.Windows.Forms.Label();
             ExecutePanel = new System.Windows.Forms.Panel();
@@ -99,6 +98,10 @@
             executeButton = new System.Windows.Forms.Button();
             proglabel = new System.Windows.Forms.Label();
             StatusLabel = new System.Windows.Forms.Label();
+            GraphOptPanel = new System.Windows.Forms.Panel();
+            graphOption = new System.Windows.Forms.RadioButton();
+            zoomOption = new System.Windows.Forms.RadioButton();
+            label6 = new System.Windows.Forms.Label();
             ModelSetupPanel.SuspendLayout();
             HAWQSButtonPanel.SuspendLayout();
             SystemInfoPanel.SuspendLayout();
@@ -109,6 +112,7 @@
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             LogPanel.SuspendLayout();
             ExecutePanel.SuspendLayout();
+            GraphOptPanel.SuspendLayout();
             SuspendLayout();
             // 
             // basedirBox
@@ -679,30 +683,20 @@
             // 
             toggleLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            toggleLog.Location = new System.Drawing.Point(1005, 567);
+            toggleLog.Location = new System.Drawing.Point(1005, 568);
             toggleLog.Name = "toggleLog";
-            toggleLog.Size = new System.Drawing.Size(114, 24);
+            toggleLog.Size = new System.Drawing.Size(114, 25);
             toggleLog.TabIndex = 51;
             toggleLog.Text = "Toggle Log Scale";
             toggleLog.UseVisualStyleBackColor = true;
             toggleLog.Click += toggleLog_Click;
             // 
-            // GraphLabel
-            // 
-            GraphLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            GraphLabel.Location = new System.Drawing.Point(619, 568);
-            GraphLabel.Name = "GraphLabel";
-            GraphLabel.Size = new System.Drawing.Size(262, 32);
-            GraphLabel.TabIndex = 53;
-            GraphLabel.Text = "Draw a box to zoom or \"right click\" on a point to get its name and value.";
-            // 
             // resetZoom
             // 
-            resetZoom.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            resetZoom.Location = new System.Drawing.Point(904, 567);
+            resetZoom.Location = new System.Drawing.Point(58, 27);
             resetZoom.Name = "resetZoom";
-            resetZoom.Size = new System.Drawing.Size(95, 24);
+            resetZoom.Size = new System.Drawing.Size(90, 22);
             resetZoom.TabIndex = 52;
             resetZoom.Text = "Reset Zoom";
             resetZoom.UseVisualStyleBackColor = true;
@@ -712,12 +706,12 @@
             // 
             LogPanel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             LogPanel.Controls.Add(LogChange);
-            LogPanel.Controls.Add(WarningsBox);
             LogPanel.Controls.Add(label1);
             LogPanel.Controls.Add(InfoBox);
             LogPanel.Controls.Add(InputsBox);
             LogPanel.Controls.Add(ErrorsBox);
-            LogPanel.Location = new System.Drawing.Point(599, 565);
+            LogPanel.Controls.Add(WarningsBox);
+            LogPanel.Location = new System.Drawing.Point(612, 565);
             LogPanel.Name = "LogPanel";
             LogPanel.Size = new System.Drawing.Size(521, 37);
             LogPanel.TabIndex = 54;
@@ -736,19 +730,6 @@
             LogChange.UseVisualStyleBackColor = true;
             LogChange.Click += LogChange_Click;
             // 
-            // WarningsBox
-            // 
-            WarningsBox.AutoSize = true;
-            WarningsBox.Checked = true;
-            WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            WarningsBox.Location = new System.Drawing.Point(169, 11);
-            WarningsBox.Name = "WarningsBox";
-            WarningsBox.Size = new System.Drawing.Size(76, 19);
-            WarningsBox.TabIndex = 56;
-            WarningsBox.Text = "Warnings";
-            WarningsBox.UseVisualStyleBackColor = true;
-            WarningsBox.CheckedChanged += LogOptions_CheckChanged;
-            // 
             // label1
             // 
             label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
@@ -765,7 +746,7 @@
             InfoBox.AutoSize = true;
             InfoBox.Checked = true;
             InfoBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            InfoBox.Location = new System.Drawing.Point(309, 11);
+            InfoBox.Location = new System.Drawing.Point(309, 8);
             InfoBox.Name = "InfoBox";
             InfoBox.Size = new System.Drawing.Size(47, 19);
             InfoBox.TabIndex = 44;
@@ -778,7 +759,7 @@
             InputsBox.AutoSize = true;
             InputsBox.Checked = true;
             InputsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            InputsBox.Location = new System.Drawing.Point(247, 11);
+            InputsBox.Location = new System.Drawing.Point(247, 8);
             InputsBox.Name = "InputsBox";
             InputsBox.Size = new System.Drawing.Size(59, 19);
             InputsBox.TabIndex = 43;
@@ -791,13 +772,26 @@
             ErrorsBox.AutoSize = true;
             ErrorsBox.Checked = true;
             ErrorsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            ErrorsBox.Location = new System.Drawing.Point(111, 11);
+            ErrorsBox.Location = new System.Drawing.Point(111, 8);
             ErrorsBox.Name = "ErrorsBox";
             ErrorsBox.Size = new System.Drawing.Size(56, 19);
             ErrorsBox.TabIndex = 41;
             ErrorsBox.Text = "Errors";
             ErrorsBox.UseVisualStyleBackColor = true;
             ErrorsBox.CheckedChanged += LogOptions_CheckChanged;
+            // 
+            // WarningsBox
+            // 
+            WarningsBox.AutoSize = true;
+            WarningsBox.Checked = true;
+            WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            WarningsBox.Location = new System.Drawing.Point(169, 8);
+            WarningsBox.Name = "WarningsBox";
+            WarningsBox.Size = new System.Drawing.Size(76, 19);
+            WarningsBox.TabIndex = 56;
+            WarningsBox.Text = "Warnings";
+            WarningsBox.UseVisualStyleBackColor = true;
+            WarningsBox.CheckedChanged += LogOptions_CheckChanged;
             // 
             // logfilen
             // 
@@ -888,18 +882,68 @@
             StatusLabel.Text = "Model Ready to Run: Input Segments Created";
             StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // GraphOptPanel
+            // 
+            GraphOptPanel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            GraphOptPanel.Controls.Add(resetZoom);
+            GraphOptPanel.Controls.Add(graphOption);
+            GraphOptPanel.Controls.Add(zoomOption);
+            GraphOptPanel.Controls.Add(label6);
+            GraphOptPanel.Location = new System.Drawing.Point(615, 561);
+            GraphOptPanel.Name = "GraphOptPanel";
+            GraphOptPanel.Size = new System.Drawing.Size(385, 51);
+            GraphOptPanel.TabIndex = 59;
+            GraphOptPanel.Visible = false;
+            // 
+            // graphOption
+            // 
+            graphOption.AutoSize = true;
+            graphOption.Checked = true;
+            graphOption.ForeColor = System.Drawing.Color.Navy;
+            graphOption.Location = new System.Drawing.Point(148, 5);
+            graphOption.Name = "graphOption";
+            graphOption.Size = new System.Drawing.Size(226, 19);
+            graphOption.TabIndex = 60;
+            graphOption.TabStop = true;
+            graphOption.Text = "Click on the graph to show date/value";
+            graphOption.UseVisualStyleBackColor = true;
+            graphOption.CheckedChanged += zoomOption_CheckedChanged;
+            // 
+            // zoomOption
+            // 
+            zoomOption.AutoSize = true;
+            zoomOption.Cursor = System.Windows.Forms.Cursors.SizeNS;
+            zoomOption.ForeColor = System.Drawing.Color.Navy;
+            zoomOption.Location = new System.Drawing.Point(17, 5);
+            zoomOption.Name = "zoomOption";
+            zoomOption.Size = new System.Drawing.Size(131, 19);
+            zoomOption.TabIndex = 59;
+            zoomOption.Text = "Draw a box to zoom";
+            zoomOption.UseVisualStyleBackColor = true;
+            zoomOption.CheckedChanged += zoomOption_CheckedChanged;
+            // 
+            // label6
+            // 
+            label6.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            label6.AutoSize = true;
+            label6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            label6.Location = new System.Drawing.Point(60, -40);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(41, 15);
+            label6.TabIndex = 55;
+            label6.Text = "Show:";
+            // 
             // MultiSegForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1132, 611);
+            Controls.Add(GraphOptPanel);
             Controls.Add(label9);
             Controls.Add(ExecutePanel);
             Controls.Add(webView);
             Controls.Add(logfilen);
             Controls.Add(LogPanel);
-            Controls.Add(GraphLabel);
-            Controls.Add(resetZoom);
             Controls.Add(toggleLog);
             Controls.Add(BrowseJSON);
             Controls.Add(OutputLabel);
@@ -948,6 +992,8 @@
             LogPanel.ResumeLayout(false);
             LogPanel.PerformLayout();
             ExecutePanel.ResumeLayout(false);
+            GraphOptPanel.ResumeLayout(false);
+            GraphOptPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -995,7 +1041,6 @@
         private System.Windows.Forms.Button viewOutputButton;
         private System.Windows.Forms.Button BrowseJSON;
         private System.Windows.Forms.Button toggleLog;
-        private System.Windows.Forms.Label GraphLabel;
         private System.Windows.Forms.Button resetZoom;
         private System.Windows.Forms.CheckBox LabelCheckBox;
         private System.Windows.Forms.CheckBox NRCheckBox;
@@ -1025,5 +1070,9 @@
         private System.Windows.Forms.Label proglabel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox EditJSONBox;
+        private System.Windows.Forms.Panel GraphOptPanel;
+        private System.Windows.Forms.RadioButton graphOption;
+        private System.Windows.Forms.RadioButton zoomOption;
+        private System.Windows.Forms.Label label6;
     }
 }

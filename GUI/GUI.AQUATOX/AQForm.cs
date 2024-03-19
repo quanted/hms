@@ -5,8 +5,8 @@ using AQUATOX.Chemicals;
 using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
-using Hawqs;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +16,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Web.Services;
+using Utilities;
+using System.Net.Http;
 
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
@@ -35,6 +38,7 @@ namespace GUI.AQUATOX
         private List<string> SVList = null;
         private List<TStateVariable> TSVList = null;
         private System.Drawing.Graphics graphics;
+        private string LastSaveJSON = "";  //check if simulation has changed
 
 
         public AQTTestForm()
@@ -94,11 +98,9 @@ namespace GUI.AQUATOX
 
             if (openFileDialog1.FileName != "")
             {
-                string json = File.ReadAllText(openFileDialog1.FileName);
+                LastSaveJSON = File.ReadAllText(openFileDialog1.FileName);
 
-                // json = TEST_INSERT_LOAD(json);  // temporary used to test insert load code
-
-                if (!LoadJSON(json)) return;
+                if (!LoadJSON(LastSaveJSON)) return;
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
 
                 ButtonPanel.Visible = true;
@@ -110,14 +112,12 @@ namespace GUI.AQUATOX
                 aQTS.ArchiveSimulation();
 
                 ShowStudyInfo();
-
-
             }
         }
 
-        private void saveJSON_Click(object sender, EventArgs e)
+        private bool saveJSONfile()
         {
-            if (aQTS == null) return;
+            if (aQTS == null) return false;
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "JSON File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
@@ -132,10 +132,22 @@ namespace GUI.AQUATOX
                 {
                     aQTS.AQTSeg.FileName = saveFileDialog1.FileName;
                     File.WriteAllText(saveFileDialog1.FileName, jsondata);
-                    ShowStudyInfo();
+
+                    return true;
                 }
-                else MessageBox.Show(errmessage);
+                else
+                {
+                    MessageBox.Show(errmessage);
+                    return false;
+                }
             }
+            else return false;
+        }
+
+        private void saveJSON_Click(object sender, EventArgs e)
+        {
+            saveJSONfile();
+            ShowStudyInfo();
         }
 
         private int ScaleX(int x)
@@ -1291,6 +1303,18 @@ namespace GUI.AQUATOX
         string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect.csv";
         string ModFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect_MOD.csv";
         string omitfilepath = @"N:\AQUATOX\CSRA\GIS\HUC_14\COMD_HUC14_Omit_List.csv";
+
+        private void AQTTestForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (aQTS == null) return;
+            if (MultiSegmentInput) return;
+
+            var result = MessageBox.Show("Save any changes before exiting?", "Confirm Exit", MessageBoxButtons.YesNoCancel);
+
+            if (result == DialogResult.Yes) e.Cancel = !(saveJSONfile());
+            else if (result == DialogResult.No) return;
+            else e.Cancel = true;
+        }
 
 
         //private void button1_Click(object sender, EventArgs e)  // process duplicate COMIDs in COMID to HUC14 database

@@ -31,6 +31,8 @@ using static AQUATOX.AQSim_2D.AQSim_2D;
 using System.Globalization;
 using Utilities;
 using System.Collections.Concurrent;
+using Data.Source;
+using static System.Windows.Forms.LinkLabel;
 
 namespace GUI.AQUATOX
 
@@ -146,14 +148,14 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
             chart1.ChartAreas[0].AxisY.LabelStyle.Format = "{0:#,##0.###}";
 
-            chart1.ChartAreas[0].CursorX.IsUserEnabled = true;
-            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
-            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = false;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = false;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
             chart1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
 
-            chart1.ChartAreas[0].CursorY.IsUserEnabled = true;
-            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
-            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = false;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = false;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
             chart1.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
             // 
             // end chart1 -----------------------------------------------
@@ -456,7 +458,7 @@ namespace GUI.AQUATOX
                     chart1.ChartAreas[0].RecalculateAxesScale();
                 }
 
-                if (e.Button == MouseButtons.Right)
+                if (!zoomOption.Checked)
                 {
                     string msgstr = resultExplode.Series.Name;
                     if (resultExplode.PointIndex > 0)
@@ -508,12 +510,11 @@ namespace GUI.AQUATOX
         private bool ShowMsg(string msg)
         {
             if (msg.Contains("ERROR")) return (ErrorsBox.Checked);
-            if (msg.Contains("WARNING")) return (WarningsBox.Checked);
+            if (msg.IndexOf("WARNING", StringComparison.OrdinalIgnoreCase) >= 0) return (WarningsBox.Checked);
             if (msg.Contains("INFO")) return (InfoBox.Checked);
             if (msg.Contains("INPUT")) return (InputsBox.Checked);
             return true;
         }
-
 
         private void AddToProcessLog(string msg)
         {
@@ -876,7 +877,7 @@ namespace GUI.AQUATOX
             if (!SetupForRun()) return;
 
             AddToProcessLog("INPUTS: Model Run Initiated");
-//            try
+            //            try
             {
                 if ((Lake0D != 0) || (HUC0D != ""))
                 {
@@ -956,7 +957,7 @@ namespace GUI.AQUATOX
                 }
             }
         }
-        
+
         private async Task<bool> ExecuteModelForEachSegment(int order, int[] outofnetwork)
         {
             var results = new ConcurrentBag<bool>();  //thread safe storage of model results
@@ -1725,11 +1726,11 @@ namespace GUI.AQUATOX
         }
 
 
-        private void webView_MouseDown(string COMIDstr)
+        private async void webView_MouseDown(string COMIDstr)
         {
             {
                 if ((outputjump.Enabled) && (outputjump.Checked))
-                    ViewOutput(COMIDstr);
+                    await ViewOutput(COMIDstr);
                 else EditCOMID(COMIDstr);
             }
 
@@ -1805,8 +1806,12 @@ namespace GUI.AQUATOX
             };
         }
 
-        private void ViewOutput(string CString)
+        bool ViewOutputClicked = false;
+        async Task ViewOutput(string CString)
         {
+            if (ViewOutputClicked) return;
+            ViewOutputClicked = true;
+
             string graphjson = "";
             BaseDir = basedirBox.Text;
             string filen = BaseDir + "AQT_Run_" + CString + ".JSON";
@@ -1814,26 +1819,35 @@ namespace GUI.AQUATOX
 
             if (ValidFilen(filen, false))
             {
-                string json = File.ReadAllText(filen);  //read one segment of executed multi-seg model
-                AQTSim Sim = new AQTSim();
-                string err = Sim.Instantiate(json);
-                if (err != "") { MessageBox.Show(err); return; }
-                Sim.AQTSeg.SetMemLocRec();
-                Sim.ArchiveSimulation();
-                OutputForm OutForm = new OutputForm();
-                OutForm.Text = "Multi-Segment output from " + "AQT_Run_" + CString + ".JSON";
-
-                if (ValidFilen(graphfilen, false))
+                try
                 {
-                    graphjson = File.ReadAllText(graphfilen);  //read user generated graphs
-                    Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs>(graphjson);
+                    UseWaitCursor = true;
+
+                    string json = File.ReadAllText(filen);  //read one segment of executed multi-seg model
+                    AQTSim Sim = new AQTSim();
+                    string err = Sim.Instantiate(json);
+                    if (err != "") { MessageBox.Show(err); return; }
+                    Sim.AQTSeg.SetMemLocRec();
+                    Sim.ArchiveSimulation();
+                    OutputForm OutForm = new OutputForm();
+                    OutForm.Text = "Multi-Segment output from " + "AQT_Run_" + CString + ".JSON";
+
+                    if (ValidFilen(graphfilen, false))
+                    {
+                        graphjson = File.ReadAllText(graphfilen);  //read user generated graphs
+                        Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs>(graphjson);
+                    }
+
+                    await Task.Run(() => OutForm.ShowOutput(Sim));
+                    ViewOutputClicked = false;
+
+                    graphjson = JsonConvert.SerializeObject(Sim.SavedRuns.Values.Last().Graphs);
+                    File.WriteAllText(graphfilen, graphjson);
                 }
-
-                OutForm.ShowOutput(Sim);
-
-                graphjson = JsonConvert.SerializeObject(Sim.SavedRuns.Values.Last().Graphs);
-                File.WriteAllText(graphfilen, graphjson);
-
+                finally
+                {
+                    UseWaitCursor = false;
+                }
             }
             else { MessageBox.Show("COMID: " + CString + ".  Linked output for this COMID not available."); };
         }
@@ -2106,11 +2120,11 @@ namespace GUI.AQUATOX
             }
         }
 
-        private void viewOutputButton_Click(object sender, EventArgs e)
+        private async void viewOutputButton_Click(object sender, EventArgs e)
         {
-            if (Lake0D > 0) ViewOutput(Lake0D.ToString());
+            if (Lake0D > 0) await ViewOutput(Lake0D.ToString());
 
-            if (HUC0D != "") ViewOutput(HUC0D);
+            if (HUC0D != "") await ViewOutput(HUC0D);
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -2151,7 +2165,7 @@ namespace GUI.AQUATOX
         {
             resetZoom.Visible = vis;
             chart1.Visible = vis;
-            GraphLabel.Visible = vis;
+            GraphOptPanel.Visible = vis;
             toggleLog.Visible = vis;
         }
 
@@ -2164,10 +2178,13 @@ namespace GUI.AQUATOX
         private void resetZoom_Click(object sender, EventArgs e)
         {
             unZoom();
-            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
-            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
-            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
-            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            if (zoomOption.Checked)
+                {
+                    chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
+                    chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+                    chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
+                    chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+                }
         }
 
         private void NRCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -2440,61 +2457,82 @@ namespace GUI.AQUATOX
         Hawqs.Hawqs HAWQS_Sim = null;
         runstatus HAWQS_RunStatus = null;
 
-public class CSVAggregator
-    {
-        public static async Task<string> DownloadAndAggregateCSV(string fileUrl)
+        public class CSVAggregator
         {
-            var tempFilePath = Path.GetTempFileName();
-            var outputStringBuilder = new StringBuilder();
-
-            // Download file
-            using (var httpClient = new HttpClient())
+            public static async Task<(string csvContent, string metadata)> DownloadAndAggregateCSV(string fileUrl)
             {
-                var response = await httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
+                var tempFilePath = Path.GetTempFileName();
+                var outputStringBuilder = new StringBuilder();
+                var metadataStringBuilder = new StringBuilder();
 
-                using (var fs = new FileStream(tempFilePath, FileMode.Create))
-                using (var stream = await response.Content.ReadAsStreamAsync())
+                // Download file
+                using (var httpClient = new HttpClient())
                 {
-                    await stream.CopyToAsync(fs);
-                }
-            }
+                    var response = await httpClient.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
 
-            SevenZipCompressor.SetLibraryPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"x64\7z.dll"));  //fixme deployment
-            // Extract and aggregate CSVs
-            using (var extractor = new SevenZipExtractor(tempFilePath))
-            {
-                foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith(".csv") && file.Size > 170))  // 170 byte files simply contain an error message
-                {
-                    using (var entryStream = new MemoryStream())
+                    using (var fs = new FileStream(tempFilePath, FileMode.Create))
+                    using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        extractor.ExtractFile(entry.FileName, entryStream);
-                        entryStream.Position = 0;
+                        await stream.CopyToAsync(fs);
+                    }
+                }
 
-                        using (var reader = new StreamReader(entryStream))
+                SevenZipCompressor.SetLibraryPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"x64\7z.dll"));  //fixme deployment
+                                                                                                                                                  // Extract and aggregate CSVs
+                using (var extractor = new SevenZipExtractor(tempFilePath))
+                {
+                    foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith(".csv") && file.Size > 170))  // 170 byte files simply contain an error message
+                    {
+                        using (var entryStream = new MemoryStream())
                         {
-                            bool isFirstFile = outputStringBuilder.Length == 0;
-                            while (!reader.EndOfStream)
+                            extractor.ExtractFile(entry.FileName, entryStream);
+                            entryStream.Position = 0;
+
+                            using (var reader = new StreamReader(entryStream))
                             {
-                                var line = reader.ReadLine();
-                                if (isFirstFile || !reader.EndOfStream)
+                                bool isFirstFile = outputStringBuilder.Length == 0;
+                                while (!reader.EndOfStream)
                                 {
-                                    outputStringBuilder.AppendLine(line);
+                                    var line = reader.ReadLine();
+                                    if (isFirstFile || !reader.EndOfStream)
+                                    {
+                                        outputStringBuilder.AppendLine(line);
+                                    }
+                                    isFirstFile = false;
                                 }
-                                isFirstFile = false;
+                            }
+                        }
+                    }
+
+                    foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith("metadata.txt"))) 
+                    {
+                        using (var entryStream = new MemoryStream())
+                        {
+                            extractor.ExtractFile(entry.FileName, entryStream);
+                            entryStream.Position = 0;
+
+                            using (var reader = new StreamReader(entryStream))
+                            {
+                                while (!reader.EndOfStream)
+                                {
+                                    var line = reader.ReadLine();
+                                    if (!reader.EndOfStream)
+                                        metadataStringBuilder.AppendLine(line);
+                                }
                             }
                         }
                     }
                 }
+
+                File.Delete(tempFilePath);
+                
+                return (outputStringBuilder.ToString(), metadataStringBuilder.ToString());
             }
-
-            File.Delete(tempFilePath);
-            return outputStringBuilder.ToString();
         }
-    }
 
 
-    async private void HAWQS_Click(object sender, EventArgs e)
+        async private void HAWQS_Click(object sender, EventArgs e)
         {
             if (!VerifyStreamNetwork()) return;
             if (Lake0D > 0)
@@ -2578,7 +2616,6 @@ public class CSVAggregator
             BaseDir = basedirBox.Text;
 
             //if (!VerifyStreamNetwork()) return;
-
             //if (SegmentsCreated())
             //if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
             //MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
@@ -2590,9 +2627,12 @@ public class CSVAggregator
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
 
-            string hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.Indented);
-            if (EditJSONBox.Checked)
+            string hawqsinput;
+             
+            if (!EditJSONBox.Checked) hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.None);
+            else
             {
+                hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.Indented);
                 using (var form = new JSONEditForm(hawqsinput))
                 {
                     form.jsonString = hawqsinput;
@@ -2602,7 +2642,8 @@ public class CSVAggregator
                         {
                             // Try to deserialize to the expected object type to validate JSON
                             hawqsinput = form.GetEditedJson();
-                            JsonConvert.DeserializeObject<AQSim_2D.HAWQSInput>(hawqsinput);
+                            AQSim_2D.HAWQSInput HI = JsonConvert.DeserializeObject<AQSim_2D.HAWQSInput>(hawqsinput);
+                            hawqsinput = JsonConvert.SerializeObject(HI, Formatting.None);
                         }
                         catch (JsonReaderException ex)
                         {
@@ -2612,7 +2653,6 @@ public class CSVAggregator
                     else return;  //cancel press
                 }
             }
-
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
@@ -2650,7 +2690,7 @@ public class CSVAggregator
                     TSafeUpdateProgress(progress);
                 }
 
-                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, HAWQS_RunStatus.id, false);   
+                Task<List<HawqsOutput>> GPDT = HAWQS_Sim.GetProjectData(HAWQS_apikey, HAWQS_RunStatus.id, false);
                 await (GPDT);
                 List<HawqsOutput> LHO = GPDT.Result;
 
@@ -2673,7 +2713,7 @@ public class CSVAggregator
                         indx++;
                     }
 
-                    if (!foundrch) AddToProcessLog("ERROR: daily reach output "+urlName+" not found in HAWQS data URLs.");
+                    if (!foundrch) AddToProcessLog("ERROR: daily reach output " + urlName + " not found in HAWQS data URLs.");
                     else
                     {
                         AddToProcessLog("INFO: Downloading daily reach data from " + url);
@@ -2684,9 +2724,10 @@ public class CSVAggregator
                         {
                             if (!isHUC0D)  // aggregate all the CSVs in the 7z file
                             {
-                                string csvstring = await CSVAggregator.DownloadAndAggregateCSV(url);
-                                File.WriteAllText(BaseDir + "output_rch_disaggregated.csv",csvstring);
+                                (string csvstring, string metadata) = await CSVAggregator.DownloadAndAggregateCSV(url);
+                                File.WriteAllText(BaseDir + "output_rch_disaggregated.csv", csvstring);
                                 AddToProcessLog("INFO: Saved daily reach data to " + BaseDir + "output_rch_disaggregated.csv");
+                                File.WriteAllText(BaseDir + "disaggregation_metadata.csv", metadata);
                             }
                             else //download data for HUC0D
                             {
@@ -2734,7 +2775,7 @@ public class CSVAggregator
             BaseDir = basedirBox.Text;
 
             string RCHfileN = BaseDir + "output_rch_daily.csv";
-            if (HUC0D == "")  RCHfileN = BaseDir + "output_rch_disaggregated.csv";
+            if (HUC0D == "") RCHfileN = BaseDir + "output_rch_disaggregated.csv";
 
             if (!File.Exists(RCHfileN))
             {
@@ -2752,6 +2793,11 @@ public class CSVAggregator
                 if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
+            string metadata = "";
+            string MetafileN = BaseDir + "disaggregation_metadata.csv";
+            if (File.Exists(MetafileN)) metadata = File.ReadAllText(MetafileN);
+            string[] metadataLines = metadata.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
             Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup by ID then date
             void AddHAWQSRchData(long longKey, DateTime dateTimeKey, HAWQSRCHRow data)  //add a reach and date to the nested dictionary
             {
@@ -2764,7 +2810,7 @@ public class CSVAggregator
             }
 
             try  //add data from CSV file to the nested dictionary
-            {  
+            {
                 string[] csvlines = File.ReadAllLines(RCHfileN);
                 AQT2D.HAWQSInf = new();
                 AQT2D.HAWQSInf.colnames = csvlines[0].Split(',');  //read header line, note columns 0-3 have "date" through "sub-basin"
@@ -2784,7 +2830,7 @@ public class CSVAggregator
                     }
                 }
 
-                AddToProcessLog("INPUTS: read HAWQS file " + RCHfileN);  
+                AddToProcessLog("INPUTS: read HAWQS file " + RCHfileN);
             }
 
             catch (Exception ex)
@@ -2804,7 +2850,7 @@ public class CSVAggregator
                 HAWQSInfo HInfo = new();
                 HInfo.LoadFromtoData(HUC0D);
                 List<string> Boundaries = HInfo.boundaryHUCs(HUC0D, false);  //rch data rows relevant to boundary conditions for this HUC14
-                string errmessage = AQT2D.HAWQSRead(HAWQSRchData, Boundaries, HUC0D, msj, true, true, out string AQSimJSON);
+                (string AQSimJSON,string errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Boundaries, HUC0D, msj, true, true, false);
 
                 if (errmessage == "")
                 {
@@ -2825,16 +2871,20 @@ public class CSVAggregator
                 if (AQT2D.SN.waterbodies != null)  //if there is a NWM lake or reservoir, read volumes and flows from NWM, overland and inflow nutrients will come from HAWQS
                 {
                     TSafeAddToProcessLog("INPUT: Reading Lake-Reservoir Volumes and flows from NWM");
-                    for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+
+                    await Task.Run(() =>
                     {
-                        string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
-                        string WBJSON = Read_WB_Water_Flows(WBString, true, msj);  //daily volumes and flows from NWM
-                        if (WBJSON != "")
+                        for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
                         {
-                            TSafeAddToProcessLog("INPUT: " + WBString + " Lake/Reservoir data for volume and flow read from NWM.  Overland and inflow nutrients will come from HAWQS.");
-                            WB_JSONs.Add(WBString, WBJSON);
+                            string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
+                            string WBJSON = Read_WB_Water_Flows(WBString, true, msj);  //daily volumes and flows from NWM
+                            if (WBJSON != "")
+                            {
+                                TSafeAddToProcessLog("INPUT: " + WBString + " Lake/Reservoir data for volume and flow read from NWM.  Overland and inflow nutrients will come from HAWQS.");
+                                WB_JSONs.Add(WBString, WBJSON);
+                            }
                         }
-                    }
+                    });
                 }
 
                 int[] boundaries = { };
@@ -2849,6 +2899,11 @@ public class CSVAggregator
                     int WBCOMID = -1;
                     int wbcount = 0;
                     string WBJSON = "";
+
+                    foreach (string line in metadataLines)
+                    {
+                        if (line.Contains(comid)) TSafeAddToProcessLog(line); // pass relevant warnings about the disaggregation process for the COMID to the user
+                    }
 
                     bool in_waterbody = false;
                     if ((AQT2D.SN.waterbodies != null) && (AQT2D.SN.waterbodies.comid_wb != null))
@@ -2873,10 +2928,12 @@ public class CSVAggregator
                         foreach (int SrcID in Sources)
                             if (outofnetwork.Contains(SrcID)) boundaryseg = true;   //ID inflow points to get inflow data
 
+                    bool abort_task = false;
+
                     string errmessage = "";
                     string AQSimJSON = "";
-                    if (in_waterbody) errmessage = AQT2D.HAWQS_add_COMID_to_WB(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, wbcount, WBJSON, boundaryseg, true, out AQSimJSON);                       
-                    else errmessage = AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, out AQSimJSON);
+                    if (in_waterbody) (AQSimJSON, errmessage) = await AQT2D.HAWQS_add_COMID_to_WB(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, wbcount, WBJSON, boundaryseg, true);
+                    else (AQSimJSON,errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, true);
 
                     if (errmessage == "")
                     {
@@ -2886,17 +2943,19 @@ public class CSVAggregator
                             TSafeAddToProcessLog("INPUT: Added to Lake/Res " + WBCOMID + " HAWQS overland flows and any boundary condition inputs from COMID " + comid);
                             WB_JSONs[WBCOMID.ToString()] = AQSimJSON;
                         }
-                        else TSafeAddToProcessLog("INPUT: Read HAWQS Reach data for Volumes, nutrients, OM, and Flows and saved JSON for " + comid);
+                        else TSafeAddToProcessLog("INPUT: Read NHD+ Geometries; Read HAWQS Reach data for Nutrients, OM, and Flows and saved JSON for " + comid);
                         // TSafeUpdateProgress((int)(iSeg / AQT2D.nSegs * 100.0));
                     }
                     else
                     {
                         TSafeAddToProcessLog(errmessage);
-                        return;
+                        abort_task = true;
                     }
-                }
 
+                    if (abort_task) return;
+                }
             }
+            TSafeAddToProcessLog("INFO: Model Linkage Complete");
             UpdateScreen();
         }
 
@@ -2916,6 +2975,15 @@ public class CSVAggregator
             HAWQSButtonPanel.Visible = DataSourceBox.Text.Contains("HAWQS");
         }
 
+        private void zoomOption_CheckedChanged(object sender, EventArgs e)
+        {
+            chart1.ChartAreas[0].CursorX.IsUserEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorY.IsUserEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = zoomOption.Checked;
+            chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = zoomOption.Checked;
+        }
     }
 }
 

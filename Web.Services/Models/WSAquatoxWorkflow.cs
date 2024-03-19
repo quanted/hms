@@ -213,7 +213,7 @@ namespace Web.Services.Models
             foreach (int SrcId in comids)
             {
                 nSources++;
-                Pass_Data(sim, SrcId, nSources, this.archive[SrcId]);
+                Pass_Data(sim, SrcId, nSources, true, this.archive[SrcId]);
             };
         }
 
