@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0.24-alpine3.18 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.28-alpine3.19 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0.416-alpine3.18 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.420-alpine3.19 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
