@@ -371,7 +371,7 @@ namespace GUI.AQUATOX
                     DataSourceBox.Items.Clear();
                     DataSourceBox.Items.Add("HAWQS Simulation");
                     DataSourceBox.Items.Add("NWM (flows only)");
-                    DataSourceBox.SelectedIndex = 0;  //fixme this could differ if model setup has been completed
+                    DataSourceBox.SelectedIndex = 0;
                 }
             };
 
@@ -1830,7 +1830,7 @@ namespace GUI.AQUATOX
                     Sim.AQTSeg.SetMemLocRec();
                     Sim.ArchiveSimulation();
                     OutputForm OutForm = new OutputForm();
-                    OutForm.Text = "Multi-Segment output from " + "AQT_Run_" + CString + ".JSON";
+                    OutForm.Text = "Output from multi-segment run from " + "AQT_Run_" + CString + ".JSON";
 
                     if (ValidFilen(graphfilen, false))
                     {
@@ -2179,12 +2179,12 @@ namespace GUI.AQUATOX
         {
             unZoom();
             if (zoomOption.Checked)
-                {
-                    chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
-                    chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
-                    chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
-                    chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
-                }
+            {
+                chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = false;
+                chart1.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
+                chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = false;
+                chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            }
         }
 
         private void NRCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -2505,7 +2505,7 @@ namespace GUI.AQUATOX
                         }
                     }
 
-                    foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith("metadata.txt"))) 
+                    foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith("metadata.txt")))
                     {
                         using (var entryStream = new MemoryStream())
                         {
@@ -2526,7 +2526,7 @@ namespace GUI.AQUATOX
                 }
 
                 File.Delete(tempFilePath);
-                
+
                 return (outputStringBuilder.ToString(), metadataStringBuilder.ToString());
             }
         }
@@ -2628,7 +2628,7 @@ namespace GUI.AQUATOX
 
 
             string hawqsinput;
-             
+
             if (!EditJSONBox.Checked) hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.None);
             else
             {
@@ -2850,7 +2850,7 @@ namespace GUI.AQUATOX
                 HAWQSInfo HInfo = new();
                 HInfo.LoadFromtoData(HUC0D);
                 List<string> Boundaries = HInfo.boundaryHUCs(HUC0D, false);  //rch data rows relevant to boundary conditions for this HUC14
-                (string AQSimJSON,string errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Boundaries, HUC0D, msj, true, true, false);
+                (string AQSimJSON, string errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Boundaries, HUC0D, msj, true, true, false);
 
                 if (errmessage == "")
                 {
@@ -2933,7 +2933,7 @@ namespace GUI.AQUATOX
                     string errmessage = "";
                     string AQSimJSON = "";
                     if (in_waterbody) (AQSimJSON, errmessage) = await AQT2D.HAWQS_add_COMID_to_WB(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, wbcount, WBJSON, boundaryseg, true);
-                    else (AQSimJSON,errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, true);
+                    else (AQSimJSON, errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, true);
 
                     if (errmessage == "")
                     {
@@ -2983,6 +2983,72 @@ namespace GUI.AQUATOX
             chart1.ChartAreas[0].CursorY.IsUserEnabled = zoomOption.Checked;
             chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = zoomOption.Checked;
             chart1.ChartAreas[0].AxisY.ScaleView.Zoomable = zoomOption.Checked;
+        }
+
+        public string SearchDialog(string st)
+        {
+            Form findDialog = new Form();
+            findDialog.Width = 500;
+            findDialog.Height = 142;
+            findDialog.Text = "Find Text in Log File";
+            Label textLabel = new Label() { Left = 10, Top = 20, Text = "Search string:", Width = 100 };
+            TextBox inputBox = new TextBox() { Left = 150, Top = 20, Width = 300, Text = st };
+            Button search = new Button() { Text = "Find", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
+            search.Click += (object sender, EventArgs e) => { findDialog.Close(); };
+            findDialog.Controls.Add(search);
+            findDialog.Controls.Add(textLabel);
+            findDialog.Controls.Add(inputBox);
+            findDialog.AcceptButton = search;
+            InitializeComponent();
+            inputBox.Select();
+            if (findDialog.ShowDialog() == DialogResult.OK) return inputBox.Text;
+            return "";
+        }
+
+        private void FindNext()
+        {             
+            int index = ProcessLog.Text.IndexOf(searchTerm, lastSearchIndex, StringComparison.OrdinalIgnoreCase);
+
+            if (index != -1)
+            {
+                ProcessLog.Select(index, searchTerm.Length);
+                ProcessLog.HideSelection = false;
+                ProcessLog.ScrollToCaret();
+                lastSearchIndex = index + searchTerm.Length;
+            }
+            else
+            {
+                MessageBox.Show("No more occurrences found.", "Search Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                lastSearchIndex = 0; // Reset search for next query
+            }
+        }
+
+        int lastSearchIndex = 0;
+        string searchTerm = "";
+        private void FindButton_Click(object sender, EventArgs e)
+        {
+            string rs = SearchDialog(searchTerm);
+            if (string.IsNullOrEmpty(rs)) return;
+            searchTerm = rs;
+            FindNext();
+
+        }
+
+        private void ProcessLog_KeyDown(object sender, KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            if (e.Control && e.KeyCode == Keys.F)
+            {
+                FindButton_Click(sender,e);
+            }
+
+            if (e.KeyCode == Keys.F3)
+            {
+                FindNext();
+            }
+
+
         }
     }
 }

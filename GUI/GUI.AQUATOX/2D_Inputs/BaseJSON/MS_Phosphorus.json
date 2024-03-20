@@ -251,7 +251,7 @@
     },
     {
       "$type": "TpHObj",
-      "InitialCond": 8.8157,
+      "InitialCond": 7,
       "State": 0,
       "nState": 148,
       "SVType": 0,
@@ -263,7 +263,7 @@
           "$type": "TLoadings",
           "NoUserLoad": false,
           "UseConstant": true,
-          "ConstLoad": 8.8157,
+          "ConstLoad": 7,
           "MultLdg": 1
         }
       },

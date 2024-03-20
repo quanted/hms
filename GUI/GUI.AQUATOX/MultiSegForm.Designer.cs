@@ -84,6 +84,7 @@
             toggleLog = new System.Windows.Forms.Button();
             resetZoom = new System.Windows.Forms.Button();
             LogPanel = new System.Windows.Forms.Panel();
+            FindButton = new System.Windows.Forms.Button();
             LogChange = new System.Windows.Forms.Button();
             label1 = new System.Windows.Forms.Label();
             InfoBox = new System.Windows.Forms.CheckBox();
@@ -146,6 +147,7 @@
             ProcessLog.Size = new System.Drawing.Size(814, 467);
             ProcessLog.TabIndex = 6;
             ProcessLog.WordWrap = false;
+            ProcessLog.KeyDown += ProcessLog_KeyDown;
             // 
             // label5
             // 
@@ -705,6 +707,7 @@
             // LogPanel
             // 
             LogPanel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            LogPanel.Controls.Add(FindButton);
             LogPanel.Controls.Add(LogChange);
             LogPanel.Controls.Add(label1);
             LogPanel.Controls.Add(InfoBox);
@@ -717,11 +720,24 @@
             LogPanel.TabIndex = 54;
             LogPanel.Visible = false;
             // 
+            // FindButton
+            // 
+            FindButton.Font = new System.Drawing.Font("Arial", 9F);
+            FindButton.ForeColor = System.Drawing.Color.Black;
+            FindButton.Location = new System.Drawing.Point(341, 5);
+            FindButton.Margin = new System.Windows.Forms.Padding(0);
+            FindButton.Name = "FindButton";
+            FindButton.Size = new System.Drawing.Size(54, 25);
+            FindButton.TabIndex = 58;
+            FindButton.Text = "Find";
+            FindButton.UseVisualStyleBackColor = true;
+            FindButton.Click += FindButton_Click;
+            // 
             // LogChange
             // 
             LogChange.Font = new System.Drawing.Font("Arial", 9F);
             LogChange.ForeColor = System.Drawing.Color.Black;
-            LogChange.Location = new System.Drawing.Point(381, 5);
+            LogChange.Location = new System.Drawing.Point(412, 5);
             LogChange.Margin = new System.Windows.Forms.Padding(0);
             LogChange.Name = "LogChange";
             LogChange.Size = new System.Drawing.Size(95, 25);
@@ -735,7 +751,7 @@
             label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             label1.AutoSize = true;
             label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            label1.Location = new System.Drawing.Point(60, 9);
+            label1.Location = new System.Drawing.Point(28, 9);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(41, 15);
             label1.TabIndex = 55;
@@ -746,7 +762,7 @@
             InfoBox.AutoSize = true;
             InfoBox.Checked = true;
             InfoBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            InfoBox.Location = new System.Drawing.Point(309, 8);
+            InfoBox.Location = new System.Drawing.Point(277, 8);
             InfoBox.Name = "InfoBox";
             InfoBox.Size = new System.Drawing.Size(47, 19);
             InfoBox.TabIndex = 44;
@@ -759,7 +775,7 @@
             InputsBox.AutoSize = true;
             InputsBox.Checked = true;
             InputsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            InputsBox.Location = new System.Drawing.Point(247, 8);
+            InputsBox.Location = new System.Drawing.Point(215, 8);
             InputsBox.Name = "InputsBox";
             InputsBox.Size = new System.Drawing.Size(59, 19);
             InputsBox.TabIndex = 43;
@@ -772,7 +788,7 @@
             ErrorsBox.AutoSize = true;
             ErrorsBox.Checked = true;
             ErrorsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            ErrorsBox.Location = new System.Drawing.Point(111, 8);
+            ErrorsBox.Location = new System.Drawing.Point(79, 8);
             ErrorsBox.Name = "ErrorsBox";
             ErrorsBox.Size = new System.Drawing.Size(56, 19);
             ErrorsBox.TabIndex = 41;
@@ -785,7 +801,7 @@
             WarningsBox.AutoSize = true;
             WarningsBox.Checked = true;
             WarningsBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            WarningsBox.Location = new System.Drawing.Point(169, 8);
+            WarningsBox.Location = new System.Drawing.Point(137, 8);
             WarningsBox.Name = "WarningsBox";
             WarningsBox.Size = new System.Drawing.Size(76, 19);
             WarningsBox.TabIndex = 56;
@@ -889,9 +905,9 @@
             GraphOptPanel.Controls.Add(graphOption);
             GraphOptPanel.Controls.Add(zoomOption);
             GraphOptPanel.Controls.Add(label6);
-            GraphOptPanel.Location = new System.Drawing.Point(615, 561);
+            GraphOptPanel.Location = new System.Drawing.Point(615, 560);
             GraphOptPanel.Name = "GraphOptPanel";
-            GraphOptPanel.Size = new System.Drawing.Size(385, 51);
+            GraphOptPanel.Size = new System.Drawing.Size(391, 51);
             GraphOptPanel.TabIndex = 59;
             GraphOptPanel.Visible = false;
             // 
@@ -1074,5 +1090,6 @@
         private System.Windows.Forms.RadioButton graphOption;
         private System.Windows.Forms.RadioButton zoomOption;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button FindButton;
     }
 }

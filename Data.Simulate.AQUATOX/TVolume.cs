@@ -21,7 +21,7 @@ namespace AQUATOX.Volume
     {
         // [JsonIgnore] double // LastCalcTA ;  
         // [JsonIgnore] double // LastTimeTA ;        // these don't need saving
-        [JsonIgnore] double Inflow = 0.0;
+        [JsonIgnore] public double Inflow = 0.0;
         [JsonIgnore] public double Discharg = 0.0;    // these don't need saving
         [JsonIgnore] double InflowLoad = 0.0;
         [JsonIgnore] double DischargeLoad = 0.0;

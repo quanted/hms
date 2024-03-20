@@ -1158,14 +1158,13 @@ namespace AQUATOX.AQSim_2D
                 else return ("", "ERROR: boundary condition " + bound + " missing for Segment ID " + SegID);
             }
 
-            string IDStr;
-            if (is_COMID) IDStr = "COMID " + SegID;
-            else IDStr = "HUC" + SegID.Length.ToString() + " " + SegID;
+            string SegTypeStr;
+            if (is_COMID) SegTypeStr = "COMID ";
+            else SegTypeStr = "HUC" + SegID.Length.ToString();
 
             string err;
-            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, IDStr, SegID, -9999, out err);  //COMID length from ReadCOMIDGeometry
+            AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, SegTypeStr, SegID, -9999, out err);  //COMID length from ReadCOMIDGeometry
             if (err != "") { return ("", err); }
-
 
             if (is_COMID)
             {
@@ -1436,7 +1435,10 @@ namespace AQUATOX.AQSim_2D
                     TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
 
-                    TLoadings InflowLoad = tvol.LoadsRec.Alt_Loadings[0];
+                    TLoadings flowLoad;
+                    if (tvol.Calc_Method == VolumeMethType.Manning) flowLoad = tvol.LoadsRec.Alt_Loadings[1];  //manning's input is "discharge load" or [1]
+                    else flowLoad = tvol.LoadsRec.Alt_Loadings[0];  //[0] is inflow
+
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
 
                     for (int i = 0; i < ndates; i++)
@@ -1453,7 +1455,7 @@ namespace AQUATOX.AQSim_2D
                                 frac_this_segment = OutVol / totOutVol;
                             }
 
-                        double InVol = InflowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
+                        double InVol = flowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
 
                         if (passMass)
                         {
@@ -1464,9 +1466,8 @@ namespace AQUATOX.AQSim_2D
                         else // pass concentration
                         {
                             if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i]);  // first or only input
-                            else newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] *(ninputs-1) + AR.concs[iTSV][i])/ninputs );  //weighted-averaging second or third inputs
+                            else newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] *(ninputs-1) + AR.concs[iTSV][i])/ninputs);  //weighted-averaging second or third inputs.  FIXME not weighted by flow
                         }
-
                     }
 
                     TSV.LoadsRec.Loadings.list = newlist;
@@ -1521,6 +1522,7 @@ namespace AQUATOX.AQSim_2D
             if (SVList == null)
             {
                 SVList = new List<string>();
+                SVList.Clear();  //workaround, fixes strange behavior before this was added
                 foreach (TStateVariable SV in Sim.AQTSeg.SV)
                 {
                     SVList.Add(SV.PName+" ("+SV.StateUnit+")");   //save list of SVs for output
@@ -1537,7 +1539,7 @@ namespace AQUATOX.AQSim_2D
                         if ((SrcID != segID) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                         {
                             nSources++;
-                            string errstr = Pass_Data(Sim, SrcID, nSources, true, null, divergence_flows);
+                            string errstr = Pass_Data(Sim, SrcID, nSources, false, null, divergence_flows);
                             if (errstr != "") outstr.Add(errstr);
                                 else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + segID.ToString());
                         }

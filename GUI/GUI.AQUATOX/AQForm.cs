@@ -35,11 +35,9 @@ namespace GUI.AQUATOX
         private bool MultiSegmentInput = false;
         private bool isBoundarySegment = true;
         public AQTSim aQTS = null;
-        private List<string> SVList = null;
+        private List<string> SV_List = null;
         private List<TStateVariable> TSVList = null;
         private System.Drawing.Graphics graphics;
-        private string LastSaveJSON = "";  //check if simulation has changed
-
 
         public AQTTestForm()
         {
@@ -98,9 +96,9 @@ namespace GUI.AQUATOX
 
             if (openFileDialog1.FileName != "")
             {
-                LastSaveJSON = File.ReadAllText(openFileDialog1.FileName);
+                string AQTJSON = File.ReadAllText(openFileDialog1.FileName);
 
-                if (!LoadJSON(LastSaveJSON)) return;
+                if (!LoadJSON(AQTJSON)) return;
                 aQTS.AQTSeg.FileName = openFileDialog1.FileName;
 
                 ButtonPanel.Visible = true;
@@ -293,6 +291,8 @@ namespace GUI.AQUATOX
             Application.DoEvents();
 
             OutputForm OutForm = new OutputForm();
+            OutForm.StartPosition = FormStartPosition.CenterParent;
+            OutForm.Text = "Output Window for "+ aQTS.AQTSeg.FileName; 
             OutForm.ShowOutput(aQTS);
             ShowStudyInfo();
         }
@@ -408,14 +408,14 @@ namespace GUI.AQUATOX
                 else RunStatusLabel.Text = aQTS.SavedRuns.Count + " Archived Results";
             }
 
-            aQTS.AQTSeg.DisplayNames(ref SVList, ref TSVList);
+            aQTS.AQTSeg.DisplayNames(ref SV_List, ref TSVList);
 
             ParametersLabel.Visible = true;
             StateVarLabel.Visible = true;
             SVListBox.Visible = true;
             SetupButton.Visible = (!MultiSegmentInput);
             SVListBox.DataSource = null;
-            SVListBox.DataSource = SVList;
+            SVListBox.DataSource = SV_List;
 
             Application.DoEvents();
         }
