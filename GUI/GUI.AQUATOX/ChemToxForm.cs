@@ -108,7 +108,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            AQTTestForm.OpenUrl(HelpTopic);
+            AQTMainForm.OpenUrl(HelpTopic);
         }
 
         private void RB_Click(object sender, EventArgs e)

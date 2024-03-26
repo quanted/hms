@@ -17,7 +17,25 @@ namespace GUI.AQUATOX
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new AQTTestForm());
+
+            Form splashForm = new Splash();
+
+            // Subscribe to its FormClosed event
+            splashForm.FormClosed += new FormClosedEventHandler(OnFormClosed);
+
+            // Show the splash form
+            splashForm.Show();
+
+            // Run the application
+            Application.Run();
         }
+
+        public static void OnFormClosed(object sender, FormClosedEventArgs e)
+        {
+            ((Form)sender).FormClosed -= OnFormClosed;
+            if (Application.OpenForms.Count == 0)
+                Application.Exit();
+        }
+
     }
 }

@@ -38,7 +38,6 @@
             label4 = new System.Windows.Forms.Label();
             DataSourceBox = new System.Windows.Forms.ComboBox();
             HAWQSButtonPanel = new System.Windows.Forms.Panel();
-            EditJSONBox = new System.Windows.Forms.CheckBox();
             ReadHAWQSButton = new System.Windows.Forms.Button();
             HAWQS_button = new System.Windows.Forms.Button();
             CreateButton = new System.Windows.Forms.Button();
@@ -123,7 +122,7 @@
             basedirBox.Size = new System.Drawing.Size(427, 23);
             basedirBox.TabIndex = 2;
             basedirBox.Tag = "";
-            basedirBox.Text = "..\\..\\..\\2D_Inputs\\TestDir1\\";
+            basedirBox.Text = "..\\2D_Inputs\\SampleProject\\";
             basedirBox.KeyDown += basedirBox_KeyDown;
             basedirBox.Leave += basedirBox_Leave;
             // 
@@ -143,11 +142,13 @@
             ProcessLog.Location = new System.Drawing.Point(306, 92);
             ProcessLog.Multiline = true;
             ProcessLog.Name = "ProcessLog";
+            ProcessLog.ReadOnly = true;
             ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             ProcessLog.Size = new System.Drawing.Size(814, 467);
             ProcessLog.TabIndex = 6;
             ProcessLog.WordWrap = false;
             ProcessLog.KeyDown += ProcessLog_KeyDown;
+            ProcessLog.PreviewKeyDown += ProcessLog_PreviewKeyDown;
             // 
             // label5
             // 
@@ -188,7 +189,7 @@
             // 
             label4.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             label4.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            label4.Location = new System.Drawing.Point(5, 32);
+            label4.Location = new System.Drawing.Point(12, 32);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(53, 29);
             label4.TabIndex = 56;
@@ -201,7 +202,7 @@
             DataSourceBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             DataSourceBox.FormattingEnabled = true;
             DataSourceBox.Items.AddRange(new object[] { "HAWQS Simulation", "NWM (Flows Only)" });
-            DataSourceBox.Location = new System.Drawing.Point(61, 36);
+            DataSourceBox.Location = new System.Drawing.Point(68, 36);
             DataSourceBox.Name = "DataSourceBox";
             DataSourceBox.Size = new System.Drawing.Size(125, 21);
             DataSourceBox.TabIndex = 52;
@@ -209,29 +210,16 @@
             // 
             // HAWQSButtonPanel
             // 
-            HAWQSButtonPanel.Controls.Add(EditJSONBox);
             HAWQSButtonPanel.Controls.Add(ReadHAWQSButton);
             HAWQSButtonPanel.Controls.Add(HAWQS_button);
-            HAWQSButtonPanel.Location = new System.Drawing.Point(28, 60);
+            HAWQSButtonPanel.Location = new System.Drawing.Point(28, 61);
             HAWQSButtonPanel.Name = "HAWQSButtonPanel";
             HAWQSButtonPanel.Size = new System.Drawing.Size(224, 52);
             HAWQSButtonPanel.TabIndex = 52;
             // 
-            // EditJSONBox
-            // 
-            EditJSONBox.Checked = true;
-            EditJSONBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            EditJSONBox.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            EditJSONBox.Location = new System.Drawing.Point(163, 1);
-            EditJSONBox.Name = "EditJSONBox";
-            EditJSONBox.Size = new System.Drawing.Size(55, 31);
-            EditJSONBox.TabIndex = 67;
-            EditJSONBox.Text = "Edit JSON";
-            EditJSONBox.UseVisualStyleBackColor = true;
-            // 
             // ReadHAWQSButton
             // 
-            ReadHAWQSButton.Location = new System.Drawing.Point(32, 27);
+            ReadHAWQSButton.Location = new System.Drawing.Point(39, 27);
             ReadHAWQSButton.Name = "ReadHAWQSButton";
             ReadHAWQSButton.Size = new System.Drawing.Size(127, 23);
             ReadHAWQSButton.TabIndex = 13;
@@ -241,7 +229,7 @@
             // 
             // HAWQS_button
             // 
-            HAWQS_button.Location = new System.Drawing.Point(32, 2);
+            HAWQS_button.Location = new System.Drawing.Point(39, 2);
             HAWQS_button.Name = "HAWQS_button";
             HAWQS_button.Size = new System.Drawing.Size(127, 23);
             HAWQS_button.TabIndex = 12;
@@ -251,7 +239,7 @@
             // 
             // CreateButton
             // 
-            CreateButton.Location = new System.Drawing.Point(58, 63);
+            CreateButton.Location = new System.Drawing.Point(67, 63);
             CreateButton.Name = "CreateButton";
             CreateButton.Size = new System.Drawing.Size(127, 23);
             CreateButton.TabIndex = 8;
@@ -261,7 +249,7 @@
             // 
             // FlowsButton
             // 
-            FlowsButton.Location = new System.Drawing.Point(58, 89);
+            FlowsButton.Location = new System.Drawing.Point(67, 89);
             FlowsButton.Name = "FlowsButton";
             FlowsButton.Size = new System.Drawing.Size(127, 23);
             FlowsButton.TabIndex = 23;
@@ -271,7 +259,7 @@
             // 
             // SetupButton
             // 
-            SetupButton.Location = new System.Drawing.Point(60, 10);
+            SetupButton.Location = new System.Drawing.Point(67, 10);
             SetupButton.Name = "SetupButton";
             SetupButton.Size = new System.Drawing.Size(127, 23);
             SetupButton.TabIndex = 21;
@@ -1085,7 +1073,6 @@
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Label proglabel;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.CheckBox EditJSONBox;
         private System.Windows.Forms.Panel GraphOptPanel;
         private System.Windows.Forms.RadioButton graphOption;
         private System.Windows.Forms.RadioButton zoomOption;

@@ -3,12 +3,15 @@
   <Profiles />
   <Settings>
     <Setting Name="MS_Directory" Type="System.String" Scope="User">
-      <Value Profile="(Default)">..\..\..\2D_Inputs\TestDir1\</Value>
+      <Value Profile="(Default)">..\2D_Inputs\SampleProject\</Value>
     </Setting>
     <Setting Name="BrowserExe" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="MS_Recent" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="HAWQS_apikey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

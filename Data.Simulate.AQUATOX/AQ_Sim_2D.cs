@@ -25,6 +25,17 @@ namespace AQUATOX.AQSim_2D
 {
     public class AQSim_2D
     {
+        
+        public class webServiceURLsClass
+        {
+            public string hmsRest = "https://qedcloud.net/hms/rest/api/";  //defaults, this class is read from json for GUI.AQUATOX
+            public string nationalMap = "https://hydro.nationalmap.gov/arcgis/rest/services/";
+            public string watersGeo = "https://watersgeo.epa.gov/arcgis/rest/services/";
+            public string hawqsAPI = "https://dev-api.hawqs.tamu.edu/";
+        }
+
+        webServiceURLsClass webServiceURLs = new(); 
+        
         /// <summary>
         /// holds results from streamNetwork web service
         /// </summary>
@@ -58,7 +69,7 @@ namespace AQUATOX.AQSim_2D
             public void LoadFromtoData(string HUC_ID)
             {
                 string HUCStr = HUC_ID.Length.ToString();
-                string fromtopath = $@"..\..\..\2D_Inputs\fromto\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";  // fixme deployment
+                string fromtopath = $@"..\2D_Inputs\HAWQS_Data\FromTo\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";  
                 if (fromtofilen == fromtopath) return;  //already loaded
 
                 if (File.Exists(fromtopath))  //csv file with "OutletHUC, InletHUC"
@@ -154,7 +165,7 @@ namespace AQUATOX.AQSim_2D
 
         public class ReportData
         {
-            public List<string> formats { get; set; } = new List<string> { "csv" };
+            public string[] formats { get; set; } = new string[] { "csv" };
             public string units { get; set; } = "metric";
             public Outputs outputs { get; set; } = new Outputs();
         }
@@ -167,14 +178,14 @@ namespace AQUATOX.AQSim_2D
 
         public class Rch
         {
-            public List<string> statistics { get; set; } = new List<string> { "daily" };
+            public string[] statistics { get; set; } = new string[] { "daily" };
 
             public string[] subbasins { get; set; }
         }
 
         public class Sub
         {
-            public List<string> statistics { get; set; } = new List<string> { "daily" };
+            public string[] statistics { get; set; } = new string[] { "daily" };
         }
 
 
@@ -517,9 +528,7 @@ namespace AQUATOX.AQSim_2D
         /// 
         public string ReadGeoJSON(string comid)
         {
-            string requestURL = "https://qedcloud.net/hms/rest/api/";
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string requestURL = webServiceURLs.hmsRest;
 
             string component = "info";
             string dataset = "catchment";
@@ -527,7 +536,7 @@ namespace AQUATOX.AQSim_2D
             try
             {
                 string rurl = requestURL + "" + component + "/" + dataset + "?streamGeometry=true&comid=" + comid;
-                var request = (HttpWebRequest)WebRequest.Create(rurl);
+                var request = (HttpWebRequest)WebRequest.Create(rurl);  // replace with HttpClient constructs
                 var response = (HttpWebResponse)request.GetResponse();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
             }
@@ -545,8 +554,7 @@ namespace AQUATOX.AQSim_2D
         /// <returns>JSON or error message</returns>
         public async Task<string> ReadWBGeoJSON(string WBcomid)
         {
-            string requestURL = "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
-            // https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query?where=COMID%3D167267891&f=geojson
+            string requestURL =  webServiceURLs.watersGeo +"NHDPlus_NP21/NHDSnapshot_NP21/MapServer/1/query";
 
             try
             {
@@ -573,7 +581,7 @@ namespace AQUATOX.AQSim_2D
         {
             try
             {
-                string requestURL = "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer";
+                string requestURL = webServiceURLs.nationalMap+"wbd/MapServer";
 
                 // Determine the layer ID based on HUCStr
                 int layerID = -1;
@@ -627,9 +635,7 @@ namespace AQUATOX.AQSim_2D
         /// <returns>JSON or error message</returns>
         public string ReadStreamNetwork(string comid, string endComid, string span)
         {
-            string requestURL = "https://qedcloud.net/hms/rest/api/";
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            //string requestURL = "https://qed.epa.gov/hms/rest/api/";
+            string requestURL = webServiceURLs.hmsRest;
             string component = "info";
             string dataset = "streamnetwork";
 
@@ -705,9 +711,8 @@ namespace AQUATOX.AQSim_2D
         {
             // ------- Use Streamflow.Streamflow for Flask Request ------- 
 
-            Environment.SetEnvironmentVariable("FLASK_SERVER", "https://qedcloud.net/hms/rest/api/v2"); 
-            // Environment.SetEnvironmentVariable("FLASK_SERVER", "https://ceamdev.ceeopdev.net/hms/rest/api/v2");
-            TSI.BaseURL = new List<string> { "https://qedcloud.net/hms/rest/api/v2/hms/nwm/data/?" };
+            Environment.SetEnvironmentVariable("FLASK_SERVER", webServiceURLs.hmsRest+"v2"); 
+            TSI.BaseURL = new List<string> { webServiceURLs.hmsRest+"v2/hms/nwm/data/?" };
 
             Streamflow.Streamflow sf = new();
             ITimeSeriesInputFactory iFactory = new TimeSeriesInputFactory();
@@ -981,7 +986,7 @@ namespace AQUATOX.AQSim_2D
                 subbasinFilen = "subbasins-huc12-2023-05-23-115646.csv";
             }
 
-            string DBDir = @"N:\AQUATOX\CSRA\HAWQS\RTEs\";  //fixme deployment
+            string DBDir = @"..\2D_Inputs\HAWQS_data\RTE_SUB\";  
             
 
             double[] ExtractFromCSV(string filePath, string uniqueId, int[] columnIndices)
@@ -1084,7 +1089,7 @@ namespace AQUATOX.AQSim_2D
                 return result;
             }
 
-            string baseUrl = "https://qedcloud.net/hms/rest/api/info/catchment";
+            string baseUrl = webServiceURLs.hmsRest+"info/catchment";
             string parameters = "?comid="+COMID+"&streamcat=false&geometry=false&nwis=false&streamGeometry=false&cn=false&network=false";
             string fullUrl = baseUrl + parameters;
 
@@ -1116,7 +1121,7 @@ namespace AQUATOX.AQSim_2D
                 Sim.AQTSeg.Location.Locale.Latitude.Val = double.Parse(GeoVals["CentroidLatitude"]);
                 Sim.AQTSeg.Location.Locale.Latitude.Comment = "from WSCatchment web service";
 
-                Sim.AQTSeg.Location.Locale.SurfArea.Val = double.Parse(GeoVals["BANKFULL_WIDTH"])*sitelength*1000d;  //m2
+                Sim.AQTSeg.Location.Locale.SurfArea.Val = double.Parse(GeoVals["BANKFULL_WIDTH"])*sitelength*1000;  //m2
                 Sim.AQTSeg.Location.Locale.SurfArea.Comment = "calculated from from WSCatchment web service";
 
                 Sim.AQTSeg.Location.Locale.UseEnteredManning.Val = true;

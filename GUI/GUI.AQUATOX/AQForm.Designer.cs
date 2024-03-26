@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace GUI.AQUATOX
 {
-    partial class AQTTestForm
+    partial class AQTMainForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -32,7 +32,7 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AQTTestForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AQTMainForm));
             loadJSON = new Button();
             saveJSON = new Button();
             integrate = new Button();
@@ -60,7 +60,6 @@ namespace GUI.AQUATOX
             AddButton = new Button();
             EditButton = new Button();
             DeleteButton = new Button();
-            MultiSegButton = new Button();
             HelpButton = new Button();
             modelRunningLabel = new Label();
             browserButton = new Button();
@@ -366,17 +365,6 @@ namespace GUI.AQUATOX
             DeleteButton.Visible = false;
             DeleteButton.Click += DeleteButton_Click;
             // 
-            // MultiSegButton
-            // 
-            MultiSegButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            MultiSegButton.Location = new System.Drawing.Point(26, 445);
-            MultiSegButton.Name = "MultiSegButton";
-            MultiSegButton.Size = new System.Drawing.Size(138, 24);
-            MultiSegButton.TabIndex = 22;
-            MultiSegButton.Text = "NWM-Linked Runs";
-            MultiSegButton.UseVisualStyleBackColor = true;
-            MultiSegButton.Click += MultiSegButton_Click;
-            // 
             // HelpButton
             // 
             HelpButton.Image = Properties.Resources.help_icon;
@@ -491,7 +479,7 @@ namespace GUI.AQUATOX
             CancelButt.Visible = false;
             CancelButt.Click += CancelButt_Click;
             // 
-            // AQTTestForm
+            // AQTMainForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -504,7 +492,6 @@ namespace GUI.AQUATOX
             Controls.Add(ParametersLabel);
             Controls.Add(browserButton);
             Controls.Add(HelpButton);
-            Controls.Add(MultiSegButton);
             Controls.Add(AddButton);
             Controls.Add(EditButton);
             Controls.Add(DeleteButton);
@@ -523,8 +510,8 @@ namespace GUI.AQUATOX
             Controls.Add(pictureBox1);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MinimumSize = new System.Drawing.Size(828, 465);
-            Name = "AQTTestForm";
-            Text = "AQUATOX.NET 1.0.0 ";
+            Name = "AQTMainForm";
+            Text = "AQUATOX.NET 1.0.001 ";
             FormClosing += AQTTestForm_FormClosing;
             Load += AQTTestForm_Load;
             DBPanel.ResumeLayout(false);

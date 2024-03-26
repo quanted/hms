@@ -630,7 +630,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            AQTTestForm.OpenUrl(HelpTopic);
+            AQTMainForm.OpenUrl(HelpTopic);
         }
 
         private void Param_Form_Load(object sender, EventArgs e)

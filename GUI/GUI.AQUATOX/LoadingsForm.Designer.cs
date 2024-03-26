@@ -391,6 +391,7 @@ namespace GUI.AQUATOX
             HMS_Button.TabIndex = 30;
             HMS_Button.Text = "HMS";
             HMS_Button.UseVisualStyleBackColor = true;
+            HMS_Button.Visible = false;
             HMS_Button.Click += HMS_Click;
             // 
             // label2

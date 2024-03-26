@@ -116,7 +116,7 @@ namespace GUI.AQUATOX
 
 
 
-        public void ShowOutput(AQTSim aQ)
+        public void ShowOutput(AQTSim aQ, Form parent)
         {
             aQTS = aQ;
             OutputBox.Items.Clear();
@@ -131,9 +131,14 @@ namespace GUI.AQUATOX
             Application.DoEvents();
             OutputBox.Visible = true;
 
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new System.Drawing.Point(parent.Location.X + (parent.Width - this.Width) / 2,
+                                           parent.Location.Y + (parent.Height - this.Height) / 2);
+
+
             BeginInvoke((MethodInvoker)delegate ()
             {
-                ShowDialog();
+                Show(parent);
             });
 
         }
@@ -359,7 +364,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            AQTTestForm.OpenUrl(HelpTopic);
+            AQTMainForm.OpenUrl(HelpTopic);
         }
 
         private void graph_to_CSV_Click(object sender, EventArgs e)

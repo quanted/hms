@@ -43,6 +43,7 @@ namespace GUI.AQUATOX
         private AQSim_2D AQT2D = null;
         private int Lake0D = 0;
         private string HUC0D = "";
+        public string HAWQS_apikey = "";
 
         private FormWindowState LastWindowState = FormWindowState.Minimized;
         private OChart chart1 = new OChart();
@@ -169,6 +170,7 @@ namespace GUI.AQUATOX
             chart1.Size = new System.Drawing.Size(webView.Width, webView.Height);
 
             DataSourceBox.SelectedIndex = 0;
+            ProcessLog.BackColor = SystemColors.Window; // Set the background color to the default window color despite being readonly true
         }
 
 
@@ -200,7 +202,7 @@ namespace GUI.AQUATOX
             }
             else if (content.StartsWith("H14"))
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";  // fixme deployment
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + content.Substring(3, 2) + ".geojson";  
                 string HUC14 = File.ReadAllText(filestr);
                 webView.CoreWebView2.PostWebMessageAsString("ADDH14|" + HUC14); // display layer
             }
@@ -1471,7 +1473,7 @@ namespace GUI.AQUATOX
         private void HelpButton2_Click(object sender, EventArgs e)
         {
             string target = "Multi_Segment_Runs";
-            AQTTestForm.OpenUrl(target);
+            AQTMainForm.OpenUrl(target);
         }
 
 
@@ -1780,7 +1782,7 @@ namespace GUI.AQUATOX
             if (ValidFilen(filen, false))
             {
                 string json = File.ReadAllText(filen);  //read one segment 
-                AQTTestForm AQForm = new AQTTestForm();
+                AQTMainForm AQForm = new AQTMainForm();
 
                 bool isBoundarySeg = true;
                 if ((Lake0D != 0) && (HUC0D != ""))
@@ -1838,7 +1840,7 @@ namespace GUI.AQUATOX
                         Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs>(graphjson);
                     }
 
-                    await Task.Run(() => OutForm.ShowOutput(Sim));
+                    await Task.Run(() => OutForm.ShowOutput(Sim, this));
                     ViewOutputClicked = false;
 
                     graphjson = JsonConvert.SerializeObject(Sim.SavedRuns.Values.Last().Graphs);
@@ -2038,8 +2040,8 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 string StudyStr;
-                                if (IsHUC) StudyStr = "..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";  // fixme deployment?
-                                else StudyStr = "..\\..\\..\\Studies\\Default Lake.JSON";  // fixme deployment?
+                                if (IsHUC) StudyStr = "..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";  
+                                else StudyStr = "..\\Studies\\Default Lake.JSON";  
                                 BSim = new AQTSim();
                                 if (File.Exists(StudyStr))
                                     BSim.Instantiate(File.ReadAllText(StudyStr));
@@ -2077,7 +2079,7 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 BSim = new AQTSim();
-                                BSim.Instantiate(File.ReadAllText("..\\..\\..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));  // fixme deployment?
+                                BSim.Instantiate(File.ReadAllText("..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));  
                             }
 
                             AQT2D = null;
@@ -2314,46 +2316,55 @@ namespace GUI.AQUATOX
         }
 
 
-        string HAWQS_apikey = "tCjPA8sqwg9NtaZirKnnBA63HjPma4qM0v+pwrRAq98=";  // fixme deployment
         public class runstatus
         {
             public string id { get; set; }
             public string url { get; set; }
         }
 
-        public string dbpath = @"..\..\..\2D_Inputs\COMID_HUC14_Unique.sqlite";  // fixme deployment
+        public string dbpath = @"..\2D_Inputs\HAWQS_data\COMID_HUC14_Unique.sqlite";  
 
         public List<string> ID_Relevant_HUC14s(out string pourpoint)
         {
-            List<string> H14s = new List<string>();
-            // Identify relevant HUC14s
-            using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbpath))
+            try
             {
-                // Use the connection for database operations
-                pourpoint = "";
-                connection.Open();
-                using (SQLiteCommand command = new SQLiteCommand("SELECT HUC14 FROM COMID_to_HUC14 WHERE COMID = @Index", connection))
+                List<string> H14s = new List<string>();
+                // Identify relevant HUC14s
+                using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + dbpath))
                 {
-                    for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                        foreach (int COMID in AQT2D.SN.order[i])
-                        {
-                            command.Parameters.Clear();
-                            command.Parameters.AddWithValue("@Index", COMID);
-
-                            using (SQLiteDataReader reader = command.ExecuteReader())
+                    // Use the connection for database operations
+                    pourpoint = "";
+                    connection.Open();
+                    using (SQLiteCommand command = new SQLiteCommand("SELECT HUC14 FROM COMID_to_HUC14 WHERE COMID = @Index", connection))
+                    {
+                        for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                            foreach (int COMID in AQT2D.SN.order[i])
                             {
-                                if (reader.Read())
+                                command.Parameters.Clear();
+                                command.Parameters.AddWithValue("@Index", COMID);
+
+                                using (SQLiteDataReader reader = command.ExecuteReader())
                                 {
-                                    string HUC14 = reader["HUC14"].ToString();
-                                    if (!H14s.Contains(HUC14))
-                                        H14s.Add(HUC14);
-                                    if (i == AQT2D.SN.order.Length - 1) pourpoint = HUC14;  // last to run in the order is the pourpoint
+                                    if (reader.Read())
+                                    {
+                                        string HUC14 = reader["HUC14"].ToString();
+                                        if (!H14s.Contains(HUC14))
+                                            H14s.Add(HUC14);
+                                        if (i == AQT2D.SN.order.Length - 1) pourpoint = HUC14;  // last to run in the order is the pourpoint
+                                    }
                                 }
                             }
-                        }
+                    }
                 }
+                return H14s;
             }
-            return H14s;
+            catch (Exception ex)
+            {
+                MessageBox.Show("HUC14 Database Error: " + ex.Message);
+                pourpoint = "";
+                return null;
+            }
+
         }
 
         private string SubsetGeoJSON(string GeoJSON_in, List<string> HUC14s)
@@ -2407,6 +2418,8 @@ namespace GUI.AQUATOX
             this.Cursor = Cursors.WaitCursor; // Set cursor to wait cursor
 
             List<string> H14s = ID_Relevant_HUC14s(out pourpoint);
+            if (H14s == null) return null;
+
             TSafeAddToProcessLog("INFO: Relevant HUC14s are " + string.Join(", ", H14s));
 
             double[] latlons = new double[4];
@@ -2434,7 +2447,7 @@ namespace GUI.AQUATOX
 
             foreach (string code in Codes)
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + code + ".geojson";  // fixme deployment
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + code + ".geojson";  
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
                 PostWebviewMessage("RH14s|" + RelevantH14s);
@@ -2555,6 +2568,8 @@ namespace GUI.AQUATOX
             if (!isHUC0D)  //streamnetwork code first
             {
                 List<string> H14s = Render_RelevantH14s(out string pourpoint);
+                if (H14s == null) return;
+
                 HAWQSInp.downstreamSubbasin = pourpoint;
 
                 HAWQSInp.dataset = "HUC14";
@@ -2626,32 +2641,41 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing set of HAWQS linkage data?  (" + BaseDir + "output_rch_daily.csv" + ")", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-
             string hawqsinput;
 
-            if (!EditJSONBox.Checked) hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.None);
-            else
+            hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.Indented);
+            using (var form = new JSONEditForm(hawqsinput, HAWQS_apikey))
             {
-                hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.Indented);
-                using (var form = new JSONEditForm(hawqsinput))
-                {
-                    form.jsonString = hawqsinput;
-                    var result = form.ShowDialog();
-                    if (result == DialogResult.OK)
-                        try
+                form.jsonString = hawqsinput;
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                    try
+                    {
+                        // Try to deserialize to the expected object type to validate JSON
+                        (string APIEdit,hawqsinput) = form.GetEditedJson();
+                        if (APIEdit == "") 
                         {
-                            // Try to deserialize to the expected object type to validate JSON
-                            hawqsinput = form.GetEditedJson();
-                            AQSim_2D.HAWQSInput HI = JsonConvert.DeserializeObject<AQSim_2D.HAWQSInput>(hawqsinput);
-                            hawqsinput = JsonConvert.SerializeObject(HI, Formatting.None);
+                           MessageBox.Show("ERROR: A HAWQS API String is required", "API Error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                           return;
                         }
-                        catch (JsonReaderException ex)
+
+                        if (APIEdit != HAWQS_apikey)
                         {
-                            MessageBox.Show("The edited JSON is not valid: " + ex.Message, "Invalid JSON", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
+                            Properties.Settings.Default.HAWQS_apikey = APIEdit;
+                            Properties.Settings.Default.Save();
+                            HAWQS_apikey = APIEdit;
                         }
-                    else return;  //cancel press
-                }
+
+
+                        AQSim_2D.HAWQSInput HI = JsonConvert.DeserializeObject<AQSim_2D.HAWQSInput>(hawqsinput);
+                        hawqsinput = JsonConvert.SerializeObject(HI, Formatting.None);
+                    }
+                    catch (JsonReaderException ex)
+                    {
+                        MessageBox.Show("ERROR: The edited JSON is not valid: " + ex.Message, "Invalid JSON", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                else return;  //cancel press
             }
 
             UseWaitCursor = true;
@@ -2999,14 +3023,13 @@ namespace GUI.AQUATOX
             findDialog.Controls.Add(textLabel);
             findDialog.Controls.Add(inputBox);
             findDialog.AcceptButton = search;
-            InitializeComponent();
-            inputBox.Select();
+            findDialog.Shown += (sender, e) => inputBox.Select();
             if (findDialog.ShowDialog() == DialogResult.OK) return inputBox.Text;
             return "";
         }
 
         private void FindNext()
-        {             
+        {
             int index = ProcessLog.Text.IndexOf(searchTerm, lastSearchIndex, StringComparison.OrdinalIgnoreCase);
 
             if (index != -1)
@@ -3036,19 +3059,21 @@ namespace GUI.AQUATOX
 
         private void ProcessLog_KeyDown(object sender, KeyEventArgs e)
         {
-            base.OnKeyDown(e);
+        }
 
+        private void ProcessLog_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
             if (e.Control && e.KeyCode == Keys.F)
             {
-                FindButton_Click(sender,e);
+                e.IsInputKey = true; // Indicates that the key is a regular input key
+                FindButton_Click(sender, e);
             }
 
             if (e.KeyCode == Keys.F3)
             {
+                e.IsInputKey = true;
                 FindNext();
             }
-
-
         }
     }
 }

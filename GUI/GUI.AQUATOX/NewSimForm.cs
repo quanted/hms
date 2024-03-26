@@ -379,7 +379,7 @@ namespace GUI.AQUATOX
         private void HelpButton2_Click(object sender, EventArgs e)
         {
             string target = "New_Simulation";
-            AQTTestForm.OpenUrl(target);
+            AQTMainForm.OpenUrl(target);
         }
 
 

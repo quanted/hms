@@ -135,7 +135,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton_Click(object sender, EventArgs e)
         {
-            AQTTestForm.OpenUrl(HelpTopic);
+            AQTMainForm.OpenUrl(HelpTopic);
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)

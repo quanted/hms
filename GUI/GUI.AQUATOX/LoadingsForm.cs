@@ -385,14 +385,14 @@ namespace GUI.AQUATOX
 
             // check to see if HMS loadings may be available for this AQUATOX time-series
 
-            if (!(SV.NState == AllVariables.Volume))
-            {
+            //if (!(SV.NState == AllVariables.Volume))
+            //{
 
-                MessageBox.Show("HMS Linkages are not available for this time series", "Information",
-                   MessageBoxButtons.OK, MessageBoxIcon.Warning,
-                   MessageBoxDefaultButton.Button1);
-                return;
-            }
+            //    MessageBox.Show("HMS Linkages are not available for this time series", "Information",
+            //       MessageBoxButtons.OK, MessageBoxIcon.Warning,
+            //       MessageBoxDefaultButton.Button1);
+            //    return;
+            //}
 
 
             // query HMS for loadings options   -- build service in HMS, data type is fixed, what sources of nutrient loadings
@@ -425,50 +425,50 @@ namespace GUI.AQUATOX
             //            var response = (HttpWebResponse)request.GetResponse();
             //            Task<IActionResult> res;
 
-            submitRequest();
+            //submitRequest();
 
 
-            if (SV.LoadsRec.Loadings.ITSI == null)
-            {
-                TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
-                TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
-                input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-                SV.LoadsRec.Loadings.ITSI = input;
+            //if (SV.LoadsRec.Loadings.ITSI == null)
+            //{
+            //    TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+            //    TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+            //    input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+            //    SV.LoadsRec.Loadings.ITSI = input;
 
-            }
+            //}
 
-            SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
-            SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0,1,0.0);
-            ShowGrid();
+            //SV.LoadsRec.Loadings.ITSI.InputTimeSeries.Add("input", ATSO);
+            //SV.LoadsRec.Loadings.Translate_ITimeSeriesInput(0,1,0.0);
+            //ShowGrid();
         }
 
 
         /// <summary>
-        /// Submit POST request to HMS web API
+        /// Submit POST request to HMS web API.   Not yet implemented.  Better interface and linkages available through multi-seg linkage.
         /// </summary>
-        public void submitRequest()
-        {
-            string requestURL = "https://qedcloud.net/hms/rest/api/";
-            //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
-            // string requestURL = "https://qed.epa.gov/hms/rest/api/";
-            string component = "hydrology";
-            string dataset = "streamflow";
+        //public void submitRequest()
+        //{
+        //    string requestURL = "https://qedcloud.net/hms/rest/api/";
+        //    //string requestURL = "https://ceamdev.ceeopdev.net/hms/rest/api/";
+        //    // string requestURL = "https://qed.epa.gov/hms/rest/api/";
+        //    string component = "hydrology";
+        //    string dataset = "streamflow";
 
-            var request = (HttpWebRequest) WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");  //fixme deprecated
-            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(TSI));  //StreamFlowInput previously initialized
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            request.ContentLength = data.Length;
+        //    var request = (HttpWebRequest) WebRequest.Create(requestURL + "" + component + "/" + dataset + "/");  //fixme deprecated
+        //    var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(TSI));  //StreamFlowInput previously initialized
+        //    request.Method = "POST";
+        //    request.ContentType = "application/json";
+        //    request.ContentLength = data.Length;
 
-            using (var stream = request.GetRequestStream())
-            {
-                stream.Write(data, 0, data.Length);
-            }
-            var response = (HttpWebResponse)request.GetResponse();
-            string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            ATSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
+        //    using (var stream = request.GetRequestStream())
+        //    {
+        //        stream.Write(data, 0, data.Length);
+        //    }
+        //    var response = (HttpWebResponse)request.GetResponse();
+        //    string rstring = new StreamReader(response.GetResponseStream()).ReadToEnd();
+        //    ATSO = JsonConvert.DeserializeObject<TimeSeriesOutput>(rstring);
 
-        }
+        //}
 
         ///// <summary>
         ///// Start polling HMS data api, with a 5 second delay.
@@ -708,20 +708,20 @@ namespace GUI.AQUATOX
         {
             switch (SV.NState)
             {
-                case AllVariables.WindLoading: AQTTestForm.OpenUrl("Wind"); break;
-                case AllVariables.Light: AQTTestForm.OpenUrl("Light"); break;
-                case AllVariables.pH: AQTTestForm.OpenUrl("pHScreen"); break;
-                case AllVariables.Volume: AQTTestForm.OpenUrl("Volume"); break;
-                case AllVariables.TSS: AQTTestForm.OpenUrl("TSS"); break;
-                case AllVariables.Temperature: AQTTestForm.OpenUrl("Temperature"); break;
-                case AllVariables.DissRefrDetr: AQTTestForm.OpenUrl("SuspDiss"); break;
+                case AllVariables.WindLoading: AQTMainForm.OpenUrl("Wind"); break;
+                case AllVariables.Light: AQTMainForm.OpenUrl("Light"); break;
+                case AllVariables.pH: AQTMainForm.OpenUrl("pHScreen"); break;
+                case AllVariables.Volume: AQTMainForm.OpenUrl("Volume"); break;
+                case AllVariables.TSS: AQTMainForm.OpenUrl("TSS"); break;
+                case AllVariables.Temperature: AQTMainForm.OpenUrl("Temperature"); break;
+                case AllVariables.DissRefrDetr: AQTMainForm.OpenUrl("SuspDiss"); break;
                 case AllVariables.SedmLabDetr:
-                case AllVariables.SedmRefrDetr: AQTTestForm.OpenUrl("Default_Sediment"); break;
+                case AllVariables.SedmRefrDetr: AQTMainForm.OpenUrl("Default_Sediment"); break;
                 // case AllVariables.H2OTox: AQTTestForm.OpenUrl("DissOrgToxLoadings"); break;
                 case AllVariables.Nitrate:
                 case AllVariables.Ammonia:
-                case AllVariables.Phosphate: AQTTestForm.OpenUrl("NutrientLoadings"); break;
-                default : AQTTestForm.OpenUrl("ICandLoadings"); break;
+                case AllVariables.Phosphate: AQTMainForm.OpenUrl("NutrientLoadings"); break;
+                default : AQTMainForm.OpenUrl("ICandLoadings"); break;
 
             }
         }

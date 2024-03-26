@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace GUI.AQUATOX
 {
     public partial class JSONEditForm : Form
     {
         public string jsonString;
+        public string apiString;
 
-        public JSONEditForm(string json)
+        public JSONEditForm(string json, string apikey)
         {
             InitializeComponent();
             jsonString = json;
+            apiString = apikey;
             InitializeComponents();
         }
 
@@ -25,15 +19,16 @@ namespace GUI.AQUATOX
         {
             CancelButton = cancelButton;
             textBox.Text = jsonString;
+            API_key_textbox.Text = apiString;
 
             StartPosition = FormStartPosition.CenterScreen;
-            Width = 600;
-            Height = 400;
+            Width = 745;
+            Height = 545;
         }
 
-        public string GetEditedJson()
+        public (string,string) GetEditedJson()
         {
-            return textBox.Text;
+            return (API_key_textbox.Text, textBox.Text);
         }
     }
 

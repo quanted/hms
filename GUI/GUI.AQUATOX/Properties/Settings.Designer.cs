@@ -12,7 +12,7 @@ namespace GUI.AQUATOX.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -25,7 +25,7 @@ namespace GUI.AQUATOX.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("..\\..\\..\\2D_Inputs\\TestDir1\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("..\\2D_Inputs\\SampleProject\\")]
         public string MS_Directory {
             get {
                 return ((string)(this["MS_Directory"]));
@@ -55,6 +55,18 @@ namespace GUI.AQUATOX.Properties {
             }
             set {
                 this["MS_Recent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HAWQS_apikey {
+            get {
+                return ((string)(this["HAWQS_apikey"]));
+            }
+            set {
+                this["HAWQS_apikey"] = value;
             }
         }
     }

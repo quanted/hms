@@ -20,13 +20,12 @@ using Web.Services;
 using Utilities;
 using System.Net.Http;
 
-
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 
 namespace GUI.AQUATOX
 {
 
-    public partial class AQTTestForm : Form
+    public partial class AQTMainForm : Form
     {
         private BackgroundWorker Worker = new BackgroundWorker();
         private string errmessage;
@@ -39,7 +38,7 @@ namespace GUI.AQUATOX
         private List<TStateVariable> TSVList = null;
         private System.Drawing.Graphics graphics;
 
-        public AQTTestForm()
+        public AQTMainForm()
         {
             InitializeComponent();
             Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
@@ -92,7 +91,7 @@ namespace GUI.AQUATOX
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text File|*.txt;*.json";
             openFileDialog1.Title = "Open a JSON File";
-            openFileDialog1.ShowDialog();
+            openFileDialog1.ShowDialog(this);
 
             if (openFileDialog1.FileName != "")
             {
@@ -120,7 +119,7 @@ namespace GUI.AQUATOX
             saveFileDialog1.Filter = "JSON File|*.JSON";
             saveFileDialog1.Title = "Save to JSON File";
             saveFileDialog1.FileName = aQTS.AQTSeg.FileName;
-            saveFileDialog1.ShowDialog();
+            saveFileDialog1.ShowDialog(this);
 
             if (saveFileDialog1.FileName != "")
             {
@@ -195,7 +194,10 @@ namespace GUI.AQUATOX
             inputBox.AcceptButton = okButton;
             inputBox.CancelButton = cancelButton;
 
-            DialogResult result = inputBox.ShowDialog();
+            inputBox.StartPosition = FormStartPosition.Manual; // Set the start position to manual
+            inputBox.Location = new System.Drawing.Point(this.Location.X+20, this.Location.Y+20); // Set the location near the upper left corner of the current form
+                        
+            DialogResult result = inputBox.ShowDialog(this);
             input = textBox.Text;
             return result;
         }
@@ -254,7 +256,7 @@ namespace GUI.AQUATOX
             if ((!e.Cancelled) && (errmessage == ""))
             {
                 Application.DoEvents();
-                graph_Click(null, null);
+                graph_Click(sender, e);
                 ShowStudyInfo();
             };
 
@@ -291,9 +293,9 @@ namespace GUI.AQUATOX
             Application.DoEvents();
 
             OutputForm OutForm = new OutputForm();
-            OutForm.StartPosition = FormStartPosition.CenterParent;
+
             OutForm.Text = "Output Window for "+ aQTS.AQTSeg.FileName; 
-            OutForm.ShowOutput(aQTS);
+            OutForm.ShowOutput(aQTS, this);
             ShowStudyInfo();
         }
 
@@ -690,31 +692,40 @@ namespace GUI.AQUATOX
             string fileN = ReadDBPath("AnimalLib.JSON");
             if (fileN == "") return;
 
-            string json = File.ReadAllText(fileN);
-            List<AnimalRecord> AnimDB = JsonConvert.DeserializeObject<List<AnimalRecord>>(json);
-
-            AnimalRecord SR = AnimDB[0]; SR.Setup();
-            TParameter[] PPS = SR.InputArray();
-
-            DataTable table = ParmArray_to_Table("AnimGrid", PPS);
-            for (int r = 0; r < AnimDB.Count; r++)
+            try
             {
-                ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
-            }
 
-            GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "AnimalDataScreen"))
-            {
-                if (gf.gridChange)
+                string json = File.ReadAllText(fileN);
+                List<AnimalRecord> AnimDB = JsonConvert.DeserializeObject<List<AnimalRecord>>(json);
+
+                AnimalRecord SR = AnimDB[0]; SR.Setup();
+                TParameter[] PPS = SR.InputArray();
+
+                DataTable table = ParmArray_to_Table("AnimGrid", PPS);
+                for (int r = 0; r < AnimDB.Count; r++)
                 {
-                    fileN = ReadSaveName();
-                    if (fileN == "") return;
+                    ParmArray_to_Table_Row(ref table, AnimDB[r].InputArray());
+                }
 
-                    List<AnimalRecord> AnimDB2 = Table_to_AnimDB(table);
-                    json = JsonConvert.SerializeObject(AnimDB2);
-                    File.WriteAllText(fileN, json);
+                GridForm gf = new GridForm();
+                if (gf.ShowGrid(table, false, true, "AnimalDataScreen"))
+                {
+                    if (gf.gridChange)
+                    {
+                        fileN = ReadSaveName();
+                        if (fileN == "") return;
+
+                        List<AnimalRecord> AnimDB2 = Table_to_AnimDB(table);
+                        json = JsonConvert.SerializeObject(AnimDB2);
+                        File.WriteAllText(fileN, json);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Error: " + ex.Message);
+            }
+
         }
 
         private void AnimButton_Click(object sender, EventArgs e)
@@ -773,31 +784,39 @@ namespace GUI.AQUATOX
             string fileN = ReadDBPath("ReminLib.JSON");
             if (fileN == "") return;
 
-            string json = File.ReadAllText(fileN);
-            List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
-
-            ReminRecord SR = ReminDB[0]; SR.Setup();
-            TParameter[] PPS = SR.InputArray();
-
-            DataTable table = ParmArray_to_Table("ReminGrid", PPS);
-            for (int r = 0; r < ReminDB.Count; r++)
-            {
-                ParmArray_to_Table_Row(ref table, ReminDB[r].InputArray());
-            }
-
-            GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "Remineralization"))
-            {
-                if (gf.gridChange)
+                try
                 {
-                    fileN = ReadSaveName();
-                    if (fileN == "") return;
+                    string json = File.ReadAllText(fileN);
+                List<ReminRecord> ReminDB = JsonConvert.DeserializeObject<List<ReminRecord>>(json);
 
-                    List<ReminRecord> ReminDB2 = Table_to_ReminDB(table);
-                    json = JsonConvert.SerializeObject(ReminDB2);
-                    File.WriteAllText(fileN, json);
+                ReminRecord SR = ReminDB[0]; SR.Setup();
+                TParameter[] PPS = SR.InputArray();
+
+                DataTable table = ParmArray_to_Table("ReminGrid", PPS);
+                for (int r = 0; r < ReminDB.Count; r++)
+                {
+                    ParmArray_to_Table_Row(ref table, ReminDB[r].InputArray());
+                }
+
+                GridForm gf = new GridForm();
+                if (gf.ShowGrid(table, false, true, "Remineralization"))
+                {
+                    if (gf.gridChange)
+                    {
+                        fileN = ReadSaveName();
+                        if (fileN == "") return;
+
+                        List<ReminRecord> ReminDB2 = Table_to_ReminDB(table);
+                        json = JsonConvert.SerializeObject(ReminDB2);
+                        File.WriteAllText(fileN, json);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Error: " + ex.Message);
+            }
+
         }
 
         private void ChemDB_Click(object sender, EventArgs e)
@@ -805,36 +824,44 @@ namespace GUI.AQUATOX
             string fileN = ReadDBPath("ChemLib.JSON");
             if (fileN == "") return;
 
-            string json = File.ReadAllText(fileN);
-            List<ChemicalRecord> ChemDB = JsonConvert.DeserializeObject<List<ChemicalRecord>>(json);
-
-            ChemicalRecord SR = ChemDB[0]; SR.Setup();
-            TParameter[] PPS = SR.InputArray();
-
-            DataTable table = ParmArray_to_Table("ChemGrid", PPS);
-            for (int r = 0; r < ChemDB.Count; r++)
+            try
             {
-                ParmArray_to_Table_Row(ref table, ChemDB[r].InputArray());
-            }
 
-            GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "ChemData"))
-            {
-                if (gf.gridChange)
+                string json = File.ReadAllText(fileN);
+                List<ChemicalRecord> ChemDB = JsonConvert.DeserializeObject<List<ChemicalRecord>>(json);
+
+                ChemicalRecord SR = ChemDB[0]; SR.Setup();
+                TParameter[] PPS = SR.InputArray();
+
+                DataTable table = ParmArray_to_Table("ChemGrid", PPS);
+                for (int r = 0; r < ChemDB.Count; r++)
                 {
-                    fileN = ReadSaveName();
-                    if (fileN == "") return;
-
-                    List<ChemicalRecord> ChemDB2 = Table_to_ChemDB(table);
-                    json = JsonConvert.SerializeObject(ChemDB2);
-                    File.WriteAllText(fileN, json);
+                    ParmArray_to_Table_Row(ref table, ChemDB[r].InputArray());
                 }
+
+                GridForm gf = new GridForm();
+                if (gf.ShowGrid(table, false, true, "ChemData"))
+                {
+                    if (gf.gridChange)
+                    {
+                        fileN = ReadSaveName();
+                        if (fileN == "") return;
+
+                        List<ChemicalRecord> ChemDB2 = Table_to_ChemDB(table);
+                        json = JsonConvert.SerializeObject(ChemDB2);
+                        File.WriteAllText(fileN, json);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Error: " + ex.Message);
             }
         }
 
         private string ReadDBPath(string deflt)
         {
-            string fileN = Path.GetFullPath("..\\..\\..\\DB\\" + deflt);
+            string fileN = Path.GetFullPath("..\\DB\\" + deflt);
             if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No)
@@ -842,7 +869,7 @@ namespace GUI.AQUATOX
                 OpenFileDialog openFileDialog1 = new OpenFileDialog();
                 openFileDialog1.Filter = "Text File|*.txt;*.json";
                 openFileDialog1.Title = "Open a JSON File";
-                if (openFileDialog1.ShowDialog() == DialogResult.Cancel) return "";
+                if (openFileDialog1.ShowDialog(this) == DialogResult.Cancel) return "";
                 fileN = openFileDialog1.FileName;
             }
 
@@ -857,7 +884,7 @@ namespace GUI.AQUATOX
             saveFileDialog1.RestoreDirectory = true;
             saveFileDialog1.OverwritePrompt = true;
 
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK) return saveFileDialog1.FileName;
+            if (saveFileDialog1.ShowDialog(this) == DialogResult.OK) return saveFileDialog1.FileName;
             else return "";
 
         }
@@ -867,62 +894,78 @@ namespace GUI.AQUATOX
             string fileN = ReadDBPath("SiteLib.JSON");
             if (fileN == "") return;
 
-            string json = File.ReadAllText(fileN);
-            List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
-
-            SiteRecord SR = SiteDB[0]; SR.Setup();
-            TParameter[] PPS = SR.InputArray();
-
-            DataTable table = ParmArray_to_Table("SiteGrid", PPS);
-            for (int r = 0; r < SiteDB.Count; r++)
+            try
             {
-                ParmArray_to_Table_Row(ref table, SiteDB[r].InputArray());
-            }
 
-            GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "Site"))
-            {
-                if (gf.gridChange)
+                string json = File.ReadAllText(fileN);
+                List<SiteRecord> SiteDB = JsonConvert.DeserializeObject<List<SiteRecord>>(json);
+
+                SiteRecord SR = SiteDB[0]; SR.Setup();
+                TParameter[] PPS = SR.InputArray();
+
+                DataTable table = ParmArray_to_Table("SiteGrid", PPS);
+                for (int r = 0; r < SiteDB.Count; r++)
                 {
-                    fileN = ReadSaveName();
-                    if (fileN == "") return;
-
-                    List<SiteRecord> SiteDB2 = Table_to_SiteDB(table);
-                    json = JsonConvert.SerializeObject(SiteDB2);
-                    File.WriteAllText(fileN, json);
+                    ParmArray_to_Table_Row(ref table, SiteDB[r].InputArray());
                 }
+
+                GridForm gf = new GridForm();
+                if (gf.ShowGrid(table, false, true, "Site"))
+                {
+                    if (gf.gridChange)
+                    {
+                        fileN = ReadSaveName();
+                        if (fileN == "") return;
+
+                        List<SiteRecord> SiteDB2 = Table_to_SiteDB(table);
+                        json = JsonConvert.SerializeObject(SiteDB2);
+                        File.WriteAllText(fileN, json);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Error: " + ex.Message);
             }
         }
 
-        private void PlantsDB_Click(object sender, EventArgs e)
+private void PlantsDB_Click(object sender, EventArgs e)
         {
             string fileN = ReadDBPath("PlantLib.JSON");
             if (fileN == "") return;
 
-            string json = File.ReadAllText(fileN);
-            List<PlantRecord> PlantDB = JsonConvert.DeserializeObject<List<PlantRecord>>(json);
-
-            PlantRecord PR = PlantDB[0]; PR.Setup();
-            TParameter[] PPS = PR.InputArray();
-
-            DataTable table = ParmArray_to_Table("PlantGrid", PPS);
-            for (int r = 0; r < PlantDB.Count; r++)
+            try
             {
-                ParmArray_to_Table_Row(ref table, PlantDB[r].InputArray());
-            }
 
-            GridForm gf = new GridForm();
-            if (gf.ShowGrid(table, false, true, "PlantData"))
-            {
-                if (gf.gridChange)
+                string json = File.ReadAllText(fileN);
+                List<PlantRecord> PlantDB = JsonConvert.DeserializeObject<List<PlantRecord>>(json);
+
+                PlantRecord PR = PlantDB[0]; PR.Setup();
+                TParameter[] PPS = PR.InputArray();
+
+                DataTable table = ParmArray_to_Table("PlantGrid", PPS);
+                for (int r = 0; r < PlantDB.Count; r++)
                 {
-                    fileN = ReadSaveName();
-                    if (fileN == "") return;
-
-                    List<PlantRecord> PlantDB2 = Table_to_PlantDB(table);
-                    json = JsonConvert.SerializeObject(PlantDB2);
-                    File.WriteAllText(fileN, json);
+                    ParmArray_to_Table_Row(ref table, PlantDB[r].InputArray());
                 }
+
+                GridForm gf = new GridForm();
+                if (gf.ShowGrid(table, false, true, "PlantData"))
+                {
+                    if (gf.gridChange)
+                    {
+                        fileN = ReadSaveName();
+                        if (fileN == "") return;
+
+                        List<PlantRecord> PlantDB2 = Table_to_PlantDB(table);
+                        json = JsonConvert.SerializeObject(PlantDB2);
+                        File.WriteAllText(fileN, json);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database Error: "+ex.Message);
             }
         }
 
@@ -1011,11 +1054,6 @@ namespace GUI.AQUATOX
                 aQTS.AQTSeg.Tables_to_Trophint(tTables);
         }
 
-        private void MultiSegButton_Click(object sender, EventArgs e)
-        {
-            MultiSegForm MSForm = new MultiSegForm();
-            MSForm.ShowDialog();
-        }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
@@ -1129,7 +1167,7 @@ namespace GUI.AQUATOX
 
         static public void OpenUrl(string bookmark)
         {
-            string url = "file:" + Path.GetFullPath("../../../Docs/AQUATOX.NET_1.0_UMAN.htm");
+            string url = "file:" + Path.GetFullPath("../Docs/AQUATOX.NET_1.0_UMAN.htm");
             url = Uri.UnescapeDataString(url + "#" + bookmark);
             try
             {
@@ -1209,7 +1247,7 @@ namespace GUI.AQUATOX
 
             ShowStudyInfo();
 
-            if (ShowDialog() == DialogResult.Cancel) return false;
+            if (ShowDialog(this) == DialogResult.Cancel) return false;
 
             string errmessage = aQTS.SaveJSON(ref json);
             if (errmessage != "") MessageBox.Show("Error creating json string: " + errmessage);
