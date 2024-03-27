@@ -809,6 +809,8 @@ namespace GUI.AQUATOX
             NewProject.Enabled = !busy;
             CreateButton.Enabled = !busy;
             FlowsButton.Enabled = !busy;
+            HAWQS_button.Enabled = !busy;  
+            ReadHAWQSButton.Enabled = !busy; 
             executeButton.Enabled = !busy;
             RecentFilesBox.Enabled = !busy;
             basedirBox.Leave -= basedirBox_Leave;
@@ -2491,9 +2493,11 @@ namespace GUI.AQUATOX
                     }
                 }
 
-                SevenZipCompressor.SetLibraryPath(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"x64\7z.dll"));  //fixme deployment
-                                                                                                                                                  // Extract and aggregate CSVs
-                using (var extractor = new SevenZipExtractor(tempFilePath))
+                string architecture = Environment.Is64BitProcess ? "x64" : "x86";
+                string libraryPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), architecture, "7z.dll");
+                SevenZipCompressor.SetLibraryPath(libraryPath);
+                                                                                                                                                  
+                using (var extractor = new SevenZipExtractor(tempFilePath))  // Extract and aggregate CSVs
                 {
                     foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith(".csv") && file.Size > 170))  // 170 byte files simply contain an error message
                     {
@@ -2556,6 +2560,19 @@ namespace GUI.AQUATOX
 
             bool isHUC0D = (HUC0D != "");
 
+            string msj = MasterSetupJson();
+            if (msj == "")
+            {
+                AddToProcessLog("ERROR: MasterSetup.json missing and could not be created.");
+                return;
+            }
+            Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
+            if ((SR.FirstDay.Val < new DateTime(2002, 1, 1)) || (SR.LastDay.Val > new DateTime(2020, 12, 31)))
+            {
+                AddToProcessLog("ERROR: HAWQS Linkage is valid for simulations from 2002 to 2020 at this time.  Choose another date range in Master Setup.");
+                return;
+            };
+
             HAWQS_Sim = new();
             AQSim_2D.HAWQSInput HAWQSInp = new();
             AQT2D.HAWQSInf = new();
@@ -2603,14 +2620,6 @@ namespace GUI.AQUATOX
             }
 
             HAWQSInp.upstreamSubbasins = AQT2D.HAWQSInf.HAWQSboundaryHUCs.ToArray();
-
-            string msj = MasterSetupJson();
-            if (msj == "")
-            {
-                AddToProcessLog("ERROR: MasterSetup.json missing and could not be created.");
-                return;
-            }
-            Setup_Record SR = JsonConvert.DeserializeObject<Setup_Record>(msj);
 
             DateTime firstHAWQSday = SR.FirstDay.Val.AddYears(-2);  //default is a two-year spin up
             HAWQSInp.startingSimulationDate = firstHAWQSday.ToString("yyyy-MM-dd");
@@ -2864,10 +2873,15 @@ namespace GUI.AQUATOX
                 return;
             }
 
+
             string BaseFileN = FullBaseJSONName();
             if (BaseFileN == "") return;
             AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
             string msj = MasterSetupJson();
+
+            UseWaitCursor = true;
+            SetInterfaceBusy(true);
+
 
             if (HUC0D != "")
             {
@@ -2976,9 +2990,18 @@ namespace GUI.AQUATOX
                         abort_task = true;
                     }
 
-                    if (abort_task) return;
+                    if (abort_task)
+                    {
+                        UseWaitCursor = false;
+                        SetInterfaceBusy(false);
+                        return;
+                    }
                 }
             }
+
+            UseWaitCursor = false;
+            SetInterfaceBusy(false);
+
             TSafeAddToProcessLog("INFO: Model Linkage Complete");
             UpdateScreen();
         }

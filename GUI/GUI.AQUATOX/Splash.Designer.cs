@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Splash));
             panel1 = new System.Windows.Forms.Panel();
+            pictureBox2 = new System.Windows.Forms.PictureBox();
             panel2 = new System.Windows.Forms.Panel();
             Close = new System.Windows.Forms.Button();
             MultiSeg = new System.Windows.Forms.Button();
@@ -40,6 +41,7 @@
             label1 = new System.Windows.Forms.Label();
             pictureBox1 = new System.Windows.Forms.PictureBox();
             panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
@@ -47,11 +49,22 @@
             // panel1
             // 
             panel1.BackColor = System.Drawing.Color.Black;
+            panel1.Controls.Add(pictureBox2);
             panel1.Controls.Add(panel2);
             panel1.Location = new System.Drawing.Point(3, 4);
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(464, 270);
             panel1.TabIndex = 0;
+            // 
+            // pictureBox2
+            // 
+            pictureBox2.Image = Properties.Resources.x1;
+            pictureBox2.Location = new System.Drawing.Point(444, 1);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new System.Drawing.Size(18, 19);
+            pictureBox2.TabIndex = 8;
+            pictureBox2.TabStop = false;
+            pictureBox2.Click += Close_Click;
             // 
             // panel2
             // 
@@ -168,6 +181,7 @@
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Splash";
             panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
@@ -186,5 +200,6 @@
         private System.Windows.Forms.Button SingleSeg;
         private System.Windows.Forms.Button MultiSeg;
         private System.Windows.Forms.Button Close;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }

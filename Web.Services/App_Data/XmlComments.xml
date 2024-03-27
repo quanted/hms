@@ -645,6 +645,136 @@
             <param name="evapoInput">Parameters for retrieving evapotranspiration data. Required fields: DateTimeSpan.StartDate, DateTimeSpan.EndDate, Geometry.Point.Latitude, Geometry.Point.Longitude, Source</param>
             <returns>ITimeSeries</returns>
         </member>
+        <member name="T:Web.Services.Controllers.InputsResponseExample">
+            <summary>
+            Swashbuckle project/inputs GET response example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.InputsResponseExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSHawqsProjectInputsController">
+            <summary>
+            HMS API controller for retrieving HAWQS project inputs.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHawqsProjectInputsController.GetProjectInputDefinitions">
+            <summary>
+            Returns HAWQS project input parameters as a JSON string
+            </summary>
+            <returns>
+            A JSON string
+            </returns>
+        </member>
+        <member name="T:Web.Services.Controllers.SubmitInputExample">
+            <summary>
+            Swashbuckle project/submit POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.SubmitInputExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.SubmitResponseExample">
+            <summary>
+            Swashbuckle project/submit POST response example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.SubmitResponseExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.StatusInputExample">
+            <summary>
+            Swashbuckle project/status POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.StatusInputExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.StatusResponseExample">
+            <summary>
+            Swashbuckle project/status POST response example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.StatusResponseExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.DataInputExample">
+            <summary>
+            Swashbuckle project/data POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.DataInputExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.DataResponseExample">
+            <summary>
+            Swashbuckle project/data POST response example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.DataResponseExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.CancelInputExample">
+            <summary>
+            Swashbuckle project/cancel POST request example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.CancelInputExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.CancelResponseExample">
+            <summary>
+            Swashbuckle project/cancel POST response example
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.CancelResponseExample.GetExamples">
+            <summary></summary>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Controllers.WSHawqsProjectSubmitController">
+            <summary>
+            HMS API controller for hawqs project submission, status, and data.
+            </summary>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHawqsProjectSubmitController.SubmitProject(Hawqs.HawqsSubmitRequest)">
+            <summary>
+            Submits and executes a HAWQS project. Returns project id and status url as a JSON string
+            </summary>
+            <returns>
+            job id and data url or error
+            </returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHawqsProjectSubmitController.GetProjectStatus(Hawqs.HawqsStatusRequest,System.String)">
+            <summary>
+            Returns project progress percentage as a JSON string
+            </summary>
+            <returns>
+            Returns JSON string
+            </returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHawqsProjectSubmitController.GetProjectData(Hawqs.HawqsDataRequest,System.String)">
+            <summary>
+            Returns list of web URLs for data retrevial as a JSON string
+            </summary>
+            <returns>
+            Returns JSON string
+            </returns>
+        </member>
+        <member name="M:Web.Services.Controllers.WSHawqsProjectSubmitController.CancelProjectExecution(Hawqs.HawqsCancelRequest,System.String)">
+            <summary>
+            Cancels project execution
+            </summary>
+            <returns>
+            </returns>
+        </member>
         <member name="T:Web.Services.Controllers.HumidityInput">
             <summary>
             Label: Humidity;
@@ -1797,6 +1927,41 @@
             Gets Data Source evapotranspiration data (NLDAS, GLDAS) using the given TimeSeriesInput parameters.
             </summary>
             <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Web.Services.Models.WSHawqs">
+            <summary>
+            HMS Web Service Radiation Model
+            </summary>
+        </member>
+        <member name="M:Web.Services.Models.WSHawqs.GetProjectInputDefinitions">
+            <summary>
+            Gets project input definitions.
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSHawqs.SubmitProject(System.String,System.String)">
+            <summary>
+            Submits a new HAWQS project.
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSHawqs.GetProjectStatus(System.String,System.String)">
+            <summary>
+            Gets project status.
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSHawqs.GetProjectData(System.String,System.String,System.Boolean)">
+            <summary>
+            Gets conpleted project data file urls.
+            </summary>
+            <returns>JSON string</returns>
+        </member>
+        <member name="M:Web.Services.Models.WSHawqs.CancelProjectExecution(System.String,System.String)">
+            <summary>
+            Cancels submitted project execution.
+            </summary>
             <returns></returns>
         </member>
         <member name="T:Web.Services.Models.WSHumidity">

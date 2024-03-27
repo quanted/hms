@@ -34,7 +34,7 @@ namespace AQUATOX.AQSim_2D
             public string hawqsAPI = "https://dev-api.hawqs.tamu.edu/";
         }
 
-        webServiceURLsClass webServiceURLs = new(); 
+        public static webServiceURLsClass webServiceURLs = new(); 
         
         /// <summary>
         /// holds results from streamNetwork web service
@@ -624,8 +624,6 @@ namespace AQUATOX.AQSim_2D
             }
         }
 
-
-
         /// <summary>
         /// Reads the stream network data structure from web services
         /// </summary>
@@ -1173,7 +1171,7 @@ namespace AQUATOX.AQSim_2D
 
             if (is_COMID)
             {
-                if (!await ReadCOMIDGeometry(Sim, SegID)) return ("", "ERROR: Cannot read COMID " + SegID + " geometry from webserivce");
+                if (!await ReadCOMIDGeometry(Sim, SegID)) return ("", "ERROR: Cannot read COMID " + SegID + " geometry parameters from webserivce");
             }
             else if (!ReadHUCGeometry(Sim, SegID)) return ("", "ERROR: Cannot read HUC Geometry for " + SegID + " from local databases"); ;
 
