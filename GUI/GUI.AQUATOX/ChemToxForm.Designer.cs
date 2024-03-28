@@ -33,7 +33,7 @@ namespace GUI.AQUATOX
             this.OKButton = new System.Windows.Forms.Button();
             this.CancelButt = new System.Windows.Forms.Button();
             this.changedLabel = new System.Windows.Forms.Label();
-            this.HelpButton = new System.Windows.Forms.Button();
+            this.Help_Button = new System.Windows.Forms.Button();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.AnimBioPanel = new System.Windows.Forms.Panel();
             this.ACalcK1 = new System.Windows.Forms.RadioButton();
@@ -105,16 +105,16 @@ namespace GUI.AQUATOX
             // 
             // HelpButton
             // 
-            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(464, 8);
-            this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(87, 27);
-            this.HelpButton.TabIndex = 28;
-            this.HelpButton.Text = "  Help";
-            this.HelpButton.UseVisualStyleBackColor = true;
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            this.Help_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Help_Button.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Help_Button.Location = new System.Drawing.Point(464, 8);
+            this.Help_Button.Name = "HelpButton";
+            this.Help_Button.Size = new System.Drawing.Size(87, 27);
+            this.Help_Button.TabIndex = 28;
+            this.Help_Button.Text = "  Help";
+            this.Help_Button.UseVisualStyleBackColor = true;
+            this.Help_Button.Click += new System.EventHandler(this.HelpButton_Click);
             // 
             // dataGridView2
             // 
@@ -295,7 +295,7 @@ namespace GUI.AQUATOX
             this.Controls.Add(this.PlantBioPanel);
             this.Controls.Add(this.AnimBioPanel);
             this.Controls.Add(this.dataGridView2);
-            this.Controls.Add(this.HelpButton);
+            this.Controls.Add(this.Help_Button);
             this.Controls.Add(this.changedLabel);
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.CancelButt);
@@ -320,7 +320,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Label changedLabel;
-        private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Button Help_Button;
         private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.Panel AnimBioPanel;
         private System.Windows.Forms.RadioButton ACalcK1;

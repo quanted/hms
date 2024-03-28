@@ -40,7 +40,7 @@ namespace GUI.AQUATOX
             ExportButton = new System.Windows.Forms.Button();
             toggleLog = new System.Windows.Forms.Button();
             resetZoom = new System.Windows.Forms.Button();
-            HelpButton = new System.Windows.Forms.Button();
+            Help_Button = new System.Windows.Forms.Button();
             pictureBox1 = new System.Windows.Forms.PictureBox();
             Graph_to_CSV = new System.Windows.Forms.Button();
             graphOption = new System.Windows.Forms.RadioButton();
@@ -169,16 +169,16 @@ namespace GUI.AQUATOX
             // 
             // HelpButton
             // 
-            HelpButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            HelpButton.Image = Properties.Resources.help_icon;
-            HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton.Location = new System.Drawing.Point(8, 431);
-            HelpButton.Name = "HelpButton";
-            HelpButton.Size = new System.Drawing.Size(87, 24);
-            HelpButton.TabIndex = 29;
-            HelpButton.Text = "  Help";
-            HelpButton.UseVisualStyleBackColor = true;
-            HelpButton.Click += HelpButton_Click;
+            Help_Button.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            Help_Button.Image = Properties.Resources.help_icon;
+            Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            Help_Button.Location = new System.Drawing.Point(8, 431);
+            Help_Button.Name = "HelpButton";
+            Help_Button.Size = new System.Drawing.Size(87, 24);
+            Help_Button.TabIndex = 29;
+            Help_Button.Text = "  Help";
+            Help_Button.UseVisualStyleBackColor = true;
+            Help_Button.Click += HelpButton_Click;
             // 
             // pictureBox1
             // 
@@ -249,7 +249,7 @@ namespace GUI.AQUATOX
             Controls.Add(zoomOption);
             Controls.Add(Graph_to_CSV);
             Controls.Add(pictureBox1);
-            Controls.Add(HelpButton);
+            Controls.Add(Help_Button);
             Controls.Add(resetZoom);
             Controls.Add(toggleLog);
             Controls.Add(ExportButton);
@@ -282,7 +282,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.Button toggleLog;
         private System.Windows.Forms.Button resetZoom;
-        private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Button Help_Button;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button Graph_to_CSV;
         private System.Windows.Forms.RadioButton graphOption;

@@ -6,7 +6,6 @@ using AQUATOX.Diagenesis;
 using AQUATOX.Plants;
 using Globals;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,11 +13,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Web.Services;
-using Utilities;
-using System.Net.Http;
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 
@@ -228,8 +223,8 @@ namespace GUI.AQUATOX
                     c.Enabled = false;
                 }
 
-                CancelButton.Enabled = true;
-                CancelButton.Visible = true;
+                Cancel_Button.Enabled = true;
+                Cancel_Button.Visible = true;
                 progressBar1.Enabled = true;
                 progressBar1.Visible = true;
                 modelRunningLabel.Enabled = true;
@@ -267,7 +262,7 @@ namespace GUI.AQUATOX
             {
                 c.Enabled = true;
             }
-            CancelButton.Visible = false;
+            Cancel_Button.Visible = false;
             progressBar1.Visible = false;
             ShowStudyInfo();
 
@@ -1227,7 +1222,7 @@ private void PlantsDB_Click(object sender, EventArgs e)
             StateVarLabel.Top = ScaleY(60);
             SVListBox.Height = ScaleY(390);
 
-            HelpButton.Top = ScaleY(78);
+            Help_Button.Top = ScaleY(78);
             browserButton.Top = ScaleY(110);
 
             ButtonPanel.Top = ScaleY(78);
@@ -1237,7 +1232,6 @@ private void PlantsDB_Click(object sender, EventArgs e)
             MultiSegmentInput = true;
             ButtonPanel.Visible = true;
             SetupButton.Visible = false;
-            MultiSegButton.Visible = false;
             DBPanel.Visible = false;
             loadJSON.Visible = false;
             saveJSON.Visible = false;
@@ -1247,7 +1241,7 @@ private void PlantsDB_Click(object sender, EventArgs e)
 
             ShowStudyInfo();
 
-            if (ShowDialog(this) == DialogResult.Cancel) return false;
+            if (ShowDialog() == DialogResult.Cancel) return false;
 
             string errmessage = aQTS.SaveJSON(ref json);
             if (errmessage != "") MessageBox.Show("Error creating json string: " + errmessage);
@@ -1308,7 +1302,6 @@ private void PlantsDB_Click(object sender, EventArgs e)
             sw.Close();
         }
 
-        char csvDelimiter = ',';
         public DataTable CSVtoDataTable(string strFilePath, char csvDelimiter)
         {
             DataTable dt = new DataTable();
@@ -1337,10 +1330,6 @@ private void PlantsDB_Click(object sender, EventArgs e)
             }
             return dt;
         }
-
-        string CsvFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect.csv";
-        string ModFilePath = @"N:\AQUATOX\CSRA\GIS\HUC_14\comid_huc14_intersect_MOD.csv";
-        string omitfilepath = @"N:\AQUATOX\CSRA\GIS\HUC_14\COMD_HUC14_Omit_List.csv";
 
         private void AQTTestForm_FormClosing(object sender, FormClosingEventArgs e)
         {

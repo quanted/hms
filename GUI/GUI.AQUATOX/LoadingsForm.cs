@@ -33,7 +33,7 @@ namespace GUI.AQUATOX
         private string Displayname;
         readonly private System.Drawing.Graphics graphics;
 
-        TimeSeriesOutput ATSO;
+        //TimeSeriesOutput ATSO;
         // string taskID = null;
 
         private TimeSeriesInput TSI = new TimeSeriesInput()

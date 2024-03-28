@@ -17,6 +17,8 @@ namespace GUI.AQUATOX
 {
     public partial class Splash : Form
     {
+        private Point mouseOffset;
+
         public Splash()
         {
             InitializeComponent();
@@ -74,6 +76,26 @@ namespace GUI.AQUATOX
         private void Close_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Capture the mouse position relative to the form
+            mouseOffset = new Point(e.Location.X, e.Location.Y);
+        }
+
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Check if the left mouse button is pressed (dragging)
+            if (e.Button == MouseButtons.Left)
+            {
+                // Calculate the new form location based on the mouse movement
+                Point newLocation = this.PointToScreen(new Point(e.X, e.Y));
+                newLocation.Offset(-mouseOffset.X, -mouseOffset.Y);
+
+                // Set the new location for the form
+                this.Location = newLocation;
+            }
         }
     }
 }

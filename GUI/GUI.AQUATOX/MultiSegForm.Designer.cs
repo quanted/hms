@@ -94,7 +94,7 @@
             label9 = new System.Windows.Forms.Label();
             ExecutePanel = new System.Windows.Forms.Panel();
             progressBar1 = new System.Windows.Forms.ProgressBar();
-            CancelButton = new System.Windows.Forms.Button();
+            Cancel_Button = new System.Windows.Forms.Button();
             executeButton = new System.Windows.Forms.Button();
             proglabel = new System.Windows.Forms.Label();
             StatusLabel = new System.Windows.Forms.Label();
@@ -820,7 +820,7 @@
             // 
             ExecutePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             ExecutePanel.Controls.Add(progressBar1);
-            ExecutePanel.Controls.Add(CancelButton);
+            ExecutePanel.Controls.Add(Cancel_Button);
             ExecutePanel.Controls.Add(executeButton);
             ExecutePanel.Controls.Add(proglabel);
             ExecutePanel.Controls.Add(StatusLabel);
@@ -843,18 +843,18 @@
             // 
             // CancelButton
             // 
-            CancelButton.Cursor = System.Windows.Forms.Cursors.Hand;
-            CancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            CancelButton.ForeColor = System.Drawing.Color.Black;
-            CancelButton.Location = new System.Drawing.Point(89, 71);
-            CancelButton.Margin = new System.Windows.Forms.Padding(0);
-            CancelButton.Name = "CancelButton";
-            CancelButton.Size = new System.Drawing.Size(68, 23);
-            CancelButton.TabIndex = 54;
-            CancelButton.Text = "Cancel";
-            CancelButton.UseVisualStyleBackColor = true;
-            CancelButton.Visible = false;
-            CancelButton.Click += CancelButton_Click;
+            Cancel_Button.Cursor = System.Windows.Forms.Cursors.Hand;
+            Cancel_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            Cancel_Button.ForeColor = System.Drawing.Color.Black;
+            Cancel_Button.Location = new System.Drawing.Point(89, 71);
+            Cancel_Button.Margin = new System.Windows.Forms.Padding(0);
+            Cancel_Button.Name = "CancelButton";
+            Cancel_Button.Size = new System.Drawing.Size(68, 23);
+            Cancel_Button.TabIndex = 54;
+            Cancel_Button.Text = "Cancel";
+            Cancel_Button.UseVisualStyleBackColor = true;
+            Cancel_Button.Visible = false;
+            Cancel_Button.Click += CancelButton_Click;
             // 
             // executeButton
             // 
@@ -1027,8 +1027,6 @@
         private System.Windows.Forms.RadioButton ConsoleButton;
         private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.Panel PlotPanel;
-        private System.Windows.Forms.CheckBox showCOMIDsBox;
-        private System.Windows.Forms.RadioButton flowchartButton;
         private System.Windows.Forms.Button PlotButton;
         private System.Windows.Forms.CheckBox outputjump;
         private System.Windows.Forms.RadioButton GraphButton;
@@ -1069,7 +1067,7 @@
         private System.Windows.Forms.Panel ExecutePanel;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label StatusLabel;
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button Cancel_Button;
         private System.Windows.Forms.Button executeButton;
         private System.Windows.Forms.Label proglabel;
         private System.Windows.Forms.Label label4;

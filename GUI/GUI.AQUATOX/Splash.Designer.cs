@@ -32,7 +32,7 @@
             panel1 = new System.Windows.Forms.Panel();
             pictureBox2 = new System.Windows.Forms.PictureBox();
             panel2 = new System.Windows.Forms.Panel();
-            Close = new System.Windows.Forms.Button();
+            Close_Button = new System.Windows.Forms.Button();
             MultiSeg = new System.Windows.Forms.Button();
             SingleSeg = new System.Windows.Forms.Button();
             label4 = new System.Windows.Forms.Label();
@@ -55,6 +55,8 @@
             panel1.Name = "panel1";
             panel1.Size = new System.Drawing.Size(464, 270);
             panel1.TabIndex = 0;
+            panel1.MouseDown += panel1_MouseDown;
+            panel1.MouseMove += panel1_MouseMove;
             // 
             // pictureBox2
             // 
@@ -69,7 +71,7 @@
             // panel2
             // 
             panel2.BackColor = System.Drawing.Color.WhiteSmoke;
-            panel2.Controls.Add(Close);
+            panel2.Controls.Add(Close_Button);
             panel2.Controls.Add(MultiSeg);
             panel2.Controls.Add(SingleSeg);
             panel2.Controls.Add(label4);
@@ -81,17 +83,19 @@
             panel2.Name = "panel2";
             panel2.Size = new System.Drawing.Size(426, 235);
             panel2.TabIndex = 1;
+            panel2.MouseDown += panel1_MouseDown;
+            panel2.MouseMove += panel1_MouseMove;
             // 
-            // Close
+            // Close_Button
             // 
-            Close.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-            Close.Location = new System.Drawing.Point(339, 194);
-            Close.Name = "Close";
-            Close.Size = new System.Drawing.Size(66, 23);
-            Close.TabIndex = 7;
-            Close.Text = "&Close";
-            Close.UseVisualStyleBackColor = true;
-            Close.Click += Close_Click;
+            Close_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
+            Close_Button.Location = new System.Drawing.Point(339, 194);
+            Close_Button.Name = "Close_Button";
+            Close_Button.Size = new System.Drawing.Size(66, 23);
+            Close_Button.TabIndex = 7;
+            Close_Button.Text = "&Close";
+            Close_Button.UseVisualStyleBackColor = true;
+            Close_Button.Click += Close_Click;
             // 
             // MultiSeg
             // 
@@ -173,7 +177,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            CancelButton = Close;
+            CancelButton = Close_Button;
             ClientSize = new System.Drawing.Size(471, 276);
             Controls.Add(panel1);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -199,7 +203,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button SingleSeg;
         private System.Windows.Forms.Button MultiSeg;
-        private System.Windows.Forms.Button Close;
+        private System.Windows.Forms.Button Close_Button;
         private System.Windows.Forms.PictureBox pictureBox2;
     }
 }

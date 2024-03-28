@@ -29,10 +29,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 using System.Globalization;
-using Utilities;
 using System.Collections.Concurrent;
-using Data.Source;
-using static System.Windows.Forms.LinkLabel;
 
 namespace GUI.AQUATOX
 
@@ -546,7 +543,7 @@ namespace GUI.AQUATOX
                     progressBar1.Visible = false;
                     StatusLabel.Visible = true;
                     proglabel.Visible = false;
-                    CancelButton.Visible = false;
+                    Cancel_Button.Visible = false;
                 });
         }
 
@@ -847,7 +844,7 @@ namespace GUI.AQUATOX
 
             SetInterfaceBusy(true);
 
-            CancelButton.Visible = true;
+            Cancel_Button.Visible = true;
             var progressHandler = new Progress<int>(value =>
             {
                 TSafeUpdateProgress(value);
@@ -1842,7 +1839,8 @@ namespace GUI.AQUATOX
                         Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs>(graphjson);
                     }
 
-                    await Task.Run(() => OutForm.ShowOutput(Sim, this));
+                    await Task.Run(() => this.Invoke(new MethodInvoker(delegate
+                    { OutForm.ShowOutput(Sim, this); })));
                     ViewOutputClicked = false;
 
                     graphjson = JsonConvert.SerializeObject(Sim.SavedRuns.Values.Last().Graphs);
@@ -2693,7 +2691,7 @@ namespace GUI.AQUATOX
             proglabel.Text = "HAWQS RUN";
             proglabel.Visible = true;
             Application.DoEvents();
-            CancelButton.Visible = true;
+            Cancel_Button.Visible = true;
             SetInterfaceBusy(true);
 
             AddToProcessLog("INPUTS: HAWQS Input-- " + hawqsinput);
@@ -2791,7 +2789,7 @@ namespace GUI.AQUATOX
                 HAWQS_RunStatus = null;
                 SetInterfaceBusy(false);
                 TSafeHideProgBar();
-                CancelButton.Visible = false;
+                Cancel_Button.Visible = false;
                 UseWaitCursor = false;
                 UpdateScreen();
             }

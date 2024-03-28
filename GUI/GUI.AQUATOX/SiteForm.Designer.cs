@@ -338,13 +338,11 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button File_Import;
-        private System.Windows.Forms.Button HMS_Button;
         private System.Windows.Forms.Panel RBPanel;
         private System.Windows.Forms.RadioButton RBStream;
         private System.Windows.Forms.RadioButton RBLake;
         private System.Windows.Forms.RadioButton RBPond;
         private System.Windows.Forms.Label RBLabel;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.RadioButton RBRes;
         private System.Windows.Forms.RadioButton RBMarine;
         private System.Windows.Forms.RadioButton RBEncl;

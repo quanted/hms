@@ -627,8 +627,6 @@
         private System.Windows.Forms.TextBox comidBox;
         private System.Windows.Forms.Button ChooseTemplateButton;
         private System.Windows.Forms.Button HelpButton2;
-        private System.Windows.Forms.CheckBox showCOMIDsBox;
-        private System.Windows.Forms.RadioButton flowchartButton;
         private System.Windows.Forms.Label infolabel1;
         private System.Windows.Forms.Label infolabel2;
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;

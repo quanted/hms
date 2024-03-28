@@ -66,7 +66,7 @@ namespace GUI.AQUATOX
             OKButton = new System.Windows.Forms.Button();
             CancelButt = new System.Windows.Forms.Button();
             WarningLabel = new System.Windows.Forms.Label();
-            HelpButton = new System.Windows.Forms.Button();
+            Help_Button = new System.Windows.Forms.Button();
             ToxicityButton = new System.Windows.Forms.Button();
             LoadingsPanel.SuspendLayout();
             RBPanel.SuspendLayout();
@@ -477,16 +477,16 @@ namespace GUI.AQUATOX
             // 
             // HelpButton
             // 
-            HelpButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            HelpButton.Image = Properties.Resources.help_icon;
-            HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton.Location = new System.Drawing.Point(291, 10);
-            HelpButton.Name = "HelpButton";
-            HelpButton.Size = new System.Drawing.Size(87, 27);
-            HelpButton.TabIndex = 26;
-            HelpButton.Text = "  Help";
-            HelpButton.UseVisualStyleBackColor = true;
-            HelpButton.Click += HelpButton_Click;
+            Help_Button.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            Help_Button.Image = Properties.Resources.help_icon;
+            Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            Help_Button.Location = new System.Drawing.Point(291, 10);
+            Help_Button.Name = "HelpButton";
+            Help_Button.Size = new System.Drawing.Size(87, 27);
+            Help_Button.TabIndex = 26;
+            Help_Button.Text = "  Help";
+            Help_Button.UseVisualStyleBackColor = true;
+            Help_Button.Click += HelpButton_Click;
             // 
             // ToxicityButton
             // 
@@ -507,7 +507,7 @@ namespace GUI.AQUATOX
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(676, 447);
             Controls.Add(ToxicityButton);
-            Controls.Add(HelpButton);
+            Controls.Add(Help_Button);
             Controls.Add(WarningLabel);
             Controls.Add(OKButton);
             Controls.Add(CancelButt);
@@ -570,7 +570,7 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Label ToxICUnitLabel;
         private System.Windows.Forms.Label ToxICLabel;
         private System.Windows.Forms.TextBox ToxIC;
-        private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Button Help_Button;
         private System.Windows.Forms.Label timeSeriesLabel;
         private System.Windows.Forms.Button ToxicityButton;
     }

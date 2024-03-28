@@ -60,12 +60,12 @@ namespace GUI.AQUATOX
             AddButton = new Button();
             EditButton = new Button();
             DeleteButton = new Button();
-            HelpButton = new Button();
+            Help_Button = new Button();
             modelRunningLabel = new Label();
             browserButton = new Button();
             ParametersLabel = new Label();
             StateVarLabel = new Label();
-            CancelButton = new Button();
+            Cancel_Button = new Button();
             SetupButton = new Button();
             pictureBox1 = new PictureBox();
             OKButton = new Button();
@@ -367,15 +367,15 @@ namespace GUI.AQUATOX
             // 
             // HelpButton
             // 
-            HelpButton.Image = Properties.Resources.help_icon;
-            HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton.Location = new System.Drawing.Point(26, 240);
-            HelpButton.Name = "HelpButton";
-            HelpButton.Size = new System.Drawing.Size(87, 28);
-            HelpButton.TabIndex = 23;
-            HelpButton.Text = "  Help";
-            HelpButton.UseVisualStyleBackColor = true;
-            HelpButton.Click += HelpButton_Click;
+            Help_Button.Image = Properties.Resources.help_icon;
+            Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            Help_Button.Location = new System.Drawing.Point(26, 240);
+            Help_Button.Name = "HelpButton";
+            Help_Button.Size = new System.Drawing.Size(87, 28);
+            Help_Button.TabIndex = 23;
+            Help_Button.Text = "  Help";
+            Help_Button.UseVisualStyleBackColor = true;
+            Help_Button.Click += HelpButton_Click;
             // 
             // modelRunningLabel
             // 
@@ -422,18 +422,18 @@ namespace GUI.AQUATOX
             // 
             // CancelButton
             // 
-            CancelButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            CancelButton.Font = new System.Drawing.Font("Arial Narrow", 9.75F);
-            CancelButton.ForeColor = System.Drawing.Color.Black;
-            CancelButton.Location = new System.Drawing.Point(727, 75);
-            CancelButton.Margin = new Padding(0);
-            CancelButton.Name = "CancelButton";
-            CancelButton.Size = new System.Drawing.Size(68, 25);
-            CancelButton.TabIndex = 28;
-            CancelButton.Text = "Cancel";
-            CancelButton.UseVisualStyleBackColor = true;
-            CancelButton.Visible = false;
-            CancelButton.Click += CancelButton_Click;
+            Cancel_Button.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            Cancel_Button.Font = new System.Drawing.Font("Arial Narrow", 9.75F);
+            Cancel_Button.ForeColor = System.Drawing.Color.Black;
+            Cancel_Button.Location = new System.Drawing.Point(727, 75);
+            Cancel_Button.Margin = new Padding(0);
+            Cancel_Button.Name = "CancelButton";
+            Cancel_Button.Size = new System.Drawing.Size(68, 25);
+            Cancel_Button.TabIndex = 28;
+            Cancel_Button.Text = "Cancel";
+            Cancel_Button.UseVisualStyleBackColor = true;
+            Cancel_Button.Visible = false;
+            Cancel_Button.Click += CancelButton_Click;
             // 
             // SetupButton
             // 
@@ -487,11 +487,11 @@ namespace GUI.AQUATOX
             Controls.Add(OKButton);
             Controls.Add(CancelButt);
             Controls.Add(SetupButton);
-            Controls.Add(CancelButton);
+            Controls.Add(Cancel_Button);
             Controls.Add(StateVarLabel);
             Controls.Add(ParametersLabel);
             Controls.Add(browserButton);
-            Controls.Add(HelpButton);
+            Controls.Add(Help_Button);
             Controls.Add(AddButton);
             Controls.Add(EditButton);
             Controls.Add(DeleteButton);
@@ -551,13 +551,12 @@ namespace GUI.AQUATOX
         private Button EditButton;
         private Button DeleteButton;
         private Button FoodWebButton;
-        private Button MultiSegButton;
-        private Button HelpButton;
+        private Button Help_Button;
         private Label modelRunningLabel;
         private Button browserButton;
         private Label ParametersLabel;
         private Label StateVarLabel;
-        private Button CancelButton;
+        private Button Cancel_Button;
         private Button SetupButton;
         private PictureBox pictureBox1;
         private Button OKButton;

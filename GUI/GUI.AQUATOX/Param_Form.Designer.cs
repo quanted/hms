@@ -31,7 +31,7 @@
             this.CancelButt = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.DB_Button = new System.Windows.Forms.Button();
-            this.HelpButton = new System.Windows.Forms.Button();
+            this.Help_Button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CancelButt
@@ -69,23 +69,23 @@
             // 
             // HelpButton
             // 
-            this.HelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.HelpButton.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.HelpButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.HelpButton.Location = new System.Drawing.Point(703, 8);
-            this.HelpButton.Name = "HelpButton";
-            this.HelpButton.Size = new System.Drawing.Size(87, 27);
-            this.HelpButton.TabIndex = 24;
-            this.HelpButton.Text = "  Help";
-            this.HelpButton.UseVisualStyleBackColor = true;
-            this.HelpButton.Click += new System.EventHandler(this.HelpButton_Click);
+            this.Help_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Help_Button.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
+            this.Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Help_Button.Location = new System.Drawing.Point(703, 8);
+            this.Help_Button.Name = "HelpButton";
+            this.Help_Button.Size = new System.Drawing.Size(87, 27);
+            this.Help_Button.TabIndex = 24;
+            this.Help_Button.Text = "  Help";
+            this.Help_Button.UseVisualStyleBackColor = true;
+            this.Help_Button.Click += new System.EventHandler(this.HelpButton_Click);
             // 
             // Param_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(962, 497);
-            this.Controls.Add(this.HelpButton);
+            this.Controls.Add(this.Help_Button);
             this.Controls.Add(this.DB_Button);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.CancelButt);
@@ -104,6 +104,6 @@
         private System.Windows.Forms.Button CancelButt;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button DB_Button;
-        private System.Windows.Forms.Button HelpButton;
+        private System.Windows.Forms.Button Help_Button;
     }
 }
