@@ -1467,12 +1467,14 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
         /// <param name="ninputs">Number of upstream inputs</param>
         /// <param name="AR">Data structure of archived inputs from which to gather model results</param>
         /// <param name="passMass">if true passes mass, if false, passes the water concentration which can be done if water models may differ between segments e.g. reservoir to stream</param> 
+        /// <param name="previous_flows">a list containing the sum of the previous flows linked to this segment for each time step.  Needed for weighted averaging.</param>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <returns>errors, warnings</returns>
-        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, bool passMass, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
+        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, bool passMass, ref SortedList<DateTime, double> previous_flows, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
         {
+
             //archived_results AR;
-            if (AR == null)    // (AR.Equals(null)) crashed
+            if (AR == null)    
                 { 
                 archive.TryGetValue(SrcID, out AR);
                 if (AR == null)
@@ -1482,7 +1484,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         SN.waterbodies.comid_wb.TryGetValue(SrcID, out SrcID);  // translate SrcID to the relevant WBCOMID
                         archive.TryGetValue(SrcID, out AR);
                         }
-                if (AR == null) return "WARNING: Segment "+Sim.AQTSeg.StudyName+" is missing expected linkage data from "+SrcID;
+                if (AR == null) return "ERROR: Segment "+Sim.AQTSeg.StudyName+" is missing expected linkage data from "+SrcID;
                     } 
                 } 
              
@@ -1497,28 +1499,29 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
                         ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
                     {
-                        TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                    TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
                     int ndates = AR.dates.Count();
 
-                        TLoadings flowLoad;
-                        if (tvol.Calc_Method == VolumeMethType.Manning) flowLoad = tvol.LoadsRec.Alt_Loadings[1];  //manning's input is "discharge load" or [1]
-                        else flowLoad = tvol.LoadsRec.Alt_Loadings[0];  //[0] is inflow
+                    TLoadings flowLoad;
+                    if (tvol.Calc_Method == VolumeMethType.Manning) flowLoad = tvol.LoadsRec.Alt_Loadings[1];  //manning's input is "discharge load" or [1]
+                    else flowLoad = tvol.LoadsRec.Alt_Loadings[0];  //[0] is inflow
 
-                        SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
+                    SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
+                    if (ninputs == 1) previous_flows = new SortedList<DateTime, double>();  // first or only loading, start saving flows for weighted averaging with potential future loadings
 
                     for (int i = 0; i < ndates; i++)
-                        {
+                    {
                         double OutVol = AR.washout[i];  // out volume to this segment from upstream segment
 
-                                double frac_this_segment = 1.0;
-                                double totOutVol = OutVol;
-                                if (divergence_flows != null)
-                                    foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
-                                    {
-                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400 ;     //potential issue if master setup time-step changes or simulation time-period is increased since NWM data gathering
-                                        // m3/d       m3/d                                        m3/s               s/d
-                                        frac_this_segment = OutVol / totOutVol;
-                                    }
+                        double frac_this_segment = 1.0;
+                        double totOutVol = OutVol;
+                        if (divergence_flows != null)
+                            foreach (ITimeSeriesOutput<List<double>> its in divergence_flows)
+                            {
+                                totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400;     //fixme potential issue if master setup time-step changes or simulation time-period is increased since NWM data gathering
+                                                                                                                       // m3/d       m3/d                                        m3/s               s/d
+                                frac_this_segment = OutVol / totOutVol;
+                            }
 
                         double InVol = flowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
 
@@ -1527,13 +1530,23 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                             if (InVol < Consts.Tiny) newlist.Add(AR.dates[i], 0);
                             else if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  // first or only input
                             else newlist.Add(AR.dates[i], TSV.LoadsRec.Loadings.list.Values[i] + AR.concs[iTSV][i] * (OutVol / InVol) * frac_this_segment);  //adding second or third inputs
-                            }
-                            else // pass concentration
+                        }
+                        else // pass concentration
+                        {
+                            if (ninputs == 1)
                             {
-                            if (ninputs == 1) newlist.Add(AR.dates[i], AR.concs[iTSV][i]);  // first or only input
-                            else newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] *(ninputs-1) + AR.concs[iTSV][i])/ninputs);  //weighted-averaging second or third inputs.  FIXME not weighted by flow
+                                newlist.Add(AR.dates[i], AR.concs[iTSV][i]);  // first or only input
+                                previous_flows.Add(AR.dates[i], OutVol * frac_this_segment);  //water flowing into this segment at this time step corrected for divergences
+                            }
+                            else
+                            {
+                                double otherSegFlows = previous_flows.Values[i];  //sum of other-segment flows into this segment in this time step
+                                double thisSegFlows = OutVol * frac_this_segment; //flows into this segment from passage segment this time step
+                                double totFlows = otherSegFlows + thisSegFlows;   //total flows into this segment this time step
+                                newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] * otherSegFlows + AR.concs[iTSV][i] * thisSegFlows) / totFlows);  //weighted-averaging second or third inputs by volume of water.  
                             }
                         }
+                    }
 
                     TSV.LoadsRec.Loadings.list = newlist;
                     TSV.LoadsRec.Loadings.UseConstant = false;
@@ -1593,7 +1606,8 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                     SVList.Add(SV.PName+" ("+SV.StateUnit+")");   //save list of SVs for output
                 }
             }
-                
+
+            SortedList<DateTime, double> previous_flows = null;
             int nSources = 0;
             if (SN != null)
             {
@@ -1604,7 +1618,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         if ((SrcID != segID) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                         {
                             nSources++;
-                            string errstr = Pass_Data(Sim, SrcID, nSources, false, null, divergence_flows);
+                            string errstr = Pass_Data(Sim, SrcID, nSources, false, ref previous_flows, null, divergence_flows);
                     if (errstr != "") outstr.Add(errstr);
                                 else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + segID.ToString());
                 }
@@ -1623,11 +1637,11 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                                     if (AR != null)
                                     {
                                         nSources++;
-                                        string errstr = Pass_Data(Sim, SrcID, nSources, false, null, divergence_flows);
+                                        string errstr = Pass_Data(Sim, SrcID, nSources, false, ref previous_flows, null, divergence_flows);
                                         if (errstr != "") outstr.Add(errstr);
                                             else outstr.Add("INFO: Passed data from Source " + entry.Key.ToString() + " into WBCOMID " + segID.ToString());
-                                }
-                }
+                                    }
+                              }
                 }
 
             }

@@ -210,10 +210,11 @@ namespace Web.Services.Models
         {
             // Pass the archived data to the current simulation
             int nSources = 0;
+            SortedList<DateTime, double> previous_flows = null;
             foreach (int SrcId in comids)
             {
                 nSources++;
-                Pass_Data(sim, SrcId, nSources, true, this.archive[SrcId]);
+                Pass_Data(sim, SrcId, nSources, true, ref previous_flows, this.archive[SrcId]);
             };
         }
 

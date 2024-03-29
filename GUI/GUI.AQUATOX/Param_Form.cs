@@ -495,7 +495,7 @@ namespace GUI.AQUATOX
 
         private string ReadDBPath(string deflt)
         {
-            string fileN = Path.GetFullPath("..\\..\\..\\DB\\" + deflt);
+            string fileN = Path.GetFullPath("..\\DB\\" + deflt);
             if (MessageBox.Show("Open the default database: '" + fileN + "'?", "Confirm",
                  MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                  MessageBoxDefaultButton.Button1) == DialogResult.No)

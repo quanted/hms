@@ -167,7 +167,7 @@
             BaseJSONBox.Size = new System.Drawing.Size(200, 23);
             BaseJSONBox.TabIndex = 16;
             BaseJSONBox.Tag = "";
-            BaseJSONBox.Text = "..\\..\\..\\2D_Inputs\\LBR Glenwood 4.JSON";
+            BaseJSONBox.Text = "..\\2D_Inputs\\LBR Glenwood 4.JSON";
             BaseJSONBox.Enter += BaseJSONBox_Enter;
             BaseJSONBox.Leave += BaseJSONBox_Leave;
             // 
