@@ -1,8 +1,10 @@
 ﻿using System;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using Serilog.AspNetCore;
 
 namespace Web.Services
 {
@@ -25,16 +27,16 @@ namespace Web.Services
                 .WriteTo.Console()
                 .WriteTo.Logger(lc => lc
                     .Filter.ByIncludingOnly(Serilog.Filters.Matching.WithProperty<string>("Type", t => t == "exception"))
-                    .WriteTo.File("App_Data//exception_log.txt", restrictedToMinimumLevel:Serilog.Events.LogEventLevel.Warning)
+                    .WriteTo.File("App_Data//exception_log.txt", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
                 )
                 .CreateLogger();
-            
+
             try
             {
                 Log.Information("HMS web host starting");
                 BuildWebHost(args).Run();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Fatal(ex, "HMS terminated unexpectedly");
             }
@@ -50,19 +52,21 @@ namespace Web.Services
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(true)
-                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
-                .ConfigureAppConfiguration((hostingContext, config) =>
+        public static IHost BuildWebHost(string[] args) =>    // Update to Host.CreateDefaultBuilder method, required for newer versions of ASP.NET Core
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var env = hostingContext.HostingEnvironment;
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                          .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-                    config.AddEnvironmentVariables();
+                    webBuilder.CaptureStartupErrors(true)
+                              .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
+                              .ConfigureAppConfiguration((hostingContext, config) =>
+                              {
+                                  var env = hostingContext.HostingEnvironment;
+                                  config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                              })
+                              .UseStartup<Startup>();
                 })
                 .UseSerilog()
-                .UseStartup<Startup>()
                 .Build();
     }
 }

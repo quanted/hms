@@ -12,6 +12,7 @@ using Web.Services.Controllers;
 using Xunit;
 using System.Text.Json;
 using Serilog;
+using Microsoft.Extensions.Hosting;
 
 namespace Web.Services.Tests
 {
@@ -36,7 +37,10 @@ namespace Web.Services.Tests
         /// </summary>
         public PressureControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
+            _server = new TestServer(Host.CreateDefaultBuilder()
+                                         .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                                         .UseSerilog() // UseSerilog on IHostBuilder
+                                         .Build().Services);
             _client = _server.CreateClient();
         }
 

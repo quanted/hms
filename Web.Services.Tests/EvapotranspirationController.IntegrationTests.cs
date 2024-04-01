@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using Serilog;
+using Microsoft.Extensions.Hosting;
 
 namespace Web.Services.Tests
 {
@@ -360,7 +361,10 @@ namespace Web.Services.Tests
         /// </summary>
         public EvapotranspirationControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
+            _server = new TestServer(Host.CreateDefaultBuilder()
+                                         .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+                                         .UseSerilog() // UseSerilog on IHostBuilder
+                                         .Build().Services);
             _client = _server.CreateClient();
             _client.Timeout = new System.TimeSpan(0, 10, 0); //Many tests were failing due to timeout errors
         }
