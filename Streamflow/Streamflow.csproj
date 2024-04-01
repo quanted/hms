@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.24.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ContaminantLoader\ContaminantLoader.csproj" />
     <ProjectReference Include="..\Data.Source\Data.Source.csproj" />
     <ProjectReference Include="..\Data\Data.csproj" />
