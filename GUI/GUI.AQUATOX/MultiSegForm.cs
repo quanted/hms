@@ -1471,7 +1471,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            string target = "Multi_Segment_Runs";
+            string target = "multi_seg";
             AQTMainForm.OpenUrl(target);
         }
 
@@ -2582,7 +2582,7 @@ namespace GUI.AQUATOX
             string hucstr;
             if (!isHUC0D)  //streamnetwork code first
             {
-                List<string> H14s = Render_RelevantH14s(out string pourpoint);
+                List<string> H14s = Render_RelevantH14s(out string pourpoint);  //identify HUC14s with modeled stream segments within them
                 if (H14s == null) return;
 
                 HAWQSInp.downstreamSubbasin = pourpoint;
@@ -2601,10 +2601,21 @@ namespace GUI.AQUATOX
                         AddToProcessLog("ERROR: " + ex.Message); //file system error
                         return;
                     }
-                    AQT2D.HAWQSInf.AddSourceHUCs(HUC14);
-                    outhucs = MergeLists(outhucs, AQT2D.HAWQSInf.boundaryHUCs(HUC14, true));
+                    outhucs = MergeLists(outhucs, AQT2D.HAWQSInf.boundaryHUCs(HUC14, true));  //look up-river one segment and add to HAWQS model output for disaggregation, also add current H14 segment
                 }
                 outputHUCs = outhucs.ToArray();
+
+                foreach (string HUC14 in outputHUCs)  
+                {
+                    try { AQT2D.HAWQSInf.LoadFromtoData(HUC14); } //load relevant fromto data to dictionary
+                    catch (Exception ex)
+                    {
+                        AddToProcessLog("ERROR: " + ex.Message); //file system error
+                        return;
+                    }
+                    AQT2D.HAWQSInf.AddSourceHUCs(HUC14);   //traverse up-river until a HUC8 boundary is encountered, set that as the HAWQS upstream segment
+                }
+
             }
             else  //HUC0D code
             {
@@ -2728,8 +2739,7 @@ namespace GUI.AQUATOX
                 string urlName = "output_rch_daily.csv";
                 if (!isHUC0D) urlName = "output_rch_daily_comids.7z";
 
-
-                if (LHO.Count == 0) AddToProcessLog("WARNING: No HAWQS Results Returned.");
+                if (LHO.Count == 0) AddToProcessLog("WARNING: No HAWQS Results Returned.  For more information visit https://dev-api.hawqs.tamu.edu/#/docs/projects/" + HAWQS_RunStatus.id);
                 else
                 {
                     string HO = JsonConvert.SerializeObject(LHO);

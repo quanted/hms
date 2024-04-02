@@ -7,6 +7,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -56,7 +57,7 @@ namespace GUI.AQUATOX
                     {
                         string jsonContent = File.ReadAllText("..\\2D_Inputs\\webServiceURLs.JSON");
                         AQSim_2D.webServiceURLs = JsonConvert.DeserializeObject<webServiceURLsClass>(jsonContent);
-                        if (webServiceURLs == null) AQSim_2D.webServiceURLs = new(); 
+                        if (webServiceURLs == null) AQSim_2D.webServiceURLs = new();
                     }
                     catch (Exception ex)
                     {
@@ -96,6 +97,14 @@ namespace GUI.AQUATOX
                 // Set the new location for the form
                 this.Location = newLocation;
             }
+        }
+
+        private void Splash_Shown(object sender, EventArgs e)
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string exeDirectory = Path.GetDirectoryName(exePath);
+            Directory.SetCurrentDirectory(exeDirectory);
+            AQTMainForm.defaultBrowser = Properties.Settings.Default.BrowserExe;
         }
     }
 }

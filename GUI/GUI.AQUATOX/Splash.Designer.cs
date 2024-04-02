@@ -181,9 +181,11 @@
             ClientSize = new System.Drawing.Size(471, 276);
             Controls.Add(panel1);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             Name = "Splash";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Splash";
+            Shown += Splash_Shown;
             panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             panel2.ResumeLayout(false);

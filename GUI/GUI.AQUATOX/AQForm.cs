@@ -24,7 +24,7 @@ namespace GUI.AQUATOX
     {
         private BackgroundWorker Worker = new BackgroundWorker();
         private string errmessage;
-        static private string defaultBrowser;
+        static public string defaultBrowser;
 
         private bool MultiSegmentInput = false;
         private bool isBoundarySegment = true;
