@@ -1,15 +1,9 @@
 ﻿using AQUATOX.AQSim_2D;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 
@@ -105,6 +99,12 @@ namespace GUI.AQUATOX
             string exeDirectory = Path.GetDirectoryName(exePath);
             Directory.SetCurrentDirectory(exeDirectory);
             AQTMainForm.defaultBrowser = Properties.Settings.Default.BrowserExe;
+        }
+
+        private void Help_Button_Click(object sender, EventArgs e)
+        {
+            string target = "splash";
+            AQTMainForm.OpenUrl(target);
         }
     }
 }

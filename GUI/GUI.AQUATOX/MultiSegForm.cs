@@ -2914,13 +2914,14 @@ namespace GUI.AQUATOX
             else  //multi-segment HAWQS Read
             {
                 Dictionary<string, string> WB_JSONs = new Dictionary<string, string>();
-                if (AQT2D.SN.waterbodies != null)  //if there is a NWM lake or reservoir, read volumes and flows from NWM, overland and inflow nutrients will come from HAWQS
+                if ((AQT2D.SN.waterbodies != null) &&  //if there is a NWM lake or reservoir, read volumes and flows from NWM, overland and inflow nutrients will come from HAWQS
+                    (AQT2D.SN.waterbodies.wb_table.Length>1))
                 {
                     TSafeAddToProcessLog("INPUT: Reading Lake-Reservoir Volumes and flows from NWM");
 
                     await Task.Run(() =>
                     {
-                        for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)
+                        for (int i = 1; i < AQT2D.SN.waterbodies.wb_table.Length; i++)  //index 0 is the header
                         {
                             string WBString = AQT2D.SN.waterbodies.wb_table[i][0];
                             string WBJSON = Read_WB_Water_Flows(WBString, true, msj);  //daily volumes and flows from NWM

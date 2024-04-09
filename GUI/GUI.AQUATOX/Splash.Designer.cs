@@ -32,7 +32,9 @@
             panel1 = new System.Windows.Forms.Panel();
             pictureBox2 = new System.Windows.Forms.PictureBox();
             panel2 = new System.Windows.Forms.Panel();
-            Close_Button = new System.Windows.Forms.Button();
+            label5 = new System.Windows.Forms.Label();
+            SingleSegmentLabel = new System.Windows.Forms.Label();
+            Help_Button = new System.Windows.Forms.Button();
             MultiSeg = new System.Windows.Forms.Button();
             SingleSeg = new System.Windows.Forms.Button();
             label4 = new System.Windows.Forms.Label();
@@ -53,7 +55,7 @@
             panel1.Controls.Add(panel2);
             panel1.Location = new System.Drawing.Point(3, 4);
             panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size(464, 270);
+            panel1.Size = new System.Drawing.Size(468, 308);
             panel1.TabIndex = 0;
             panel1.MouseDown += panel1_MouseDown;
             panel1.MouseMove += panel1_MouseMove;
@@ -61,7 +63,7 @@
             // pictureBox2
             // 
             pictureBox2.Image = Properties.Resources.x1;
-            pictureBox2.Location = new System.Drawing.Point(444, 1);
+            pictureBox2.Location = new System.Drawing.Point(449, 0);
             pictureBox2.Name = "pictureBox2";
             pictureBox2.Size = new System.Drawing.Size(18, 19);
             pictureBox2.TabIndex = 8;
@@ -71,7 +73,9 @@
             // panel2
             // 
             panel2.BackColor = System.Drawing.Color.WhiteSmoke;
-            panel2.Controls.Add(Close_Button);
+            panel2.Controls.Add(label5);
+            panel2.Controls.Add(SingleSegmentLabel);
+            panel2.Controls.Add(Help_Button);
             panel2.Controls.Add(MultiSeg);
             panel2.Controls.Add(SingleSeg);
             panel2.Controls.Add(label4);
@@ -81,26 +85,48 @@
             panel2.Controls.Add(pictureBox1);
             panel2.Location = new System.Drawing.Point(18, 17);
             panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size(426, 235);
+            panel2.Size = new System.Drawing.Size(431, 270);
             panel2.TabIndex = 1;
             panel2.MouseDown += panel1_MouseDown;
             panel2.MouseMove += panel1_MouseMove;
             // 
-            // Close_Button
+            // label5
             // 
-            Close_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-            Close_Button.Location = new System.Drawing.Point(339, 194);
-            Close_Button.Name = "Close_Button";
-            Close_Button.Size = new System.Drawing.Size(66, 23);
-            Close_Button.TabIndex = 7;
-            Close_Button.Text = "&Close";
-            Close_Button.UseVisualStyleBackColor = true;
-            Close_Button.Click += Close_Click;
+            label5.BackColor = System.Drawing.Color.WhiteSmoke;
+            label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
+            label5.Location = new System.Drawing.Point(180, 215);
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size(165, 46);
+            label5.TabIndex = 26;
+            label5.Text = "Create linked segments and/or link to data from NHDPlus, NWM, and HAWQS";
+            label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // SingleSegmentLabel
+            // 
+            SingleSegmentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
+            SingleSegmentLabel.Location = new System.Drawing.Point(23, 216);
+            SingleSegmentLabel.Name = "SingleSegmentLabel";
+            SingleSegmentLabel.Size = new System.Drawing.Size(146, 46);
+            SingleSegmentLabel.TabIndex = 25;
+            SingleSegmentLabel.Text = "Run one 0-D model segment with nutrients, chemicals, and a food web";
+            SingleSegmentLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // Help_Button
+            // 
+            Help_Button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            Help_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
+            Help_Button.Location = new System.Drawing.Point(349, 190);
+            Help_Button.Name = "Help_Button";
+            Help_Button.Size = new System.Drawing.Size(53, 23);
+            Help_Button.TabIndex = 7;
+            Help_Button.Text = "&Help";
+            Help_Button.UseVisualStyleBackColor = true;
+            Help_Button.Click += Help_Button_Click;
             // 
             // MultiSeg
             // 
             MultiSeg.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-            MultiSeg.Location = new System.Drawing.Point(177, 194);
+            MultiSeg.Location = new System.Drawing.Point(186, 190);
             MultiSeg.Name = "MultiSeg";
             MultiSeg.Size = new System.Drawing.Size(144, 23);
             MultiSeg.TabIndex = 6;
@@ -111,7 +137,7 @@
             // SingleSeg
             // 
             SingleSeg.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-            SingleSeg.Location = new System.Drawing.Point(17, 194);
+            SingleSeg.Location = new System.Drawing.Point(22, 190);
             SingleSeg.Name = "SingleSeg";
             SingleSeg.Size = new System.Drawing.Size(144, 23);
             SingleSeg.TabIndex = 5;
@@ -123,7 +149,7 @@
             // 
             label4.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             label4.ForeColor = System.Drawing.Color.Maroon;
-            label4.Location = new System.Drawing.Point(61, 105);
+            label4.Location = new System.Drawing.Point(61, 103);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(317, 75);
             label4.TabIndex = 4;
@@ -177,8 +203,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            CancelButton = Close_Button;
-            ClientSize = new System.Drawing.Size(471, 276);
+            ClientSize = new System.Drawing.Size(474, 316);
             Controls.Add(panel1);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
@@ -205,7 +230,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button SingleSeg;
         private System.Windows.Forms.Button MultiSeg;
-        private System.Windows.Forms.Button Close_Button;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Button Help_Button;
+        private System.Windows.Forms.Label SingleSegmentLabel;
+        private System.Windows.Forms.Label label5;
     }
 }

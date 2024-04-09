@@ -104,6 +104,9 @@ namespace AQUATOX.Volume
             // AVERAGE FLOW DISCHARGE
             Q = Discharg / 86400.0;
             // m3/s // m3/d  // s/d
+
+            if (Q < 0) Q = 0;  //bullet proof 4/4/2024
+
             Width = Location.Locale.SurfArea.Val / (Location.Locale.SiteLength.Val * 1000.0);
             // m                   // sq.m                      // km       // m/km
             Y = Math.Pow((Q * Location.ManningCoeff()) / (Math.Sqrt(Location.Locale.Channel_Slope.Val) * Width), 0.6);

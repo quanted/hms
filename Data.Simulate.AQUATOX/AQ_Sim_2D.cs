@@ -793,7 +793,8 @@ namespace AQUATOX.AQSim_2D
 
             foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
             {
-                DischargLoad.list.Add(pair.Key, pair.Value.vals[0] * 86400);  //flow from RCH_Daily file -- converted from cms to m3/d
+                double disch = (pair.Value.vals[0] * 86400 > 0) ? pair.Value.vals[0] * 86400 : 0 ;
+                DischargLoad.list.Add(pair.Key, disch);  //flow from RCH_Daily file -- converted from cms to m3/d
             }
 
             TVol.LoadNotes1 = "Flows from HAWQS converted to m3/day";
@@ -870,7 +871,7 @@ namespace AQUATOX.AQSim_2D
                     double COMID_IC = (InitFlow <= 0) ? 0 : ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
                     if (isSED) COMID_IC *= 1000;  // sed is in units of tons
                     if (isCHLA) COMID_IC = COMID_IC * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90;
-                    //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
+                    //         mg/L OM  =   mg/L chl-a              C to chl-a          g OM / g OC
 
                     if (SegIndex == 1) TSV.InitialCond = COMID_IC;
                     else TSV.InitialCond = (COMID_IC + TSV.InitialCond * (SegIndex - 1)) / SegIndex;  //Average initial condition for all COMIDs within the WBCOMID
@@ -1520,7 +1521,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                             {
                                 totOutVol = totOutVol + Convert.ToDouble(its.Data.Values.ElementAt(i)[0]) * 86400;     //fixme potential issue if master setup time-step changes or simulation time-period is increased since NWM data gathering
                                                                                                                        // m3/d       m3/d                                        m3/s               s/d
-                                frac_this_segment = OutVol / totOutVol;
+                                frac_this_segment = totOutVol > 0 ? OutVol / totOutVol : 1;
                             }
 
                         double InVol = flowLoad.ReturnLoad(AR.dates[i]);  // inflow volume to current segment,   If velocity is not used, must be estimated as current seg. outflow 
@@ -1543,7 +1544,8 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                                 double otherSegFlows = previous_flows.Values[i];  //sum of other-segment flows into this segment in this time step
                                 double thisSegFlows = OutVol * frac_this_segment; //flows into this segment from passage segment this time step
                                 double totFlows = otherSegFlows + thisSegFlows;   //total flows into this segment this time step
-                                newlist.Add(AR.dates[i], (TSV.LoadsRec.Loadings.list.Values[i] * otherSegFlows + AR.concs[iTSV][i] * thisSegFlows) / totFlows);  //weighted-averaging second or third inputs by volume of water.  
+                                double weightavg = totFlows > 0 ? (TSV.LoadsRec.Loadings.list.Values[i] * otherSegFlows + AR.concs[iTSV][i] * thisSegFlows) / totFlows : 0;
+                                newlist.Add(AR.dates[i], weightavg);  //weighted-averaging second or third inputs by volume of water.  
                             }
                         }
                     }
