@@ -93,7 +93,7 @@
             Controls.Add(textBox);
             Controls.Add(cancelButton);
             Controls.Add(okButton);
-            MaximumSize = new System.Drawing.Size(745, 545);
+            MinimumSize = new System.Drawing.Size(745, 545);
             Name = "JSONEditForm";
             Text = "HAWQS Input JSON:";
             ResumeLayout(false);

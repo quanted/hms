@@ -461,6 +461,7 @@ namespace GUI.AQUATOX
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
                 infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
+                if (BSim == null) BaseJSON_FileN = "Default Lake.JSON"; 
             }
             else if (LakeButton.Checked)
             {
@@ -471,6 +472,7 @@ namespace GUI.AQUATOX
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a Lake/Reservoir to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+                if (BSim == null) BaseJSON_FileN = "Default Lake.JSON";
             }
             else //  HUCButton.checked
             {
@@ -483,7 +485,9 @@ namespace GUI.AQUATOX
 
                 infolabel1.Text = "Click on one HUC to Select";
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+                if (BSim == null) BaseJSON_FileN = "MS_OM.JSON";
             }
+            SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\""; 
         }
 
         private void MS_Surrogate_Button_Click(object sender, EventArgs e)

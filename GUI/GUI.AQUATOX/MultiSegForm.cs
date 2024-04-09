@@ -2054,6 +2054,7 @@ namespace GUI.AQUATOX
 
                             BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
                             BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+                            BSim.AQTSeg.PSetup.StepSizeInDays.Val = true;
 
                             if ((!IsHUC) && (NSForm.SArea > 0))
                             {
@@ -2100,6 +2101,7 @@ namespace GUI.AQUATOX
 
                             BSim.AQTSeg.PSetup.FirstDay.Val = NSForm.StartDT;    //update start and end date from input on screen
                             BSim.AQTSeg.PSetup.LastDay.Val = NSForm.EndDT;
+                            BSim.AQTSeg.PSetup.StepSizeInDays.Val = true;
 
                             string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                             if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
@@ -2660,7 +2662,6 @@ namespace GUI.AQUATOX
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
             string hawqsinput;
-
             hawqsinput = JsonConvert.SerializeObject(HAWQSInp, Formatting.Indented);
             using (var form = new JSONEditForm(hawqsinput, HAWQS_apikey))
             {
