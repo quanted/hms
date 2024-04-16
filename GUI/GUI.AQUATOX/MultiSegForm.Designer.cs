@@ -841,14 +841,14 @@
             progressBar1.Value = 1;
             progressBar1.Visible = false;
             // 
-            // CancelButton
+            // Cancel_Button
             // 
             Cancel_Button.Cursor = System.Windows.Forms.Cursors.Hand;
             Cancel_Button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             Cancel_Button.ForeColor = System.Drawing.Color.Black;
             Cancel_Button.Location = new System.Drawing.Point(89, 71);
             Cancel_Button.Margin = new System.Windows.Forms.Padding(0);
-            Cancel_Button.Name = "CancelButton";
+            Cancel_Button.Name = "Cancel_Button";
             Cancel_Button.Size = new System.Drawing.Size(68, 23);
             Cancel_Button.TabIndex = 54;
             Cancel_Button.Text = "Cancel";
@@ -974,6 +974,7 @@
             Controls.Add(label2);
             Controls.Add(basedirBox);
             Controls.Add(viewOutputButton);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             MinimumSize = new System.Drawing.Size(1148, 650);
             Name = "MultiSegForm";
             Text = "Multiple Segment Runs";

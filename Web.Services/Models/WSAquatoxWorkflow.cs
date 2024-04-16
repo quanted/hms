@@ -168,7 +168,7 @@ namespace Web.Services.Models
                             return "Invalid Time Series Output.";
                         }
                         // Update stream discharge for current segment simulation
-                        StreamFlowsFromNWM(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO, true);  //JSC 7/1/2021.
+                        StreamFlowsFromNWM(sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume, TSO);  //JSC 7/1/2021.
                         break;
                     default:
                         return "Unrecognized dependency: " + item.Key;

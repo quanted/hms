@@ -63,11 +63,16 @@ namespace GUI.AQUATOX
                 {
                     base.OnPaint(e);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    ChartAreas[0].AxisY.IsLogarithmic = false;
-                    System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
-                    base.OnPaint(e);
+                    if (ex.Message.Contains("logarithmic"))
+                    {
+                        ChartAreas[0].AxisY.IsLogarithmic = false;
+                        MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
+                        base.OnPaint(e);
+                        // Code to execute if the exception message includes "logarithmic"
+                    }
+                    else MessageBox.Show("Error plotting graph: " + ex.Message);
                 }
             }
         }
@@ -454,7 +459,14 @@ namespace GUI.AQUATOX
                     Series selectedSeries = (Series)legendItem.Tag;
                     if (selectedSeries != null)
                         selectedSeries.Enabled = !selectedSeries.Enabled;
-                    chart1.ChartAreas[0].RecalculateAxesScale();
+                    try
+                    {
+                        chart1.ChartAreas[0].RecalculateAxesScale();
+                    }
+                    catch (Exception ex)
+                    {
+                        // MessageBox.Show("Axis Resize Error: "+ex.Message);
+                    }
                 }
 
                 if (!zoomOption.Checked)
@@ -666,7 +678,7 @@ namespace GUI.AQUATOX
             }
             else
             {
-                TSafeAddToProcessLog("ERROR: " + errmessage);
+                TSafeAddToProcessLog("ERROR linking NWM Lake Data: " + errmessage);
                 UseWaitCursor = false;
                 PostWebviewMessage("COLOR|" + WBComid + "|red");
                 TSafeHideProgBar();
@@ -1053,7 +1065,7 @@ namespace GUI.AQUATOX
             SaveModelRunResults();
             reset_interface_after_run(success);
             if (success) TSafeAddToProcessLog("INPUTS: Model execution complete");
-            else TSafeAddToProcessLog("ERROR:  Network Run terminated due to execution error.");
+            else TSafeAddToProcessLog("ERROR:  Network Run terminated due to user cancelation or execution error.");
         }
 
         private void SaveModelRunResults()
@@ -1565,7 +1577,17 @@ namespace GUI.AQUATOX
             try
             {
                 var jsonObject = Newtonsoft.Json.Linq.JObject.Parse(jsonString);  // Check for basic GeoJSON structure
-                return jsonObject["type"] != null && jsonObject["features"] != null;
+
+                // First, access the "stream_geometry" object
+                var streamGeometry = jsonObject["stream_geometry"] as Newtonsoft.Json.Linq.JObject;
+
+                // Then check if this object contains both "type" and "features"
+                if (streamGeometry != null)
+                {
+                    return streamGeometry["type"] != null && streamGeometry["features"] != null;
+                }
+                else return false;
+                // return jsonObject["type"] != null && jsonObject["features"] != null;
             }
             catch
             {
@@ -1649,7 +1671,7 @@ namespace GUI.AQUATOX
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
                             // GeoJSON = "{}";
-                            GeoJSON = AQT2D.ReadGeoJSON(CString);  // read from web service    
+                            GeoJSON = await AQT2D.ReadGeoJSON(CString);
                             if (!IsValidGeoJSON(GeoJSON))
                             {
                                 AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
@@ -2872,7 +2894,7 @@ namespace GUI.AQUATOX
                     }
                 }
 
-                AddToProcessLog("INPUTS: read HAWQS file " + RCHfileN);
+                AddToProcessLog("INPUTS: read HAWQS file " + RCHfileN + "   Please wait, linking segments.");
             }
 
             catch (Exception ex)

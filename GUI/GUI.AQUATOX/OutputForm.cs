@@ -25,12 +25,17 @@ namespace GUI.AQUATOX
                 {
                     base.OnPaint(e);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    ChartAreas[0].AxisY.IsLogarithmic = false;
-                    System.Windows.Forms.MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
-                    ChartAreas[0].AxisY.LabelStyle.Format = "{0:#,##0.###}";
-                    base.OnPaint(e);
+                    if (ex.Message.Contains("logarithmic"))
+                    {
+                        ChartAreas[0].AxisY.IsLogarithmic = false;
+                        MessageBox.Show("Zero or negative values cannot be displayed on a logarithmic scale");
+                        ChartAreas[0].AxisY.LabelStyle.Format = "{0:#,##0.###}";
+                        base.OnPaint(e);
+                        // Code to execute if the exception message includes "logarithmic"
+                    }
+                    else MessageBox.Show("Error plotting graph: " + ex.Message);
                 }
             }
         }

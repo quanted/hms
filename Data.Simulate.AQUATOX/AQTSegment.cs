@@ -2930,94 +2930,100 @@ namespace AQUATOX.AQTSegment
             {
                 SV.restimes.Add(TimeIndex);
                 foreach (TStateVariable TSV in SV) if (TSV.TrackResults)
+                {
+                    int rescnt = 0;
+                    double res = TSV.State;
+                    if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
                     {
-                        int rescnt = 0;
-                        double res = TSV.State;
-                        if (Convert_g_m2_to_mg_L(TSV.NState, TSV.SVType, TSV.Layer))
+                        res = res * SegVol() / SurfaceArea();
+                        //  g/m2  g/m3     m3         m2
+                    }
+
+                    if (TSV.SVResults == null) TSV.SVResults = new SavedResults();
+
+                    if (firstwrite)
+                    {
+                        string ustr = TSV.StateUnit;
+                        if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp)) ustr = "ug/L";
+                        TSV.SVResults.AddColumn("", ustr);
+                    }
+
+                    TSV.SVResults.Results[rescnt].Add(res); rescnt++;
+
+                    if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  // output PPB
+                    {
+                        if (firstwrite) TSV.SVResults.AddColumn("PPB", "PPB");
+                        TSV.SVResults.Results[rescnt].Add(((TToxics)TSV).ppb); rescnt++;
+                    }
+
+                    if ((TSV.SVType == T_SVType.NIntrnl) || (TSV.SVType == T_SVType.PIntrnl))   //output internal nutrients in g/g
+                    {
+                        double TP = GetStateVal(TSV.NState, T_SVType.StV, TSV.Layer);
+                        if (firstwrite) TSV.SVResults.AddColumn("Ratio", "g/gOM");
+                        TSV.SVResults.Results[rescnt].Add((res / TP) * 1e-3); rescnt++;
+                    } //                  (gN/gOM) =    (ug/L)/(mg/L) * (mg/ug) 
+
+
+                    if ((PSetup.SaveBRates.Val) && (TSV.SaveRates) && (TSV.RateColl != null))  // save rates output
+                        foreach (TRate PR in TSV.RateColl)
                         {
-                            res = res * SegVol() / SurfaceArea();
-                            //  g/m2  g/m3     m3         m2
-                        }
-
-                        if (TSV.SVResults == null) TSV.SVResults = new SavedResults();
-
-                        if (firstwrite)
-                        {
-                            string ustr = TSV.StateUnit;
-                            if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp)) ustr = "ug/L";
-                            TSV.SVResults.AddColumn("", ustr);
-                        }
-
-                        TSV.SVResults.Results[rescnt].Add(res); rescnt++;
-
-                        if ((TSV.SVType >= Consts.FirstOrgTxTyp) && (TSV.SVType <= Consts.LastOrgTxTyp))  // output PPB
-                        {
-                            if (firstwrite) TSV.SVResults.AddColumn("PPB", "PPB");
-                            TSV.SVResults.Results[rescnt].Add(((TToxics)TSV).ppb); rescnt++;
-                        }
-
-                        if ((TSV.SVType == T_SVType.NIntrnl) || (TSV.SVType == T_SVType.PIntrnl))   //output internal nutrients in g/g
-                        {
-                            double TP = GetStateVal(TSV.NState, T_SVType.StV, TSV.Layer);
-                            if (firstwrite) TSV.SVResults.AddColumn("Ratio", "g/gOM");
-                            TSV.SVResults.Results[rescnt].Add((res / TP) * 1e-3); rescnt++;
-                        } //                  (gN/gOM) =    (ug/L)/(mg/L) * (mg/ug) 
-
-
-                        if ((PSetup.SaveBRates.Val) && (TSV.SaveRates) && (TSV.RateColl != null))  // save rates output
-                            foreach (TRate PR in TSV.RateColl)
+                            double ThisRate = PR.GetRate();
+                            string ustr = "Fraction";
+                            if ((PR.Name.IndexOf("_LIM") <= 0))
                             {
-                                double ThisRate = PR.GetRate();
-                                string ustr = "Fraction";
-                                if ((PR.Name.IndexOf("_LIM") <= 0))
+                                if ((PR.Name.IndexOf("GrowthRate2") > 0)) // GrowthRate2 in g/m2
                                 {
-                                    if ((PR.Name.IndexOf("GrowthRate2") > 0)) // GrowthRate2 in g/m2
-                                    {
-                                        ThisRate = ThisRate * SegVol() / SurfaceArea();
-                                        //   (g/m2) =   (g/m3)    (m3)       (m2)
-                                        ustr = "g/m2";
-                                    }
+                                    ThisRate = ThisRate * SegVol() / SurfaceArea();
+                                    //   (g/m2) =   (g/m3)    (m3)       (m2)
+                                    ustr = "g/m2";
+                                }
+                                else
+                                {
+                                    ustr = "Percent";
+                                    if (TSV.State < Globals.Consts.Tiny) ThisRate = 0;// avoid divide by zero
                                     else
                                     {
-                                        ustr = "Percent";
-                                        if (TSV.State < Globals.Consts.Tiny) ThisRate = 0;// avoid divide by zero
-                                        else
-                                        {
-                                            try { ThisRate = (ThisRate / TSV.State) * 100; }    // normal rate output
-                                            catch { ThisRate = 0; } // floating point error catch 
-                                        }
+                                        try { ThisRate = (ThisRate / TSV.State) * 100; }    // normal rate output
+                                        catch { ThisRate = 0; } // floating point error catch 
                                     }
                                 }
-
-                                if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
-                                TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
                             }
 
-                        if (TSV.NState == AllVariables.Volume)
-                        {
-                            foreach (TRate PR in TSV.RateColl)  //5/5/2021, always write volume rates
-                            {
-                                double ThisRate = PR.GetRate();
-                                string ustr = "m3/d";
-                                if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
-                                TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
-                            }
-
-                            // store other general calculations in TVolume state variable for now  FIXME
-
-                            // chl a
-                            double chla = 0;
-                            for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
-                            {
-                                TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
-                                if (PP != null) chla += PP.State * ((0.526 / PP.PAlgalRec.Plant_to_Chla.Val) * 1000.0);
-
-                            }
-                            if (firstwrite) TSV.SVResults.AddColumn("chlorophyll a", "ug/L");
-                            TSV.SVResults.Results[rescnt].Add(chla); 
-
+                            if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
+                            TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
                         }
+
+                    if (TSV.NState == AllVariables.Volume)
+                    {
+                        foreach (TRate PR in TSV.RateColl)  //5/5/2021, always write volume rates
+                        {
+                            double ThisRate = PR.GetRate();
+                            string ustr = "m3/d";
+                            if (firstwrite) TSV.SVResults.AddColumn(PR.Name, ustr);
+                            TSV.SVResults.Results[rescnt].Add(ThisRate); rescnt++;
+                        }
+
+                        // store other general calculations in TVolume state variable for now  
+
+                        // chl a
+                        double chla = 0;
+                        for (AllVariables NS = Consts.FirstPlant; NS <= Consts.LastPlant; NS++)
+                        {
+                            TPlant PP = GetStatePointer(NS, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
+                            if (PP != null) chla += PP.State * ((0.526 / PP.PAlgalRec.Plant_to_Chla.Val) * 1000.0);
+                        }
+                        if (firstwrite) TSV.SVResults.AddColumn("chlorophyll a", "ug/L");
+                        TSV.SVResults.Results[rescnt].Add(chla); rescnt++;
+
+                        // retention time
+                        double resTime = 99999;   // if there is no discharge, set ResTime to an arbitrary high number}
+                        if (Location.Discharge > Consts.Tiny)
+                        { resTime = SegVol() / Location.Discharge;  }
+                        //   days     cu m              cu m/ d 
+                        if (firstwrite) TSV.SVResults.AddColumn("retention time", "days");
+                        TSV.SVResults.Results[rescnt].Add(resTime);   // add rescnt++ if another variable is output after this one.
                     }
+                }
             }
         }
 
@@ -3215,7 +3221,7 @@ namespace AQUATOX.AQTSegment
                     TSV.SVoutput.DataSource = "AQUATOX";
                     TSV.SVoutput.Metadata = new Dictionary<string, string>()
                     {
-                        {"AQUATOX_Version", "4.0.0"},
+                        {"AQUATOX_DOT_NET_Version", "1.0.0.1"},
                         {"SimulationDate", (SimulationDate.ToString(Consts.DateFormatString))},
                         {"State_Variable", TSV.PName},
                     };

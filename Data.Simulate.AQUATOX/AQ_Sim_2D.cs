@@ -19,6 +19,7 @@ using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
 using System.Globalization;
 using System.Data.SQLite;
+using Utilities;
 
 namespace AQUATOX.AQSim_2D
 
@@ -267,6 +268,11 @@ namespace AQUATOX.AQSim_2D
         }
 
         /// <summary>
+        /// average retention time for each segment/COMID.  Used to determine which segments may be merged or skipped
+        /// </summary>
+        public Dictionary<int, double> avgRetention = new Dictionary<int, double>();
+
+        /// <summary>
         /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.
         /// </summary>
         public Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
@@ -309,8 +315,17 @@ namespace AQUATOX.AQSim_2D
             else return "MS_Phosphorus.json"; //flag [1] for phosphorus is the only one selected
         }
 
-        public void LakeFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO)  // time series output must currently be in m3/s
+        /// <summary>
+        /// Given a time series output from web service, converts the lake volume and water flows into inputs required for the AQUATOX TVolume object
+        /// </summary>
+        /// <param name="TVol">AQUATOX Volume object to be populated with data</param>
+        /// <param name="ATSO">National Water Model time-series output</param>
+        /// <returns>The average retention time for the period being modeled in days</returns>
+        public double LakeFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO)  // time series output must currently be in m3/s   
         {
+            double RTSum = 0;
+            int RTCount = 0;
+
             TVol.Calc_Method = VolumeMethType.KnownVal;
 
             TLoadings KnownValLoad = TVol.LoadsRec.Loadings;
@@ -351,6 +366,9 @@ namespace AQUATOX.AQSim_2D
                 KnownValLoad.list.Add(date, volume);
                 if (firstvol) TVol.InitialCond = volume;
 
+                RTSum += volume / (flow * 86400);   // m3  / (m3/s * s/d)  = retention time in days
+                RTCount++;
+
                 firstvol = false;
             }
 
@@ -364,13 +382,22 @@ namespace AQUATOX.AQSim_2D
             InflowLoad.ITSI = null;
 
             TVol.AQTSeg.CalcVelocity = true;
+            return RTSum / RTCount;  //average retention time in days
         }
 
 
-        public void StreamFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO, bool useVelocity)  // time series output must currently be in m3/s
+        /// <summary>
+        /// Given a time series output from web service, converts the stream-segment volume and velocity into inputs required for the AQUATOX TVolume object
+        /// </summary>
+        /// <param name="TVol">AQUATOX Volume object to be populated with data</param>
+        /// <param name="ATSO">National Water Model time-series output</param>
+        /// <returns>The average retention time for the period being modeled in days</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public double StreamFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO)  // time series output must currently be in m3/s   
         {
+            double RTSum = 0;
+            int RTCount = 0;
 
-            if (useVelocity)
             {
                 TVol.Calc_Method = VolumeMethType.KnownVal;
 
@@ -419,6 +446,9 @@ namespace AQUATOX.AQSim_2D
 
                     if (firstvol) TVol.InitialCond = VolCalc;
                     firstvol = false;
+
+                    RTSum += VolCalc / (flow * 86400);   // m3  / (m3/s * s/d)  = retention time in days
+                    RTCount++;
                 }
 
                 InflowLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  // default minimum flow of 1000 cmd for now  multiplier is seconds per day
@@ -449,30 +479,33 @@ namespace AQUATOX.AQSim_2D
                 VelocityLoad.UseConstant = false;
                 VelocityLoad.ITSI = null;
             }
-            else  // don't use velocity, use discharge and manning's equation
-            {
-                TVol.Calc_Method = VolumeMethType.Manning;
+            //else  // old code that doesn't use velocity, but use discharge and manning's equation, average retention time not implemented
+            //{
+            //    TVol.Calc_Method = VolumeMethType.Manning;
 
-                // array slot [1] is "discharge" in this case (TVolume)
-                TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
+            //    // array slot [1] is "discharge" in this case (TVolume)
+            //    TLoadings DischargeLoad = TVol.LoadsRec.Alt_Loadings[1];
 
-                if (DischargeLoad.ITSI == null)
-                {
-                    TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
-                    TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
-                    input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
-                    DischargeLoad.ITSI = input;
-                }
+            //    if (DischargeLoad.ITSI == null)
+            //    {
+            //        TimeSeriesInputFactory Factory = new TimeSeriesInputFactory();
+            //        TimeSeriesInput input = (TimeSeriesInput)Factory.Initialize();
+            //        input.InputTimeSeries = new Dictionary<string, TimeSeriesOutput>();
+            //        DischargeLoad.ITSI = input;
+            //    }
 
-                DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
-                DischargeLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  //default minimum flow of 1000 cu m /d for now, multiplier is seconds/day
-                DischargeLoad.MultLdg = 1;
-                // DischargeLoad.Hourly = true;  12/14/22
-                DischargeLoad.UseConstant = false;
-                TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
-                TVol.LoadNotes2 = "Converted to m3/d using multiplier";
-                DischargeLoad.ITSI = null;
-            }
+            //    DischargeLoad.ITSI.InputTimeSeries.Add("input", (TimeSeriesOutput)ATSO.ToDefault());
+            //    DischargeLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  //default minimum flow of 1000 cu m /d for now, multiplier is seconds/day
+            //    DischargeLoad.MultLdg = 1;
+            //    // DischargeLoad.Hourly = true;  12/14/22
+            //    DischargeLoad.UseConstant = false;
+            //    TVol.LoadNotes1 = "Discharge from NWM in m3/s";                      // Add flexibility here in case of alternative data source
+            //    TVol.LoadNotes2 = "Converted to m3/d using 86400 multiplier";
+            //    DischargeLoad.ITSI = null;
+            //}
+
+            return RTSum / RTCount;  //average retention time in days
+
         }
 
 
@@ -526,7 +559,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="comid">comid</param>
         /// <returns>JSON or error message</returns>
         /// 
-        public string ReadGeoJSON(string comid)
+        public async Task<string> ReadGeoJSON(string comid)
         {
             string requestURL = webServiceURLs.hmsRest;
 
@@ -536,9 +569,18 @@ namespace AQUATOX.AQSim_2D
             try
             {
                 string rurl = requestURL + "" + component + "/" + dataset + "?streamGeometry=true&comid=" + comid;
-                var request = (HttpWebRequest)WebRequest.Create(rurl);  // replace with HttpClient constructs
-                var response = (HttpWebResponse)request.GetResponse();
-                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(rurl))
+
+                using (HttpContent content = response.Content)
+                {
+                    // Check if the response is successful
+                    if (!response.IsSuccessStatusCode)
+                        throw new HttpRequestException($"Error: {response.StatusCode}, {response.ReasonPhrase}");
+
+                    string result = await content.ReadAsStringAsync();
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -780,8 +822,12 @@ namespace AQUATOX.AQSim_2D
         /// <param name="TVol">The AQUATOX Volume object</param>
         /// <param name="ThisSeg">The full set of HAWQS daily results for this segment</param>
         /// <param name="FirstDate">The first date fo the AQUATOX simulation</param>
-        public void VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate)
+        /// <returns>The average retention time for the period being modeled in days</returns>
+        public double VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
         {
+            double RTSum = 0;
+            int RTCount = 0;
+
             TVol.Discharg = ThisSeg[FirstDate].vals[1] * 86400; // convert to m3/day
             TVol.InitialCond = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;     
 
@@ -795,11 +841,17 @@ namespace AQUATOX.AQSim_2D
             {
                 double disch = (pair.Value.vals[0] * 86400 > 0) ? pair.Value.vals[0] * 86400 : 0 ;
                 DischargLoad.list.Add(pair.Key, disch);  //flow from RCH_Daily file -- converted from cms to m3/d
+
+                double vol = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000);
+                RTSum += vol / Math.Max(disch,1);   // m3  / (m3/d)  = retention time in days
+                RTCount++;
             }
 
             TVol.LoadNotes1 = "Flows from HAWQS converted to m3/day";
             TVol.LoadNotes2 = "Manning's Equation Used to Estimate Volume";
             TVol.AQTSeg.CalcVelocity = true;
+
+            return RTSum / RTCount;  //average retention time in days
         }
 
         /// <summary>
@@ -1240,7 +1292,9 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
 
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
             DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
-            VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);  // read data for volume/flow model from HAWQS Linkage
+
+            double avgRet = VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);  // read data for volume/flow model from HAWQS Linkage and record 
+            if (is_COMID) avgRetention[int.Parse(SegID)]= avgRet;   // log avg. retention time if relevant
 
             string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  
             AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen, AllVariables.Temperature };
@@ -1392,7 +1446,8 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                 if (TSO.Data.Count == 0) return "ERROR: No data records were returned.  Your date range may be outside available NWM data.";
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol);
                 TVolume TVol = TSV as TVolume;
-                LakeFlowsFromNWM(TVol, TSO);
+
+                avgRetention.Add(WBComid, LakeFlowsFromNWM(TVol, TSO));  //read lake flows and log avg. retention time
 
                 Sim.AQTSeg.Location.Locale.ICZMean.Val = TVol.InitialCond / Sim.AQTSeg.Location.Locale.SurfArea.Val;   // Estimate mean depth from volume & surface area
                                                    //m                //m3               //m2
@@ -1447,7 +1502,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
             {
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
-                StreamFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO,true);
+                avgRetention.Add(iSeg, StreamFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO));  //read stream flows and log avg. retention time
             }
             catch (Exception ex)
             {
