@@ -136,7 +136,7 @@ namespace AQUATOX.Animals
             TOpt.Symbol = "Optimum Temperature"; TOpt.Name = "Optimum temperature for given process"; TOpt.Units = "°C";
             TMax.Symbol = "Maximum Temperature"; TMax.Name = "Maximum temperature tolerated"; TMax.Units = "°C";
             TRef.Symbol = "Min Adaptation Temp"; TRef.Name = "Adaptation temperature below which there is no acclimation"; TRef.Units = "°C";
-            EndogResp.Symbol = "Endogenous Respiration"; EndogResp.Name = "Basal respiration rate at 0° C for given predator"; EndogResp.Units = "day-1";
+            EndogResp.Symbol = "Endogenous Respiration"; EndogResp.Name = "Basal respiration rate at TOpt for given predator"; EndogResp.Units = "day-1";
             KResp.Symbol = "Specific Dynamic Action"; KResp.Name = "Proportion assimilated energy lost to SDA"; KResp.Units = "Unitless";
             KExcr.Symbol = "Excretion:Respiration"; KExcr.Name = "Proportionality constant for excretion:respiration"; KExcr.Units = "Unitless";
             N2Org.Symbol = "N to Organics"; N2Org.Name = "Fixed ratio of nitrate to organic matter for given species"; N2Org.Units = "fraction dry weight";

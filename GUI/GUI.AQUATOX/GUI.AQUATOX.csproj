@@ -16,7 +16,7 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
-		<AssemblyName>GUI.AQUATOX.noRC</AssemblyName>   
+		<AssemblyName>GUI.AQUATOX</AssemblyName>   
 	</PropertyGroup>
 	<ItemGroup>
     <Compile Remove="Studies\APS\**" />

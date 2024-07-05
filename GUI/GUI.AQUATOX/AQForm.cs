@@ -18,7 +18,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Threading;
-using System.Drawing.Text;
 
 //TODO Fix issue of multiple url_info.txt on build overwriting each other.  Currently ignored in csproj using <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> 
 
@@ -1262,7 +1261,8 @@ namespace GUI.AQUATOX
         private double SimError(AQTSim Sim)
         {
             // bool WINTERSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1999, 1, 1, 0, 0, 0)) == 0);  // winterstart triggered based on 1/1/1999 start date
-            bool VALSTART = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1984, 4, 1, 0, 0, 0)) == 0);  // ValStart triggered based on 4/1/1984 start date
+            bool START1984 = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1984, 4, 1, 0, 0, 0)) == 0);  // START1984 triggered based on 4/1/1984 start date
+            bool START1985 = (DateTime.Compare(Sim.AQTSeg.PSetup.FirstDay.Val, new DateTime(1985, 4, 1, 0, 0, 0)) == 0);  // START1985 triggered based on 4/1/1985 start date
 
             int[] Indices = new int[6] { 3, 22, 42, 63, 83, 103 };
 
@@ -1279,7 +1279,7 @@ namespace GUI.AQUATOX
                                                     {0.00000,0.00734,0.00171,0.23017},
                                                     {0.00067,0.04935,0.00142,0.16644}};
 
-            double[,] ValBioEst = new double[8, 4] {{0.03295,0.03367,0.00041,0.00890},  //9-14-23 added 1984 data based on Cal_and_Validation_Data_cal_cell_weight_8-28-23.xlsx
+            double[,] BioEst1984 = new double[8, 4] {{0.03295,0.03367,0.00041,0.00890},  //9-14-23 added 1984 data based on Cal_and_Validation_Data_cal_cell_weight_8-28-23.xlsx
                                                     {0.03160,0.02543,0.00000,0.00495},
                                                     {0.00857,0.01562,0.00051,0.00357},
                                                     {0.00172,0.02852,0.00137,0.00000},
@@ -1288,14 +1288,32 @@ namespace GUI.AQUATOX
                                                     {0.00080,0.07334,0.03363,0.00000},
                                                     {0.00031,0.04650,0.02249,0.01147}};
 
-            double[] ValChlaEst = new double[8] { 1.49000, 0.58500, 0.28000, 0.62667, 1.84000, 3.05333, 1.81667, 0.72000 };
-            int[] ValIndices = new int[8] { 13, 27, 33, 55, 76, 91, 105, 133 };
+            double[] ChlaEst1984 = new double[8] { 1.49000, 0.58500, 0.28000, 0.62667, 1.84000, 3.05333, 1.81667, 0.72000 };
+            int[] Indices1984 = new int[8] { 13, 27, 33, 55, 76, 91, 105, 133 };
+
+            double[,] BioEst1985 = new double[9, 4] {{0.01881,0.01350,0.00053,0.02077}, // 12/11/23 added 1985 data based on Cal_and_Validation_12-06-23_C0_33.53.xlsx
+                                                     {0.05719,0.03241,0.00061,0.00000},
+                                                     {0.07321,0.02567,0.00144,0.00000},
+                                                     {0.09464,0.02017,0.00141,0.00514},
+                                                     {0.03294,0.01099,0.00050,0.00000},
+                                                     {0.00606,0.00261,0.00013,0.00000},
+                                                     {0.00163,0.12586,0.00008,0.00541},
+                                                     {0.00653,0.15945,0.01225,0.00830},
+                                                     {0.00395,0.04414,0.00212,0.00000}};
+
+            double[] ChlaEst1985 = new double[9] { 1.34000, 1.72667, 1.48000, 1.28667, 1.34333, 1.26333, 2.91333, 7.42000, 1.35333 };
+            int[] Indices1985 = new int[9] { 3, 19, 27, 40, 53, 69, 81, 95, 109 };
 
             int[] BioIndices = new int[7] { 3, 22, 29, 42, 63, 83, 103 };    // annual 
 
             int[] ChlaInd = new int[15] { 8, 14, 22, 28, 36, 43, 51, 58, 64, 71, 78, 87, 104, 110, 121 };
             double[] ObsChla = new double[15] { 0.430, 0.655, 0.7786, 1.393, 0.512, 0.799, 0.328, 0.348, 0.471, 0.615, 1.885, 4.467, 2.6024, 2.4795, 2.623 };
             double[] ModelChla = new double[15];
+
+            double[] obszooplank = new double[7] { 0.00109, 0.08634, 0.07650, 0.06230, 0.04481, 0.07322, 0.00109 };
+            int[] zooindices = new int[7] { 76, 101, 112, 125, 152, 165, 175 };
+
+
             double Bioerror;
 
             {
@@ -1311,9 +1329,13 @@ namespace GUI.AQUATOX
                 {
                     BioIndices[i] += 61;
                 }
-                for (int i = 0; i < ValIndices.Length; i++)
+                for (int i = 0; i < Indices1984.Length; i++)
                 {
-                    ValIndices[i] += 61;
+                    Indices1984[i] += 61;
+                }
+                for (int i = 0; i < Indices1985.Length; i++)
+                {
+                    Indices1985[i] += 61;
                 }
 
             }
@@ -1338,15 +1360,28 @@ namespace GUI.AQUATOX
             //        PctPhyto[p - 12, i] = 100 * (phyto[p - 12] / ModelSumPhyto[i]);198
             //}
 
-            if (VALSTART)
+            if (START1984)
             {
                 Bioerror = 0;
                 for (int i = 0; i < 8; i++)
                 {
                     for (int p = 12; p < 16; p++)
                     {
-                        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ValIndices[i] - 1)[0]);
-                        double ObsBio = ValBioEst[i, p - 12];
+                        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices1984[i] - 1)[0]);
+                        double ObsBio = BioEst1984[i, p - 12];
+                        Bioerror += 50 * Math.Abs(ModelBio - ObsBio);
+                    }
+                }
+            }
+            else if (START1985)
+            {
+                Bioerror = 0;
+                for (int i = 0; i < 9; i++)
+                {
+                    for (int p = 12; p < 16; p++)
+                    {
+                        double ModelBio = Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices1985[i] - 1)[0]);
+                        double ObsBio = BioEst1985[i, p - 12];
                         Bioerror += 50 * Math.Abs(ModelBio - ObsBio);
                     }
                 }
@@ -1366,8 +1401,9 @@ namespace GUI.AQUATOX
             };
 
             double chlaMAE25 = 0;
+            double zooMAE = 0;
 
-            if (VALSTART)
+            if (START1984)
             {
                 for (int i = 0; i < 8; i++)
                 {
@@ -1378,9 +1414,25 @@ namespace GUI.AQUATOX
                         double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
 
                         ModelChla[i] +=
-                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(ValIndices[i] - 1)[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
+                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices1984[i] - 1)[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
                     }
-                    chlaMAE25 += Math.Abs(ModelChla[i] - ValChlaEst[i]);
+                    chlaMAE25 += Math.Abs(ModelChla[i] - ChlaEst1984[i]);
+                }
+            }
+            else if (START1985)
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    ModelChla[i] = 0;
+                    for (int p = 12; p < 16; p++)
+                    {
+                        TPlant TP = Sim.AQTSeg.SV[p] as TPlant;
+                        double Plant_to_ChlA = TP.PAlgalRec.Plant_to_Chla.Val;
+
+                        ModelChla[i] +=
+                            Convert.ToDouble(Sim.AQTSeg.SV[p].SVoutput.Data.Values.ElementAt(Indices1985[i] - 1)[0]) * (0.526 / Plant_to_ChlA) * 1000.0;
+                    }
+                    chlaMAE25 += Math.Abs(ModelChla[i] - ChlaEst1985[i]);
                 }
             }
             else
@@ -1399,6 +1451,15 @@ namespace GUI.AQUATOX
                     chlaMAE25 += Math.Abs(ModelChla[i] - ObsChla[i]);
                     // chlaFE15 += Math.Max(ModelChla[i], ObsChla[i]) / Math.Min(ModelChla[i], ObsChla[i]);
                 }
+
+                for (int i = 0; i < 7; i++)
+                {
+                    // zooplankton addition 12/15/2023
+                    double ModelZoo = Convert.ToDouble(Sim.AQTSeg.SV[17].SVoutput.Data.Values.ElementAt(zooindices[i])[0]);
+                    zooMAE += Math.Abs(ModelZoo - obszooplank[i]);
+                }
+
+                zooMAE = zooMAE * 30;
             }
 
             //if (WINTERSTART)
@@ -1437,7 +1498,7 @@ namespace GUI.AQUATOX
             //phytoMAE = phytoMAE / 24.0;
 
             //return chlaMAE25 + phytoMAE;
-            return chlaMAE25 + Bioerror;   //Avg chl-a * 50 + sum Bio error * 50
+            return chlaMAE25 + Bioerror + zooMAE;   //Avg chl-a * 50 + sum Bio error * 50
         }
 
         public static class ThreadLocalRandom
@@ -1487,7 +1548,7 @@ namespace GUI.AQUATOX
 
 
         const int NDTypes = 11;   // CHANGEDIST //12/6 rotifer is index 10 
-        const int NDists = NDTypes * 4;   
+        const int NDists = NDTypes * 4;
         double[] BestParms = new double[NDists];
         int[] DTypes = new int[NDists];
         int[] SVIndices = new int[NDists];
@@ -1514,18 +1575,24 @@ namespace GUI.AQUATOX
                 LocalAQTS.AQTSeg.SetupLinks();
                 CopyParmToSim(LocalAQTS.AQTSeg, NewParms);
 
-                LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;   //12/6  Start with low Chryso always for no_CR version   //9/28/2023, normal chrysophytes in 1999 
+                LocalAQTS.AQTSeg.SV[15].InitialCond = 0.016;   //9/28/2023, normal chrysophytes in 1999 
                 LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
                 LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
                 LocalAQTS.Integrate(); // 1999 simulation
                 double New_Error = SimError(LocalAQTS);
 
-                LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run first year of validation period
+                LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1984, 4, 1);  // run 1984
                 LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1984, 10, 12);
                 LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;  //9/28/2023, start with low chrysophytes in 1984 
-
                 LocalAQTS.Integrate(); // 1984 simulation
-                return (New_Error + SimError(LocalAQTS)) / 2;
+                New_Error = (New_Error + SimError(LocalAQTS));
+
+                //LocalAQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1985, 4, 1);  // run 1985
+                //LocalAQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1985, 10, 12);
+                //LocalAQTS.AQTSeg.SV[15].InitialCond = 0.0016;  //9/28/2023, start with low chrysophytes in 1985 
+                //LocalAQTS.Integrate(); // 1985 simulation
+
+                return (New_Error / 2);  //exclude 1985    // + SimError(LocalAQTS)) / 3;  // average of 3 years errors
             }
 
 
@@ -1569,7 +1636,7 @@ namespace GUI.AQUATOX
             DMins[10, 0] = 1; DMaxs[10, 0] = 4; //DType 10 = CMAX Rotifer
             DMins[10, 1] = 0.01; DMaxs[10, 1] = 0.1; //DType 10 = Min Prey Rotifer
             DMins[10, 2] = 0.005; DMaxs[10, 2] = 0.1; //DType 10 = Mort Coeff Rotifer
-            DMins[10, 3] = 0.0001; DMaxs[10, 3] = 0.002; //DType 10 = Const Inflow Loading Rotifer
+            DMins[10, 3] = 0.0001; DMaxs[10, 3] = 0.08; //DType 10 = Const Inflow Loading Rotifer
 
             for (int i = 0; i < 4; i++)
             {
@@ -1614,6 +1681,7 @@ namespace GUI.AQUATOX
                 CopySimToParm(aQTS.AQTSeg, OldParms);
                 Old_Error = RunOneIteration(OldParms);
                 Min_Error = Old_Error;
+                OldParms.CopyTo(BestParms, 0);
                 Min_Error_Logged = Old_Error;
             }
 
@@ -1630,6 +1698,8 @@ namespace GUI.AQUATOX
                 int lastprog = 0;
                 int runs = 0;
 
+                // for (int dr = 0; dr <= NUMDRAWS; dr++)  single-CPU testing only
+
                 Parallel.For(0, NUMDRAWS, (dr, state) =>
                 {
                     double[] NewParms = new double[NDists];
@@ -1637,8 +1707,9 @@ namespace GUI.AQUATOX
                     OldParms.CopyTo(NewParms, 0);
                     int OldParmIndex = LastAccept;  // interation basis for this test
 
-                    int index = ThreadLocalRandom.Instance.Next(0, NDists - 1);
-                    NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);
+                    int index = ThreadLocalRandom.Instance.Next(0, NDists);  //12-20 jsc fixed, was NDists-1 
+                    index = NDists - 1;
+                    NewParms[index] = RandUniform(DMins[DTypes[index], SVIndices[index] - 12], DMaxs[DTypes[index], SVIndices[index] - 12]);  //12 converts 12-15 to 0-4 for array index
 
                     double New_Error = RunOneIteration(NewParms);
 
@@ -1651,9 +1722,9 @@ namespace GUI.AQUATOX
                     if ((OldParmIndex != LastAccept) && (AcceptThis))
                         uselessruns++;  // acceptable run, but last run was accepted so throw it out 
 
-                    totruns++; //total runs
-                    runs++; //runs in this loop
-                    Truns++; //runs at this temperature this loop
+                    totruns++; // total runs
+                    runs++;   // runs in this loop
+                    Truns++; // runs at this temperature this loop
 
                     int progint = Math.Max((int)(((double)runs / (double)NUMDRAWS) * 100.0), 1);
                     if (progint > lastprog)
@@ -1682,7 +1753,7 @@ namespace GUI.AQUATOX
                             lock (BestParms) { NewParms.CopyTo(BestParms, 0); }
                         }
                     }
-                }); //parallel.For
+                }); //parallel.For  
 
                 if (Min_Error < Min_Error_Logged)
                     using (StreamWriter sw = File.AppendText(logfile))
@@ -1737,7 +1808,8 @@ namespace GUI.AQUATOX
                             break;
                     }
                 }
-                else {  //rotifer code
+                else
+                {  //rotifer code
                     TAnimal TRot = ASeg.SV[17] as TAnimal;
                     switch (SVIndices[d])
                     {
@@ -1777,11 +1849,12 @@ namespace GUI.AQUATOX
                         case 9: Parms[d] = TP.PAlgalRec.TMax.Val; break;
                     }
                 }
-                else {  //rotifer code
+                else
+                {  //rotifer code
                     TAnimal TRot = ASeg.SV[17] as TAnimal;
                     switch (SVIndices[d])
                     {
-                        case 12: Parms[d] =TRot.PAnimalData.CMax.Val; break;
+                        case 12: Parms[d] = TRot.PAnimalData.CMax.Val; break;
                         case 13: Parms[d] = TRot.PAnimalData.BMin.Val; break;
                         case 14: Parms[d] = TRot.PAnimalData.KMort.Val; break;
                         case 15: Parms[d] = TRot.LoadsRec.Loadings.ConstLoad; break;
@@ -2005,7 +2078,7 @@ namespace GUI.AQUATOX
                 modelRunningLabel.Text = "Model is Running";
                 aQTS.AQTSeg.ProgWorker = null;
 
-                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;   // 12/6  Start with low Chryso always for no_CR version  
+                aQTS.AQTSeg.SV[15].InitialCond = 0.016;   // Normal Chryso Init
                 aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // run calibration period
                 aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 9, 30);
                 aQTS.AQTSeg.RunID = "1999: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
@@ -2019,7 +2092,7 @@ namespace GUI.AQUATOX
                 aQTS.AQTSeg.RunID = "1984: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                 aQTS.Integrate(); // 1984 simulation
                 aQTS.ArchiveSimulation();
-                New_Error = (New_Error + SimError(aQTS)) / 2;
+                New_Error = (New_Error + SimError(aQTS)) / 2;  // exclude 1985
 
                 aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1985, 4, 1);  // run 1985
                 aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1985, 10, 12);
@@ -2027,11 +2100,11 @@ namespace GUI.AQUATOX
                 aQTS.AQTSeg.RunID = "1985: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                 aQTS.Integrate(); // 1985 simulation
                 aQTS.ArchiveSimulation();
-
+                // New_Error = (New_Error + SimError(aQTS))/3;  // average of 3 years errors, e.g. include 1985
 
                 aQTS.AQTSeg.PSetup.FirstDay.Val = new DateTime(1999, 4, 1);  // bioassay period
                 aQTS.AQTSeg.PSetup.LastDay.Val = new DateTime(1999, 7, 05);
-                aQTS.AQTSeg.SV[15].InitialCond = 0.0016;   // 12/6  Start with low Chryso always for no_CR version  
+                aQTS.AQTSeg.SV[15].InitialCond = 0.016;   // 12/6  Start with normal chryso for bioassay
                 aQTS.AQTSeg.RunID = "Bioassay Baseline: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
                 aQTS.Integrate();
                 aQTS.ArchiveSimulation();

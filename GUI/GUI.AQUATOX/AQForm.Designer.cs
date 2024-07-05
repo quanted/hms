@@ -525,6 +525,7 @@ namespace GUI.AQUATOX
             estdbbutton.TabIndex = 40;
             estdbbutton.Text = "est db";
             estdbbutton.UseVisualStyleBackColor = true;
+            estdbbutton.Visible = false;
             estdbbutton.Click += estdbbutton_Click;
             // 
             // AnnealPanel

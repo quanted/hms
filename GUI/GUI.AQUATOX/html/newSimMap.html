@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <title>Leaflet-WebView2 test</title>
@@ -23,430 +24,617 @@
     <script src="https://unpkg.com/esri-leaflet-geocoder@3.1.3/dist/esri-leaflet-geocoder.js"
             integrity="sha512-mwRt9Y/qhSlNH3VWCNNHrCwquLLU+dTbmMxVud/GcnbXfOKJ35sznUmt3yM39cMlHR2sHbV9ymIpIMDpKg4kKw=="
             crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"
+            integrity="sha512-Abr21JO2YqcJ03XGZRPuZSWKBhJpUAR6+2wH5zBeO4wAw4oksr8PRdF+BKIRsxvCdq+Mv4670rZ+dLnIyabbGw=="
+            crossorigin="anonymous" "></script>
+
+    <script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+    <!-- geojson vt  -->
+    <script src="JS/geojson-vt.js"></script>
+    <script src="JS/leaflet-geojson-vt.js"></script>
+    <script src='LPIP.js'></script>
 
 </head>
 
-    <body>
-        <div id="map_container">
-            <div id="map"></div>
-        </div>
+<body>
+    <div id="map_container">
+        <div id="map"></div>
+    </div>
 
-        <script>
-            var allShapes = null;
-            var geoLayer;
-            var lastFlLayer = null;
-            var lastFl2Layer = null;
-            var lastWBLayer = null;
-            var redlayers = [];
-            var redCOMIDs = [];
-            var lakemode = true;
-            var oldzoom = 6;
-            var AwaitSearch = false;
-            ZoomThresh = 9;
+    <script>
+        var allShapes = null;
+        var geoLayer;
+        var lastFlLayer = null;
+        var lastFl2Layer = null;
+        var lastWBLayer = null;
+        var redlayers = [];
+        var redCOMIDs = [];
+        var lakemode = true;
+        var oldzoom = 6;
+        var AwaitSearch = false;
+        var H14Showing = false;
+        ZoomThresh = 9;
+        LakeZoomThresh = 6;
+        H14ZoomThresh = 9;
 
 
-            // catchments
-            const URL_NWS_WB =
-                "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer/0";
-            const URL_NP21_CATCHMENTS =
-                "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/Catchments_NP21_Simplified/MapServer/0";
-            // WBD - HUC_8
-            const URL_NP21_HUC8 =
-                "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/WBD_NP21_Simplified/MapServer/2";
-            // flowlines
-            const URL_NP21_FLOWLINES =
-                "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/0";
+        // catchments
+        const URL_NWS_WB =
+            "https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer/0";
+        const URL_NP21_CATCHMENTS =
+            "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/Catchments_NP21_Simplified/MapServer/0";
+        // WBD - HUC_8
+        const URL_NP21_HUCs =
+            "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/WBD_NP21_Simplified/MapServer/";
+        // flowlines
+        const URL_NP21_FLOWLINES =
+            "https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer/0";
 
-            var arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
+        var arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
 
-            // build base map layer
-            var MAP = L.map("map").fitBounds([ 
-                [49.5, -125.02],
-                [23.73, -69.05]
-            ]);
+        // build base map layer
+        var MAP = L.map("map").fitBounds([
+            [49.5, -125.02],
+            [23.73, -69.05]
+        ]);
 
-            var markers = L.layerGroup();
+        var markers = L.layerGroup();
 
-            const CenterBox = L.Control.extend({
-                options: {
-                    position: 'bottomright'
-                },
-                onAdd: function (MAP) {
-                    return L.DomUtil.create('div', 'center-box');
-                },
-                setContent: function (content) {
-                    this.getContainer().innerHTML = 'Map Center: ' + content;
-                }
-            });
-
-            var centerBox = new CenterBox().addTo(MAP); 
-
-            var geosearch = null;
-            StreamSearch();
-
-            function LakeSearch() {
-                lakemode = true;
-                if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
-                if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
-                ResetRedLayers();
-
-                if (geosearch != null) geosearch.remove();
-                geosearch = null;
-                geosearch = L.esri.Geocoding.geosearch({
-                    placeholder: 'Lake/Res Name or WBCOMID',
-                    providers: [
-                        arcgisOnline,
-                        L.esri.Geocoding.mapServiceProvider({
-                            label: 'Waterbodies and WBCOMIDs',
-                            url: 'https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer',
-                            layers: [0],
-                            formatSuggestion: function (feature) {
-                                return feature.properties.GNIS_NAME + ' - ' + feature.properties.feature_id; // format suggestions like this.
-                            },
-                            searchFields: ['GNIS_NAME', 'feature_id'],
-                        })
-                    ]
-                }).addTo(MAP);
+        const CenterBox = L.Control.extend({
+            options: {
+                position: 'bottomright'
+            },
+            onAdd: function (MAP) {
+                return L.DomUtil.create('div', 'center-box');
+            },
+            setContent: function (content) {
+                this.getContainer().innerHTML = 'Map Center: ' + content;
             }
+        });
 
-            function StreamSearch() {
-                lakemode = false;
-                if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
-                if (geosearch != null) geosearch.remove();
-                geosearch = null;
-                geosearch = L.esri.Geocoding.geosearch({
-                    placeholder: 'Flowline COMID',
-                    providers: [
-                        arcgisOnline,
-                        L.esri.Geocoding.mapServiceProvider({
-                            label: 'River Name and COMID',
-                            url: 'https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer',
-                            layers: [0],
-                            formatSuggestion: function (feature) {
-                                return feature.properties.GNIS_NAME + ' - ' + feature.properties.COMID;  // format suggestions like this.
-                            },
-                            searchFields: ['COMID'],
-                        })
-                    ]
-                }).addTo(MAP);
-            }
+        var centerBox = new CenterBox().addTo(MAP);
 
+        var geosearch = null;
+        StreamSearch();
 
-            function LatLngToArrayString(ll) {
-                return "[" + ll.lat.toFixed(5) + ", " + ll.lng.toFixed(5) + "]";
-            }
+        function LakeSearch() {
+            lakemode = true;
+            if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
+            if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
+            ResetRedLayers();
 
-            MAP.on("layeradd", function (event) {
-                if (geoLayer != null) { geoLayer.bringToFront(); }
-            });
-
-            MAP.on('moveend', function () {
-                centerBox.setContent(LatLngToArrayString(MAP.getCenter()));
-
-            });
-
-
-            MAP.on('zoomend', function () {
-                newzoom = MAP.getZoom();
-                if (newzoom <= ZoomThresh) {
-                    if (oldzoom > ZoomThresh) {
-                        if (!lakemode) MAP.removeLayer(FLOWLINES_LAYER);
-                    }
-                }
-
-                if (newzoom > ZoomThresh) {
-                    if (oldzoom <= ZoomThresh) {
-                        if (!lakemode) MAP.addLayer(FLOWLINES_LAYER);
-                    }
-                }
-
-                oldzoom = newzoom;
-            });
-
-            const LIGHT_GRAY = L.tileLayer("https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-                attribution:
-                    'Sources: Esri, HERE, Garmin, (c) OpenStreetMap contributors, and the GIS user community',
+            if (geosearch != null) geosearch.remove();
+            geosearch = null;
+            geosearch = L.esri.Geocoding.geosearch({
+                placeholder: 'Lake/Res Name or WBCOMID',
+                providers: [
+                    arcgisOnline,
+                    L.esri.Geocoding.mapServiceProvider({
+                        label: 'Waterbodies and WBCOMIDs',
+                        url: 'https://mapservices.weather.noaa.gov/static/rest/services/nws_reference_maps/NWM_Lakes_and_Reservoirs/MapServer',
+                        layers: [0],
+                        formatSuggestion: function (feature) {
+                            return feature.properties.GNIS_NAME + ' - ' + feature.properties.feature_id; // format suggestions like this.
+                        },
+                        searchFields: ['GNIS_NAME', 'feature_id'],
+                    })
+                ]
             }).addTo(MAP);
+        }
 
-            const NAT_GEO = L.tileLayer(
-                "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
-                {
-                    attribution:
-                        "Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC",
+        var H14Maps = [];
+        var H14Codes = [];
+        var H14GeoJson = [];
+
+
+        MAP.on('moveend', function () {
+            if (H14Showing) ShowHUC14Maps();
+        });
+
+        function ShowHUC14Maps() {
+            if (!H14Showing) return;
+
+            var MB = MAP.getBounds();
+            var E_Code = LonCode(MB.getEast());
+            var W_Code = LonCode(MB.getWest());
+            var S_Code = LatCode(MB.getSouth());
+            var N_Code = LatCode(MB.getNorth());
+
+            var Codes = [];
+            Codes.push(E_Code + N_Code);
+            Codes.push(E_Code + S_Code);
+            Codes.push(W_Code + N_Code);
+            Codes.push(W_Code + S_Code);
+
+            Codes.forEach((code) => {
+                if (!H14Codes.includes(code)) {
+                    sendMessageToDotnet('H14' + code);   
+                    H14Codes.push(code);
                 }
-            );
+            })
 
-            const SATELLITE = L.tileLayer(
-                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                {
-                    attribution:
-                        "Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+            for (let i = 0; i < H14Codes.length; ++i) {
+                if (!Codes.includes(H14Codes[i])) {
+                    delete H14Codes[i];
+                    if (H14Maps[i] != null) MAP.removeLayer(H14Maps[i]);
+                    delete H14Maps[i];
+                    delete H14GeoJson[i];
                 }
+            }
+        }
+
+
+        function LonCode(lon) {
+            var lonch;
+
+            if (lon > -83.48) { lonch = "1" }
+            else if (lon > -91.72) { lonch = "2" }
+            else if (lon > -99.96) { lonch = "3" }
+            else if (lon > -108.20) { lonch = "4" }
+            else if (lon > -116.44) { lonch = "5" }
+            else { lonch = "6" };
+
+            return lonch; 
+        }
+
+
+        function LatCode(lat) {
+            var latch;
+            if (lat < 36.0) { latch = "0" }
+            else if (lat < 41.5) { latch = "1" }
+            else { latch = "2" }; 
+
+            return latch;
+        }
+
+
+        function StreamSearch() {
+            lakemode = false;
+            if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
+            if (geosearch != null) geosearch.remove();
+            geosearch = null;
+            geosearch = L.esri.Geocoding.geosearch({
+                placeholder: 'Flowline COMID',
+                providers: [
+                    arcgisOnline,
+                    L.esri.Geocoding.mapServiceProvider({
+                        label: 'River Name and COMID',
+                        url: 'https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer',
+                        layers: [0],
+                        formatSuggestion: function (feature) {
+                            return feature.properties.GNIS_NAME + ' - ' + feature.properties.COMID;  // format suggestions like this.
+                        },
+                        searchFields: ['COMID'],
+                    })
+                ]
+            }).addTo(MAP);
+        }
+
+
+        function LatLngToArrayString(ll) {
+            return "[" + ll.lat.toFixed(5) + ", " + ll.lng.toFixed(5) + "]";
+        }
+
+        MAP.on("layeradd", function (event) {
+            if (geoLayer != null) { geoLayer.bringToFront(); }
+        });
+
+        MAP.on('moveend', function () {
+            centerBox.setContent(LatLngToArrayString(MAP.getCenter()));
+
+        });
+
+        //start geojson-vt map tiles
+        //interaction on the underlying polygon not drawn but represented by the tiles - they draw better
+        var highlight;
+        var allShapes;
+
+        MAP.on('click', function (e) {
+            if (highlight) {
+                MAP.removeLayer(highlight)
+            }
+            var x = e.latlng.lng;
+            var y = e.latlng.lat;
+
+            H14GeoJson.forEach((geojsonlayer) => {
+                if (geojsonlayer) {
+                    var layerData = pointInLayer([x, y], geojsonlayer, true);
+                    if (!layerData[0]) {
+                        console.log('nothing to see here')
+                    } else {
+                        var highlightIndex = layerData[0].feature.properties.HUC14;
+                        highlight = new L.geoJson(allShapes, {
+                            filter: function (feature, layer) {
+                                return feature.properties.HUC14 == highlightIndex
+                            },
+                            style: { color: 'deepskyblue', fillColor: 'deepskyblue' }
+                        }).addTo(MAP);
+
+                        var attributes = highlightIndex.split('-', 2);
+                        var name = attributes[0];
+                        var popup = 'HUC14 ID: ' + name;
+                        MAP.on('popupopen', function () {
+                        });
+                        MAP.openPopup(popup, e.latlng);
+                        MAP.on('popupclose', function () {
+                            MAP.removeLayer(highlight)
+                        });
+                        return;
+                    }
+                }
+            });
+        });
+
+        MAP.on('zoomend', function () {
+            newzoom = MAP.getZoom();
+            if (newzoom <= ZoomThresh) {
+                if (oldzoom > ZoomThresh) {
+                    MAP.removeLayer(FLOWLINES_LAYER);
+                }
+            }
+
+            if (newzoom <= LakeZoomThresh) {
+                if (oldzoom > LakeZoomThresh) MAP.removeLayer(WB_LAYER);
+            }
+
+            if (newzoom > LakeZoomThresh) {
+                if (oldzoom <= LakeZoomThresh) MAP.addLayer(WB_LAYER);
+            }
+
+            if (newzoom < H14ZoomThresh) H14Showing = false;
+            if (newzoom >= H14ZoomThresh) {
+                H14Showing = true;  //fixme context dependent
+                if (oldzoom <= H14ZoomThresh) {                    
+                    ShowHUC14Maps();
+                }
+            }
+
+            oldzoom = newzoom;
+        });
+
+        const LIGHT_GRAY = L.tileLayer("https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+            attribution:
+                'Sources: Esri, HERE, Garmin, (c) OpenStreetMap contributors, and the GIS user community',
+        }).addTo(MAP);
+
+        const NAT_GEO = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
+            {
+                attribution:
+                    "Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC",
+            }
+        );
+
+        const SATELLITE = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            {
+                attribution:
+                    "Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+            }
+        );
+
+        const Base_Maps = {
+            "Black and White": LIGHT_GRAY,
+            "ESRI Natl. Geo.": NAT_GEO,
+            "ESRI Imagery": SATELLITE,
+        };
+
+        const WB_LAYER = L.esri
+            .featureLayer({
+                url: URL_NWS_WB,
+                onEachFeature: WBonEachFeature
+            }
             );
 
-            const Base_Maps = {
-                "Black and White": LIGHT_GRAY,
-                "ESRI Natl. Geo.": NAT_GEO,
-                "ESRI Imagery": SATELLITE,
-            };
-//            const BASE_OPTIONS = L.control.layers()
-                //((null, Base_Maps);
-            //BASE_OPTIONS.addTo(MAP);
-
-            const WB_LAYER = L.esri
-                .featureLayer({
-                    url: URL_NWS_WB,
-                    onEachFeature: WBonEachFeature }
-            );
-
-            function WBonEachFeature(feature, layer) {
-                if (layer.feature.properties.GNIS_NAME != null) {
-                    var str = layer.feature.properties.GNIS_NAME.toString();
-                    if (str != ' ') { layer.bindTooltip(str, { opacity: 1.0 }) }
-                    else {
-                        str = layer.feature.properties.feature_id.toString();
-                        layer.bindTooltip(str, { opacity: 1.0 });
-                    };
-                };
-
-                layer.on('click', function (e) {
-                    if ((lakemode) && (layer.feature.properties.feature_id != null)) {
-                        var str = "LAKE|" + layer.feature.properties.feature_id.toString() + "|";
-                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
-                        str = str + "|";
-                        if (layer.feature.properties.Shape_Area != null) str = str + layer.feature.properties.Shape_Area.toString() + "|";
-                        if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
-                        layer.setStyle({ color: "red", weight: 2 });
-                        lastWBLayer = layer;
-                        MAP.fitBounds(layer.getBounds());
-                        sendMessageToDotnet(str);
-                        str = layer.feature.properties.feature_id.toString() + "|" + JSON.stringify(layer.toGeoJSON());   
-                        sendMessageToDotnet(str);
-                    };
-                });
-            };
-
-            function FLonEachFeature(feature, layer) {
-                if ((feature.properties.FCODE == 56600) || (feature.properties.FLOWDIR == 0 )) {
-                    layer.setStyle({ opacity: 0.0 });
-                    return;
-                };
-
-                layer.options.style.color = 'blue';
-                layer.options.style.weight = 1;
-                layer.setStyle({ opacity: 1.0 });
-                if (redCOMIDs.length > 0)
-                    redCOMIDs.forEach(redCOMID => {
-                        if (feature.properties.COMID == redCOMID) {
-                            layer.options.style.weight = 2;
-                            layer.options.style.color = 'red';
-                        }
-                    });
-                    
-                if (feature.properties.COMID != null) {
-                    var str = '';
-                    if (feature.properties.GNIS_NAME != null)  str = ", " + feature.properties.GNIS_NAME.toString(); 
-                    if (str == ' ')  str = ''; 
-                    str = feature.properties.COMID.toString()+str;
+        function WBonEachFeature(feature, layer) {
+            if (layer.feature.properties.GNIS_NAME != null) {
+                var str = layer.feature.properties.GNIS_NAME.toString();
+                if (str != ' ') { layer.bindTooltip(str, { opacity: 1.0 }) }
+                else {
+                    str = layer.feature.properties.feature_id.toString();
                     layer.bindTooltip(str, { opacity: 1.0 });
                 };
-
-                layer.on('click', function (e) {
-                    if ((!lakemode)&&(feature.properties.COMID != null)) {
-                        if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
-                        layer.setStyle({ color: "Orange", weight: 2 });
-                        lastFlLayer = layer;
-                        var str = "FL|" + feature.properties.COMID.toString() + "|";
-                        if (feature.properties.GNIS_NAME != null) str = str + feature.properties.GNIS_NAME.toString();
-                        sendMessageToDotnet(str);
-                    };
-                });
-
-                layer.on('contextmenu', function (e) {
-                    if ((!lakemode) &&(layer.feature.properties.COMID != null)) {
-                        if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
-                        layer.setStyle({ color: "Green", weight: 2 });
-                        lastFl2Layer = layer;
-                        var str = "FL2|" + layer.feature.properties.COMID.toString() + "|";
-                        if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
-                        sendMessageToDotnet(str);
-                    };
-                });
             };
 
-            
-            // build map layers
-//            const CATCHMENTS_LAYER = L.esri
-//                .featureLayer({
-//                    url: URL_NP21_CATCHMENTS,
-//                });
-//            CATCHMENTS_LAYER.setStyle({
-//                color: "orange",
-//                fillOpacity: 0,
-//                weight: 1,
-//            });
-
-            const BOUNDARIES_LAYER = L.esri
-                .featureLayer({
-                    url: URL_NP21_HUC8,
-                });
-            BOUNDARIES_LAYER.setStyle({
-                color: "red",
-                fillOpacity: 0,
-                weight: 1,
+            layer.on('click', function (e) {
+                if ((lakemode) && (layer.feature.properties.feature_id != null)) {
+                    var str = "LAKE|" + layer.feature.properties.feature_id.toString() + "|";
+                    if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                    str = str + "|";
+                    if (layer.feature.properties.Shape_Area != null) str = str + layer.feature.properties.Shape_Area.toString() + "|";
+                    if (lastWBLayer != null) { lastWBLayer.setStyle({ color: "blue" }); };
+                    layer.setStyle({ color: "red", weight: 2 });
+                    lastWBLayer = layer;
+                    MAP.fitBounds(layer.getBounds());
+                    sendMessageToDotnet(str);
+                    str = layer.feature.properties.feature_id.toString() + "|" + JSON.stringify(layer.toGeoJSON());
+                    sendMessageToDotnet(str);
+                };
             });
-            
-            const FLOWLINES_LAYER = L.esri
-                .featureLayer({
-                    url: URL_NP21_FLOWLINES,
-                    onEachFeature: FLonEachFeature
-                });
-            FLOWLINES_LAYER.setStyle({
-                color: "blue",
-                fillOpacity: 0,
-                weight: 1,
-            });
+        };
 
-            const OVERLAY_MAPS = {
-                "HUC8 Boundaries": BOUNDARIES_LAYER,
-//                Catchments: CATCHMENTS_LAYER,
-                "Flow Lines": FLOWLINES_LAYER,
-                "NWS Lake/Res": WB_LAYER,
+        function FLonEachFeature(feature, layer) {
+            if ((feature.properties.FCODE == 56600) || (feature.properties.FLOWDIR == 0)) {
+                layer.setStyle({ opacity: 0.0 });
+                return;
             };
 
-            WB_LAYER.addTo(MAP);  
+            layer.options.style.color = 'blue';
+            layer.options.style.weight = 1;
+            layer.setStyle({ opacity: 1.0 });
+            if (redCOMIDs.length > 0)
+                redCOMIDs.forEach(redCOMID => {
+                    if (feature.properties.COMID == redCOMID) {
+                        layer.options.style.weight = 2;
+                        layer.options.style.color = 'red';
+                    }
+                });
 
-            const LAYER_OPTIONS = L.control.layers(Base_Maps, OVERLAY_MAPS);
-            LAYER_OPTIONS.addTo(MAP);
+            if (feature.properties.COMID != null) {
+                var str = '';
+                if (feature.properties.GNIS_NAME != null) str = ", " + feature.properties.GNIS_NAME.toString();
+                if (str == ' ') str = '';
+                str = feature.properties.COMID.toString() + str;
+                layer.bindTooltip(str, { opacity: 1.0 });
+            };
 
-            // app interaction
-            function handleMapClick(e) {
-                
-            }
-            MAP.on("click", handleMapClick);
-
-            function concatGeoJSON(g1, g2) {
-                return {
-                    "type": "FeatureCollection",
-                    "features": [...g1.features, ...g2.features]
-                }
-            }
-
-            var greenIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [15, 25],
-                iconAnchor: [6, 25],
-                popupAnchor: [1, -25],
-                shadowSize: [25, 25]
-            });
-            var redIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [15, 25],
-                iconAnchor: [6, 25],
-                popupAnchor: [1, -25],
-                shadowSize: [25, 25]
+            layer.on('click', function (e) {
+                if ((!lakemode) && (feature.properties.COMID != null)) {
+                    if (lastFlLayer != null) { lastFlLayer.setStyle({ color: "blue" }); };
+                    layer.setStyle({ color: "Orange", weight: 2 });
+                    lastFlLayer = layer;
+                    var str = "FL|" + feature.properties.COMID.toString() + "|";
+                    if (feature.properties.GNIS_NAME != null) str = str + feature.properties.GNIS_NAME.toString();
+                    sendMessageToDotnet(str);
+                };
             });
 
-            function AddMarker(mcolor, long, lat, msg) {
-                var marker;
-                if (mcolor == "green") marker = L.marker([lat, long], { icon: greenIcon });
-                else marker = L.marker([lat, long], { icon: redIcon });
-                marker.bindTooltip(msg);
-                markers.addLayer(marker);
-            }
+            layer.on('contextmenu', function (e) {
+                if ((!lakemode) && (layer.feature.properties.COMID != null)) {
+                    if (lastFl2Layer != null) { lastFl2Layer.setStyle({ color: "blue" }); };
+                    layer.setStyle({ color: "Green", weight: 2 });
+                    lastFl2Layer = layer;
+                    var str = "FL2|" + layer.feature.properties.COMID.toString() + "|";
+                    if (layer.feature.properties.GNIS_NAME != null) str = str + layer.feature.properties.GNIS_NAME.toString();
+                    sendMessageToDotnet(str);
+                };
+            });
+        };
 
-            function Bounds(showstr) {
-                if (showstr == "True") MAP.addLayer(markers);
-                else MAP.removeLayer(markers);
-            }
 
-            function ShowStreamDefaults() {
-                newzoom = MAP.getZoom();
-                if (newzoom > ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
-                MAP.addLayer(WB_LAYER);
-                FLOWLINES_LAYER.setStyle({color: "blue", weight: 1 });
-                StreamSearch();
-            }
+        // build map layers
+        //            const CATCHMENTS_LAYER = L.esri
+        //                .featureLayer({
+        //                    url: URL_NP21_CATCHMENTS,
+        //                });
+        //            CATCHMENTS_LAYER.setStyle({
+        //                color: "orange",
+        //                fillOpacity: 0,
+        //                weight: 1,
+        //            });
 
-            function ShowLakeDefaults() {
-                MAP.addLayer(WB_LAYER);
-                MAP.removeLayer(FLOWLINES_LAYER);
+        const HUC8 = L.esri
+            .featureLayer({
+                url: URL_NP21_HUCs+"2",
+            });
+        HUC8.setStyle({
+            color: "red",
+            fillOpacity: 0,
+            weight: 1,
+        });
+        const HUC10 = L.esri
+            .featureLayer({
+                url: URL_NP21_HUCs + "1",
+            });
+        HUC10.setStyle({
+            color: "maroon",
+            fillOpacity: 0,
+            weight: 1,
+        });
+        const HUC12 = L.esri
+            .featureLayer({
+                url: URL_NP21_HUCs + "0",
+            });
+        HUC12.setStyle({
+            color: "darkolivegreen",
+            fillOpacity: 0,
+            weight: 1,
+        });
+
+        const FLOWLINES_LAYER = L.esri
+            .featureLayer({
+                url: URL_NP21_FLOWLINES,
+                onEachFeature: FLonEachFeature
+            });
+        FLOWLINES_LAYER.setStyle({
+            color: "blue",
+            fillOpacity: 0,
+            weight: 1,
+        });
+
+        const OVERLAY_MAPS = {
+            "HUC8 Boundaries": HUC8,
+            "HUC10 Boundaries": HUC10,
+            "HUC12 Boundaries": HUC12,
+            //                Catchments: CATCHMENTS_LAYER,
+            "Flow Lines": FLOWLINES_LAYER,
+            "NWS Lake/Res": WB_LAYER,
+        };
+
+        // WB_LAYER.addTo(MAP);
+
+        const LAYER_OPTIONS = L.control.layers(Base_Maps, OVERLAY_MAPS);
+        LAYER_OPTIONS.addTo(MAP);
+
+        // app interaction
+        function handleMapClick(e) {
+
+        }
+        MAP.on("click", handleMapClick);
+
+        function concatGeoJSON(g1, g2) {
+            return {
+                "type": "FeatureCollection",
+                "features": [...g1.features, ...g2.features]
+            }
+        }
+
+
+        var greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [15, 25],
+            iconAnchor: [6, 25],
+            popupAnchor: [1, -25],
+            shadowSize: [25, 25]
+        });
+        var redIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [15, 25],
+            iconAnchor: [6, 25],
+            popupAnchor: [1, -25],
+            shadowSize: [25, 25]
+        });
+
+        function AddMarker(mcolor, long, lat, msg) {
+            var marker;
+            if (mcolor == "green") marker = L.marker([lat, long], { icon: greenIcon });
+            else marker = L.marker([lat, long], { icon: redIcon });
+            marker.bindTooltip(msg);
+            markers.addLayer(marker);
+        }
+
+        function Bounds(showstr) {
+            if (showstr == "True") MAP.addLayer(markers);
+            else MAP.removeLayer(markers);
+        }
+
+        var geojsonStyle = {
+            color: "#4A5D23",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.01,
+        };
+
+
+        // app interaction
+        function AddGeoJSON(gstr) {
+
+            allShapes = JSON.parse(gstr);
+
+            var options = {
+                maxZoom: 20,
+                minZoom: H14ZoomThresh,
+                tolerance: 5,
+                debug: 0,
+                style: geojsonStyle
+            };
+            H14GeoJson.push(new L.GeoJSON(allShapes));
+            H14Maps.push(L.geoJson.vt(allShapes, options).addTo(MAP));
+
+            sendMessageToDotnet('DoneDraw');
+        }
+
+        function ShowStreamDefaults() {
+            newzoom = MAP.getZoom();
+            if (newzoom > ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
+            if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
+            FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
+            StreamSearch();
+        }
+
+        function ShowLakeDefaults() {
+            if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
+            MAP.removeLayer(FLOWLINES_LAYER);
+            FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
+            LakeSearch()
+        }
+
+            function ShowHUCDefaults(hucstr) {
+                MAP.removeLayer(WB_LAYER);
+                MAP.addLayer(FLOWLINES_LAYER);
+                if (hucstr == "8") MAP.addLayer(URL_NP21_HUC8); else MAP.removeLayer(URL_NP21_HUC8);
+                if (hucstr == "10") MAP.addLayer(URL_NP21_HUC10); else MAP.removeLayer(URL_NP21_HUC10);
+                if (hucstr == "12") MAP.addLayer(URL_NP21_HUC12); else MAP.removeLayer(URL_NP21_HUC12);
+                if (hucstr == "14") MAP.addLayer(URL_NP21_HUC14); else MAP.removeLayer(URL_NP21_HUC14);
                 FLOWLINES_LAYER.setStyle({ color: "blue", weight: 1 });
                 LakeSearch()
             }
 
-            function highlightFlowLine(COMID,lastlayer) {
-                FLOWLINES_LAYER.eachFeature(function (lyr) {
-                    if (lyr.feature.properties.COMID == COMID) {
-                        lyr.setStyle({ color: 'red', weight: 2 });
-                        redlayers.push(lyr);
-                        redCOMIDs.push(COMID);
-                        str = COMID + "|" + JSON.stringify(lyr.toGeoJSON());
-                        sendMessageToDotnet(str);
-                        return;
-                    }
 
-                });
-
-                AwaitSearch = true;
-                var find = L.esri.find({ url: 'https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer' });
-                find.layers('0').text(COMID).fields('COMID');
-                find.run(function (error, featureCollection, response) {
-                    if (error) { return; }
-                    var rl = L.geoJSON(featureCollection.features[0]); 
-                    redlayers.push(rl);
+        function highlightFlowLine(COMID, lastlayer) {
+            FLOWLINES_LAYER.eachFeature(function (lyr) {
+                if (lyr.feature.properties.COMID == COMID) {
+                    lyr.setStyle({ color: 'red', weight: 2 });
+                    redlayers.push(lyr);
                     redCOMIDs.push(COMID);
-                    if (lastlayer == "True") AwaitSearch = false;
-                });
-
-            }
-
-            function ZoomtoRedLayers() {
-                if (AwaitSearch == true) {
-                    window.setTimeout(ZoomtoRedLayers, 100); /* this checks the flag every 100 milliseconds*/
-                } else {
-                    var FG = L.featureGroup();
-                    redlayers.forEach(function (item, index) {
-                        FG.addLayer(item);
-                    });
-                    MAP.fitBounds(FG.getBounds());
+                    str = COMID + "|" + JSON.stringify(lyr.toGeoJSON());
+                    sendMessageToDotnet(str);
+                    return;
                 }
-            }
 
-            function ResetRedLayers() {
+            });
+
+            AwaitSearch = true;
+            var find = L.esri.find({ url: 'https://watersgeo.epa.gov/arcgis/rest/services/NHDPlus_NP21/NHDSnapshot_NP21/MapServer' });
+            find.layers('0').text(COMID).fields('COMID');
+            find.run(function (error, featureCollection, response) {
+                if (error) { return; }
+                var rl = L.geoJSON(featureCollection.features[0]);
+                redlayers.push(rl);
+                redCOMIDs.push(COMID);
+                if (lastlayer == "True") AwaitSearch = false;
+            });
+
+        }
+
+        function ZoomtoRedLayers() {
+            if (AwaitSearch == true) {
+                window.setTimeout(ZoomtoRedLayers, 100); /* this checks the flag every 100 milliseconds*/
+            } else {
+                var FG = L.featureGroup();
                 redlayers.forEach(function (item, index) {
-                    item.setStyle({ color: 'blue', weight: 1 });
+                    FG.addLayer(item);
                 });
-                redlayers = [];
-                redCOMIDs = [];
-            };
-
-
-            // dotnet <=> js message handlers
-            window.addEventListener('DOMContentLoaded', (event) => {
-                window.chrome.webview.postMessage('DOMContentLoaded');
-            });
-
-            window.chrome.webview.addEventListener("message", (event) => {
-                var messageArr = event.data.split("|");
-                if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
-                if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
-                if (messageArr[0] == "STREAMMAP") ShowStreamDefaults();
-                if (messageArr[0] == "LAKEMAP") ShowLakeDefaults();
-                if (messageArr[0] == "FLCOLOR") highlightFlowLine(messageArr[1],messageArr[2]);
-                if (messageArr[0] == "RESETCOLORS") ResetRedLayers();
-                if (messageArr[0] == "ZOOM") ZoomtoRedLayers();
-
-//                console.log(`message from dotnet: ${event.data}`);
-//                this.document.getElementById("message-bar").innerHTML =
-//                    event.data;
-            });
-
-            function sendMessageToDotnet(message) {
-                window.chrome.webview.postMessage(message);
+                MAP.fitBounds(FG.getBounds());
             }
-        </script>
-    </body>
+        }
+
+        function ResetRedLayers() {
+            redlayers.forEach(function (item, index) {
+                item.setStyle({ color: 'blue', weight: 1 });
+            });
+            redlayers = [];
+            redCOMIDs = [];
+        };
+
+
+        // dotnet <=> js message handlers
+        window.addEventListener('DOMContentLoaded', (event) => {
+            window.chrome.webview.postMessage('DOMContentLoaded');
+        });
+
+        window.chrome.webview.addEventListener("message", (event) => {
+            var messageArr = event.data.split("|");
+            if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
+            if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
+            if (messageArr[0] == "STREAMMAP") ShowStreamDefaults();
+            if (messageArr[0] == "LAKEMAP") ShowLakeDefaults();
+            if (messageArr[0] == "FLCOLOR") highlightFlowLine(messageArr[1], messageArr[2]);
+            if (messageArr[0] == "RESETCOLORS") ResetRedLayers();
+            if (messageArr[0] == "ADD") AddGeoJSON(messageArr[1]);
+            if (messageArr[0] == "ZOOM") ZoomtoRedLayers();
+                if (messageArr[0] == "HUCMAP") ShowHUCDefaults(messageArr[1]);
+
+            //                console.log(`message from dotnet: ${event.data}`);
+            //                this.document.getElementById("message-bar").innerHTML =
+            //                    event.data;
+        });
+
+        function sendMessageToDotnet(message) {
+            window.chrome.webview.postMessage(message);
+        }
+    </script>
+</body>
 </html>
