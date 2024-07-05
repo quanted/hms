@@ -3022,6 +3022,8 @@ namespace AQUATOX.AQTSegment
                         //   days     cu m              cu m/ d 
                         if (firstwrite) TSV.SVResults.AddColumn("retention time", "days");
                         TSV.SVResults.Results[rescnt].Add(resTime);   // add rescnt++ if another variable is output after this one.
+
+                        
                     }
                 }
             }
@@ -5508,7 +5510,6 @@ namespace AQUATOX.AQTSegment
             DB = 0.0;  //TSS is a driving variable only
         }
     }
-
 
 
     public class AQTKnownTypesBinder : Newtonsoft.Json.Serialization.ISerializationBinder

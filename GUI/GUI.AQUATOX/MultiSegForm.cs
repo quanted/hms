@@ -30,6 +30,8 @@ using System.Windows.Forms.DataVisualization.Charting;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 using System.Globalization;
 using System.Collections.Concurrent;
+using DocumentFormat.OpenXml.Bibliography;
+using Utilities;
 
 namespace GUI.AQUATOX
 
@@ -204,7 +206,7 @@ namespace GUI.AQUATOX
             }
             else if (content.StartsWith("H14"))
             {
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + content.Substring(3, 2) + ".geojson";  
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + content.Substring(3, 2) + ".geojson";
                 string HUC14 = File.ReadAllText(filestr);
                 webView.CoreWebView2.PostWebMessageAsString("ADDH14|" + HUC14); // display layer
             }
@@ -818,8 +820,8 @@ namespace GUI.AQUATOX
             NewProject.Enabled = !busy;
             CreateButton.Enabled = !busy;
             FlowsButton.Enabled = !busy;
-            HAWQS_button.Enabled = !busy;  
-            ReadHAWQSButton.Enabled = !busy; 
+            HAWQS_button.Enabled = !busy;
+            ReadHAWQSButton.Enabled = !busy;
             executeButton.Enabled = !busy;
             RecentFilesBox.Enabled = !busy;
             basedirBox.Leave -= basedirBox_Leave;
@@ -1488,22 +1490,87 @@ namespace GUI.AQUATOX
         }
 
 
-        public class GeoJSonType
+        public class GeoJsonType
         {
             public StreamGeometry stream_geometry { get; set; }
         }
+
         public class StreamGeometry
         {
             public Feature[] features { get; set; }
         }
+
         public class Feature
         {
-            public LineStringGeometry geometry { get; set; }
+            public Geometry geometry { get; set; }
         }
-        public class LineStringGeometry
+
+        public class Geometry
         {
             public string type { get; set; }
-            public double[][] coordinates { get; set; }
+            public object coordinates { get; set; }
+
+            [JsonIgnore]
+            public double[][] LineStringCoordinates
+            {
+                get => type == "LineString" ? (double[][])coordinates : null;
+                set
+                {
+                    type = "LineString";
+                    coordinates = value;
+                }
+            }
+
+            [JsonIgnore]
+            public double[][][] MultiLineStringCoordinates
+            {
+                get => type == "MultiLineString" ? (double[][][])coordinates : null;
+                set
+                {
+                    type = "MultiLineString";
+                    coordinates = value;
+                }
+            }
+        }
+
+        public class GeometryConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType == typeof(Geometry);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                var jObject = JObject.Load(reader);
+                var geometry = new Geometry
+                {
+                    type = jObject["type"].Value<string>()
+                };
+
+                if (geometry.type == "LineString")
+                {
+                    geometry.coordinates = jObject["coordinates"].ToObject<double[][]>();
+                }
+                else if (geometry.type == "MultiLineString")
+                {
+                    geometry.coordinates = jObject["coordinates"].ToObject<double[][][]>();
+                }
+
+                return geometry;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var geometry = (Geometry)value;
+                var jObject = new JObject
+        {
+            { "type", geometry.type },
+            { "coordinates", JToken.FromObject(geometry.coordinates) }
+        };
+
+                jObject.WriteTo(writer);
+            }
         }
 
 
@@ -1545,7 +1612,7 @@ namespace GUI.AQUATOX
                     GeoJSON = await AQT2D.ReadWBGeoJSON(identifier);
                 }
 
-                if (GeoJSON.IndexOf("ERROR") >= 0)  // Fixme, check for valid geojson
+                if (GeoJSON.IndexOf("ERROR") >= 0)  // Fixme, thorough check for valid geojson?
                 {
                     AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
                     if (type != "HUC" && GeoJSON.IndexOf("Unable to find catchment in database") >= 0)
@@ -1637,7 +1704,7 @@ namespace GUI.AQUATOX
 
             int[] outofnetwork = new int[0];
 
-            if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID", "");  // plot stand alone 0-D lake    fixme, name
+            if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID", "");  // plot stand alone 0-D lake    fixme, could add name
             else if (HUC0D != "") PlotGeoJSON(HUC0D, "HUC", "");  // plot stand alone HUC  fixme, name
             else  // loop through lake/res waterbodies if they exist
             {
@@ -1692,8 +1759,14 @@ namespace GUI.AQUATOX
                         {
                             try
                             {
-                                GeoJSonType coords = JsonConvert.DeserializeObject<GeoJSonType>(GeoJSON);
-                                polyline = coords.stream_geometry.features[0].geometry.coordinates;
+                                var settings = new JsonSerializerSettings();
+                                settings.Converters.Add(new GeometryConverter());
+                                GeoJsonType coords = JsonConvert.DeserializeObject<GeoJsonType>(GeoJSON, settings);
+
+                                // Access the coordinates based on the geometry type
+                                var geometry = coords.stream_geometry.features[0].geometry;
+                                polyline = (geometry.type == "MultiLineString") ? geometry.MultiLineStringCoordinates[0] : geometry.LineStringCoordinates;
+                                if (i == AQT2D.SN.order.Length - 1) polyline = (geometry.type == "MultiLineString") ? geometry.MultiLineStringCoordinates[geometry.MultiLineStringCoordinates.Length - 1] : geometry.LineStringCoordinates;  //place red marker on correct merged segment
                             }
                             catch
                             {
@@ -1703,12 +1776,17 @@ namespace GUI.AQUATOX
 
                         if (polyline != null)
                         {
+                            string SrcIDList = "";
                             if (AQT2D.SN.sources.TryGetValue(CString, out int[] Sources))
+                            {
                                 foreach (int SrcID in Sources)
                                     if (outofnetwork.Contains(SrcID))  //ID inflow points with green markers
                                     {
-                                        PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcID);
+                                        if (SrcIDList == "") SrcIDList = SrcID.ToString();
+                                        else SrcIDList += ", " + SrcID;
                                     }
+                                if (SrcIDList != "") PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcIDList);
+                            }
 
                             if (i == AQT2D.SN.order.Length - 1) //ID pour point with red marker
                             {
@@ -2062,8 +2140,8 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 string StudyStr;
-                                if (IsHUC) StudyStr = "..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";  
-                                else StudyStr = "..\\Studies\\Default Lake.JSON";  
+                                if (IsHUC) StudyStr = "..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";
+                                else StudyStr = "..\\Studies\\Default Lake.JSON";
                                 BSim = new AQTSim();
                                 if (File.Exists(StudyStr))
                                     BSim.Instantiate(File.ReadAllText(StudyStr));
@@ -2102,7 +2180,7 @@ namespace GUI.AQUATOX
                             if (BSim == null)
                             {
                                 BSim = new AQTSim();
-                                BSim.Instantiate(File.ReadAllText("..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));  
+                                BSim.Instantiate(File.ReadAllText("..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json"));
                             }
 
                             AQT2D = null;
@@ -2240,7 +2318,6 @@ namespace GUI.AQUATOX
                     AddToProcessLog("INFO: Read stream network from " + BaseDir + "StreamNetwork.JSON");
                 }
 
-
                 ShowStep++;
                 if (ShowStep > AQT2D.SN.order.Length)
                 {
@@ -2346,7 +2423,7 @@ namespace GUI.AQUATOX
             public string url { get; set; }
         }
 
-        public string dbpath = @"..\2D_Inputs\HAWQS_data\COMID_HUC14_Unique.sqlite";  
+        public string dbpath = @"..\2D_Inputs\HAWQS_data\COMID_HUC14_Unique.sqlite";
 
         public List<string> ID_Relevant_HUC14s(out string pourpoint)
         {
@@ -2471,7 +2548,7 @@ namespace GUI.AQUATOX
 
             foreach (string code in Codes)
             {
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + code + ".geojson";  
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + code + ".geojson";
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
                 PostWebviewMessage("RH14s|" + RelevantH14s);
@@ -2518,7 +2595,7 @@ namespace GUI.AQUATOX
                 string architecture = Environment.Is64BitProcess ? "x64" : "x86";
                 string libraryPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), architecture, "7z.dll");
                 SevenZipCompressor.SetLibraryPath(libraryPath);
-                                                                                                                                                  
+
                 using (var extractor = new SevenZipExtractor(tempFilePath))  // Extract and aggregate CSVs
                 {
                     foreach (var entry in extractor.ArchiveFileData.Where(file => file.FileName.EndsWith(".csv") && file.Size > 170))  // 170 byte files simply contain an error message
@@ -2629,7 +2706,7 @@ namespace GUI.AQUATOX
                 }
                 outputHUCs = outhucs.ToArray();
 
-                foreach (string HUC14 in outputHUCs)  
+                foreach (string HUC14 in outputHUCs)
                 {
                     try { AQT2D.HAWQSInf.LoadFromtoData(HUC14); } //load relevant fromto data to dictionary
                     catch (Exception ex)
@@ -2693,11 +2770,11 @@ namespace GUI.AQUATOX
                     try
                     {
                         // Try to deserialize to the expected object type to validate JSON
-                        (string APIEdit,hawqsinput) = form.GetEditedJson();
-                        if (APIEdit == "") 
+                        (string APIEdit, hawqsinput) = form.GetEditedJson();
+                        if (APIEdit == "")
                         {
-                           MessageBox.Show("ERROR: A HAWQS API String is required", "API Error",MessageBoxButtons.OK, MessageBoxIcon.Error);
-                           return;
+                            MessageBox.Show("ERROR: A HAWQS API String is required", "API Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
 
                         if (APIEdit != HAWQS_apikey)
@@ -2938,7 +3015,7 @@ namespace GUI.AQUATOX
             {
                 Dictionary<string, string> WB_JSONs = new Dictionary<string, string>();
                 if ((AQT2D.SN.waterbodies != null) &&  //if there is a NWM lake or reservoir, read volumes and flows from NWM, overland and inflow nutrients will come from HAWQS
-                    (AQT2D.SN.waterbodies.wb_table.Length>1))
+                    (AQT2D.SN.waterbodies.wb_table.Length > 1))
                 {
                     TSafeAddToProcessLog("INPUT: Reading Lake-Reservoir Volumes and flows from NWM");
 
@@ -3130,6 +3207,301 @@ namespace GUI.AQUATOX
                 FindNext();
             }
         }
+
+
+        private void MergeSegments(string smallSegmentId, string targetSegmentId, HashSet<int> runOrderComids)
+        {
+            AddToProcessLog($"INPUTS: Merging segment {smallSegmentId} into {targetSegmentId}");
+
+            var newMergeEntry = new string[] { smallSegmentId, targetSegmentId };
+            if (AQT2D.SN.merged == null) AQT2D.SN.merged = new string[][] { newMergeEntry };
+            else AQT2D.SN.merged = AQT2D.SN.merged.Concat(new string[][] { newMergeEntry }).ToArray();
+
+            // Update network structure
+            var smallSegment = AQT2D.SN.network.First(n => n[0] == smallSegmentId);  // identify network array for small
+            var targetSegment = AQT2D.SN.network.First(n => n[0] == targetSegmentId);
+
+            targetSegment[4] = (double.Parse(targetSegment[4]) + double.Parse(smallSegment[4])).ToString(); // [4] is length, so sum the two
+            targetSegment[5] = (double.Parse(targetSegment[5]) + double.Parse(smallSegment[5])).ToString(); // [5] is travel time, so sum the two
+
+            // Remove small segment from network
+            AQT2D.SN.network = AQT2D.SN.network.Where(n => n[0] != smallSegmentId).ToArray();
+
+            // Replace all occurrences of smallSegmentId with targetSegmentId in Sources before removing smallSegmentId
+            foreach (var key in AQT2D.SN.sources.Keys.ToList())
+            {
+                AQT2D.SN.sources[key] = AQT2D.SN.sources[key]
+                    .Select(id => id == int.Parse(smallSegmentId) ? int.Parse(targetSegmentId) : id)
+                    .ToArray();
+            }
+
+            // Update sources
+            if (AQT2D.SN.sources.ContainsKey(smallSegmentId))
+            {
+                // Combine the sources of smallSegmentId into targetSegmentId
+                if (AQT2D.SN.sources.ContainsKey(targetSegmentId))
+                {
+                    AQT2D.SN.sources[targetSegmentId] = AQT2D.SN.sources[targetSegmentId]
+                        .Concat(AQT2D.SN.sources[smallSegmentId])
+                        .Where(id => id != int.Parse(targetSegmentId)) // Prevent self-referencing
+                        .Distinct()
+                        .ToArray();
+                }
+                else
+                {
+                    AQT2D.SN.sources[targetSegmentId] = AQT2D.SN.sources[smallSegmentId]
+                        .Where(id => id != int.Parse(targetSegmentId)) // Prevent self-referencing
+                        .ToArray();
+                }
+
+                AQT2D.SN.sources.Remove(smallSegmentId);  // now remove the smallSegmentID key
+            }
+
+            RebuildOrderBasedOnSources(runOrderComids);  // do this once post merger?
+
+            MergeGeoJsonFiles(BaseDir, smallSegmentId, targetSegmentId);
+        }
+
+        private void RebuildOrderBasedOnSources(HashSet<int> originalOrderComids)
+        {
+            var newOrder = new List<List<int>>();
+            var processed = new HashSet<int>();
+            var toProcess = new HashSet<int>(originalOrderComids);
+
+            // Start with the last segment in the original order array
+            var lastSegmentId = AQT2D.SN.order.Last().Last();
+            newOrder.Add(new List<int> { lastSegmentId });
+            processed.Add(lastSegmentId);
+            toProcess.Remove(lastSegmentId);
+
+            // Define the previous levels
+            while (toProcess.Count > 0)
+            {
+                var previousLevel = new List<int>();
+
+                // Check sources for all segments in the current level
+                foreach (var segmentId in newOrder.Last())
+                {
+                    if (AQT2D.SN.sources.ContainsKey(segmentId.ToString()))
+                    {
+                        foreach (var sourceId in AQT2D.SN.sources[segmentId.ToString()])
+                        {
+                            if (originalOrderComids.Contains(sourceId) && !processed.Contains(sourceId))
+                            {
+                                previousLevel.Add(sourceId);
+                                processed.Add(sourceId);
+                                toProcess.Remove(sourceId);
+                            }
+                        }
+                    }
+                }
+
+                if (previousLevel.Count > 0)
+                {
+                    newOrder.Add(previousLevel);
+                }
+                else
+                {
+                    break; // No more levels to process
+                }
+            }
+
+            // Reverse the newOrder to have the correct order from first to last
+            newOrder.Reverse();
+
+            // Convert List<List<int>> to int[][] and update AQT2D.SN.order
+            AQT2D.SN.order = newOrder.Select(step => step.ToArray()).ToArray();
+        }
+
+        public int[] GetDownstreamSegments(string segmentId)
+        {
+            return AQT2D.SN.sources
+                .Where(entry => entry.Value.Contains(int.Parse(segmentId)))
+                .Select(entry => int.Parse(entry.Key))
+                .ToArray();
+        }
+
+        private void merge_button_Click(object sender, EventArgs e)
+        {
+            var ttdata = AnalyzeTravelTimes();
+            double TTThreshold;
+            using (var form = new MergeForm(ttdata))
+            {
+                if (form.ShowDialog() != DialogResult.OK) return;
+                TTThreshold = form.Threshold;
+            }
+
+            string PreMergedJSON = JsonConvert.SerializeObject(AQT2D.SN, Formatting.Indented);
+            File.WriteAllText(BaseDir + "PreMergedStreamNetwork.JSON", PreMergedJSON);
+
+            if (!VerifyStreamNetwork()) return;
+
+            var runOrderComids = new HashSet<int>(AQT2D.SN.order.SelectMany(o => o).Select(o => int.Parse(o.ToString())));
+
+            // Initialize small segments list
+            var smallSegments = GetSmallSegments(TTThreshold, runOrderComids);
+
+            // Process each small segment
+            // while (smallSegments.Count > 0)
+            {
+                foreach (var segmentId in smallSegments.ToList())
+                {
+                    // Find adjacent segments
+                    var upstreamSegments = AQT2D.SN.sources.ContainsKey(segmentId) ? AQT2D.SN.sources[segmentId] : new int[] { };
+                    var downstreamSegment = GetDownstreamSegments(segmentId);  //fixme deal with divergences
+
+                    // Filter valid upstream segments
+                    var validUpstreamSegments = upstreamSegments
+                        .Where(id => AQT2D.SN.network.Any(n => n[0] == id.ToString()))
+                        .ToArray();
+
+
+                    // merge with the downstream segment to ensure flow >= current segment
+                    if (downstreamSegment != null)
+                    {
+                        MergeSegments(segmentId, downstreamSegment[0].ToString(), runOrderComids);
+                    }
+                    // Try to merge with the smallest valid upstream segment
+                    else if (validUpstreamSegments.Length > 0)
+                    {  // check upstream segments if merging pour point
+                        foreach (var upstreamSegment in validUpstreamSegments.OrderBy(id => double.Parse(AQT2D.SN.network.First(n => n[0] == id.ToString())[4])))
+                        {
+                            if (upstreamSegment.ToString() != segmentId)
+                            {
+                                MergeSegments(segmentId, upstreamSegment.ToString(), runOrderComids);
+                                break;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            string MergedJSON = JsonConvert.SerializeObject(AQT2D.SN, Formatting.Indented);
+            File.WriteAllText(BaseDir + "MergedStreamNetwork.JSON", MergedJSON);
+
+            string snJson = JsonConvert.SerializeObject(AQT2D.SN, Formatting.Indented);
+            File.WriteAllText(Path.Combine(BaseDir, "StreamNetwork.JSON"), snJson, Encoding.Default);
+            AddToProcessLog("INFO: Merged stream network saved to " + Path.Combine(BaseDir, "StreamNetwork.JSON"));
+
+            AQT2D.nSegs = AQT2D.SN.network.Count() - 1;
+            PlotButton_Click(sender, e);
+            UpdateScreen();
+
+            string Msg = "Segments have been Merged.";
+            if (executeButton.Enabled) Msg += "  Linked segments must be re-created before running the model.";
+            MessageBox.Show(Msg);
+
+        }
+
+        private (int segmentCount, double averageTravelTime, double minTravelTime, double fifthPctileTravelTime, List<double> TTimes) AnalyzeTravelTimes()
+        {
+            List<double> travelTimes = new List<double>();
+
+            for (int i = 1; i < AQT2D.SN.network.Length; i++) // element zero contains headers
+            {
+                double travelTime = double.Parse(AQT2D.SN.network[i][5]); // travel time in days
+                travelTimes.Add(travelTime);
+            }
+
+            int segmentCount = travelTimes.Count;
+            double averageTravelTime = travelTimes.Average();
+            double minTravelTime = travelTimes.Min();
+            double fifthPctileTravelTime = CalculatePercentile(travelTimes, 5);
+
+            return (segmentCount, averageTravelTime, minTravelTime, fifthPctileTravelTime, travelTimes);
+        }
+
+        private double CalculatePercentile(List<double> sortedValues, double percentile)
+        {
+            sortedValues.Sort();
+            double realIndex = percentile / 100.0 * (sortedValues.Count - 1);
+            int index = (int)realIndex;
+            double frac = realIndex - index;
+
+            if (index + 1 < sortedValues.Count)
+            {
+                return sortedValues[index] * (1 - frac) + sortedValues[index + 1] * frac;
+            }
+            else
+            {
+                return sortedValues[index];
+            }
+        }
+
+        // get small segments list
+        private List<string> GetSmallSegments(double lengthThreshold, HashSet<int> runOrderComids)
+        {
+            var smallSegments = new List<string>();
+            for (int i = 1; i < AQT2D.SN.network.Length; i++) // element zero contains headers
+            {
+                double length = double.Parse(AQT2D.SN.network[i][5]); // travel time in days
+                string comid = AQT2D.SN.network[i][0];
+                if (length < lengthThreshold && runOrderComids.Contains(int.Parse(comid)))
+                {
+                    smallSegments.Add(comid);
+                }
+            }
+            return smallSegments;
+        }
+
+        private void MergeGeoJsonFiles(string baseDir, string smallSegmentId, string targetSegmentId)
+        {
+            // Paths to the GeoJSON files
+            string smallSegmentPath = Path.Combine(baseDir, $"{smallSegmentId}.GeoJSON");
+            string targetSegmentPath = Path.Combine(baseDir, $"{targetSegmentId}.GeoJSON");
+
+            // Read the GeoJSON files
+            JObject smallSegmentGeoJson = JObject.Parse(File.ReadAllText(smallSegmentPath));
+            JObject targetSegmentGeoJson = JObject.Parse(File.ReadAllText(targetSegmentPath));
+
+            // Backup the target segment GeoJSON
+            string backupPath = Path.Combine(baseDir, $"{targetSegmentId}_pre_merge.GeoJSON");
+            File.Copy(targetSegmentPath, backupPath, overwrite: true);
+
+            // Get the coordinates of both segments
+            JArray smallSegmentCoordinates = (JArray)smallSegmentGeoJson["stream_geometry"]["features"][0]["geometry"]["coordinates"];
+            JObject targetGeometry = (JObject)targetSegmentGeoJson["stream_geometry"]["features"][0]["geometry"];
+
+            // Check if the target geometry is already a MultiLineString
+            if (targetGeometry["type"].ToString() == "MultiLineString")
+            {
+                JArray targetCoordinates = (JArray)targetGeometry["coordinates"];
+                targetCoordinates.Insert(0, smallSegmentCoordinates);
+            }
+            else if (targetGeometry["type"].ToString() == "LineString")
+            {
+                // Convert to MultiLineString and insert small segment coordinates first
+                JArray targetCoordinates = new JArray { smallSegmentCoordinates, targetGeometry["coordinates"] };
+                targetGeometry["type"] = "MultiLineString";
+                targetGeometry["coordinates"] = targetCoordinates;
+            }
+
+            // Update GNIS_NAME
+            string targetGnisName = (string)targetSegmentGeoJson["stream_geometry"]["features"][0]["properties"]["GNIS_NAME"];
+            string newGnisName;
+
+            if (string.IsNullOrEmpty(targetGnisName)) newGnisName = $" (merged with) {smallSegmentId}";
+            else newGnisName = targetGnisName + $" (merged with) {smallSegmentId}";
+
+            int firstIndex = newGnisName.IndexOf(" (merged with) "); // handle potential for names with multiple "(merged with)" substrings
+            if (firstIndex != -1)
+            {
+                int secondIndex = newGnisName.IndexOf(" (merged with) ", firstIndex + 1);
+                while (secondIndex != -1)
+                {
+                    newGnisName = newGnisName.Remove(secondIndex, " (merged with) ".Length).Insert(secondIndex, ", ");
+                    secondIndex = newGnisName.IndexOf(" (merged with) ", secondIndex + 1);
+                }
+            }
+
+
+            targetSegmentGeoJson["stream_geometry"]["features"][0]["properties"]["GNIS_NAME"] = newGnisName;
+
+            // Save the updated target segment GeoJSON
+            File.WriteAllText(targetSegmentPath, targetSegmentGeoJson.ToString());
+        }
+
     }
 }
 

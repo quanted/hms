@@ -48,7 +48,7 @@ namespace AQUATOX.AQSim_2D
             public Dictionary<string, int[]> boundary;
             [JsonProperty("divergent-paths")] public Dictionary<string, int[]> divergentpaths;
             public cWaterbodies waterbodies;
-
+            public string[][] merged;  // tracks those segments that have been merged
         }
 
         public class cWaterbodies
@@ -817,38 +817,92 @@ namespace AQUATOX.AQSim_2D
         }
 
         /// <summary>
-        /// Creates inputs for a Volume model for the AQUATOX segment using HAWQS flows, Manning's Equation, and site-specific geometry
+        /// Creates inputs for a Volume model for the AQUATOX segment using HAWQS flows, Manning's Equation, and site-specific geometry.  
+        /// Also accounts for merged segments additively.
         /// </summary>
         /// <param name="TVol">The AQUATOX Volume object</param>
         /// <param name="ThisSeg">The full set of HAWQS daily results for this segment</param>
         /// <param name="FirstDate">The first date fo the AQUATOX simulation</param>
         /// <returns>The average retention time for the period being modeled in days</returns>
-        public double VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate) 
+        public double VolFlowFromHAWQS(TVolume TVol, Dictionary<DateTime, HAWQSRCHRow> ThisSeg, DateTime FirstDate, string segID, Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD)
         {
             double RTSum = 0;
             int RTCount = 0;
 
-            TVol.Discharg = ThisSeg[FirstDate].vals[1] * 86400; // convert to m3/day
-            TVol.InitialCond = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000); //default minimum volume (length * XSec 1 m2) for now ;     
+            // Initialize discharge and initial condition
+            double totalDischarge = ThisSeg[FirstDate].vals[1] * 86400; // convert to m3/day
+            double totalVolume = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000);
+
+            // Check for merged segments and aggregate data
+            bool SegsMerged = false;
+            if (SN!=null && SN.merged != null)
+            {
+                foreach (var merge in SN.merged)
+                {
+                    if (merge[1] == segID)
+                    {
+                        string mergedSegmentId = merge[0];
+                        if (HRD.ContainsKey(long.Parse(mergedSegmentId)))
+                        {
+                            var mergedSegmentData = HRD[long.Parse(mergedSegmentId)];
+                            totalDischarge += mergedSegmentData[FirstDate].vals[1] * 86400; // convert to m3/day
+                            totalVolume += Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000);
+                            SegsMerged = true;
+                        }
+                    }
+                }
+            }
+
+            TVol.Discharg = totalDischarge;
+            TVol.InitialCond = totalVolume;
 
             TVol.Calc_Method = VolumeMethType.Manning;
 
-            TLoadings DischargLoad = TVol.LoadsRec.Alt_Loadings[1];   // array slot [0] is "inflow" in this case (TVolume)
+            TLoadings DischargLoad = TVol.LoadsRec.Alt_Loadings[1];   // array slot [1] is "discharge" in this case (TVolume)
 
             setupLoad(DischargLoad, ThisSeg.Count);
-
+            // Add the discharge values for the primary segment
             foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)
             {
-                double disch = (pair.Value.vals[0] * 86400 > 0) ? pair.Value.vals[0] * 86400 : 0 ;
+                double disch = (pair.Value.vals[0] * 86400 > 0) ? pair.Value.vals[0] * 86400 : 0;
                 DischargLoad.list.Add(pair.Key, disch);  //flow from RCH_Daily file -- converted from cms to m3/d
 
                 double vol = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000);
-                RTSum += vol / Math.Max(disch,1);   // m3  / (m3/d)  = retention time in days
-                RTCount++;
+                RTSum += vol / Math.Max(disch, 1);   // m3  / (m3/d)  = retention time in days
+                RTCount++;  // count number of days
             }
+
+            // Add the discharge values for the merged segments
+            if (SN!=null && SN.merged != null)
+                foreach (var merge in SN.merged)
+                    if (merge[1] == segID)
+                    {
+                        string mergedSegmentId = merge[0];
+                        if (HRD.ContainsKey(long.Parse(mergedSegmentId)))
+                        {
+                            var mergedSegmentData = HRD[long.Parse(mergedSegmentId)];
+                            foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in mergedSegmentData)
+                            {
+                                double disch = (pair.Value.vals[0] * 86400 > 0) ? pair.Value.vals[0] * 86400 : 0;
+                                if (DischargLoad.list.ContainsKey(pair.Key))
+                                    DischargLoad.list[pair.Key] += disch;
+                                else
+                                    DischargLoad.list.Add(pair.Key, disch);
+
+                                double vol = Math.Max(TVol.Manning_Volume(), TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000);
+                                RTSum += vol / Math.Max(disch, 1);   // m3  / (m3/d)  = retention time in days
+                            }
+                        }
+                    }
 
             TVol.LoadNotes1 = "Flows from HAWQS converted to m3/day";
             TVol.LoadNotes2 = "Manning's Equation Used to Estimate Volume";
+
+            if (SegsMerged)
+            {
+                TVol.LoadNotes1 += " (Including merged segments)";
+            }
+
             TVol.AQTSeg.CalcVelocity = true;
 
             return RTSum / RTCount;  //average retention time in days
@@ -860,7 +914,7 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         /// <param name="HRD">HAWQS Reach Data -- a nested dictionary of relevant inputs for each HAWQS subbasin</param>
         /// <param name="Boundaries">The list of upstream boundaries that have data relevant to the SegID segment unit</param>
-        /// <param name="SegID">The identifying string for the unit-- can be COMID, or HUC8-HUC14 identifier</param>
+        /// <param name="SegID">The identifying string for the COMID</param>
         /// <param name="SegIndex">Count of the number of COMIDs that have passed data to this Lake/Reservoir, including this one</param>
         /// <param name="WBJSON">The input waterbody JSON that will be modified with this COMID data from HAWQS</param>
         /// <param name="setupjson">string holding the master setup record</param>
@@ -1031,11 +1085,17 @@ namespace AQUATOX.AQSim_2D
                 rtesFilen = "rtes-huc10-2024-03-01-071352.csv";
                 subbasinFilen = "subbasins-huc10-2023-05-02-124829.csv";
             }
-            else
+            if (HUClen == 12)
             {
                 rtesFilen = "rtes-huc12-2024-03-01-070604.csv";
                 subbasinFilen = "subbasins-huc12-2023-05-23-115646.csv";
             }
+            else //(HUClen == 14)
+            {
+                rtesFilen = "rtes-huc14-2024-05-15.csv";
+                subbasinFilen = "subbasins-huc14-2024-04-29-142943.csv";
+            }
+
 
             string DBDir = @"..\2D_Inputs\HAWQS_data\RTE_SUB\";
 
@@ -1249,6 +1309,7 @@ namespace AQUATOX.AQSim_2D
         //return true;
         //}
 
+
         /// <summary>
         /// Adds HAWQS daily outputs for overland flows and inflows (where relevant) to the simulation unit identified with SegID
         /// </summary>
@@ -1259,14 +1320,26 @@ namespace AQUATOX.AQSim_2D
         /// <param name="link_boundary">should boundary condition inflows from HAWQS be added to this segment-- i.e. is the up-river segment out of the AQUATOX domain?</param>
         /// <param name="link_overland">should overland flows be added to this segment</param>
         /// <returns>jsondata (the AQUATOX simulation JSON after HAWQS data has been linked), errors</returns>
-public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, bool is_COMID)
+    public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HRD, List <string> Boundaries, string SegID, string setupjson, bool link_boundary, bool link_overland, bool is_COMID)
         {
             string jsondata = "";
             long ID = long.Parse(SegID);
 
-            Dictionary<DateTime, HAWQSRCHRow> ThisSeg;
-            if (HRD.ContainsKey(ID)) ThisSeg = HRD[ID];
+            List<Dictionary<DateTime, HAWQSRCHRow>> ThisSeg = new();  // 7/3/2024 convert to List to account for merged segments
+            if (HRD.ContainsKey(ID)) ThisSeg.Add(HRD[ID]);
             else return ("","ERROR: Segment " + SegID + " missing from HAWQS reach output");
+
+            if (SN != null && SN.merged != null)
+                foreach (var merge in SN.merged)
+                    if (merge[1] == SegID)
+                    {
+                        long mergedSegId = long.Parse(merge[0]);
+                        if (HRD.ContainsKey(mergedSegId))
+                        {
+                            ThisSeg.Add(HRD[mergedSegId]);
+                        }
+                    }
+         
 
             List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
             foreach (string bound in Boundaries)
@@ -1293,7 +1366,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
             DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
 
-            double avgRet = VolFlowFromHAWQS(TVol, ThisSeg, FirstDay);  // read data for volume/flow model from HAWQS Linkage and record 
+            double avgRet = VolFlowFromHAWQS(TVol, ThisSeg[0], FirstDay, SegID, HRD);  // read data for volume/flow model from HAWQS Linkage and record 
             if (is_COMID) avgRetention[int.Parse(SegID)]= avgRet;   // log avg. retention time if relevant
 
             string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  
@@ -1312,9 +1385,12 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         break;
                     }
                 }
-            }  
+            }
 
-            double InitFlow = ThisSeg[FirstDay].vals[1];  //column for flow_OUT
+            bool savedboundary = false;  //were boundary flows saved for later use in data passage?
+            TLoadings BoundLoad = TVol.LoadsRec.Alt_Loadings[2];
+
+            double InitFlow = ThisSeg.Sum(seg => seg[FirstDay].vals[1]);  //[1] is column for flow_OUT
             for (int i = 0; i < components.Length; i++)
             {
                 bool isSED = (components[i] == "SED");  //sediment is handled differently in units and modeling
@@ -1329,7 +1405,7 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
                 if (TSV != null) 
                 {
-                    TSV.InitialCond = (InitFlow <= 0) ? 0 : ThisSeg[FirstDay].vals[col_OUT] / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
+                    TSV.InitialCond = (InitFlow <= 0) ? 0 : ThisSeg.Sum(seg => seg[FirstDay].vals[col_OUT]) / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
                     if (isSED) TSV.InitialCond *= 1000;  // sed is in units of tons
                     if (isCHLA) TSV.InitialCond = TSV.InitialCond * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90 ;
                     //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
@@ -1364,16 +1440,24 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         TSV.LoadNotes2 = "Non-Point Source Loads from HAWQS Simulation";
                     }
 
-                    foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                    foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg[0])  //for each date
                     {
                         double boundInput = 0;
                         double boundflow = 0;
+                        bool foundboundary = false;
 
                         foreach (Dictionary<DateTime, HAWQSRCHRow> BoundSeg in BoundSegs)
                         {
                             boundInput += BoundSeg[pair.Key].vals[col_OUT];  // kg/d
                             boundflow += BoundSeg[pair.Key].vals[1];  // flow out in m3/s
+                            foundboundary = true;
                         }
+
+                        if (foundboundary && !savedboundary)
+                        {
+                            BoundLoad.list.Add(pair.Key, boundflow * 86400);   // associated boundary condition loads in m3/d
+                        }
+                        
 
                         double inflowConc = 0;
                         if (boundflow > Consts.Tiny)
@@ -1387,11 +1471,16 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
 
                         if (link_overland && overlandrelevant)
                         {
-                            double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
-                            double overland_flow = Math.Max(0,(comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
+                            double overland_flow = 0;
+                            foreach (var seg in ThisSeg)
+                            {
+                                double comp_IN = seg[pair.Key].vals[col_IN]; // kg/d
+                                overland_flow += Math.Max(0, (comp_IN - boundInput) * 1000); // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
+                            }
                             NPSLoad.list.Add(pair.Key, overland_flow);   // add daily NPS load in grams/d 
                         }
                     }
+                    if (BoundLoad.list.Count > 0) savedboundary = true; 
                 }
             }
 
@@ -1400,11 +1489,11 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
             int col_WTMP = Array.IndexOf(HAWQSInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
             if ((TTemp != null) && (col_WTMP >= 0))
             {
-                TTemp.InitialCond = ThisSeg[FirstDay].vals[col_WTMP];
+                TTemp.InitialCond = ThisSeg[0][FirstDay].vals[col_WTMP];
                 TTemp.LoadNotes1 = "Temperature from HAWQS RCH data";
                 TTemp.LoadNotes2 = "";
                 setupLoad(TTemp.LoadsRec.Loadings, ThisSeg.Count);
-                foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg)  //for each date
+                foreach (KeyValuePair<DateTime, HAWQSRCHRow> pair in ThisSeg[0])  //for each date
                 {
                     TTemp.LoadsRec.Loadings.list.Add(pair.Key, pair.Value.vals[col_WTMP]);  // add daily WT in deg C
                 }
@@ -1528,6 +1617,10 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
         /// <returns>errors, warnings</returns>
         public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, bool passMass, ref SortedList<DateTime, double> previous_flows, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
         {
+            SortedList<DateTime, double> tot_flows = null;
+            SortedList<DateTime, double> boundary_flows = null;
+            bool tot_flows_init = false;
+            bool Add_bound_flows = false;
 
             //archived_results AR;
             if (AR == null)    
@@ -1547,22 +1640,22 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
             Sim.AQTSeg.PSetup.UseDetrInputRecInflow.Val = false;  // 10/4/2021 inflow from upstream for detritus, not from input record
 
             for (int iTSV = 0; iTSV < Sim.AQTSeg.SV.Count; iTSV++)
-                {
-                    TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
+            {
+                TStateVariable TSV = Sim.AQTSeg.SV[iTSV];
+                TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+                int ndates = AR.dates.Count();
 
                 if (((TSV.NState >= AllVariables.H2OTox) && (TSV.NState < AllVariables.TSS)) ||    // Select which state variables move from segment to segment
-                        ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || 
-                        ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
-                        ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
-                    {
-                    TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
-                    int ndates = AR.dates.Count();
-
+                    ((TSV.NState >= AllVariables.DissRefrDetr) && (TSV.NState <= AllVariables.SuspLabDetr)) || 
+                    ((TSV.IsPlant()) && ( ((TPlant)TSV).IsPhytoplankton() || (((TPlant)TSV).IsMacrophyte() && (((TPlant)TSV).MacroType == TMacroType.Freefloat))) ) ||
+                    ((TSV.IsAnimal()) && ((TAnimal)TSV).IsPlanktonInvert()))
+                {
                     TLoadings flowLoad;
                     if (tvol.Calc_Method == VolumeMethType.Manning) flowLoad = tvol.LoadsRec.Alt_Loadings[1];  //manning's input is "discharge load" or [1]
                     else flowLoad = tvol.LoadsRec.Alt_Loadings[0];  //[0] is inflow
 
                     SortedList<DateTime, double> newlist = new SortedList<DateTime, double>();
+                    if (!tot_flows_init) tot_flows = new SortedList<DateTime, double>();
                     if (ninputs == 1) previous_flows = new SortedList<DateTime, double>();  // first or only loading, start saving flows for weighted averaging with potential future loadings
 
                     for (int i = 0; i < ndates; i++)
@@ -1592,25 +1685,67 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                             if (ninputs == 1)
                             {
                                 newlist.Add(AR.dates[i], AR.concs[iTSV][i]);  // first or only input
-                                previous_flows.Add(AR.dates[i], OutVol * frac_this_segment);  //water flowing into this segment at this time step corrected for divergences
+                                if (!tot_flows_init) tot_flows.Add(AR.dates[i], OutVol * frac_this_segment);  //water flowing into this segment at this time step corrected for divergences
                             }
                             else
                             {
                                 double otherSegFlows = previous_flows.Values[i];  //sum of other-segment flows into this segment in this time step
                                 double thisSegFlows = OutVol * frac_this_segment; //flows into this segment from passage segment this time step
-                                double totFlows = otherSegFlows + thisSegFlows;   //total flows into this segment this time step
-                                double weightavg = totFlows > 0 ? (TSV.LoadsRec.Loadings.list.Values[i] * otherSegFlows + AR.concs[iTSV][i] * thisSegFlows) / totFlows : 0;
+                                double totFlow = otherSegFlows + thisSegFlows;   //total flows into this segment this time step
+                                double weightavg = totFlow > 0 ? (TSV.LoadsRec.Loadings.list.Values[i] * otherSegFlows + AR.concs[iTSV][i] * thisSegFlows) / totFlow : 0;
                                 newlist.Add(AR.dates[i], weightavg);  //weighted-averaging second or third inputs by volume of water.  
+                                if (!tot_flows_init) tot_flows.Add(AR.dates[i], totFlow);  //save summed flows to a list
                             }
                         }
-                    }
+                    }  // loop through dates
+
+                    // following code deals for the case where there are both in-domain loads and boundary condition loads to the same segment e.g. after merging segments
+                    boundary_flows = tvol.LoadsRec.Alt_Loadings[2].list;  //list of boundary-condition inflow loads 
+                    if ((ninputs == 1) && (TSV.LoadsRec.Loadings.list.Count > 0))  // only run algorithm for first in-domain stream (ninputs ==1) when there are saved boundary inputs and flows (list.Count>0)
+                        foreach (var date in tot_flows.Keys.ToList())
+                        {
+                            if (boundary_flows.ContainsKey(date))
+                            {
+                                Add_bound_flows = true;
+                                double inDomainFlow = tot_flows[date];  //flows coming in from in-domain segment
+                                double boundFlow = boundary_flows[date]; //boundary condition flows 
+                                double totFlow = inDomainFlow + boundFlow;
+
+                                if (newlist.ContainsKey(date))
+                                {
+                                    newlist[date] = (newlist[date] * inDomainFlow + TSV.LoadsRec.Loadings.list[date] * boundFlow) / totFlow;
+                                }
+                                else
+                                {
+                                    newlist[date] = TSV.LoadsRec.Loadings.list[date];
+                                }
+                            }
+                        }
+
+                    tot_flows_init = true;
 
                     TSV.LoadsRec.Loadings.list = newlist;
                     TSV.LoadsRec.Loadings.UseConstant = false;
                     // TSV.LoadsRec.Loadings.Hourly = true; 12/14/22
-                    TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
+
+                    if (ninputs == 1) TSV.LoadNotes1 = "Linkage Data from " + SrcID.ToString();
+                    else TSV.LoadNotes1 += "; " + SrcID.ToString();
+
+                }  //loop through all relevant SVs
+            } //loop through all SVs
+
+            if (Add_bound_flows)  //update tot flows to include boundary-condition flow volumes
+                foreach (var date in tot_flows.Keys.ToList())
+                {
+                    if (boundary_flows.ContainsKey(date))
+                    {
+                        double inDomainFlow = tot_flows[date];   //flows coming in from in-domain segment
+                        double boundFlow = boundary_flows[date]; //boundary condition flows 
+                        tot_flows[date] = inDomainFlow + boundFlow;
+                    }
                 }
-            }
+            previous_flows = tot_flows;  //save for next segment linkage if it exists
+
             return "";
         }
 
@@ -1676,9 +1811,9 @@ public async Task<(string,string)> HAWQSRead(Dictionary<long, Dictionary<DateTim
                         {
                             nSources++;
                             string errstr = Pass_Data(Sim, SrcID, nSources, false, ref previous_flows, null, divergence_flows);
-                    if (errstr != "") outstr.Add(errstr);
+                            if (errstr != "") outstr.Add(errstr);
                                 else outstr.Add("INFO: Passed data from Source " + SrcID.ToString() + " into COMID " + segID.ToString());
-                }
+                        }
                     };
             
                 if ((SN.waterbodies != null) && (SN.sources != null))

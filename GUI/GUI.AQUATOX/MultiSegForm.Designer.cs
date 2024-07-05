@@ -44,7 +44,7 @@
             FlowsButton = new System.Windows.Forms.Button();
             SetupButton = new System.Windows.Forms.Button();
             SystemInfoPanel = new System.Windows.Forms.Panel();
-            trackBar1 = new System.Windows.Forms.TrackBar();
+            mergetestbutton = new System.Windows.Forms.Button();
             SILabel3 = new System.Windows.Forms.Label();
             SILabel2 = new System.Windows.Forms.Label();
             SILabel1 = new System.Windows.Forms.Label();
@@ -105,7 +105,6 @@
             ModelSetupPanel.SuspendLayout();
             HAWQSButtonPanel.SuspendLayout();
             SystemInfoPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             OutputPanel.SuspendLayout();
             TogglePanel.SuspendLayout();
             PlotPanel.SuspendLayout();
@@ -144,7 +143,7 @@
             ProcessLog.Name = "ProcessLog";
             ProcessLog.ReadOnly = true;
             ProcessLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            ProcessLog.Size = new System.Drawing.Size(814, 467);
+            ProcessLog.Size = new System.Drawing.Size(814, 511);
             ProcessLog.TabIndex = 6;
             ProcessLog.WordWrap = false;
             ProcessLog.KeyDown += ProcessLog_KeyDown;
@@ -180,9 +179,9 @@
             ModelSetupPanel.Controls.Add(CreateButton);
             ModelSetupPanel.Controls.Add(FlowsButton);
             ModelSetupPanel.Controls.Add(SetupButton);
-            ModelSetupPanel.Location = new System.Drawing.Point(24, 262);
+            ModelSetupPanel.Location = new System.Drawing.Point(24, 296);
             ModelSetupPanel.Name = "ModelSetupPanel";
-            ModelSetupPanel.Size = new System.Drawing.Size(255, 118);
+            ModelSetupPanel.Size = new System.Drawing.Size(255, 120);
             ModelSetupPanel.TabIndex = 23;
             // 
             // label4
@@ -270,26 +269,30 @@
             // SystemInfoPanel
             // 
             SystemInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            SystemInfoPanel.Controls.Add(trackBar1);
-            SystemInfoPanel.Controls.Add(SILabel3);
             SystemInfoPanel.Controls.Add(SILabel2);
+            SystemInfoPanel.Controls.Add(mergetestbutton);
+            SystemInfoPanel.Controls.Add(SILabel3);
             SystemInfoPanel.Controls.Add(SILabel1);
             SystemInfoPanel.Location = new System.Drawing.Point(24, 128);
             SystemInfoPanel.Name = "SystemInfoPanel";
-            SystemInfoPanel.Size = new System.Drawing.Size(255, 122);
+            SystemInfoPanel.Size = new System.Drawing.Size(255, 145);
             SystemInfoPanel.TabIndex = 24;
             // 
-            // trackBar1
+            // mergetestbutton
             // 
-            trackBar1.Location = new System.Drawing.Point(123, 135);
-            trackBar1.Name = "trackBar1";
-            trackBar1.Size = new System.Drawing.Size(104, 45);
-            trackBar1.TabIndex = 57;
+            mergetestbutton.Location = new System.Drawing.Point(67, 114);
+            mergetestbutton.Name = "mergetestbutton";
+            mergetestbutton.Size = new System.Drawing.Size(126, 24);
+            mergetestbutton.TabIndex = 60;
+            mergetestbutton.Text = "Merge Segments";
+            mergetestbutton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            mergetestbutton.UseVisualStyleBackColor = true;
+            mergetestbutton.Click += merge_button_Click;
             // 
             // SILabel3
             // 
             SILabel3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel3.Location = new System.Drawing.Point(10, 80);
+            SILabel3.Location = new System.Drawing.Point(10, 75);
             SILabel3.Name = "SILabel3";
             SILabel3.Size = new System.Drawing.Size(235, 40);
             SILabel3.TabIndex = 56;
@@ -298,7 +301,7 @@
             // SILabel2
             // 
             SILabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel2.Location = new System.Drawing.Point(11, 40);
+            SILabel2.Location = new System.Drawing.Point(11, 35);
             SILabel2.Name = "SILabel2";
             SILabel2.Size = new System.Drawing.Size(235, 40);
             SILabel2.TabIndex = 55;
@@ -308,7 +311,7 @@
             // 
             SILabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             SILabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            SILabel1.Location = new System.Drawing.Point(10, 15);
+            SILabel1.Location = new System.Drawing.Point(10, 10);
             SILabel1.Name = "SILabel1";
             SILabel1.Size = new System.Drawing.Size(235, 19);
             SILabel1.TabIndex = 54;
@@ -322,7 +325,7 @@
             OutputPanel.Controls.Add(label3);
             OutputPanel.Controls.Add(CSVButton);
             OutputPanel.Enabled = false;
-            OutputPanel.Location = new System.Drawing.Point(24, 508);
+            OutputPanel.Location = new System.Drawing.Point(24, 555);
             OutputPanel.Name = "OutputPanel";
             OutputPanel.Size = new System.Drawing.Size(255, 81);
             OutputPanel.TabIndex = 25;
@@ -367,7 +370,7 @@
             // 
             // viewOutputButton
             // 
-            viewOutputButton.Location = new System.Drawing.Point(83, 513);
+            viewOutputButton.Location = new System.Drawing.Point(83, 560);
             viewOutputButton.Name = "viewOutputButton";
             viewOutputButton.Size = new System.Drawing.Size(127, 23);
             viewOutputButton.TabIndex = 49;
@@ -387,7 +390,7 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new System.Drawing.Point(53, 254);
+            label8.Location = new System.Drawing.Point(53, 288);
             label8.Name = "label8";
             label8.Size = new System.Drawing.Size(168, 15);
             label8.TabIndex = 27;
@@ -422,7 +425,7 @@
             TogglePanel.Controls.Add(GraphButton);
             TogglePanel.Controls.Add(MapButton2);
             TogglePanel.Controls.Add(ConsoleButton);
-            TogglePanel.Location = new System.Drawing.Point(305, 564);
+            TogglePanel.Location = new System.Drawing.Point(305, 608);
             TogglePanel.Name = "TogglePanel";
             TogglePanel.Size = new System.Drawing.Size(291, 23);
             TogglePanel.TabIndex = 36;
@@ -561,7 +564,7 @@
             // 
             infolabel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel1.AutoSize = true;
-            infolabel1.Location = new System.Drawing.Point(619, 566);
+            infolabel1.Location = new System.Drawing.Point(619, 610);
             infolabel1.Name = "infolabel1";
             infolabel1.Size = new System.Drawing.Size(361, 15);
             infolabel1.TabIndex = 39;
@@ -572,7 +575,7 @@
             // 
             infolabel2.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             infolabel2.AutoSize = true;
-            infolabel2.Location = new System.Drawing.Point(619, 585);
+            infolabel2.Location = new System.Drawing.Point(619, 629);
             infolabel2.Name = "infolabel2";
             infolabel2.Size = new System.Drawing.Size(244, 15);
             infolabel2.TabIndex = 40;
@@ -600,7 +603,7 @@
             webView.Location = new System.Drawing.Point(306, 93);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(814, 466);
+            webView.Size = new System.Drawing.Size(814, 510);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -650,7 +653,7 @@
             // OutputLabel
             // 
             OutputLabel.AutoSize = true;
-            OutputLabel.Location = new System.Drawing.Point(53, 496);
+            OutputLabel.Location = new System.Drawing.Point(53, 543);
             OutputLabel.Name = "OutputLabel";
             OutputLabel.Size = new System.Drawing.Size(126, 15);
             OutputLabel.TabIndex = 48;
@@ -673,7 +676,7 @@
             // 
             toggleLog.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             toggleLog.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            toggleLog.Location = new System.Drawing.Point(1005, 568);
+            toggleLog.Location = new System.Drawing.Point(1005, 612);
             toggleLog.Name = "toggleLog";
             toggleLog.Size = new System.Drawing.Size(114, 25);
             toggleLog.TabIndex = 51;
@@ -684,7 +687,7 @@
             // resetZoom
             // 
             resetZoom.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            resetZoom.Location = new System.Drawing.Point(58, 27);
+            resetZoom.Location = new System.Drawing.Point(58, 26);
             resetZoom.Name = "resetZoom";
             resetZoom.Size = new System.Drawing.Size(90, 22);
             resetZoom.TabIndex = 52;
@@ -702,7 +705,7 @@
             LogPanel.Controls.Add(InputsBox);
             LogPanel.Controls.Add(ErrorsBox);
             LogPanel.Controls.Add(WarningsBox);
-            LogPanel.Location = new System.Drawing.Point(612, 565);
+            LogPanel.Location = new System.Drawing.Point(612, 609);
             LogPanel.Name = "LogPanel";
             LogPanel.Size = new System.Drawing.Size(521, 37);
             LogPanel.TabIndex = 54;
@@ -810,7 +813,7 @@
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new System.Drawing.Point(50, 383);
+            label9.Location = new System.Drawing.Point(50, 424);
             label9.Name = "label9";
             label9.Size = new System.Drawing.Size(96, 15);
             label9.TabIndex = 56;
@@ -824,7 +827,7 @@
             ExecutePanel.Controls.Add(executeButton);
             ExecutePanel.Controls.Add(proglabel);
             ExecutePanel.Controls.Add(StatusLabel);
-            ExecutePanel.Location = new System.Drawing.Point(24, 391);
+            ExecutePanel.Location = new System.Drawing.Point(24, 432);
             ExecutePanel.Name = "ExecutePanel";
             ExecutePanel.Size = new System.Drawing.Size(255, 102);
             ExecutePanel.TabIndex = 53;
@@ -893,7 +896,7 @@
             GraphOptPanel.Controls.Add(graphOption);
             GraphOptPanel.Controls.Add(zoomOption);
             GraphOptPanel.Controls.Add(label6);
-            GraphOptPanel.Location = new System.Drawing.Point(615, 560);
+            GraphOptPanel.Location = new System.Drawing.Point(615, 604);
             GraphOptPanel.Name = "GraphOptPanel";
             GraphOptPanel.Size = new System.Drawing.Size(391, 51);
             GraphOptPanel.TabIndex = 59;
@@ -941,7 +944,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1132, 611);
+            ClientSize = new System.Drawing.Size(1132, 655);
             Controls.Add(GraphOptPanel);
             Controls.Add(label9);
             Controls.Add(ExecutePanel);
@@ -985,8 +988,6 @@
             ModelSetupPanel.ResumeLayout(false);
             HAWQSButtonPanel.ResumeLayout(false);
             SystemInfoPanel.ResumeLayout(false);
-            SystemInfoPanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             OutputPanel.ResumeLayout(false);
             OutputPanel.PerformLayout();
             TogglePanel.ResumeLayout(false);
@@ -1062,7 +1063,6 @@
         private System.Windows.Forms.Button ReadHAWQSButton;
         private System.Windows.Forms.Button HAWQS_button;
         private System.Windows.Forms.CheckBox ShowH14Box;
-        private System.Windows.Forms.TrackBar trackBar1;
         private System.Windows.Forms.ComboBox DataSourceBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Panel ExecutePanel;
@@ -1077,5 +1077,6 @@
         private System.Windows.Forms.RadioButton zoomOption;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button FindButton;
+        private System.Windows.Forms.Button mergetestbutton;
     }
 }
