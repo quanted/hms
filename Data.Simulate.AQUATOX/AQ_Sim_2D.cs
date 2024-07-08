@@ -391,9 +391,10 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         /// <param name="TVol">AQUATOX Volume object to be populated with data</param>
         /// <param name="ATSO">National Water Model time-series output</param>
+        /// <param name="merged">Is this a segment that has been merged (for addition)</param>
         /// <returns>The average retention time for the period being modeled in days</returns>
         /// <exception cref="ArgumentException"></exception>
-        public double StreamFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO)  // time series output must currently be in m3/s   
+        public double StreamFlowsFromNWM(TVolume TVol, Data.TimeSeriesOutput<List<double>> ATSO, string IDStr, bool merged)  // time series output must currently be in m3/s   
         {
             double RTSum = 0;
             int RTCount = 0;
@@ -421,8 +422,11 @@ namespace AQUATOX.AQSim_2D
 
                 ITimeSeriesOutput TSO = InflowLoad.ITSI.InputTimeSeries.FirstOrDefault().Value;
 
-                KnownValLoad.list.Clear();
-                KnownValLoad.list.Capacity = TSO.Data.Count;
+                if (!merged)
+                {
+                    KnownValLoad.list.Clear();
+                    KnownValLoad.list.Capacity = TSO.Data.Count;
+                }
 
                 bool firstvol = true;
                 foreach (KeyValuePair<string, List<string>> entry in TSO.Data)
@@ -442,22 +446,29 @@ namespace AQUATOX.AQSim_2D
                         VolCalc = (flow / velocity) * (TVol.AQTSeg.Location.Locale.SiteLength.Val) * 1000;
                     // known value(m3) = flow(m3/s) / velocity(m/s) * sitelength(km) * 1000 (m/km)
                     if (VolCalc < Consts.Tiny) VolCalc = TVol.AQTSeg.Location.Locale.SiteLength.Val * 1000; //default minimum volume (length * XSec 1 m2) for now
-                    KnownValLoad.list.Add(date, VolCalc);
 
-                    if (firstvol) TVol.InitialCond = VolCalc;
+                    if (!merged) KnownValLoad.list.Add(date, VolCalc);
+                    else KnownValLoad.list[date] += VolCalc;
+
+                    if (firstvol)
+                    {
+                        if (!merged) TVol.InitialCond = VolCalc;
+                        else TVol.InitialCond += VolCalc;
+                    }
                     firstvol = false;
 
                     RTSum += VolCalc / (flow * 86400);   // m3  / (m3/s * s/d)  = retention time in days
                     RTCount++;
                 }
 
-                InflowLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  // default minimum flow of 1000 cmd for now  multiplier is seconds per day
+                if (!merged) InflowLoad.Translate_ITimeSeriesInput(0, 86400, 1000);  // default minimum flow of 1000 cmd for now  multiplier is seconds per day
                 InflowLoad.MultLdg = 1;
                 // InflowLoad.Hourly = true; 12/14/22
                 InflowLoad.UseConstant = false;
 
                 TVol.LoadNotes1 = "Volumes from NWM using flows in m3/s";
-                TVol.LoadNotes2 = "NWM inflow converted from m3/d using multiplier";
+                if (merged) TVol.LoadNotes2 += ", " + IDStr;
+                    else TVol.LoadNotes2 = "COMID " + IDStr;
                 InflowLoad.ITSI = null;
 
                 if (TVol.AQTSeg.DynVelocity == null) TVol.AQTSeg.DynVelocity = new TLoadings();
@@ -1568,9 +1579,10 @@ namespace AQUATOX.AQSim_2D
         /// </summary>
         /// <param name="iSeg">index of segment being set up</param>
         /// <param name="setupjson">string holding the master setup record</param>
+        /// <param name="mergeIDs">list of segments that were merged to this one</param>
         /// <param name="jsondata">a json string holding the modified AQUATOX segment</param>
         /// <returns>a blank string if no error, or error details otherwise</returns>
-        public string PopulateStreamNetwork(int iSeg, string setupjson, out string jsondata) 
+        public string PopulateStreamNetwork(int iSeg, string setupjson, List<string> mergeIDs, out string jsondata) 
         {
             jsondata = "";
             string comid = SN.network[iSeg][0];
@@ -1587,19 +1599,37 @@ namespace AQUATOX.AQSim_2D
             TSI.Geometry.GeometryMetadata["waterbody"] ="false"; 
             TSI.Source = "nwm";
 
+            TVolume tvol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
+
             try
             {
                 TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
                 if (errstr != "") return errstr;
-                avgRetention.Add(iSeg, StreamFlowsFromNWM(Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume,TSO));  //read stream flows and log avg. retention time
+                double RTime = StreamFlowsFromNWM(tvol, TSO, comid, false);  // add stream flows to TVol
+                avgRetention.Add(iSeg,RTime);  //read stream flows and log avg. retention time
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return "Error reading NWM Data for comid "+comid+": "+ ex.Message;
             }
 
-            jsondata = "";
+            foreach (string mergeID in mergeIDs)
+            {
+                try
+                {
+                    TSI.Geometry.ComID = int.Parse(mergeID);
+                    TimeSeriesOutput<List<double>> TSO = submitHydrologyRequest(TSI, out string errstr);
+                    if (errstr != "") return errstr;
+                    avgRetention[iSeg] += StreamFlowsFromNWM(tvol, TSO, mergeID, true);  //read stream flows and add to avg. retention time
+                }
+                catch (Exception ex)
+                {
+                    return "Error reading NWM Data for merged ID " + mergeID + ": " + ex.Message;
+                }
+            }
 
+
+            jsondata = "";
             string errmessage = Sim.SaveJSON(ref jsondata);
             return errmessage;
         }
@@ -1744,7 +1774,7 @@ namespace AQUATOX.AQSim_2D
                         tot_flows[date] = inDomainFlow + boundFlow;
                     }
                 }
-            previous_flows = tot_flows;  //save for next segment linkage if it exists
+            previous_flows = tot_flows;
 
             return "";
         }

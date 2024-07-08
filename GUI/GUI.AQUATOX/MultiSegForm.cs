@@ -30,8 +30,6 @@ using System.Windows.Forms.DataVisualization.Charting;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 using System.Globalization;
 using System.Collections.Concurrent;
-using DocumentFormat.OpenXml.Bibliography;
-using Utilities;
 
 namespace GUI.AQUATOX
 
@@ -733,6 +731,7 @@ namespace GUI.AQUATOX
                     if (BaseFileN == "") return;
 
                     AQT2D.baseSimJSON = File.ReadAllText(BaseFileN);
+                    AQT2D.avgRetention = new Dictionary<int, double>();
                     string msj = MasterSetupJson();
 
                     for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
@@ -742,20 +741,30 @@ namespace GUI.AQUATOX
 
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null)
-                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
+                        if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
                             continue;
                         }
 
-                        string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, out string jsondata);
+                        List<string> merged = new List<string>();
+                        if (AQT2D.SN.merged != null)
+                            foreach (var merge in AQT2D.SN.merged)
+                                if (merge[1] == comid) merged.Add(merge[0]);  // which other comids have been merged into this one
+
+                        string errmessage = AQT2D.PopulateStreamNetwork(iSeg, msj, merged, out string jsondata);
 
                         if (errmessage == "")
                         {
                             File.WriteAllText(filen, jsondata);
                             TSafeAddToProcessLog("INPUT: Read Volumes and Flows and Saved JSON for " + comid);
+                            if (merged.Count > 0)
+                            {
+                                TSafeAddToProcessLog("INPUT: Added to " + comid + " merged segments " + string.Join(", ", merged));
+                            }
                             TSafeUpdateProgress((int)((float)iSeg / (float)AQT2D.nSegs * 100.0));
+
                         }
                         else
                         {
@@ -2938,8 +2947,9 @@ namespace GUI.AQUATOX
             string MetafileN = BaseDir + "disaggregation_metadata.csv";
             if (File.Exists(MetafileN)) metadata = File.ReadAllText(MetafileN);
             string[] metadataLines = metadata.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-
+            AQT2D.avgRetention = new Dictionary<int, double>();
             Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup by ID then date
+
             void AddHAWQSRchData(long longKey, DateTime dateTimeKey, HAWQSRCHRow data)  //add a reach and date to the nested dictionary
             {
                 if (!HAWQSRchData.ContainsKey(longKey))  // Check if the outer dictionary already has the long key
