@@ -29,6 +29,7 @@ namespace GUI.AQUATOX
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MergeForm));
             OKBtn = new System.Windows.Forms.Button();
             CancelBtn = new System.Windows.Forms.Button();
             SILabel2 = new System.Windows.Forms.Label();
@@ -36,14 +37,15 @@ namespace GUI.AQUATOX
             Travel_Time_Edit = new System.Windows.Forms.TextBox();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
+            HelpButton2 = new System.Windows.Forms.Button();
             SuspendLayout();
             // 
             // OKBtn
             // 
             OKBtn.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            OKBtn.Location = new System.Drawing.Point(350, 12);
+            OKBtn.Location = new System.Drawing.Point(353, 10);
             OKBtn.Name = "OKBtn";
-            OKBtn.Size = new System.Drawing.Size(61, 23);
+            OKBtn.Size = new System.Drawing.Size(61, 26);
             OKBtn.TabIndex = 1;
             OKBtn.Text = "OK";
             OKBtn.UseVisualStyleBackColor = true;
@@ -53,9 +55,9 @@ namespace GUI.AQUATOX
             // 
             CancelBtn.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             CancelBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            CancelBtn.Location = new System.Drawing.Point(422, 12);
+            CancelBtn.Location = new System.Drawing.Point(425, 10);
             CancelBtn.Name = "CancelBtn";
-            CancelBtn.Size = new System.Drawing.Size(61, 23);
+            CancelBtn.Size = new System.Drawing.Size(61, 26);
             CancelBtn.TabIndex = 2;
             CancelBtn.Text = "Cancel";
             CancelBtn.UseVisualStyleBackColor = true;
@@ -101,17 +103,31 @@ namespace GUI.AQUATOX
             // label3
             // 
             label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
-            label3.Location = new System.Drawing.Point(12, 9);
+            label3.Location = new System.Drawing.Point(8, 9);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(300, 40);
+            label3.Size = new System.Drawing.Size(245, 53);
             label3.TabIndex = 60;
             label3.Text = "Merging segments can prevent tiny segments from causing the model to run slowly.";
+            // 
+            // HelpButton2
+            // 
+            HelpButton2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            HelpButton2.Image = (System.Drawing.Image)resources.GetObject("HelpButton2.Image");
+            HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            HelpButton2.Location = new System.Drawing.Point(264, 9);
+            HelpButton2.Name = "HelpButton2";
+            HelpButton2.Size = new System.Drawing.Size(78, 27);
+            HelpButton2.TabIndex = 61;
+            HelpButton2.Text = "   Help";
+            HelpButton2.UseVisualStyleBackColor = true;
+            HelpButton2.Click += HelpButton2_Click;
             // 
             // MergeForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(501, 162);
+            ClientSize = new System.Drawing.Size(500, 165);
+            Controls.Add(HelpButton2);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -134,5 +150,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.TextBox Travel_Time_Edit;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button HelpButton2;
     }
 }

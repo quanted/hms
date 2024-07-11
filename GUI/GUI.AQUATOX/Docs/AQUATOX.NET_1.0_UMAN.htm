@@ -3107,7 +3107,7 @@ html{background-color:#999999;}body{width:6.5in;background-color:#FFFFFF;float:n
   style='background:yellow'>TBD</span></span></p>
   <p class=MsoNormal style='background:white'><span style='font-size:8.0pt;
   font-family:"Helvetica",sans-serif;color:black'>Environmental Protection                                                                                                                          Draft
-  4/8/2024</span></p>
+  7/11/2024</span></p>
   <p class=MsoNormal style='background:white'><span style='font-size:8.0pt;
   font-family:"Helvetica",sans-serif;color:black'>Agency</span></p>
   <p class=MsoNormal style='line-height:3.1pt;background:white'>
@@ -7828,6 +7828,93 @@ selected, clicking on a stream line or waterbody will bring you to the <a
 href="#OutputScreen">output window</a> that pertains to the segment selected.  </p>
 
 <p class=MsoNormal>&nbsp;</p>
+
+<h3 style='page-break-after:avoid'><a name=MergeSegments>Merging Segments<o:p></o:p></a></h3>
+
+<span style='mso-bookmark:MergeSegments'></span>
+
+<p class=MsoNormal>This capability is relevant to models using NHD+ stream
+networks.<span style='mso-spacerun:yes'>  </span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>Linked AQUATOX DOT NET stream segments are based on flow
+lines defined using USGS NHD+ COMIDs.<span style='mso-spacerun:yes'> 
+</span>Within NHD+ river networks, <span style='mso-spacerun:yes'> </span>relatively
+short flowlines may be present.<span style='mso-spacerun:yes'>  </span>These
+segments, sometimes only a few hundred meters in length, are necessary to
+connect adjacent flowlines or waterbodies.<span style='mso-spacerun:yes'> 
+</span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>Because of the very short travel time of these segments, they
+will often act as bottlenecks for a linked-model simulation.<span
+style='mso-spacerun:yes'>  </span>A model solution for a segment will generally
+require time steps that are shorter than the travel time for that segment.<span
+style='mso-spacerun:yes'>  </span>So if a segment has a travel time of 0.01
+days, at least 100 time-steps per day will be required for its simulation.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>To help with this problem, extremely short segments may be merged
+with adjacent larger segments.<span style='mso-spacerun:yes'>  </span>This can
+be achieved using the <b>Merge Segments</b> button.<span
+style='mso-spacerun:yes'>  </span>When this button is pressed, the user is
+provided with a dialog that gives statistics about the estimated travel time in
+the selected stream network.<span style='mso-spacerun:yes'>  </span>The average
+travel time for the network and the fifth-percentile travel time are shown.<span
+style='mso-spacerun:yes'>  </span>The user may then select a threshold for
+travel time and the number of segments that will be merged is updated.<span
+style='mso-spacerun:yes'>  </span>If the user selects OK from the dialog, segments
+shorter than that threshold will be merged with an adjacent downstream segment.<br>
+<br>
+Here are the steps taken when segments are merged together:</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in;mso-list:l30 level1 lfo39'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>The stream network (<span class=SpellE>StreamNetwork.JSON</span>)
+is backed up prior to modification.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;mso-list:l30 level1 lfo39'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>The modified stream network merges together
+small segments, adding them to an adjacent larger segment and updating length
+and travel time information.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in;mso-list:l30 level1 lfo39'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>The network structure is updated and the order
+of model solution is updated in the stream network.</p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-.25in;mso-list:l30 level1 lfo39'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>The shape for the larger segment is updated,
+adding the smaller segment, and the original <span class=SpellE>GeoJSON</span>
+file is backed up.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>Merged segments can be created for either an NWM-based or a
+HAWQS-based simulation. The merging of segments should be performed prior to step
+4 (NWM chosen) or step 5 (HAWQS chosen) above.<span style='mso-spacerun:yes'> 
+</span>This will ensure that the set of linked model inputs will be different
+for the simplified stream network than it would be for an un-merged network.<span
+style='mso-spacerun:yes'>  </span>After the “Link HAQWS data” or “Create Linked
+Inputs” has been completed, the simplified network will be ready to run and
+should produce faster run times.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+
 
 <h3 style='page-break-after:avoid'><a name=DataLinkage>Data Linkage Assumptions
 and Procedures</a></h3>

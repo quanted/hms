@@ -252,17 +252,21 @@ namespace GUI.AQUATOX
         {
             if (Properties.Settings.Default == null) return;
             if (Properties.Settings.Default.MS_Recent == null) Properties.Settings.Default.MS_Recent = new();
-            int indx = Properties.Settings.Default.MS_Recent.IndexOf(BDir);
-            if (indx == -1)
+
+            if (BDir != "")
             {
-                Properties.Settings.Default.MS_Recent.Insert(0, BDir);
-                if (Properties.Settings.Default.MS_Recent.Count > 10)
-                    Properties.Settings.Default.MS_Recent.RemoveAt(10);
-            }
-            else
-            {
-                Properties.Settings.Default.MS_Recent.RemoveAt(indx);
-                Properties.Settings.Default.MS_Recent.Insert(0, BDir);  //move to top
+                int indx = Properties.Settings.Default.MS_Recent.IndexOf(BDir);
+                if (indx == -1)
+                {
+                    Properties.Settings.Default.MS_Recent.Insert(0, BDir);
+                    if (Properties.Settings.Default.MS_Recent.Count > 10)
+                        Properties.Settings.Default.MS_Recent.RemoveAt(10);
+                }
+                else
+                {
+                    Properties.Settings.Default.MS_Recent.RemoveAt(indx);
+                    Properties.Settings.Default.MS_Recent.Insert(0, BDir);  //move to top
+                }
             }
 
             UpdateShortDirNames();
@@ -330,9 +334,9 @@ namespace GUI.AQUATOX
         private void UpdateScreen()
         {
 
-            bool validDirectory = VerifyBaseDir();
+            bool validDirectory = VerifyBaseDir();   // base directory valid?
             bool validJSON = false;
-            if (validDirectory) validJSON = VerifyStreamNetwork();
+            if (validDirectory) validJSON = VerifyStreamNetwork();  //stream network valid
             bool isLake0D = (Lake0D > 0);
             bool isHUC0D = (HUC0D != "");
             bool inputsegs = false;
@@ -347,6 +351,7 @@ namespace GUI.AQUATOX
                 FlowsButton.Text = "Model Params.";
                 executeButton.Text = "Run Model";
                 OutputLabel.Visible = false;
+                mergebutton.Visible = false;
                 OutputPanel.Visible = false;
                 GraphButton.Visible = false;
                 ShowBoundBox.Visible = false;
@@ -364,6 +369,7 @@ namespace GUI.AQUATOX
                 FlowsButton.Text = "Overland Flows";
                 executeButton.Text = "Execute Network";
                 OutputLabel.Visible = true;
+                mergebutton.Visible = validJSON;
                 OutputPanel.Visible = true;
                 GraphButton.Visible = true;
                 ShowBoundBox.Visible = true;
@@ -379,6 +385,8 @@ namespace GUI.AQUATOX
                 }
             };
 
+
+            
 
             if (validJSON)
             {
@@ -407,7 +415,9 @@ namespace GUI.AQUATOX
             {
                 setinfolabels("Empty Directory", "No AQUATOX NWM Model in this directory", "");
                 ConsoleButton.Checked = true;
+                UpdateRecentFiles("");
                 webView.Visible = false;
+                ReadHAWQSButton.Enabled = false;
                 ChartVisible(false);
             }
 
@@ -437,16 +447,15 @@ namespace GUI.AQUATOX
             SystemInfoPanel.Enabled = validDirectory;
             PlotPanel.Enabled = validJSON;
             TogglePanel.Enabled = validJSON;
-            SetupButton.Enabled = validDirectory;
+            SetupButton.Enabled = validJSON;
             CreateButton.Enabled = validJSON;
             FlowsButton.Enabled = inputsegs;
+            HAWQS_button.Enabled = validJSON;
             executeButton.Enabled = inputsegs;
             OutputPanel.Enabled = ArchivedOutput();
             outputjump.Enabled = (modelrun != DateTime.MinValue);
             viewOutputButton.Enabled = (modelrun != DateTime.MinValue);
         }
-
-
 
         private void chart1_MouseDown(object sender, MouseEventArgs e)  // display value from chart
         {
@@ -463,7 +472,7 @@ namespace GUI.AQUATOX
                     {
                         chart1.ChartAreas[0].RecalculateAxesScale();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // MessageBox.Show("Axis Resize Error: "+ex.Message);
                     }
@@ -741,7 +750,7 @@ namespace GUI.AQUATOX
 
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null)
-                        if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
+                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
@@ -1494,7 +1503,7 @@ namespace GUI.AQUATOX
 
         private void HelpButton2_Click(object sender, EventArgs e)
         {
-            string target = "multi_seg";
+            string target = "Multi_Segment_Runs";
             AQTMainForm.OpenUrl(target);
         }
 
@@ -1911,7 +1920,7 @@ namespace GUI.AQUATOX
             else
             {
                 if (Lake0D != 0) MessageBox.Show("WBCOMID: " + CString + ".  Model input for this waterbody not yet generated.");
-                else if (HUC0D != "") MessageBox.Show(HUCStr(CString) + ": " + CString + ".  Model input for this HUC not yet generated.");
+                else if (HUC0D != "") MessageBox.Show("HUC" + HUCStr(CString) + ": " + CString + ".  Model input for this HUC not yet generated.");
                 else MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated.");
             };
         }
@@ -2474,7 +2483,6 @@ namespace GUI.AQUATOX
                 pourpoint = "";
                 return null;
             }
-
         }
 
         private string SubsetGeoJSON(string GeoJSON_in, List<string> HUC14s)
@@ -2725,11 +2733,10 @@ namespace GUI.AQUATOX
                     }
                     AQT2D.HAWQSInf.AddSourceHUCs(HUC14);   //traverse up-river until a HUC8 boundary is encountered, set that as the HAWQS upstream segment
                 }
-
             }
             else  //HUC0D code
             {
-                hucstr = HUCStr(HUC0D);  // "8" to "14"
+                hucstr = HUCStr(HUC0D);  // string holding "8" to "14"
                 HAWQSInp.dataset = "HUC" + hucstr;
                 HAWQSInp.downstreamSubbasin = HUC0D;
 
@@ -2916,6 +2923,12 @@ namespace GUI.AQUATOX
 
         async private void Link_HAWQS_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(BaseJSONBox.Text))
+            {
+                AddToProcessLog("ERROR: Base JSON must be set prior to creating linked segments (upper-left part of Multi-Seg window).");
+                return;
+            }
+
             ConsoleButton.Checked = true;
             ChartVisible(false);
             BaseDir = basedirBox.Text;
@@ -3333,6 +3346,8 @@ namespace GUI.AQUATOX
 
         private void merge_button_Click(object sender, EventArgs e)
         {
+            if (AQT2D.SN == null) return;
+
             var ttdata = AnalyzeTravelTimes();
             double TTThreshold;
             using (var form = new MergeForm(ttdata))
@@ -3357,33 +3372,33 @@ namespace GUI.AQUATOX
                 foreach (var segmentId in smallSegments.ToList())
                 {
                     // Find adjacent segments
-                    var upstreamSegments = AQT2D.SN.sources.ContainsKey(segmentId) ? AQT2D.SN.sources[segmentId] : new int[] { };
-                    var downstreamSegment = GetDownstreamSegments(segmentId);  //fixme deal with divergences
+                    // var upstreamSegments = AQT2D.SN.sources.ContainsKey(segmentId) ? AQT2D.SN.sources[segmentId] : new int[] { };
+                    var downstreamSegment = GetDownstreamSegments(segmentId);
+                    //exclusively merge to downstream segment to ensure not merging a main stem to a small tributary.
 
                     // Filter valid upstream segments
-                    var validUpstreamSegments = upstreamSegments
-                        .Where(id => AQT2D.SN.network.Any(n => n[0] == id.ToString()))
-                        .ToArray();
-
+                    //var validUpstreamSegments = upstreamSegments
+                    //.Where(id => AQT2D.SN.network.Any(n => n[0] == id.ToString()))
+                    //.ToArray();
 
                     // merge with the downstream segment to ensure flow >= current segment
-                    if (downstreamSegment != null)
+                    if ((downstreamSegment != null) && (downstreamSegment.Length > 0))
                     {
                         MergeSegments(segmentId, downstreamSegment[0].ToString(), runOrderComids);
                     }
-                    // Try to merge with the smallest valid upstream segment
-                    else if (validUpstreamSegments.Length > 0)
-                    {  // check upstream segments if merging pour point
-                        foreach (var upstreamSegment in validUpstreamSegments.OrderBy(id => double.Parse(AQT2D.SN.network.First(n => n[0] == id.ToString())[4])))
-                        {
-                            if (upstreamSegment.ToString() != segmentId)
-                            {
-                                MergeSegments(segmentId, upstreamSegment.ToString(), runOrderComids);
-                                break;
-                            }
-                        }
-                    }
-
+                    /*                    // Try to merge with the smallest valid upstream segment
+                                        else if (validUpstreamSegments.Length > 0)
+                                        {  // check upstream segments if merging pour point
+                                            foreach (var upstreamSegment in validUpstreamSegments.OrderBy(id => double.Parse(AQT2D.SN.network.First(n => n[0] == id.ToString())[4])))
+                                            {
+                                                if (upstreamSegment.ToString() != segmentId)
+                                                {
+                                                    MergeSegments(segmentId, upstreamSegment.ToString(), runOrderComids);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                    */
                 }
             }
 

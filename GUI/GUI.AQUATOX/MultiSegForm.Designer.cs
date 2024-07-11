@@ -44,9 +44,9 @@
             FlowsButton = new System.Windows.Forms.Button();
             SetupButton = new System.Windows.Forms.Button();
             SystemInfoPanel = new System.Windows.Forms.Panel();
-            mergetestbutton = new System.Windows.Forms.Button();
-            SILabel3 = new System.Windows.Forms.Label();
             SILabel2 = new System.Windows.Forms.Label();
+            mergebutton = new System.Windows.Forms.Button();
+            SILabel3 = new System.Windows.Forms.Label();
             SILabel1 = new System.Windows.Forms.Label();
             OutputPanel = new System.Windows.Forms.Panel();
             chartButton = new System.Windows.Forms.Button();
@@ -116,9 +116,10 @@
             // 
             // basedirBox
             // 
-            basedirBox.Location = new System.Drawing.Point(79, 9);
+            basedirBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            basedirBox.Location = new System.Drawing.Point(207, 9);
             basedirBox.Name = "basedirBox";
-            basedirBox.Size = new System.Drawing.Size(427, 23);
+            basedirBox.Size = new System.Drawing.Size(426, 23);
             basedirBox.TabIndex = 2;
             basedirBox.Tag = "";
             basedirBox.Text = "..\\2D_Inputs\\SampleProject\\";
@@ -129,7 +130,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            label2.Location = new System.Drawing.Point(10, 12);
+            label2.Location = new System.Drawing.Point(138, 12);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(67, 15);
             label2.TabIndex = 4;
@@ -270,33 +271,13 @@
             // 
             SystemInfoPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             SystemInfoPanel.Controls.Add(SILabel2);
-            SystemInfoPanel.Controls.Add(mergetestbutton);
+            SystemInfoPanel.Controls.Add(mergebutton);
             SystemInfoPanel.Controls.Add(SILabel3);
             SystemInfoPanel.Controls.Add(SILabel1);
             SystemInfoPanel.Location = new System.Drawing.Point(24, 128);
             SystemInfoPanel.Name = "SystemInfoPanel";
             SystemInfoPanel.Size = new System.Drawing.Size(255, 145);
             SystemInfoPanel.TabIndex = 24;
-            // 
-            // mergetestbutton
-            // 
-            mergetestbutton.Location = new System.Drawing.Point(67, 114);
-            mergetestbutton.Name = "mergetestbutton";
-            mergetestbutton.Size = new System.Drawing.Size(126, 24);
-            mergetestbutton.TabIndex = 60;
-            mergetestbutton.Text = "Merge Segments";
-            mergetestbutton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-            mergetestbutton.UseVisualStyleBackColor = true;
-            mergetestbutton.Click += merge_button_Click;
-            // 
-            // SILabel3
-            // 
-            SILabel3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            SILabel3.Location = new System.Drawing.Point(10, 75);
-            SILabel3.Name = "SILabel3";
-            SILabel3.Size = new System.Drawing.Size(235, 40);
-            SILabel3.TabIndex = 56;
-            SILabel3.Text = "XX segments including XX lake/reservoir segments";
             // 
             // SILabel2
             // 
@@ -306,6 +287,26 @@
             SILabel2.Size = new System.Drawing.Size(235, 40);
             SILabel2.TabIndex = 55;
             SILabel2.Text = "Pour-Point COMID: 123457890 with a XX km up-network reach";
+            // 
+            // mergebutton
+            // 
+            mergebutton.Location = new System.Drawing.Point(67, 114);
+            mergebutton.Name = "mergebutton";
+            mergebutton.Size = new System.Drawing.Size(126, 24);
+            mergebutton.TabIndex = 60;
+            mergebutton.Text = "Merge Segments";
+            mergebutton.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            mergebutton.UseVisualStyleBackColor = true;
+            mergebutton.Click += merge_button_Click;
+            // 
+            // SILabel3
+            // 
+            SILabel3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            SILabel3.Location = new System.Drawing.Point(10, 75);
+            SILabel3.Name = "SILabel3";
+            SILabel3.Size = new System.Drawing.Size(235, 40);
+            SILabel3.TabIndex = 56;
+            SILabel3.Text = "XX segments including XX lake/reservoir segments";
             // 
             // SILabel1
             // 
@@ -409,11 +410,12 @@
             // 
             // HelpButton2
             // 
+            HelpButton2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             HelpButton2.Image = (System.Drawing.Image)resources.GetObject("HelpButton2.Image");
             HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton2.Location = new System.Drawing.Point(1045, 8);
+            HelpButton2.Location = new System.Drawing.Point(1041, 8);
             HelpButton2.Name = "HelpButton2";
-            HelpButton2.Size = new System.Drawing.Size(78, 28);
+            HelpButton2.Size = new System.Drawing.Size(79, 28);
             HelpButton2.TabIndex = 30;
             HelpButton2.Text = "   Help";
             HelpButton2.UseVisualStyleBackColor = true;
@@ -467,9 +469,10 @@
             // 
             // browseButton
             // 
+            browseButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             browseButton.Font = new System.Drawing.Font("Arial Narrow", 9F);
             browseButton.ForeColor = System.Drawing.Color.Black;
-            browseButton.Location = new System.Drawing.Point(506, 8);
+            browseButton.Location = new System.Drawing.Point(633, 8);
             browseButton.Margin = new System.Windows.Forms.Padding(0);
             browseButton.Name = "browseButton";
             browseButton.Size = new System.Drawing.Size(56, 25);
@@ -609,9 +612,10 @@
             // 
             // RecentLabel
             // 
+            RecentLabel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             RecentLabel.AutoSize = true;
             RecentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            RecentLabel.Location = new System.Drawing.Point(699, 14);
+            RecentLabel.Location = new System.Drawing.Point(711, 14);
             RecentLabel.Name = "RecentLabel";
             RecentLabel.Size = new System.Drawing.Size(95, 15);
             RecentLabel.TabIndex = 44;
@@ -619,9 +623,10 @@
             // 
             // RecentFilesBox
             // 
+            RecentFilesBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             RecentFilesBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             RecentFilesBox.FormattingEnabled = true;
-            RecentFilesBox.Location = new System.Drawing.Point(794, 9);
+            RecentFilesBox.Location = new System.Drawing.Point(806, 9);
             RecentFilesBox.Name = "RecentFilesBox";
             RecentFilesBox.Size = new System.Drawing.Size(201, 23);
             RecentFilesBox.TabIndex = 45;
@@ -629,12 +634,12 @@
             // 
             // NewProject
             // 
-            NewProject.Font = new System.Drawing.Font("Segoe UI", 9F);
+            NewProject.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
             NewProject.ForeColor = System.Drawing.Color.Black;
-            NewProject.Location = new System.Drawing.Point(582, 7);
+            NewProject.Location = new System.Drawing.Point(9, 9);
             NewProject.Margin = new System.Windows.Forms.Padding(0);
             NewProject.Name = "NewProject";
-            NewProject.Size = new System.Drawing.Size(86, 25);
+            NewProject.Size = new System.Drawing.Size(101, 25);
             NewProject.TabIndex = 46;
             NewProject.Text = "New Project";
             NewProject.UseVisualStyleBackColor = true;
@@ -896,7 +901,7 @@
             GraphOptPanel.Controls.Add(graphOption);
             GraphOptPanel.Controls.Add(zoomOption);
             GraphOptPanel.Controls.Add(label6);
-            GraphOptPanel.Location = new System.Drawing.Point(615, 604);
+            GraphOptPanel.Location = new System.Drawing.Point(613, 604);
             GraphOptPanel.Name = "GraphOptPanel";
             GraphOptPanel.Size = new System.Drawing.Size(391, 51);
             GraphOptPanel.TabIndex = 59;
@@ -1077,6 +1082,6 @@
         private System.Windows.Forms.RadioButton zoomOption;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button FindButton;
-        private System.Windows.Forms.Button mergetestbutton;
+        private System.Windows.Forms.Button mergebutton;
     }
 }

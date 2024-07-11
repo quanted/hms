@@ -47,6 +47,12 @@ namespace GUI.AQUATOX
                 // Keep the dialog open by not closing it
             }
         }
+
+        private void HelpButton2_Click(object sender, EventArgs e)
+        {
+            string target = "MergeSegments";
+            AQTMainForm.OpenUrl(target);
+        }
     }
 
 }

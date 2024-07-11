@@ -1096,6 +1096,7 @@ namespace AQUATOX.AQSim_2D
                 rtesFilen = "rtes-huc10-2024-03-01-071352.csv";
                 subbasinFilen = "subbasins-huc10-2023-05-02-124829.csv";
             }
+            else
             if (HUClen == 12)
             {
                 rtesFilen = "rtes-huc12-2024-03-01-070604.csv";
