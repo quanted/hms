@@ -407,7 +407,7 @@ namespace GUI.AQUATOX
                 ReadHAWQSButton.Enabled = HAWQSrun;
 
                 if (inputsegs)
-                {
+                {   
                     modelrun = ModelRunDate();
                 }
             }
