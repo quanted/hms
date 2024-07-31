@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0.28-alpine3.19 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0.420-alpine3.19 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0.424-alpine3.20 AS build
 WORKDIR /src
 COPY . ./
 WORKDIR /src/Web.Services
@@ -11,8 +11,9 @@ RUN dotnet build --self-contained --runtime linux-musl-x64 -c Release -o /app
 FROM build AS publish
 RUN dotnet publish --self-contained --runtime linux-musl-x64 -c Release -o /app
 
-FROM base AS final
+FROM build AS final
 WORKDIR /app
+RUN apk update
 RUN apk upgrade --available
 
 COPY --from=publish /app .
@@ -20,7 +21,7 @@ RUN ls /app/App_Data
 
 COPY ./GUI /app/GUI
 
-ENV APP_USER hms_user
+ENV APP_USER=hms_user
 
 RUN adduser \
   --disabled-password \
