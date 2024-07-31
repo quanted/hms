@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0.28-alpine3.19 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0.32-alpine3.20 AS base
 WORKDIR /app
 EXPOSE 8080
 
@@ -11,7 +11,7 @@ RUN dotnet build --self-contained --runtime linux-musl-x64 -c Release -o /app
 FROM build AS publish
 RUN dotnet publish --self-contained --runtime linux-musl-x64 -c Release -o /app
 
-FROM build AS final
+FROM base AS final
 WORKDIR /app
 RUN apk update
 RUN apk upgrade --available
