@@ -25,50 +25,27 @@ namespace Utilities
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true
             };
-            string key = System.Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
-            string hereKey = System.Environment.GetEnvironmentVariable("HERE_API_KEY");
-            if (key != null)
+            string baseUrl = Environment.GetEnvironmentVariable("FLASK_SERVER");
+            string location = "/hms/gis/tz?latitude=" + point.Latitude.ToString() + "&longitude=" + point.Longitude.ToString();
+
+            if (baseUrl == null)
             {
-                string baseUrl = "https://maps.googleapis.com/maps/api/timezone/json?";
-                string location = "location=" + point.Latitude.ToString() + "," + point.Longitude.ToString();
-                string timeStamp = "timestamp=1331161200";
-                string completeUrl = baseUrl + location + "&" + timeStamp + "&key=" + key;
-                try
-                {
-                    WebClient wc = new WebClient();
-                    byte[] buffer = wc.DownloadData(completeUrl);
-                    string resultString = Encoding.UTF8.GetString(buffer);
-                    Dictionary<string, object> tz = JsonSerializer.Deserialize<Dictionary<string, object>>(resultString);
-                    return new Timezone() { Name = tz["timeZoneId"].ToString(), Offset = Convert.ToDouble(tz["rawOffset"].ToString()) / 3600, DLS = false };
-                }
-                catch (Exception ex)
-                {
-                    errorMsg = "ERROR: " + ex.Message;
-                    return new Timezone();
-                }
+                baseUrl = "http://localhost:7777";
+                location = "/gis/tz?latitude=" + point.Latitude.ToString() + "&longitude=" + point.Longitude.ToString();
+
             }
-            else if(hereKey != null)
+            string completeUrl = baseUrl + location;
+            try
             {
-                string baseUrl = "https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json?";
-                string location = "prox=" + point.Latitude.ToString() + "," + point.Longitude.ToString();
-                string completeUrl = baseUrl + location + "&mode=retrieveAddresses&maxresults=1&gen=9&key=" + hereKey;
-                try
-                {
-                    WebClient wc = new WebClient();
-                    byte[] buffer = wc.DownloadData(completeUrl);
-                    string resultString = Encoding.UTF8.GetString(buffer);
-                    Dictionary<string, object> tz = JsonSerializer.Deserialize<Dictionary<string, object>>(resultString);
-                    return new Timezone() { Name = tz["timeZoneId"].ToString(), Offset = Convert.ToDouble(tz["rawOffset"].ToString()) / 3600, DLS = false };
-                }
-                catch (Exception ex)
-                {
-                    errorMsg = "ERROR: " + ex.Message;
-                    return new Timezone();
-                }
+                WebClient wc = new WebClient();
+                byte[] buffer = wc.DownloadData(completeUrl);
+                string resultString = Encoding.UTF8.GetString(buffer);
+                Dictionary<string, object> tz = JsonSerializer.Deserialize<Dictionary<string, object>>(resultString);
+                return new Timezone() { Name = tz["tzName"].ToString(), Offset = Convert.ToDouble(tz["tzOffset"].ToString()), DLS = false };
             }
-            else
+            catch (Exception ex)
             {
-                errorMsg = "ERROR: Unable to retrieve timezone data.";
+                errorMsg = "ERROR: " + ex.Message;
                 return new Timezone();
             }
 
