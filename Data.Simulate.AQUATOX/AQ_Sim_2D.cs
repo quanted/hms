@@ -29,7 +29,7 @@ namespace AQUATOX.AQSim_2D
 
         public class webServiceURLsClass
         {
-            public string hmsRest = "https://qedcloud.net/hms/rest/api/";  //defaults, this class is read from json for GUI.AQUATOX
+            public string hmsRest = "https://qed.epa.gov/hms/rest/api/";  //defaults, this class is read from json for GUI.AQUATOX
             public string nationalMap = "https://hydro.nationalmap.gov/arcgis/rest/services/";
             public string watersGeo = "https://watersgeo.epa.gov/arcgis/rest/services/";
             public string hawqsAPI = "https://dev-api.hawqs.tamu.edu/";
@@ -38,26 +38,78 @@ namespace AQUATOX.AQSim_2D
         public static webServiceURLsClass webServiceURLs = new();
 
         /// <summary>
-        /// holds results from streamNetwork web service
+        /// holds results from streamNetwork web service or data put together for a HUC network
         /// </summary>
         public class streamNetwork
         {
             public string[][] network;
-            public int[][] order;
-            public Dictionary<string, int[]> sources;
-            public Dictionary<string, int[]> boundary;
-            [JsonProperty("divergent-paths")] public Dictionary<string, int[]> divergentpaths;
+            public long[][] order;
+            public Dictionary<string, long[]> sources;
+            public Dictionary<string, long[]> boundary;
+            [JsonProperty("divergent-paths")] public Dictionary<string, long[]> divergentpaths;
             public cWaterbodies waterbodies;
             public string[][] merged;  // tracks those segments that have been merged
         }
 
+        public void RebuildOrderBasedOnSources(HashSet<long> originalOrderComids)
+        {
+            var newOrder = new List<List<long>>();
+            var processed = new HashSet<long>();
+            var toProcess = new HashSet<long>(originalOrderComids);
+
+            // Start with the last segment in the original order array
+            var lastSegmentId = SN.order.Last().Last();
+            newOrder.Add(new List<long> { lastSegmentId });
+            processed.Add(lastSegmentId);
+            toProcess.Remove(lastSegmentId);
+
+            // Define the previous levels
+            while (toProcess.Count > 0)
+            {
+                var previousLevel = new List<long>();
+
+                // Check sources for all segments in the current level
+                foreach (var segmentId in newOrder.Last())
+                {
+                    if (SN.sources.ContainsKey(segmentId.ToString()))
+                    {
+                        foreach (var sourceId in SN.sources[segmentId.ToString()])
+                        {
+                            if (originalOrderComids.Contains(sourceId) && !processed.Contains(sourceId))
+                            {
+                                previousLevel.Add(sourceId);
+                                processed.Add(sourceId);
+                                toProcess.Remove(sourceId);
+                            }
+                        }
+                    }
+                }
+
+                if (previousLevel.Count > 0)
+                {
+                    newOrder.Add(previousLevel);
+                }
+                else
+                {
+                    break; // No more levels to process
+                }
+            }
+
+            // Reverse the newOrder to have the correct order from first to last
+            newOrder.Reverse();
+
+            // Convert List<List<int>> to int[][] and update AQT2D.SN.order
+            SN.order = newOrder.Select(step => step.ToArray()).ToArray();
+        }
+
+
         public class cWaterbodies
         {
-            [JsonProperty("comid-wbcomid")] public Dictionary<int, int> comid_wb;
+            [JsonProperty("comid-wbcomid")] public Dictionary<long, long> comid_wb;
             [JsonProperty("waterbody-table")] public string[][] wb_table;
         }
 
-        public class HAWQSInfo
+        public class HUCInfo
         {
             public List<string> upriverHUCs;
             public List<string> HAWQSboundaryHUCs;
@@ -70,6 +122,7 @@ namespace AQUATOX.AQSim_2D
             public void LoadFromtoData(string HUC_ID)
             {
                 string HUCStr = HUC_ID.Length.ToString();
+                if (HUCStr == "15") HUCStr = "14";
                 string fromtopath = $@"..\2D_Inputs\HAWQS_Data\FromTo\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";
                 if (fromtofilen == fromtopath) return;  //already loaded
 
@@ -106,7 +159,7 @@ namespace AQUATOX.AQSim_2D
                     if (include_self) matchingHUCs.Add(HUC_ID);
                     return matchingHUCs;
                 }
-                else
+                else  //return empty string or self if "include_self"
                 {
                     List<string> boundary = new List<string>();
                     if (include_self) boundary.Add(HUC_ID);
@@ -114,11 +167,11 @@ namespace AQUATOX.AQSim_2D
                 }
             }
 
+            // function to check if the HUC starts with the same first eight characters
+            bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
 
             public void AddSourceHUCs(string HUC_ID)
             {
-                // function to check if the HUC starts with the same first eight characters
-                bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
                 // function to check if the HUC is located within the model domain (may span multiple HUC8s)
                 bool InModelDomain(string huc) => modelDomain.Contains(huc);
 
@@ -137,9 +190,92 @@ namespace AQUATOX.AQSim_2D
                     }
                 }
             }
+
+            public Dictionary<string, long[]> ReadSources(string HUC_ID, bool HUC8, int n_traverse)  // read all HUCs within HUC8 and assign to dictionary data structure compatible with sources
+            {
+                var sources = new Dictionary<string, long[]>();
+                var visited = new HashSet<string>();
+                var stack = new Stack<(string HUCID, int level)>();
+                stack.Push((HUC_ID, 0));
+
+                while (stack.Count > 0)
+                {
+                    var (currentHUC, currentLevel) = stack.Pop();
+
+                    if (!visited.Contains(currentHUC))
+                    {
+                        visited.Add(currentHUC);
+
+                        bool keeplooking = (HUC8 && IsSameRegion(currentHUC, HUC_ID)) ||  //ID all within the HUC8
+                                           (n_traverse > currentLevel);
+
+                        if (keeplooking)
+                            if (fromtoData.TryGetValue(currentHUC, out List<string> upstreamHUCs) && upstreamHUCs.Count > 0)
+                            {
+                                // Convert list of string IDs to int[]
+                                long[] upstreamIDs = upstreamHUCs.Select(huc => long.Parse(huc)).ToArray();
+                                sources[currentHUC] = upstreamIDs;
+                                foreach (var upstreamHUC in upstreamHUCs)
+                                        stack.Push((upstreamHUC, currentLevel + 1));
+                            }
+                            else
+                            {
+                                // No upstream HUCs; assign an empty array
+                                sources[currentHUC] = new long[0];
+                            }
+                    }
+                }
+
+                return sources;
+            }
+
+            public Dictionary<string, long[]> ReadSinglePathSources(string HUC_ID, string up_huc)
+            {
+                var sources = new Dictionary<string, long[]>();
+                var visited = new HashSet<string>();
+                var pathFound = FindPath(HUC_ID, up_huc, sources, visited);
+
+                if (!pathFound)
+                {
+                    Console.WriteLine($"No path found from {HUC_ID} to {up_huc}.");
+                }
+
+                return sources;
+            }
+
+            private bool FindPath(string currentHUC, string targetHUC, Dictionary<string, long[]> sources, HashSet<string> visited)
+            {
+                if (visited.Contains(currentHUC))
+                    return false;
+
+                visited.Add(currentHUC);
+
+                if (currentHUC == targetHUC)
+                {
+                    // Reached the target; add to sources with no upstream
+                    sources[currentHUC] = new long[0];
+                    return true;
+                }
+
+                if (fromtoData.TryGetValue(currentHUC, out List<string> upstreamHUCs) && upstreamHUCs.Count > 0)
+                {
+                    foreach (var upstreamHUC in upstreamHUCs)
+                    {
+                        if (FindPath(upstreamHUC, targetHUC, sources, visited))
+                        {
+                            // Path found; add the current HUC and its upstream HUC to sources
+                            sources[currentHUC] = new long[] { long.Parse(upstreamHUC) };
+                            return true;
+                        }
+                    }
+                }
+
+                // No path found from this node
+                return false;
+            }
         }
 
-        public class HAWQSInput
+         public class HAWQSInput
         {
             public string dataset { get; set; } = "HUC14";
             public string downstreamSubbasin { get; set; } = "01010002010504";
@@ -190,12 +326,10 @@ namespace AQUATOX.AQSim_2D
         }
 
 
-
-
         /// <summary>
         /// Info linked from HAWQS
         /// </summary>
-        public HAWQSInfo HAWQSInf = null;
+        public HUCInfo HUCInf = null;
 
         /// <summary>
         /// current stream network object
@@ -231,10 +365,10 @@ namespace AQUATOX.AQSim_2D
             for (int i = 0; i < SN.order.Length; i++)
                 for (int j = 0; j < SN.order[i].Length; j++)
                 {
-                    int COMID = SN.order[i][j];
+                    long COMID = SN.order[i][j];
                     string CString = COMID.ToString();
                     bool in_waterbody = false;
-                    if (SN.waterbodies != null) in_waterbody = NWM_Waterbody(COMID);
+                    if (SN.waterbodies != null) in_waterbody = NWM_Waterbody((int) COMID);
                     if (!in_waterbody) FLCount++; // don't count segments that are superceded by their lake/reservoir waterbody.
                 };
             string outstr = "A total of " + (WBCount + FLCount).ToString() + " segments";
@@ -245,9 +379,9 @@ namespace AQUATOX.AQSim_2D
         /// <summary>
         /// Returns the WBCOMID associated with the streamflow COMID or -1 if the COMID is not located within an NWM waterbody
         /// </summary>
-        public int NWM_WaterbodyID(int COMID)
+        public long NWM_WaterbodyID(long COMID)
         {
-            int WBCOMID;
+            long WBCOMID;
             if (SN.waterbodies != null) if (SN.waterbodies.comid_wb.TryGetValue(COMID, out WBCOMID))
                     for (int i = 1; i < SN.waterbodies.wb_table.GetLength(0); i++)
                     {
@@ -262,7 +396,7 @@ namespace AQUATOX.AQSim_2D
         /// <summary>
         /// Returns true if the COMID is located within an NWM waterbody and does not need running as a stream segment.
         /// </summary>
-        public bool NWM_Waterbody(int COMID)
+        public bool NWM_Waterbody(long COMID)
         {
             return NWM_WaterbodyID(COMID) != -1;
         }
@@ -275,7 +409,7 @@ namespace AQUATOX.AQSim_2D
         /// <summary>
         /// Dictionary of archived_results organized by COMID.  Used for routing state variables and summarizing 2-D results.
         /// </summary>
-        public Dictionary<int, archived_results> archive = new Dictionary<int, archived_results>();
+        public Dictionary<long, archived_results> archive = new Dictionary<long, archived_results>();
 
         /// <summary>
         /// Archived results for a single COMID;  
@@ -947,6 +1081,7 @@ namespace AQUATOX.AQSim_2D
             }
 
             string HUCStr = SegID.Length.ToString();
+            if (HUCStr == "15") HUCStr = "14";
 
             AQTSim Sim = JsonConvert.DeserializeObject<AQTSim>(WBJSON, AQTSim.AQTJSONSettings());
 
@@ -979,7 +1114,7 @@ namespace AQUATOX.AQSim_2D
                 bool isCBOD = (components[i] == "CBOD"); //unique input data structure in AQUATOX for CBOD
                 bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
 
-                int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
+                int col_IN = Array.IndexOf(HUCInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
                 int col_OUT = col_IN + 1;
 
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
@@ -1062,7 +1197,7 @@ namespace AQUATOX.AQSim_2D
 
             // Water Temperature Linkage Here
             TStateVariable TTemp = Sim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            int col_WTMP = Array.IndexOf(HAWQSInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
+            int col_WTMP = Array.IndexOf(HUCInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
             if ((TTemp != null) && (col_WTMP >= 0))
             {
                 TTemp.InitialCond = ThisSeg[FirstDay].vals[col_WTMP];
@@ -1364,6 +1499,7 @@ namespace AQUATOX.AQSim_2D
             string SegTypeStr;
             if (is_COMID) SegTypeStr = "COMID ";
             else SegTypeStr = "HUC" + SegID.Length.ToString();
+            if (SegTypeStr == "HUC15") SegTypeStr = "HUC14";
 
             string err;
             AQTSim Sim = JSON_to_AQTSim(baseSimJSON, setupjson, SegTypeStr, SegID, -9999, out err);  //COMID length from ReadCOMIDGeometry
@@ -1409,7 +1545,7 @@ namespace AQUATOX.AQSim_2D
                 bool isCBOD = (components[i] == "CBOD"); //unique input data structure in AQUATOX for CBOD
                 bool isCHLA = (components[i] == "CHLA");  //Convert CHLA to biomass units
 
-                int col_IN = Array.IndexOf(HAWQSInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
+                int col_IN = Array.IndexOf(HUCInf.colnames, components[i] + "_IN");  //identify relevant columns in RCH_OUT file
                 if (col_IN < 0) return ("", "ERROR: Missing column " + components[i] + "_IN from HAWQS RCH output.");
 
                 int col_OUT = col_IN + 1;
@@ -1498,7 +1634,7 @@ namespace AQUATOX.AQSim_2D
 
             // Water Temperature Linkage Here
             TStateVariable TTemp = Sim.AQTSeg.GetStatePointer( AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
-            int col_WTMP = Array.IndexOf(HAWQSInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
+            int col_WTMP = Array.IndexOf(HUCInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
             if ((TTemp != null) && (col_WTMP >= 0))
             {
                 TTemp.InitialCond = ThisSeg[0][FirstDay].vals[col_WTMP];
@@ -1646,7 +1782,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="previous_flows">a list containing the sum of the previous flows linked to this segment for each time step.  Needed for weighted averaging.</param>
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <returns>errors, warnings</returns>
-        public string Pass_Data(AQTSim Sim, int SrcID, int ninputs, bool passMass, ref SortedList<DateTime, double> previous_flows, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
+        public string Pass_Data(AQTSim Sim, long SrcID, int ninputs, bool passMass, ref SortedList<DateTime, double> previous_flows, archived_results AR = null, List <ITimeSeriesOutput<List<double>>> divergence_flows = null)  
         {
             SortedList<DateTime, double> tot_flows = null;
             SortedList<DateTime, double> boundary_flows = null;
@@ -1814,7 +1950,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="divergence_flows">a list of any additional divergence flows from source segment (flows not to this segment), for the complete set of time-steps of the simulation in m3/s</param> 
         /// <param name="outofnetwork">array of COMIDs that are out of the network water sources.</param>  
         /// <returns>boolean: true if the run was completed successfully</returns>/// 
-        public bool executeModel(long segID, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, int[] outofnetwork = null)         
+        public bool executeModel(long segID, string setupjson, ref List<string> outstr, ref string jsonstring, List<ITimeSeriesOutput<List<double>>> divergence_flows = null, long[] outofnetwork = null)         
         {
             AQTSim Sim = Instantiate_with_setup(setupjson, ref outstr, jsonstring);
             Sim.AQTSeg.ProgHandle = this.ProgHandle;
@@ -1835,7 +1971,7 @@ namespace AQUATOX.AQSim_2D
             if (SN != null)
             {
                 if (SN.sources != null)
-                 if (SN.sources.TryGetValue(segID.ToString(), out int[] Sources))
+                 if (SN.sources.TryGetValue(segID.ToString(), out long[] Sources))
                     foreach (int SrcID in Sources)
                     {
                         if ((SrcID != segID) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
@@ -1850,9 +1986,9 @@ namespace AQUATOX.AQSim_2D
                 if ((SN.waterbodies != null) && (SN.sources != null))
                 {   // pass data into Waterbodies from adjacent stream segments
                     if (SN.waterbodies.comid_wb.ContainsValue((int)segID))  // if the comid is a waterbody
-                      foreach (KeyValuePair<int, int> entry in SN.waterbodies.comid_wb)  
+                      foreach (KeyValuePair<long, long> entry in SN.waterbodies.comid_wb)  
                         if (entry.Value == segID)  // for each stream segment in waterbody
-                          if (SN.sources.TryGetValue(entry.Key.ToString(), out int[] Sources)) //get the sources for the stream segment
+                          if (SN.sources.TryGetValue(entry.Key.ToString(), out long[] Sources)) //get the sources for the stream segment
                             foreach (int SrcID in Sources) //loop through the sources
                               if ((SrcID != entry.Key) && !outofnetwork.Contains(SrcID))  // don't pass data from out of network segments
                                 {

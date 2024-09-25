@@ -118,7 +118,7 @@ namespace GUI.AQUATOX
             {
                 System.Threading.SynchronizationContext.Current.Post((_) =>
                 {
-                    webView_MouseDown(false,true, content);
+                    webView_MouseDown(false, true, content);
                 }, null);
             }
             else
@@ -141,6 +141,7 @@ namespace GUI.AQUATOX
         private void UpdateLeftPanels()
         {
             ReadNetworkPanel.Visible = StreamButton.Checked;
+            readHUCNetworkPanel.Visible = HUCNetworkButton.Checked;
             NetworkLabel.Visible = StreamButton.Checked;
 
             comidBox.Text = NScrSettings.COMIDstr;
@@ -150,7 +151,7 @@ namespace GUI.AQUATOX
             if (LakeButton.Checked)
             {
 
-                if (WBCOMID =="")
+                if (WBCOMID == "")
                 {
                     Summary1Label.Text = "WB COMID:  (unselected)";
                     Summary2Label.Visible = false;
@@ -173,9 +174,23 @@ namespace GUI.AQUATOX
             {
                 SimNameEdit.Text = SimName;
                 if (HUCChosen == "") Summary1Label.Text = "HUC" + HUCStr + ":  (unselected)";
-                else Summary1Label.Text = "HUC"+": " + HUCChosen;
+                else Summary1Label.Text = "HUC" + ": " + HUCChosen;
                 Summary2Label.Visible = false;
 
+            }
+            else if (HUCNetworkButton.Checked)
+            {
+                if (SNPopulated)
+                {
+                    Summary1Label.Text = "Pour Point HUC: " + HUCChosen;
+                    Summary2Label.Text = AQT2D.SNStats();
+                    Summary2Label.Visible = true;
+                }
+                else
+                {
+                    if (!SNPopulated) Summary1Label.Text = "HUC network has not been defined";
+                    Summary2Label.Visible = false;
+                }
             }
             else  // otherwise-- stream network selected
             {
@@ -255,7 +270,7 @@ namespace GUI.AQUATOX
             endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
 
             SNPopulated = true;
-            
+
             HighlightStreamNetwork();
 
             comidBox_Leave(sender, e); //update NScrSettings
@@ -342,9 +357,11 @@ namespace GUI.AQUATOX
 
             if (DialogResult == DialogResult.OK)
             {
-                if ((StreamButton.Checked && !SNPopulated)||(LakeButton.Checked && (WBCOMID==""))||(HUCButton.Checked && (HUCChosen=="")))
+                if (((StreamButton.Checked || HUCNetworkButton.Checked) && !SNPopulated) ||  // network not yet defined
+                    (LakeButton.Checked && (WBCOMID == "")) || (HUCButton.Checked && (HUCChosen == "")))  //0-D segment not yet chosen
                 {
                     string ErrStr = "To create a new simulation, populate a stream network (with \"Read Network\")";
+                    if (HUCNetworkButton.Checked) ErrStr = "To model a HUC network you must create a network (with \"Read Network\")";
                     if (LakeButton.Checked) ErrStr = "To create a 0-D Lake/Reservoir simulation, you must first click on a waterbody on the map";
                     if (HUCButton.Checked) ErrStr = "To create a HUC simulation, you must first click on one of the HUCs diaplsyed on the map";
                     MessageBox.Show(ErrStr, "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
@@ -362,7 +379,7 @@ namespace GUI.AQUATOX
                 if (!e.Cancel)
                 {
                     if (!StreamButton.Checked) COMID = "";
-                    if (!HUCButton.Checked) HUCChosen = "";
+                    if (!HUCButton.Checked && !HUCNetworkButton.Checked) HUCChosen = "";
                     if (!LakeButton.Checked) WBCOMID = "";
                 }
             }
@@ -406,8 +423,11 @@ namespace GUI.AQUATOX
             else if (HUC)
             {
                 HUCChosen = msg[1];
-                if (msg.Length > 2) SimName = "HUC" + HUCStr + ": "+msg[2];
+                if (msg.Length > 2) SimName = "HUC" + HUCStr + ": " + msg[2];
                 else SimName = "HUC" + HUCStr + ": " + HUCChosen;
+
+                HUCBox.Text = HUCChosen;
+                // fixme left click issue
 
                 UpdateLeftPanels();
             }
@@ -461,7 +481,7 @@ namespace GUI.AQUATOX
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
                 infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
-                if (BSim == null) BaseJSON_FileN = "Default Lake.JSON"; 
+                if (BSim == null) BaseJSON_FileN = "Default Lake.JSON";
             }
             else if (LakeButton.Checked)
             {
@@ -474,7 +494,7 @@ namespace GUI.AQUATOX
                 infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
                 if (BSim == null) BaseJSON_FileN = "Default Lake.JSON";
             }
-            else //  HUCButton.checked
+            else //  HUCButton.checked or HUCNetworkButton.checked
             {
                 ShowH14Box.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("HUCMAP|" + HUCStr);
@@ -483,11 +503,20 @@ namespace GUI.AQUATOX
                 SegLoadLabel.Text = "Zoom in to see HUC14 segments.";
                 SegLoadLabel.Visible = BHUC14.Checked;
 
-                infolabel1.Text = "Click on one HUC to Select";
-                infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+                if (HUCNetworkButton.Checked)
+                {
+                    infolabel1.Text = "Click on a down-river HUC polygon then model an entire HUC8 or right-click on ";
+                    infolabel2.Text = "an up-river HUC or input a number of HUCs to model up-river and click \"Read Network\"";
+                }
+                else
+                {
+                    infolabel1.Text = "Click on one HUC to Select";
+                    infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
+                }
+
                 if (BSim == null) BaseJSON_FileN = "MS_OM.JSON";
             }
-            SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\""; 
+            SimJSONLabel.Text = "\"" + BaseJSON_FileN + "\"";
         }
 
         private void MS_Surrogate_Button_Click(object sender, EventArgs e)
@@ -547,6 +576,73 @@ namespace GUI.AQUATOX
             string showstr = "false";
             if (ShowH14Box.Checked) showstr = "true";
             webView.CoreWebView2.PostWebMessageAsString("SHOWH14|" + showstr);
+        }
+
+        private void ModelHUC8checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            bool ModelH8 = ModelHUC8checkBox.Checked;
+            HUCLabel1.Enabled = !ModelH8;
+            HUCLabel2.Enabled = !ModelH8;
+            HUCLabel3.Enabled = !ModelH8;
+            traverseHUCBox.Enabled = !ModelH8;
+            upperHUCBox.Enabled = !ModelH8;
+        }
+
+        private void HighlightHUCNetwork()
+        {
+            for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                {
+                    bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
+                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|" + lastshape.ToString()); // display all layers
+                };
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
+        }
+
+        private void ReadHUCNetworkButton_Click(object sender, EventArgs e)
+        {
+            string HUCstr = HUCBox.Text.Trim();
+            if (!Int64.TryParse(HUCstr, out long HUCInt))
+            {
+                MessageBox.Show("Please either enter a HUC Number in the 'Pour-Point HUC' box or click on a HUC to select a pour point.");
+                return;
+            }
+
+            bool modelUpHUC8 = ModelHUC8checkBox.Checked;
+            bool hasUpperHUC = Int64.TryParse(upperHUCBox.Text, out long upperHUC);
+            bool hasspan = Int64.TryParse(traverseHUCBox.Text, out long num2travel);
+
+            if (!hasUpperHUC && !hasspan && !modelUpHUC8)
+            {
+                MessageBox.Show("Please either select to model up to the HUC8 boundaries, specify a number of HUCs to traverse, or enter an up-river HUC in the 'upper HUC' box (or right-click on a HUC polygon to select an upstream end point).");
+                return;
+            }
+
+            AQT2D = new();
+            AQT2D.SN = new();
+            AQT2D.HUCInf = new();
+
+            if (modelUpHUC8)
+            {
+                try { AQT2D.HUCInf.LoadFromtoData(HUCstr); } //load relevant fromto data to dictionary
+                catch (Exception ex)
+                {
+                    MessageBox.Show("ERROR: " + ex.Message);  //file system error
+                    return;
+                }
+                AQT2D.SN.sources = AQT2D.HUCInf.ReadSources(HUCstr,true,0);   //traverse up-river until a HUC8 boundary is encountered, write all interior HUCs to the sources structure
+
+                HashSet<long> order_set = new HashSet<long>();
+                foreach (var key in AQT2D.SN.sources.Keys)
+                    if (long.TryParse(key, out long keyLong)) order_set.Add(keyLong);
+                AQT2D.SN.order = new long[][] { new long[] { 0L, HUCInt } };  // initialize SN.order with the pour point element as required for "rebuildorder" method
+                AQT2D.RebuildOrderBasedOnSources(order_set);  // set the order for model execution
+
+                MessageBox.Show("done");
+
+
+            }
+
         }
     }
 }

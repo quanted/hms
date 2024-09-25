@@ -883,8 +883,8 @@ namespace AQUATOX.Chemicals
                 Loading = Loading * CarrierLdg / 1e6 * Wet2Dry;
                 // ug/L d     ug/kg      mg/L      mg/kg  {loadings need conversion to dry weight
 
-                // 10/24/2012 handle loss of toxicant due to time-series fishing or withdrawal
-                if ((NState >= Consts.FirstAnimal && NState <= Consts.LastAnimal))
+                // 10/24/2012 handle loss of toxicant due to time-series fishing or withdrawal  9/24/2024-- extend to plants
+                if ((NState >= Consts.FirstBiota && NState <= Consts.LastBiota))
                 {
                     if (!(CPtr.LoadsRec.Alt_Loadings[0] == null))
                     {

@@ -181,8 +181,8 @@ namespace AQUATOX.Organisms
                 }
             }
 
-            // 10/15/2010 update 10/24/2012 handle fish/animal stocking or time-series fishing or withdrawal
-            if ((NState >= Consts.FirstAnimal && NState <= Consts.LastFish) && (!(LoadsRec.Alt_Loadings[0] == null)))
+            // 10/15/2010 handle fish/animal stocking or time-series fishing or withdrawal; update 9/24/2024 add plants/macrophytes
+            if ((NState >= Consts.FirstBiota && NState <= Consts.LastBiota) && (!(LoadsRec.Alt_Loadings[0] == null)))
             {
                 for (Loop = 0; Loop <= 1; Loop++)  //PointsSource and DirectPrecip
                 {

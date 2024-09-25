@@ -20,6 +20,7 @@ using System.Text;
 using System.Drawing;
 using Microsoft.Research.Science.Data.Utilities;
 using System.Reflection.Emit;
+using static System.Windows.Forms.AxHost;
 namespace GUI.AQUATOX
 {
 
@@ -37,7 +38,8 @@ namespace GUI.AQUATOX
         // string taskID = null;
 
         private TimeSeriesInput TSI = new TimeSeriesInput()
-        {            Source = "nwis",
+        {
+            Source = "nwis",
             DateTimeSpan = new DateTimeSpan()
             {
                 StartDate = new DateTime(2015, 01, 01),
@@ -90,7 +92,7 @@ namespace GUI.AQUATOX
 
             UpdateScreen();
 
-            int panelBottom = LoadingsPanel.Location.Y+LTPanel.Location.Y + LTPanel.Height + 20;
+            int panelBottom = LoadingsPanel.Location.Y + LTPanel.Location.Y + LTPanel.Height + 20;
             if (panelBottom > this.ClientSize.Height) this.Height = panelBottom + (this.Height - this.ClientSize.Height);  //ensure notes are visible.
 
             if (ShowDialog() == DialogResult.Cancel)
@@ -147,7 +149,7 @@ namespace GUI.AQUATOX
                 if (RBChecked == 1) RB1.Checked = true;
 
                 RB2.Visible = (RBList.Count > 2);
-                if (RBList.Count > 2)  RB2.Text = RBList[2];
+                if (RBList.Count > 2) RB2.Text = RBList[2];
                 if (RBChecked == 2) RB2.Checked = true;
 
 
@@ -171,15 +173,19 @@ namespace GUI.AQUATOX
                 WarningLabel.Visible = true;
                 WarningLabel.Text = "Inflow Loadings not relevant.";
             }
-
+            if (SV.NState >= Consts.FirstMacro && SV.NState <= Consts.LastMacro)
+            {
+                MacroWashoutOffBox.Visible = true;
+                MacroWashoutOffBox.Checked = ((TMacrophyte)SV).TurnOffWashout;
+            }
 
             NotesEdit.Text = SV.LoadNotes1;
             NotesEdit2.Text = SV.LoadNotes2;
 
             SVNameLabel.Text = Displayname;
-            
+
             if (DetritusScreen) ICEdit.Text = ((TDissRefrDetr)SV).InputRecord.InitCond.ToString("G9");  //special case diss&susp detr
-              else ICEdit.Text = SV.InitialCond.ToString("G9");
+            else ICEdit.Text = SV.InitialCond.ToString("G9");
 
             IgnoreLoadingsBox.Checked = SV.LoadsRec.Loadings.NoUserLoad;
             LoadingsPanel.Visible = !SV.LoadsRec.Loadings.NoUserLoad;
@@ -227,16 +233,17 @@ namespace GUI.AQUATOX
                 {
                     ToxIC.Visible = true;
                     ToxICLabel.Visible = true;
+                    ToxICLabel.Text = "Initial Condition";
                     ToxICUnitLabel.Visible = true;
-                    if (LTSI ==3) ToxIC.Text = DIR.Percent_PartIC.ToString("G9");
+                    if (LTSI == 3) ToxIC.Text = DIR.Percent_PartIC.ToString("G9");
                     else ToxIC.Text = DIR.Percent_RefrIC.ToString("G9");
                 }
             }
 
-            if (LTSI > SV.nontoxloadings-1)  //then toxicant selected
+            if (LTSI > SV.nontoxloadings - 1)  //then toxicant selected
             {
                 int chemint = 1 + LTSI - SV.nontoxloadings;
-                T_SVType chemtype = T_SVType.OrgTox1;  chemtype--;  //set to enumerated variable before
+                T_SVType chemtype = T_SVType.OrgTox1; chemtype--;  //set to enumerated variable before
                 int currentchem = 0;
                 TT = null;
                 while (chemint > currentchem)
@@ -249,9 +256,16 @@ namespace GUI.AQUATOX
 
                 ToxIC.Visible = true;
                 ToxICLabel.Visible = true;
+                ToxICLabel.Text = "Initial Condition";
                 ToxICUnitLabel.Visible = true;
                 ToxIC.Text = TT.InitialCond.ToString("G9");
 
+            }
+
+            if (SV.IsPlantOrAnimal() && ((LTBox.SelectedIndex == 1) || (LTBox.SelectedIndex == 2)))
+            {
+                ToxICLabel.Visible = true;
+                ToxICLabel.Text = "Use Negative Numbers for Removal";
             }
 
             UseConstRadio.Checked = LoadShown.UseConstant;  // Update interface based on "LoadShown"
@@ -307,7 +321,7 @@ namespace GUI.AQUATOX
                 }
                 dataGridView1.Enabled = !disable;
                 if (disable) dataGridView1.ForeColor = Color.Gray;
-                      else dataGridView1.ForeColor = Color.Black;
+                else dataGridView1.ForeColor = Color.Black;
             }
         }
 
@@ -327,7 +341,7 @@ namespace GUI.AQUATOX
                 PlantRecord PIR = TP.PAlgalRec;
                 PIR.Setup();
                 TParameter[] PPS = PIR.InputArray();
-                plantform.EditParams(ref PPS, "Plant Parameters", false, "PlantLib.JSON","PlantData");
+                plantform.EditParams(ref PPS, "Plant Parameters", false, "PlantLib.JSON", "PlantData");
                 TP.ChangeData();
             }
 
@@ -348,7 +362,7 @@ namespace GUI.AQUATOX
                 Param_Form chemform = new Param_Form();
                 ChemicalRecord CR = TC.ChemRec; CR.Setup();
                 TParameter[] PPS = CR.InputArray();
-                chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON","ChemData");
+                chemform.EditParams(ref PPS, "Chem Parameters", false, "ChemLib.JSON", "ChemData");
             }
 
             SV.UpdateName();
@@ -583,7 +597,7 @@ namespace GUI.AQUATOX
             for (int i = 0; i < LoadTable.Rows.Count; i++)
             {
                 DataRow row = LoadTable.Rows[i];
-                try 
+                try
                 {
                     LoadShown.list.Add(row.Field<DateTime>(0), row.Field<double>(1));
                 }
@@ -591,7 +605,7 @@ namespace GUI.AQUATOX
                 { }
 
             }
-            
+
         }
 
         private void ICEdit_TextChanged(object sender, EventArgs e)
@@ -599,7 +613,7 @@ namespace GUI.AQUATOX
             try
             {
                 if (DetritusScreen) ((TDissRefrDetr)SV).InputRecord.InitCond = double.Parse(ICEdit.Text);  //special case diss&susp detr
-                else  SV.InitialCond = double.Parse(ICEdit.Text);
+                else SV.InitialCond = double.Parse(ICEdit.Text);
                 ICEdit.BackColor = Color.White;
             }
             catch
@@ -608,7 +622,7 @@ namespace GUI.AQUATOX
             }
         }
 
-            private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             {
                 if ((e.Context & DataGridViewDataErrorContexts.Parsing) == DataGridViewDataErrorContexts.Parsing)
@@ -683,7 +697,7 @@ namespace GUI.AQUATOX
 
         private void ToxIC_TextChanged(object sender, EventArgs e)
         {
-            try   
+            try
             {
                 if (TT == null)
                 {
@@ -721,7 +735,7 @@ namespace GUI.AQUATOX
                 case AllVariables.Nitrate:
                 case AllVariables.Ammonia:
                 case AllVariables.Phosphate: AQTMainForm.OpenUrl("NutrientLoadings"); break;
-                default : AQTMainForm.OpenUrl("ICandLoadings"); break;
+                default: AQTMainForm.OpenUrl("ICandLoadings"); break;
 
             }
         }
@@ -733,12 +747,20 @@ namespace GUI.AQUATOX
             DataTable PT = TC.PTR_Table();
 
             ChemToxForm ctf = new ChemToxForm();
-            if (ctf.ShowGrids(AT,PT, ref TC.Anim_Method, ref TC.Plant_Method))
+            if (ctf.ShowGrids(AT, PT, ref TC.Anim_Method, ref TC.Plant_Method))
                 if (ctf.gridChange)
                 {
                     TC.SetPTR(PT);
                     TC.SetATR(AT);
                 }
         }
+
+        private void TurnOffMacroWashCheckBoxChanged(object sender, EventArgs e)
+        {
+            ((TMacrophyte)SV).TurnOffWashout = MacroWashoutOffBox.Checked;
+            UpdateScreen();
+
+        }
+                
     }
 }

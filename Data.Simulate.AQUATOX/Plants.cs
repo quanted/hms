@@ -274,15 +274,16 @@ namespace AQUATOX.Plants
             }
             if (PAlgalRec.PlantType.Val == "Macrophytes")
             {
-                if (PAlgalRec.Macrophyte_Type.Val == "benthic")
+                string mtype = PAlgalRec.Macrophyte_Type.Val.ToLower();
+                if (mtype == "benthic")
                 {
                     MacroType = TMacroType.Benthic;
                 }
-                else if (PAlgalRec.Macrophyte_Type.Val == "free-floating")
+                else if (mtype == "free-floating")
                 {
                     MacroType = TMacroType.Freefloat;
                 }
-                else if (PAlgalRec.Macrophyte_Type.Val == "rooted floating")
+                else if (mtype == "rooted floating")
                 {
                     MacroType = TMacroType.Rootedfloat;
                 }
@@ -1636,6 +1637,8 @@ namespace AQUATOX.Plants
 
     public class TMacrophyte : TPlant
     {
+
+        public bool TurnOffWashout = false;
         public TMacrophyte(AllVariables Ns, T_SVType SVT, T_SVLayer L, string aName, AQUATOXSegment P, double IC) : base(Ns, SVT, L, aName, P, IC)
         {
         }
@@ -1749,21 +1752,22 @@ namespace AQUATOX.Plants
         {
             double SegVolume;
             double Disch;
-            double KCap;
-            double KCapLimit;
+//          double KCap;
+//          double KCapLimit;
 
-            // change macrophyte washout for Integral, 10/12/2017
+            if (TurnOffWashout) return 0;   // User option to turn off macrophyte washout 9/23/2024
             if ((MacroType != TMacroType.Freefloat)) return 0;
 
             SegVolume = AQTSeg.Location.Morph.SegVolum;
 
             Disch = Location.Discharge;
 
-            KCap = KCAP_in_g_m3();
+//          KCap = KCAP_in_g_m3();   
             // g/m3
-            KCapLimit = 1.0 - ((KCap - State) / KCap);
-            return KCapLimit * Disch / SegVolume * State;
-            // g/cu m-d  (fraction) (cu m/d)   (cu m)   (g/cu m)
+//          KCapLimit = 1.0 - ((KCap - State) / KCap);   9/24/2024, KCap now part of photosynthesis
+
+            return         Disch / SegVolume * State;
+            // g/cu m-d  (cu m/d)   (cu m)   (g/cu m)
 
             //         WashoutStep[AQTSeg.DerivStep] = result * AQTSeg.SegVol();
         }
@@ -1836,7 +1840,10 @@ namespace AQUATOX.Plants
                         SaveRate("Washout", WO);
                         SaveRate("NetBoundary", L + WI - WO);
                     }
-                    SaveRate("Lt_LIM", Lt_Limit);
+
+                    if (MacroType == TMacroType.Benthic) SaveRate("Lt_LIM", 1.0);     // 7/25/2018  More accurately output light limit assumption for non-benthic macrophytes
+                    else SaveRate("Lt_LIM", Lt_Limit);
+
                     if ((PAlgalRec.PlantType.Val == "Bryophytes") || (MacroType == TMacroType.Freefloat))
                     {
                         SaveRate("Nutr_LIM", Nutr_Limit);
@@ -1846,8 +1853,17 @@ namespace AQUATOX.Plants
                     }
                     SaveRate("Temp_LIM", Temp_Limit);
                     SaveRate("Chem_LIM", Chem_Limit);
-                    SaveRate("LowLt_LIM", LowLt_Limit);
-                    SaveRate("HighLt_LIM", HighLt_Limit);
+
+                    if (MacroType == TMacroType.Benthic)   // 7/25/2018  More accurately output light limit assumption for non-benthic macrophytes
+                    {
+                        SaveRate("LowLt_LIM", 1.0);
+                        SaveRate("HighLt_LIM", 1.0);
+                    }
+                    else {
+                        SaveRate("LowLt_LIM", LowLt_Limit);
+                        SaveRate("HighLt_LIM", HighLt_Limit);
+
+                    }
                 }
             }
             // --------------------------------------------------

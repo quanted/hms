@@ -866,7 +866,7 @@
             // 
             // executeButton
             // 
-            executeButton.Location = new System.Drawing.Point(59, 8);
+            executeButton.Location = new System.Drawing.Point(63, 8);
             executeButton.Name = "executeButton";
             executeButton.Size = new System.Drawing.Size(127, 23);
             executeButton.TabIndex = 52;

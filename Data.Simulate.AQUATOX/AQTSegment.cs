@@ -555,7 +555,7 @@ namespace AQUATOX.AQTSegment
 
             int toploadindex = 0;
             if (Has_Alt_Loadings()) toploadindex = 3;
-            if ((IsAnimal()) || (NState == AllVariables.Volume)) toploadindex = 2; // specialcases
+            if ((IsPlantOrAnimal()) || (NState == AllVariables.Volume)) toploadindex = 2; // specialcases
 
                 if (NState == AllVariables.DissRefrDetr) // special case 
             {
@@ -569,19 +569,19 @@ namespace AQUATOX.AQTSegment
             { 
                 if (index == 1) // pointsource
                 {
-                    if (IsAnimal()) return "pct./day";  //special case 
+                    if (IsPlantOrAnimal()) return "pct./day";  //special case 
                     if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
                     return "g / d"; //point-source loadings
                 }
                 if (index == 2) // direct precip.
                 {
-                    if (IsAnimal()) return "g/m2 - d";  //special case 
+                    if (IsPlantOrAnimal()) return "g/m2 - d";  //special case 
                     if (NState == AllVariables.Volume) return "cu.m/d"; //special case 
                     return "g/m2 - d"; //direct precip. loadings
                 }
                 // (index == 3) // non-point source
                 {
-                    if (IsAnimal()) return "error"; //special case , not relevant to animals
+                    if (IsPlantOrAnimal()) return "error"; //special case , not relevant to animals
                     if (NState == AllVariables.Volume) return "error"; //special case , not relevant to volume
                     if (NState == AllVariables.CO2) return "mg/L";  // special case equilibrium CO2 Import
                     return "g / d"; //non point-source loadings
@@ -600,7 +600,7 @@ namespace AQUATOX.AQTSegment
                 outList = new List<string>(new string[] { "Segment Values" });  //special case s, no inflow loadings, just in-segment driving values
             else if (NState == AllVariables.Volume) outList = new List<string>(new string[] { "Known Volume(s)", "Inflow Water", "Discharge Water"});  //special case 
             else if (NState == AllVariables.Light) outList = new List<string>(new string[] { "Top of Segment Loading" });  //special case 
-            else if (IsAnimal()) outList = new List<string>(new string[] { "In Inflow Water", "Animal Removal", "Animal Stocking" });  //special case 
+            else if (IsPlantOrAnimal()) outList = new List<string>(new string[] { "In Inflow Water", "Organism Removal", "Organism Stocking" });  //special case 
             else if (NState == AllVariables.DissRefrDetr) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Non-Point Source", "Dissolved vs. Particulate", "Labile vs. Refractory" });  //special case for detritus
             else if (Has_Alt_Loadings()) outList = new List<string>(new string[] { "In Inflow Water", "Point Source", "Direct. Precip.", "Non-Point Source" });  
             else outList = new List<string>(new string[] { "In Inflow Water"});

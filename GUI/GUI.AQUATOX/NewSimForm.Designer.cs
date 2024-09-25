@@ -54,6 +54,7 @@
             label5 = new System.Windows.Forms.Label();
             EndDate = new System.Windows.Forms.DateTimePicker();
             TogglePanel = new System.Windows.Forms.Panel();
+            HUCNetworkButton = new System.Windows.Forms.RadioButton();
             HUCButton = new System.Windows.Forms.RadioButton();
             StreamButton = new System.Windows.Forms.RadioButton();
             LakeButton = new System.Windows.Forms.RadioButton();
@@ -74,19 +75,30 @@
             label1 = new System.Windows.Forms.Label();
             HUCSelectionPanel = new System.Windows.Forms.Panel();
             label4 = new System.Windows.Forms.Label();
+            readHUCNetworkPanel = new System.Windows.Forms.Panel();
+            upperHUCBox = new System.Windows.Forms.TextBox();
+            ModelHUC8checkBox = new System.Windows.Forms.CheckBox();
+            ReadHUCNetworkButton = new System.Windows.Forms.Button();
+            HUCLabel3 = new System.Windows.Forms.Label();
+            HUCLabel2 = new System.Windows.Forms.Label();
+            traverseHUCBox = new System.Windows.Forms.TextBox();
+            HUCLabel1 = new System.Windows.Forms.Label();
+            label12 = new System.Windows.Forms.Label();
+            HUCBox = new System.Windows.Forms.TextBox();
             ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             TogglePanel.SuspendLayout();
             panel2.SuspendLayout();
             SummaryPanel.SuspendLayout();
             HUCSelectionPanel.SuspendLayout();
+            readHUCNetworkPanel.SuspendLayout();
             SuspendLayout();
             // 
             // button1
             // 
             button1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button1.DialogResult = System.Windows.Forms.DialogResult.OK;
-            button1.Location = new System.Drawing.Point(956, 9);
+            button1.Location = new System.Drawing.Point(1100, 9);
             button1.Name = "button1";
             button1.Size = new System.Drawing.Size(61, 26);
             button1.TabIndex = 0;
@@ -115,7 +127,7 @@
             ReadNetworkPanel.Controls.Add(EndCOMIDBox);
             ReadNetworkPanel.Controls.Add(comidLabel);
             ReadNetworkPanel.Controls.Add(comidBox);
-            ReadNetworkPanel.Location = new System.Drawing.Point(17, 149);
+            ReadNetworkPanel.Location = new System.Drawing.Point(17, 153);
             ReadNetworkPanel.Name = "ReadNetworkPanel";
             ReadNetworkPanel.Size = new System.Drawing.Size(259, 143);
             ReadNetworkPanel.TabIndex = 24;
@@ -210,7 +222,7 @@
             HelpButton2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             HelpButton2.Image = (System.Drawing.Image)resources.GetObject("HelpButton2.Image");
             HelpButton2.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            HelpButton2.Location = new System.Drawing.Point(856, 7);
+            HelpButton2.Location = new System.Drawing.Point(1000, 7);
             HelpButton2.Name = "HelpButton2";
             HelpButton2.Size = new System.Drawing.Size(78, 28);
             HelpButton2.TabIndex = 30;
@@ -224,7 +236,7 @@
             infolabel1.AutoSize = true;
             infolabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             infolabel1.ForeColor = System.Drawing.Color.Maroon;
-            infolabel1.Location = new System.Drawing.Point(398, 495);
+            infolabel1.Location = new System.Drawing.Point(398, 550);
             infolabel1.Name = "infolabel1";
             infolabel1.Size = new System.Drawing.Size(392, 15);
             infolabel1.TabIndex = 39;
@@ -236,7 +248,7 @@
             infolabel2.AutoSize = true;
             infolabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             infolabel2.ForeColor = System.Drawing.Color.Maroon;
-            infolabel2.Location = new System.Drawing.Point(398, 514);
+            infolabel2.Location = new System.Drawing.Point(398, 569);
             infolabel2.Name = "infolabel2";
             infolabel2.Size = new System.Drawing.Size(377, 15);
             infolabel2.TabIndex = 40;
@@ -251,7 +263,7 @@
             webView.Location = new System.Drawing.Point(297, 71);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(809, 416);
+            webView.Size = new System.Drawing.Size(953, 471);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -259,7 +271,7 @@
             // 
             button3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             button3.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            button3.Location = new System.Drawing.Point(1045, 9);
+            button3.Location = new System.Drawing.Point(1189, 9);
             button3.Name = "button3";
             button3.Size = new System.Drawing.Size(61, 26);
             button3.TabIndex = 46;
@@ -336,13 +348,25 @@
             // 
             // TogglePanel
             // 
+            TogglePanel.Controls.Add(HUCNetworkButton);
             TogglePanel.Controls.Add(HUCButton);
             TogglePanel.Controls.Add(StreamButton);
             TogglePanel.Controls.Add(LakeButton);
             TogglePanel.Location = new System.Drawing.Point(433, 7);
             TogglePanel.Name = "TogglePanel";
-            TogglePanel.Size = new System.Drawing.Size(397, 28);
+            TogglePanel.Size = new System.Drawing.Size(540, 28);
             TogglePanel.TabIndex = 58;
+            // 
+            // HUCNetworkButton
+            // 
+            HUCNetworkButton.AutoSize = true;
+            HUCNetworkButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            HUCNetworkButton.Location = new System.Drawing.Point(402, 3);
+            HUCNetworkButton.Name = "HUCNetworkButton";
+            HUCNetworkButton.Size = new System.Drawing.Size(103, 19);
+            HUCNetworkButton.TabIndex = 5;
+            HUCNetworkButton.Text = "HUC Network";
+            HUCNetworkButton.UseVisualStyleBackColor = true;
             // 
             // HUCButton
             // 
@@ -412,7 +436,7 @@
             // NetworkLabel
             // 
             NetworkLabel.AutoSize = true;
-            NetworkLabel.Location = new System.Drawing.Point(26, 140);
+            NetworkLabel.Location = new System.Drawing.Point(26, 144);
             NetworkLabel.Name = "NetworkLabel";
             NetworkLabel.Size = new System.Drawing.Size(157, 15);
             NetworkLabel.TabIndex = 26;
@@ -569,11 +593,119 @@
             label4.TabIndex = 66;
             label4.Text = "Type";
             // 
+            // readHUCNetworkPanel
+            // 
+            readHUCNetworkPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            readHUCNetworkPanel.Controls.Add(upperHUCBox);
+            readHUCNetworkPanel.Controls.Add(ModelHUC8checkBox);
+            readHUCNetworkPanel.Controls.Add(ReadHUCNetworkButton);
+            readHUCNetworkPanel.Controls.Add(HUCLabel3);
+            readHUCNetworkPanel.Controls.Add(HUCLabel2);
+            readHUCNetworkPanel.Controls.Add(traverseHUCBox);
+            readHUCNetworkPanel.Controls.Add(HUCLabel1);
+            readHUCNetworkPanel.Controls.Add(label12);
+            readHUCNetworkPanel.Controls.Add(HUCBox);
+            readHUCNetworkPanel.Location = new System.Drawing.Point(17, 153);
+            readHUCNetworkPanel.Name = "readHUCNetworkPanel";
+            readHUCNetworkPanel.Size = new System.Drawing.Size(259, 143);
+            readHUCNetworkPanel.TabIndex = 30;
+            readHUCNetworkPanel.Visible = false;
+            // 
+            // upperHUCBox
+            // 
+            upperHUCBox.Enabled = false;
+            upperHUCBox.Location = new System.Drawing.Point(133, 57);
+            upperHUCBox.Name = "upperHUCBox";
+            upperHUCBox.Size = new System.Drawing.Size(71, 23);
+            upperHUCBox.TabIndex = 24;
+            // 
+            // ModelHUC8checkBox
+            // 
+            ModelHUC8checkBox.AutoSize = true;
+            ModelHUC8checkBox.Checked = true;
+            ModelHUC8checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            ModelHUC8checkBox.Location = new System.Drawing.Point(15, 38);
+            ModelHUC8checkBox.Name = "ModelHUC8checkBox";
+            ModelHUC8checkBox.Size = new System.Drawing.Size(201, 19);
+            ModelHUC8checkBox.TabIndex = 66;
+            ModelHUC8checkBox.Text = "Model all up-river HUCS in HUC8";
+            ModelHUC8checkBox.UseVisualStyleBackColor = true;
+            ModelHUC8checkBox.CheckedChanged += ModelHUC8checkBox_CheckedChanged;
+            // 
+            // ReadHUCNetworkButton
+            // 
+            ReadHUCNetworkButton.Location = new System.Drawing.Point(126, 113);
+            ReadHUCNetworkButton.Name = "ReadHUCNetworkButton";
+            ReadHUCNetworkButton.Size = new System.Drawing.Size(99, 23);
+            ReadHUCNetworkButton.TabIndex = 29;
+            ReadHUCNetworkButton.Text = "Read Network";
+            ReadHUCNetworkButton.UseVisualStyleBackColor = true;
+            ReadHUCNetworkButton.Click += ReadHUCNetworkButton_Click;
+            // 
+            // HUCLabel3
+            // 
+            HUCLabel3.AutoSize = true;
+            HUCLabel3.Enabled = false;
+            HUCLabel3.Location = new System.Drawing.Point(209, 88);
+            HUCLabel3.Name = "HUCLabel3";
+            HUCLabel3.Size = new System.Drawing.Size(37, 15);
+            HUCLabel3.TabIndex = 28;
+            HUCLabel3.Text = "HUCs";
+            // 
+            // HUCLabel2
+            // 
+            HUCLabel2.AutoSize = true;
+            HUCLabel2.Enabled = false;
+            HUCLabel2.Location = new System.Drawing.Point(37, 87);
+            HUCLabel2.Name = "HUCLabel2";
+            HUCLabel2.Size = new System.Drawing.Size(94, 15);
+            HUCLabel2.TabIndex = 27;
+            HUCLabel2.Text = "(or)  Traverse up ";
+            // 
+            // traverseHUCBox
+            // 
+            traverseHUCBox.Enabled = false;
+            traverseHUCBox.Location = new System.Drawing.Point(133, 85);
+            traverseHUCBox.Name = "traverseHUCBox";
+            traverseHUCBox.Size = new System.Drawing.Size(71, 23);
+            traverseHUCBox.TabIndex = 26;
+            traverseHUCBox.Text = "5";
+            // 
+            // HUCLabel1
+            // 
+            HUCLabel1.AutoSize = true;
+            HUCLabel1.Enabled = false;
+            HUCLabel1.Location = new System.Drawing.Point(4, 63);
+            HUCLabel1.Name = "HUCLabel1";
+            HUCLabel1.Size = new System.Drawing.Size(131, 15);
+            HUCLabel1.TabIndex = 25;
+            HUCLabel1.Text = "(or specify) upper HUC:";
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
+            label12.Location = new System.Drawing.Point(27, 11);
+            label12.Name = "label12";
+            label12.Size = new System.Drawing.Size(94, 15);
+            label12.TabIndex = 23;
+            label12.Text = "Pour-Point HUC";
+            // 
+            // HUCBox
+            // 
+            HUCBox.BackColor = System.Drawing.SystemColors.Window;
+            HUCBox.Location = new System.Drawing.Point(133, 8);
+            HUCBox.Name = "HUCBox";
+            HUCBox.Size = new System.Drawing.Size(71, 23);
+            HUCBox.TabIndex = 22;
+            // 
             // NewSimForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1119, 540);
+            ClientSize = new System.Drawing.Size(1263, 595);
+            Controls.Add(NetworkLabel);
+            Controls.Add(readHUCNetworkPanel);
             Controls.Add(label4);
             Controls.Add(ShowH14Box);
             Controls.Add(HUCSelectionPanel);
@@ -581,7 +713,6 @@
             Controls.Add(SummaryPanel);
             Controls.Add(SegLoadLabel);
             Controls.Add(label7);
-            Controls.Add(NetworkLabel);
             Controls.Add(panel2);
             Controls.Add(TogglePanel);
             Controls.Add(label2);
@@ -609,6 +740,8 @@
             SummaryPanel.PerformLayout();
             HUCSelectionPanel.ResumeLayout(false);
             HUCSelectionPanel.PerformLayout();
+            readHUCNetworkPanel.ResumeLayout(false);
+            readHUCNetworkPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -659,5 +792,16 @@
         private System.Windows.Forms.CheckBox ShowH14Box;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.RadioButton HUCNetworkButton;
+        private System.Windows.Forms.Panel readHUCNetworkPanel;
+        private System.Windows.Forms.Button ReadHUCNetworkButton;
+        private System.Windows.Forms.Label HUCLabel3;
+        private System.Windows.Forms.Label HUCLabel2;
+        private System.Windows.Forms.TextBox traverseHUCBox;
+        private System.Windows.Forms.Label HUCLabel1;
+        private System.Windows.Forms.TextBox upperHUCBox;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TextBox HUCBox;
+        private System.Windows.Forms.CheckBox ModelHUC8checkBox;
     }
 }

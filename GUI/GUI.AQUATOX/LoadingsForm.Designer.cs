@@ -68,6 +68,7 @@ namespace GUI.AQUATOX
             WarningLabel = new System.Windows.Forms.Label();
             Help_Button = new System.Windows.Forms.Button();
             ToxicityButton = new System.Windows.Forms.Button();
+            MacroWashoutOffBox = new System.Windows.Forms.CheckBox();
             LoadingsPanel.SuspendLayout();
             RBPanel.SuspendLayout();
             LTPanel.SuspendLayout();
@@ -475,13 +476,13 @@ namespace GUI.AQUATOX
             WarningLabel.TabIndex = 25;
             WarningLabel.Text = "Ammonia Selected as a Driving Variable in the Setup Window";
             // 
-            // HelpButton
+            // Help_Button
             // 
             Help_Button.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             Help_Button.Image = Properties.Resources.help_icon;
             Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             Help_Button.Location = new System.Drawing.Point(291, 10);
-            Help_Button.Name = "HelpButton";
+            Help_Button.Name = "Help_Button";
             Help_Button.Size = new System.Drawing.Size(87, 27);
             Help_Button.TabIndex = 26;
             Help_Button.Text = "  Help";
@@ -501,11 +502,25 @@ namespace GUI.AQUATOX
             ToxicityButton.Visible = false;
             ToxicityButton.Click += button1_Click;
             // 
+            // MacroWashoutOffBox
+            // 
+            MacroWashoutOffBox.AutoSize = true;
+            MacroWashoutOffBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            MacroWashoutOffBox.Location = new System.Drawing.Point(162, 67);
+            MacroWashoutOffBox.Name = "MacroWashoutOffBox";
+            MacroWashoutOffBox.Size = new System.Drawing.Size(193, 19);
+            MacroWashoutOffBox.TabIndex = 28;
+            MacroWashoutOffBox.Text = "Turn off Macrophyte Washout";
+            MacroWashoutOffBox.UseVisualStyleBackColor = true;
+            MacroWashoutOffBox.Visible = false;
+            MacroWashoutOffBox.CheckedChanged += TurnOffMacroWashCheckBoxChanged;
+            // 
             // LoadingsForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(676, 447);
+            Controls.Add(MacroWashoutOffBox);
             Controls.Add(ToxicityButton);
             Controls.Add(Help_Button);
             Controls.Add(WarningLabel);
@@ -573,5 +588,6 @@ namespace GUI.AQUATOX
         private System.Windows.Forms.Button Help_Button;
         private System.Windows.Forms.Label timeSeriesLabel;
         private System.Windows.Forms.Button ToxicityButton;
+        private System.Windows.Forms.CheckBox MacroWashoutOffBox;
     }
 }
