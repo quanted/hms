@@ -19,7 +19,7 @@ namespace Web.Services
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Debug)
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.AspNewCore", Serilog.Events.LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
