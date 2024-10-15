@@ -1,8 +1,13 @@
 ﻿using System;
+using System.IO;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Web.Services
 {
@@ -32,7 +37,11 @@ namespace Web.Services
             try
             {
                 Log.Information("HMS web host starting");
-                BuildWebHost(args).Run();
+                var builder = CreateHostBuilder(args);
+                builder.ConfigureServices(services => services.AddSerilog());
+
+                var app = builder.Build();
+                app.Run();
             }
             catch(Exception ex)
             {
@@ -45,24 +54,41 @@ namespace Web.Services
 
         }
 
-        /// <summary>
-        /// Web Services build Web host method
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .CaptureStartupErrors(true)
-                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
-                .ConfigureAppConfiguration((hostingContext, config) =>
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
+                webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     var env = hostingContext.HostingEnvironment;
                     config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                           .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
                     config.AddEnvironmentVariables();
-                })
-                .UseSerilog()
-                .UseStartup<Startup>()
-                .Build();
+
+                });
+                webBuilder.UseStartup<Startup>();
+            });
+
+        /// <summary>
+        /// Web Services build Web host method
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        //public static IHostedService BuildWebHost(string[] args)
+        //{
+        //    await Host.CreateDefaultBuilder(args)
+        //        .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
+        //        .ConfigureAppConfiguration((hostingContext, config) =>
+        //        {
+        //            var env = hostingContext.HostingEnvironment;
+        //            config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+        //                  .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+        //            config.AddEnvironmentVariables();
+        //        })
+        //        .UseStartup<Startup>()
+        //        .Build();
+        //}
+
     }
 }

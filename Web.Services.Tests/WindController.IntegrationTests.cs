@@ -73,7 +73,7 @@ namespace Web.Services.Tests
         /// </summary>
         public WindControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

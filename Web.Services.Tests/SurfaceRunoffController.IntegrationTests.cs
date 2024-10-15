@@ -81,7 +81,6 @@ namespace Web.Services.Tests
         {
             _server = new TestServer(
                 new WebHostBuilder()
-                    .UseSerilog()
                     .UseStartup<Startup>()
             );
             //_server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>().UseSolutionRelativeContentRoot("Web.Services").ConfigureTestServices(services => services.AddMvc().AddApplicationPart(typeof(Startup).Assembly)));

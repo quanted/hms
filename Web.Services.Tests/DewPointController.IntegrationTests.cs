@@ -33,9 +33,9 @@ namespace Web.Services.Tests
         /// <summary>
         /// Integration test constructor creates test server and test client.
         /// </summary>
-        public DewPointControllerIntegrationTests()
+        public DewPointControllerIntegrationTests(WebHostBuilder webHostBuilder)
         {
-            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
+            _server = new TestServer(webHostBuilder.UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

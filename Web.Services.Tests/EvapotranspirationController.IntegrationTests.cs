@@ -360,7 +360,7 @@ namespace Web.Services.Tests
         /// </summary>
         public EvapotranspirationControllerIntegrationTests()
         {
-            _server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>());
+            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             _client = _server.CreateClient();
             _client.Timeout = new System.TimeSpan(0, 10, 0); //Many tests were failing due to timeout errors
         }

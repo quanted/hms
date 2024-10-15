@@ -720,7 +720,6 @@ namespace Web.Services.Models
                     catchments.Add(new NetworkCatchment(row.ElementAt(0), row.ElementAt(1), row.ElementAt(2), row.ElementAt(3),
                         row.ElementAt(4), row.ElementAt(5), row.ElementAt(6), row.ElementAt(7), row.ElementAt(8), row.ElementAt(9)));
                 }
-                spreadsheetDocument.Close();
             }
             return catchments;
         }
