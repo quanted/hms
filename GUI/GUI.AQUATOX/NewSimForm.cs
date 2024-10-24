@@ -101,14 +101,30 @@ namespace GUI.AQUATOX
             {
                 System.Threading.SynchronizationContext.Current.Post((_) =>
                 {
-                    webView_MouseDown((content.StartsWith("LAKE|")), false, content);
+                    webView_MouseDown((content.StartsWith("LAKE|")), false, false, content);
                 }, null);
             }
-            else if (content.StartsWith("H14"))
+            else if (content.StartsWith("H1"))
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_14\GeoJSON_split\H14_" + content.Substring(3, 2) + ".geojson";
-                string HUC14 = File.ReadAllText(filestr);
-                webView.CoreWebView2.PostWebMessageAsString("ADD|" + HUC14); // display layer
+                string hucstr = content.Substring(1, 2);
+                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_"+hucstr+@"\H" +hucstr +"_" + content.Substring(3, 2) + ".geojson";  //FIXME TEST ONLY  FIX DIRECTORY
+                if (File.Exists(filestr))
+                {
+                    string HUCgeo = File.ReadAllText(filestr);
+                    webView.CoreWebView2.PostWebMessageAsString("ADD|"+hucstr +"|" + HUCgeo); // display layer
+                }
+                else MessageBox.Show("File not found: "+filestr);
+            }
+            else if (content.StartsWith("H8"))
+            {
+                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_8\H8.geojson";  //FIXME TEST ONLY  FIX DIRECTORY
+                if (File.Exists(filestr))
+                {
+                    string HUCgeo = File.ReadAllText(filestr);
+                    webView.CoreWebView2.PostWebMessageAsString("ADD|8|" + HUCgeo); // display layer
+                }
+                else MessageBox.Show("File not found: " + filestr);
+
             }
             else if (content.StartsWith("DoneDraw"))
             {
@@ -118,7 +134,14 @@ namespace GUI.AQUATOX
             {
                 System.Threading.SynchronizationContext.Current.Post((_) =>
                 {
-                    webView_MouseDown(false, true, content);
+                    webView_MouseDown(false, true, false, content);
+                }, null);
+            }
+            else if (content.StartsWith("RHUC"))
+            {
+                System.Threading.SynchronizationContext.Current.Post((_) =>
+                {
+                    webView_MouseDown(false, false, true, content);
                 }, null);
             }
             else
@@ -167,8 +190,6 @@ namespace GUI.AQUATOX
                     }
                     else Summary2Label.Visible = false;
                 }
-
-
             }
             else if (HUCButton.Checked)
             {
@@ -180,16 +201,18 @@ namespace GUI.AQUATOX
             }
             else if (HUCNetworkButton.Checked)
             {
-                if (SNPopulated)
+                if (SNPopulated && AQT2D.SN != null)
                 {
                     Summary1Label.Text = "Pour Point HUC: " + HUCChosen;
                     Summary2Label.Text = AQT2D.SNStats();
                     Summary2Label.Visible = true;
+                    clear_network.Enabled = true;
                 }
                 else
                 {
                     if (!SNPopulated) Summary1Label.Text = "HUC network has not been defined";
                     Summary2Label.Visible = false;
+                    clear_network.Enabled = false;
                 }
             }
             else  // otherwise-- stream network selected
@@ -216,65 +239,18 @@ namespace GUI.AQUATOX
         }
 
 
-        private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
+
+        private void HighlightHUCNetwork()
         {
-
-            if (!Int32.TryParse(comidBox.Text, out int COMID))
-            {
-                MessageBox.Show("Please either enter a COMID in the COMID box or click on a stream segment to select a pour point.");
-                return;
-            }
-
-            bool hasendcomid = Int32.TryParse(EndCOMIDBox.Text, out int endCOMID);
-            bool hasspan = Double.TryParse(spanBox.Text, out double Span);
-
-            if ((!hasendcomid) && (!hasspan))
-            {
-                MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
-                return;
-            }
-
-            if ((hasendcomid) && (hasspan)) spanBox.Text = ""; //end comid takes precedence so make this clear on the interface
-
-            SegLoadLabel.Text = "Please Wait, Reading Stream Network...";
-            SegLoadLabel.Visible = true;
-
-            Cursor.Current = Cursors.WaitCursor;
-            Application.DoEvents();
-
-            if (AQT2D == null) AQT2D = new();
-            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
-            SegLoadLabel.Visible = false;
-            Cursor.Current = Cursors.Default;
-            if (SNJSON == "")
-            {
-                MessageBox.Show("ERROR: web service returned empty JSON."); return;
-            }
-            if (SNJSON.IndexOf("ERROR", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                MessageBox.Show("Web service returned an error: " + SNJSON); return;
-            }
-            try
-            { AQT2D.CreateStreamNetwork(SNJSON); }
-            catch
-            {
-                Cursor.Current = Cursors.Default;
-                SegLoadLabel.Visible = false;
-                MessageBox.Show("ERROR converting JSON: " + SNJSON);
-                return;
-            }
-
-            ExportSNJSON = SNJSON;
-            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
-            comidLabel.ForeColor = System.Drawing.Color.Black;
-            endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
-
-            SNPopulated = true;
-
-            HighlightStreamNetwork();
-
-            comidBox_Leave(sender, e); //update NScrSettings
-            UpdateLeftPanels();
+            for (int i = 0; i < AQT2D.SN.order.Length; i++)
+                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
+                {
+                    bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
+                    HUCStr = AQT2D.SN.order[i][j].ToString();
+                    if (HUCStr.Length % 2 != 0) HUCStr = "0" + HUCStr;
+                    webView.CoreWebView2.PostWebMessageAsString("HUCCOLOR|" + HUCStr + "|" + lastshape.ToString()); // display all layers
+                };
+            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
         }
 
 
@@ -403,7 +379,7 @@ namespace GUI.AQUATOX
 
 
 
-        private void webView_MouseDown(bool lake, bool HUC, string COMIDstr)
+        private void webView_MouseDown(bool lake, bool HUC, bool RHUC, string COMIDstr)
 
         {
             string[] msg = COMIDstr.Split('|');
@@ -427,8 +403,13 @@ namespace GUI.AQUATOX
                 else SimName = "HUC" + HUCStr + ": " + HUCChosen;
 
                 HUCBox.Text = HUCChosen;
-                // fixme left click issue
 
+                UpdateLeftPanels();
+            }
+            else if (RHUC)
+            {
+                HUCChosen = msg[1];
+                upperHUCBox.Text = HUCChosen;
                 UpdateLeftPanels();
             }
             else  //flow lines
@@ -476,6 +457,7 @@ namespace GUI.AQUATOX
                 ShowH14Box.Visible = true;
                 ShowH14Box.Checked = false;
                 HUCSelectionPanel.Visible = false;
+                HAWQSHUCLabel.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
                 SegLoadLabel.Text = "Zoom in to see stream segments.";
                 SegLoadLabel.Visible = true;
@@ -487,6 +469,7 @@ namespace GUI.AQUATOX
             {
                 ShowH14Box.Visible = false;
                 HUCSelectionPanel.Visible = false;
+                HAWQSHUCLabel.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
                 SegLoadLabel.Text = "Zoom in to see Lakes/Reservoirs.";
                 SegLoadLabel.Visible = true;
@@ -497,19 +480,21 @@ namespace GUI.AQUATOX
             else //  HUCButton.checked or HUCNetworkButton.checked
             {
                 ShowH14Box.Visible = false;
-                webView.CoreWebView2.PostWebMessageAsString("HUCMAP|" + HUCStr);
                 HUCSelectionPanel.Visible = true;
+                HAWQSHUCLabel.Visible = true;
 
-                SegLoadLabel.Text = "Zoom in to see HUC14 segments.";
-                SegLoadLabel.Visible = BHUC14.Checked;
+                SegLoadLabel.Text = "HUC8s shown; zoom in to see HUC"+HUCStr+" segments.";
+                SegLoadLabel.Visible = !BHUC8.Checked;
 
                 if (HUCNetworkButton.Checked)
                 {
+                    webView.CoreWebView2.PostWebMessageAsString("HUCMAP2|" + HUCStr);
                     infolabel1.Text = "Click on a down-river HUC polygon then model an entire HUC8 or right-click on ";
                     infolabel2.Text = "an up-river HUC or input a number of HUCs to model up-river and click \"Read Network\"";
                 }
                 else
                 {
+                    webView.CoreWebView2.PostWebMessageAsString("HUCMAP|" + HUCStr);
                     infolabel1.Text = "Click on one HUC to Select";
                     infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";
                 }
@@ -588,16 +573,68 @@ namespace GUI.AQUATOX
             upperHUCBox.Enabled = !ModelH8;
         }
 
-        private void HighlightHUCNetwork()
+        private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
-            for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
-                {
-                    bool lastshape = ((i == AQT2D.SN.order.Length - 1) && (j == AQT2D.SN.order[i].Length - 1));
-                    webView.CoreWebView2.PostWebMessageAsString("FLCOLOR|" + AQT2D.SN.order[i][j] + "|" + lastshape.ToString()); // display all layers
-                };
-            webView.CoreWebView2.PostWebMessageAsString("ZOOM");
+
+            if (!Int32.TryParse(comidBox.Text, out int COMID))
+            {
+                MessageBox.Show("Please either enter a COMID in the COMID box or click on a stream segment to select a pour point.");
+                return;
+            }
+
+            bool hasendcomid = Int32.TryParse(EndCOMIDBox.Text, out int endCOMID);
+            bool hasspan = Double.TryParse(spanBox.Text, out double Span);
+
+            if ((!hasendcomid) && (!hasspan))
+            {
+                MessageBox.Show("Please either specify an up-river span, enter an up-river COMID in the endCOMID box, or right-click on a stream segment to select an upstream end point.");
+                return;
+            }
+
+            if ((hasendcomid) && (hasspan)) spanBox.Text = ""; //end comid takes precedence so make this clear on the interface
+
+            SegLoadLabel.Text = "Please Wait, Reading Stream Network...";
+            SegLoadLabel.Visible = true;
+
+            Cursor.Current = Cursors.WaitCursor;
+            Application.DoEvents();
+
+            if (AQT2D == null) AQT2D = new();
+            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+            SegLoadLabel.Visible = false;
+            Cursor.Current = Cursors.Default;
+
+            if (SNJSON == "")
+            {
+                MessageBox.Show("ERROR: web service returned empty JSON."); return;
+            }
+            if (SNJSON.IndexOf("ERROR", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                MessageBox.Show("Web service returned an error: " + SNJSON); return;
+            }
+            try
+            { AQT2D.CreateStreamNetwork(SNJSON); }
+            catch
+            {
+                Cursor.Current = Cursors.Default;
+                SegLoadLabel.Visible = false;
+                MessageBox.Show("ERROR converting JSON: " + SNJSON);
+                return;
+            }
+
+            ExportSNJSON = SNJSON;
+            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+            comidLabel.ForeColor = System.Drawing.Color.Black;
+            endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
+
+            SNPopulated = true;
+
+            HighlightStreamNetwork();
+
+            comidBox_Leave(sender, e); //update NScrSettings
+            UpdateLeftPanels();
         }
+
 
         private void ReadHUCNetworkButton_Click(object sender, EventArgs e)
         {
@@ -609,8 +646,9 @@ namespace GUI.AQUATOX
             }
 
             bool modelUpHUC8 = ModelHUC8checkBox.Checked;
-            bool hasUpperHUC = Int64.TryParse(upperHUCBox.Text, out long upperHUC);
-            bool hasspan = Int64.TryParse(traverseHUCBox.Text, out long num2travel);
+            string upperHUCstr = upperHUCBox.Text.Trim();
+            bool hasUpperHUC = Int64.TryParse(upperHUCstr, out long upperHUC);
+            bool hasspan = Int32.TryParse(traverseHUCBox.Text, out int num2travel);
 
             if (!hasUpperHUC && !hasspan && !modelUpHUC8)
             {
@@ -622,26 +660,50 @@ namespace GUI.AQUATOX
             AQT2D.SN = new();
             AQT2D.HUCInf = new();
 
-            if (modelUpHUC8)
+            try { AQT2D.HUCInf.LoadFromtoData(HUCstr); } //load relevant fromto data to dictionary
+            catch (Exception ex)
             {
-                try { AQT2D.HUCInf.LoadFromtoData(HUCstr); } //load relevant fromto data to dictionary
-                catch (Exception ex)
-                {
-                    MessageBox.Show("ERROR: " + ex.Message);  //file system error
-                    return;
-                }
-                AQT2D.SN.sources = AQT2D.HUCInf.ReadSources(HUCstr,true,0);   //traverse up-river until a HUC8 boundary is encountered, write all interior HUCs to the sources structure
-
-                HashSet<long> order_set = new HashSet<long>();
-                foreach (var key in AQT2D.SN.sources.Keys)
-                    if (long.TryParse(key, out long keyLong)) order_set.Add(keyLong);
-                AQT2D.SN.order = new long[][] { new long[] { 0L, HUCInt } };  // initialize SN.order with the pour point element as required for "rebuildorder" method
-                AQT2D.RebuildOrderBasedOnSources(order_set);  // set the order for model execution
-
-                MessageBox.Show("done");
-
-
+                MessageBox.Show("ERROR: " + ex.Message);  //file system error
+                return;
             }
+
+            string errstr = "";
+            if (modelUpHUC8)
+                AQT2D.SN.sources = AQT2D.HUCInf.ReadSources(HUCstr, true, -1);   //traverse up-river until a HUC8 boundary is encountered, write all interior HUCs to the sources structure
+            else if (hasspan) AQT2D.SN.sources = AQT2D.HUCInf.ReadSources(HUCstr, false, num2travel);   //traverse up-river a certain number of HUCs
+            else AQT2D.SN.sources = AQT2D.HUCInf.ReadSinglePathSources(HUCstr, upperHUCstr, out errstr);   //traverse up-river until a HUC8 boundary is encountered, write all interior HUCs to the sources structure 
+
+            if (errstr != "")
+            {
+                MessageBox.Show(errstr);
+                return;
+            }
+
+            HashSet<string> order_set = new HashSet<string>();
+            foreach (var key in AQT2D.SN.sources.Keys)
+                order_set.Add(key);
+            AQT2D.SN.order = new string[][] { new string[] { "", HUCstr } };  // initialize SN.order with the pour point element as required for "rebuildorder" method
+            AQT2D.RebuildOrderBasedOnSources(order_set);  // set the order for model execution
+
+            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+
+            SNPopulated = true;
+
+            HighlightHUCNetwork();
+            UpdateLeftPanels();
+
+
+        }
+
+        private void clear_network_Click(object sender, EventArgs e)
+        {
+            AQT2D.SN = new();
+            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+            UpdateLeftPanels();
+        }
+
+        private void traverseHUCBox_TextChanged(object sender, EventArgs e)
+        {
 
         }
     }

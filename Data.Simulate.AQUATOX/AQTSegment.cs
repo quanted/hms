@@ -5350,11 +5350,11 @@ namespace AQUATOX.AQTSegment
                 light = light * LoadsRec.Loadings.MultLdg;  // allow perturbation JSC 1-23-03
             }
 
-            // ACCOUNT FOR ICE COVER
+            // ACCOUNT FOR REDUCTION IN LIGHT DUE TO ICE COVER
             {
                 if (AQTSeg.GetState(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol) < AQTSeg.Ice_Cover_Temp())
                 {   // Aug 2007, changed from 33% to 15%
-                    light = light * 0.15;
+                    light = light * 0.15;    // Note, this line must be commented out to reproduce results for alpine-lakes project -- assumes clear ice (relevant to spin-up only), primary calibration period is ice-off period
                 }
             }
 

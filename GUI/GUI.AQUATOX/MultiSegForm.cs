@@ -50,7 +50,7 @@ namespace GUI.AQUATOX
         private System.Drawing.Graphics graphics;
         private ScreenSettings ScrSettings = new();
         private StringCollection ShortDirNames = new();
-        private List<long> executed = new List<long>(); // list of comids that have been asked to execute
+        private List<string> executed = new List<string>(); // list of comids that have been asked to execute
         private string BaseDir;
         private string[] BoundStr;
         private string showinglog = "";
@@ -610,7 +610,7 @@ namespace GUI.AQUATOX
                 try
                 {
                     string arch = File.ReadAllText(archfilen);
-                    AQT2D.archive = JsonConvert.DeserializeObject<Dictionary<long, AQSim_2D.archived_results>>(arch);
+                    AQT2D.archive = JsonConvert.DeserializeObject<Dictionary<string, AQSim_2D.archived_results>>(arch);
                     string svlist = File.ReadAllText(svlistfilen);
                     AQT2D.SVList = JsonConvert.DeserializeObject<List<string>>(svlist);
                     bindgraphlist();
@@ -752,7 +752,7 @@ namespace GUI.AQUATOX
 
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null)
-                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(int.Parse(comid));
+                            if (AQT2D.SN.waterbodies.comid_wb != null) in_waterbody = AQT2D.NWM_Waterbody(comid);
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.");
@@ -800,11 +800,11 @@ namespace GUI.AQUATOX
 
                     if (Lake0D == 0)
                     {
-                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out long[] outofnetwork))
+                        if (AQT2D.SN.boundary.TryGetValue("out-of-network", out string[] outofnetwork))
                             if (outofnetwork.Length > 0)
                             {
                                 string bnote = "Note: Boundary Condition Flows and State Variable upriver inputs should be added to COMIDs: ";
-                                foreach (long bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
+                                foreach (string bid in outofnetwork) bnote = bnote + bid.ToString() + ", ";
                                 TSafeAddToProcessLog("INPUT: " + bnote);
                             }
                     }
@@ -866,7 +866,7 @@ namespace GUI.AQUATOX
         private bool SetupForRun()
         {
             AddToProcessLog("INFO: Starting model execution...");
-            if (AQT2D.archive == null) AQT2D.archive = new Dictionary<long, AQSim_2D.archived_results>();
+            if (AQT2D.archive == null) AQT2D.archive = new Dictionary<string, AQSim_2D.archived_results>();
             AQT2D.archive.Clear();
             AQT2D.SVList = null;
 
@@ -948,7 +948,7 @@ namespace GUI.AQUATOX
 
             await Task.Run(() =>
             {
-                success = AQT2D.executeModel(long.Parse(segID), MasterSetupJson(), ref strout, ref json, null, null);
+                success = AQT2D.executeModel(segID, MasterSetupJson(), ref strout, ref json, null, null);
                 Process_0D_Run(success, strout, json, segID);
             });
         }
@@ -971,7 +971,7 @@ namespace GUI.AQUATOX
 
         private async Task RunStreamNetworkModel()
         {
-            long[] outofnetwork = new long[0];
+            string[] outofnetwork = new string[0];
             if (AQT2D.SN.boundary != null)
                 AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
@@ -993,7 +993,7 @@ namespace GUI.AQUATOX
             }
         }
 
-        private async Task<bool> ExecuteModelForEachSegment(int order, long[] outofnetwork)
+        private async Task<bool> ExecuteModelForEachSegment(int order, string[] outofnetwork)
         {
             var results = new ConcurrentBag<bool>();  //thread safe storage of model results
 
@@ -1006,7 +1006,7 @@ namespace GUI.AQUATOX
             return results.All(r => r);  //returns true if all simulations were successful, otherwise false
         }
 
-        private bool ExecuteSingleSNSegment(long runID, long[] outofnetwork)
+        private bool ExecuteSingleSNSegment(string runID, string[] outofnetwork)
         // execute a single segment that is part of a stream network
         {
             List<string> strout = new();
@@ -1016,10 +1016,10 @@ namespace GUI.AQUATOX
             if (AQT2D.SN.waterbodies != null)
                 in_waterbody = AQT2D.NWM_Waterbody(runID);
 
-            long IDtoRun = runID;
+            string IDtoRun = runID;
             if (in_waterbody)
                 IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
-            if (IDtoRun == -9999)
+            if (IDtoRun == "-9999")
                 return true;
 
             string runIDstr = IDtoRun.ToString();
@@ -1036,9 +1036,9 @@ namespace GUI.AQUATOX
             List<ITimeSeriesOutput<List<double>>> divergence_flows = null;  //code block handles divergences
             if (AQT2D.SN.divergentpaths != null)
             {
-                if (AQT2D.SN.divergentpaths.TryGetValue(runIDstr, out long[] Divg))
+                if (AQT2D.SN.divergentpaths.TryGetValue(runIDstr, out string[] Divg))
                 {
-                    foreach (int ID in Divg)
+                    foreach (string ID in Divg)
                     {
                         TimeSeriesOutput<List<double>> ITSO = null;
                         string DivSeg = File.ReadAllText(BaseDir + "AQT_Input_" + ID.ToString());  //read the divergent segment of 2D model 
@@ -1132,7 +1132,7 @@ namespace GUI.AQUATOX
 
             DateTime[] dateList = null;
 
-            foreach (KeyValuePair<long, AQSim_2D.archived_results> entry in AQT2D.archive)
+            foreach (KeyValuePair<string, AQSim_2D.archived_results> entry in AQT2D.archive)
             {
                 csv.Append((entry.Key) + ",");
                 if (i == 0)
@@ -1193,7 +1193,7 @@ namespace GUI.AQUATOX
                 chart1.BringToFront();
                 int sercnt = 0;
 
-                foreach (KeyValuePair<long, AQSim_2D.archived_results> entry in AQT2D.archive)
+                foreach (KeyValuePair<string, AQSim_2D.archived_results> entry in AQT2D.archive)
                 {
                     Series ser = chart1.Series.Add(entry.Key.ToString());
                     ser.ChartType = SeriesChartType.Line;
@@ -1722,7 +1722,7 @@ namespace GUI.AQUATOX
             webView.Visible = true;
             PostWebviewMessage("ERASE");
 
-            long[] outofnetwork = new long[0];
+            string[] outofnetwork = new string[0];
 
             if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID", "");  // plot stand alone 0-D lake    fixme, could add name
             else if (HUC0D != "") PlotGeoJSON(HUC0D, "HUC", "");  // plot stand alone HUC  fixme, name
@@ -1740,7 +1740,7 @@ namespace GUI.AQUATOX
                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
                     for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                     {
-                        long COMID = AQT2D.SN.order[i][j];
+                        string COMID = AQT2D.SN.order[i][j];
                         string CString = COMID.ToString();
 
                         if (!NRCheckBox.Checked)
@@ -1797,9 +1797,9 @@ namespace GUI.AQUATOX
                         if (polyline != null)
                         {
                             string SrcIDList = "";
-                            if (AQT2D.SN.sources.TryGetValue(CString, out long[] Sources))
+                            if (AQT2D.SN.sources.TryGetValue(CString, out string[] Sources))
                             {
-                                foreach (int SrcID in Sources)
+                                foreach (string SrcID in Sources)
                                     if (outofnetwork.Contains(SrcID))  //ID inflow points with green markers
                                     {
                                         if (SrcIDList == "") SrcIDList = SrcID.ToString();
@@ -1907,12 +1907,12 @@ namespace GUI.AQUATOX
                 if ((Lake0D != 0) && (HUC0D != ""))
                 {
                     isBoundarySeg = false;
-                    long[] outofnetwork = new long[0];
+                    string[] outofnetwork = new string[0];
                     if (AQT2D.SN.boundary != null)
                         AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
 
-                    if (AQT2D.SN.sources.TryGetValue(CString, out long[] Sources))
-                        foreach (int SrcID in Sources)
+                    if (AQT2D.SN.sources.TryGetValue(CString, out string[] Sources))
+                        foreach (string SrcID in Sources)
                             if (outofnetwork.Contains(SrcID)) isBoundarySeg = true;
                 }
 
@@ -2041,17 +2041,17 @@ namespace GUI.AQUATOX
 
 
 
-        private long ExecuteComidWithinLake(long runID)
+        private string ExecuteComidWithinLake(string runID)
         {
             executed.Add(runID);  // add comid to list that is ready to run
 
-            long WBcomid;
-            if (!AQT2D.SN.waterbodies.comid_wb.TryGetValue(runID, out WBcomid)) return -9999;
+            string WBcomid;
+            if (!AQT2D.SN.waterbodies.comid_wb.TryGetValue(runID, out WBcomid)) return "-9999";
             for (int i = 0; i < AQT2D.SN.waterbodies.comid_wb.Count; i++)
             {
                 if (AQT2D.SN.waterbodies.comid_wb.Values.ElementAt(i) == WBcomid)
                     if (!executed.Contains(AQT2D.SN.waterbodies.comid_wb.Keys.ElementAt(i)))
-                        return -9999;
+                        return "-9999";
             }
 
             return WBcomid;
@@ -2208,7 +2208,7 @@ namespace GUI.AQUATOX
                                 for (int i = 0; i < AQT2D.SN.order.Length; i++)
                                     for (int j = 0; j < AQT2D.SN.order[i].Length; j++)
                                     {
-                                        long COMID = AQT2D.SN.order[i][j];
+                                        string COMID = AQT2D.SN.order[i][j];
                                         string CString = COMID.ToString();
                                         string Geostr;
                                         if (NSForm.GeoJSON.TryGetValue(CString, out Geostr))
@@ -2344,7 +2344,7 @@ namespace GUI.AQUATOX
                     ShowStep = 0;
 
                     for (int s2 = 0; s2 < AQT2D.SN.order.Length; s2++)
-                        foreach (int runID in AQT2D.SN.order[s2])
+                        foreach (string runID in AQT2D.SN.order[s2])
                             PostWebviewMessage("COLOR|" + runID.ToString() + "|grey");
                     if (AQT2D.SN.waterbodies != null)
                         foreach (string[] WBID in AQT2D.SN.waterbodies.wb_table)
@@ -2357,16 +2357,16 @@ namespace GUI.AQUATOX
 
                 try
                 {
-                    foreach (long runID in AQT2D.SN.order[ShowStep - 1])  // step through each COMID in this "order" 
+                    foreach (string runID in AQT2D.SN.order[ShowStep - 1])  // step through each COMID in this "order" 
                     {
                         bool in_waterbody = false;
                         if (AQT2D.SN.waterbodies != null) in_waterbody = AQT2D.NWM_Waterbody(runID);  // is this identified as a lake/res in streamnetwork
 
-                        long IDtoRun = runID;
+                        string IDtoRun = runID;
                         if (in_waterbody) IDtoRun = ExecuteComidWithinLake(runID);  // return water body IDtoRun or -9999 if the lake is not ready
 
                         string lineColor = "red";
-                        if (IDtoRun == -9999) { IDtoRun = runID; lineColor = "white"; }
+                        if (IDtoRun == "-9999") { IDtoRun = runID; lineColor = "white"; }
                         PostWebviewMessage("COLOR|" + IDtoRun.ToString() + "|" + lineColor);
                     }
 
@@ -2459,7 +2459,7 @@ namespace GUI.AQUATOX
                     using (SQLiteCommand command = new SQLiteCommand("SELECT HUC14 FROM COMID_to_HUC14 WHERE COMID = @Index", connection))
                     {
                         for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                            foreach (int COMID in AQT2D.SN.order[i])
+                            foreach (string COMID in AQT2D.SN.order[i])
                             {
                                 command.Parameters.Clear();
                                 command.Parameters.AddWithValue("@Index", COMID);
@@ -2963,16 +2963,16 @@ namespace GUI.AQUATOX
             if (File.Exists(MetafileN)) metadata = File.ReadAllText(MetafileN);
             string[] metadataLines = metadata.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             AQT2D.avgRetention = new Dictionary<int, double>();
-            Dictionary<long, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup by ID then date
+            Dictionary<string, Dictionary<DateTime, HAWQSRCHRow>> HAWQSRchData = new();  //nested dictionary to allow multi-key lookup by ID then date
 
-            void AddHAWQSRchData(long longKey, DateTime dateTimeKey, HAWQSRCHRow data)  //add a reach and date to the nested dictionary
+            void AddHAWQSRchData(string stringKey, DateTime dateTimeKey, HAWQSRCHRow data)  //add a reach and date to the nested dictionary
             {
-                if (!HAWQSRchData.ContainsKey(longKey))  // Check if the outer dictionary already has the long key
+                if (!HAWQSRchData.ContainsKey(stringKey))  // Check if the outer dictionary already has the string key
                 {
-                    HAWQSRchData[longKey] = new Dictionary<DateTime, HAWQSRCHRow>();  // If not, create a new inner dictionary
+                    HAWQSRchData[stringKey] = new Dictionary<DateTime, HAWQSRCHRow>();  // If not, create a new inner dictionary
                 }
 
-                HAWQSRchData[longKey][dateTimeKey] = data;  // Now, add or update the data in the inner dictionary
+                HAWQSRchData[stringKey][dateTimeKey] = data;  // Now, add or update the data in the inner dictionary
             }
 
             try  //add data from CSV file to the nested dictionary
@@ -2989,7 +2989,7 @@ namespace GUI.AQUATOX
                         HAWQSRCHRow row = new();
                         row.lat = Convert.ToDouble(rowdata[1]);
                         row.lon = Convert.ToDouble(rowdata[2]);
-                        long SubBasin = Convert.ToInt64(rowdata[3]);
+                        string SubBasin = rowdata[3];
                         row.vals = new double[rowdata.Length - 4];
                         for (int j = 4; j < rowdata.Length; j++) row.vals[j - 4] = Convert.ToDouble(rowdata[j]);
                         AddHAWQSRchData(SubBasin, date, row);
@@ -3060,15 +3060,15 @@ namespace GUI.AQUATOX
                 }
 
                 int[] boundaries = { };
-                long[] outofnetwork = new long[0];
+                string[] outofnetwork = new string[0];
                 if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
-                Dictionary<long, int> wbCountTracker = new Dictionary<long, int>();  //tracks number of COMIDS identified to each waterbody so that weighted averaging can be completed
+                Dictionary<string, int> wbCountTracker = new Dictionary<string, int>();  //tracks number of COMIDS identified to each waterbody so that weighted averaging can be completed
 
                 for (int iSeg = 1; iSeg <= AQT2D.nSegs; iSeg++)
                 {
                     string comid = AQT2D.SN.network[iSeg][0];
                     string inpfilen = BaseDir + "AQT_Input_" + comid + ".JSON";
-                    long WBCOMID = -1;
+                    string WBCOMID = "-1";
                     int wbcount = 0;
                     string WBJSON = "";
 
@@ -3080,8 +3080,8 @@ namespace GUI.AQUATOX
                     bool in_waterbody = false;
                     if ((AQT2D.SN.waterbodies != null) && (AQT2D.SN.waterbodies.comid_wb != null))
                     {
-                        WBCOMID = AQT2D.NWM_WaterbodyID(int.Parse(comid));
-                        in_waterbody = (WBCOMID != -1);
+                        WBCOMID = AQT2D.NWM_WaterbodyID(comid);
+                        in_waterbody = (WBCOMID != "-1");
                         if (in_waterbody)
                         {
                             TSafeAddToProcessLog("INPUT: " + comid + " is not modeled as a stream segment as it is part of a lake/reservoir.  HAWQS inputs added to that waterbody.");
@@ -3095,9 +3095,9 @@ namespace GUI.AQUATOX
                     }
 
                     bool boundaryseg = false;
-                    long[] Sources = new long[0];
+                    string[] Sources = new string[0];
                     if (AQT2D.SN.sources.TryGetValue(comid, out Sources))
-                        foreach (int SrcID in Sources)
+                        foreach (string SrcID in Sources)
                             if (outofnetwork.Contains(SrcID)) boundaryseg = true;   //ID inflow points to get inflow data
 
                     bool abort_task = false;
@@ -3234,7 +3234,7 @@ namespace GUI.AQUATOX
         }
 
 
-        private void MergeSegments(string smallSegmentId, string targetSegmentId, HashSet<long> runOrderComids)
+        private void MergeSegments(string smallSegmentId, string targetSegmentId, HashSet<string> runOrderComids)
         {
             AddToProcessLog($"INPUTS: Merging segment {smallSegmentId} into {targetSegmentId}");
 
@@ -3256,7 +3256,7 @@ namespace GUI.AQUATOX
             foreach (var key in AQT2D.SN.sources.Keys.ToList())
             {
                 AQT2D.SN.sources[key] = AQT2D.SN.sources[key]
-                    .Select(id => id == int.Parse(smallSegmentId) ? int.Parse(targetSegmentId) : id)
+                    .Select(id => id == smallSegmentId ? targetSegmentId : id)
                     .ToArray();
             }
 
@@ -3268,14 +3268,14 @@ namespace GUI.AQUATOX
                 {
                     AQT2D.SN.sources[targetSegmentId] = AQT2D.SN.sources[targetSegmentId]
                         .Concat(AQT2D.SN.sources[smallSegmentId])
-                        .Where(id => id != int.Parse(targetSegmentId)) // Prevent self-referencing
+                        .Where(id => id != targetSegmentId) // Prevent self-referencing
                         .Distinct()
                         .ToArray();
                 }
                 else
                 {
                     AQT2D.SN.sources[targetSegmentId] = AQT2D.SN.sources[smallSegmentId]
-                        .Where(id => id != int.Parse(targetSegmentId)) // Prevent self-referencing
+                        .Where(id => id != targetSegmentId) // Prevent self-referencing
                         .ToArray();
                 }
 
@@ -3291,7 +3291,7 @@ namespace GUI.AQUATOX
         public int[] GetDownstreamSegments(string segmentId)
         {
             return AQT2D.SN.sources
-                .Where(entry => entry.Value.Contains(int.Parse(segmentId)))
+                .Where(entry => entry.Value.Contains(segmentId))
                 .Select(entry => int.Parse(entry.Key))
                 .ToArray();
         }
@@ -3313,7 +3313,7 @@ namespace GUI.AQUATOX
 
             if (!VerifyStreamNetwork()) return;
 
-            var runOrderComids = new HashSet<long>(AQT2D.SN.order.SelectMany(o => o).Select(o => long.Parse(o.ToString())));
+            var runOrderComids = new HashSet<string>(AQT2D.SN.order.SelectMany(o => o).Select(o => o.ToString()));
 
             // Initialize small segments list
             var smallSegments = GetSmallSegments(TTThreshold, runOrderComids);
@@ -3407,14 +3407,14 @@ namespace GUI.AQUATOX
         }
 
         // get small segments list
-        private List<string> GetSmallSegments(double lengthThreshold, HashSet<long> runOrderComids)
+        private List<string> GetSmallSegments(double lengthThreshold, HashSet<string> runOrderComids)
         {
             var smallSegments = new List<string>();
             for (int i = 1; i < AQT2D.SN.network.Length; i++) // element zero contains headers
             {
                 double length = double.Parse(AQT2D.SN.network[i][5]); // travel time in days
                 string comid = AQT2D.SN.network[i][0];
-                if (length < lengthThreshold && runOrderComids.Contains(long.Parse(comid)))
+                if (length < lengthThreshold && runOrderComids.Contains(comid))
                 {
                     smallSegments.Add(comid);
                 }

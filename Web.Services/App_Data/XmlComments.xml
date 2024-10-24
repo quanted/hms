@@ -1824,7 +1824,7 @@
             <param name="comids">List of comids converted to ints</param>
             <returns>Error message or empty string</returns>
         </member>
-        <member name="M:Web.Services.Models.WSAquatoxWorkflow.Pass_Data(AQUATOX.AQTSegment.AQTSim,System.Collections.Generic.List{System.Int32})">
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.Pass_Data(AQUATOX.AQTSegment.AQTSim,System.Collections.Generic.List{System.String})">
             <summary>
             Auxiliary function to mimic how data is passed in AQSim_2D.executeModel()
             </summary>
@@ -1848,7 +1848,7 @@
             </summary>
             <param name="task_id">Task ID in database.</param>
         </member>
-        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ArchiveUpstreamOutputs(System.Collections.Generic.List{System.Int32})">
+        <member name="M:Web.Services.Models.WSAquatoxWorkflow.ArchiveUpstreamOutputs(System.Collections.Generic.List{System.String})">
             <summary>
             Iterate over each comid and generate the archive results for each.
             </summary>

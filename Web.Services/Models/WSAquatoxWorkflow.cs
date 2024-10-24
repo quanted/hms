@@ -54,9 +54,7 @@ namespace Web.Services.Models
             errormsg = CheckDependencies(sim);
             if (errormsg != "") { return; }
 
-            // Convert upstream comids to ints to run with AQSim_2D
-            errormsg = ConvertUpstreamToInt(upstream.Keys.ToList(), out List<int> comids);
-            if (errormsg != "") { return; }
+            var comids = upstream.Keys.ToList();
 
             // Get upstream outputs and archive them
             errormsg = ArchiveUpstreamOutputs(comids);
@@ -206,12 +204,12 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="sim">The current simulation to pass data to.</param>
         /// <param name="comids">List of comids</param>
-        private void Pass_Data(AQTSim sim, List<int> comids)
+        private void Pass_Data(AQTSim sim, List<string> comids)
         {
             // Pass the archived data to the current simulation
             int nSources = 0;
             SortedList<DateTime, double> previous_flows = null;
-            foreach (int SrcId in comids)
+            foreach (string SrcId in comids)
             {
                 nSources++;
                 Pass_Data(sim, SrcId, nSources, true, ref previous_flows, this.archive[SrcId]);
@@ -266,7 +264,7 @@ namespace Web.Services.Models
                 }
 
                 // Archive the simulation to the inherited property: archive
-                archiveOutput(0, sim);
+                archiveOutput("", sim);
 
                 // Convert the archived results to a dictionary
                 return Task.FromResult(ConvertArchive(sim));
@@ -283,9 +281,9 @@ namespace Web.Services.Models
         /// </summary>
         /// <param name="comids">List of comids</param>
         /// <returns>Error message or empty string</returns>
-        public string ArchiveUpstreamOutputs(List<int> comids)
+        public string ArchiveUpstreamOutputs(List<string> comids)
         {
-            foreach (int item in comids)
+            foreach (string item in comids)
             {
                 try
                 {
@@ -337,8 +335,8 @@ namespace Web.Services.Models
         {
             // Convert the archived results
             ConvertedArchive CA = new ConvertedArchive();
-            CA.Dates = archive[0].dates;
-            CA.Washout = archive[0].washout;
+            CA.Dates = archive[""].dates;
+            CA.Washout = archive[""].washout;
             CA.Data = new Dictionary<string, double[]>();
 
             for (int i = 0; i < sim.AQTSeg.SV.Count; i++)
@@ -347,7 +345,7 @@ namespace Web.Services.Models
                 ITimeSeriesOutput TSO = sim.AQTSeg.SV[i].SVoutput;
                 // Get the state variable name and the current list of values
                 string name = sim.AQTSeg.SV[i].PName + $" ({TSO.Metadata["Unit_1"]})";
-                double[] values = archive[0].concs[i];
+                double[] values = archive[""].concs[i];
                 // Add to dictionary
                 CA.Data.Add(name, values);
             }
