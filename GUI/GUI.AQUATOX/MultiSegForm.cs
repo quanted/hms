@@ -206,7 +206,7 @@ namespace GUI.AQUATOX
             }
             else if (content.StartsWith("H14"))
             {
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + content.Substring(3, 2) + ".geojson";
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H14_" + content.Substring(3, 2) + ".geojson";
                 string HUC14 = File.ReadAllText(filestr);
                 webView.CoreWebView2.PostWebMessageAsString("ADDH14|" + HUC14); // display layer
             }
@@ -341,6 +341,7 @@ namespace GUI.AQUATOX
             if (validDirectory) validJSON = VerifyStreamNetwork();  //stream network valid
             bool isLake0D = (Lake0D > 0);
             bool isHUC0D = (HUC0D != "");
+            bool isHUCNet = IsHUCNetwork();
             bool inputsegs = false;
             bool HAWQSrun = false;
             DateTime modelrun = DateTime.MinValue;
@@ -371,45 +372,41 @@ namespace GUI.AQUATOX
                 FlowsButton.Text = "Overland Flows";
                 executeButton.Text = "Execute Network";
                 OutputLabel.Visible = true;
-                mergebutton.Visible = validJSON;
+                mergebutton.Visible = validJSON && !isHUCNet;
                 OutputPanel.Visible = true;
                 GraphButton.Visible = true;
                 ShowBoundBox.Visible = true;
                 LabelCheckBox.Visible = true;
                 NRCheckBox.Visible = true;
                 viewOutputButton.Visible = false;
-                if (DataSourceBox.Items.Count < 2)
-                {
-                    DataSourceBox.Items.Clear();
-                    DataSourceBox.Items.Add("HAWQS Simulation");
-                    DataSourceBox.Items.Add("NWM (flows only)");
-                    DataSourceBox.SelectedIndex = 0;
-                }
+                DataSourceBox.Items.Clear();
+                DataSourceBox.Items.Add("HAWQS Simulation");
+                if (!isHUCNet) DataSourceBox.Items.Add("NWM (flows only)");
+                DataSourceBox.SelectedIndex = 0;
             };
 
-
-            
 
             if (validJSON)
             {
                 if (isLake0D) setinfolabels("0-D Lake/Reservoir Simulation", "WBCOMID " + Lake0D, "");
                 else if (isHUC0D) setinfolabels("HUC" + HUCStr(HUC0D) + " Simulation", "HUC ID " + HUC0D, "");
-                else
+                else if (!isHUCNet)
                 {
                     string str3;
                     if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
                     else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
                     setinfolabels("Stream Network Information:", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
                 }
+                else setinfolabels("HUC Network Information:", "", AQT2D.SNStats());
 
                 UpdateRecentFiles(basedirBox.Text);
                 inputsegs = SegmentsCreated();
-                if (isHUC0D) HAWQSrun = File.Exists(BaseDir + "output_rch_daily.csv");
+                if (isHUC0D || isHUCNet) HAWQSrun = File.Exists(BaseDir + "output_rch_daily.csv");
                 else HAWQSrun = File.Exists(BaseDir + "output_rch_disaggregated.csv");
                 ReadHAWQSButton.Enabled = HAWQSrun;
 
                 if (inputsegs)
-                {   
+                {
                     modelrun = ModelRunDate();
                 }
             }
@@ -630,6 +627,13 @@ namespace GUI.AQUATOX
             return Directory.Exists(BaseDir);
         }
 
+        private bool IsHUCNetwork()
+        {
+            if (AQT2D.SN == null) return false;
+            if (AQT2D.SN.network == null) return false;
+            return AQT2D.SN.network[0][0] == "id";  //identify based on simplified stream network
+        }
+
         private bool VerifyStreamNetwork()
         {
             BaseDir = basedirBox.Text;
@@ -659,6 +663,7 @@ namespace GUI.AQUATOX
                 catch
                 {
                     AddToProcessLog("ERROR: Cannot process stream network file " + BaseDir + "StreamNetwork.JSON");
+                    AQT2D.SN = null;
                     return false;
                 }
             }
@@ -1717,6 +1722,7 @@ namespace GUI.AQUATOX
             double[][] polyline;
 
             await mapReadyForRender; // segments can't render until page is loaded
+            bool isHUCnet = (IsHUCNetwork());
 
             logfilen.Visible = false;
             webView.Visible = true;
@@ -1725,7 +1731,7 @@ namespace GUI.AQUATOX
             string[] outofnetwork = new string[0];
 
             if (Lake0D > 0) PlotGeoJSON(Lake0D.ToString(), "WB_COMID", "");  // plot stand alone 0-D lake    fixme, could add name
-            else if (HUC0D != "") PlotGeoJSON(HUC0D, "HUC", "");  // plot stand alone HUC  fixme, name
+            else if (HUC0D != "") PlotGeoJSON(HUC0D, "HUC", "");  // plot stand alone HUC  
             else  // loop through lake/res waterbodies if they exist
             {
                 if (AQT2D.SN.boundary != null) AQT2D.SN.boundary.TryGetValue("out-of-network", out outofnetwork);
@@ -1754,6 +1760,11 @@ namespace GUI.AQUATOX
                         { GeoJSON = System.IO.File.ReadAllText(BaseDir + CString + ".GeoJSON"); }
                         else
                         {
+                            if (isHUCnet)
+                            {
+                                AddToProcessLog("ERROR: Missing HUC GEOJSON file (map data) for " + BaseDir + CString + ".GeoJSON");
+                                continue;
+                            }
 
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
@@ -1772,10 +1783,13 @@ namespace GUI.AQUATOX
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
                             PostWebviewMessage("ADD|" + GeoJSON);
+                            //if (i == AQT2D.SN.order.Length - 1)
+                            //    PostWebviewMessage("COLOR|" + CString + "|maroon");
+
                         }
 
-                        if (GeoJSON == "{}") polyline = null;
-                        else
+                        polyline = null;
+                        if ((GeoJSON != "{}") && (!isHUCnet))
                         {
                             try
                             {
@@ -1805,7 +1819,7 @@ namespace GUI.AQUATOX
                                         if (SrcIDList == "") SrcIDList = SrcID.ToString();
                                         else SrcIDList += ", " + SrcID;
                                     }
-                                if (SrcIDList != "") PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundry condition inflow from " + SrcIDList);
+                                if (SrcIDList != "") PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundary condition inflow from " + SrcIDList);
                             }
 
                             if (i == AQT2D.SN.order.Length - 1) //ID pour point with red marker
@@ -1923,7 +1937,7 @@ namespace GUI.AQUATOX
             {
                 if (Lake0D != 0) MessageBox.Show("WBCOMID: " + CString + ".  Model input for this waterbody not yet generated.");
                 else if (HUC0D != "") MessageBox.Show("HUC" + HUCStr(CString) + ": " + CString + ".  Model input for this HUC not yet generated.");
-                else MessageBox.Show("COMID: " + CString + ".  Linked input for this COMID not yet generated.");
+                else MessageBox.Show("Segment ID: " + CString + ".  Linked input for this COMID not yet generated.");
             };
         }
 
@@ -1971,7 +1985,7 @@ namespace GUI.AQUATOX
                     UseWaitCursor = false;
                 }
             }
-            else { MessageBox.Show("COMID: " + CString + ".  Linked output for this COMID not available."); };
+            else { MessageBox.Show("Segment ID: " + CString + ".  Linked output for this COMID not available."); };
         }
 
 
@@ -2092,7 +2106,7 @@ namespace GUI.AQUATOX
                 string oldbasedir = basedirBox.Text;
                 using (var fbd = new FolderBrowserDialog())
                 {
-                    bool fbd_canceled = false;
+                    bool fbd_canceled = false;  //folder browser dialog
                     bool fbd_done = false;
 
                     while (!fbd_done)
@@ -2141,8 +2155,9 @@ namespace GUI.AQUATOX
                         BaseDir = basedirBox.Text;
 
                         if ((NSForm.WBCOMID != "") || (NSForm.HUCChosen != ""))
-                        {
+                        {  // this code processes 0-D simulations
                             bool IsHUC = (NSForm.HUCChosen != "");
+
                             string SNJSON;
                             if (IsHUC) SNJSON = "{\"HUC\": " + NSForm.HUCChosen + "}";
                             else SNJSON = "{\"WBComid\": " + NSForm.WBCOMID + "}";
@@ -2533,14 +2548,37 @@ namespace GUI.AQUATOX
         }
 
 
+        private List<string> Relevant_UpriverHUCs()
+        {
+            HashSet<string> resultSet = new HashSet<string>();
+
+            // Iterate over the AQT2D.SN.order array
+            for (int i = 0; i < AQT2D.SN.order.Length; i++)
+            {
+                foreach (string id in AQT2D.SN.order[i])
+                {
+                    Dictionary<string, string[]> srcs = AQT2D.HUCInf.ReadSources(id, true, -1);
+
+                    foreach (var key in srcs.Keys) //add keys
+                        resultSet.Add(key);
+
+                    foreach (var valuesArray in srcs.Values) //add values
+                        foreach (var value in valuesArray)
+                            resultSet.Add(value);
+                }
+            }
+
+            return resultSet.ToList();
+        }
+
         private List<string> Render_RelevantH14s(out string pourpoint)
         {
             this.Cursor = Cursors.WaitCursor; // Set cursor to wait cursor
 
-            List<string> H14s = ID_Relevant_HUC14s(out pourpoint);
+            List<string> H14s = ID_Relevant_HUC14s(out pourpoint);  //H14s is a list of all HUC14s with stream segments within them
             if (H14s == null) return null;
 
-            TSafeAddToProcessLog("INFO: Relevant HUC14s are " + string.Join(", ", H14s));
+            TSafeAddToProcessLog("INFO: Relevant HUC14s are " + string.Join(", ", H14s));   
 
             double[] latlons = new double[4];
             for (int i = 0; i < 4; i++)
@@ -2560,7 +2598,7 @@ namespace GUI.AQUATOX
             string E_Code = LonCode(latlons[3]);
 
             HashSet<string> Codes = new HashSet<string>();  //HashSet ensures uniqueness
-            Codes.Add(E_Code + N_Code);
+            Codes.Add(E_Code + N_Code);  //find relevant H14 tile for each corner of the map
             Codes.Add(E_Code + S_Code);
             Codes.Add(W_Code + N_Code);
             Codes.Add(W_Code + S_Code);
@@ -2570,7 +2608,7 @@ namespace GUI.AQUATOX
                 string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + code + ".geojson";
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
-                PostWebviewMessage("RH14s|" + RelevantH14s);
+                PostWebviewMessage("RH14s|" + RelevantH14s);   // Send to webview request to render H14 tile
             }
 
             this.Cursor = Cursors.Default; // Set cursor back from wait cursor
@@ -2677,6 +2715,7 @@ namespace GUI.AQUATOX
             }
 
             bool isHUC0D = (HUC0D != "");
+            bool isHUCNet = IsHUCNetwork();
 
             string msj = MasterSetupJson();
             if (msj == "")
@@ -2700,7 +2739,7 @@ namespace GUI.AQUATOX
             string[] outputHUCs;
 
             string hucstr;
-            if (!isHUC0D)  //streamnetwork code first
+            if (!isHUC0D & !isHUCNet) //streamnetwork code first
             {
                 List<string> H14s = Render_RelevantH14s(out string pourpoint);  //identify HUC14s with modeled stream segments within them
                 if (H14s == null) return;
@@ -2718,7 +2757,7 @@ namespace GUI.AQUATOX
                     try { AQT2D.HUCInf.LoadFromtoData(HUC14); } //load relevant fromto data to dictionary
                     catch (Exception ex)
                     {
-                        AddToProcessLog("ERROR: " + ex.Message); //file system error
+                        AddToProcessLog("ERROR: " + ex.Message); //file system error when loading fromto
                         return;
                     }
                     outhucs = MergeLists(outhucs, AQT2D.HUCInf.boundaryHUCs(HUC14, true));  //look up-river one segment and add to HAWQS model output for disaggregation, also add current H14 segment
@@ -2736,7 +2775,7 @@ namespace GUI.AQUATOX
                     AQT2D.HUCInf.AddSourceHUCs(HUC14);   //traverse up-river until a HUC8 boundary is encountered, set that as the HAWQS upstream segment
                 }
             }
-            else  //HUC0D code
+            else if (isHUC0D)  //HUC0D code
             {
                 hucstr = HUCStr(HUC0D);  // string holding "8" to "14"
                 HAWQSInp.dataset = "HUC" + hucstr;
@@ -2746,6 +2785,39 @@ namespace GUI.AQUATOX
                 AQT2D.HUCInf.AddSourceHUCs(HUC0D);
                 outputHUCs = AQT2D.HUCInf.boundaryHUCs(HUC0D, true).ToArray();
             }
+            else // HUC Network code
+            {
+                int pourIndex = AQT2D.SN.order.Length - 1;
+                string pourpoint = AQT2D.SN.order[pourIndex][0].ToString();
+                hucstr = HUCStr(pourpoint);  // string holding "8" to "14"
+                HAWQSInp.dataset = "HUC" + hucstr;
+                HAWQSInp.downstreamSubbasin = pourpoint;
+
+                AQT2D.HUCInf.modelDomain = new();
+                List<string> outhucs = new List<string>();
+                foreach (string[] innerArray in AQT2D.SN.order)
+                    foreach (string s in innerArray)
+                    {
+                        outhucs.Add(s);
+                        AQT2D.HUCInf.modelDomain.Add(s);  // all data in AQUATOX model domain
+                        AQT2D.HUCInf.LoadFromtoData(s);   // load relevant fromto data to dictionary
+                        outhucs = MergeLists(outhucs, AQT2D.HUCInf.boundaryHUCs(s, false));  //look up-river one segment and add to HAWQS model output for disaggregation
+                    }
+
+                outputHUCs = outhucs.ToArray();
+
+                foreach (string HUC in AQT2D.HUCInf.modelDomain)
+                {
+                    try { AQT2D.HUCInf.LoadFromtoData(HUC); } //load relevant fromto data to dictionary
+                    catch (Exception ex)
+                    {
+                        AddToProcessLog("ERROR: " + ex.Message); //file system error
+                        return;
+                    }
+                    AQT2D.HUCInf.AddSourceHUCs(HUC);   //traverse up-river until a HUC8 boundary is encountered, set that as the HAWQS upstream segment
+                                                       //updates HAWQSboundaryHUC and upriverHUCs
+                }
+            }  // end HUC Network Code
 
             HAWQSInp.upstreamSubbasins = AQT2D.HUCInf.HAWQSboundaryHUCs.ToArray();
 
@@ -2816,6 +2888,7 @@ namespace GUI.AQUATOX
 
             UseWaitCursor = true;
             progressBar1.Visible = true;
+            progressBar1.Value = 0;
             StatusLabel.Visible = false;
             proglabel.Text = "HAWQS RUN";
             proglabel.Visible = true;
@@ -2855,7 +2928,7 @@ namespace GUI.AQUATOX
                 List<HawqsOutput> LHO = GPDT.Result;
 
                 string urlName = "output_rch_daily.csv";
-                if (!isHUC0D) urlName = "output_rch_daily_comids.7z";
+                if (!isHUC0D & !isHUCNet) urlName = "output_rch_daily_comids.7z"; //streamnetwork results
 
                 if (LHO.Count == 0) AddToProcessLog("WARNING: No HAWQS Results Returned.  For more information visit https://dev-api.hawqs.tamu.edu/#/docs/projects/" + HAWQS_RunStatus.id);
                 else
@@ -2881,7 +2954,7 @@ namespace GUI.AQUATOX
 
                         try
                         {
-                            if (!isHUC0D)  // aggregate all the CSVs in the 7z file
+                            if (!isHUC0D & !isHUCNet)  // aggregate all the CSVs in the 7z file
                             {
                                 (string csvstring, string metadata) = await CSVAggregator.DownloadAndAggregateCSV(url);
                                 File.WriteAllText(BaseDir + "output_rch_disaggregated.csv", csvstring);
@@ -2938,9 +3011,10 @@ namespace GUI.AQUATOX
             if (!VerifyStreamNetwork()) return;
 
             BaseDir = basedirBox.Text;
+            bool isHUCNet = IsHUCNetwork();
 
             string RCHfileN = BaseDir + "output_rch_daily.csv";
-            if (HUC0D == "") RCHfileN = BaseDir + "output_rch_disaggregated.csv";
+            if ((HUC0D == "") && !isHUCNet) RCHfileN = BaseDir + "output_rch_disaggregated.csv";
 
             if (!File.Exists(RCHfileN))
             {
@@ -2958,7 +3032,7 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-            string metadata = "";
+                string metadata = "";
             string MetafileN = BaseDir + "disaggregation_metadata.csv";
             if (File.Exists(MetafileN)) metadata = File.ReadAllText(MetafileN);
             string[] metadataLines = metadata.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -3105,7 +3179,7 @@ namespace GUI.AQUATOX
                     string errmessage = "";
                     string AQSimJSON = "";
                     if (in_waterbody) (AQSimJSON, errmessage) = await AQT2D.HAWQS_add_COMID_to_WB(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, wbcount, WBJSON, boundaryseg, true);
-                    else (AQSimJSON, errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, true);
+                    else (AQSimJSON, errmessage) = await AQT2D.HAWQSRead(HAWQSRchData, Sources.Select(x => x.ToString()).ToList(), comid, msj, boundaryseg, true, !isHUCNet);
 
                     if (errmessage == "")
                     {
@@ -3287,7 +3361,7 @@ namespace GUI.AQUATOX
             MergeGeoJsonFiles(BaseDir, smallSegmentId, targetSegmentId);
         }
 
-        
+
         public int[] GetDownstreamSegments(string segmentId)
         {
             return AQT2D.SN.sources
@@ -3479,6 +3553,10 @@ namespace GUI.AQUATOX
             File.WriteAllText(targetSegmentPath, targetSegmentGeoJson.ToString());
         }
 
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

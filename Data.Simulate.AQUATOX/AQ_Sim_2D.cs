@@ -51,6 +51,15 @@ namespace AQUATOX.AQSim_2D
             public string[][] merged;  // tracks those segments that have been merged
         }
 
+        public void AddNetworkBasedOnSources(HashSet<string> ids)
+        {
+            var newNetwork = new List<List<string>>();
+            newNetwork.Add(new List<string> { "id" });
+            foreach (string segmentId in ids)
+                newNetwork.Add(new List<string> { segmentId });
+            SN.network = newNetwork.Select(step => step.ToArray()).ToArray();
+        }
+
         public void RebuildOrderBasedOnSources(HashSet<string> originalOrderComids)
         {
             var newOrder = new List<List<string>>();
@@ -98,7 +107,7 @@ namespace AQUATOX.AQSim_2D
             // Reverse the newOrder to have the correct order from first to last
             newOrder.Reverse();
 
-            // Convert List<List<int>> to int[][] and update AQT2D.SN.order
+            // Convert List<List<string>> to string[][] and update AQT2D.SN.order
             SN.order = newOrder.Select(step => step.ToArray()).ToArray();
         }
 
@@ -167,10 +176,11 @@ namespace AQUATOX.AQSim_2D
                 }
             }
 
-            // function to check if the HUC starts with the same first eight characters
+            // function to check if the two HUCs start with the same first eight characters (are in the same HUC8)
             bool IsSameRegion(string huc1, string huc2) => huc1.Substring(0, 8) == huc2.Substring(0, 8);
 
-            public void AddSourceHUCs(string HUC_ID)
+            public void AddSourceHUCs(string HUC_ID)  //traverse up-river until a HUC8 pour-point is encountered, and add to upriverHUCs
+                                                      //set the HUC8 pour-point as the HAWQS upstream segment
             {
                 // function to check if the HUC is located within the model domain (may span multiple HUC8s)
                 bool InModelDomain(string huc) => modelDomain.Contains(huc);
@@ -185,7 +195,7 @@ namespace AQUATOX.AQSim_2D
                             AddSourceHUCs(boundaryHuc); // Recursively add BoundaryHUCs if the identified boundaryHuc is in the same region
                         else if ((!HAWQSboundaryHUCs.Contains(boundaryHuc)) && (!InModelDomain(boundaryHuc)))
                         {
-                            HAWQSboundaryHUCs.Add(boundaryHuc);  //identify those segments out of the region as upstream bound
+                            HAWQSboundaryHUCs.Add(boundaryHuc);  //identify those segments out of the HUC8 region as upstream bound
                         }
                     }
                 }
@@ -222,7 +232,7 @@ namespace AQUATOX.AQSim_2D
 
             }
 
-            public Dictionary<string, string[]> ReadSources(string HUC_ID, bool HUC8, int n_traverse)  // read all HUCs within HUC8 and assign to dictionary data structure compatible with sources
+            public Dictionary<string, string[]> ReadSources(string HUC_ID, bool HUC8, int n_traverse)  // read all HUCs within HUC8 and assign to dictionary data structure compatible with sources, or traverse
             {
                 var sources = new Dictionary<string, string[]>();
                 var visited = new HashSet<string>();
@@ -1254,27 +1264,26 @@ namespace AQUATOX.AQSim_2D
 
             if (HUClen == 8)
             {
-                rtesFilen = "rtes-huc8-2024-03-01-071355.csv";
-                subbasinFilen = "subbasins-huc8-2023-05-02-124826.csv";
+                rtesFilen = "rtes-huc8-2024-10-21-125553.csv";
+                subbasinFilen = "subbasins-huc8-2024-11-04-144433.csv";
             }
             else
             if (HUClen == 10)
             {
-                rtesFilen = "rtes-huc10-2024-03-01-071352.csv";
-                subbasinFilen = "subbasins-huc10-2023-05-02-124829.csv";
+                rtesFilen = "rtes-huc10-2024-10-21-125549.csv";
+                subbasinFilen = "subbasins-huc10-2024-11-04-144429.csv";
             }
             else
             if (HUClen == 12)
             {
-                rtesFilen = "rtes-huc12-2024-03-01-070604.csv";
-                subbasinFilen = "subbasins-huc12-2023-05-23-115646.csv";
+                rtesFilen = "rtes-huc12-2024-10-21-125545.csv";
+                subbasinFilen = "subbasins-huc12-2024-11-04-144425.csv";
             }
             else //(HUClen == 14)
             {
-                rtesFilen = "rtes-huc14-2024-05-15.csv";
-                subbasinFilen = "subbasins-huc14-2024-04-29-142943.csv";
+                rtesFilen = "rtes-huc14-2024-10-21-122655.csv";
+                subbasinFilen = "subbasins-huc14-2024-11-04-144304.csv";
             }
-
 
             string DBDir = @"..\2D_Inputs\HAWQS_data\RTE_SUB\";
 
@@ -1825,7 +1834,8 @@ namespace AQUATOX.AQSim_2D
                 archive.TryGetValue(SrcID, out AR);
                 if (AR == null)
                     {  // check to see if upstream segment is null because it is actually a lake/reservoir
-                    if (SN.waterbodies.comid_wb.ContainsKey(SrcID))
+                    if ((SN.waterbodies != null) &&
+                       (SN.waterbodies.comid_wb.ContainsKey(SrcID)))
                         {
                         SN.waterbodies.comid_wb.TryGetValue(SrcID, out SrcID);  // translate SrcID to the relevant WBCOMID
                         archive.TryGetValue(SrcID, out AR);

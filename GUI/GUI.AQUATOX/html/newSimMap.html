@@ -311,6 +311,15 @@
             }
         }
 
+        MAP.on('baselayerchange', function (e) {
+            // Bring the GeoJSON layer to the front
+            for (let level in HUCData) {
+                for (let i = 0; i < HUCData[level].maps.length; ++i) {
+                    if (HUCData[level].maps[i] != null) HUCData[level].maps[i].bringToFront();
+                }
+            }
+        });
+
         MAP.on('zoomend', function () {  // Shows or hides layers based on zoom threshold, Flowlines, WB, HUC14
 
             newzoom = MAP.getZoom();
@@ -743,7 +752,7 @@
             ShowHAWQSHUCMaps();
         }
 
-
+        var missingHUCs = [];  // HUCs not in currently rendered tiles
         function highlightHUC(HUCNAME, lastlayer) {  //  Given a HUCName, highlights the HUC, adds to redlayers, Sends name and JSON to DotNet
 
             var hucLevel = HUCNAME.length.toString(); // Convert length to string to match HUCData keys
@@ -754,6 +763,7 @@
                 return;
             }
 
+            AwaitSearch = true;
             var hucField = 'HUC' + hucLevel; // e.g., 'HUC8', 'HUC10', 'HUC12'
 
             var geoJsonLayers = HUCData[hucLevel].geoJson; // Array of L.GeoJSON layers
@@ -795,11 +805,17 @@
                 var str = HUCNAME + "|" + JSON.stringify(rl.toGeoJSON());
                 sendMessageToDotnet(str);
             } else {
-                console.warn('No features found for HUCNAME: ' + HUCNAME);
+                missingHUCs.push(HUCNAME);
             }
-
             if (lastlayer === "True") {
-                AwaitSearch = false;
+                if (missingHUCs.length > 0) {
+                    // Send all missing HUCs to C# in one message
+                    var str = "FINDHUC_BATCH|" + missingHUCs.join(',');
+                    sendMessageToDotnet(str);
+                    missingHUCs = []; // Reset the list after sending
+                } else {
+                    AwaitSearch = false;
+                }
             }
         }
 
@@ -888,9 +904,21 @@
             });
         }
 
+
+        function AddRedLayerBatch(jsonResponse) {
+            var geojsonArray = JSON.parse(jsonResponse);
+            geojsonArray.forEach(function (geojsonObject) {
+                var rl = L.geoJSON(geojsonObject, {
+                    style: { color: 'red', weight: 2 }
+                }).addTo(MAP);
+                redlayers.push(rl);
+            });
+            AwaitSearch = false; // Set to false after processing all layers
+        }
+
         function ZoomtoRedLayers() {
             if (AwaitSearch == true) {
-                window.setTimeout(ZoomtoRedLayers, 100); /* this checks the flag every 100 milliseconds*/
+                window.setTimeout(ZoomtoRedLayers, 200); /* this checks the flag every 200 milliseconds*/
             } else {
                 var FG = L.featureGroup();
                 redlayers.forEach(function (item, index) {
@@ -923,6 +951,7 @@
             if (messageArr[0] == "FLCOLOR") highlightFlowLine(messageArr[1], messageArr[2]);
             if (messageArr[0] == "HUCCOLOR") highlightHUC(messageArr[1], messageArr[2]);
             if (messageArr[0] == "RESETCOLORS") ResetRedLayers();
+            if (messageArr[0] == "ADDREDLAYER_BATCH") AddRedLayerBatch(messageArr[1]);
             if (messageArr[0] == "ADD") AddGeoJSON(messageArr[1], messageArr[2]);
             if (messageArr[0] == "ZOOM") ZoomtoRedLayers();
             if (messageArr[0] == "HUCMAP") ShowHUCDefaults(messageArr[1], false);

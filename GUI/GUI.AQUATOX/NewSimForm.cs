@@ -2,6 +2,7 @@
 using AQUATOX.AQTSegment;
 using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -87,7 +88,7 @@ namespace GUI.AQUATOX
         }
 
 
-        void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
+        async void MessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs args)
         {
             String content = (args.WebMessageAsJson).Trim('"'); //  TryGetWebMessageAsString();
 
@@ -107,17 +108,17 @@ namespace GUI.AQUATOX
             else if (content.StartsWith("H1"))
             {
                 string hucstr = content.Substring(1, 2);
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_"+hucstr+@"\H" +hucstr +"_" + content.Substring(3, 2) + ".geojson";  //FIXME TEST ONLY  FIX DIRECTORY
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H" + hucstr + "_" + content.Substring(3, 2) + ".geojson";  
                 if (File.Exists(filestr))
                 {
                     string HUCgeo = File.ReadAllText(filestr);
-                    webView.CoreWebView2.PostWebMessageAsString("ADD|"+hucstr +"|" + HUCgeo); // display layer
+                    webView.CoreWebView2.PostWebMessageAsString("ADD|" + hucstr + "|" + HUCgeo); // display layer
                 }
-                else MessageBox.Show("File not found: "+filestr);
+                else MessageBox.Show("File not found: " + filestr);
             }
             else if (content.StartsWith("H8"))
             {
-                string filestr = @"N:\AQUATOX\CSRA\GIS\HUC_8\H8.geojson";  //FIXME TEST ONLY  FIX DIRECTORY
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H8.geojson";  
                 if (File.Exists(filestr))
                 {
                     string HUCgeo = File.ReadAllText(filestr);
@@ -144,6 +145,26 @@ namespace GUI.AQUATOX
                     webView_MouseDown(false, false, true, content);
                 }, null);
             }
+            else if (content.StartsWith("FINDHUC_BATCH|"))
+            {
+                string ids = content.Remove(0, 14);
+                string[] hucIds = ids.Split(',');
+                List<JObject> geojsons = new List<JObject>();
+                foreach (string HID in hucIds)
+                {
+                    JObject geojson = FindHUC(HID);
+                    if (geojson != null)
+                    {
+                        if (!GeoJSON.ContainsKey(HID))
+                            GeoJSON.Add(HID, geojson.ToString());
+                        geojsons.Add(geojson);
+                    }
+                    // else case?  (e.g., raise message or log missing HUCs)
+                }
+                // Serialize the list of GeoJSONs and send back to JavaScript
+                string jsonResponse = JsonConvert.SerializeObject(geojsons);
+                webView.CoreWebView2.PostWebMessageAsString("ADDREDLAYER_BATCH|" + jsonResponse);       
+            }
             else
             {
                 string[] split = content.Split('|');
@@ -153,6 +174,81 @@ namespace GUI.AQUATOX
 
         }
 
+        // Cache for parsed GeoJSON files
+        private Dictionary<string, JObject> geoJsonCache = new Dictionary<string, JObject>();
+
+        private JObject featureFromID(string HUCstr, string HUCid, JObject geojson)
+        {
+            if (geojson == null)
+            {
+                return null;
+            }
+
+            JArray features = (JArray)geojson["features"];
+
+            // Loop through each feature in the GeoJSON
+            foreach (JObject feature in features)
+            {
+                JObject properties = (JObject)feature["properties"];
+                string hucValue = (string)properties[HUCstr];
+
+                if (hucValue == HUCid)
+                {
+                    return feature;
+                }
+            }
+
+            return null;
+        }
+
+        private JObject FindHUC(string HUCID)
+        {
+            string hucLevel = HUCID.Length.ToString();
+            string FileDir = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\";
+            JObject geoOut = null;
+            string hucField = "HUC" + hucLevel;
+
+            // First, attempt to find the feature in any of the cached GeoJSON files
+            foreach (var kvp in geoJsonCache)
+            {
+                JObject geojson = kvp.Value;
+                geoOut = featureFromID(hucField, HUCID, geojson);
+                if (geoOut != null) return geoOut;
+            }
+
+            for (int code1 = 1; code1 < 7; code1++)
+                for (int code2 = 0; code2 < 3; code2++)
+                {
+                    string TestNum = code1.ToString() + code2.ToString();
+                    string filestr = FileDir + @"H" + hucLevel + "_" + TestNum + ".geojson";
+                    if (!geoJsonCache.ContainsKey(filestr))
+                    {
+                        // Read and parse the GeoJSON file
+                        string jsonContent = File.ReadAllText(filestr);
+                        JObject geojson = JObject.Parse(jsonContent);
+
+                        // Add to cache
+                        geoJsonCache[filestr] = geojson;
+
+                        // Attempt to find the feature in this GeoJSON
+                        geoOut = featureFromID(hucField, HUCID, geojson);
+                        if (geoOut != null) return geoOut;
+
+                    }
+                    else
+                    {
+                        // GeoJSON is already cached, use it
+                        JObject geojson = geoJsonCache[filestr];
+                        geoOut = featureFromID(hucField, HUCID, geojson);
+                        if (geoOut != null) return geoOut;
+
+                    }
+                }
+
+            // HUCID is not found
+            return null;
+        }
+    
         protected override void WndProc(ref Message m)
         {
             // Suppress the WM_UPDATEUISTATE message
@@ -355,7 +451,7 @@ namespace GUI.AQUATOX
                 if (!e.Cancel)
                 {
                     if (!StreamButton.Checked) COMID = "";
-                    if (!HUCButton.Checked && !HUCNetworkButton.Checked) HUCChosen = "";
+                    if (!HUCButton.Checked) HUCChosen = "";  // && !HUCNetworkButton.Checked
                     if (!LakeButton.Checked) WBCOMID = "";
                 }
             }
@@ -638,6 +734,7 @@ namespace GUI.AQUATOX
 
         private void ReadHUCNetworkButton_Click(object sender, EventArgs e)
         {
+            
             string HUCstr = HUCBox.Text.Trim();
             if (!Int64.TryParse(HUCstr, out long HUCInt))
             {
@@ -656,6 +753,8 @@ namespace GUI.AQUATOX
                 return;
             }
 
+            Cursor.Current = Cursors.WaitCursor;
+
             AQT2D = new();
             AQT2D.SN = new();
             AQT2D.HUCInf = new();
@@ -664,6 +763,7 @@ namespace GUI.AQUATOX
             catch (Exception ex)
             {
                 MessageBox.Show("ERROR: " + ex.Message);  //file system error
+                Cursor.Current = Cursors.Default;
                 return;
             }
 
@@ -675,6 +775,7 @@ namespace GUI.AQUATOX
 
             if (errstr != "")
             {
+                Cursor.Current = Cursors.Default;
                 MessageBox.Show(errstr);
                 return;
             }
@@ -684,12 +785,15 @@ namespace GUI.AQUATOX
                 order_set.Add(key);
             AQT2D.SN.order = new string[][] { new string[] { "", HUCstr } };  // initialize SN.order with the pour point element as required for "rebuildorder" method
             AQT2D.RebuildOrderBasedOnSources(order_set);  // set the order for model execution
+            AQT2D.AddNetworkBasedOnSources(order_set);  // set the order for model execution
 
             webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
 
             SNPopulated = true;
 
+            ExportSNJSON = JsonConvert.SerializeObject(AQT2D.SN); 
             HighlightHUCNetwork();
+            Cursor.Current = Cursors.Default;
             UpdateLeftPanels();
 
 

@@ -281,9 +281,9 @@
             });
 
         const OVERLAY_MAPS = {
-            "HUC8 Boundaries": HUC8,
-            "HUC10 Boundaries": HUC10,
-            "HUC12 Boundaries": HUC12,
+            "USGS HUC8 Boundaries": HUC8,
+            "USGS HUC10 Boundaries": HUC10,
+            "USGS HUC12 Boundaries": HUC12,
             "Flow Lines": FLOWLINES_LAYER,
             "NWS Lake/Res": WB_LAYER,
         };
@@ -337,7 +337,7 @@
 
         // app interaction
         function AddGeoJSON(gstr) {
-            flowline = JSON.parse(gstr).stream_geometry;  //stream segments only
+            flowline = JSON.parse(gstr).stream_geometry;  //stream segments or HUC boundaries only
             if (allShapes == null) allShapes = flowline
             else allShapes = concatGeoJSON(allShapes, flowline);
         }
@@ -372,25 +372,34 @@
             if (geoLayer) geoLayer.bringToFront();
         }
 
+        function getFeatureID(properties) {
+            if (properties.COMID != null) return properties.COMID.toString();
+            else if (properties.HUC14 != null) return properties.HUC14.toString();
+            else if (properties.HUC12 != null) return properties.HUC12.toString();
+            else if (properties.HUC10 != null) return properties.HUC10.toString();
+            else if (properties.HUC8 != null) return properties.HUC8.toString();
+            else return "";
+        }
+
         function onEachFeature(feature, layer) {
+            var id = getFeatureID(feature.properties);
+            layer.myId = id;
+
             layer.on('click', function (e) {
-                if (layer.feature.properties.COMID != null) sendMessageToDotnet(layer.feature.properties.COMID.toString());
-                else if (layer.feature.properties.ID != null) sendMessageToDotnet(layer.feature.properties.ID.toString());
-                else if (layer.feature.properties.HUC_12 != null) sendMessageToDotnet(layer.feature.properties.HUC_12.toString());    
-                else if (layer.feature.properties.HUC_10 != null) sendMessageToDotnet(layer.feature.properties.HUC_10.toString());    
-                else if (layer.feature.properties.HUC_8 != null) sendMessageToDotnet(layer.feature.properties.HUC_8.toString());    
+                if (id != "") sendMessageToDotnet(id);
             });
 
-            if (layer.feature.properties.ID != null) {
+            if (id != "") {
                 var str = '';
                 if (feature.properties.Name) str = ", " + feature.properties.Name.toString();
-                str = feature.properties.ID.toString() + str;
+                str = id + str;
                 layer.bindTooltip(str, {
                     permanent: false,
                     opacity: 1.0
                 });
-            };
+            }
         }
+
 
         function renderGeoJSON() {
             if (allShapes != null) {
@@ -414,12 +423,12 @@
             }
         }
 
-        function ColorGeoJSON(COMID, linecolor) {
+        function ColorGeoJSON(ID, linecolor) {
             geoLayer.eachLayer(function (layer) {
-                if (layer.feature.properties.COMID == COMID) {
+                if (layer.myId == ID) {
                     layer.setStyle({ color: linecolor });
                 }
-            })
+            });
         }
 
         function eraseGeoJSON() {
@@ -465,11 +474,11 @@
             if (boostr == "True") permanentlabels = true;
 
                 geoLayer.eachLayer(function (layer) {
-                    if (layer.feature.properties.COMID != null) {
+                    if (layer.myId != null) {
                         var str = '';
                         if (layer.feature.properties.GNIS_NAME != null) str = ", " + layer.feature.properties.GNIS_NAME.toString();
                         if (str == ' ') str = '';
-                        str = layer.feature.properties.COMID.toString() + str;
+                        str = layer.myId + str;
                         if (str != ' ') { layer.unbindTooltip(); layer.bindTooltip(str, { permanent: permanentlabels, opacity: 1.0 }); };
                     }
                 });
@@ -494,7 +503,7 @@
             if (messageArr[0] == "ADDWB") AddWBGeoJSON(messageArr[1]);
             if (messageArr[0] == "RENDER") renderGeoJSON();
             if (messageArr[0] == "ERASE") eraseGeoJSON();
-            if (messageArr[0] == "COLOR") ColorGeoJSON(parseInt(messageArr[1]), messageArr[2]);
+            if (messageArr[0] == "COLOR") ColorGeoJSON(messageArr[1], messageArr[2]);
             if (messageArr[0] == "MARKER") AddMarker(messageArr[1], messageArr[2], messageArr[3], messageArr[4]);
             if (messageArr[0] == "BOUNDS") Bounds(messageArr[1]);
             if (messageArr[0] == "LABELS") Labels(messageArr[1]);

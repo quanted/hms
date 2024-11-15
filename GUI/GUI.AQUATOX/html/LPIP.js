@@ -12,7 +12,9 @@ function inpoly(lat, lng, ring) {
 }
 
 function pointInPolygon(point, geometry, bounds) {
-    var inbox = !(point.coordinates[0] > bounds._northEast.lng ||
+    var inbox = false;
+    if (bounds._northEast)
+        inbox = !(point.coordinates[0] > bounds._northEast.lng ||
         point.coordinates[1] > bounds._northEast.lat ||
         point.coordinates[0] < bounds._southWest.lng ||
         point.coordinates[1] < bounds._southWest.lat);
