@@ -785,7 +785,7 @@ namespace GUI.AQUATOX
                 order_set.Add(key);
             AQT2D.SN.order = new string[][] { new string[] { "", HUCstr } };  // initialize SN.order with the pour point element as required for "rebuildorder" method
             AQT2D.RebuildOrderBasedOnSources(order_set);  // set the order for model execution
-            AQT2D.AddNetworkBasedOnSources(order_set);  // set the order for model execution
+            AQT2D.AddNetworkBasedOnSources(order_set);  // define the network variable 
 
             webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
 

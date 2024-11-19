@@ -1783,9 +1783,6 @@ namespace GUI.AQUATOX
                         if ((GeoJSON != "{}") && (webView != null && webView.CoreWebView2 != null))
                         {
                             PostWebviewMessage("ADD|" + GeoJSON);
-                            //if (i == AQT2D.SN.order.Length - 1)
-                            //    PostWebviewMessage("COLOR|" + CString + "|maroon");
-
                         }
 
                         polyline = null;
@@ -1808,7 +1805,7 @@ namespace GUI.AQUATOX
                             }
                         }
 
-                        if (polyline != null)
+                        if ((polyline != null) || (isHUCnet))
                         {
                             string SrcIDList = "";
                             if (AQT2D.SN.sources.TryGetValue(CString, out string[] Sources))
@@ -1819,12 +1816,18 @@ namespace GUI.AQUATOX
                                         if (SrcIDList == "") SrcIDList = SrcID.ToString();
                                         else SrcIDList += ", " + SrcID;
                                     }
-                                if (SrcIDList != "") PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundary condition inflow from " + SrcIDList);
+                                if (SrcIDList != "") 
+                                {
+                                    if (isHUCnet) PostWebviewMessage("MARKER_ID|" + CString + "|green|" + CString + ": boundary inflow from " + SrcIDList);
+                                       else PostWebviewMessage("MARKER|green|" + polyline[0][0] + "|" + polyline[0][1] + "|boundary condition inflow from " + SrcIDList); 
+                                }
+
                             }
 
                             if (i == AQT2D.SN.order.Length - 1) //ID pour point with red marker
                             {
-                                PostWebviewMessage("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
+                                if (isHUCnet) PostWebviewMessage("MARKER_ID|" + CString + "|red|" + CString + ": pour point");
+                                else PostWebviewMessage("MARKER|red|" + polyline[polyline.Length - 1][0] + "|" + polyline[polyline.Length - 1][1] + "|pour point");
                             }
 
                         }
@@ -2548,28 +2551,28 @@ namespace GUI.AQUATOX
         }
 
 
-        private List<string> Relevant_UpriverHUCs()
-        {
-            HashSet<string> resultSet = new HashSet<string>();
+        //private List<string> Relevant_UpriverHUCs()
+        //{
+        //    HashSet<string> resultSet = new HashSet<string>();
 
-            // Iterate over the AQT2D.SN.order array
-            for (int i = 0; i < AQT2D.SN.order.Length; i++)
-            {
-                foreach (string id in AQT2D.SN.order[i])
-                {
-                    Dictionary<string, string[]> srcs = AQT2D.HUCInf.ReadSources(id, true, -1);
+        //    // Iterate over the AQT2D.SN.order array
+        //    for (int i = 0; i < AQT2D.SN.order.Length; i++)
+        //    {
+        //        foreach (string id in AQT2D.SN.order[i])
+        //        {
+        //            Dictionary<string, string[]> srcs = AQT2D.HUCInf.ReadSources(id, true, -1);
 
-                    foreach (var key in srcs.Keys) //add keys
-                        resultSet.Add(key);
+        //            foreach (var key in srcs.Keys) //add keys
+        //                resultSet.Add(key);
 
-                    foreach (var valuesArray in srcs.Values) //add values
-                        foreach (var value in valuesArray)
-                            resultSet.Add(value);
-                }
-            }
+        //            foreach (var valuesArray in srcs.Values) //add values
+        //                foreach (var value in valuesArray)
+        //                    resultSet.Add(value);
+        //        }
+        //    }
 
-            return resultSet.ToList();
-        }
+        //    return resultSet.ToList();
+        //}
 
         private List<string> Render_RelevantH14s(out string pourpoint)
         {
@@ -2801,7 +2804,7 @@ namespace GUI.AQUATOX
                         outhucs.Add(s);
                         AQT2D.HUCInf.modelDomain.Add(s);  // all data in AQUATOX model domain
                         AQT2D.HUCInf.LoadFromtoData(s);   // load relevant fromto data to dictionary
-                        outhucs = MergeLists(outhucs, AQT2D.HUCInf.boundaryHUCs(s, false));  //look up-river one segment and add to HAWQS model output for disaggregation
+                        outhucs = MergeLists(outhucs, AQT2D.HUCInf.boundaryHUCs(s, false));  //look up-river one segment and add to HAWQS model output for inflows
                     }
 
                 outputHUCs = outhucs.ToArray();
@@ -2982,6 +2985,7 @@ namespace GUI.AQUATOX
             catch (Exception ex)
             {
                 AddToProcessLog("ERROR: when running HAWQS: " + ex.Message);
+                AddToProcessLog("INFO: For more information visit https://dev-api.hawqs.tamu.edu/#/docs/projects/" + HAWQS_RunStatus.id);
             }
 
             finally
@@ -3032,7 +3036,7 @@ namespace GUI.AQUATOX
                 if (MessageBox.Show("Overwrite the existing set of segments and any edits made to the inputs?", "Confirm",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1) == DialogResult.No) return;
 
-                string metadata = "";
+            string metadata = "";
             string MetafileN = BaseDir + "disaggregation_metadata.csv";
             if (File.Exists(MetafileN)) metadata = File.ReadAllText(MetafileN);
             string[] metadataLines = metadata.Split(new[] { Environment.NewLine }, StringSplitOptions.None);

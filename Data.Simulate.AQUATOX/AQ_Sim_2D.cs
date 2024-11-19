@@ -19,7 +19,6 @@ using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
 using System.Globalization;
 using System.Data.SQLite;
-using Utilities;
 
 namespace AQUATOX.AQSim_2D
 
@@ -51,13 +50,37 @@ namespace AQUATOX.AQSim_2D
             public string[][] merged;  // tracks those segments that have been merged
         }
 
-        public void AddNetworkBasedOnSources(HashSet<string> ids)
+        public void AddNetworkBasedOnSources(HashSet<string> ids)  // adds the SN network and out-of-network data structures
         {
             var newNetwork = new List<List<string>>();
             newNetwork.Add(new List<string> { "id" });
             foreach (string segmentId in ids)
                 newNetwork.Add(new List<string> { segmentId });
             SN.network = newNetwork.Select(step => step.ToArray()).ToArray();
+
+            var outOfNetwork = new List<string>();
+            foreach (string s in ids)
+            {
+                List<string> bounds = HUCInf.boundaryHUCs(s, false);
+                foreach (string bound in bounds)
+                {
+                    if (!ids.Contains(bound))
+                        outOfNetwork.Add(bound); // Add the boundary ID to the out-of-network list
+                                                 // Ensure 's' is a key in SN.sources
+                    if (!SN.sources.ContainsKey(s))
+                        SN.sources[s] = new string[0]; // Initialize with an empty array
+                    if (!SN.sources[s].Contains(bound))
+                    {
+                        // Convert the array to a list, add 'bound', and assign back to the dictionary
+                        var sourceList = SN.sources[s].ToList();
+                        sourceList.Add(bound);
+                        SN.sources[s] = sourceList.ToArray();
+                    }
+                }
+
+            }
+            SN.boundary = new();
+            SN.boundary["out-of-network"] = outOfNetwork.ToArray();
         }
 
         public void RebuildOrderBasedOnSources(HashSet<string> originalOrderComids)
@@ -130,8 +153,10 @@ namespace AQUATOX.AQSim_2D
 
             public void LoadFromtoData(string HUC_ID)
             {
-                string HUCStr = HUC_ID.Length.ToString();
-                if (HUCStr == "15") HUCStr = "14";
+                check_cross_region(HUC_ID);  //load relevant fromto data if a HUC2 boundary is crossed
+
+                string HUCStr = HUC_ID.Length.ToString();  
+
                 string fromtopath = $@"..\2D_Inputs\HAWQS_Data\FromTo\fromto{HUC_ID.Substring(0, 2)}_{HUCStr}.csv";
                 if (fromtofilen == fromtopath) return;  //already loaded
 
@@ -232,7 +257,7 @@ namespace AQUATOX.AQSim_2D
 
             }
 
-            public Dictionary<string, string[]> ReadSources(string HUC_ID, bool HUC8, int n_traverse)  // read all HUCs within HUC8 and assign to dictionary data structure compatible with sources, or traverse
+            public Dictionary<string, string[]> ReadSources(string HUC_ID, bool HUC8, int n_traverse)  // read all HUCs within HUC8 (or upriver n traverses) and assign to dictionary data structure compatible with sn.sources
             {
                 var sources = new Dictionary<string, string[]>();
                 var visited = new HashSet<string>();
@@ -242,7 +267,7 @@ namespace AQUATOX.AQSim_2D
                 while (stack.Count > 0)
                 {
                     var (currentHUC, currentLevel) = stack.Pop();
-                    check_cross_region(currentHUC);
+                    check_cross_region(currentHUC); 
 
                     if (!visited.Contains(currentHUC))
                     {
@@ -1321,6 +1346,7 @@ namespace AQUATOX.AQSim_2D
 
                 double[] RTEData = ExtractFromCSV(DBDir + rtesFilen, HUCID, new int[] { 1, 2 });
                 double Slope = RTEData[0];
+                if (Slope < 1e-9) Slope = 1e-9;  //assumed minimum slope to avoid crash
                 double Length = RTEData[1];
 
                 double CH_W2 = 1.29d * Math.Pow(CumulativeArea, 0.6);  //estimates based on equations from TAMU/HAWQS
@@ -1330,7 +1356,8 @@ namespace AQUATOX.AQSim_2D
                 Sim.AQTSeg.Location.Locale.SiteLength.Comment = "RTE data inputs from HAWQS/SWAT";
 
                 Sim.AQTSeg.Location.Locale.Channel_Slope.Val = Slope;  //m/m
-                Sim.AQTSeg.Location.Locale.Channel_Slope.Comment = "RTE data inputs from HAWQS/SWAT";
+                if (Slope == 1e-9) Sim.AQTSeg.Location.Locale.Channel_Slope.Comment = "Minimum 1e-9 assigned as HAWQS RTE data is zero or below 1e-9";
+                    else Sim.AQTSeg.Location.Locale.Channel_Slope.Comment = "RTE data inputs from HAWQS/SWAT";
 
                 Sim.AQTSeg.Location.Locale.ICZMean.Val = CH_D;  //m
                 Sim.AQTSeg.Location.Locale.ICZMean.Comment = "Estimated based on Subbasin Cumulative Area using eqn. from HAWQS/SWAT";
