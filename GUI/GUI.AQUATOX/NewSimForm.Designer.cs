@@ -87,6 +87,7 @@
             label12 = new System.Windows.Forms.Label();
             HUCBox = new System.Windows.Forms.TextBox();
             HAWQSHUCLabel = new System.Windows.Forms.Label();
+            HAWQSHUCHelp = new System.Windows.Forms.PictureBox();
             ReadNetworkPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             TogglePanel.SuspendLayout();
@@ -94,6 +95,7 @@
             SummaryPanel.SuspendLayout();
             HUCSelectionPanel.SuspendLayout();
             readHUCNetworkPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)HAWQSHUCHelp).BeginInit();
             SuspendLayout();
             // 
             // button1
@@ -631,6 +633,7 @@
             upperHUCBox.Name = "upperHUCBox";
             upperHUCBox.Size = new System.Drawing.Size(112, 23);
             upperHUCBox.TabIndex = 24;
+            upperHUCBox.Leave += HUCBox_Leave;
             // 
             // ModelHUC8checkBox
             // 
@@ -682,6 +685,7 @@
             traverseHUCBox.Name = "traverseHUCBox";
             traverseHUCBox.Size = new System.Drawing.Size(35, 23);
             traverseHUCBox.TabIndex = 26;
+            traverseHUCBox.Leave += HUCBox_Leave;
             // 
             // HUCLabel1
             // 
@@ -710,6 +714,7 @@
             HUCBox.Name = "HUCBox";
             HUCBox.Size = new System.Drawing.Size(112, 23);
             HUCBox.TabIndex = 22;
+            HUCBox.Leave += HUCBox_Leave;
             // 
             // HAWQSHUCLabel
             // 
@@ -723,11 +728,24 @@
             HAWQSHUCLabel.Text = "HAWQS HUCs";
             HAWQSHUCLabel.Visible = false;
             // 
+            // HAWQSHUCHelp
+            // 
+            HAWQSHUCHelp.Image = Properties.Resources.help_icon;
+            HAWQSHUCHelp.Location = new System.Drawing.Point(292, 42);
+            HAWQSHUCHelp.Name = "HAWQSHUCHelp";
+            HAWQSHUCHelp.Size = new System.Drawing.Size(20, 20);
+            HAWQSHUCHelp.TabIndex = 68;
+            HAWQSHUCHelp.TabStop = false;
+            HAWQSHUCHelp.Visible = false;
+            HAWQSHUCHelp.Click += pictureBox1_Click;
+            HAWQSHUCHelp.MouseHover += pictureBox1_MouseHover;
+            // 
             // NewSimForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1224, 574);
+            Controls.Add(HAWQSHUCHelp);
             Controls.Add(HAWQSHUCLabel);
             Controls.Add(NetworkLabel);
             Controls.Add(readHUCNetworkPanel);
@@ -767,6 +785,7 @@
             HUCSelectionPanel.PerformLayout();
             readHUCNetworkPanel.ResumeLayout(false);
             readHUCNetworkPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)HAWQSHUCHelp).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -830,5 +849,6 @@
         private System.Windows.Forms.CheckBox ModelHUC8checkBox;
         private System.Windows.Forms.Button clear_network;
         private System.Windows.Forms.Label HAWQSHUCLabel;
+        private System.Windows.Forms.PictureBox HAWQSHUCHelp;
     }
 }

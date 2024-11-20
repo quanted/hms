@@ -86,10 +86,10 @@ namespace GUI.AQUATOX
         public class ScreenSettings
         {
             public string BaseJSONstr = "";
-            public string COMIDstr = "";
+            public string PourPointStr = "";
             public string WBCOMIDstr = "";
             public string HUCChosen = "";
-            public string EndCOMIDstr = "";
+            public string UpstreamSeg = "";
             public string UpSpanStr = "";
         }
 
@@ -303,8 +303,8 @@ namespace GUI.AQUATOX
         private void LoadScreenSettings()
         {
             ScrSettings.BaseJSONstr = "";
-            ScrSettings.COMIDstr = "";
-            ScrSettings.EndCOMIDstr = "";
+            ScrSettings.PourPointStr = "";
+            ScrSettings.UpstreamSeg = "";
             ScrSettings.UpSpanStr = "";
 
             try
@@ -393,11 +393,21 @@ namespace GUI.AQUATOX
                 else if (!isHUCNet)
                 {
                     string str3;
-                    if (ScrSettings.EndCOMIDstr == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
-                    else str3 = "Upstream COMID " + ScrSettings.EndCOMIDstr;
-                    setinfolabels("Stream Network Information:", "Pour Point COMID " + ScrSettings.COMIDstr + "; " + str3, AQT2D.SNStats());
+                    if (ScrSettings.UpstreamSeg == "") str3 = "Upstream Span of " + ScrSettings.UpSpanStr + "km";
+                    else str3 = "Upstream COMID " + ScrSettings.UpstreamSeg;
+                    setinfolabels("Stream Network Information:", "Pour Point COMID " + ScrSettings.PourPointStr + "; " + str3, AQT2D.SNStats());
                 }
-                else setinfolabels("HUC Network Information:", "", AQT2D.SNStats());
+                else
+                {
+                    string str3;
+                    if (ScrSettings.UpstreamSeg == "") {
+                        if (ScrSettings.UpSpanStr == "") str3 = "";
+                        else str3 = "Upstream Traverse of " + ScrSettings.UpSpanStr + "segments"; 
+                    }
+                    else str3 = "Upstream HUC " + ScrSettings.UpstreamSeg;
+                    setinfolabels("HUC Network Information:", "Pour Point HUC " + ScrSettings.PourPointStr + "; " + str3, AQT2D.SNStats());
+                }
+               
 
                 UpdateRecentFiles(basedirBox.Text);
                 inputsegs = SegmentsCreated();
@@ -2144,12 +2154,12 @@ namespace GUI.AQUATOX
                     if (!fbd_canceled)
                     {
                         ScrSettings.UpSpanStr = "";
-                        ScrSettings.EndCOMIDstr = "";
+                        ScrSettings.UpstreamSeg = "";
 
                         string BaseJSONFileN = NSForm.BaseJSON_FileN;
 
                         BaseJSONBox.Text = BaseJSONFileN;
-                        ScrSettings.COMIDstr = NSForm.COMID;
+                        ScrSettings.PourPointStr = NSForm.COMID;
                         ScrSettings.WBCOMIDstr = NSForm.WBCOMID;
                         ScrSettings.HUCChosen = NSForm.HUCChosen;
                         ScrSettings.BaseJSONstr = BaseJSONFileN;
@@ -2244,11 +2254,11 @@ namespace GUI.AQUATOX
                             string BFJSON = JsonConvert.SerializeObject(BSim, AQTSim.AQTJSONSettings());
                             if (NSForm.fromtemplate) File.WriteAllText(BaseDir + BaseJSONFileN, BFJSON);    // save template study back as JSON in project directory
 
-                            ScrSettings.COMIDstr = NSForm.NScrSettings.COMIDstr;
+                            ScrSettings.PourPointStr = NSForm.NScrSettings.PourPoint;
                             ScrSettings.UpSpanStr = NSForm.NScrSettings.UpSpanStr;
-                            ScrSettings.EndCOMIDstr = NSForm.NScrSettings.EndCOMIDstr;
+                            ScrSettings.UpstreamSeg = NSForm.NScrSettings.StartSegID;
 
-                            AddToProcessLog("INPUTS: New stream network simulation setup.  Pour Point COMID " + ScrSettings.COMIDstr);
+                            AddToProcessLog("INPUTS: New stream network simulation setup.  Pour Point COMID " + ScrSettings.PourPointStr);
                             AddToProcessLog("INPUTS: " + AQT2D.SNStats());
                             AddToProcessLog("INPUTS: Base simulation for reaches = " + BaseJSONFileN);
                             AddToProcessLog("INPUTS: Start date and end date set from inputs on screen. ");

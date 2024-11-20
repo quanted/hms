@@ -46,8 +46,8 @@ namespace GUI.AQUATOX
 
         public class NScreenSettings
         {
-            public string COMIDstr = "";
-            public string EndCOMIDstr = "";
+            public string PourPoint = "";
+            public string StartSegID = "";
             public string UpSpanStr = "";
         }
 
@@ -108,7 +108,7 @@ namespace GUI.AQUATOX
             else if (content.StartsWith("H1"))
             {
                 string hucstr = content.Substring(1, 2);
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H" + hucstr + "_" + content.Substring(3, 2) + ".geojson";  
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H" + hucstr + "_" + content.Substring(3, 2) + ".geojson";
                 if (File.Exists(filestr))
                 {
                     string HUCgeo = File.ReadAllText(filestr);
@@ -118,7 +118,7 @@ namespace GUI.AQUATOX
             }
             else if (content.StartsWith("H8"))
             {
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H8.geojson";  
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H8.geojson";
                 if (File.Exists(filestr))
                 {
                     string HUCgeo = File.ReadAllText(filestr);
@@ -163,7 +163,7 @@ namespace GUI.AQUATOX
                 }
                 // Serialize the list of GeoJSONs and send back to JavaScript
                 string jsonResponse = JsonConvert.SerializeObject(geojsons);
-                webView.CoreWebView2.PostWebMessageAsString("ADDREDLAYER_BATCH|" + jsonResponse);       
+                webView.CoreWebView2.PostWebMessageAsString("ADDREDLAYER_BATCH|" + jsonResponse);
             }
             else
             {
@@ -248,7 +248,7 @@ namespace GUI.AQUATOX
             // HUCID is not found
             return null;
         }
-    
+
         protected override void WndProc(ref Message m)
         {
             // Suppress the WM_UPDATEUISTATE message
@@ -263,8 +263,8 @@ namespace GUI.AQUATOX
             readHUCNetworkPanel.Visible = HUCNetworkButton.Checked;
             NetworkLabel.Visible = StreamButton.Checked;
 
-            comidBox.Text = NScrSettings.COMIDstr;
-            EndCOMIDBox.Text = NScrSettings.EndCOMIDstr;
+            comidBox.Text = NScrSettings.PourPoint;
+            EndCOMIDBox.Text = NScrSettings.StartSegID;
             spanBox.Text = NScrSettings.UpSpanStr;
 
             if (LakeButton.Checked)
@@ -499,6 +499,7 @@ namespace GUI.AQUATOX
                 else SimName = "HUC" + HUCStr + ": " + HUCChosen;
 
                 HUCBox.Text = HUCChosen;
+                NScrSettings.PourPoint = HUCChosen;
 
                 UpdateLeftPanels();
             }
@@ -506,6 +507,7 @@ namespace GUI.AQUATOX
             {
                 HUCChosen = msg[1];
                 upperHUCBox.Text = HUCChosen;
+                NScrSettings.StartSegID = HUCChosen;
                 UpdateLeftPanels();
             }
             else  //flow lines
@@ -519,14 +521,14 @@ namespace GUI.AQUATOX
                     comidBox.Text = COMID;
 
                     comidLabel.ForeColor = System.Drawing.Color.DarkOrange;
-                    NScrSettings.COMIDstr = COMID;
+                    NScrSettings.PourPoint = COMID;
                     SimNameEdit.Text = SimName;
                 }
                 else
                 {
                     EndCOMIDBox.Text = COMID;
                     endCOMIDLabel.ForeColor = System.Drawing.Color.Green;
-                    NScrSettings.EndCOMIDstr = COMID;
+                    NScrSettings.StartSegID = COMID;
                 }
             }
         }
@@ -540,10 +542,18 @@ namespace GUI.AQUATOX
 
         private void comidBox_Leave(object sender, EventArgs e)
         {
-            NScrSettings.COMIDstr = comidBox.Text;
-            NScrSettings.EndCOMIDstr = EndCOMIDBox.Text;
+            NScrSettings.PourPoint = comidBox.Text;
+            NScrSettings.StartSegID = EndCOMIDBox.Text;
             NScrSettings.UpSpanStr = spanBox.Text;
         }
+
+        private void HUCBox_Leave(object sender, EventArgs e)
+        {
+            NScrSettings.PourPoint = HUCBox.Text;
+            NScrSettings.StartSegID = upperHUCBox.Text;
+            NScrSettings.UpSpanStr = traverseHUCBox.Text;
+        }
+
 
         private void MapType_CheckChanged(object sender, EventArgs e)
         {
@@ -554,6 +564,7 @@ namespace GUI.AQUATOX
                 ShowH14Box.Checked = false;
                 HUCSelectionPanel.Visible = false;
                 HAWQSHUCLabel.Visible = false;
+                HAWQSHUCHelp.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("STREAMMAP");
                 SegLoadLabel.Text = "Zoom in to see stream segments.";
                 SegLoadLabel.Visible = true;
@@ -566,6 +577,7 @@ namespace GUI.AQUATOX
                 ShowH14Box.Visible = false;
                 HUCSelectionPanel.Visible = false;
                 HAWQSHUCLabel.Visible = false;
+                HAWQSHUCHelp.Visible = false;
                 webView.CoreWebView2.PostWebMessageAsString("LAKEMAP");
                 SegLoadLabel.Text = "Zoom in to see Lakes/Reservoirs.";
                 SegLoadLabel.Visible = true;
@@ -578,8 +590,9 @@ namespace GUI.AQUATOX
                 ShowH14Box.Visible = false;
                 HUCSelectionPanel.Visible = true;
                 HAWQSHUCLabel.Visible = true;
+                HAWQSHUCHelp.Visible = true;
 
-                SegLoadLabel.Text = "HUC8s shown; zoom in to see HUC"+HUCStr+" segments.";
+                SegLoadLabel.Text = "HUC8s shown; zoom in to see HUC" + HUCStr + " segments.";
                 SegLoadLabel.Visible = !BHUC8.Checked;
 
                 if (HUCNetworkButton.Checked)
@@ -734,7 +747,7 @@ namespace GUI.AQUATOX
 
         private void ReadHUCNetworkButton_Click(object sender, EventArgs e)
         {
-            
+
             string HUCstr = HUCBox.Text.Trim();
             if (!Int64.TryParse(HUCstr, out long HUCInt))
             {
@@ -791,12 +804,10 @@ namespace GUI.AQUATOX
 
             SNPopulated = true;
 
-            ExportSNJSON = JsonConvert.SerializeObject(AQT2D.SN); 
+            ExportSNJSON = JsonConvert.SerializeObject(AQT2D.SN);
             HighlightHUCNetwork();
             Cursor.Current = Cursors.Default;
             UpdateLeftPanels();
-
-
         }
 
         private void clear_network_Click(object sender, EventArgs e)
@@ -806,9 +817,16 @@ namespace GUI.AQUATOX
             UpdateLeftPanels();
         }
 
-        private void traverseHUCBox_TextChanged(object sender, EventArgs e)
+        private void pictureBox1_Click(object sender, EventArgs e)
         {
+            string target = "New_Simulation";
+            AQTMainForm.OpenUrl(target);
+        }
 
+        private void pictureBox1_MouseHover(object sender, EventArgs e)
+        {
+            ToolTip tt = new ToolTip();
+            tt.SetToolTip(this.HAWQSHUCHelp, "Describes the difference between USGS and HAWQS HUC boundaries");
         }
     }
 }

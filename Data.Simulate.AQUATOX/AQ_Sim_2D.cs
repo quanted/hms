@@ -423,7 +423,7 @@ namespace AQUATOX.AQSim_2D
         /// <summary>
         /// Returns a summary of stream segments and waterbodies in network
         /// </summary>
-        public String SNStats()
+        public String SNStats()  
         {
             if (SN == null) return "";
             int WBCount = 0;
@@ -1640,9 +1640,9 @@ namespace AQUATOX.AQSim_2D
 
                     TSV.LoadNotes1 = "";
                     TSV.LoadNotes2 = "";
+                    setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs; zero out existing inflow loads 11/20/2024
                     if (link_boundary || isSED) 
                     {
-                        setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs
                         TSV.LoadNotes1 = "Inflow Loads from HAWQS Linkage (Daily RCH file)";
                         if (isSED) TSV.LoadNotes1 = "In-reach Sediment Values from HAWQS Linkage (Daily RCH file)";
                     }
@@ -1945,7 +1945,7 @@ namespace AQUATOX.AQSim_2D
                                 double boundFlow = boundary_flows[date]; //boundary condition flows 
                                 double totFlow = inDomainFlow + boundFlow;
 
-                                if (newlist.ContainsKey(date))
+                                if (newlist.ContainsKey(date) && TSV.LoadsRec.Loadings.list.ContainsKey(date))
                                 {
                                     newlist[date] = (newlist[date] * inDomainFlow + TSV.LoadsRec.Loadings.list[date] * boundFlow) / totFlow;
                                 }
