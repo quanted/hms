@@ -12,7 +12,6 @@ using Web.Services.Controllers;
 using Xunit;
 using System.Text.Json;
 using Serilog;
-using Microsoft.Extensions.Hosting;
 
 namespace Web.Services.Tests
 {
@@ -34,12 +33,9 @@ namespace Web.Services.Tests
         /// <summary>
         /// Integration test constructor creates test server and test client.
         /// </summary>
-        public DewPointControllerIntegrationTests()
+        public DewPointControllerIntegrationTests(WebHostBuilder webHostBuilder)
         {
-            _server = new TestServer(Host.CreateDefaultBuilder()
-                                         .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-                                         .UseSerilog() // UseSerilog on IHostBuilder
-                                         .Build().Services);
+            _server = new TestServer(webHostBuilder.UseStartup<Startup>());
             _client = _server.CreateClient();
         }
 

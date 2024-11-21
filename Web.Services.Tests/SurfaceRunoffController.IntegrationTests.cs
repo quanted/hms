@@ -15,7 +15,6 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Microsoft.Extensions.Hosting;
 
 namespace Web.Services.Tests
 {
@@ -80,10 +79,10 @@ namespace Web.Services.Tests
         /// </summary>
         public SurfaceRunoffControllerIntegrationTests()
         {
-            _server = new TestServer(Host.CreateDefaultBuilder()
-                                         .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
-                                         .UseSerilog() // UseSerilog on IHostBuilder
-                                         .Build().Services);
+            _server = new TestServer(
+                new WebHostBuilder()
+                    .UseStartup<Startup>()
+            );
             //_server = new TestServer(new WebHostBuilder().UseSerilog().UseStartup<Startup>().UseSolutionRelativeContentRoot("Web.Services").ConfigureTestServices(services => services.AddMvc().AddApplicationPart(typeof(Startup).Assembly)));
             _client = _server.CreateClient();
         }

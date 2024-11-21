@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
 
 namespace WatershedDelineation
 {
@@ -250,8 +251,9 @@ namespace WatershedDelineation
         {
             errorMsg = "";
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
-            string requestURL = "";
-            if(mainstem && !string.IsNullOrEmpty(endComid))
+            string requestURL = "https://api.epa.gov/waters/v2/navigation3?p_indexing_engine=DISTANCE&p_limit_innetwork=FALSE&p_limit_navigable=TRUE&p_fallback_limit_innetwork=FALSE&p_fallback_limit_navigable=TRUE&p_return_link_path=FALSE&p_use_simplified_catchments=TRUE&p_known_region=point";
+            string apiKey = Environment.GetEnvironmentVariable("WATERS_APIKEY");
+            if (mainstem && !string.IsNullOrEmpty(endComid))
             {
                 // Downstream mainstem traversal, start and stop comids are switched. 
                 //string query = "SELECT PB.ComID FROM PlusFlowlineVAA as PA join PlusFlowlineVAA as PB on PA.DnHydroseq=PB.Hydroseq AND PA.ComID=" + this.startCOMID;
@@ -261,24 +263,26 @@ namespace WatershedDelineation
                 //{
                 //    comid = sourceComid["ComID"];
                 //}
-                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=DM&pStopComID=" + comid + "&pStartComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
+                // requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=DM&pStopComID=" + comid + "&pStartComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
+                requestURL += "&p_search_type=DM&p_start_nhdplusid=" + endComid; 
             }
             else if (mainstem)
             {
                 // Upstream mainstem traversal, stopping condition is maxDistance
-                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UM&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+                requestURL += "&p_search_type=UM&p_start_nhdplusid=" + this.startCOMID;
             }
             else if (!string.IsNullOrEmpty(endComid))
             {
                 // Point to point traversal
-                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=PP&pStartComID=" + this.startCOMID + "&pStopComID=" + endComid + "&pMaxDistanceKm=" + maxDistance.ToString();
-
+                requestURL += "&p_search_type=PP&p_start_nhdplusid=" + this.startCOMID + "&p_stop_nhdplusid=" + endComid;
             }
             else
             {
                 // Upstream with tributary traversal, stopping condition is maxDistance
-                requestURL = "https://ofmpub.epa.gov/waters10/Navigation.Service?pNavigationType=UT&pStartComID=" + this.startCOMID + "&pMaxDistanceKm=" + maxDistance.ToString();
+                requestURL += "&p_search_type=UT&p_start_nhdplusid=" + this.startCOMID;
             }
+            requestURL += "&p_search_max_distancekm=" + maxDistance.ToString();
+            requestURL += "&p_network_resolution=MR&f=json&api_key=" + apiKey;
 
             string data = "";
             try

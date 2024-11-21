@@ -278,7 +278,7 @@ namespace GUI.AQUATOX
             RecentFilesBox.DataSource = ShortDirNames;
 
             RecentFilesBox.SelectionChangeCommitted -= RecentFilesBox_SelectionChangeCommitted;
-            RecentFilesBox.SelectedIndex = 0;
+            if (RecentFilesBox.Items.Count > 0) RecentFilesBox.SelectedIndex = 0;
             RecentFilesBox.SelectionChangeCommitted += RecentFilesBox_SelectionChangeCommitted;
         }
 
@@ -557,7 +557,7 @@ namespace GUI.AQUATOX
         private void TSafeAddToProcessLog(string msg)  //thread safe addition to progress log
         {
 
-            ProcessLog.BeginInvoke((MethodInvoker)delegate ()
+            ProcessLog.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate ()
             {
                 msg = FormatMsg(msg);
                 if (ShowMsg(msg)) ProcessLog.AppendText(msg);
@@ -568,7 +568,7 @@ namespace GUI.AQUATOX
 
         private void TSafeHideProgBar()  //thread safe hide progress bar
         {
-            progressBar1.BeginInvoke((MethodInvoker)delegate ()
+            progressBar1.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate ()
                 {
                     progressBar1.Visible = false;
                     StatusLabel.Visible = true;
@@ -639,6 +639,7 @@ namespace GUI.AQUATOX
 
         private bool IsHUCNetwork()
         {
+            if (AQT2D == null) return false;
             if (AQT2D.SN == null) return false;
             if (AQT2D.SN.network == null) return false;
             return AQT2D.SN.network[0][0] == "id";  //identify based on simplified stream network
@@ -720,7 +721,7 @@ namespace GUI.AQUATOX
 
             void ResetInterface()
             {
-                this.BeginInvoke((MethodInvoker)(() =>
+                this.BeginInvoke((System.Windows.Forms.MethodInvoker)(() =>
                 {
                     SetInterfaceBusy(false);
                     TSafeHideProgBar();
@@ -842,7 +843,7 @@ namespace GUI.AQUATOX
 
         private void TSafeUpdateProgress(int Prog)
         {
-            progressBar1.BeginInvoke((MethodInvoker)delegate ()
+            progressBar1.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate ()
             {
                 if (Prog < 100) Prog++;  // workaround of animation bug
                 Prog = Math.Max(Prog, 1);
@@ -867,7 +868,7 @@ namespace GUI.AQUATOX
 
         private void reset_interface_after_run(bool success)
         {
-            this.BeginInvoke((MethodInvoker)(() =>
+            this.BeginInvoke((System.Windows.Forms.MethodInvoker)(() =>
             {
                 UseWaitCursor = false;
                 TSafeHideProgBar();
@@ -911,7 +912,7 @@ namespace GUI.AQUATOX
 
         private void PostWebviewMessage(string str)
         {
-            webView.BeginInvoke((MethodInvoker)(() =>
+            webView.BeginInvoke((   System.Windows.Forms.MethodInvoker)(() =>
             {
                 webView.CoreWebView2.PostWebMessageAsString(str);
             }));
@@ -1986,7 +1987,7 @@ namespace GUI.AQUATOX
                         Sim.SavedRuns.Values.Last().Graphs = JsonConvert.DeserializeObject<TGraphs>(graphjson);
                     }
 
-                    await Task.Run(() => this.Invoke(new MethodInvoker(delegate
+                    await Task.Run(() => this.Invoke(new System.Windows.Forms.MethodInvoker(delegate
                     { OutForm.ShowOutput(Sim, this); })));
                     ViewOutputClicked = false;
 
@@ -2618,7 +2619,7 @@ namespace GUI.AQUATOX
 
             foreach (string code in Codes)
             {
-                string filestr = @"..\2D_Inputs\HAWQS_data\HUC14\H14_" + code + ".geojson";
+                string filestr = @"..\2D_Inputs\HAWQS_data\HUC_Shapes\H14_" + code + ".geojson";
                 string HUC14layer = File.ReadAllText(filestr);
                 string RelevantH14s = SubsetGeoJSON(HUC14layer, H14s);
                 PostWebviewMessage("RH14s|" + RelevantH14s);   // Send to webview request to render H14 tile

@@ -209,39 +209,35 @@ namespace WatershedDelineation
         {
             string serializedData = JsonSerializer.Serialize(networkData);
             JsonDocument data = JsonSerializer.Deserialize<JsonDocument>(serializedData);
-            if (data.RootElement.GetProperty("output").IsEqual(null)) { return null; }
+            //if (data.RootElement.GetProperty("output").IsEqual(null)) { return null; }
             List<List<object>> networkTable = new List<List<object>>();
             List<object> columns = new List<object>()
             {
-                "comid", "hydroseq","uphydroseq", "dnhydroseq", "lengthkm", "travtime", "ftype", "wbd_huc12" 
+                "comid", "hydroseq", "uphydroseq", "dnhydroseq", "lengthkm", "travtime", "ftype", "wbd_huc12" 
             };
             networkTable.Add(columns);
             string hucstr = (huc is null) ? "" : huc;
-            //if (hucstr == "12")
-            //{
-            //    hucstr = data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard")[1].GetProperty("wbd_huc12").ToString();
-            //}
-            foreach(var seg in data.RootElement.GetProperty("output").GetProperty("ntNavResultsStandard").EnumerateArray())
+            foreach (var seg in data.RootElement.GetProperty("result_streams_selected").GetProperty("features").EnumerateArray())
             {
-                string cHUC = seg.GetProperty("wbd_huc12").ToString();
+                var segProperties = seg.GetProperty("properties");
+                string cHUC = segProperties.GetProperty("xwalk_huc12").ToString();
                 if ((cHUC.Contains(hucstr) || cHUC.Equals(hucstr)) || hucstr == "")
                 {
-                    string comid = seg.GetProperty("comid").ToString();
+                    string comid = segProperties.GetProperty("nhdplusid").ToString();
                     List<object> values = new List<object>()
                     {
                         comid,
-                        seg.GetProperty("hydroseq"),
-                        seg.GetProperty("uphydroseq"),
-                        seg.GetProperty("dnhydroseq"),
-                        seg.GetProperty("lengthkm"),
-                        seg.GetProperty("travtime"),
-                        seg.GetProperty("ftype"),
+                        segProperties.GetProperty("hydrosequence"),
+                        segProperties.GetProperty("uphydrosequence"),
+                        segProperties.GetProperty("downhydrosequence"),
+                        segProperties.GetProperty("lengthkm"),
+                        segProperties.GetProperty("flowtimeday"),
+                        segProperties.GetProperty("ftype"),
                         cHUC
                     };
                     networkTable.Add(values);
                 }
             }
-
             return networkTable;
         }
 

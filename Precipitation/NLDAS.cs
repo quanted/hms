@@ -26,8 +26,10 @@ namespace Precipitation
             Data.Source.NLDAS nldas = new Data.Source.NLDAS();
             //bool validInputs = ValidateInputs(input, out errorMsg);
             //if (errorMsg.Contains("ERROR")) { return null; }
+            //int t0 = DateTime.Now.Second;
             string data = nldas.GetData(out errorMsg, "PRECIP", input, retries);
-            
+            //int t2 = DateTime.Now.Second;
+            //Console.WriteLine("Data Request took " + (t2 - t0) + " seconds");
 
             ITimeSeriesOutput nldasOutput = output;
             if (errorMsg.Contains("ERROR")) { return null; }
