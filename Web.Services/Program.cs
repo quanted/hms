@@ -54,6 +54,22 @@ namespace Web.Services
 
         }
 
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseSetting(WebHostDefaults.DetailedErrorsKey, "true");
+                webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                          .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                    config.AddEnvironmentVariables();
+
+                });
+                webBuilder.UseStartup<Startup>();
+            });
+
         /// <summary>
         /// Web Services build Web host method
         /// </summary>

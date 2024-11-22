@@ -2378,13 +2378,6 @@
             </summary>
             <param name="args"></param>
         </member>
-        <member name="M:Web.Services.Program.BuildWebHost(System.String[])">
-            <summary>
-            Web Services build Web host method
-            </summary>
-            <param name="args"></param>
-            <returns></returns>
-        </member>
         <member name="T:Web.Services.Startup">
             <summary>
             Web Services Startup Class
