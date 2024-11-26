@@ -682,7 +682,7 @@ namespace GUI.AQUATOX
             upperHUCBox.Enabled = !ModelH8;
         }
 
-        private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
+        async private void ReadNetwork_Click(object sender, EventArgs e) // initializes the AQT2D object, reads the stream network from web services, saves the stream network object
         {
 
             if (!Int32.TryParse(comidBox.Text, out int COMID))
@@ -709,7 +709,8 @@ namespace GUI.AQUATOX
             Application.DoEvents();
 
             if (AQT2D == null) AQT2D = new();
-            string SNJSON = AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+            string SNJSON = await AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+
             SegLoadLabel.Visible = false;
             Cursor.Current = Cursors.Default;
 

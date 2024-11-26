@@ -562,7 +562,7 @@ namespace GUI.AQUATOX
                 msg = FormatMsg(msg);
                 if (ShowMsg(msg)) ProcessLog.AppendText(msg);
                 File.AppendAllText(TodaysLogName(), msg);
-                //  if (msg.Contains("ERROR")) MessageBox.Show(msg);
+                if (msg.Contains("ERROR")) MessageBox.Show(msg);
             });
         }
 
@@ -2510,7 +2510,7 @@ namespace GUI.AQUATOX
             }
             catch (Exception ex)
             {
-                MessageBox.Show("HUC14 Database Error: " + ex.Message);
+                TSafeAddToProcessLog("ERROR: HUC14 Database Error: " + ex.Message+ "  Data Source=" + dbpath);
                 pourpoint = "";
                 return null;
             }
@@ -3056,6 +3056,7 @@ namespace GUI.AQUATOX
 
             void AddHAWQSRchData(string stringKey, DateTime dateTimeKey, HAWQSRCHRow data)  //add a reach and date to the nested dictionary
             {
+                stringKey = stringKey.Trim();
                 if (!HAWQSRchData.ContainsKey(stringKey))  // Check if the outer dictionary already has the string key
                 {
                     HAWQSRchData[stringKey] = new Dictionary<DateTime, HAWQSRCHRow>();  // If not, create a new inner dictionary

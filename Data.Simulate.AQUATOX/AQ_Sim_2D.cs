@@ -887,7 +887,7 @@ namespace AQUATOX.AQSim_2D
         /// <param name="endComid">Optional PourID</param>
         /// <param name="span">Optional up-stream distance to search in km</param>
         /// <returns>JSON or error message</returns>
-        public string ReadStreamNetwork(string comid, string endComid, string span)
+        public async Task<string> ReadStreamNetwork(string comid, string endComid, string span)
         {
             string requestURL = webServiceURLs.hmsRest;
             string component = "info";
@@ -895,17 +895,25 @@ namespace AQUATOX.AQSim_2D
 
             try
             {
-                string rurl = requestURL + component + "/" + dataset + "?mainstem=false&comid=" + comid;
-                if (endComid != "") rurl += "&endComid=" + endComid;
-                if (span != "") rurl += "&maxDistance=" + span;
-                var request = (HttpWebRequest)WebRequest.Create(rurl);
-                request.Timeout = 600000;  //10 minutes
-                var response = (HttpWebResponse)request.GetResponse();
-                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+                // Build the request URL
+                string rurl = $"{requestURL}{component}/{dataset}?mainstem=false&comid={comid}";
+                if (!string.IsNullOrEmpty(endComid))
+                    rurl += $"&endComid={endComid}";
+                if (!string.IsNullOrEmpty(span))
+                    rurl += $"&maxDistance={span}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromMinutes(10); // Set timeout to 10 minutes
+                    HttpResponseMessage response = await client.GetAsync(rurl);
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadAsStringAsync();
+                }
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                // Return the exception message as a string (or log it if needed)
+                return $"Error: {ex.Message}";
             }
         }
 
