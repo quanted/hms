@@ -49,6 +49,7 @@ namespace Web.Services.Models
             int maxTries = 3;
             int iTries = 0;
             bool completed = false;
+            string logMessage = "";
             while (!completed)
             {
                 try
@@ -62,11 +63,13 @@ namespace Web.Services.Models
                 }
                 catch(Exception ex)
                 {
-                    
+                    logMessage = "Error attempting to obtain stream network data from EPA Waters. Error: " + ex.Message;
+                    Log.Warning(logMessage);   
                 }
                 if (networkTable.Count == 0)
                 {
                     iTries += 1;
+                    logMessage = "Error attempting to obtain stream network data. Network table count is 0";
                 }
                 else
                 {
@@ -74,12 +77,13 @@ namespace Web.Services.Models
                 }
                 if (iTries == maxTries)
                 {
+                    logMessage = "Error attempting to obtain stream network data. Maximum EPA Waters tries reached.";
                     completed = true;
                 }
             }
             if (networkTable.Count == 0)
             {
-                return this.Error("Unable to obtain network data from EPA Waters.");
+                return this.Error(logMessage);
             }
             if (optimized)
             {
