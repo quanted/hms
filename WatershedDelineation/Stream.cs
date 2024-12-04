@@ -1,4 +1,5 @@
 ﻿using Data;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -220,7 +221,7 @@ namespace WatershedDelineation
             {
                 // TODO: Read in max retry attempt from config file.
                 int retries = 5;
-
+                Log.Information("Requesting EPA Waters data: " + requestURL);
                 // Response status message
                 string status = "";
                 while (retries > 0 && !status.Contains("OK"))
@@ -289,6 +290,7 @@ namespace WatershedDelineation
             {
                 // TODO: Read in max retry attempt from config file.
                 int retries = 5;
+                Log.Information("Requesting stream network data from EPA Waters API. URL: " + requestURL);
 
                 // Response status message
                 string status = "";
