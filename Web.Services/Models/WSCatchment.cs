@@ -121,7 +121,7 @@ namespace Web.Services.Models
             if (network)
             {
                 WatershedDelineation.Streams streamN = new WatershedDelineation.Streams(comid, null, null);
-                var streamNetwork = streamN.GetNetwork();
+                var streamNetwork = streamN.GetNetwork(out errorMsg);
                 result.Add("network", streamNetwork);
             }
 

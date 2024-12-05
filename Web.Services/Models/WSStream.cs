@@ -55,29 +55,45 @@ namespace Web.Services.Models
                 try
                 {
                     stopWatch.Start();
-                    var streamNetwork = streamN.GetNetwork(maxDistance, endComid, mainstem);
+                    var streamNetwork = streamN.GetNetwork(out errorMsg, maxDistance, endComid, mainstem);
                     stopWatch.Stop();
                     Log.Information("Stream Network 1 - GetNetwork Attempt: " + (iTries + 1).ToString() + ", Runtime: " + stopWatch.Elapsed.TotalSeconds.ToString() + " sec");
                     stopWatch.Reset();
-                    networkTable = StreamNetwork.generateTable(streamNetwork, null);
+                    if (streamNetwork == null)
+                    {
+                        Log.Warning("Unable to obtain EPA Waters Data. ERROR: " + errorMsg);
+                    }
+                    else
+                    {
+                        networkTable = StreamNetwork.generateTable(streamNetwork, null);
+                    }
                 }
                 catch(Exception ex)
                 {
                     logMessage = "Error attempting to obtain stream network data from EPA Waters. Error: " + ex.Message;
                     Log.Warning(logMessage);   
                 }
-                if (networkTable.Count == 0)
+                if (networkTable == null)
+                {
+                    iTries += 1;
+                    logMessage = "Error attempting to obtain stream network, network table is null";
+                    Log.Warning(logMessage);
+                    System.Threading.Thread.Sleep(500);
+                }
+                else if (networkTable.Count == 0)
                 {
                     iTries += 1;
                     logMessage = "Error attempting to obtain stream network data. Network table count is 0";
+                    Log.Warning(logMessage);
+                    System.Threading.Thread.Sleep(500);
                 }
                 else
                 {
                     completed = true;
                 }
-                if (iTries == maxTries)
+                if (iTries >= maxTries)
                 {
-                    logMessage = "Error attempting to obtain stream network data. Maximum EPA Waters tries reached.";
+                    logMessage = "Error attempting to obtain stream network data. Maximum EPA Waters tries reached. ERROR: " + errorMsg;
                     completed = true;
                 }
             }
