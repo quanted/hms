@@ -556,6 +556,10 @@ namespace GUI.AQUATOX
 
         private void TSafeAddToProcessLog(string msg)  //thread safe addition to progress log
         {
+            if (!ProcessLog.IsHandleCreated)
+            {
+                return;
+            }
 
             ProcessLog.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate ()
             {
@@ -1679,24 +1683,29 @@ namespace GUI.AQUATOX
         {
             try
             {
-                var jsonObject = Newtonsoft.Json.Linq.JObject.Parse(jsonString);  // Check for basic GeoJSON structure
+                var jsonObject = Newtonsoft.Json.Linq.JObject.Parse(jsonString);
 
-                // First, access the "stream_geometry" object
+                // Check if it's a direct GeoJSON structure
+                if (jsonObject["type"]?.ToString() == "FeatureCollection" && jsonObject["features"] is Newtonsoft.Json.Linq.JArray)
+                {
+                    return true;
+                }
+
+                // Check if it's nested under "stream_geometry"
                 var streamGeometry = jsonObject["stream_geometry"] as Newtonsoft.Json.Linq.JObject;
-
-                // Then check if this object contains both "type" and "features"
                 if (streamGeometry != null)
                 {
-                    return streamGeometry["type"] != null && streamGeometry["features"] != null;
+                    return streamGeometry["type"]?.ToString() == "FeatureCollection" && streamGeometry["features"] is Newtonsoft.Json.Linq.JArray;
                 }
-                else return false;
-                // return jsonObject["type"] != null && jsonObject["features"] != null;
+
+                return false; // If neither condition matches, it's invalid
             }
             catch
             {
-                return false;  // If parsing failed, jsonString is not valid JSON
+                return false; // If parsing fails, the input is not valid GeoJSON
             }
         }
+
 
 
         public string InsertPropertiesInGeoJSON(string geoJsonString, string id, string name)
@@ -1780,7 +1789,8 @@ namespace GUI.AQUATOX
                             webView.Visible = false;
                             AddToProcessLog("INFO: Reading GEOJSON (map data) from webservice for COMID " + CString);
                             // GeoJSON = "{}";
-                            GeoJSON = await AQT2D.ReadGeoJSON(CString);
+                            GeoJSON = await AQT2D.ReadFlowlineGeoJSON2(CString);
+                            GeoJSON = @"{""stream_geometry"": " + GeoJSON + "}";  //required for ReadFlowlineGeoJSON2
                             if (!IsValidGeoJSON(GeoJSON))
                             {
                                 AddToProcessLog("ERROR: while reading GeoJSON, web service returned: " + GeoJSON);
@@ -2188,9 +2198,7 @@ namespace GUI.AQUATOX
                             AQTSim BSim = NSForm.BSim;
                             if (BSim == null)
                             {
-                                string StudyStr;
-                                if (IsHUC) StudyStr = "..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";
-                                else StudyStr = "..\\Studies\\Default Lake.JSON";
+                                string StudyStr = "..\\2D_Inputs\\BaseJSON\\" + "MS_OM.json";
                                 BSim = new AQTSim();
                                 if (File.Exists(StudyStr))
                                     BSim.Instantiate(File.ReadAllText(StudyStr));
@@ -3205,7 +3213,7 @@ namespace GUI.AQUATOX
                             TSafeAddToProcessLog("INPUT: Added to Lake/Res " + WBCOMID + " HAWQS overland flows and any boundary condition inputs from COMID " + comid);
                             WB_JSONs[WBCOMID.ToString()] = AQSimJSON;
                         }
-                        else TSafeAddToProcessLog("INPUT: Read NHD+ Geometries; Read HAWQS Reach data for Nutrients, OM, and Flows and saved JSON for " + comid);
+                        else TSafeAddToProcessLog("INPUT: Read NHD+ Geometries; Read HAWQS Reach data for Nutrients, OM, and Flows and saved JSON for " + comid);  //fixme NHD+ for HUC simulations is wrong
                         // TSafeUpdateProgress((int)(iSeg / AQT2D.nSegs * 100.0));
                     }
                     else

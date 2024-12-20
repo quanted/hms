@@ -697,6 +697,7 @@
         }
 
         function ShowLakeDefaults() {
+            newzoom = MAP.getZoom();
             if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
             MAP.removeLayer(FLOWLINES_LAYER);
             RemoveHUCMaps()

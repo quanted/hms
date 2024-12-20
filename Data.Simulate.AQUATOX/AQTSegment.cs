@@ -3129,9 +3129,20 @@ namespace AQUATOX.AQTSegment
             {
                 firststep = false;
                 DateTime Start_SI_Time = SV.restimes[i];
-                DateTime End_SI_Time = SV.restimes[i + 1];
                 Start_SI_Val = vals[i];
-                End_SI_Val = vals[i + 1];
+
+                DateTime End_SI_Time ;
+                if (i + 1 < SV.restimes.Count)
+                {
+                    End_SI_Time = SV.restimes[i + 1];
+                    End_SI_Val = vals[i + 1];
+                }
+                else  //handle rare case where due to machine error End_Interval_Time is marginally beyond the last datapoint  12/20/2024
+                {
+                    if (SV.restimes[i] < End_Interval_Time.AddDays(7E-4)) break; // add one minute to ensure it's a rounding/ machine error issue, then ignore final tiny step
+                    throw new Exception("Trapezoidal integration error -- integration beyond date span.");
+                }
+
 
                 if (End_SI_Time > End_Interval_Time)
                 {

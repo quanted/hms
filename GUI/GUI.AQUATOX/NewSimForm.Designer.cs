@@ -118,7 +118,7 @@
             SimBaseLabel.Name = "SimBaseLabel";
             SimBaseLabel.Size = new System.Drawing.Size(175, 15);
             SimBaseLabel.TabIndex = 17;
-            SimBaseLabel.Text = "Simulation Base:  Default Lake";
+            SimBaseLabel.Text = "Simulation Base:  Nutrients and OM";
             // 
             // ReadNetworkPanel
             // 
@@ -309,7 +309,7 @@
             SimJSONLabel.Name = "SimJSONLabel";
             SimJSONLabel.Size = new System.Drawing.Size(113, 15);
             SimJSONLabel.TabIndex = 50;
-            SimJSONLabel.Text = "\"Default Lake.JSON\"";
+            SimJSONLabel.Text = "\"MS_OM.json\"";
             // 
             // StartDate
             // 

@@ -22,7 +22,7 @@ namespace GUI.AQUATOX
         public string ExportSNJSON = "";
         public string SimName = "";
         public double SArea = -9999;  // surface area in square meters as taken from waterbodies object
-        public string BaseJSON_FileN = "Default Lake.JSON";
+        public string BaseJSON_FileN = "MS_OM.json";
         public AQTSim BSim = null;
         public DateTime StartDT;  // start and end simulation time 
         public DateTime EndDT;
@@ -570,7 +570,7 @@ namespace GUI.AQUATOX
                 SegLoadLabel.Visible = true;
                 infolabel1.Text = "Click on a pour-point stream segment then right-click on an upstream";
                 infolabel2.Text = "segment or input an up-river span in km and click \"Read Network\"";
-                if (BSim == null) BaseJSON_FileN = "Default Lake.JSON";
+                if (BSim == null) BaseJSON_FileN = "MS_OM.json";
             }
             else if (LakeButton.Checked)
             {
@@ -706,43 +706,52 @@ namespace GUI.AQUATOX
             SegLoadLabel.Visible = true;
 
             Cursor.Current = Cursors.WaitCursor;
-            Application.DoEvents();
+            this.UseWaitCursor = true;
+            ReadSNButton.Enabled = false;
+            // Application.DoEvents();
 
-            if (AQT2D == null) AQT2D = new();
-            string SNJSON = await AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
-
-            SegLoadLabel.Visible = false;
-            Cursor.Current = Cursors.Default;
-
-            if (SNJSON == "")
-            {
-                MessageBox.Show("ERROR: web service returned empty JSON."); return;
-            }
-            if (SNJSON.IndexOf("ERROR", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                MessageBox.Show("Web service returned an error: " + SNJSON); return;
-            }
             try
-            { AQT2D.CreateStreamNetwork(SNJSON); }
-            catch
             {
-                Cursor.Current = Cursors.Default;
-                SegLoadLabel.Visible = false;
-                MessageBox.Show("ERROR converting JSON: " + SNJSON);
-                return;
+                if (AQT2D == null) AQT2D = new();
+                string SNJSON = await AQT2D.ReadStreamNetwork(comidBox.Text, EndCOMIDBox.Text, spanBox.Text);
+
+                if (SNJSON == "")
+                {
+                    MessageBox.Show("ERROR: web service returned empty JSON."); return;
+                }
+                if (SNJSON.IndexOf("ERROR", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    MessageBox.Show("Web service returned an error: " + SNJSON); return;
+                }
+                try
+                { AQT2D.CreateStreamNetwork(SNJSON); }
+                catch
+                {
+                    Cursor.Current = Cursors.Default;
+                    SegLoadLabel.Visible = false;
+                    MessageBox.Show("ERROR converting JSON: " + SNJSON);
+                    return;
+                }
+
+                ExportSNJSON = SNJSON;
+                webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
+                comidLabel.ForeColor = System.Drawing.Color.Black;
+                endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
+
+                SNPopulated = true;
+
+                HighlightStreamNetwork();
+
+                comidBox_Leave(sender, e); //update NScrSettings
+                UpdateLeftPanels();
             }
-
-            ExportSNJSON = SNJSON;
-            webView.CoreWebView2.PostWebMessageAsString("RESETCOLORS");
-            comidLabel.ForeColor = System.Drawing.Color.Black;
-            endCOMIDLabel.ForeColor = System.Drawing.Color.Black;
-
-            SNPopulated = true;
-
-            HighlightStreamNetwork();
-
-            comidBox_Leave(sender, e); //update NScrSettings
-            UpdateLeftPanels();
+            finally
+            {
+                ReadSNButton.Enabled = true;
+                SegLoadLabel.Visible = false;
+                Cursor.Current = Cursors.Default;
+                this.UseWaitCursor = false;
+            }
         }
 
 
@@ -820,7 +829,7 @@ namespace GUI.AQUATOX
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            string target = "New_Simulation";
+            string target = "HUCs";
             AQTMainForm.OpenUrl(target);
         }
 

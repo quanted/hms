@@ -1,24 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using Globals;
+﻿using AQUATOX.Animals;
 using AQUATOX.AQTSegment;
-using AQUATOX.Volume;
 using AQUATOX.Loadings;
-using System.Linq;
-using Newtonsoft.Json;
-using Data;
-using System.IO;
-using AQUATOX.Plants;
-using AQUATOX.Animals;
-using System.Net;
-using System.Threading;
-using System.Data;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.FileIO;
 using AQUATOX.OrgMatter;
-using System.Globalization;
+using AQUATOX.Plants;
+using AQUATOX.Volume;
+using Data;
+using Globals;
+using Microsoft.VisualBasic.FileIO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AQUATOX.AQSim_2D
 
@@ -767,14 +767,61 @@ namespace AQUATOX.AQSim_2D
         }
 
 
+
+
+        /// <summary>
+        /// Reads the GeoJSON for a comid from web services, faster response than procedure below
+        /// </summary>
+        /// <param name="comid">comid</param>
+        /// <returns>JSON or error message</returns>
+        /// 
+        private string URL_NP21_FLOWLINES = webServiceURLs.watersGeo + "NHDPlus_NP21/NHDSnapshot_NP21/MapServer/0";
+
+        public async Task<string> ReadFlowlineGeoJSON2(string comid)
+        {
+            try
+            {
+                // Construct the query URL
+                string queryUrl = $"{URL_NP21_FLOWLINES}/query" +
+                                  $"?where=COMID={comid}" +
+                                  $"&outFields=*&outSR=4326&f=geojson";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    // Send the GET request
+                    HttpResponseMessage response = await client.GetAsync(queryUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    // Read the response as a string
+                    string geoJsonResponse = await response.Content.ReadAsStringAsync();
+
+                    // Parse and validate the GeoJSON
+                    var parsedJson = JObject.Parse(geoJsonResponse);
+                    if (parsedJson["features"]?.HasValues == true)
+                    {
+                        return geoJsonResponse;
+                    }
+                    else
+                    {
+                        throw new Exception("No geometry found for the specified COMID.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+        
         /// <summary>
         /// Reads the GeoJSON for a comid from web services
         /// </summary>
         /// <param name="comid">comid</param>
         /// <returns>JSON or error message</returns>
         /// 
-        public async Task<string> ReadGeoJSON(string comid)
+        public async Task<string> ReadFlowlineGeoJSON(string comid)
         {
+
             string requestURL = webServiceURLs.hmsRest;
 
             string component = "info";
@@ -1146,6 +1193,7 @@ namespace AQUATOX.AQSim_2D
         public async Task<(string, string)> HAWQS_add_COMID_to_WB(Dictionary<string, Dictionary<DateTime, HAWQSRCHRow>> HRD, List<string> Boundaries, string SegID, int SegIndex, string WBJSON, bool link_boundary, bool link_overland)
         {
             string jsondata = "";
+            if (string.IsNullOrEmpty(WBJSON)) return ("","INPUT: Cannot create waterbody due to empty input");
 
             Dictionary<DateTime, HAWQSRCHRow> ThisSeg = HRD[SegID];
             List<Dictionary<DateTime, HAWQSRCHRow>> BoundSegs = new();
