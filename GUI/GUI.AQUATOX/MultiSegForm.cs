@@ -940,7 +940,7 @@ namespace GUI.AQUATOX
                 }
                 else
                 {
-                    await RunStreamNetworkModel();
+                    await RunNetworkModel();
                 }
             }
             //catch (Exception ex)
@@ -989,7 +989,7 @@ namespace GUI.AQUATOX
             reset_interface_after_run(success);
         }
 
-        private async Task RunStreamNetworkModel()
+        private async Task RunNetworkModel()
         {
             string[] outofnetwork = new string[0];
             if (AQT2D.SN.boundary != null)

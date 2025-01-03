@@ -1310,7 +1310,7 @@ namespace AQUATOX.AQSim_2D
                         if (link_overland && overlandrelevant)
                         {
                             double comp_IN = ThisSeg[pair.Key].vals[col_IN];      // kg/d
-                            double overland_flow = Math.Max(0, (comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no zeros due to rounding error
+                            double overland_flow = Math.Max(0, (comp_IN - boundInput) * 1000);   // g/d = kg/d * 1000 g/kg -- Math.Max ensures no negative #s due to rounding error
                             if (!NPSLoad.list.ContainsKey(pair.Key)) NPSLoad.list.Add(pair.Key, overland_flow);
                             else NPSLoad.list[pair.Key] = NPSLoad.list[pair.Key] + overland_flow;  //sum all overland inputs
                         }
@@ -1636,13 +1636,23 @@ namespace AQUATOX.AQSim_2D
             TVolume TVol = Sim.AQTSeg.GetStatePointer(AllVariables.Volume, T_SVType.StV, T_SVLayer.WaterCol) as TVolume;
             DateTime FirstDay = Sim.AQTSeg.PSetup.FirstDay.Val;
 
-            double avgRet = VolFlowFromHAWQS(TVol, ThisSeg[0], FirstDay, SegID, HRD);  // read data for volume/flow model from HAWQS Linkage and record 
-            if (is_COMID) avgRetention[int.Parse(SegID)]= avgRet;   // log avg. retention time if relevant
+            double avgRet = 0.0;
+            try
+            {
+                avgRet = VolFlowFromHAWQS(TVol, ThisSeg[0], FirstDay, SegID, HRD);  // read data for volume/flow model from HAWQS Linkage and record 
+            }
+            catch
+            {
+                return ("", "ERROR reading HAWQS data -- possible date mismatch between HAWQS run and master setup parameters.");
+            }
 
-            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };  
+            
+            if (is_COMID) avgRetention[int.Parse(SegID)] = avgRet;   // log avg. retention time if relevant
+
+            string[] components = { "SED", "NO3", "NH4", "MINP", "CHLA", "CBOD", "DISOX" };
             AllVariables[] SVs = { AllVariables.TSS, AllVariables.Nitrate, AllVariables.Ammonia, AllVariables.Phosphate, AllVariables.NullStateVar, AllVariables.DissRefrDetr, AllVariables.Oxygen, AllVariables.Temperature };
 
-            TPlant PPhyto = null; 
+            TPlant PPhyto = null;
             for (AllVariables AlgLoop = Consts.FirstAlgae; AlgLoop <= Consts.LastAlgae; AlgLoop++)  //identify any phytoplankton in the simulation for CHLA linkage
             {
                 TPlant TP = Sim.AQTSeg.GetStatePointer(AlgLoop, T_SVType.StV, T_SVLayer.WaterCol) as TPlant;
@@ -1650,7 +1660,7 @@ namespace AQUATOX.AQSim_2D
                 {
                     if (TP.IsPhytoplankton())  //Chl-a is assigned to first phytoplankton in the simulation 
                     {
-                        PPhyto = TP;  
+                        PPhyto = TP;
                         SVs[4] = TP.NState;
                         break;
                     }
@@ -1673,11 +1683,11 @@ namespace AQUATOX.AQSim_2D
                 int col_OUT = col_IN + 1;
 
                 TStateVariable TSV = Sim.AQTSeg.GetStatePointer(SVs[i], T_SVType.StV, T_SVLayer.WaterCol);
-                if (TSV != null) 
+                if (TSV != null)
                 {
                     TSV.InitialCond = (InitFlow <= 0) ? 0 : ThisSeg.Sum(seg => seg[FirstDay].vals[col_OUT]) / InitFlow * 0.0115740;  // (kg/d) / (m3/s) * (mg/kg * d/s * m3/L)
                     if (isSED) TSV.InitialCond *= 1000;  // sed is in units of tons
-                    if (isCHLA) TSV.InitialCond = TSV.InitialCond * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90 ;
+                    if (isCHLA) TSV.InitialCond = TSV.InitialCond * PPhyto.PAlgalRec.Plant_to_Chla.Val / 1.90;
                     //             mg/L OM      =   mg/L chl-a            C to chl-a                    g OM / g OC
 
                     TLoadings InflowLoad = TSV.LoadsRec.Loadings;     // inflow loadings for boundary condition segments
@@ -1688,7 +1698,7 @@ namespace AQUATOX.AQSim_2D
                         DetritalInputRecordType DIR = ((TDissRefrDetr)TSV).InputRecord;
                         DIR.InitCond = TSV.InitialCond;
                         DIR.DataType = DetrDataType.CBOD;
-                        InflowLoad = DIR.Load.Loadings; 
+                        InflowLoad = DIR.Load.Loadings;
                         NPSLoad = DIR.Load.Alt_Loadings[2];  //deal with different data structure for susp&dissolved detritus (CBOD)
                     }
 
@@ -1697,12 +1707,12 @@ namespace AQUATOX.AQSim_2D
                     TSV.LoadNotes1 = "";
                     TSV.LoadNotes2 = "";
                     setupLoad(InflowLoad, ThisSeg.Count);  //get inflow loads ready to receive inputs; zero out existing inflow loads 11/20/2024
-                    if (link_boundary || isSED) 
+                    if (link_boundary || isSED)
                     {
                         TSV.LoadNotes1 = "Inflow Loads from HAWQS Linkage (Daily RCH file)";
                         if (isSED) TSV.LoadNotes1 = "In-reach Sediment Values from HAWQS Linkage (Daily RCH file)";
                     }
-                    
+
 
                     if (link_overland && overlandrelevant)
                     {
@@ -1727,11 +1737,10 @@ namespace AQUATOX.AQSim_2D
                         {
                             BoundLoad.list.Add(pair.Key, boundflow * 86400);   // associated boundary condition loads in m3/d
                         }
-                        
 
                         double inflowConc = 0;
                         if (boundflow > Consts.Tiny)
-                             inflowConc = boundInput / boundflow * 0.0115740;  //  (kg/d) / (m3/s) * (mg/kg * d/s)
+                            inflowConc = boundInput / boundflow * 0.0115740;  //  (kg/d) / (m3/s) * (mg/kg * d/s)
                         if (components[i] == "SED") inflowConc *= 1000;        // in HAWQS sed is in units of tons, other components in kg
 
                         if (link_boundary || isSED)
@@ -1750,12 +1759,12 @@ namespace AQUATOX.AQSim_2D
                             NPSLoad.list.Add(pair.Key, overland_flow);   // add daily NPS load in grams/d 
                         }
                     }
-                    if (BoundLoad.list.Count > 0) savedboundary = true; 
+                    if (BoundLoad.list.Count > 0) savedboundary = true;
                 }
             }
 
             // Water Temperature Linkage Here
-            TStateVariable TTemp = Sim.AQTSeg.GetStatePointer( AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
+            TStateVariable TTemp = Sim.AQTSeg.GetStatePointer(AllVariables.Temperature, T_SVType.StV, T_SVLayer.WaterCol);
             int col_WTMP = Array.IndexOf(HUCInf.colnames, "WTMP");  //identify relevant columns in RCH_OUT file
             if ((TTemp != null) && (col_WTMP >= 0))
             {
@@ -1770,8 +1779,8 @@ namespace AQUATOX.AQSim_2D
             }
 
             string errmessage = Sim.SaveJSON(ref jsondata);
-            return (jsondata,errmessage);
-        }
+            return (jsondata, errmessage);
+            }
 
         /// <summary>
         /// Reads NWM Volumes and Flows and Saved JSON for WaterBody associated with WBCOMID

@@ -130,6 +130,7 @@ namespace GUI.AQUATOX
             else if (content.StartsWith("DoneDraw"))
             {
                 Application.DoEvents();
+                this.Cursor = Cursors.Default; // Reset cursor to default
             }
             else if (content.StartsWith("HUC"))
             {
@@ -668,8 +669,13 @@ namespace GUI.AQUATOX
         private void ShowH14Box_CheckedChanged(object sender, EventArgs e)
         {
             string showstr = "false";
-            if (ShowH14Box.Checked) showstr = "true";
+            if (ShowH14Box.Checked)
+            {
+                showstr = "true";
+                this.Cursor = Cursors.WaitCursor; // Set cursor to wait cursor
+            }
             webView.CoreWebView2.PostWebMessageAsString("SHOWH14|" + showstr);
+
         }
 
         private void ModelHUC8checkBox_CheckedChanged(object sender, EventArgs e)
