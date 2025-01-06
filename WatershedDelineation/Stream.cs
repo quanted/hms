@@ -1,4 +1,5 @@
 ﻿using Data;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Diagnostics.Tracing;
 
 namespace WatershedDelineation
 {
@@ -111,11 +113,21 @@ namespace WatershedDelineation
             this.StreamSegments = segs;
         }
 
-        public object GetNetwork(double maxDistance=50.0, string endComid=null, bool mainstem=false)
+        public object GetNetwork(out string errorMsg, double maxDistance=50.0, string endComid=null, bool mainstem=false)
         {
-            string errorMsg = "";
+            errorMsg = "";
             string data = GetStreamNetwork(out errorMsg, endComid, maxDistance, mainstem);
-            object networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
+            object networkObject;
+            try
+            {
+                networkObject = System.Text.Json.JsonSerializer.Deserialize<object>(data);
+            }
+            catch (Exception ex)
+            {
+                errorMsg = "ERROR: Unable to deserialize EPA WATERS data. " + ex.Message;
+                Log.Warning(errorMsg);
+                networkObject = null;
+            }
             return networkObject;
         }
 
@@ -220,7 +232,7 @@ namespace WatershedDelineation
             {
                 // TODO: Read in max retry attempt from config file.
                 int retries = 5;
-
+                Log.Information("Requesting EPA Waters data: " + requestURL);
                 // Response status message
                 string status = "";
                 while (retries > 0 && !status.Contains("OK"))
@@ -253,6 +265,17 @@ namespace WatershedDelineation
             string dbPath = Path.Combine(".", "App_Data", "catchments.sqlite");
             string requestURL = "https://api.epa.gov/waters/v2/navigation3?p_indexing_engine=DISTANCE&p_limit_innetwork=FALSE&p_limit_navigable=TRUE&p_fallback_limit_innetwork=FALSE&p_fallback_limit_navigable=TRUE&p_return_link_path=FALSE&p_use_simplified_catchments=TRUE&p_known_region=point";
             string apiKey = Environment.GetEnvironmentVariable("WATERS_APIKEY");
+            if (apiKey == null)
+            {
+                errorMsg = "ERROR: Missing EPA Waters API key.";
+                return "";
+            }
+            if (string.IsNullOrEmpty(this.startCOMID))
+            {
+                errorMsg = "ERROR: Missing start COMID.";
+                return "";
+            }
+           
             if (mainstem && !string.IsNullOrEmpty(endComid))
             {
                 // Downstream mainstem traversal, start and stop comids are switched. 
@@ -289,6 +312,7 @@ namespace WatershedDelineation
             {
                 // TODO: Read in max retry attempt from config file.
                 int retries = 5;
+                Log.Information("Requesting stream network data from EPA Waters API. URL: " + requestURL);
 
                 // Response status message
                 string status = "";

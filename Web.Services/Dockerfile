@@ -14,6 +14,7 @@ RUN dotnet publish --self-contained --runtime linux-musl-x64 -c Release -o /app
 FROM base AS final
 WORKDIR /app
 RUN apk update
+#RUN apk add --no-cache aws-cli
 RUN apk upgrade --available
 
 COPY --from=publish /app .
