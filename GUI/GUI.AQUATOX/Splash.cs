@@ -8,6 +8,10 @@ using System.Windows.Forms;
 using static AQUATOX.AQSim_2D.AQSim_2D;
 
 
+
+// Menu View/Terminal  "dotnet publish hms.sln -c Release -r win-x64 --self-contained true"
+
+
 namespace GUI.AQUATOX
 {
     public partial class Splash : Form

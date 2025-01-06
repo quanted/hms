@@ -386,9 +386,7 @@
             });
             rH14Layer.setStyle({ weight: 2 });
             rH14Layer.eachLayer(function (layer) {
-                if (layer.feature.geometry.type == 'Polygon') {
-                    layer.setStyle({ color: 'navy', weight: 1, fillOpacity: 0.0 })
-                }
+                    layer.setStyle({ color: 'gray', weight: 1, fillOpacity: 0.0 })
             });
             rH14Layer.addTo(MAP);
             if (geoLayer) geoLayer.bringToFront();

@@ -2495,23 +2495,22 @@ namespace GUI.AQUATOX
                     connection.Open();
                     using (SQLiteCommand command = new SQLiteCommand("SELECT HUC14 FROM COMID_to_HUC14 WHERE COMID = @Index", connection))
                     {
-                        for (int i = 0; i < AQT2D.SN.order.Length; i++)
-                            foreach (string COMID in AQT2D.SN.order[i])
-                            {
-                                command.Parameters.Clear();
-                                command.Parameters.AddWithValue("@Index", COMID);
+                        foreach (string COMID in AQT2D.SN.AllCOMIDs())
+                        {
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@Index", COMID);
 
-                                using (SQLiteDataReader reader = command.ExecuteReader())
+                            using (SQLiteDataReader reader = command.ExecuteReader())
+                            {
+                                if (reader.Read())
                                 {
-                                    if (reader.Read())
-                                    {
-                                        string HUC14 = reader["HUC14"].ToString();
-                                        if (!H14s.Contains(HUC14))
-                                            H14s.Add(HUC14);
-                                        if (i == AQT2D.SN.order.Length - 1) pourpoint = HUC14;  // last to run in the order is the pourpoint
-                                    }
+                                    string HUC14 = reader["HUC14"].ToString();
+                                    if (!H14s.Contains(HUC14))
+                                        H14s.Add(HUC14);
+                                    if (COMID == AQT2D.SN.order[AQT2D.SN.order.Length - 1][0]) pourpoint = HUC14;  // last to run in the order is the pourpoint
                                 }
                             }
+                        }
                     }
                 }
                 return H14s;

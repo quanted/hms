@@ -47,7 +47,26 @@ namespace AQUATOX.AQSim_2D
             public Dictionary<string, string[]> boundary;
             [JsonProperty("divergent-paths")] public Dictionary<string, string[]> divergentpaths;
             public cWaterbodies waterbodies;
-            public string[][] merged;  // tracks those segments that have been merged
+            public string[][] merged;  // tracks those segments that have been merged.
+                                       // Element [n,0] is the small merged stream; [n,1] is the remaining stream that has been merged into.
+
+            
+            public IEnumerable<string> AllCOMIDs()  // Retrieves all COMIDs in the system including those that are merged
+            {
+                var allCOMIDs = new List<string>();
+                foreach (var orderArray in order)
+                {
+                    if (orderArray != null)
+                        allCOMIDs.AddRange(orderArray);  //COMIDs to be run
+                }
+                foreach (var mergePair in merged)
+                {
+                    if (mergePair != null && mergePair.Length > 0)
+                        allCOMIDs.Add(mergePair[0]);  //COMIDs that were merged
+                }
+
+                return allCOMIDs;
+            }
         }
 
         public void AddNetworkBasedOnSources(HashSet<string> ids)  // adds the SN network and out-of-network data structures
