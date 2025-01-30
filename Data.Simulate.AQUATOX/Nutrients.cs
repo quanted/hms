@@ -1571,7 +1571,7 @@ namespace AQUATOX.Nutrients
         {
             if (!TN_IC && !TN_Inflow && !TN_PS && !TN_NPS) return 0;
             if (TN_IC && TN_Inflow && TN_PS && TN_NPS) return 1;
-            return -1;
+            return -1;   // leave button unchecked because Inflow, PS, and NBS are not aligned in their TN status
         }
 
         public override void SetVarFromRadioButton(int iButton)

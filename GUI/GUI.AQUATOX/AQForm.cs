@@ -987,11 +987,6 @@ private void PlantsDB_Click(object sender, EventArgs e)
 
 
 
-        private void SVListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void NetCDF_Click(object sender, EventArgs e)
         {
 

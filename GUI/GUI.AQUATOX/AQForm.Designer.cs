@@ -191,7 +191,6 @@ namespace GUI.AQUATOX
             SVListBox.Size = new System.Drawing.Size(356, 319);
             SVListBox.TabIndex = 9;
             SVListBox.Visible = false;
-            SVListBox.SelectedIndexChanged += SVListBox_SelectedIndexChanged;
             SVListBox.DoubleClick += SVListBox_DoubleClick;
             // 
             // StudyNameBox

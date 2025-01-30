@@ -1081,13 +1081,21 @@ namespace AQUATOX.AQTSegment
             PR.Rate[AQTSeg.DerivStep] = Rt;
         }
 
-        // return output header stint for graphing/export purposes
+        // return output header for graphing/export purposes
         public string OutputText(int col)
         {
-            if (SVoutput == null) return "";
-            return SVoutput.Metadata["State_Variable"] + " " +
-                   SVoutput.Metadata["Name_" + col.ToString()] +
-                   " (" + SVoutput.Metadata["Unit_" + col.ToString()] + ")";
+            if (SVoutput?.Metadata == null) return "";
+
+            string GetMetadataOrKey(string key)
+            {
+                return SVoutput.Metadata.TryGetValue(key, out var value) ? value : key;
+            }
+
+            string stateVariable = GetMetadataOrKey("State_Variable");
+            string nameValue = GetMetadataOrKey($"Name_{col}");
+            string unitValue = GetMetadataOrKey($"Unit_{col}");
+
+            return $"{stateVariable} {nameValue} ({unitValue})";
         }
 
     }  // end TStateVariable
