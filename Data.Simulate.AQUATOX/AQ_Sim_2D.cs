@@ -59,11 +59,12 @@ namespace AQUATOX.AQSim_2D
                     if (orderArray != null)
                         allCOMIDs.AddRange(orderArray);  //COMIDs to be run
                 }
-                foreach (var mergePair in merged)
-                {
-                    if (mergePair != null && mergePair.Length > 0)
-                        allCOMIDs.Add(mergePair[0]);  //COMIDs that were merged
-                }
+                if (merged != null)
+                    foreach (var mergePair in merged)
+                    {
+                        if (mergePair != null && mergePair.Length > 0)
+                            allCOMIDs.Add(mergePair[0]);  //COMIDs that were merged
+                    }
 
                 return allCOMIDs;
             }

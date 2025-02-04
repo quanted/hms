@@ -3533,32 +3533,60 @@ namespace GUI.AQUATOX
             string backupPath = Path.Combine(baseDir, $"{targetSegmentId}_pre_merge.GeoJSON");
             File.Copy(targetSegmentPath, backupPath, overwrite: true);
 
-            // Get the coordinates of both segments
-            JArray smallSegmentCoordinates = (JArray)smallSegmentGeoJson["stream_geometry"]["features"][0]["geometry"]["coordinates"];
+            // Extract geometry objects
+            JObject smallGeometry = (JObject)smallSegmentGeoJson["stream_geometry"]["features"][0]["geometry"];
             JObject targetGeometry = (JObject)targetSegmentGeoJson["stream_geometry"]["features"][0]["geometry"];
 
-            // Check if the target geometry is already a MultiLineString
-            if (targetGeometry["type"].ToString() == "MultiLineString")
+            // Extract geometry types
+            string smallType = (string)smallGeometry["type"];
+            string targetType = (string)targetGeometry["type"];
+
+            // Extract coordinates
+            JArray smallCoordinates = (JArray)smallGeometry["coordinates"];
+            JArray targetCoordinates = (JArray)targetGeometry["coordinates"];
+
+            // Convert target geometry to MultiLineString if not already
+            if (targetType == "LineString")
             {
-                JArray targetCoordinates = (JArray)targetGeometry["coordinates"];
-                targetCoordinates.Insert(0, smallSegmentCoordinates);
-            }
-            else if (targetGeometry["type"].ToString() == "LineString")
-            {
-                // Convert to MultiLineString and insert small segment coordinates first
-                JArray targetCoordinates = new JArray { smallSegmentCoordinates, targetGeometry["coordinates"] };
-                targetGeometry["type"] = "MultiLineString";
-                targetGeometry["coordinates"] = targetCoordinates;
+                JArray newTargetCoords = new JArray();
+                targetGeometry["type"] = "MultiLineString"; // switch to MultiLineString
+                targetGeometry["coordinates"] = newTargetCoords;
+                targetCoordinates = newTargetCoords; // reassign so we can keep using it below
             }
 
-            // Update GNIS_NAME
+            // Append the small segment geometry lines to the target's MultiLineString
+            if (smallType == "LineString")
+            {
+                targetCoordinates.Add(smallCoordinates);
+            }
+            else if (smallType == "MultiLineString")
+            {
+                foreach (var line in smallCoordinates)
+                {
+                    targetCoordinates.Add(line);
+                }
+            }
+
+            // If the original target was "LineString", we still need to add the original line
+            if (targetType == "LineString")
+            {
+                JArray oldTargetLine = (JArray)JObject.Parse(File.ReadAllText(targetSegmentPath))
+                                                     ["stream_geometry"]["features"][0]["geometry"]["coordinates"];
+
+                ((JArray)targetGeometry["coordinates"]).Add(oldTargetLine);
+            }
+
+            // Update GNIS_NAME to reflect the merge
             string targetGnisName = (string)targetSegmentGeoJson["stream_geometry"]["features"][0]["properties"]["GNIS_NAME"];
             string newGnisName;
 
-            if (string.IsNullOrEmpty(targetGnisName)) newGnisName = $" (merged with) {smallSegmentId}";
-            else newGnisName = targetGnisName + $" (merged with) {smallSegmentId}";
+            if (string.IsNullOrEmpty(targetGnisName))
+                newGnisName = $" (merged with) {smallSegmentId}";
+            else
+                newGnisName = targetGnisName + $" (merged with) {smallSegmentId}";
 
-            int firstIndex = newGnisName.IndexOf(" (merged with) "); // handle potential for names with multiple "(merged with)" substrings
+            // Handle potential for multiple "(merged with)" substrings
+            int firstIndex = newGnisName.IndexOf(" (merged with) ");
             if (firstIndex != -1)
             {
                 int secondIndex = newGnisName.IndexOf(" (merged with) ", firstIndex + 1);
@@ -3569,17 +3597,13 @@ namespace GUI.AQUATOX
                 }
             }
 
-
+            // Assign back the updated name
             targetSegmentGeoJson["stream_geometry"]["features"][0]["properties"]["GNIS_NAME"] = newGnisName;
 
             // Save the updated target segment GeoJSON
             File.WriteAllText(targetSegmentPath, targetSegmentGeoJson.ToString());
         }
 
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
 

@@ -593,17 +593,18 @@ namespace GUI.AQUATOX
                 HAWQSHUCLabel.Visible = true;
                 HAWQSHUCHelp.Visible = true;
 
-                SegLoadLabel.Text = "HUC8s shown; zoom in to see HUC" + HUCStr + " segments.";
                 SegLoadLabel.Visible = !BHUC8.Checked;
 
                 if (HUCNetworkButton.Checked)
                 {
+                    SegLoadLabel.Text = "HUC8s shown; zoom in to see HUC" + HUCStr + " segments.";
                     webView.CoreWebView2.PostWebMessageAsString("HUCMAP2|" + HUCStr);
                     infolabel1.Text = "Click on a down-river HUC polygon then model an entire HUC8 or right-click on ";
                     infolabel2.Text = "an up-river HUC or input a number of HUCs to model up-river and click \"Read Network\"";
                 }
                 else
                 {
+                    SegLoadLabel.Text = "Zoom in to see HUC" + HUCStr + " segments.";
                     webView.CoreWebView2.PostWebMessageAsString("HUCMAP|" + HUCStr);
                     infolabel1.Text = "Click on one HUC to Select";
                     infolabel2.Text = "Drag to pan the map, mouse-wheel to zoom";

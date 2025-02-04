@@ -1157,8 +1157,11 @@ private void PlantsDB_Click(object sender, EventArgs e)
 
         static public void OpenUrl(string bookmark)
         {
-            string url = "file:" + Path.GetFullPath("../Docs/AQUATOX.NET_1.0_UMAN.htm");
-            url = Uri.UnescapeDataString(url + "#" + bookmark);
+            var exeDir = AppContext.BaseDirectory;  // or: Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var docPath = Path.Combine(exeDir, "..", "Docs", "AQUATOX.NET_1.0_UMAN.htm");
+            string url = "file:" + Path.GetFullPath(docPath);
+            url = url + "#" + bookmark; 
+            
             try
             {
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = false });  //true opens default browser, but not at context-sensitive bookmark

@@ -116,7 +116,7 @@
             SimBaseLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             SimBaseLabel.Location = new System.Drawing.Point(18, 28);
             SimBaseLabel.Name = "SimBaseLabel";
-            SimBaseLabel.Size = new System.Drawing.Size(175, 15);
+            SimBaseLabel.Size = new System.Drawing.Size(203, 15);
             SimBaseLabel.TabIndex = 17;
             SimBaseLabel.Text = "Simulation Base:  Nutrients and OM";
             // 
@@ -239,7 +239,7 @@
             infolabel1.AutoSize = true;
             infolabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             infolabel1.ForeColor = System.Drawing.Color.Maroon;
-            infolabel1.Location = new System.Drawing.Point(398, 529);
+            infolabel1.Location = new System.Drawing.Point(398, 524);
             infolabel1.Name = "infolabel1";
             infolabel1.Size = new System.Drawing.Size(392, 15);
             infolabel1.TabIndex = 39;
@@ -251,7 +251,7 @@
             infolabel2.AutoSize = true;
             infolabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             infolabel2.ForeColor = System.Drawing.Color.Maroon;
-            infolabel2.Location = new System.Drawing.Point(398, 548);
+            infolabel2.Location = new System.Drawing.Point(398, 543);
             infolabel2.Name = "infolabel2";
             infolabel2.Size = new System.Drawing.Size(377, 15);
             infolabel2.TabIndex = 40;
@@ -266,7 +266,7 @@
             webView.Location = new System.Drawing.Point(297, 71);
             webView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             webView.Name = "webView";
-            webView.Size = new System.Drawing.Size(914, 450);
+            webView.Size = new System.Drawing.Size(914, 445);
             webView.TabIndex = 43;
             webView.ZoomFactor = 1D;
             // 
@@ -307,7 +307,7 @@
             SimJSONLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
             SimJSONLabel.Location = new System.Drawing.Point(18, 48);
             SimJSONLabel.Name = "SimJSONLabel";
-            SimJSONLabel.Size = new System.Drawing.Size(113, 15);
+            SimJSONLabel.Size = new System.Drawing.Size(84, 15);
             SimJSONLabel.TabIndex = 50;
             SimJSONLabel.Text = "\"MS_OM.json\"";
             // 
@@ -744,7 +744,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(1224, 574);
+            ClientSize = new System.Drawing.Size(1224, 569);
             Controls.Add(HAWQSHUCHelp);
             Controls.Add(HAWQSHUCLabel);
             Controls.Add(NetworkLabel);

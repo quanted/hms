@@ -153,10 +153,10 @@
                 if (((!HUCData[HUCLevel].selected) && (!keep8mode)) ||
                     ((HUCData[HUCLevel].selected) && (!HZoom) && (HUCLevel != '8'))) {   //selected, but delete layer as too zoomed out
                     for (let i = 0; i < HUCData[HUCLevel].codes.length; ++i) {
-                        delete HUCData[HUCLevel].codes[i];
+                        HUCData[HUCLevel].codes = [];
                         if (HUCData[HUCLevel].maps[i] != null) MAP.removeLayer(HUCData[HUCLevel].maps[i]);
-                        delete HUCData[HUCLevel].maps[i];
-                        delete HUCData[HUCLevel].geoJson[i];
+                        HUCData[HUCLevel].maps = [];
+                        HUCData[HUCLevel].geoJson = [];
                     }
                 }
                 else {
@@ -183,15 +183,15 @@
 
                             for (let i = 0; i < HUCData[HUCLevel].codes.length; ++i) {
                                 if (!Codes.includes(HUCData[HUCLevel].codes[i])) {
-                                    delete HUCData[HUCLevel].codes[i];
+                                    HUCData[HUCLevel].codes = [];
                                     if (HUCData[HUCLevel].maps[i] != null) MAP.removeLayer(HUCData[HUCLevel].maps[i]);
-                                    delete HUCData[HUCLevel].maps[i];
-                                    delete HUCData[HUCLevel].geoJson[i];
+                                    HUCData[HUCLevel].maps = [];
+                                    HUCData[HUCLevel].geoJson = [];
                                 }
                             }
-
                         }
-                        else {   // HUCLevel = "8"
+                        else
+                        {   // HUCLevel = "8"
                             if (HUCData[HUCLevel].codes.length == 0) {
                                 HUCData[HUCLevel].codes.push("0");
                                 sendMessageToDotnet('H8');
@@ -688,6 +688,7 @@
         }
 
         function ShowStreamDefaults() {
+            hucnetmode = false;
             newzoom = MAP.getZoom();
             if (newzoom > ZoomThresh) MAP.addLayer(FLOWLINES_LAYER);
             if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
@@ -697,6 +698,7 @@
         }
 
         function ShowLakeDefaults() {
+            hucnetmode = false;
             newzoom = MAP.getZoom();
             if (newzoom > LakeZoomThresh) MAP.addLayer(WB_LAYER);
             MAP.removeLayer(FLOWLINES_LAYER);

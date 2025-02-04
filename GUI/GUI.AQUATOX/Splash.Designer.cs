@@ -94,9 +94,9 @@
             // 
             label5.BackColor = System.Drawing.Color.WhiteSmoke;
             label5.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
-            label5.Location = new System.Drawing.Point(180, 215);
+            label5.Location = new System.Drawing.Point(178, 215);
             label5.Name = "label5";
-            label5.Size = new System.Drawing.Size(165, 46);
+            label5.Size = new System.Drawing.Size(179, 46);
             label5.TabIndex = 26;
             label5.Text = "Create linked segments and/or link to data from NHDPlus, NWM, and HAWQS";
             label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -104,9 +104,9 @@
             // SingleSegmentLabel
             // 
             SingleSegmentLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, 0);
-            SingleSegmentLabel.Location = new System.Drawing.Point(23, 216);
+            SingleSegmentLabel.Location = new System.Drawing.Point(17, 216);
             SingleSegmentLabel.Name = "SingleSegmentLabel";
-            SingleSegmentLabel.Size = new System.Drawing.Size(146, 46);
+            SingleSegmentLabel.Size = new System.Drawing.Size(161, 46);
             SingleSegmentLabel.TabIndex = 25;
             SingleSegmentLabel.Text = "Run one 0-D model segment with nutrients, chemicals, and a food web";
             SingleSegmentLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
