@@ -1159,8 +1159,8 @@ private void PlantsDB_Click(object sender, EventArgs e)
         {
             var exeDir = AppContext.BaseDirectory;  // or: Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var docPath = Path.Combine(exeDir, "..", "Docs", "AQUATOX.NET_1.0_UMAN.htm");
-            string url = "file:" + Path.GetFullPath(docPath);
-            url = url + "#" + bookmark; 
+            Uri docUri = new Uri(Path.GetFullPath(docPath));
+            string url = docUri.AbsoluteUri + "#" + bookmark;
             
             try
             {
