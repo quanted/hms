@@ -21,6 +21,8 @@ namespace GUI.AQUATOX
                             $"The 5th percentile retention time is {ttdata.fifthPctileTravelTime:F3} days.";
             TravelTimes = ttdata.TTimes;
             Travel_Time_Edit_TextChanged(null, null);
+            Splash.ScaleFonts(this, this);
+
         }
 
         private void Travel_Time_Edit_TextChanged(object sender, EventArgs e)

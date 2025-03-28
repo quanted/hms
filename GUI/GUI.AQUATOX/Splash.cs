@@ -18,8 +18,45 @@ namespace GUI.AQUATOX
     {
         private Point mouseOffset;
 
+        public static void ScaleFonts(Form frm, Control parent)
+            // This procedure is necessary if non-default fonts are used on a form and "make text bigger" is selected within Windows Setup options 
+            // non-default fonts will not scale by default thus causing form rendering problems.
+        {
+            float systemDefaultSize = SystemFonts.DefaultFont.Size;  
+            float currentFormSize = frm.Font.Size;
+
+            // If scaling is ~100%, skip font adjustment entirely
+            if ((currentFormSize<10) || (Math.Abs(currentFormSize - systemDefaultSize) < 0.1f))
+                return;
+
+            float scaleFactor = (currentFormSize / systemDefaultSize) * 0.85f;
+
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl.Font == frm.Font)
+                {
+                    if (ctrl.HasChildren)
+                        ScaleFonts(frm, ctrl);
+                    continue;
+                }
+
+                Font oldFont = ctrl.Font;
+                float newSize = oldFont.Size * scaleFactor;
+
+                // Only update if size would actually change
+                if (Math.Abs(oldFont.Size - newSize) > 0.1f)
+                {
+                    ctrl.Font = new Font(oldFont.FontFamily, newSize, oldFont.Style);
+                }
+
+                if (ctrl.HasChildren)
+                    ScaleFonts(frm, ctrl);
+            }
+        }
+
         public Splash()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             InitializeComponent();
             this.ControlBox = true;
             this.MinimizeBox = false;
@@ -109,6 +146,11 @@ namespace GUI.AQUATOX
         {
             string target = "splash";
             AQTMainForm.OpenUrl(target);
+        }
+
+        private void Splash_Load(object sender, EventArgs e)
+        {
+            ScaleFonts(this,this);
         }
     }
 }

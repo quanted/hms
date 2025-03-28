@@ -195,18 +195,20 @@ namespace GUI.AQUATOX
                 booledits[index].Text = Param.Name;
                 new ToolTip().SetToolTip(booledits[index], Param.Name);
                 booledits[index].Checked = ((TBoolParam)Param).Val;
+                booledits[index].Font = new Font(booledits[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
                 booledits[index].Visible = !suppressing;
                 Controls.Add(booledits[index]);
                 return;
             }
 
             labels[index] = new Label();
+            labels[index].Font = new Font(labels[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
             if (Param is TSubheading)
             {
                 labels[index].Text = ((TSubheading)Param).Val;
                 labels[index].Location = new Point(ScaleX(12),ScaleY( top - 2));
                 labels[index].Size = new Size(ScaleX(360),ScaleY( 39));
-                labels[index].Font = new Font(labels[index].Font.FontFamily, 12, FontStyle.Bold);
+                labels[index].Font = new Font(labels[index].Font.FontFamily, 16, FontStyle.Bold, GraphicsUnit.Pixel);
                 labels[index].TextAlign = ContentAlignment.MiddleLeft;
 
                 if (index > 0)
@@ -219,7 +221,7 @@ namespace GUI.AQUATOX
                     int left = 330;
                     if (Spacing == 28) left = 330;
                     buttons[index].Location = new Point(ScaleX(left),ScaleY( top + 8));
-                    buttons[index].Font = new Font(buttons[index].Font.FontFamily, 8);
+                    buttons[index].Font = new Font(buttons[index].Font.FontFamily, 12, GraphicsUnit.Pixel);
 
                     buttons[index].Size = new Size(ScaleX(60),ScaleY( 20));
                     buttons[index].Click += new EventHandler(NewButton_Click);
@@ -233,7 +235,7 @@ namespace GUI.AQUATOX
                         units[index].Location = new Point(ScaleX(395),ScaleY( top - 1));
                         units[index].Size = new Size(ScaleX(500),ScaleY( 39));
                         units[index].Text = Param.Comment;
-                        units[index].Font = new Font(labels[index].Font.FontFamily, 9, FontStyle.Italic);
+                        units[index].Font = new Font(units[index].Font.FontFamily, 12, FontStyle.Italic, GraphicsUnit.Pixel);
                         units[index].TextAlign = ContentAlignment.MiddleLeft;
                         Controls.Add(units[index]);
                     }
@@ -266,6 +268,7 @@ namespace GUI.AQUATOX
                 dropboxes[index].TabIndex = 0 + (2 * index);
                 dropboxes[index].Text = ((TDropDownParam)Param).Val;
                 dropboxes[index].Visible = !suppressing;
+                dropboxes[index].Font = new Font(dropboxes[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
                 Controls.Add(dropboxes[index]);
                 return;
             }
@@ -280,6 +283,7 @@ namespace GUI.AQUATOX
                 dateedits[index].Size = new Size(ScaleX(95),ScaleY( 23));
                 dateedits[index].TabIndex = 0 + (2 * index);
                 dateedits[index].Value = ((TDateParam)Param).Val;
+                dateedits[index].Font = new Font(dateedits[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
                 dateedits[index].Visible = !suppressing;
                 Controls.Add(dateedits[index]);
                 return;
@@ -299,6 +303,7 @@ namespace GUI.AQUATOX
                 edits[index].Size = new Size(ScaleX(90),ScaleY( 23));
                 edits[index].Text = Param.Val.ToString();
             }
+            edits[index].Font = new Font(edits[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel); 
             edits[index].Visible = !suppressing;
             Controls.Add(edits[index]);
 
@@ -306,6 +311,7 @@ namespace GUI.AQUATOX
             units[index].Location = new Point(ScaleX(labelwidth + 115),ScaleY( top));
             units[index].Size = new Size(ScaleX(68),ScaleY( 39));
             units[index].Text = Param.Units;
+            units[index].Font = new Font(units[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
             units[index].TextAlign = ContentAlignment.MiddleLeft;
             units[index].Visible = !suppressing;
             Controls.Add(units[index]);
@@ -319,6 +325,7 @@ namespace GUI.AQUATOX
                 references[index].Size = new Size(ScaleX(720 - labelwidth),ScaleY( 23));
                 references[index].Text = Param.Comment;
                 references[index].Visible = !suppressing;
+                references[index].Font = new Font(references[index].Font.FontFamily, 12, FontStyle.Regular, GraphicsUnit.Pixel);
                 Controls.Add(references[index]);
             }
         }
@@ -638,6 +645,18 @@ namespace GUI.AQUATOX
 
         }
 
+        //private double ScaleFactor()
+        //{
+        //    float systemDefaultSize = SystemFonts.DefaultFont.Size;
+        //    float currentFormSize = this.Font.Size;
+
+        //    // If scaling is ~100%, skip font adjustment entirely
+        //    if ((currentFormSize < 10) || (Math.Abs(currentFormSize - systemDefaultSize) < 0.1f))
+        //        return 1.0;
+
+        //    return (currentFormSize / systemDefaultSize) * 0.85f;
+        //}
+
         public bool EditParams(ref TParameter[] parmlist, string Title, bool Dense, string DefaultDB, string HelpContext)
         {
             DB_Button.Visible = (DefaultDB != "");
@@ -645,6 +664,7 @@ namespace GUI.AQUATOX
             HelpTopic = HelpContext;
             
             if (Dense) Spacing = 28; else Spacing = 36;
+            // Spacing = (int)(Spacing * ScaleFactor());
             this.CancelButton = CancelButt;
             plist = parmlist;
             this.Text = Title;

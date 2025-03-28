@@ -35,6 +35,7 @@ namespace GUI.AQUATOX
 
         public AQTMainForm()
         {
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             InitializeComponent();
             Worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
             Worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
@@ -81,15 +82,33 @@ namespace GUI.AQUATOX
             return true;
         }
 
+        private string lastSimulationPath = null;
         private void loadJSON_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Text File|*.txt;*.json";
             openFileDialog1.Title = "Open a JSON File";
+            if (!string.IsNullOrEmpty(lastSimulationPath) && Directory.Exists(lastSimulationPath))
+            {
+                openFileDialog1.InitialDirectory = lastSimulationPath;
+            }
+            else
+            {
+                string studiesPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\Studies\\"));
+                if (Directory.Exists(studiesPath))
+                {
+                    openFileDialog1.InitialDirectory = studiesPath;
+                }
+            }
+
             openFileDialog1.ShowDialog(this);
+
 
             if (openFileDialog1.FileName != "")
             {
+                string selectedFile = openFileDialog1.FileName;
+                lastSimulationPath = Path.GetDirectoryName(selectedFile);
+
                 string AQTJSON = File.ReadAllText(openFileDialog1.FileName);
 
                 if (!LoadJSON(AQTJSON)) return;
@@ -853,6 +872,7 @@ namespace GUI.AQUATOX
                 MessageBox.Show("Database Error: " + ex.Message);
             }
         }
+
 
         private string ReadDBPath(string deflt)
         {

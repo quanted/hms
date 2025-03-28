@@ -75,12 +75,9 @@ namespace GUI.AQUATOX
         {
             InitializeComponent();
             graphics = this.CreateGraphics();
+            Splash.ScaleFonts(this, this);
         }
 
-        private void GridForm_Load(object sender, EventArgs e)
-        {
-
-        }
 
         public bool EditSV(ref TStateVariable IncomingS, AQTSim AQS, bool isBoundary)
         {

@@ -210,6 +210,7 @@
             Name = "Splash";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Splash";
+            Load += Splash_Load;
             Shown += Splash_Shown;
             panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();

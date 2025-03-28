@@ -536,7 +536,6 @@ namespace GUI.AQUATOX
             MinimumSize = new System.Drawing.Size(692, 410);
             Name = "LoadingsForm";
             Text = "State Variable Initial Condition and Loadings";
-            Load += GridForm_Load;
             LoadingsPanel.ResumeLayout(false);
             LoadingsPanel.PerformLayout();
             RBPanel.ResumeLayout(false);

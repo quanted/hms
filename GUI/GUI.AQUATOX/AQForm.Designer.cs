@@ -188,7 +188,7 @@ namespace GUI.AQUATOX
             SVListBox.ItemHeight = 15;
             SVListBox.Location = new System.Drawing.Point(440, 126);
             SVListBox.Name = "SVListBox";
-            SVListBox.Size = new System.Drawing.Size(356, 319);
+            SVListBox.Size = new System.Drawing.Size(356, 304);
             SVListBox.TabIndex = 9;
             SVListBox.Visible = false;
             SVListBox.DoubleClick += SVListBox_DoubleClick;
@@ -331,7 +331,7 @@ namespace GUI.AQUATOX
             // AddButton
             // 
             AddButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            AddButton.Location = new System.Drawing.Point(444, 450);
+            AddButton.Location = new System.Drawing.Point(444, 438);
             AddButton.Name = "AddButton";
             AddButton.Size = new System.Drawing.Size(60, 25);
             AddButton.TabIndex = 21;
@@ -343,7 +343,7 @@ namespace GUI.AQUATOX
             // EditButton
             // 
             EditButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            EditButton.Location = new System.Drawing.Point(584, 450);
+            EditButton.Location = new System.Drawing.Point(584, 438);
             EditButton.Name = "EditButton";
             EditButton.Size = new System.Drawing.Size(60, 25);
             EditButton.TabIndex = 20;
@@ -355,7 +355,7 @@ namespace GUI.AQUATOX
             // DeleteButton
             // 
             DeleteButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            DeleteButton.Location = new System.Drawing.Point(514, 450);
+            DeleteButton.Location = new System.Drawing.Point(514, 438);
             DeleteButton.Name = "DeleteButton";
             DeleteButton.Size = new System.Drawing.Size(60, 25);
             DeleteButton.TabIndex = 19;
@@ -364,12 +364,12 @@ namespace GUI.AQUATOX
             DeleteButton.Visible = false;
             DeleteButton.Click += DeleteButton_Click;
             // 
-            // HelpButton
+            // Help_Button
             // 
             Help_Button.Image = Properties.Resources.help_icon;
             Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             Help_Button.Location = new System.Drawing.Point(26, 240);
-            Help_Button.Name = "HelpButton";
+            Help_Button.Name = "Help_Button";
             Help_Button.Size = new System.Drawing.Size(87, 28);
             Help_Button.TabIndex = 23;
             Help_Button.Text = "  Help";
@@ -419,14 +419,14 @@ namespace GUI.AQUATOX
             StateVarLabel.Text = "Model State Variables and Loadings";
             StateVarLabel.Visible = false;
             // 
-            // CancelButton
+            // Cancel_Button
             // 
             Cancel_Button.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             Cancel_Button.Font = new System.Drawing.Font("Arial Narrow", 9.75F);
             Cancel_Button.ForeColor = System.Drawing.Color.Black;
             Cancel_Button.Location = new System.Drawing.Point(727, 75);
             Cancel_Button.Margin = new Padding(0);
-            Cancel_Button.Name = "CancelButton";
+            Cancel_Button.Name = "Cancel_Button";
             Cancel_Button.Size = new System.Drawing.Size(68, 25);
             Cancel_Button.TabIndex = 28;
             Cancel_Button.Text = "Cancel";
@@ -482,7 +482,7 @@ namespace GUI.AQUATOX
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(813, 490);
+            ClientSize = new System.Drawing.Size(813, 478);
             Controls.Add(OKButton);
             Controls.Add(CancelButt);
             Controls.Add(SetupButton);

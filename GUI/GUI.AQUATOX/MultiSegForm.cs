@@ -113,6 +113,7 @@ namespace GUI.AQUATOX
         {
             AutoScroll = true;
             InitializeComponent();
+            Splash.ScaleFonts(this, this);
 
             mapReadyForRender = tcs.Task;
             webviewready = InitializeAsync();
@@ -432,7 +433,7 @@ namespace GUI.AQUATOX
 
             BaseJSONBox.Text = ScrSettings.BaseJSONstr;
 
-            if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToLocalTime();
+            if (modelrun != DateTime.MinValue) StatusLabel.Text = "Run on " + modelrun.ToString("f");
             else if (inputsegs) StatusLabel.Text = "Model Ready to Run: Input Segment(s) Created";
             else if (validJSON)
             {

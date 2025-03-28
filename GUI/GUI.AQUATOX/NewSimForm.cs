@@ -60,6 +60,8 @@ namespace GUI.AQUATOX
             AutoScroll = true;
             InitializeComponent();
 
+            Splash.ScaleFonts(this, this);
+
             mapReadyForRender = tcs.Task;
             webviewready = InitializeAsync();
 

@@ -28,75 +28,77 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.CancelButt = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.DB_Button = new System.Windows.Forms.Button();
-            this.Help_Button = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            CancelButt = new System.Windows.Forms.Button();
+            button1 = new System.Windows.Forms.Button();
+            DB_Button = new System.Windows.Forms.Button();
+            Help_Button = new System.Windows.Forms.Button();
+            SuspendLayout();
             // 
             // CancelButt
             // 
-            this.CancelButt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButt.Location = new System.Drawing.Point(883, 10);
-            this.CancelButt.Name = "CancelButt";
-            this.CancelButt.Size = new System.Drawing.Size(61, 23);
-            this.CancelButt.TabIndex = 0;
-            this.CancelButt.Text = "Cancel";
-            this.CancelButt.UseVisualStyleBackColor = true;
-            this.CancelButt.Click += new System.EventHandler(this.cancel_click);
+            CancelButt.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            CancelButt.Font = new System.Drawing.Font("Segoe UI", 9F);
+            CancelButt.Location = new System.Drawing.Point(883, 10);
+            CancelButt.Name = "CancelButt";
+            CancelButt.Size = new System.Drawing.Size(61, 23);
+            CancelButt.TabIndex = 0;
+            CancelButt.Text = "Cancel";
+            CancelButt.UseVisualStyleBackColor = true;
+            CancelButt.Click += cancel_click;
             // 
             // button1
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(816, 10);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(61, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.OK_click);
+            button1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            button1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            button1.Location = new System.Drawing.Point(816, 10);
+            button1.Name = "button1";
+            button1.Size = new System.Drawing.Size(61, 23);
+            button1.TabIndex = 0;
+            button1.Text = "OK";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += OK_click;
             // 
             // DB_Button
             // 
-            this.DB_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.DB_Button.Location = new System.Drawing.Point(574, 10);
-            this.DB_Button.Name = "DB_Button";
-            this.DB_Button.Size = new System.Drawing.Size(105, 23);
-            this.DB_Button.TabIndex = 1;
-            this.DB_Button.Text = "Read from DB";
-            this.DB_Button.UseVisualStyleBackColor = true;
-            this.DB_Button.Click += new System.EventHandler(this.DB_Button_Click);
+            DB_Button.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            DB_Button.Font = new System.Drawing.Font("Segoe UI", 9F);
+            DB_Button.Location = new System.Drawing.Point(574, 10);
+            DB_Button.Name = "DB_Button";
+            DB_Button.Size = new System.Drawing.Size(105, 23);
+            DB_Button.TabIndex = 1;
+            DB_Button.Text = "Read from DB";
+            DB_Button.UseVisualStyleBackColor = true;
+            DB_Button.Click += DB_Button_Click;
             // 
-            // HelpButton
+            // Help_Button
             // 
-            this.Help_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.Help_Button.Image = global::GUI.AQUATOX.Properties.Resources.help_icon;
-            this.Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.Help_Button.Location = new System.Drawing.Point(703, 8);
-            this.Help_Button.Name = "HelpButton";
-            this.Help_Button.Size = new System.Drawing.Size(87, 27);
-            this.Help_Button.TabIndex = 24;
-            this.Help_Button.Text = "  Help";
-            this.Help_Button.UseVisualStyleBackColor = true;
-            this.Help_Button.Click += new System.EventHandler(this.HelpButton_Click);
+            Help_Button.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            Help_Button.Font = new System.Drawing.Font("Segoe UI", 9F);
+            Help_Button.Image = Properties.Resources.help_icon;
+            Help_Button.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            Help_Button.Location = new System.Drawing.Point(703, 8);
+            Help_Button.Name = "Help_Button";
+            Help_Button.Size = new System.Drawing.Size(87, 27);
+            Help_Button.TabIndex = 24;
+            Help_Button.Text = "  Help";
+            Help_Button.UseVisualStyleBackColor = true;
+            Help_Button.Click += HelpButton_Click;
             // 
             // Param_Form
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(962, 497);
-            this.Controls.Add(this.Help_Button);
-            this.Controls.Add(this.DB_Button);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.CancelButt);
-            this.MinimumSize = new System.Drawing.Size(978, 385);
-            this.Name = "Param_Form";
-            this.Text = "Edit Simulation Parameters";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Param_Form_FormClosing);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Param_Form_FormClosed);
-            this.Load += new System.EventHandler(this.Param_Form_Load);
-            this.ResumeLayout(false);
-
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            ClientSize = new System.Drawing.Size(962, 497);
+            Controls.Add(Help_Button);
+            Controls.Add(DB_Button);
+            Controls.Add(button1);
+            Controls.Add(CancelButt);
+            MinimumSize = new System.Drawing.Size(978, 385);
+            Name = "Param_Form";
+            Text = "Edit Simulation Parameters";
+            FormClosing += Param_Form_FormClosing;
+            FormClosed += Param_Form_FormClosed;
+            Load += Param_Form_Load;
+            ResumeLayout(false);
         }
 
         #endregion

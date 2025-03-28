@@ -24,6 +24,7 @@ namespace GUI.AQUATOX
         public SiteForm()
         {
             InitializeComponent();
+            Splash.ScaleFonts(this, this);
         }
 
         public bool EditSiteInfo(AQTSim AQS)

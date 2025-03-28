@@ -15,7 +15,19 @@ namespace GUI.AQUATOX
 
         public TrophMatrix()
         {
+            this.Load += TrophMatrix_Load;
             InitializeComponent();
+        }
+
+        private void TrophMatrix_Load(object sender, EventArgs e)
+        {
+            // Automatically size column widths to fit content
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+            // Automatically adjust row heights to fit content (especially text)
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            Splash.ScaleFonts(this, this);
         }
 
         /// <summary>

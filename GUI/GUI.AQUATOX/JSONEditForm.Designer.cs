@@ -64,7 +64,7 @@
             textBox.Multiline = true;
             textBox.Name = "textBox";
             textBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            textBox.Size = new System.Drawing.Size(678, 406);
+            textBox.Size = new System.Drawing.Size(678, 395);
             textBox.TabIndex = 49;
             // 
             // label1
@@ -87,7 +87,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(729, 506);
+            ClientSize = new System.Drawing.Size(729, 495);
             Controls.Add(label1);
             Controls.Add(API_key_textbox);
             Controls.Add(textBox);

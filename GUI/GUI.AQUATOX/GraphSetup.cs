@@ -21,6 +21,7 @@ namespace GUI.AQUATOX
         {
             InitializeComponent();
             this.PerformLayout();
+            Splash.ScaleFonts(this, this);
         }
 
         public bool NameInList(string st)

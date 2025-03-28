@@ -15,10 +15,20 @@ namespace GUI.AQUATOX
 
         public ChemToxForm()
         {
+            this.Load += ChemToxForm_Load;
             InitializeComponent();
         }
 
 
+        private void ChemToxForm_Load(object sender, EventArgs e)
+        {
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView2.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+
+            Splash.ScaleFonts(this, this);
+        }
 
         public void SetupDataGridView(DataGridView dgv, DataTable dt)
         {

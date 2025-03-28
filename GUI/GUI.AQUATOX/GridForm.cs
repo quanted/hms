@@ -17,14 +17,20 @@ namespace GUI.AQUATOX
         public string chosenlake = "";
         public string chosenfileN = "";
 
+
         public GridForm()
         {
+            
             InitializeComponent();
         }
 
         private void GridForm_Load(object sender, EventArgs e)
         {
+            // Automatically size column widths to fit content
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
 
+            // Automatically adjust row heights to fit content (especially text)
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
