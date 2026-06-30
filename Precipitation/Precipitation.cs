@@ -51,8 +51,8 @@ namespace Precipitation
             // If the timezone information is not provided, the tz details are retrieved and set to the geometry.timezone varaible.
             if (this.Input.Geometry.Timezone.Offset == 0 && !this.Input.Source.Contains("ncei"))
             {
-                this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
-                if (errorMsg.Contains("ERROR")) { return null; }
+                //this.Input.Geometry.Timezone = Utilities.Time.GetTimezone(out errorMsg, this.Input.Geometry.Point) as Timezone;
+                //if (errorMsg.Contains("ERROR")) { return null; }
             }
 
             switch (this.Input.Source.ToLower()) {
