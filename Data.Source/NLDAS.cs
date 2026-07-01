@@ -1,11 +1,15 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
+using System.Linq;
 using System.Net;
-using System.Threading;
-using Serilog;
 using System.Net.Http;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Utilities;
+
 
 namespace Data.Source
 {
@@ -21,6 +25,8 @@ namespace Data.Source
         private double minLat = 25.0;                                       // NLDAS spatial coverage min latitude
         private double maxLng = -63.0;                                      // NLDAS spatial coverage max longitude
         private double minLng = -125.0;                                     // NLDAS spatial coverage min longitude
+        private static object uriBuilder;
+        private string data;
 
         /// <summary>
         /// Get data function for nldas.
@@ -29,7 +35,7 @@ namespace Data.Source
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
 
@@ -51,16 +57,47 @@ namespace Data.Source
 
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
-            
+
             // Constructs the url for the NLDAS data request and it's query string.
-            string url = ConstructURL(out errorMsg, dataset, componentInput);
+            string url = ConstructURL(out errorMsg, dataset, componentInput, null, null, accessToken);
             if (errorMsg.Contains("ERROR")) { return null; }
 
+            if (componentInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(accessToken))
+            {
+                errorMsg = "ERROR: NLDAS EarthData access token is required for Giovanni data retrieval.";
+                return null;
+            }
+
             // Uses the constructed url to download time series data.
-            string data = DownloadData(url, retries).Result;
+              string data = DownloadData(url, retries, accessToken).Result;
+            
+
             if (errorMsg.Contains("ERROR") || data == null) { return null; }
 
             return data;
+        }
+
+        private static string CallTimeSeries(string dataset, ITimeSeriesInput componentInput, string accessToken)
+        {
+            double[] coords = GetNldasGridCoordinate(componentInput.Geometry.Point);
+            string start = componentInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+            string end = componentInput.DateTimeSpan.EndDate.ToString("yyyy-MM-ddTHH:mm:ss");
+            string dataVariable = GetNldasDataVariable(dataset);
+
+            using var gesDisc = new clsNLDAS_GES_DISC();
+            return gesDisc.CallTimeSeries(coords[0], coords[1], start, end, dataVariable, accessToken);
+        }
+
+        private static string GetNldasDataVariable(string dataset)
+        {
+            return dataset.Equals("PRECIP", StringComparison.OrdinalIgnoreCase)
+                ? "NLDAS_FORA0125_H_2_0_Rainf"
+                : dataset;
+        }
+
+        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput componentInput)
+        {
+            return ConstructURL(out errorMsg, dataset, componentInput, null, null, null);
         }
 
         private bool ValidateInput(out string errorMsg, ITimeSeriesInput input)
@@ -171,25 +208,64 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
         /// <returns></returns>
-        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
+        private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput, string clsNldasGesDisc,string findOrCreateTokenUrl, string accessToken = null)
         {
             errorMsg = "";
+
+            if (cInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) &&
+                string.IsNullOrWhiteSpace(accessToken))
+            {
+                using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                accessToken = gesDisc.GetAccessToken();
+            }
+            {
+                double[] coords = GetNldasGridCoordinate(cInput.Geometry.Point);
+
+                string start = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                string end = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                string dataVariable = GetNldasDataVariable(dataset);
+
+                string baseUrl = cInput.BaseURL[0].Split('?')[0];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    baseUrl = "https://api.giovanni.earthdata.nasa.gov/proxy-timeseries";
+                }
+
+                StringBuilder giovanniSb = new StringBuilder();
+                giovanniSb.Append(clsNLDAS_GES_DISC.BuildTimeSeriesUrl(coords[0], coords[1], start, end, dataVariable, baseUrl));
+                return giovanniSb.ToString();
+            }
+
             StringBuilder sb = new StringBuilder();
             sb.Append(cInput.BaseURL[0]);
 
-            //Add X and Y coordinates
-            string[] xy = GetXYCoordinate(out errorMsg, cInput.Geometry.Point); // [0] = x, [1] = y
+            string[] xy = GetXYCoordinate(out errorMsg, cInput.Geometry.Point);
             if (errorMsg.Contains("ERROR")) { return null; }
+
             sb.Append("X" + xy[0] + "-" + "Y" + xy[1]);
 
-            //Add Start and End Date
             string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
             string[] endDT = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
-            sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2");
+
+            sb.Append(@"&startDate=" + startDT[0] + @"T" + startDT[1] +
+                      @"&endDate=" + endDT[0] + "T" + endDT[1] +
+                      @"&type=asc2");
 
             return sb.ToString();
-        }
+                }
+        private static double[] GetNldasGridCoordinate(IPointCoordinate point)
+        {
+            double step = 0.125;
 
+            double x = (point.Longitude + 124.9375) / step;
+            double longitude = (Math.Round(x, MidpointRounding.AwayFromZero) * step) - 124.9375;
+
+            double y = (point.Latitude - 25.0625) / step;
+            double latitude = (Math.Round(y, MidpointRounding.AwayFromZero) * step) + 25.0625;
+
+            return new[] { latitude, longitude };
+        }
         /// <summary>
         /// Downloads nldas data from nasa servers. If Http Request fails will retry up to 5 times.
         /// TODO: Add in start date and end date check prior to the download call (Probably add to Validators class)
@@ -197,20 +273,32 @@ namespace Data.Source
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        private async Task<string> DownloadData(string url, int retries)
+        private async Task<string> DownloadData(string url, int retries, string accessToken = null)
         {
             string data = "";
-            HttpClient hc = new HttpClient();
-            HttpResponseMessage wm = new HttpResponseMessage();
             int maxRetries = 10;
 
+            if (string.IsNullOrWhiteSpace(accessToken) &&
+                url.Contains("giovanni", StringComparison.OrdinalIgnoreCase))
+            {
+                using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                accessToken = gesDisc.GetAccessToken();
+            }
+
+            using HttpClient hc = new HttpClient();
+
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                hc.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            }
             try
             {
                 string status = "";
 
                 while (retries < maxRetries && !status.Contains("OK"))
                 {
-                    wm = await hc.GetAsync(url);
+                    using HttpResponseMessage wm = await hc.GetAsync(url);
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();
@@ -228,15 +316,11 @@ namespace Data.Source
                     Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
-                    return this.DownloadData(url, retries).Result;
+                    return this.DownloadData(url, retries, accessToken).Result;
                 }
-                wm.Dispose();
-                hc.Dispose();
                 Log.Warning(ex, "Error: Failed to download nldas data.");
                 return null;
             }
-            wm.Dispose();
-            hc.Dispose();
             return data;
         }
 
@@ -304,10 +388,52 @@ namespace Data.Source
             {
                 splitData = data.Split(new string[] { "Data\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             }
+
+            if (splitData.Length <= 1)
+            {
+                return SetCsvDataToOutput(out errorMsg, dataset, data, output, input);
+            }
+
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("MEAN")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("mean")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            return output;
+        }
+
+        private ITimeSeriesOutput SetCsvDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
+        {
+            errorMsg = "";
+            output.Dataset = dataset;
+            output.DataSource = input.Source;
+
+            try
+            {
+                using var gesDisc = new clsNLDAS_GES_DISC();
+                var parsedData = gesDisc.ParseCsv(data);
+
+                foreach (var header in parsedData.headers)
+                {
+                    output.Metadata[$"nldas_{header.Key}"] = header.Value;
+                }
+
+                output.Data = new Dictionary<string, List<string>>();
+                foreach (var point in parsedData.dataPoints)
+                {
+                    string date = SetDateToLocal(
+                        input.TimeLocalized ? input.Geometry.Timezone.Offset : 0.0,
+                        point.Timestamp.ToString("yyyy-MM-dd HH"),
+                        input.DateTimeSpan.DateTimeFormat);
+
+                    output.Data[date] = new List<string> { point.Value.ToString(input.DataValueFormat) };
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsg = $"ERROR: Failed to parse NLDAS Giovanni CSV response. {ex.Message}";
+                return null;
+            }
+
             return output;
         }
 
@@ -375,7 +501,7 @@ namespace Data.Source
         {
             try
             {
-                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput));
+                WebRequest wr = WebRequest.Create(ConstructURL(out string errorMsg, dataset, testInput, null, null, null));
                 HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
                 string status = response.StatusCode.ToString();
                 string description = response.StatusDescription;
