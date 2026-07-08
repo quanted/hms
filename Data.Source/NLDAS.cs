@@ -229,7 +229,7 @@ namespace Data.Source
                 string baseUrl = cInput.BaseURL[0].Split('?')[0];
                 if (string.IsNullOrWhiteSpace(baseUrl))
                 {
-                    baseUrl = "https://api.giovanni.earthdata.nasa.gov/proxy-timeseries";
+                    baseUrl = "https://api.giovanni.earthdata.nasa.gov/timeseries";
                 }
 
                 StringBuilder giovanniSb = new StringBuilder();

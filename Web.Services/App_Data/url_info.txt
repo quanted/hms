@@ -1,4 +1,4 @@
-nldas_precipitation_url https://api.giovanni.earthdata.nasa.gov/proxy-timeseries?data=NLDAS_FORA0125_H_2_0_Rainf
+nldas_precipitation_url https://api.giovanni.earthdata.nasa.gov/timeseries?data=NLDAS_FORA0125_H_2_0_Rainf
 gldas_precipitation_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Rainf_f_tavg&location=GEOM:POINT
 nldas_surfacerunoff_url http://hydro1.sci.gsfc.nasa.gov/daac-bin/access/timeseries.cgi?variable=NLDAS:NLDAS_NOAH0125_H.002:SSRUNsfc&location=NLDAS:
 gldas_surfacerunoff_url https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Qs_acc&location=GEOM:POINT
