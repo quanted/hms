@@ -47,18 +47,58 @@ namespace Web.Services.Models
                 precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
 
-            if (precip.Input.Source.Contains("nldas"))
+            if (precip.Input.Source.Contains("nldas") && string.IsNullOrWhiteSpace(input.PreFetchedNldasData))
             {
-                using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
-                nldasAccessToken = gesDisc.GetAccessToken(); 
+                try
+                {
+                    using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                    nldasAccessToken = gesDisc.GetAccessToken();
+                }
+                catch (Exception ex)
+                {
+                    return err.ReturnError("ERROR: Unable to get EarthData access token for NLDAS. Ensure .netrc credentials are configured. " + ex.Message);
+                }
             }
 
             // Gets the Precipitation data.
-            ITimeSeriesOutput result = precip.GetData(out errorMsg, accessToken: nldasAccessToken);
+            ITimeSeriesOutput result = precip.GetData(
+                out errorMsg,
+                accessToken: nldasAccessToken,
+                preFetchedData: input.PreFetchedNldasData);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (result == null)
+            {
+                return err.ReturnError("ERROR: No precipitation data was returned from the selected source.");
+            }
 
             // Get generic statistics
             result = Utilities.Statistics.GetStatistics(out errorMsg, precip.Input, result);
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+
+            bool isNldas = precip.Input.Source.Contains("nldas");
+
+            if (isNldas)
+            {
+                string baseUrl = !string.IsNullOrWhiteSpace(input.PriorNldasBaseUrl)
+                    ? input.PriorNldasBaseUrl
+                    : (precip.Input.BaseURL != null && precip.Input.BaseURL.Count > 0 ? precip.Input.BaseURL[0] : null);
+
+                if (!string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    result.Metadata = Utilities.Metadata.AddToMetadata("base_url", baseUrl, result.Metadata);
+                }
+
+                if (input.PriorNldasMetadata != null && input.PriorNldasMetadata.Count > 0)
+                {
+                    result.Metadata = Utilities.Metadata.MergeMetadata(result.Metadata, input.PriorNldasMetadata, "prior_nldas");
+                }
+
+                if (!string.IsNullOrWhiteSpace(input.PreFetchedNldasData))
+                {
+                    result.Metadata = Utilities.Metadata.AddToMetadata("nldas_prefetched", "true", result.Metadata);
+                }
+            }
+
             return result;
          }
     }

@@ -36,7 +36,7 @@ namespace Precipitation
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, int retries = 0, string accessToken = null)
+        public ITimeSeriesOutput GetData(out string errorMsg, int retries = 0, string accessToken = null, string preFetchedData = null)
         {
             errorMsg = "";
             ITimeSeriesOutputFactory iFactory = new TimeSeriesOutputFactory();
@@ -59,7 +59,7 @@ namespace Precipitation
                 case "nldas":
                     // NLDAS Precipitation Data call
                     NLDAS nldas = new NLDAS();
-                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input, retries, accessToken);
+                    this.Output = nldas.GetData(out errorMsg, this.Output, this.Input, retries, accessToken, preFetchedData);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "gldas":

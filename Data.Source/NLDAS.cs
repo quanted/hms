@@ -37,7 +37,13 @@ namespace Data.Source
         /// <returns></returns>
         public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0, string accessToken = null)
         {
+            return GetData(out errorMsg, dataset, componentInput, out _, retries, accessToken);
+        }
+
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, out string requestUrl, int retries = 0, string accessToken = null)
+        {
             errorMsg = "";
+            requestUrl = "";
 
             if(!this.ValidateInput(out errorMsg, componentInput))
             {
@@ -60,6 +66,7 @@ namespace Data.Source
 
             // Constructs the url for the NLDAS data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput, null, null, accessToken);
+            requestUrl = url;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             if (componentInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(accessToken))
@@ -68,13 +75,41 @@ namespace Data.Source
                 return null;
             }
 
-            // Uses the constructed url to download time series data.
-              string data = DownloadData(url, retries, accessToken).Result;
-            
+            // Uses the constructed url to download time series data. #TODO
+            string data = DownloadData(url, retries, accessToken).Result;
 
-            if (errorMsg.Contains("ERROR") || data == null) { return null; }
+            if (errorMsg.Contains("ERROR")) { return null; }
+
+            if (!ValidateNldasPayload(data, out errorMsg))
+            {
+                return null;
+            }
 
             return data;
+        }
+
+        private static bool ValidateNldasPayload(string data, out string errorMsg)
+        {
+            errorMsg = "";
+
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                errorMsg = "ERROR: NLDAS request returned an empty response.";
+                return false;
+            }
+
+            bool hasExpectedTimeseries =
+                data.Contains("Timestamp (UTC),Data", StringComparison.OrdinalIgnoreCase) ||
+                data.Contains("Data\n", StringComparison.OrdinalIgnoreCase) ||
+                data.Contains("Data\r\n", StringComparison.OrdinalIgnoreCase);
+
+            if (!hasExpectedTimeseries)
+            {
+                errorMsg = "ERROR: NLDAS response did not contain expected time series content.";
+                return false;
+            }
+
+            return true;
         }
 
         private static string CallTimeSeries(string dataset, ITimeSeriesInput componentInput, string accessToken)
@@ -160,7 +195,7 @@ namespace Data.Source
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 24 - Convert.ToInt16(cInput.Geometry.Timezone.Offset), 00, 00);
             }
             else
-            {
+              {
                 dateTime.StartDate = new DateTime(dateTime.StartDate.Year, dateTime.StartDate.Month, dateTime.StartDate.Day, 01, 00, 00);
             }
 
@@ -383,6 +418,12 @@ namespace Data.Source
         public ITimeSeriesOutput SetDataToOutput(out string errorMsg, string dataset, string data, ITimeSeriesOutput output, ITimeSeriesInput input)
         {
             errorMsg = "";
+
+            if (data.Contains("Timestamp (UTC),Data", StringComparison.OrdinalIgnoreCase))
+            {
+                return SetCsvDataToOutput(out errorMsg, dataset, data, output, input);
+            }
+
             string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (splitData.Length <= 1)
             {
@@ -394,10 +435,15 @@ namespace Data.Source
                 return SetCsvDataToOutput(out errorMsg, dataset, data, output, input);
             }
 
+            int meanIndex = splitData[1].IndexOf("mean", StringComparison.OrdinalIgnoreCase);
+            string seriesSection = meanIndex > -1
+                ? splitData[1].Substring(0, meanIndex).Trim()
+                : splitData[1].Trim();
+
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("mean")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            output.Data = SetData(out errorMsg, seriesSection, input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
             return output;
         }
 

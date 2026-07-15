@@ -19,7 +19,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null, string preFetchedData = null)
         {
             errorMsg = "";
 
@@ -27,19 +27,54 @@ namespace Precipitation
             //bool validInputs = ValidateInputs(input, out errorMsg);
             //if (errorMsg.Contains("ERROR")) { return null; }
             //int t0 = DateTime.Now.Second;
-            string data = nldas.GetData(out errorMsg, "PRECIP", input, retries, accessToken);
+            string requestUrl = "";
+            string data = preFetchedData;
+
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                data = nldas.GetData(out errorMsg, "PRECIP", input, out requestUrl, retries, accessToken);
+            }
+
+            if (errorMsg.Contains("ERROR"))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                errorMsg = "ERROR: NLDAS data is empty.";
+                return null;
+            }
             //int t2 = DateTime.Now.Second;
             //Console.WriteLine("Data Request took " + (t2 - t0) + " seconds");
 
-            ITimeSeriesOutput nldasOutput = output;
-            if (errorMsg.Contains("ERROR")) { return null; }
-            else
+            ITimeSeriesOutput nldasOutput = nldas.SetDataToOutput(
+                out errorMsg,
+                "Precipitation",
+                data,
+                output,
+                input);
+
+            if (errorMsg.Contains("ERROR") || nldasOutput == null || nldasOutput.Data == null || nldasOutput.Data.Count == 0)
             {
-                nldasOutput = nldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+                if (!errorMsg.Contains("ERROR"))
+                {
+                    errorMsg = "ERROR: Failed to parse NLDAS response into timeseries output.";
+                }
+                return null;
             }
-            nldasOutput = TemporalAggregation(out errorMsg, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
-            
+
+            if (!string.IsNullOrWhiteSpace(requestUrl))
+            {
+                nldasOutput.Metadata["nldas_request_url"] = requestUrl;
+            }
+
+            nldasOutput = TemporalAggregation(out errorMsg, nldasOutput, input);
+            if (errorMsg.Contains("ERROR"))
+            {
+                return null;
+            }
+
             return nldasOutput;
         }
 
