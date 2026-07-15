@@ -19,7 +19,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
 
@@ -27,7 +27,7 @@ namespace Precipitation
             //bool validInputs = ValidateInputs(input, out errorMsg);
             //if (errorMsg.Contains("ERROR")) { return null; }
             //int t0 = DateTime.Now.Second;
-            string data = nldas.GetData(out errorMsg, "PRECIP", input, retries);
+            string data = nldas.GetData(out errorMsg, "PRECIP", input, retries, accessToken);
             //int t2 = DateTime.Now.Second;
             //Console.WriteLine("Data Request took " + (t2 - t0) + " seconds");
 

@@ -30,6 +30,8 @@ namespace Web.Services.Models
             errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid.": "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
+            string nldasAccessToken = null;
+
             // Precipitation object
             Precipitation.Precipitation precip = new Precipitation.Precipitation();
             
@@ -45,13 +47,19 @@ namespace Web.Services.Models
                 precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
 
+            if (precip.Input.Source.Contains("nldas"))
+            {
+                using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                nldasAccessToken = gesDisc.GetAccessToken(); 
+            }
+
             // Gets the Precipitation data.
-            ITimeSeriesOutput result = precip.GetData(out errorMsg);
+            ITimeSeriesOutput result = precip.GetData(out errorMsg, accessToken: nldasAccessToken);
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
             // Get generic statistics
             result = Utilities.Statistics.GetStatistics(out errorMsg, precip.Input, result);
             return result;
-        }
+         }
     }
 }
