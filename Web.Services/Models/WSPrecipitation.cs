@@ -50,7 +50,7 @@ namespace Web.Services.Models
             if (precip.Input.Source.Contains("nldas"))
             {
                 // using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
-                using var gesDisc = new Utilities.EarthDataClient(AppContext.BaseDirectory);
+                using var gesDisc = new Utilities.EarthDataClient();
                 nldasAccessToken = gesDisc.GetAccessToken(); 
             }
 
