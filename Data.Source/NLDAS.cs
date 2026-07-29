@@ -84,7 +84,8 @@ namespace Data.Source
             string end = componentInput.DateTimeSpan.EndDate.ToString("yyyy-MM-ddTHH:mm:ss");
             string dataVariable = GetNldasDataVariable(dataset);
 
-            using var gesDisc = new clsNLDAS_GES_DISC();
+            // using var gesDisc = new clsNLDAS_GES_DISC();
+            using var gesDisc = new EarthDataClient();
             return gesDisc.CallTimeSeries(coords[0], coords[1], start, end, dataVariable, accessToken);
         }
 
@@ -215,7 +216,8 @@ namespace Data.Source
             if (cInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) &&
                 string.IsNullOrWhiteSpace(accessToken))
             {
-                using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                // using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                using var gesDisc = new EarthDataClient();
                 accessToken = gesDisc.GetAccessToken();
             }
             {
@@ -233,7 +235,8 @@ namespace Data.Source
                 }
 
                 StringBuilder giovanniSb = new StringBuilder();
-                giovanniSb.Append(clsNLDAS_GES_DISC.BuildTimeSeriesUrl(coords[0], coords[1], start, end, dataVariable, baseUrl));
+                // giovanniSb.Append(clsNLDAS_GES_DISC.BuildTimeSeriesUrl(coords[0], coords[1], start, end, dataVariable, baseUrl));
+                giovanniSb.Append(EarthDataClient.BuildTimeSeriesUrl(coords[0], coords[1], start, end, dataVariable, baseUrl));
                 return giovanniSb.ToString();
             }
 
@@ -281,7 +284,8 @@ namespace Data.Source
             if (string.IsNullOrWhiteSpace(accessToken) &&
                 url.Contains("giovanni", StringComparison.OrdinalIgnoreCase))
             {
-                using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                // using var gesDisc = new clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                using var gesDisc = new EarthDataClient();
                 accessToken = gesDisc.GetAccessToken();
             }
 
@@ -409,7 +413,8 @@ namespace Data.Source
 
             try
             {
-                using var gesDisc = new clsNLDAS_GES_DISC();
+                // using var gesDisc = new clsNLDAS_GES_DISC();
+                using var gesDisc = new EarthDataClient();
                 var parsedData = gesDisc.ParseCsv(data);
 
                 foreach (var header in parsedData.headers)
