@@ -14,7 +14,6 @@ namespace Utilities
         private static IConfiguration BuildConfiguration()
         {
             var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-                      ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                       ?? "Production";
 
             var builder = new ConfigurationBuilder()
