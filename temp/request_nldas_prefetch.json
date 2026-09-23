@@ -1,0 +1,31 @@
+{
+  "Source": "nldas",
+  "DateTimeSpan": {
+    "StartDate": "2015-01-01T00:00:00",
+    "EndDate": "2015-01-03T00:00:00",
+    "DateTimeFormat": "yyyy-MM-dd HH"
+  },
+  "Geometry": {
+    "Point": {
+      "Latitude": 33.925673,
+      "Longitude": -83.355723
+    },
+    "Timezone": {
+      "Name": "",
+      "Offset": 0,
+      "DLS": false
+    },
+    "GeometryMetadata": {}
+  },
+  "DataValueFormat": "E3",
+  "TemporalResolution": "default",
+  "TimeLocalized": false,
+  "Units": "metric",
+  "OutputFormat": "json",
+  "PreFetchedNldasData": "prod_name,NLDAS_FORA0125_H.2.0\ndoi,10.5067/THUF4J1RLSYG\nparam_short_name,Rainf\nparam_name,Total precipitation\nunit,kg m-2\nundef,-9999\nbegin_time,2015-01-01 01:00:00\nend_time,2015-01-03 00:00:00\nlat,33.9375\nlon,-83.3125\nlat_resolution,0.125\nlon_resolution,0.125\nmean,2.2447e-01\nRequest_time,2026-07-31 13:59:23\n\nTimestamp (UTC),Data\n2015-01-01 01:00,0\n2015-01-01 02:00,0\n2015-01-01 03:00,0.1\n2015-01-01 04:00,0.2\n2015-01-01 05:00,0\n2015-01-01 06:00,0\n2015-01-01 07:00,0\n2015-01-01 08:00,0\n2015-01-01 09:00,0\n2015-01-01 10:00,0\n2015-01-01 11:00,0\n2015-01-01 12:00,0\n2015-01-01 13:00,0\n2015-01-01 14:00,0\n2015-01-01 15:00,0\n2015-01-01 16:00,0\n2015-01-01 17:00,0\n2015-01-01 18:00,0\n2015-01-01 19:00,0\n2015-01-01 20:00,0\n2015-01-01 21:00,0\n2015-01-01 22:00,0\n2015-01-01 23:00,0\n2015-01-02 00:00,0\n2015-01-02 01:00,0\n2015-01-02 02:00,0.0022\n2015-01-02 03:00,0.2398\n2015-01-02 04:00,0.3544\n2015-01-02 05:00,0.3524\n2015-01-02 06:00,0.0732\n2015-01-02 07:00,0.0034\n2015-01-02 08:00,0",
+  "PriorNldasBaseUrl": "https://api.giovanni.earthdata.nasa.gov/timeseries",
+  "PriorNldasMetadata": {
+    "request_id": "prev-123",
+    "note": "reused payload"
+  }
+}

@@ -7,6 +7,7 @@ using Serilog;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
+using System.Globalization;
 
 namespace Data.Source
 {
@@ -29,8 +30,10 @@ namespace Data.Source
         /// <param name="errorMsg"></param>s
         /// <param name="dataset">nldas dataset parameter</param>
         /// <param name="componentInput"></param>
+        /// <param name="retries">Number of retries</param>
+        /// <param name="accessToken">Optional EarthData access token for Giovanni API</param>
         /// <returns></returns>
-        public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
+        public List<string> GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
 
@@ -48,14 +51,29 @@ namespace Data.Source
                 TimeSpan ts = new TimeSpan(23, 00, 0);
                 componentInput.DateTimeSpan.EndDate = sfed.Date.AddDays(1.0) + ts;
             }
-            
+
+            if (componentInput.BaseURL == null || componentInput.BaseURL.Count == 0 || string.IsNullOrWhiteSpace(componentInput.BaseURL[0]))
+            {
+                errorMsg = "ERROR: GLDAS base URL is missing or invalid.";
+                return null;
+            }
+
+            if (componentInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(accessToken))
+            {
+                errorMsg = "ERROR: GLDAS EarthData access token is required for Giovanni data retrieval.";
+                return null;
+            }
+
             // Constructs the url for the NLDAS data request and it's query string.
             List<string> url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
-
-            List<string> data = DownloadData(url, retries).Result;
-            if (errorMsg.Contains("ERROR")) { return null; }
+            List<string> data = DownloadData(url, retries, accessToken).Result;
+            if (data == null || data.Count == 0)
+            {
+                errorMsg = "ERROR: GLDAS download failed or returned no data.";
+                return null;
+            }
 
             return data;
         }
@@ -96,7 +114,46 @@ namespace Data.Source
         }
 
         /// <summary>
-        /// Constructs the url for retrieving nldas data based on the given parameters.
+        /// Extracts the GLDAS data variable from the base URL or constructs it from the dataset name.
+        /// </summary>
+        /// <param name="dataset">Dataset name</param>
+        /// <param name="baseUrl">Base URL containing the data parameter</param>
+        /// <returns>Data variable string for Giovanni API</returns>
+        private static string GetGldasDataVariable(string dataset, string baseUrl)
+        {
+            // Try to extract from base URL first (for Giovanni API URLs)
+            if (!string.IsNullOrWhiteSpace(baseUrl) && baseUrl.Contains("data=", StringComparison.OrdinalIgnoreCase))
+            {
+                var dataParam = baseUrl.Split(new[] { "data=" }, StringSplitOptions.None);
+                if (dataParam.Length > 1)
+                {
+                    var variable = dataParam[1].Split('&')[0];
+                    return variable;
+                }
+            }
+
+            // Default fallback - construct from dataset name
+            return dataset;
+        }
+
+        private static string ExtractDataVariableFromBaseUrl(string baseUrl)
+        {
+            if (string.IsNullOrWhiteSpace(baseUrl) || !baseUrl.Contains("data=", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var dataParam = baseUrl.Split(new[] { "data=" }, StringSplitOptions.None);
+            if (dataParam.Length < 2)
+            {
+                return null;
+            }
+
+            return Uri.UnescapeDataString(dataParam[1].Split('&')[0]);
+        }
+
+        /// <summary>
+        /// Constructs the url for retrieving GLDAS data based on the given parameters.
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="componentInput"></param>
@@ -105,18 +162,103 @@ namespace Data.Source
         {
             errorMsg = "";
             List<string> urls = new List<string>();
+
+            // Check if using Giovanni API format
+            if (cInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase))
+            {
+                string baseUrl = cInput.BaseURL[0].Split('?')[0];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    baseUrl = "https://api.giovanni.earthdata.nasa.gov/timeseries";
+                }
+
+                string dataVariable = GetGldasDataVariable(dataset, cInput.BaseURL[0]);
+
+                // GLDAS version handling for Giovanni API
+                DateTime gldas21 = new DateTime(2010, 01, 01);
+                bool only21 = true;
+
+                if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0 || only21)
+                {
+                    // Case #3: both start and end are in GLDAS 2.1
+                    string start = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                    DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
+                    string end = tempDate.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                    string url = Utilities.clsNLDAS_GES_DISC.BuildTimeSeriesUrl(
+                        cInput.Geometry.Point.Latitude, 
+                        cInput.Geometry.Point.Longitude, 
+                        start, 
+                        end, 
+                        dataVariable, 
+                        baseUrl);
+                    urls.Add(url);
+                }
+                else if (DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)
+                {
+                    // Case #2: start is in GLDAS 2.0, end is in GLDAS 2.1
+                    string dataVariable20 = dataVariable.Replace("_v2_1_", "_v2_0_");
+
+                    // GLDAS 2.0 portion
+                    string start1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                    DateTime tempDate1 = gldas21.AddHours(3);
+                    string end1 = tempDate1.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                    string url1 = Utilities.clsNLDAS_GES_DISC.BuildTimeSeriesUrl(
+                        cInput.Geometry.Point.Latitude, 
+                        cInput.Geometry.Point.Longitude, 
+                        start1, 
+                        end1, 
+                        dataVariable20, 
+                        baseUrl);
+                    urls.Add(url1);
+
+                    // GLDAS 2.1 portion
+                    string start2 = gldas21.ToString("yyyy-MM-ddTHH:mm:ss");
+                    DateTime tempDate2 = cInput.DateTimeSpan.EndDate.AddHours(3);
+                    string end2 = tempDate2.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                    string url2 = Utilities.clsNLDAS_GES_DISC.BuildTimeSeriesUrl(
+                        cInput.Geometry.Point.Latitude, 
+                        cInput.Geometry.Point.Longitude, 
+                        start2, 
+                        end2, 
+                        dataVariable, 
+                        baseUrl);
+                    urls.Add(url2);
+                }
+                else
+                {
+                    // Case #1: both start and end are in GLDAS 2.0
+                    string dataVariable20 = dataVariable.Replace("_v2_1_", "_v2_0_");
+
+                    string start = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                    string end = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                    string url = Utilities.clsNLDAS_GES_DISC.BuildTimeSeriesUrl(
+                        cInput.Geometry.Point.Latitude, 
+                        cInput.Geometry.Point.Longitude, 
+                        start, 
+                        end, 
+                        dataVariable20, 
+                        baseUrl);
+                    urls.Add(url);
+                }
+
+                return urls;
+            }
+
+            // Legacy format support (old hydro1 URLs)
             // Example base url: https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=GLDAS2:GLDAS_NOAH025_3H_v2.1:Rainf_f_tavg&location=GEOM:POINT
             // Cases:
             // #1 both start and end are in GLDAS 2.0
             // #2 start is in GLDAS 2.0, end is in GLDAS 2.1
             // #3 both are in GLDAS 2.1
-            DateTime gldas21 = new DateTime(2010, 01, 01);
-            bool only21 = true;
-            var test = DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21);
-            if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) >= 0 || only21)            // #3
+            DateTime gldas21Legacy = new DateTime(2010, 01, 01);
+            bool only21Legacy = true;
+            var test = DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21Legacy);
+            if (DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21Legacy) >= 0 || only21Legacy)            // #3
             {
-                //string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
-
                 //Add Start and End Date
                 string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
                 DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
@@ -128,13 +270,13 @@ namespace Data.Source
                     @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2";
                 urls.Add(url1);
             }
-            else if (DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21) < 0)          // #2
+            else if (DateTime.Compare(cInput.DateTimeSpan.EndDate, gldas21Legacy) > 0 && DateTime.Compare(cInput.DateTimeSpan.StartDate, gldas21Legacy) < 0)          // #2
             {
                 string gldas2Url = cInput.BaseURL[0].Replace("GLDAS_NOAH025_3H_v2.1", "GLDAS_NOAH025_3H_v2.0");
 
                 //Add Start and End Date for GLDAS 2.0
                 string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-                DateTime tempDate1 = gldas21.AddHours(3);
+                DateTime tempDate1 = gldas21Legacy.AddHours(3);
                 string[] endDT1 = tempDate1.ToString("yyyy-MM-dd HH").Split(' ');
 
                 string url1 = gldas2Url +
@@ -144,7 +286,7 @@ namespace Data.Source
                 urls.Add(url1);
 
                 //Add Start and End Date for GLDAS 2.1
-                string[] startDT2 = gldas21.ToString("yyyy-MM-dd HH").Split(' ');
+                string[] startDT2 = gldas21Legacy.ToString("yyyy-MM-dd HH").Split(' ');
                 DateTime tempDate2 = cInput.DateTimeSpan.EndDate.AddHours(3);
                 string[] endDT2 = tempDate2.ToString("yyyy-MM-dd HH").Split(' ');
 
@@ -160,7 +302,6 @@ namespace Data.Source
 
                 //Add Start and End Date for GLDAS 2.0
                 string[] startDT1 = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-                //DateTime tempDate1 = gldas21.AddHours(3);
                 string[] endDT1 = cInput.DateTimeSpan.EndDate.ToString("yyyy-MM-dd HH").Split(' ');
 
                 string url1 = gldas2Url +
@@ -178,11 +319,19 @@ namespace Data.Source
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
+        /// <param name="accessToken">Optional EarthData access token</param>
         /// <returns></returns>
-        private async Task<List<string>> DownloadData(List<string> urls, int retries)
+        private async Task<List<string>> DownloadData(List<string> urls, int retries, string accessToken = null)
         {
             List<string> data = new List<string>();
             HttpClient hc = new HttpClient();
+
+            // Add authorization header if access token is provided
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                hc.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            }
+
             HttpResponseMessage wm = new HttpResponseMessage();
             foreach (string url in urls)
             {
@@ -214,7 +363,7 @@ namespace Data.Source
                         Log.Warning("Error: Failed to download gldas data. Retry {0}:{1}", retries, maxRetries);
                         Random r = new Random();
                         Thread.Sleep(5000 + (r.Next(10) * 1000));
-                        return this.DownloadData(urls, retries).Result;
+                        return await this.DownloadData(urls, retries, accessToken);
                     }
 
                     wm.Dispose();
@@ -260,14 +409,38 @@ namespace Data.Source
             errorMsg = "";
             List<string> metadataList = new List<string>();
             List<string> dataList = new List<string>();
+
+            if (data == null || data.Count == 0)
+            {
+                errorMsg = "ERROR: GLDAS response data is empty.";
+                return output;
+            }
+
             foreach (string _data in data)
             {
-                string[] splitData = _data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] splitData = _data.Split(new string[] { "Data\r\n", "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+                if (splitData.Length < 2)
+                {
+                    errorMsg = "ERROR: Unable to parse GLDAS response payload format.";
+                    return output;
+                }
                 metadataList.Add(splitData[0]);
                 dataList.Add(splitData[1]);
             }
             output.Dataset = dataset;
             output.DataSource = input.Source;
+
+            string dataVariable = null;
+            if (input?.BaseURL != null && input.BaseURL.Count > 0)
+            {
+                dataVariable = ExtractDataVariableFromBaseUrl(input.BaseURL[0]);
+            }
+
+            if (!string.IsNullOrWhiteSpace(dataVariable))
+            {
+                output.Metadata["gldas_data_variable"] = dataVariable;
+            }
+
             output.Metadata = SetMetadata(out errorMsg, metadataList, output);
             output.Data = SetData(out errorMsg, dataList, input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
 
@@ -330,20 +503,65 @@ namespace Data.Source
                 string[] tsLines = data.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < tsLines.Length; i++)
                 {
-                    if (tsLines[i].Contains("MEAN"))
+                    string line = tsLines[i].Trim();
+                    if (line.Contains("MEAN") || string.IsNullOrWhiteSpace(line))
                     {
                         break;
                     }
-                    string[] lineData = tsLines[i].Split(new string[] { "T", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
-                    string key = NLDAS.SetDateToLocal(offset, lineData[0] + " " + lineData[1].Replace("Z", ""), dateFormat);
+
+                    if (line.StartsWith("Date", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    string timestampString = "";
+                    string valueString = "";
+
+                    string[] csvParts = line.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    if (csvParts.Length >= 2)
+                    {
+                        timestampString = csvParts[0].Trim().Trim('"').Replace("T", " ").Replace("Z", "");
+                        valueString = csvParts[1].Trim().Trim('"');
+                    }
+                    else
+                    {
+                        string[] whitespaceParts = line.Split(new string[] { "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
+                        if (whitespaceParts.Length < 3)
+                        {
+                            continue;
+                        }
+
+                        timestampString = (whitespaceParts[0] + " " + whitespaceParts[1]).Trim().Trim('"').Replace("T", " ").Replace("Z", "");
+                        valueString = whitespaceParts[2].Trim().Trim('"');
+                    }
+
+                    if (!DateTime.TryParse(timestampString, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTime parsedTimestamp) &&
+                        !DateTime.TryParse(timestampString, out parsedTimestamp))
+                    {
+                        continue;
+                    }
+
+                    if (!double.TryParse(valueString, NumberStyles.Float, CultureInfo.InvariantCulture, out double value) &&
+                        !double.TryParse(valueString, out value))
+                    {
+                        continue;
+                    }
+
+                    string key = NLDAS.SetDateToLocal(offset, parsedTimestamp.ToString("yyyy-MM-dd HH:mm:ss"), dateFormat);
                     if (!dataDict.ContainsKey(key))
                     {
                         timestepData = new List<string>();
-                        timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
+                        timestepData.Add(value.ToString(dataFormat));
                         dataDict[key] = timestepData;
                     }
                 }
             }
+
+            if (dataDict.Count == 0)
+            {
+                errorMsg = "ERROR: Unable to parse GLDAS response data values.";
+            }
+
             return dataDict;
         }
 

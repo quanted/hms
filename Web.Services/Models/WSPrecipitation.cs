@@ -30,7 +30,7 @@ namespace Web.Services.Models
             errorMsg = (!Enum.TryParse(input.Source, true, out PrecipSources pSource)) ? "ERROR: 'Source' was not found or is invalid.": "";
             if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
 
-            string nldasAccessToken = null;
+            string earthDataAccessToken = null;
 
             // Precipitation object
             Precipitation.Precipitation precip = new Precipitation.Precipitation();
@@ -47,19 +47,54 @@ namespace Web.Services.Models
                 precip.Input.Geometry.GeometryMetadata["token"] = (precip.Input.Geometry.GeometryMetadata.ContainsKey("token")) ? precip.Input.Geometry.GeometryMetadata["token"] : "RUYNSTvfSvtosAoakBSpgxcHASBxazzP";
             }
 
-            if (precip.Input.Source.Contains("nldas"))
+            if (precip.Input.Source.Contains("nldas") || precip.Input.Source.Contains("gldas") || precip.Input.Source.Contains("trmm"))
             {
-                // using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
-                using var gesDisc = new Utilities.EarthDataClient();
-                nldasAccessToken = gesDisc.GetAccessToken(); 
+                try
+                {
+                    using var gesDisc = new Utilities.clsNLDAS_GES_DISC(AppContext.BaseDirectory);
+                    earthDataAccessToken = gesDisc.GetAccessToken();
+                }
+                catch (Exception ex)
+                {
+                    return err.ReturnError("ERROR: Unable to get EarthData access token for NLDAS/GLDAS/TRMM. Ensure .netrc credentials are configured. " + ex.Message);
+                }
             }
 
             // Gets the Precipitation data.
-            ITimeSeriesOutput result = precip.GetData(out errorMsg, accessToken: nldasAccessToken);
-            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            ITimeSeriesOutput result = precip.GetData(
+                out errorMsg,
+                accessToken: earthDataAccessToken);            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            if (result == null)
+            {
+                return err.ReturnError("ERROR: No precipitation data was returned from the selected source.");
+            }
+            precip.Output = result;
 
             // Get generic statistics
             result = Utilities.Statistics.GetStatistics(out errorMsg, precip.Input, result);
+            if (errorMsg.Contains("ERROR")) { return err.ReturnError(errorMsg); }
+            precip.Output = result;
+
+            bool isNldas = precip.Input.Source.Contains("nldas");
+
+            if (isNldas)
+            {
+                string baseUrl = !string.IsNullOrWhiteSpace(input.PriorNldasBaseUrl)
+                    ? input.PriorNldasBaseUrl
+                    : (precip.Input.BaseURL != null && precip.Input.BaseURL.Count > 0 ? precip.Input.BaseURL[0] : null);
+
+                if (!string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    result.Metadata = Utilities.Metadata.AddToMetadata("base_url", baseUrl, result.Metadata);
+                }
+
+                if (input.PriorNldasMetadata != null && input.PriorNldasMetadata.Count > 0)
+                {
+                    result.Metadata = Utilities.Metadata.MergeMetadata(result.Metadata, input.PriorNldasMetadata, "prior_nldas");
+                }
+
+            }
+
             return result;
          }
     }

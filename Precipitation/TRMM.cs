@@ -20,7 +20,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
 
@@ -31,16 +31,34 @@ namespace Precipitation
             }
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (errorMsg.Contains("ERROR")) { return null; }
-            string data = trmm.GetData(out errorMsg, "PRECIP", input, retries);
 
-            ITimeSeriesOutput trmmOutput = output;
+            string data = trmm.GetData(out errorMsg, "PRECIP", input, retries, accessToken);
             if (errorMsg.Contains("ERROR")) { return null; }
-            else
+            if (string.IsNullOrWhiteSpace(data))
             {
-                trmmOutput = trmm.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+                errorMsg = "ERROR: No TRMM precipitation data was returned.";
+                return null;
             }
-            trmmOutput = TemporalAggregation(out errorMsg, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+
+            ITimeSeriesOutput trmmOutput = trmm.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
+            if (errorMsg.Contains("ERROR") || trmmOutput == null || trmmOutput.Data == null || trmmOutput.Data.Count == 0)
+            {
+                if (!errorMsg.Contains("ERROR"))
+                {
+                    errorMsg = "ERROR: Failed to parse TRMM response into timeseries output.";
+                }
+                return null;
+            }
+
+            trmmOutput = TemporalAggregation(out errorMsg, trmmOutput, input);
+            if (errorMsg.Contains("ERROR") || trmmOutput == null || trmmOutput.Data == null || trmmOutput.Data.Count == 0)
+            {
+                if (!errorMsg.Contains("ERROR"))
+                {
+                    errorMsg = "ERROR: Failed to aggregate TRMM precipitation output.";
+                }
+                return null;
+            }
 
             return trmmOutput;
         }

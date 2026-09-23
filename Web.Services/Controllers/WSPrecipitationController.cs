@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Services.Models;
 using System.Text.Json;
@@ -25,6 +26,22 @@ namespace Web.Services.Controllers
         /// Required: True;
         /// </summary>
         public new string Source { get; set; }
+
+        /// <summary>
+        /// Optional pre-fetched raw NLDAS response payload. If provided for source='nldas',
+        /// this value is parsed directly and an additional source fetch is skipped.
+        /// </summary>
+        public string PreFetchedNldasData { get; set; }
+
+        /// <summary>
+        /// Optional prior request NLDAS base URL to carry forward in response metadata.
+        /// </summary>
+        public string PriorNldasBaseUrl { get; set; }
+
+        /// <summary>
+        /// Optional prior request NLDAS metadata to merge into response metadata.
+        /// </summary>
+        public Dictionary<string, string> PriorNldasMetadata { get; set; }
     }
 
     // --------------- Swashbuckle Examples --------------- //
@@ -103,7 +120,6 @@ namespace Web.Services.Controllers
                 results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 stpWatch.Stop();
                 results.Metadata = Utilities.Metadata.AddToMetadata("retrievalTime", stpWatch.ElapsedMilliseconds.ToString() + " ms", results.Metadata);
-                results.Metadata = Utilities.Metadata.AddToMetadata("request_url", this.Request.Path, results.Metadata);
                 return new ObjectResult(results);
             }
             catch(Exception ex)

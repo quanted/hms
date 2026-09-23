@@ -65,7 +65,7 @@ namespace Precipitation
                 case "gldas":
                     // GLDAS Precipitation Data call
                     GLDAS gldas = new GLDAS();
-                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input, retries);
+                    this.Output = gldas.GetData(out errorMsg, this.Output, this.Input, retries, accessToken);
                     if (errorMsg.Contains("ERROR")) { return null; }
                     break;
                 case "ncei":
@@ -96,7 +96,7 @@ namespace Precipitation
                 case "trmm":
                     // TRMM Precipitation Data call
                     TRMM trmm = new TRMM();
-                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input, retries);
+                    this.Output = trmm.GetData(out errorMsg, this.Output, this.Input, retries, accessToken);
                     if(errorMsg.Contains("ERROR")) { return null; }
                     break;
 

@@ -29,8 +29,10 @@ namespace Data.Source
         /// <param name="errorMsg"></param>s
         /// <param name="dataset">trmm dataset parameter</param>
         /// <param name="componentInput"></param>
+        /// <param name="retries">Number of retries</param>
+        /// <param name="accessToken">Optional EarthData access token for Giovanni API</param>
         /// <returns></returns>
-        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0)
+        public string GetData(out string errorMsg, string dataset, ITimeSeriesInput componentInput, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
             if (!this.ValidateInput(out errorMsg, componentInput))
@@ -41,12 +43,18 @@ namespace Data.Source
             // Adjusts date/times by the timezone offset if timelocalized is set to true.
             componentInput.DateTimeSpan = TRMM.AdjustForOffset(out errorMsg, componentInput) as DateTimeSpan;
 
+            if (componentInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(accessToken))
+            {
+                errorMsg = "ERROR: TRMM EarthData access token is required for Giovanni data retrieval.";
+                return null;
+            }
+
             // Constructs the url for the TRMM data request and it's query string.
             string url = ConstructURL(out errorMsg, dataset, componentInput);
             if (errorMsg.Contains("ERROR")) { return null; }
 
             // Uses the constructed url to download time series data.
-            string data = DownloadData(url, retries).Result;
+            string data = DownloadData(url, retries, accessToken).Result;
             if (errorMsg.Contains("ERROR")) { return null; }
 
             return data;
@@ -155,6 +163,29 @@ namespace Data.Source
         }
 
         /// <summary>
+        /// Extracts the TRMM data variable from the base URL or constructs it from the dataset name.
+        /// </summary>
+        /// <param name="dataset">Dataset name</param>
+        /// <param name="baseUrl">Base URL containing the data parameter</param>
+        /// <returns>Data variable string for Giovanni API</returns>
+        private static string GetTrmmDataVariable(string dataset, string baseUrl)
+        {
+            // Try to extract from base URL first (for Giovanni API URLs)
+            if (!string.IsNullOrWhiteSpace(baseUrl) && baseUrl.Contains("data=", StringComparison.OrdinalIgnoreCase))
+            {
+                var dataParam = baseUrl.Split(new[] { "data=" }, StringSplitOptions.None);
+                if (dataParam.Length > 1)
+                {
+                    var variable = dataParam[1].Split('&')[0];
+                    return variable;
+                }
+            }
+
+            // Default fallback - construct from dataset name
+            return dataset;
+        }
+
+        /// <summary>
         /// Constructs the url for retrieving TRMM data based on the given parameters.
         /// </summary>
         /// <param name="errorMsg"></param>
@@ -163,17 +194,45 @@ namespace Data.Source
         private static string ConstructURL(out string errorMsg, string dataset, ITimeSeriesInput cInput)
         {
             errorMsg = "";
+
+            // Check if using Giovanni API format
+            if (cInput.BaseURL[0].Contains("giovanni", StringComparison.OrdinalIgnoreCase))
+            {
+                string baseUrl = cInput.BaseURL[0].Split('?')[0];
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    baseUrl = "https://api.giovanni.earthdata.nasa.gov/timeseries";
+                }
+
+                string dataVariable = GetTrmmDataVariable(dataset, cInput.BaseURL[0]);
+
+                string start = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
+                string end = tempDate.ToString("yyyy-MM-ddTHH:mm:ss");
+
+                string url = Utilities.clsNLDAS_GES_DISC.BuildTimeSeriesUrl(
+                    cInput.Geometry.Point.Latitude, 
+                    cInput.Geometry.Point.Longitude, 
+                    start, 
+                    end, 
+                    dataVariable, 
+                    baseUrl);
+
+                return url;
+            }
+
+            // Legacy format support (old hydro1 URLs)
             // Example base url: https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi?variable=TRMM:TRMM_3B42.7:precipitation&location=GEOM:POINT
             string[] startDT = cInput.DateTimeSpan.StartDate.ToString("yyyy-MM-dd HH").Split(' ');
-            DateTime tempDate = cInput.DateTimeSpan.EndDate.AddHours(3);
-            string[] endDT = tempDate.ToString("yyyy-MM-dd HH").Split(' ');
+            DateTime tempDateLegacy = cInput.DateTimeSpan.EndDate.AddHours(3);
+            string[] endDT = tempDateLegacy.ToString("yyyy-MM-dd HH").Split(' ');
 
-            string url = cInput.BaseURL[0] +
+            string legacyUrl = cInput.BaseURL[0] +
                 @"%28" + cInput.Geometry.Point.Longitude.ToString() +
                 @",%20" + cInput.Geometry.Point.Latitude.ToString() + @"%29" +
                 @"&startDate=" + startDT[0] + @"T" + startDT[1] + @"&endDate=" + endDT[0] + "T" + endDT[1] + @"&type=asc2";
 
-            return url;
+            return legacyUrl;
         }
 
         /// <summary>
@@ -182,11 +241,19 @@ namespace Data.Source
         /// </summary>
         /// <param name="errorMsg"></param>
         /// <param name="url"></param>
+        /// <param name="accessToken">Optional EarthData access token</param>
         /// <returns></returns>
-        private async Task<string> DownloadData(string url, int retries)
+        private async Task<string> DownloadData(string url, int retries, string accessToken = null)
         {
             string data = "";
             HttpClient hc = new HttpClient();
+
+            // Add authorization header if access token is provided
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                hc.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            }
+
             HttpResponseMessage wm = new HttpResponseMessage();
             int maxRetries = 10;
             try
@@ -214,7 +281,7 @@ namespace Data.Source
                     Log.Warning("Error: Failed to download trmm data. Retry {0}:{1}", retries, maxRetries);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
-                    return this.DownloadData(url, retries).Result;
+                    return await this.DownloadData(url, retries, accessToken);
                 }
                 wm.Dispose();
                 hc.Dispose();

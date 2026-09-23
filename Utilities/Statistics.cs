@@ -32,9 +32,23 @@ namespace Utilities
             ITimeSeriesOutput data)
         {
             errorMsg = "";
+
+            if (data == null || data.Data == null || data.Data.Count == 0)
+            {
+                errorMsg = "ERROR: Statistics cannot be computed because timeseries data is empty.";
+                return data;
+            }
+
             int missingDays = 0;
             int decimals = 3;
             Matrix<double> matrix = BuildMatrix(data.Data, true, out missingDays);
+
+            if (matrix == null || matrix.RowCount == 0 || matrix.ColumnCount == 0)
+            {
+                errorMsg = "ERROR: Statistics cannot be computed because no valid numeric rows were found.";
+                return data;
+            }
+
             return CalculateStatistics(out errorMsg, input, data, matrix, missingDays, decimals);
         }
 
