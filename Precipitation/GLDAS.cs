@@ -18,19 +18,51 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>S
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
             bool validInputs = ValidateInputs(input, out errorMsg);
             if (!validInputs) { return null; }
 
             Data.Source.GLDAS gldas = new Data.Source.GLDAS();
+            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input, retries, accessToken);
 
-            ITimeSeriesOutput gldasOutput = output;
-            List<string> data = gldas.GetData(out errorMsg, "PRECIP", input, retries);
-            gldasOutput = gldas.SetDataToOutput(out errorMsg, "Precipitation", data, output, input);
-            gldasOutput = TemporalAggregation(out errorMsg, output, input);
-            if (errorMsg.Contains("ERROR")) { return null; }
+            if (errorMsg.Contains("ERROR"))
+            {
+                return null;
+            }
+
+            if (data == null || data.Count == 0)
+            {
+                errorMsg = "ERROR: GLDAS data is empty.";
+                return null;
+            }
+
+            ITimeSeriesOutput gldasOutput = gldas.SetDataToOutput(
+                out errorMsg,
+                "Precipitation",
+                data,
+                output,
+                input);
+
+            if (errorMsg.Contains("ERROR") || gldasOutput == null || gldasOutput.Data == null || gldasOutput.Data.Count == 0)
+            {
+                if (!errorMsg.Contains("ERROR"))
+                {
+                    errorMsg = "ERROR: Failed to parse GLDAS response into timeseries output.";
+                }
+                return null;
+            }
+
+            gldasOutput = TemporalAggregation(out errorMsg, gldasOutput, input);
+            if (errorMsg.Contains("ERROR") || gldasOutput == null || gldasOutput.Data == null || gldasOutput.Data.Count == 0)
+            {
+                if (!errorMsg.Contains("ERROR"))
+                {
+                    errorMsg = "ERROR: Failed to aggregate GLDAS precipitation output.";
+                }
+                return null;
+            }
 
             return gldasOutput;
         }

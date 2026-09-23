@@ -19,7 +19,7 @@ namespace Precipitation
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null, string preFetchedData = null)
+        public ITimeSeriesOutput GetData(out string errorMsg, ITimeSeriesOutput output, ITimeSeriesInput input, int retries = 0, string accessToken = null)
         {
             errorMsg = "";
 
@@ -28,12 +28,8 @@ namespace Precipitation
             //if (errorMsg.Contains("ERROR")) { return null; }
             //int t0 = DateTime.Now.Second;
             string requestUrl = "";
-            string data = preFetchedData;
 
-            if (string.IsNullOrWhiteSpace(data))
-            {
-                data = nldas.GetData(out errorMsg, "PRECIP", input, out requestUrl, retries, accessToken);
-            }
+            string data = nldas.GetData(out errorMsg, "PRECIP", input, out requestUrl, retries, accessToken);
 
             if (errorMsg.Contains("ERROR"))
             {
