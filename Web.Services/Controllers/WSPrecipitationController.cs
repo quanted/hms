@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Web.Services.Models;
 using System.Text.Json;
@@ -27,22 +26,7 @@ namespace Web.Services.Controllers
         /// </summary>
         public new string Source { get; set; }
 
-        /// <summary>
-        /// Optional pre-fetched raw NLDAS response payload. If provided for source='nldas',
-        /// this value is parsed directly and an additional source fetch is skipped.
-        /// </summary>
-        public string PreFetchedNldasData { get; set; }
-
-        /// <summary>
-        /// Optional prior request NLDAS base URL to carry forward in response metadata.
-        /// </summary>
-        public string PriorNldasBaseUrl { get; set; }
-
-        /// <summary>
-        /// Optional prior request NLDAS metadata to merge into response metadata.
-        /// </summary>
-        public Dictionary<string, string> PriorNldasMetadata { get; set; }
-    }
+        }
 
     // --------------- Swashbuckle Examples --------------- //
 

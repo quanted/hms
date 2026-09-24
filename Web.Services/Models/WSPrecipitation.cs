@@ -79,20 +79,12 @@ namespace Web.Services.Models
 
             if (isNldas)
             {
-                string baseUrl = !string.IsNullOrWhiteSpace(input.PriorNldasBaseUrl)
-                    ? input.PriorNldasBaseUrl
-                    : (precip.Input.BaseURL != null && precip.Input.BaseURL.Count > 0 ? precip.Input.BaseURL[0] : null);
+                string baseUrl = (precip.Input.BaseURL != null && precip.Input.BaseURL.Count > 0) ? precip.Input.BaseURL[0] : null;
 
                 if (!string.IsNullOrWhiteSpace(baseUrl))
                 {
                     result.Metadata = Utilities.Metadata.AddToMetadata("base_url", baseUrl, result.Metadata);
                 }
-
-                if (input.PriorNldasMetadata != null && input.PriorNldasMetadata.Count > 0)
-                {
-                    result.Metadata = Utilities.Metadata.MergeMetadata(result.Metadata, input.PriorNldasMetadata, "prior_nldas");
-                }
-
             }
 
             return result;
