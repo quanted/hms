@@ -384,9 +384,11 @@ namespace Data.Source
         {
             errorMsg = "";
             string[] splitData = data.Split(new string[] { "Data\n" }, StringSplitOptions.RemoveEmptyEntries);
+            //string[] splitData = data.Split(new string[] { "Timestamp (UTC),\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (splitData.Length <= 1)
             {
                 splitData = data.Split(new string[] { "Data\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                //splitData = data.Split(new string[] { "Timestamp (UTC),\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             }
 
             if (splitData.Length <= 1)
@@ -397,7 +399,8 @@ namespace Data.Source
             output.Dataset = dataset;
             output.DataSource = input.Source;
             output.Metadata = SetMetadata(out errorMsg, splitData[0], output);
-            output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("mean")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            //output.Data = SetData(out errorMsg, splitData[1].Substring(0, splitData[1].IndexOf("mean")).Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
+            output.Data = SetData(out errorMsg, splitData[1].Trim(), input.TimeLocalized, input.DateTimeSpan.DateTimeFormat, input.DataValueFormat, input.Geometry.Timezone);
             return output;
         }
 
@@ -484,9 +487,12 @@ namespace Data.Source
             for (int i = 0; i < tsLines.Length; i++)
             {
                 timestepData = new List<string>();
-                string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
-                dataDict[SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
+                //string[] lineData = tsLines[i].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] lineData = tsLines[i].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                //timestepData.Add(Convert.ToDouble(lineData[2]).ToString(dataFormat));
+                timestepData.Add(Convert.ToDouble(lineData[1]).ToString(dataFormat));
+                //dataDict[SetDateToLocal(offset, lineData[0] + " " + lineData[1], dateFormat)] = timestepData;
+                dataDict[SetDateToLocal(offset, lineData[0], dateFormat)] = timestepData;
             }
             return dataDict;
         }
