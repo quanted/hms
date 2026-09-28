@@ -42,7 +42,7 @@ prism_temperature_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1
 prism_dewpoint_url http://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
 prism_evapotranspiration_url https://csip.engr.colostate.edu:8083/csip-climate/m/prism/1.0
 gldas_surfacepressure_url https://api.giovanni.earthdata.nasa.gov/timeseries?data=GLDAS_NOAH025_3H_2_1_Psurf_f_inst
-trmm_precipitation_url https://api.giovanni.earthdata.nasa.gov/timeseries?data=TRMM_3B42_7_precipitation
+trmm_precipitation_url https://api.giovanni.earthdata.nasa.gov/timeseries?data=TRMM_3B42_Daily_7_precipitation
 nwis_streamflow_url https://nwis.waterdata.usgs.gov/usa/nwis/uv/?
 noaa_coastal_coastal_url https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?
 noaa_coastal_temperature_url https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?
