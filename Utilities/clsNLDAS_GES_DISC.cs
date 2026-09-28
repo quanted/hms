@@ -10,17 +10,43 @@ using System.Threading.Tasks;
 
 namespace Utilities
 {
+    /// <summary>
+    /// Where EarthData credentials are looked up.
+    /// </summary>
+    public enum CredentialSource
+    {
+        /// <summary>Environment variables first; fall back to .edl_token / .netrc on disk. (Default)</summary>
+        EnvironmentThenFile,
+        /// <summary>Only environment variables.</summary>
+        EnvironmentOnly,
+        /// <summary>Only files on disk (original behavior).</summary>
+        FileOnly
+    }
+
     public class clsNLDAS_GES_DISC : IDisposable
     {
+        // Environment variable names (same names NASA's earthaccess library uses)
+        public const string TokenEnvVar = "EARTHDATA_TOKEN";
+        public const string UsernameEnvVar = "EARTHDATA_USERNAME";
+        public const string PasswordEnvVar = "EARTHDATA_PASSWORD";
+        /// <summary>Optional override for the .netrc location (standard curl/Python convention).</summary>
+        public const string NetrcPathEnvVar = "NETRC";
+
+        private const string NetrcFileName = ".netrc";
+        private const string TokenFileName = ".edl_token";
+
         private readonly HttpClient _httpClient;
         private readonly string _basePath;
+        private readonly CredentialSource _credentialSource;
         //private const string TimeSeriesUrl = "https://api.giovanni.earthdata.nasa.gov/timeseries";
         private const string TimeSeriesUrl = "https://api.giovanni.earthdata.nasa.gov/proxy-timeseries?";
         private const string UserAgent = "GESDISC.Net v1.0";
 
-        public clsNLDAS_GES_DISC(string? basePath = null)
+        public clsNLDAS_GES_DISC(string? basePath = null,
+            CredentialSource credentialSource = CredentialSource.EnvironmentThenFile)
         {
             _basePath = basePath ?? AppContext.BaseDirectory;
+            _credentialSource = credentialSource;
 
             var handler = new HttpClientHandler()
             {
@@ -31,9 +57,72 @@ namespace Utilities
             _httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
         }
 
+        private bool UseEnvironment => _credentialSource != CredentialSource.FileOnly;
+        private bool UseFiles => _credentialSource != CredentialSource.EnvironmentOnly;
+
+        #region Environment lookups
+
+        private static string? GetEnv(string name)
+        {
+            var value = Environment.GetEnvironmentVariable(name);
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        /// <summary>
+        /// Returns the token from EARTHDATA_TOKEN, or null if it is not set.
+        /// </summary>
+        public string? ReadEnvironmentToken() => GetEnv(TokenEnvVar);
+
+        /// <summary>
+        /// Returns credentials from EARTHDATA_USERNAME / EARTHDATA_PASSWORD, or null if neither is set.
+        /// Throws if only one of the pair is set, so a half-configured environment isn't silently ignored.
+        /// </summary>
+        public (string username, string password)? ReadEnvironmentCredentials()
+        {
+            var username = GetEnv(UsernameEnvVar);
+            var password = GetEnv(PasswordEnvVar);
+
+            if (username == null && password == null)
+                return null;
+
+            if (username == null || password == null)
+                throw new InvalidOperationException(
+                    $"Incomplete EarthData credentials in environment: both {UsernameEnvVar} and {PasswordEnvVar} must be set.");
+
+            return (username, password);
+        }
+
+        #endregion
+
+        #region File lookups
+
+        private string ResolveNetrcPath()
+        {
+            if (UseEnvironment)
+            {
+                var overridePath = GetEnv(NetrcPathEnvVar);
+                if (overridePath != null)
+                    return overridePath;
+            }
+            return Path.Combine(_basePath, NetrcFileName);
+        }
+
+        /// <summary>
+        /// Returns the token stored in .edl_token (whole file, trimmed), or null if the file is missing or empty.
+        /// </summary>
+        public string? ReadTokenFile()
+        {
+            string tokenPath = Path.Combine(_basePath, TokenFileName);
+            if (!File.Exists(tokenPath))
+                return null;
+
+            var token = File.ReadAllText(tokenPath).Trim();
+            return string.IsNullOrEmpty(token) ? null : token;
+        }
+
         public (string username, string password) ReadNetrcCredentials()
         {
-            string netrcPath = Path.Combine(_basePath, ".netrc");
+            string netrcPath = ResolveNetrcPath();
             if (!File.Exists(netrcPath))
                 throw new FileNotFoundException($"No .netrc file found at {netrcPath}. Please create one with your EarthData credentials.");
             var lines = File.ReadAllLines(netrcPath);
@@ -75,22 +164,58 @@ namespace Utilities
             return (username, password);
         }
 
+        #endregion
+
+        /// <summary>
+        /// Resolves an EarthData bearer token. With the default <see cref="CredentialSource.EnvironmentThenFile"/>:
+        ///   1. EARTHDATA_TOKEN
+        ///   2. EARTHDATA_USERNAME + EARTHDATA_PASSWORD (exchanged for a token)
+        ///   3. .edl_token file in the base path
+        ///   4. .netrc (from NETRC if set, else the base path), exchanged for a token
+        /// </summary>
         public string GetAccessToken()
         {
             try
             {
-                var (username, password) = ReadNetrcCredentials();
-                string? accessToken = FindOrCreateToken(username, password);
-                if (string.IsNullOrEmpty(accessToken))
-                    throw new InvalidOperationException("Failed to obtain access token");
-                return accessToken;
+                if (UseEnvironment)
+                {
+                    var envToken = ReadEnvironmentToken();
+                    if (envToken != null)
+                        return envToken;
+
+                    var envCreds = ReadEnvironmentCredentials();
+                    if (envCreds is { } creds)
+                        return RequireToken(FindOrCreateToken(creds.username, creds.password));
+                }
+
+                if (UseFiles)
+                {
+                    var fileToken = ReadTokenFile();
+                    if (fileToken != null)
+                        return fileToken;
+
+                    var (username, password) = ReadNetrcCredentials();
+                    return RequireToken(FindOrCreateToken(username, password));
+                }
+
+                throw new InvalidOperationException(
+                    $"No EarthData credentials found in environment. Set {TokenEnvVar}, " +
+                    $"or {UsernameEnvVar} and {PasswordEnvVar}.");
             }
             catch (Exception ex)
             {
                 throw new InvalidOperationException("Authentication with NASA EarthData failed. " +
-                    "Please ensure that your .netrc file is stored and contains valid credentials. " +
+                    $"Please set {TokenEnvVar} (or {UsernameEnvVar}/{PasswordEnvVar}) in the environment, " +
+                    "or ensure that your .edl_token or .netrc file is stored and contains valid credentials. " +
                     $"Error: {ex.Message}", ex);
             }
+        }
+
+        private static string RequireToken(string? token)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw new InvalidOperationException("Failed to obtain access token");
+            return token;
         }
 
         public string? FindOrCreateToken(string username, string password)
@@ -162,7 +287,7 @@ namespace Utilities
                 throw new InvalidOperationException(
                     "The returned CSV is empty or incomplete.\n" +
                     "Please ensure that your subsetting bounds are within the extent of your dataset\n" +
-                    "or that your .netrc file is stored and contains valid credentials.");
+                    "or that your credentials (environment variables, .edl_token or .netrc) are valid.");
             }
             for (int i = 0; i < 13 && i < lines.Length; i++)
             {
