@@ -42,6 +42,17 @@ namespace Utilities
         private const string TimeSeriesUrl = "https://api.giovanni.earthdata.nasa.gov/proxy-timeseries?";
         private const string UserAgent = "GESDISC.Net v1.0";
 
+        // Token cache (per instance; reuse the instance to benefit from it)
+        private readonly object _tokenLock = new();
+        private string? _cachedToken;
+        private DateTimeOffset? _cachedTokenRefreshAtUtc;   // null = expiry unknown; kept until the server rejects it
+        private readonly HashSet<string> _rejectedTokens = new(StringComparer.Ordinal);
+
+        /// <summary>
+        /// How long before a token's expiry it is considered "about to expire" and replaced.
+        /// </summary>
+        public TimeSpan TokenRefreshMargin { get; set; } = TimeSpan.FromHours(1);
+
         public clsNLDAS_GES_DISC(string? basePath = null,
             CredentialSource credentialSource = CredentialSource.EnvironmentThenFile)
         {
@@ -166,57 +177,183 @@ namespace Utilities
 
         #endregion
 
+        #region Token resolution and caching
+
         /// <summary>
-        /// Resolves an EarthData bearer token. With the default <see cref="CredentialSource.EnvironmentThenFile"/>:
+        /// Returns a cached EarthData bearer token, fetching a new one only when there is none cached
+        /// or the cached one is within <see cref="TokenRefreshMargin"/> of expiring.
+        ///
+        /// Lookup order with the default <see cref="CredentialSource.EnvironmentThenFile"/>:
         ///   1. EARTHDATA_TOKEN
         ///   2. EARTHDATA_USERNAME + EARTHDATA_PASSWORD (exchanged for a token)
         ///   3. .edl_token file in the base path
         ///   4. .netrc (from NETRC if set, else the base path), exchanged for a token
+        /// A static token (1 or 3) that is expired, about to expire, or was rejected by the server
+        /// is skipped in favor of the next source.
         /// </summary>
         public string GetAccessToken()
         {
-            try
+            lock (_tokenLock)
             {
-                if (UseEnvironment)
+                if (_cachedToken != null &&
+                    (_cachedTokenRefreshAtUtc == null || DateTimeOffset.UtcNow < _cachedTokenRefreshAtUtc))
                 {
-                    var envToken = ReadEnvironmentToken();
-                    if (envToken != null)
-                        return envToken;
-
-                    var envCreds = ReadEnvironmentCredentials();
-                    if (envCreds is { } creds)
-                        return RequireToken(FindOrCreateToken(creds.username, creds.password));
+                    return _cachedToken;
                 }
 
-                if (UseFiles)
+                try
                 {
-                    var fileToken = ReadTokenFile();
-                    if (fileToken != null)
-                        return fileToken;
-
-                    var (username, password) = ReadNetrcCredentials();
-                    return RequireToken(FindOrCreateToken(username, password));
+                    var (token, expiresUtc) = ResolveToken();
+                    _cachedToken = token;
+                    _cachedTokenRefreshAtUtc = ComputeRefreshAt(expiresUtc);
+                    return token;
                 }
-
-                throw new InvalidOperationException(
-                    $"No EarthData credentials found in environment. Set {TokenEnvVar}, " +
-                    $"or {UsernameEnvVar} and {PasswordEnvVar}.");
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Authentication with NASA EarthData failed. " +
-                    $"Please set {TokenEnvVar} (or {UsernameEnvVar}/{PasswordEnvVar}) in the environment, " +
-                    "or ensure that your .edl_token or .netrc file is stored and contains valid credentials. " +
-                    $"Error: {ex.Message}", ex);
+                catch (Exception ex)
+                {
+                    _cachedToken = null;
+                    _cachedTokenRefreshAtUtc = null;
+                    throw new InvalidOperationException("Authentication with NASA EarthData failed. " +
+                        $"Please set {TokenEnvVar} (or {UsernameEnvVar}/{PasswordEnvVar}) in the environment, " +
+                        "or ensure that your .edl_token or .netrc file is stored and contains valid credentials. " +
+                        $"Error: {ex.Message}", ex);
+                }
             }
         }
 
-        private static string RequireToken(string? token)
+        /// <summary>
+        /// Drops the cached token so the next <see cref="GetAccessToken"/> call fetches a new one.
+        /// Pass the token the server rejected; a static token (env var or .edl_token) with that value
+        /// won't be used again by this instance. If another caller has already replaced the cached
+        /// token, the newer token is kept.
+        /// </summary>
+        public void InvalidateToken(string? rejectedToken = null)
         {
+            lock (_tokenLock)
+            {
+                if (rejectedToken != null)
+                {
+                    _rejectedTokens.Add(rejectedToken);
+                    if (_cachedToken != rejectedToken)
+                        return;
+                }
+                _cachedToken = null;
+                _cachedTokenRefreshAtUtc = null;
+            }
+        }
+
+        private (string token, DateTimeOffset? expiresUtc) ResolveToken()
+        {
+            string? skippedReason = null;
+            (string token, DateTimeOffset? expiresUtc)? lastResort = null;
+
+            // Accepts a static token only if it isn't rejected and isn't about to expire.
+            // A still-valid-but-expiring token is kept as a last resort in case no credentials exist.
+            bool TryStaticToken(string? token, string sourceName, out (string token, DateTimeOffset? expiresUtc) result)
+            {
+                result = default;
+                if (token == null)
+                    return false;
+
+                if (_rejectedTokens.Contains(token))
+                {
+                    skippedReason ??= $"The token from {sourceName} was rejected by the server.";
+                    return false;
+                }
+
+                var expiresUtc = GetJwtExpiration(token);
+                if (expiresUtc.HasValue && expiresUtc.Value - TokenRefreshMargin <= DateTimeOffset.UtcNow)
+                {
+                    skippedReason ??= $"The token from {sourceName} expires at {expiresUtc.Value:u}.";
+                    if (expiresUtc.Value > DateTimeOffset.UtcNow)
+                        lastResort ??= (token, expiresUtc);
+                    return false;
+                }
+
+                result = (token, expiresUtc);
+                return true;
+            }
+
+            if (UseEnvironment)
+            {
+                if (TryStaticToken(ReadEnvironmentToken(), TokenEnvVar, out var envToken))
+                    return envToken;
+
+                if (ReadEnvironmentCredentials() is { } creds)
+                    return TokenFromCredentials(creds.username, creds.password);
+            }
+
+            if (UseFiles)
+            {
+                if (TryStaticToken(ReadTokenFile(), TokenFileName, out var fileToken))
+                    return fileToken;
+
+                // With nothing skipped, a missing .netrc should raise its usual FileNotFoundException.
+                if (skippedReason == null || File.Exists(ResolveNetrcPath()))
+                {
+                    var (username, password) = ReadNetrcCredentials();
+                    return TokenFromCredentials(username, password);
+                }
+            }
+
+            if (lastResort is { } fallback)
+                return fallback;
+
+            if (skippedReason != null)
+                throw new InvalidOperationException(
+                    $"{skippedReason} No username/password credentials are available to obtain a new token.");
+
+            throw new InvalidOperationException(
+                $"No EarthData credentials found in environment. Set {TokenEnvVar}, " +
+                $"or {UsernameEnvVar} and {PasswordEnvVar}.");
+        }
+
+        private (string token, DateTimeOffset? expiresUtc) TokenFromCredentials(string username, string password)
+        {
+            var token = FindOrCreateToken(username, password);
             if (string.IsNullOrEmpty(token))
                 throw new InvalidOperationException("Failed to obtain access token");
-            return token;
+            return (token, GetJwtExpiration(token));
         }
+
+        /// <summary>
+        /// Refresh a margin before expiry. If the token is already inside the margin (the login server
+        /// returned an existing token that is close to expiring), keep it until it actually expires,
+        /// since asking again before then would just return the same token.
+        /// </summary>
+        private DateTimeOffset? ComputeRefreshAt(DateTimeOffset? expiresUtc)
+        {
+            if (expiresUtc == null)
+                return null;
+            var refreshAt = expiresUtc.Value - TokenRefreshMargin;
+            return refreshAt > DateTimeOffset.UtcNow ? refreshAt : expiresUtc;
+        }
+
+        /// <summary>
+        /// Reads the "exp" claim from an EarthData Login token (a JWT). Returns null if the token
+        /// isn't a JWT or has no expiry, in which case it is kept until the server rejects it.
+        /// </summary>
+        private static DateTimeOffset? GetJwtExpiration(string token)
+        {
+            try
+            {
+                var parts = token.Split('.');
+                if (parts.Length < 2)
+                    return null;
+
+                var payload = parts[1].Replace('-', '+').Replace('_', '/');
+                payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+                var claims = JObject.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
+
+                var exp = claims["exp"];
+                return exp == null ? null : DateTimeOffset.FromUnixTimeSeconds(exp.Value<long>());
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
 
         public string? FindOrCreateToken(string username, string password)
         {
@@ -258,7 +395,11 @@ namespace Utilities
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                throw new HttpRequestException($"API request failed with status {response.StatusCode}: {errorContent}");
+                // StatusCode is carried on the exception so callers can detect 401s.
+                throw new HttpRequestException(
+                    $"API request failed with status {response.StatusCode}: {errorContent}",
+                    null,
+                    response.StatusCode);
             }
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
@@ -321,7 +462,18 @@ namespace Utilities
             string dataVariable = "NLDAS_FORA0125_H_2_0_Rainf")
         {
             var accessToken = GetAccessToken();
-            var csvData = CallTimeSeries(lat, lon, timeStart, timeEnd, dataVariable, accessToken);
+            string csvData;
+            try
+            {
+                csvData = CallTimeSeries(lat, lon, timeStart, timeEnd, dataVariable, accessToken);
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Token was revoked or expired early: drop it, get a fresh one, and retry once.
+                InvalidateToken(accessToken);
+                accessToken = GetAccessToken();
+                csvData = CallTimeSeries(lat, lon, timeStart, timeEnd, dataVariable, accessToken);
+            }
             return ParseCsv(csvData);
         }
 
