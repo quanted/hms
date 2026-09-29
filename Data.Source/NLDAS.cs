@@ -82,10 +82,21 @@ namespace Data.Source
 
             if (!ValidateNldasPayload(data, out errorMsg))
             {
+                Log.Warning("NLDAS response validation failed: {Error} Url: {Url}, response length: {Length}, response body: {Body}",
+                    errorMsg, url, data?.Length ?? 0, LogSnippet(data));
                 return null;
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Shortens response text for logging.
+        /// </summary>
+        private static string LogSnippet(string text, int maxLength = 2000)
+        {
+            if (string.IsNullOrEmpty(text)) { return "(empty)"; }
+            return text.Length <= maxLength ? text : text.Substring(0, maxLength) + "...";
         }
 
         private static bool ValidateNldasPayload(string data, out string errorMsg)
@@ -341,10 +352,24 @@ namespace Data.Source
                     var response = wm.Content;
                     status = wm.StatusCode.ToString();
                     data = await wm.Content.ReadAsStringAsync();
+                    Log.Information("NLDAS download attempt {Attempt}: HTTP {StatusCode} {Status}, content type: {ContentType}, final url: {FinalUrl}, token sent: {TokenSent}, response length: {Length}",
+                        retries + 1, (int)wm.StatusCode, status, wm.Content.Headers.ContentType?.ToString(),
+                        wm.RequestMessage?.RequestUri?.ToString(), !string.IsNullOrWhiteSpace(accessToken), data?.Length ?? 0);
+                    if (!status.Contains("OK"))
+                    {
+                        Log.Warning("NLDAS download returned HTTP {StatusCode} {Status}. Url: {Url}, response body: {Body}",
+                            (int)wm.StatusCode, status, url, LogSnippet(data));
+                    }
                     retries += 1;
                     if (!status.Contains("OK")) { 
                         Thread.Sleep(1000 * retries);
                     }
+                }
+
+                if (!status.Contains("OK"))
+                {
+                    Log.Warning("NLDAS download did not succeed after {Retries} attempts. Last status: {Status}, Url: {Url}",
+                        retries, status == "" ? "(no request made)" : status, url);
                 }
             }
             catch (Exception ex)
@@ -352,7 +377,7 @@ namespace Data.Source
                 if (retries < maxRetries)
                 {
                     retries += 1;
-                    Log.Warning("Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
+                    Log.Warning(ex, "Error: Failed to download nldas data. Retry {0}:{1}, Url: {2}", retries, maxRetries, url);
                     Random r = new Random();
                     Thread.Sleep(5000 + (r.Next(10) * 1000));
                     return this.DownloadData(url, retries, accessToken).Result;
